@@ -1,0 +1,75 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_knowledge_work_plugins_search_strategy a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "search-strategy" ;
+    skos:broader "Multi-source search orchestration framework" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/knowledge-work-plugins/search-strategy" ;
+    oc:contentHash "faa48f2f69198c32fd247b4381969f402e29ea12118c4e3e8949fcb46666e190" ;
+    oc:dependsOnSkill oc:skill_search,
+        oc:skill_source_management ;
+    oc:differentia "Decomposes natural language queries into source-specific sub-queries, executes them in parallel, and ranks/deduplicates results using weighted relevance scoring" ;
+    oc:handlesFailure oc:NetworkTimeout,
+        oc:NoResultsFound,
+        oc:RateLimited ;
+    oc:hasCategory "research" ;
+    oc:hasDescription "Query decomposition and multi-source search orchestration. Breaks natural language questions into targeted searches per source, translates queries into source-specific syntax, ranks results by relevance, and handles ambiguity and fallback strategies." ;
+    oc:hasName "search-strategy" ;
+    oc:impartsKnowledge oc:kn_12a40975,
+        oc:kn_5489700b,
+        oc:kn_743efcde,
+        oc:kn_a1e8ce5a,
+        oc:kn_a3caa57f,
+        oc:kn_bb296124 ;
+    oc:isUserInvocable false ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:NetworkAvailable ;
+    oc:resolvesIntent "decompose search queries across multiple sources",
+        "handle ambiguous search queries",
+        "orchestrate parallel multi-source search",
+        "rank and deduplicate search results",
+        "translate queries into source-specific syntax" ;
+    oc:yieldsState oc:SearchResultsCompiled .
+
+oc:kn_12a40975 a oc:FallbackStrategy,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When sources fail or are unavailable during search" ;
+    oc:directiveContent "When a source is unavailable, skip it and search remaining sources noting the gap. When rate-limited, note the limitation, return available results, and suggest retrying later." ;
+    oc:hasRationale "Partial results are more valuable than complete failure; users need to know which sources were not searched" .
+
+oc:kn_5489700b a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When orchestrating multi-source searches" ;
+    oc:directiveContent "Always execute searches across all sources in parallel, never sequentially. Total search time should approximate the slowest single source, not the sum of all sources." ;
+    oc:hasRationale "Parallel execution dramatically reduces latency and provides results faster to the user" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_743efcde a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When decomposing any natural language query" ;
+    oc:directiveContent "Classify queries into types (Decision, Status, Document, Person, Factual, Temporal, Exploratory) to determine source prioritization and ranking weights before generating sub-queries." ;
+    oc:hasRationale "Query type determines which sources and authority hierarchies are most relevant, improving result quality" .
+
+oc:kn_a1e8ce5a a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When initial queries return insufficient results" ;
+    oc:directiveContent "When broadening queries that return too few results, remove constraints in order: (1) date filters, (2) source/location filters, (3) less important keywords, keeping only core entity/topic terms." ;
+    oc:hasRationale "Systematic constraint removal ensures broader searches while preserving the most important search terms" .
+
+oc:kn_a3caa57f a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "When ranking search results for synthesis" ;
+    oc:directiveContent "Relevance scoring uses weighted factors (keyword match, freshness, authority, completeness) that vary by query type — e.g., status queries weight freshness highest (0.4), factual queries weight authority highest (0.4)." ;
+    oc:hasRationale "Different query types have different relevance signals; a one-size-fits-all ranking produces suboptimal results" .
+
+oc:kn_bb296124 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When encountering ambiguous queries" ;
+    oc:directiveContent "Do NOT ask for clarification when the query is clear enough to produce useful results, or when minor ambiguity can be resolved by returning results from multiple interpretations." ;
+    oc:hasRationale "Unnecessary clarification requests add friction; returning multi-interpretation results is more helpful" ;
+    oc:severityLevel "MEDIUM" .
+

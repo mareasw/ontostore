@@ -1,0 +1,90 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_knowledge_work_plugins_ticket_triage a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "ticket-triage" ;
+    skos:broader "support ticket triage workflow" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/knowledge-work-plugins/ticket-triage" ;
+    oc:contentHash "1b936a29b110f70a842a8dc4a9266925786c4b3b315c09cc6fd15afdd6a9df8f" ;
+    oc:differentia "categorizes, prioritizes (P1-P4), detects duplicates, routes, and generates initial response for incoming customer issues" ;
+    oc:extends oc:skill_customer_escalation ;
+    oc:handlesFailure oc:DuplicateDetected,
+        oc:InvalidInput ;
+    oc:hasArgumentHint "\"<ticket or issue description>\"" ;
+    oc:hasCategory "automation" ;
+    oc:hasDescription "Triage and prioritize a support ticket or customer issue. Use when a new ticket comes in and needs categorization, assigning P1-P4 priority, deciding which team should handle it, or checking whether it's a duplicate or known issue before routing." ;
+    oc:hasName "ticket-triage" ;
+    oc:impartsKnowledge oc:kn_2fb6867e,
+        oc:kn_6ed7dd0a,
+        oc:kn_917c356b,
+        oc:kn_a94fe592,
+        oc:kn_c26e821a,
+        oc:kn_dd96ef6f,
+        oc:kn_fb09e6bf ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "assign ticket priority P1-P4",
+        "categorize and prioritize customer issue",
+        "detect duplicate tickets",
+        "generate initial customer response",
+        "route ticket to appropriate team",
+        "triage support ticket" ;
+    oc:yieldsState oc:TicketCategorized,
+        oc:TicketPrioritized,
+        oc:TicketRouted,
+        oc:TicketTriaged .
+
+oc:kn_2fb6867e a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When assigning a primary category to a ticket" ;
+    oc:directiveContent "Categorize by root cause, not just the symptom described. If a customer cannot log in due to a bug, category is Bug (not Account)." ;
+    oc:hasRationale "Root cause categorization ensures the ticket reaches the correct team for resolution rather than being bounced between queues." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_6ed7dd0a a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Before routing any newly triaged ticket" ;
+    oc:directiveContent "Never route a ticket without first checking for duplicates and known issues across the support platform, knowledge base, and project tracker." ;
+    oc:hasRationale "Creating duplicate tickets wastes agent time, fragments context, and provides a poor customer experience when they receive conflicting responses." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_917c356b a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When a ticket has ambiguous or multiple category signals" ;
+    oc:directiveContent "If a customer reports both a bug and a feature request, the bug is primary. 'It used to work and now it doesn't' = Bug. 'I want it to work differently' = Feature Request. When in doubt, lean toward Bug." ;
+    oc:hasRationale "Investigating a potential bug is safer than dismissing it as a feature request, since bugs imply broken functionality that affects existing users." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_a94fe592 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "During triage and throughout the ticket lifecycle" ;
+    oc:directiveContent "Automatically bump priority up when: SLA has been exceeded, multiple customers report the same issue, the customer escalates or mentions executive involvement, an existing workaround stops working, or the issue expands in scope." ;
+    oc:hasRationale "Priority escalation triggers catch degrading situations early and prevent small issues from becoming major incidents." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_c26e821a a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "At the start of triage, before any categorization or prioritization" ;
+    oc:directiveContent "Read the full ticket before categorizing — context in later messages often changes the assessment." ;
+    oc:hasRationale "Initial messages may describe a symptom that looks like a how-to question, but follow-up messages could reveal it is actually a bug or security issue." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_dd96ef6f a oc:KnowledgeNode,
+        oc:PostFlightValidation ;
+    oc:appliesToContext "After presenting the triage output to the user" ;
+    oc:directiveContent "After triage, offer concrete next steps: draft full customer response, search for more context, check known bugs, or escalate with /customer-escalation." ;
+    oc:hasRationale "Proactive next-step suggestions keep momentum and ensure the triage leads to action rather than just documentation." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_fb09e6bf a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When assigning P1-P4 priority to a ticket" ;
+    oc:directiveContent "When in doubt on priority, err on the side of higher — it is easier to de-escalate than to recover from a missed SLA." ;
+    oc:hasRationale "Under-prioritizing a real critical issue causes SLA breaches and customer trust damage; over-prioritizing just means faster resolution." ;
+    oc:severityLevel "HIGH" .
+

@@ -1,0 +1,78 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_knowledge_work_plugins_call_summary a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "call-summary" ;
+    skos:broader "Call processing workflow" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/knowledge-work-plugins/call-summary" ;
+    oc:contentHash "05261b1092d1f4dc05105873a305811c8098ebc29e971d49c54c4b6422b65a84" ;
+    oc:differentia "Extracts structured summaries, action items, and follow-up emails from raw call notes or transcripts" ;
+    oc:handlesFailure oc:InvalidInput ;
+    oc:hasArgumentHint "<call notes or transcript>" ;
+    oc:hasCategory "productivity" ;
+    oc:hasDescription "Process call notes or a transcript — extract action items, draft follow-up email, generate internal summary. Use when pasting rough notes or a transcript after a discovery, demo, or negotiation call, drafting a customer follow-up, logging the activity for your CRM, or capturing objections and next steps for your team." ;
+    oc:hasName "call-summary" ;
+    oc:impartsKnowledge oc:kn_4f9a9166,
+        oc:kn_6646176a,
+        oc:kn_bb79be1d,
+        oc:kn_e33ead5a,
+        oc:kn_e9d70684,
+        oc:kn_ee4fe5b4 ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:resolvesIntent "draft follow-up email after call",
+        "extract action items from call",
+        "generate internal call summary",
+        "log call activity for CRM",
+        "process call notes",
+        "summarize call transcript" ;
+    oc:yieldsState oc:ActionItemsExtracted,
+        oc:CallSummaryGenerated,
+        oc:FollowUpEmailDrafted .
+
+oc:kn_4f9a9166 a oc:Idempotency,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When the skill is used without connected CRM/email/transcript tools" ;
+    oc:directiveContent "Running this skill multiple times on the same call notes will produce consistent structural output but may vary in wording. It does not modify any external state in standalone mode." ;
+    oc:hasRationale "Understanding idempotency helps agents decide whether re-running is safe or necessary" ;
+    oc:severityLevel "LOW" .
+
+oc:kn_6646176a a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When generating the internal summary and follow-up email" ;
+    oc:directiveContent "Do not fabricate attendee names, company details, or discussion points that are not present in the source notes or transcript." ;
+    oc:hasRationale "Invented details in a call summary can lead to incorrect CRM entries, misaligned follow-ups, and loss of credibility with the customer" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_bb79be1d a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When advising users on input quality" ;
+    oc:directiveContent "More detail in the input produces better output. Even rough, unstructured notes like 'they seemed concerned about X' provide useful context that improves summary quality." ;
+    oc:hasRationale "The skill is designed to handle unstructured input and structure it, so more raw information always yields a more complete summary" ;
+    oc:severityLevel "LOW" .
+
+oc:kn_e33ead5a a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "When connectors (Gong, Fireflies, CRM, Email, Calendar) are configured" ;
+    oc:directiveContent "When CRM, email, or transcript connectors are available, the skill may update opportunity stages, log activities, create tasks, draft emails, and pull transcripts from external platforms." ;
+    oc:hasRationale "Agents must be aware of external side effects to avoid unintended CRM updates or email sends without user approval" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_e9d70684 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When identifying action items from call notes or transcripts" ;
+    oc:directiveContent "Extract action items with explicit owners and due dates. If the source material does not specify an owner or deadline, flag the ambiguity rather than guessing." ;
+    oc:hasRationale "Vague action items without owners or deadlines are the primary reason follow-through fails after sales calls" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_ee4fe5b4 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When drafting the customer follow-up email portion of the output" ;
+    oc:directiveContent "Customer-facing follow-up emails must use plain text formatting only — no markdown, no asterisks, no bold syntax. Use simple dashes or numbers for lists." ;
+    oc:hasRationale "Markdown formatting looks broken in most email clients and appears unprofessional to the recipient" ;
+    oc:severityLevel "HIGH" .
+

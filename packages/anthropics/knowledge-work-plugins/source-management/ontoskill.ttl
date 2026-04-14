@@ -1,0 +1,71 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_knowledge_work_plugins_source_management a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "source-management" ;
+    skos:broader "Source management framework" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/knowledge-work-plugins/source-management" ;
+    oc:contentHash "83c55fe85b79c9a2530d3aeac76ad68600234c1102e129b9772f98478b847d18" ;
+    oc:dependsOnSkill oc:skill_digest,
+        oc:skill_search ;
+    oc:differentia "that detects, prioritizes, and orchestrates MCP-connected data sources for enterprise search with rate limiting awareness" ;
+    oc:handlesFailure oc:NetworkTimeout,
+        oc:PermissionDenied ;
+    oc:hasCategory "productivity" ;
+    oc:hasDescription "Manages connected MCP sources for enterprise search. Detects available sources, guides users to connect new ones, handles source priority ordering, and manages rate limiting awareness." ;
+    oc:hasName "source-management" ;
+    oc:impartsKnowledge oc:kn_1a46e030,
+        oc:kn_48e2da6f,
+        oc:kn_6af7de78,
+        oc:kn_e6959ad4,
+        oc:kn_eaa804aa ;
+    oc:isUserInvocable false ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "detect available MCP sources",
+        "guide users to connect new data sources",
+        "handle source rate limiting gracefully",
+        "manage source health and availability",
+        "prioritize search sources by query type" ;
+    oc:yieldsState oc:SourcePriorityEstablished,
+        oc:SourcesDetected .
+
+oc:kn_1a46e030 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When detecting which MCP sources are connected" ;
+    oc:directiveContent "Source availability is determined by checking whether a tool prefix exists among available MCP tools. If no tool prefix for a source is found, the source is not connected." ;
+    oc:hasRationale "The tool prefix is the only reliable signal for source connectivity; assuming a source is available without verification leads to failed queries." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_48e2da6f a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Before querying any MCP source" ;
+    oc:directiveContent "Do not make unnecessary API calls to sources that are unlikely to have relevant results for the query type." ;
+    oc:hasRationale "Avoiding unnecessary calls conserves rate limit budgets and reduces latency." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_6af7de78 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When an MCP source returns HTTP 429 or rate limit error messages" ;
+    oc:directiveContent "When a source is rate limited, do not retry immediately. Continue searching other available sources and inform the user which sources were excluded." ;
+    oc:hasRationale "Respecting rate limits prevents cascading failures and allows partial results to still be useful to the user." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_e6959ad4 a oc:KnowledgeNode,
+        oc:SuccessIndicator ;
+    oc:appliesToContext "After completing any multi-source search" ;
+    oc:directiveContent "When reporting search results, always include which sources were searched so the user knows the scope and completeness of the answer." ;
+    oc:hasRationale "Transparency about source coverage helps users assess result completeness and identify gaps." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_eaa804aa a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When searching across multiple MCP sources for enterprise search queries" ;
+    oc:directiveContent "Use source priority ordering to weight results by query type (decision, status, document, people, factual/policy), but never skip sources entirely based on priority alone." ;
+    oc:hasRationale "Different query types have different likelihoods of finding relevant results in specific sources; weighting improves relevance without sacrificing completeness." ;
+    oc:severityLevel "MEDIUM" .
+

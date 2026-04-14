@@ -1,0 +1,134 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_knowledge_work_plugins_create_cowork_plugin a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "create-cowork-plugin" ;
+    skos:broader "Plugin builder" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/knowledge-work-plugins/create-cowork-plugin" ;
+    oc:contentHash "02dab7a1fff655b1bb2eeb055376a4ee25c925551c0c12e29f5d80f0e2832213" ;
+    oc:dependsOnSkill oc:skill_cowork_plugin_customizer,
+        oc:skill_plugin_structure ;
+    oc:differentia "Guides users through a five-phase conversational workflow to create, validate, and package a complete Claude Cowork plugin as a .plugin file" ;
+    oc:handlesFailure oc:InvalidInput,
+        oc:PermissionDenied ;
+    oc:hasAlias "build-plugin",
+        "make-plugin",
+        "new-plugin",
+        "scaffold-plugin" ;
+    oc:hasAllowedTool "AskUserQuestion",
+        "Bash",
+        "Edit",
+        "Read",
+        "Write" ;
+    oc:hasArgumentHint "description of plugin purpose and desired capabilities" ;
+    oc:hasCategory "development" ;
+    oc:hasDescription """Guide users through creating a new plugin from scratch in a cowork session. Use when users want to create a plugin, build a plugin, make a new plugin, develop a plugin, scaffold a plugin, start a plugin from scratch, or design a plugin. This skill requires Cowork mode with access to the outputs directory for delivering the final .plugin file.
+""" ;
+    oc:hasName "create-cowork-plugin" ;
+    oc:hasRequirement oc:req_5c3efadf,
+        oc:req_82de432f,
+        oc:req_883dcb03,
+        oc:req_b173cdaa,
+        oc:req_debc444e ;
+    oc:impartsKnowledge oc:kn_13b90471,
+        oc:kn_217a655e,
+        oc:kn_3581deec,
+        oc:kn_3d7aff2b,
+        oc:kn_4791c1df,
+        oc:kn_7f0bf050,
+        oc:kn_bc9e0750,
+        oc:kn_ccc34ca0,
+        oc:kn_eb7a2490 ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "build a plugin from scratch",
+        "create a plugin",
+        "design a plugin",
+        "develop a plugin",
+        "make a new plugin",
+        "package a plugin",
+        "scaffold a plugin" ;
+    oc:yieldsState oc:FileDownloaded,
+        oc:PluginCreated,
+        oc:PluginValidated .
+
+oc:kn_13b90471 a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "During Phase 5 when running the zip command" ;
+    oc:directiveContent "When packaging, always create the zip in /tmp/ first then copy to the outputs folder. Writing directly to outputs may fail due to permissions." ;
+    oc:hasRationale "The outputs directory may have restricted write permissions; staging in /tmp/ avoids failures" .
+
+oc:kn_217a655e a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "During Phase 5 (Review & Package) before running the zip command" ;
+    oc:directiveContent "Before packaging, validate that .claude-plugin/plugin.json exists with valid JSON and a kebab-case name, that referenced component directories exist with correctly formatted files, and that each skill subdirectory contains a SKILL.md." ;
+    oc:hasRationale "Catching structural errors before packaging prevents delivering broken plugins to users" .
+
+oc:kn_3581deec a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing SKILL.md files during Phase 4" ;
+    oc:directiveContent "Keep skill body under 3,000 words (ideally 1,500-2,000). Move detailed content to references/ and working examples to examples/. Write skill bodies as imperative directives for Claude, not user-facing documentation." ;
+    oc:hasRationale "Progressive disclosure reduces initial context load while keeping detailed knowledge available on demand" .
+
+oc:kn_3d7aff2b a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing hooks.json, .mcp.json, or any configuration referencing plugin files" ;
+    oc:directiveContent "Never hardcode absolute paths in hooks or MCP configs. Always use ${CLAUDE_PLUGIN_ROOT} for all intra-plugin path references." ;
+    oc:hasRationale "Hardcoded paths break portability — plugins must work regardless of install location" .
+
+oc:kn_4791c1df a oc:KnowledgeNode,
+        oc:SecurityImplication ;
+    oc:appliesToContext "When configuring MCP servers, agents, and hooks" ;
+    oc:directiveContent "Use environment variables for all credentials in MCP configs, HTTPS for remote servers, and least-privilege tool access in agent definitions." ;
+    oc:hasRationale "Prevents credential leakage and limits blast radius of compromised components" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_7f0bf050 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When creating any new plugin component during Phase 4" ;
+    oc:directiveContent "Always scaffold new plugins with skills/*/SKILL.md format, not the legacy commands/ directory, unless the user explicitly needs the single-file format." ;
+    oc:hasRationale "The skills format supports progressive disclosure via references/ and is the recommended architecture for Cowork plugins" .
+
+oc:kn_bc9e0750 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "During Phase 2 (Component Planning) and Phase 4 (Implementation)" ;
+    oc:directiveContent "Start with the minimum viable set of components. A plugin with one well-crafted skill is more useful than one with five half-baked components." ;
+    oc:hasRationale "Keeps the plugin focused, maintainable, and easier for users to understand and adopt" .
+
+oc:kn_ccc34ca0 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When creating the plugin manifest in Phase 4" ;
+    oc:directiveContent "The plugin.json name field must use kebab-case (lowercase with hyphens, no spaces or special characters). Version must follow semver starting at 0.1.0." ;
+    oc:hasRationale "Non-compliant names break plugin discovery and versioning" .
+
+oc:kn_eb7a2490 a oc:AssumptionBoundary,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "During all phases of plugin creation" ;
+    oc:directiveContent "Do not introduce ~~ placeholders or CONNECTORS.md unless the user explicitly wants to share the plugin outside their organization. Do not proactively ask about customization." ;
+    oc:hasRationale "Over-engineering for external distribution when the plugin is internal adds unnecessary complexity" .
+
+oc:req_5c3efadf a oc:RequirementTool ;
+    oc:isOptional true ;
+    oc:requirementValue "Read" .
+
+oc:req_82de432f a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Plugin directory structure and component schemas" .
+
+oc:req_883dcb03 a oc:RequirementTool ;
+    oc:isOptional true ;
+    oc:requirementValue "Write" .
+
+oc:req_b173cdaa a oc:RequirementTool ;
+    oc:isOptional true ;
+    oc:requirementValue "Bash" .
+
+oc:req_debc444e a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "AskUserQuestion" .
+

@@ -1,0 +1,114 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_knowledge_work_plugins_financial_statements a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "financial-statements" ;
+    skos:broader "Financial statement generator" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/knowledge-work-plugins/financial-statements" ;
+    oc:contentHash "8e43bd4bdda1a28f6465c6185919e3ebafc58f558511af940f90b2ff0d991877" ;
+    oc:differentia "Produces income statements, balance sheets, and cash flow statements with period-over-period comparison, variance analysis, and GAAP-compliant formatting" ;
+    oc:handlesFailure oc:FileNotFound,
+        oc:InvalidInput ;
+    oc:hasArgumentHint "<frequency> <period>" ;
+    oc:hasCategory "finance" ;
+    oc:hasDescription "Generate financial statements (income statement, balance sheet, cash flow) with period-over-period comparison and variance analysis. Use when preparing a monthly or quarterly P&L, closing the books and need to flag material variances, comparing actuals to budget, building a financial summary for leadership review, or looking up GAAP presentation requirements and period-end adjustments." ;
+    oc:hasName "financial-statements" ;
+    oc:hasRequirement oc:req_143aaef3,
+        oc:req_2dde8fa5,
+        oc:req_82c46d9e,
+        oc:req_e70c6c77 ;
+    oc:impartsKnowledge oc:kn_3f0d31bf,
+        oc:kn_43aaf6b7,
+        oc:kn_7aacb879,
+        oc:kn_800c88af,
+        oc:kn_82589644,
+        oc:kn_8d49514b,
+        oc:kn_b4cbe89b,
+        oc:kn_d6ebc483 ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "compare actuals to budget with material variance flags",
+        "flag material variances in P&L",
+        "generate income statement with variance analysis",
+        "look up GAAP presentation requirements for financial statements",
+        "prepare financial statements for leadership review",
+        "prepare period-end financial close statements" ;
+    oc:yieldsState oc:DocumentCreated .
+
+oc:kn_3f0d31bf a oc:KnowledgeNode,
+        oc:SuccessIndicator ;
+    oc:appliesToContext "When validating financial statement output completeness" ;
+    oc:directiveContent "A complete output includes: formatted income statement with multi-column comparisons, key metrics summary (margins, growth rates), material variance listing with investigation flags, and suggested follow-up questions." ;
+    oc:hasRationale "Each component serves a distinct analytical purpose; omitting any one reduces the value of the entire deliverable for leadership review." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_43aaf6b7 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before generating any financial statement" ;
+    oc:directiveContent "Verify that current period data, comparison period data (prior period, prior year, budget/forecast), and account hierarchy/groupings are available before generating statements." ;
+    oc:hasRationale "Incomplete data leads to incorrect statements and unreliable variance analysis; missing comparison periods make variance calculations meaningless." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_7aacb879 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When performing variance analysis and flagging material variances" ;
+    oc:directiveContent "Materiality thresholds for variance analysis should be scaled by line item size: use fixed dollar thresholds combined with percentage thresholds, and apply different thresholds based on line item magnitude." ;
+    oc:hasRationale "A $50K variance is material for a $500K line item but immaterial for a $50M line item; scaled thresholds ensure appropriate investigation focus." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_800c88af a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When formatting income statement line items" ;
+    oc:directiveContent "Never present extraordinary items as a separate line item — they are prohibited under both US GAAP and IFRS. Discontinued operations must be presented separately, net of tax." ;
+    oc:hasRationale "Since ASU 2015-01, extraordinary items are no longer recognized in US GAAP; presenting them creates non-compliant financial statements." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_82589644 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Always, when presenting any financial statement output to the user" ;
+    oc:directiveContent "This skill assists with financial statement workflows but does not provide financial advice; all statements should be reviewed by qualified financial professionals before use in reporting or filings." ;
+    oc:hasRationale "Generated financial statements may contain errors or omit required disclosures; professional review is essential for regulatory compliance and fiduciary protection." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_8d49514b a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "When pulling data from connected systems" ;
+    oc:directiveContent "Generating financial statements from connected ERP or data warehouse sources will read trial balance and income statement data but should not modify source data." ;
+    oc:hasRationale "Financial statement generation is a read-only analytical operation; any data modifications should only occur through intentional journal entry or close workflows." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_b4cbe89b a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When generating GAAP-compliant income statements under ASC 220 / IAS 1" ;
+    oc:directiveContent "Classify expenses by function (COGS, R&D, S&M, G&A) for US GAAP income statements, and disclose depreciation, amortization, and employee benefit costs by nature in the notes." ;
+    oc:hasRationale "Function-based classification is the most common presentation for US companies and is required for proper GAAP compliance." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_d6ebc483 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When investigating and explaining material variances" ;
+    oc:directiveContent "Decompose total variances into component drivers (volume effect, rate/price effect, mix effect, timing effect, currency effect, one-time items) rather than reporting only the net variance." ;
+    oc:hasRationale "Net variance alone is misleading — the same total change could be driven by volume increases offsetting price decreases, requiring fundamentally different management responses." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:req_143aaef3 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Period-end adjustments (accruals, deferrals, depreciation, FX revaluation, tax provision)" .
+
+oc:req_2dde8fa5 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "GAAP financial statement presentation requirements (ASC 220, ASC 210, ASC 230)" .
+
+oc:req_82c46d9e a oc:RequirementAPI ;
+    oc:isOptional true ;
+    oc:requirementValue "ERP or data warehouse connection for trial balance data (optional)" .
+
+oc:req_e70c6c77 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Variance analysis methodology and materiality thresholding" .
+

@@ -1,0 +1,70 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_knowledge_work_plugins_signature_request a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "signature-request" ;
+    skos:broader "E-signature routing workflow" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/knowledge-work-plugins/signature-request" ;
+    oc:contentHash "5490eb1469909557638c132d1601130583bfeb92814664b693f3528a6be02cf5" ;
+    oc:differentia "Prepares documents for electronic signature by running a pre-signature completeness checklist, configuring signing order and recipients, and routing through e-signature platforms or generating manual signing instructions" ;
+    oc:handlesFailure oc:DocumentNotFinal,
+        oc:EsignatureNotConnected,
+        oc:MissingApprovals ;
+    oc:hasArgumentHint "<document or contract to send>" ;
+    oc:hasCategory "automation" ;
+    oc:hasDescription "Prepare and route a document for e-signature — run a pre-signature checklist, configure signing order, and send for execution. Use when a contract is finalized and ready to sign, when verifying entity names, exhibits, and signature blocks before sending, or when setting up an envelope with sequential or parallel signers." ;
+    oc:hasName "signature-request" ;
+    oc:impartsKnowledge oc:kn_0b24f8eb,
+        oc:kn_15d1bf5e,
+        oc:kn_2407479c,
+        oc:kn_4e0f8cda,
+        oc:kn_b04188fc ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:DocumentExists ;
+    oc:resolvesIntent "configure signing order and signers",
+        "prepare document for signature",
+        "route contract for e-signature",
+        "send document for execution",
+        "verify document completeness before signing" ;
+    oc:yieldsState oc:SignatureRequested .
+
+oc:kn_0b24f8eb a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Always — this is a fundamental boundary of the skill" ;
+    oc:directiveContent "This skill assists with legal workflows but does not provide legal advice. Documents must be verified as final form before sending." ;
+    oc:hasRationale "Agents must not overstep into legal counsel territory; incorrect legal guidance creates liability" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_15d1bf5e a oc:FallbackStrategy,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When e-signature connector is unavailable" ;
+    oc:directiveContent "If no e-signature platform is connected, generate a signing instruction document with the file formatted for wet signature or manual e-sign, and list all signers with contact information." ;
+    oc:hasRationale "Ensures the signing workflow can proceed even without digital e-signature tooling, avoiding process bottlenecks" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_2407479c a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before routing any document for signature" ;
+    oc:directiveContent "Always run the full pre-signature checklist before routing: verify document is final form with no open redlines, all exhibits/schedules attached, correct legal entity names, correct dates or blank for execution, signature blocks match authorized signers, internal approvals obtained, and counsel review completed." ;
+    oc:hasRationale "Skipping the checklist is the most common source of signing errors, especially incorrect entity names which can invalidate agreements" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_4e0f8cda a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When configuring signers for any signature request" ;
+    oc:directiveContent "Never send a document for signature without verifying that each signer is authorized to bind their organization." ;
+    oc:hasRationale "An unauthorized signature may render the agreement unenforceable and create legal risk" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_b04188fc a oc:KnowledgeNode,
+        oc:PostFlightValidation ;
+    oc:appliesToContext "After sending a document for signature" ;
+    oc:directiveContent "After execution, ensure signed copies are filed in cloud storage or CLM immediately, and set follow-up reminders if the document is not signed within the expected turnaround time." ;
+    oc:hasRationale "Prompt filing prevents lost executed documents and follow-up ensures deals don't stall from forgotten signature requests" ;
+    oc:severityLevel "MEDIUM" .
+

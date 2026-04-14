@@ -1,0 +1,67 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_knowledge_work_plugins_discover_brand_source_ranking a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "source-ranking" ;
+    skos:broader "Ranking algorithm" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/knowledge-work-plugins/discover-brand" ;
+    oc:contentHash "03b608f7476b49596700fe90d52afc55b8e80466f08d71e8ddfff6dc4e838453" ;
+    oc:differentia "that categorizes and prioritizes discovered brand sources using a weighted multi-factor scoring system with adaptive adjustments" ;
+    oc:extends oc:skill_anthropics_knowledge_work_plugins_discover_brand ;
+    oc:handlesFailure oc:NoAuthoritativeSourcesFound ;
+    oc:hasArgumentHint "list of discovered brand sources with metadata" ;
+    oc:hasCategory "research" ;
+    oc:impartsKnowledge oc:kn_559d6214,
+        oc:kn_924b16ac,
+        oc:kn_b03c17e2,
+        oc:kn_e9bd1d13,
+        oc:kn_f35f71f5 ;
+    oc:isUserInvocable false ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:SourcesDiscovered ;
+    oc:resolvesIntent "adapt scoring when no authoritative brand sources exist",
+        "categorize discovered brand materials into authority levels",
+        "rank brand sources by trustworthiness and relevance",
+        "score brand sources for deep-fetch triage decisions" ;
+    oc:yieldsState oc:SourcesRanked,
+        oc:SourcesTriaged .
+
+oc:kn_559d6214 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When making final triage decisions for deep-fetch selection (Phase 3)" ;
+    oc:directiveContent "Include in deep fetch: all sources scoring > 0.5, all AUTHORITATIVE sources regardless of score, at least one source per category if available, and at least one source per platform if available. Category/platform inclusion overrides the score threshold." ;
+    oc:hasRationale "Ensuring category and platform diversity prevents blind spots in brand discovery even when individual source scores are low, while the score threshold maintains quality for high-volume results." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_924b16ac a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When applying recency cutoffs at the deep-fetch stage (Phase 3)" ;
+    oc:directiveContent "Never rely on STALE sources (trust weight 0.1). Exclude them entirely from deep fetch and only include them in the discovery report for reference. Never let non-AUTHORITATIVE sources older than 12 months pass through to deep fetch." ;
+    oc:hasRationale "Stale content can pollute brand guideline generation with outdated messaging, pre-rebrand instructions, or deprecated terminology that no longer reflects the current brand." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_b03c17e2 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When scoring any discovered brand source during triage" ;
+    oc:directiveContent "Apply the five ranking factors in strict priority order: Recency (30%), Explicitness (25%), Authority (20%), Specificity (15%), Cross-Source Consistency (10%). The composite score is then multiplied by the category trust weight to produce the final ranked score." ;
+    oc:hasRationale "This weighting reflects that recent, explicit guidance from authoritative sources with specific instructions is most reliable for brand guideline generation." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_e9bd1d13 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When categorizing any brand source during Phase 2 triage" ;
+    oc:directiveContent "Classify every discovered source into exactly one of five categories: AUTHORITATIVE (trust 1.0), OPERATIONAL (0.8), CONVERSATIONAL (0.6), CONTEXTUAL (0.3), or STALE (0.1). Category trust weight directly multiplies the composite score." ;
+    oc:hasRationale "Consistent categorization ensures the ranking algorithm produces comparable scores across all source types and prevents low-trust sources from dominating." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_f35f71f5 a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When Phase 2 triage produces zero AUTHORITATIVE sources" ;
+    oc:directiveContent "When zero AUTHORITATIVE sources are found, activate adaptive scoring: boost OPERATIONAL trust weight to 0.9, CONVERSATIONAL to 0.85, CONTEXTUAL to 0.4, and upgrade conversational explicitness scores (0.2→0.5, 0.4→0.6). Flag this adaptation in the discovery report." ;
+    oc:hasRationale "Without formal brand guidelines, operational templates and sales conversations become the primary evidence of brand voice. Without adaptation, these sources would score too low to pass the 0.5 deep-fetch threshold." ;
+    oc:severityLevel "HIGH" .
+

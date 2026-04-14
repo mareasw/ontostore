@@ -1,0 +1,71 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_knowledge_work_plugins_cowork_plugin_customizer_mcp_servers a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "mcp-servers" ;
+    skos:broader "MCP discovery and connection orchestration" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/knowledge-work-plugins/cowork-plugin-customizer" ;
+    oc:contentHash "d373337fe74fc77a2d0f648819c05aa9988e53eba53ad55edadec47bd8a451a1" ;
+    oc:differentia "that searches an MCP registry, presents connector choices to users, facilitates installation, and updates plugin MCP configuration files during plugin customization" ;
+    oc:extends oc:skill_anthropics_knowledge_work_plugins_cowork_plugin_customizer ;
+    oc:handlesFailure oc:MCPNotConnected,
+        oc:MCPNotFound ;
+    oc:hasAllowedTool "search_mcp_registry",
+        "suggest_connectors" ;
+    oc:hasArgumentHint "category or tool name (e.g., 'jira', 'project-management')" ;
+    oc:hasCategory "automation" ;
+    oc:impartsKnowledge oc:kn_523a6e78,
+        oc:kn_53b24e20,
+        oc:kn_55e30424,
+        oc:kn_8070e384,
+        oc:kn_dda48838 ;
+    oc:isUserInvocable false ;
+    oc:nature "Work" ;
+    oc:requiresState oc:PluginStructureKnown ;
+    oc:resolvesIntent "connect MCP servers to a plugin",
+        "discover available MCP integrations",
+        "find MCP connectors for a tool category",
+        "resolve tool placeholders in plugin customization",
+        "update plugin MCP configuration" ;
+    oc:yieldsState oc:MCPConfigUpdated,
+        oc:MCPConnectorsDiscovered .
+
+oc:kn_523a6e78 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When resolving ~~prefixed customization placeholders" ;
+    oc:directiveContent "Always check earlier phase findings before searching the registry — if the user's tool preference is already known, search for that specific tool directly and skip the discovery step." ;
+    oc:hasRationale "Avoids redundant user questions and speeds up the customization workflow by reusing previously gathered information." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_53b24e20 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When a user selects an MCP that shows connected: false in search results" ;
+    oc:directiveContent "Always call suggest_connectors to present Connect buttons when an MCP is not yet connected before writing it into the config." ;
+    oc:hasRationale "Writing a config reference to a disconnected MCP will fail at runtime; the user must first establish the connection." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_55e30424 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When updating plugin MCP configuration after a connector is chosen" ;
+    oc:directiveContent "Check plugin.json for an mcpServers field first; if present, edit the file at that path. If absent, use .mcp.json at the plugin root. If mcpServers points only to .mcpb files, create a new .mcp.json." ;
+    oc:hasRationale "Plugins may have different config layouts; following this priority order respects existing conventions and avoids overwriting bundled server references." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_8070e384 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When a customization point references a category (e.g., ~~Jira) but user preference is unknown" ;
+    oc:directiveContent "Use the category-to-keywords mapping table to translate abstract customization points into concrete search queries for the MCP registry." ;
+    oc:hasRationale "Structured keyword mapping ensures relevant results and reduces the chance of missing the right MCP connector." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_dda48838 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When encountering MCP registry entries without a url field" ;
+    oc:directiveContent "When a directory entry has no URL, match by server name instead — if the MCP server name in the config matches the directory entry name, treat it as equivalent to a URL match." ;
+    oc:hasRationale "Some MCP servers have dynamic endpoints provided by the admin at connection time, so name-based matching serves as a reliable fallback." ;
+    oc:severityLevel "MEDIUM" .
+

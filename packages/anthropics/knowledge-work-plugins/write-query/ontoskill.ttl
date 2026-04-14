@@ -1,0 +1,80 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_knowledge_work_plugins_write_query a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "write-query" ;
+    skos:broader "SQL query generator" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/knowledge-work-plugins/write-query" ;
+    oc:contentHash "181f5c07272bb209d003fc3baa1635fcb8fd2c2314ac1e8c9294f254742c5d78" ;
+    oc:differentia "translates natural language data needs into optimized, dialect-specific SQL with CTEs, performance best practices, and schema-aware structure" ;
+    oc:extends oc:skill_sql_queries ;
+    oc:handlesFailure oc:InvalidInput ;
+    oc:hasArgumentHint "<description of what data you need>" ;
+    oc:hasCategory "development" ;
+    oc:hasDescription "Write optimized SQL for your dialect with best practices. Use when translating a natural-language data need into SQL, building a multi-CTE query with joins and aggregations, optimizing a query against a large partitioned table, or getting dialect-specific syntax for Snowflake, BigQuery, Postgres, etc." ;
+    oc:hasName "write-query" ;
+    oc:impartsKnowledge oc:kn_4eb14646,
+        oc:kn_6bce5d5b,
+        oc:kn_8767d782,
+        oc:kn_9ccdb1e7,
+        oc:kn_c0be803b,
+        oc:kn_ccf6ae37,
+        oc:kn_f1db6086 ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "build multi-CTE queries with joins and aggregations",
+        "generate performance-optimized SQL for large partitioned tables",
+        "get dialect-specific SQL syntax",
+        "optimize SQL for specific dialect",
+        "write SQL query from natural language" ;
+    oc:yieldsState oc:DocumentCreated .
+
+oc:kn_4eb14646 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before writing SQL when a warehouse connection is available" ;
+    oc:directiveContent "If a data warehouse MCP server is connected, discover the schema first: search relevant tables, inspect column names/types/relationships, and check partitioning or clustering keys." ;
+    oc:hasRationale "Schema discovery ensures the query references correct table and column names and leverages existing partitions, views, and materialized views for performance." .
+
+oc:kn_6bce5d5b a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When writing queries with multiple logical steps" ;
+    oc:directiveContent "Use CTEs (WITH clauses) for readability, with one CTE per logical transformation and descriptive names like daily_signups or active_users." ;
+    oc:hasRationale "CTEs improve readability, maintainability, and make complex query logic easier to debug and modify." .
+
+oc:kn_8767d782 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When optimizing queries against large tables" ;
+    oc:directiveContent "Filter early by pushing WHERE clauses as close to base tables as possible, especially on partitioned or clustered columns." ;
+    oc:hasRationale "Early filtering reduces the data processed in subsequent joins and aggregations, significantly improving performance on partitioned tables." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_9ccdb1e7 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When structuring subqueries and joins in SQL" ;
+    oc:directiveContent "Prefer EXISTS over IN for subqueries with large result sets, use appropriate JOIN types (INNER vs LEFT), and avoid correlated subqueries when a JOIN or window function works." ;
+    oc:hasRationale "These patterns avoid unnecessary full scans and row-by-row evaluation, reducing query execution time on large datasets." .
+
+oc:kn_c0be803b a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing any SQL query for production use" ;
+    oc:directiveContent "Never use SELECT * in production queries — always specify only the needed columns." ;
+    oc:hasRationale "SELECT * fetches unnecessary data, increases I/O and memory usage, and makes queries fragile to schema changes." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_ccf6ae37 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing SQL for any specific database platform" ;
+    oc:directiveContent "Always determine and apply the target SQL dialect's specific syntax, functions, and performance features (e.g., Snowflake clustering, BigQuery partitioning)." ;
+    oc:hasRationale "Dialect-specific optimizations can yield orders-of-magnitude performance improvements and ensure the query actually runs without syntax errors." .
+
+oc:kn_f1db6086 a oc:AssumptionBoundary,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "At the start of any query-writing interaction" ;
+    oc:directiveContent "If the user's SQL dialect is not known, ask which one they use before writing the query. Remember the dialect for future queries in the same session." ;
+    oc:hasRationale "Dialect differences in syntax, functions, and performance features are significant enough that writing without knowing the dialect may produce non-functional SQL." .
+

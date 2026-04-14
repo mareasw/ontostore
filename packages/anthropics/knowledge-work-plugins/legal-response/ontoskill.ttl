@@ -1,0 +1,119 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_knowledge_work_plugins_legal_response a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "legal-response" ;
+    skos:broader "Response generator" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/knowledge-work-plugins/legal-response" ;
+    oc:contentHash "91d8018d72a7c9d0bb7e50cd91e008723ac97254cde77d9f2009e19ff218b78f" ;
+    oc:differentia "that produces templated replies to common legal inquiries with built-in escalation checks for situations requiring individualized counsel review" ;
+    oc:handlesFailure oc:FileNotFound,
+        oc:InvalidInput ;
+    oc:hasArgumentHint "[inquiry-type]" ;
+    oc:hasCategory "document" ;
+    oc:hasDescription "Generate a response to a common legal inquiry using configured templates, with built-in escalation checks for situations that shouldn't use a templated reply. Use when responding to data subject requests, litigation hold notices, vendor legal questions, NDA requests from business teams, or subpoenas." ;
+    oc:hasName "legal-response" ;
+    oc:hasRequirement oc:req_0ea30969,
+        oc:req_6f518dca,
+        oc:req_e7a458c7 ;
+    oc:impartsKnowledge oc:kn_11c8bccb,
+        oc:kn_485bb16d,
+        oc:kn_637f90eb,
+        oc:kn_80cfea2d,
+        oc:kn_82e251a1,
+        oc:kn_bfee72d8,
+        oc:kn_c8efa270,
+        oc:kn_ec9d6694,
+        oc:kn_eda82e96 ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "answer vendor legal questions",
+        "create legal response template",
+        "draft subpoena response",
+        "generate insurance notification",
+        "generate response to legal inquiry",
+        "process NDA requests",
+        "reply to data subject request",
+        "respond to litigation hold notice" ;
+    oc:yieldsState oc:DocumentCreated .
+
+oc:kn_11c8bccb a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before Step 5 (response generation)" ;
+    oc:directiveContent "Before generating a response, confirm the inquiry type is unambiguous, verify template availability, and complete the escalation trigger evaluation for all universal and category-specific triggers." ;
+    oc:hasRationale "These pre-flight checks prevent generating inappropriate templated responses for situations requiring escalation." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_485bb16d a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When no matching template exists in local settings" ;
+    oc:directiveContent "When no template is configured for the inquiry type, offer to help create one using the Template Creation Guide rather than generating a one-off response. Save approved templates for future reuse." ;
+    oc:hasRationale "Building a reusable template library improves consistency and reduces future effort for recurring inquiry types." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_637f90eb a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When generating any response — Step 5 customization" ;
+    oc:directiveContent "Every templated response must be customized with correct names, dates, reference numbers, specific facts, applicable jurisdiction and regulation, correct response deadlines based on receipt date, and appropriate signature block. Verify cited regulations match the requester's jurisdiction." ;
+    oc:hasRationale "Uncustomized or incorrect template responses can misstate obligations, cite wrong regulations, or miss jurisdiction-specific requirements, creating legal risk." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_80cfea2d a oc:KnowledgeNode,
+        oc:SecurityImplication ;
+    oc:appliesToContext "Always — before any generated response is finalized or sent" ;
+    oc:directiveContent "Generated responses must be reviewed by qualified legal professionals before being sent, especially for regulated communications. This skill assists with legal workflows but does not provide legal advice." ;
+    oc:hasRationale "Automated legal responses without counsel review could create binding commitments, waive rights, or expose the organization to liability." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_82e251a1 a oc:Idempotency,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When re-running or regenerating a response" ;
+    oc:directiveContent "Running this skill multiple times for the same inquiry is safe but each invocation may produce slightly different phrasing. The core legal content will remain consistent if the same inputs and template are used." ;
+    oc:hasRationale "Users may iterate on response drafts, but each version should be reviewed independently before use." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_bfee72d8 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "Before generating any response — Step 3 of the workflow" ;
+    oc:directiveContent "Before generating any templated response, evaluate whether the situation has escalation trigger characteristics (regulatory involvement, potential litigation, criminal liability, media attention, multiple jurisdictions, etc.). If triggered, stop and route to appropriate counsel." ;
+    oc:hasRationale "Escalation triggers identify situations where templated responses are inappropriate and individualized legal judgment is required." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_c8efa270 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When gathering details in Step 4 of the workflow" ;
+    oc:directiveContent "Template variables ({{requester_name}}, {{response_deadline}}, {{matter_reference}}, etc.) must be explicitly gathered from the user before populating. Never fabricate or assume variable values." ;
+    oc:hasRationale "Incorrect or fabricated variable values in legal communications could misrepresent facts or obligations." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_ec9d6694 a oc:KnowledgeNode,
+        oc:PostFlightValidation ;
+    oc:appliesToContext "After response generation completes" ;
+    oc:directiveContent "After generating a response, confirm it includes: escalation check results, follow-up actions (calendar reminders for deadlines, tracking/logging requirements), and clear marking as draft for user review." ;
+    oc:hasRationale "Post-generation validation ensures no required elements are missing and deadlines are tracked to prevent regulatory non-compliance." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_eda82e96 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When handling subpoena or legal process inquiries" ;
+    oc:directiveContent "Never use a subpoena template as a final response. Subpoena responses almost always require individualized counsel review — templates serve only as starting frameworks." ;
+    oc:hasRationale "Subpoena responses carry significant legal risk including privilege issues, third-party data exposure, and cross-border complications." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:req_0ea30969 a oc:RequirementKnowledge ;
+    oc:isOptional true ;
+    oc:requirementValue "organizational legal templates and escalation paths" .
+
+oc:req_6f518dca a oc:RequirementTool ;
+    oc:isOptional true ;
+    oc:requirementValue "file system access for template loading" .
+
+oc:req_e7a458c7 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "applicable privacy regulations (GDPR, CCPA, CPRA)" .
+

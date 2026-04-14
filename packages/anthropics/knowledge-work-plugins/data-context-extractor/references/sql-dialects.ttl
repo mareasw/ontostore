@@ -1,0 +1,64 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_knowledge_work_plugins_data_context_extractor_sql_dialects a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "sql-dialects" ;
+    skos:broader "Reference guide" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/knowledge-work-plugins/data-context-extractor" ;
+    oc:contentHash "a62f61bf64699f7919f4360cce7255794522406c36689069c78c95796fce0ba0" ;
+    oc:differentia "that catalogs SQL dialect-specific syntax patterns across BigQuery, Snowflake, PostgreSQL/Redshift, Databricks/Spark SQL, and MySQL for correct cross-platform query generation" ;
+    oc:extends oc:skill_anthropics_knowledge_work_plugins_data_context_extractor ;
+    oc:handlesFailure oc:InvalidInput ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_0d8c3842,
+        oc:kn_3b6e826d,
+        oc:kn_83eb0af1,
+        oc:kn_cf2fe8d4,
+        oc:kn_de299f3c ;
+    oc:isUserInvocable false ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "compare SQL function equivalents across data warehouse platforms",
+        "generate dialect-correct SQL for BigQuery, Snowflake, PostgreSQL, Databricks, or MySQL",
+        "look up SQL dialect syntax for a specific warehouse" ;
+    oc:yieldsState oc:DialectIdentified .
+
+oc:kn_0d8c3842 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing SELECT statements that need to exclude specific columns" ;
+    oc:directiveContent "Do not use SELECT * EXCEPT or SELECT * EXCLUDE on PostgreSQL/Redshift or MySQL — these platforms do not support column exclusion syntax and require explicit column lists." ;
+    oc:hasRationale "Using unsupported column exclusion syntax will cause syntax errors; PostgreSQL and MySQL require all desired columns to be listed explicitly." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_3b6e826d a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When generating any SQL that performs division operations" ;
+    oc:directiveContent "Always use dialect-specific safe division functions: SAFE_DIVIDE for BigQuery, DIV0/DIV0NULL for Snowflake, NULLIF pattern for PostgreSQL/Databricks/MySQL." ;
+    oc:hasRationale "Division by zero causes runtime errors in most dialects; using built-in safe division prevents query failures on production data." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_83eb0af1 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing any identifier reference in SQL for these platforms" ;
+    oc:directiveContent "Snowflake identifiers default to UPPERCASE unless double-quoted; PostgreSQL identifiers default to lowercase; BigQuery and MySQL use backtick-quoted identifiers with different case sensitivity rules." ;
+    oc:hasRationale "Case sensitivity mismatches between the warehouse and the SQL query lead to 'object not found' errors that are hard to diagnose." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_cf2fe8d4 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When referencing tables or columns in any SQL statement" ;
+    oc:directiveContent "Use dialect-correct table reference syntax: backticks for BigQuery and MySQL, double-quoted identifiers for Snowflake case-sensitive names, dot-notation for PostgreSQL and Databricks." ;
+    oc:hasRationale "Incorrect identifier quoting causes immediate parse errors and is the most common cross-dialect mistake." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_de299f3c a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing date/time functions in SQL" ;
+    oc:directiveContent "For date truncation and arithmetic, check the dialect-specific function argument order: Snowflake uses DATE_TRUNC('MONTH', col) while BigQuery uses DATE_TRUNC(col, MONTH) — the unit and column argument order is reversed." ;
+    oc:hasRationale "Argument order reversal between dialects is a subtle source of bugs that won't error but will silently produce wrong results or unexpected NULLs." ;
+    oc:severityLevel "HIGH" .
+

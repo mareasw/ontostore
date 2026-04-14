@@ -1,0 +1,78 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_knowledge_work_plugins_search a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "search" ;
+    skos:broader "Cross-source search orchestrator" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/knowledge-work-plugins/search" ;
+    oc:contentHash "228814218e6bd82693094487fb02b82e28d217dd11c537625892657bf61d563c" ;
+    oc:differentia "Decomposes a natural language query into targeted sub-queries across multiple connected MCP sources, executes them in parallel, and synthesizes deduplicated results into a unified answer with source attribution" ;
+    oc:handlesFailure oc:NoResultsFound,
+        oc:PartialResults,
+        oc:SourceUnavailable ;
+    oc:hasArgumentHint "<query>" ;
+    oc:hasCategory "productivity" ;
+    oc:hasDescription "Search across all connected sources in one query. Trigger with \"find that doc about...\", \"what did we decide on...\", \"where was the conversation about...\", or when looking for a decision, document, or discussion that could live in chat, email, cloud storage, or a project tracker." ;
+    oc:hasName "search" ;
+    oc:impartsKnowledge oc:kn_0b30b229,
+        oc:kn_27a3b9ce,
+        oc:kn_67193e95,
+        oc:kn_97d35cf0,
+        oc:kn_a7b71cf7,
+        oc:kn_faa0463a ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "discover information across chat email and cloud storage",
+        "find documents or discussions",
+        "locate decisions across tools",
+        "search across connected sources",
+        "search for a specific item across all platforms" ;
+    oc:yieldsState oc:SearchResultsSynthesized .
+
+oc:kn_0b30b229 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When ranking and deduplicating results from multiple sources" ;
+    oc:directiveContent "Rank results using a combination of relevance, freshness, authority, and completeness. Prefer official docs for factual questions but prefer conversations for 'what did we discuss' queries. Group duplicate information across sources and prefer the most authoritative version." ;
+    oc:hasRationale "Without intelligent ranking, users are overwhelmed with redundant or irrelevant results; context-aware ranking surfaces the most useful information." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_27a3b9ce a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When one or more MCP sources are unavailable during search" ;
+    oc:directiveContent "When some sources fail or return errors, present results from successful sources and note which sources were unreachable. Do not let one source failure block the entire search." ;
+    oc:hasRationale "Partial results are still valuable; blocking on a single failed source degrades the entire experience." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_67193e95 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Before executing any search" ;
+    oc:directiveContent "If no MCP sources are connected, inform the user that they need to connect at least one source rather than attempting a search." ;
+    oc:hasRationale "Searching with zero connected sources would produce no results and confuse the user; a clear message guides them to fix the configuration." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_97d35cf0 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When presenting any search results" ;
+    oc:directiveContent "Never present raw search result lists to the user. Always synthesize results into a coherent answer that directly addresses the user's intent, with source attribution included." ;
+    oc:hasRationale "Raw result lists force the user to do the synthesis work themselves, defeating the purpose of a cross-source search skill." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_a7b71cf7 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "At the start of every search execution" ;
+    oc:directiveContent "Before searching, check which MCP sources are available from the tool list and parse the user's query for intent, entities, time constraints, source hints, and filter syntax (from:, in:, after:, before:, type:)." ;
+    oc:hasRationale "Query decomposition and source detection are essential for generating effective per-source sub-queries." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_faa0463a a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When executing any search query with multiple connected sources" ;
+    oc:directiveContent "Always run searches across all available MCP sources in parallel — never sequentially. Each source receives its own translated sub-query using that source's native search syntax." ;
+    oc:hasRationale "Parallel execution minimizes latency and ensures comprehensive coverage; waiting for one source before querying another wastes time and risks incomplete results." ;
+    oc:severityLevel "HIGH" .
+

@@ -1,0 +1,121 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_knowledge_work_plugins_view_pdf a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "view-pdf" ;
+    skos:broader "Interactive document viewer" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/knowledge-work-plugins/view-pdf" ;
+    oc:contentHash "929e9e58ecafeb1b23da3e004dbd4ba7b3f84ab2016eed8c7613db2fdf376099" ;
+    oc:differentia "renders PDFs in a live viewer for real-time annotation, form filling, and signature placement with visual feedback" ;
+    oc:handlesFailure oc:FileNotFound,
+        oc:NetworkTimeout,
+        oc:PermissionDenied ;
+    oc:hasAllowedTool "display_pdf",
+        "interact",
+        "list_pdfs" ;
+    oc:hasArgumentHint "file-path or URL to PDF" ;
+    oc:hasCategory "document" ;
+    oc:hasDescription "Interactive PDF viewer. Use when the user wants to open, show, or view a PDF and collaborate on it visually — annotate, highlight, stamp, fill form fields, place signature/initials, or review markup together. Not for summarization or text extraction (use native Read instead)." ;
+    oc:hasName "view-pdf" ;
+    oc:hasRequirement oc:req_1a1dd5f9,
+        oc:req_7e89c8f9,
+        oc:req_c50a71f9,
+        oc:req_c75f972a ;
+    oc:impartsKnowledge oc:kn_16552cf0,
+        oc:kn_1750dcc9,
+        oc:kn_1e701535,
+        oc:kn_711fd2fa,
+        oc:kn_7db0c69a,
+        oc:kn_9676e9eb,
+        oc:kn_ad964e95,
+        oc:kn_b8fe2221 ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:FileExists,
+        oc:NetworkAvailable ;
+    oc:resolvesIntent "annotate and highlight PDF",
+        "collaboratively review and markup PDF",
+        "fill PDF form fields visually",
+        "place signature or initials on PDF",
+        "stamp PDF with labels like APPROVED or CONFIDENTIAL",
+        "view PDF document interactively" ;
+    oc:yieldsState oc:DocumentAnnotated,
+        oc:DocumentDisplayed,
+        oc:FormFilled .
+
+oc:kn_16552cf0 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When filling PDF forms with poorly labeled fields" ;
+    oc:directiveContent "For cryptic form field names (Text1, Field_7), use get_screenshot to match bounding boxes to visual labels on the page rather than relying on field metadata." ;
+    oc:hasRationale "Many PDF forms have programmatic field names that don't match their visible labels, so visual matching via screenshots is more reliable." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_1750dcc9 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When user asks to summarize, read, or extract text from a PDF" ;
+    oc:directiveContent "Do NOT use the PDF viewer for pure text ingestion like summarization, reading page content, or extracting tables — use the native Read tool instead." ;
+    oc:hasRationale "The viewer's value is interactive visual collaboration, not streaming text back to the agent. Using it for ingestion wastes resources and bypasses the native Read tool's efficiency." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_1e701535 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When placing any annotation on a PDF page" ;
+    oc:directiveContent "Annotation coordinates use PDF points (1/72 inch), origin at top-left, Y increases downward. US Letter is 612×792pt. All annotations require id, type, and page (1-indexed)." ;
+    oc:hasRationale "Incorrect coordinate system assumptions will place annotations in wrong positions, breaking the collaborative visual workflow." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_711fd2fa a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When performing annotation or form-filling actions on a PDF" ;
+    oc:directiveContent "Batch multiple commands in a single interact call via the commands array, and end each batch with get_screenshot to verify changes visually." ;
+    oc:hasRationale "Batching reduces round-trips and the screenshot confirms the visual result before proceeding to the next step." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_7db0c69a a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When user asks to sign a PDF" ;
+    oc:directiveContent "This tool places visual signature images only — it does NOT create certified or cryptographic digital signatures." ;
+    oc:hasRationale "Users may expect legally binding digital signatures; the image stamping provided here has no cryptographic validity or legal certification." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_9676e9eb a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When adding text highlights to a PDF" ;
+    oc:directiveContent "Prefer highlight_text over manual rect-based highlight annotations when the target is identifiable text content." ;
+    oc:hasRationale "highlight_text auto-finds text by query, which is more reliable than manually specifying rectangular coordinates." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_ad964e95 a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "When reading PDF content to plan annotations" ;
+    oc:directiveContent "get_text extracts text from up to 20 pages max. Use it to decide what to annotate, not for summarization." ;
+    oc:hasRationale "The 20-page limit prevents excessive data transfer; the tool is meant for annotation planning, not bulk text extraction." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_b8fe2221 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When opening and working with a PDF document" ;
+    oc:directiveContent "Call display_pdf only once per document. Use the returned viewUUID for all subsequent interact calls. Calling display_pdf again creates a separate viewer that won't match the one the user is looking at." ;
+    oc:hasRationale "Creating multiple viewers breaks the interactive session — the user sees one viewer while the agent interacts with another, causing confusion." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:req_1a1dd5f9 a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "interact" .
+
+oc:req_7e89c8f9 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Understanding of PDF coordinate system (points, 1/72 inch, top-left origin, Y-down)" .
+
+oc:req_c50a71f9 a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "display_pdf" .
+
+oc:req_c75f972a a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "list_pdfs" .
+

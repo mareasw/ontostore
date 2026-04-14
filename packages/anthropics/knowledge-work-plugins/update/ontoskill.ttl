@@ -1,0 +1,78 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_knowledge_work_plugins_update a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "update" ;
+    skos:broader "productivity synchronization command" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/knowledge-work-plugins/update" ;
+    oc:contentHash "e10ee99268571d4da67255dcabfb0c87cb948090b233d869991cb0a6764a4a0a" ;
+    oc:dependsOnSkill oc:skill_start ;
+    oc:differentia "syncs external task sources and memory files, triages stale items, decodes entity gaps, and optionally scans chat/email/calendar for missed todos" ;
+    oc:handlesFailure oc:FileNotFound,
+        oc:PermissionDenied ;
+    oc:hasArgumentHint "[--comprehensive]" ;
+    oc:hasCategory "productivity" ;
+    oc:hasDescription "Sync tasks and refresh memory from your current activity. Use when pulling new assignments from your project tracker into TASKS.md, triaging stale or overdue tasks, filling memory gaps for unknown people or projects, or running a comprehensive scan to catch todos buried in chat and email." ;
+    oc:hasName "update" ;
+    oc:impartsKnowledge oc:kn_08ea82bb,
+        oc:kn_4b57eb24,
+        oc:kn_b9c1614e,
+        oc:kn_be5e5a7b,
+        oc:kn_c3614e6b,
+        oc:kn_f2161c7e ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "fill memory gaps for unknown people or projects",
+        "refresh task list and memory to current state",
+        "scan chat and email for missed todos",
+        "sync tasks from external tools",
+        "triage stale or overdue tasks" ;
+    oc:yieldsState oc:DocumentUpdated .
+
+oc:kn_08ea82bb a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When comparing external tasks against existing TASKS.md entries" ;
+    oc:directiveContent "Use fuzzy matching on task titles to handle minor wording differences between external sources and TASKS.md." ;
+    oc:hasRationale "Exact string matching would produce false negatives for tasks that are semantically identical but worded differently across systems." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_4b57eb24 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before executing any sync or triage operations" ;
+    oc:directiveContent "Verify that TASKS.md and memory/ directory exist before proceeding. If missing, suggest running /productivity:start first." ;
+    oc:hasRationale "The update command depends on the productivity system being initialized; operating without the foundational files would produce errors or inconsistent state." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_b9c1614e a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "When capturing enrichment from tasks" ;
+    oc:directiveContent "External source links are preserved when available. Tasks and memory files may be modified with enriched context (links, status changes, relationships, deadlines)." ;
+    oc:hasRationale "Preserving external links maintains traceability; enrichment updates ensure memory files stay comprehensive." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_be5e5a7b a oc:Idempotency,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When running the update command repeatedly" ;
+    oc:directiveContent "Safe to run frequently — only surfaces updates when there is genuinely new information. No duplicate additions." ;
+    oc:hasRationale "Users should feel comfortable running this command often without fear of duplication or side effects." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_c3614e6b a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When processing task text for memory enrichment" ;
+    oc:directiveContent "Decode all entities (people, projects, acronyms, tools, links) in tasks and surface gaps where memory lacks context. Group unknowns and present them for clarification." ;
+    oc:hasRationale "Tasks often contain shorthand references that lose meaning without context; proactively surfacing gaps prevents knowledge decay and keeps memory useful." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_f2161c7e a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When syncing tasks or filling memory gaps" ;
+    oc:directiveContent "Never auto-add tasks or memories without user confirmation. Always present diffs and let the user decide." ;
+    oc:hasRationale "Autonomous modifications to task lists or memory could introduce noise, errors, or unwanted items without user oversight." ;
+    oc:severityLevel "HIGH" .
+

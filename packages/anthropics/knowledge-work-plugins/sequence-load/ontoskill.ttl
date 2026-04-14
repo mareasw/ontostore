@@ -1,0 +1,88 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_knowledge_work_plugins_sequence_load a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "sequence-load" ;
+    skos:broader "Apollo outreach automation workflow" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/knowledge-work-plugins/sequence-load" ;
+    oc:contentHash "827c0084d71019dcff263a26faec2ddefeccd10528ae839459eda3f1ca3fdc79" ;
+    oc:differentia "that finds, enriches, deduplicates, and bulk-loads targeted leads into an email sequence in one end-to-end flow" ;
+    oc:handlesFailure oc:EnrichmentFailed,
+        oc:NoMatchingLeads,
+        oc:PermissionDenied,
+        oc:SequenceNotFound ;
+    oc:hasArgumentHint "[targeting criteria + sequence name]" ;
+    oc:hasCategory "automation" ;
+    oc:hasDescription "Find leads matching criteria and bulk-add them to an Apollo outreach sequence. Handles enrichment, contact creation, deduplication, and enrollment in one flow." ;
+    oc:hasName "sequence-load" ;
+    oc:impartsKnowledge oc:kn_28b8bd84,
+        oc:kn_2b2f6140,
+        oc:kn_3a37ee89,
+        oc:kn_43f37e39,
+        oc:kn_579efd41,
+        oc:kn_dc7ef004,
+        oc:kn_f770b150 ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:APIKeySet,
+        oc:NetworkAvailable ;
+    oc:resolvesIntent "bulk-add contacts to Apollo sequence",
+        "find and enroll prospects in email campaign",
+        "list available Apollo sequences",
+        "load leads into outreach sequence" ;
+    oc:yieldsState oc:ContactsEnrolled,
+        oc:SequenceLoaded .
+
+oc:kn_28b8bd84 a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "Always, during the enrichment and enrollment steps" ;
+    oc:directiveContent "This skill consumes Apollo credits for each contact enriched and sends outreach emails once contacts are enrolled in a sequence." ;
+    oc:hasRationale "Users must be aware of the financial cost (credits) and the real-world impact (emails will be sent) before executing the full workflow." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_2b2f6140 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "During Step 3 (get email account)" ;
+    oc:directiveContent "If multiple email accounts are linked, the user must choose which to send from before enrollment can proceed." ;
+    oc:hasRationale "Sending from the wrong email account could result in outreach coming from an unintended sender identity." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_3a37ee89 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When searching for a target sequence by name" ;
+    oc:directiveContent "If sequence search returns no match or multiple matches, display all available sequences in a table and ask the user to disambiguate." ;
+    oc:hasRationale "Sequence names can be ambiguous; showing all options prevents enrolling contacts into the wrong sequence." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_43f37e39 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When creating contacts via apollo_contacts_create" ;
+    oc:directiveContent "Always set run_dedupe to true when creating contacts to prevent duplicate entries." ;
+    oc:hasRationale "Deduplication prevents enrolling the same contact multiple times in sequences, which would trigger duplicate outreach emails." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_579efd41 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "During Step 5 enrichment via apollo_people_bulk_match" ;
+    oc:directiveContent "Batch enrich up to 10 contacts per bulk match call for efficiency." ;
+    oc:hasRationale "Batching reduces API round-trips and stays within Apollo's bulk match endpoint limits." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_dc7ef004 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Between Step 4 (find matching people) and Step 5 (enrich and create contacts)" ;
+    oc:directiveContent "Present candidates in a preview table and wait for explicit user confirmation before proceeding to enrichment and enrollment." ;
+    oc:hasRationale "This ensures the user can review and veto candidates before irreversible actions (credit consumption and sequence enrollment) occur." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_f770b150 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before Step 5 (enrichment and contact creation)" ;
+    oc:directiveContent "Always confirm with the user before proceeding with enrichment, as it consumes Apollo credits per contact." ;
+    oc:hasRationale "Apollo enrichment costs credits per contact; skipping confirmation could result in unexpected credit consumption and budget overruns." ;
+    oc:severityLevel "CRITICAL" .
+

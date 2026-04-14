@@ -1,0 +1,109 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_knowledge_work_plugins_knowledge_synthesis a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "knowledge-synthesis" ;
+    skos:broader "Synthesis methodology" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/knowledge-work-plugins/knowledge-synthesis" ;
+    oc:contentHash "8f719009273702cb1b19fc512a36017d8daeec778532c7ab7862d089aed66d70" ;
+    oc:dependsOnSkill oc:skill_search,
+        oc:skill_source_management ;
+    oc:differentia "that combines multi-source search results into coherent, deduplicated answers with source attribution and confidence scoring" ;
+    oc:handlesFailure oc:ConflictingInformation,
+        oc:InsufficientResults ;
+    oc:hasCategory "research" ;
+    oc:hasDescription "Combines search results from multiple sources into coherent, deduplicated answers with source attribution. Handles confidence scoring based on freshness and authority, and summarizes large result sets effectively." ;
+    oc:hasName "knowledge-synthesis" ;
+    oc:hasRequirement oc:req_f89f5d11 ;
+    oc:impartsKnowledge oc:kn_26783bc9,
+        oc:kn_30f12aec,
+        oc:kn_5c4389ac,
+        oc:kn_6b6643c0,
+        oc:kn_832041fb,
+        oc:kn_9d69298b,
+        oc:kn_adeb6b20,
+        oc:kn_c22e26e1,
+        oc:kn_d9614631,
+        oc:kn_dbb6a3c9 ;
+    oc:isUserInvocable false ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:SearchResultsAvailable ;
+    oc:resolvesIntent "assess confidence of combined findings",
+        "deduplicate and merge overlapping information",
+        "summarize large result sets into coherent answers",
+        "synthesize search results from multiple sources" ;
+    oc:yieldsState oc:SynthesizedAnswerProduced .
+
+oc:kn_26783bc9 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When processing any multi-source result set" ;
+    oc:directiveContent "Follow the synthesis pipeline: (1) Deduplicate cross-source duplicates, (2) Cluster by theme/topic, (3) Rank by relevance, (4) Assess confidence using freshness × authority × agreement, (5) Synthesize into narrative with attribution, (6) Format detail level based on result count." ;
+    oc:hasRationale "This ordered pipeline ensures systematic processing — deduplication before clustering prevents redundancy, and confidence assessment before synthesis ensures accurate hedging." .
+
+oc:kn_30f12aec a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When performing cross-source deduplication" ;
+    oc:directiveContent "Do not deduplicate items when they represent different conclusions, different viewpoints, or meaningful evolution of information (e.g., v1 vs v2 of a decision). Keep these as separate items." ;
+    oc:hasRationale "Aggressive deduplication can erase the evolution of a decision or hide legitimate disagreement. Preserving distinct viewpoints is essential for accurate synthesis." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_5c4389ac a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When conflicting information is detected across sources" ;
+    oc:directiveContent "When sources disagree, always surface the conflict explicitly rather than silently picking one version. Present the conflicting items with their timestamps and sources so the user can judge recency and authority." ;
+    oc:hasRationale "Silent resolution of conflicts hides important context and can lead to incorrect conclusions. Explicit conflict presentation preserves information integrity." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_6b6643c0 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When assessing confidence based on result recency" ;
+    oc:directiveContent "Information older than one month should be flagged as potentially outdated, especially for status queries. For policy/factual queries, freshness matters less." ;
+    oc:hasRationale "Enterprise knowledge has a half-life. Status and decisions change frequently; flagging stale data prevents the user from acting on obsolete information." .
+
+oc:kn_832041fb a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When making any factual statement in the synthesized output" ;
+    oc:directiveContent "Every claim in the synthesized answer must be attributable to a source. Include source type, specific location, date, author, and document/thread titles when available." ;
+    oc:hasRationale "Source attribution enables the user to verify claims and assess trustworthiness. Without it, synthesis becomes unaccountable opinion." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_9d69298b a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When merging duplicate results across sources" ;
+    oc:directiveContent "When deduplicating, prefer the most complete version as primary text, combine unique details from each source, and cite all sources where the information appeared." ;
+    oc:hasRationale "This preserves the richest available context while maintaining full source provenance for verification." .
+
+oc:kn_adeb6b20 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When expressing confidence in the synthesized output" ;
+    oc:directiveContent "Do not present uncertain information with the same confidence as well-supported facts. Use graduated hedging language based on confidence level (direct statement → tentative language → explicit uncertainty flag)." ;
+    oc:hasRationale "Uniform confidence presentation misleads the user about the reliability of findings. Graduated hedging accurately communicates epistemic uncertainty." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_c22e26e1 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When determining the summarization depth for the output" ;
+    oc:directiveContent "Scale output detail by result set size: small (1-5) present everything; medium (5-15) group by theme with summaries; large (15+) provide high-level synthesis with key findings and offer drill-down." ;
+    oc:hasRationale "Over-summarizing small sets loses useful detail; under-summarizing large sets overwhelms the user. Adaptive detail scaling matches output to cognitive load." .
+
+oc:kn_d9614631 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When presenting synthesized results to the user" ;
+    oc:directiveContent "Never list results source-by-source (\"From chat: ... From email: ...\"). Always synthesize into a unified narrative grouped by topic, not by source." ;
+    oc:hasRationale "Source-by-source listing defeats the purpose of synthesis and forces the user to do the mental work of merging information themselves." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_dbb6a3c9 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Always, when formatting the final synthesized output" ;
+    oc:directiveContent "Lead with the answer, not the search process. The user wants the conclusion first, then supporting details and sources." ;
+    oc:hasRationale "Inverted pyramid structure respects the user's time and delivers value immediately, with detail available on drill-down." .
+
+oc:req_f89f5d11 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Multi-source search result data from connected enterprise sources (chat, email, cloud storage, project trackers, wikis)" .
+
