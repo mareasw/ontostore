@@ -1,0 +1,193 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_vercel_labs_agent_browser a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "agent-browser" ;
+    skos:broader "Browser automation CLI" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/agent-browser" ;
+    oc:contentHash "5a77f5355d2fcc8f395595b114c39b802e98532383567e63df953c71c5b39109" ;
+    oc:differentia "Provides AI agents with compact element references (@refs) and a command-driven interface for navigating, interacting with, extracting data from, and testing web applications via Chrome/Chromium over CDP" ;
+    oc:handlesFailure oc:AuthenticationFailed,
+        oc:ElementNotFound,
+        oc:NavigationBlocked,
+        oc:NetworkTimeout,
+        oc:PermissionDenied ;
+    oc:hasAllowedTool "Bash(agent-browser:*)",
+        "Bash(npx agent-browser:*)" ;
+    oc:hasArgumentHint "command and URL or element ref (e.g., \"open <url>\", \"snapshot -i\", \"click @e1\", \"fill @e2 \\\"text\\\"\")" ;
+    oc:hasCategory "automation" ;
+    oc:hasDescription "Browser automation CLI for AI agents. Use when the user needs to interact with websites, including navigating pages, filling forms, clicking buttons, taking screenshots, extracting data, testing web apps, or automating any browser task. Triggers include requests to \"open a website\", \"fill out a form\", \"click a button\", \"take a screenshot\", \"scrape data from a page\", \"test this web app\", \"login to a site\", \"automate browser actions\", or any task requiring programmatic web interaction." ;
+    oc:hasName "agent-browser" ;
+    oc:hasRequirement oc:req_044eb430,
+        oc:req_231b91dd,
+        oc:req_270b5627,
+        oc:req_2fe8e1c0,
+        oc:req_44b201b6,
+        oc:req_6242dd3e,
+        oc:req_a8c43c03,
+        oc:req_b7f5a376,
+        oc:req_e4ace3cb,
+        oc:req_fe79ff87 ;
+    oc:impartsKnowledge oc:kn_04c101dc,
+        oc:kn_0639febd,
+        oc:kn_1123e1c3,
+        oc:kn_251c2e57,
+        oc:kn_7b63c9f4,
+        oc:kn_7c1bfa5c,
+        oc:kn_94a3c916,
+        oc:kn_9bade8df,
+        oc:kn_a239c7e6,
+        oc:kn_c2da55b6,
+        oc:kn_e0491c28,
+        oc:kn_f7c17faf ;
+    oc:isUserInvocable true ;
+    oc:nature "Tool" ;
+    oc:requiresState oc:NetworkAvailable,
+        oc:ToolInstalled ;
+    oc:resolvesIntent "automate multi-step browser workflows",
+        "capture page snapshots with element references",
+        "click buttons and interact with page elements",
+        "compare page states via diffing",
+        "download files from web pages",
+        "extract and scrape data from web pages",
+        "fill out and submit web forms",
+        "login to websites and manage authentication sessions",
+        "navigate websites and web pages",
+        "record browser sessions as video",
+        "take screenshots and capture page state",
+        "test web applications end-to-end" ;
+    oc:yieldsState oc:AuthenticatedSession,
+        oc:DataExtracted,
+        oc:FileDownloaded,
+        oc:FormSubmitted,
+        oc:PageLoaded,
+        oc:ScreenshotCaptured .
+
+oc:kn_04c101dc a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before running browser automation in production or security-sensitive contexts" ;
+    oc:directiveContent "For security-sensitive automation, set AGENT_BROWSER_CONTENT_BOUNDARIES=1 to wrap output in markers, AGENT_BROWSER_ALLOWED_DOMAINS to restrict navigation, and AGENT_BROWSER_ACTION_POLICY to gate destructive actions." ;
+    oc:hasRationale "These opt-in security features prevent context injection from malicious pages, unauthorized navigation, and unintended destructive actions by AI agents." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_0639febd a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When expected elements are missing from snapshot output" ;
+    oc:directiveContent "When snapshot does not show an expected element, try scrolling down (`agent-browser scroll down 1000`), waiting (`agent-browser wait 1000`), or checking if a dialog is blocking (`agent-browser dialog status`)." ;
+    oc:hasRationale "Elements may be below the fold, not yet rendered by dynamic content, or hidden behind a blocking dialog." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_1123e1c3 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When dealing with slow pages, SPAs, or pages with dynamic content loading" ;
+    oc:directiveContent "Use `wait --load networkidle` after navigation and `wait @ref` or `wait --text` for specific elements before snapshotting. Avoid relying solely on the default 25-second timeout." ;
+    oc:hasRationale "Explicit waits ensure the page is fully loaded and elements are ready before interaction, preventing timing-related failures on asynchronous content." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_251c2e57 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When commands timeout or hang unexpectedly during automation" ;
+    oc:directiveContent "JavaScript dialogs (alert, confirm, prompt) block all browser commands until dismissed. If commands start timing out unexpectedly, check for a pending dialog with `agent-browser dialog status`." ;
+    oc:hasRationale "Dialogs halt the browser's command processing. Auto-accept handles alert/beforeunload by default, but confirm/prompt require explicit handling." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_7b63c9f4 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "After any click that navigates, form submission, dropdown/modal open, or dynamic content load" ;
+    oc:directiveContent "Never use stale refs after page navigation, form submission, or dynamic content loading. Always re-snapshot with `agent-browser snapshot -i` after any action that changes the DOM to obtain fresh refs." ;
+    oc:hasRationale "Refs (@e1, @e2, etc.) are invalidated when the page changes. Using stale refs causes 'ref not found' errors and incorrect element targeting." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_7c1bfa5c a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When executing JavaScript in the browser context via eval" ;
+    oc:directiveContent "Use `eval --stdin` with heredoc or `eval -b` with base64 for complex JavaScript. Never use regular `eval 'expression'` with nested quotes, arrow functions, template literals, or $() expressions." ;
+    oc:hasRationale "Shell quoting corrupts complex JavaScript expressions (double quotes, !, backticks, $() are all interpreted by the shell before reaching agent-browser." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_94a3c916 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When constructing multi-step browser automation sequences" ;
+    oc:directiveContent "Chain commands with && when intermediate output doesn't need parsing (e.g., open + wait + screenshot). Use separate commands when you need to read output before deciding next steps (e.g., snapshot to discover refs, then interact)." ;
+    oc:hasRationale "Command chaining reduces process startup overhead and is more efficient, but only when no decision logic is needed between steps." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_9bade8df a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When saving or loading authentication state files" ;
+    oc:directiveContent "State files (auth.json, etc.) contain session tokens in plaintext. They must be added to .gitignore, deleted when no longer needed, and encrypted at rest using AGENT_BROWSER_ENCRYPTION_KEY." ;
+    oc:hasRationale "Leaked state files expose full session tokens, enabling unauthorized access to authenticated services." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_a239c7e6 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When running parallel browser tasks or multiple agents simultaneously" ;
+    oc:directiveContent "Use named sessions (`--session <name>`) when running concurrent automations to ensure cookie, storage, and tab isolation. Always close sessions with `agent-browser close` when done." ;
+    oc:hasRationale "Without named sessions, concurrent automations share the same browser context, causing state collisions, cookie leaks, and race conditions." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_c2da55b6 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "Before any interaction with a newly loaded or changed page" ;
+    oc:directiveContent "Always run `agent-browser snapshot -i` before interacting with a page to discover interactive elements and their refs. Never assume element refs from prior knowledge." ;
+    oc:hasRationale "The snapshot-interact-resnapshot cycle is the core workflow. Skipping snapshot leads to guesswork and errors." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_e0491c28 a oc:KnowledgeNode,
+        oc:PostFlightValidation ;
+    oc:appliesToContext "After performing click, fill, or submit actions to verify the outcome" ;
+    oc:directiveContent "Use `agent-browser diff snapshot` after performing an action to verify it had the intended effect by comparing the current accessibility tree against the last snapshot." ;
+    oc:hasRationale "Diffing provides deterministic verification that an action changed the page as expected, catching silent failures." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_f7c17faf a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When automating login flows or handling credentials" ;
+    oc:directiveContent "Prefer `auth vault` (`agent-browser auth save`/`auth login`) for credential management so the LLM never sees passwords. Use environment variables for credentials when direct fill is necessary." ;
+    oc:hasRationale "Avoiding plaintext credentials in commands prevents them from appearing in logs, shell history, and LLM context windows." ;
+    oc:severityLevel "HIGH" .
+
+oc:req_044eb430 a oc:RequirementEnvVar ;
+    oc:isOptional true ;
+    oc:requirementValue "AGENT_BROWSER_IDLE_TIMEOUT_MS" .
+
+oc:req_231b91dd a oc:RequirementEnvVar ;
+    oc:isOptional true ;
+    oc:requirementValue "AGENT_BROWSER_ALLOWED_DOMAINS" .
+
+oc:req_270b5627 a oc:RequirementEnvVar ;
+    oc:isOptional true ;
+    oc:requirementValue "AGENT_BROWSER_PROVIDER" .
+
+oc:req_2fe8e1c0 a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "agent-browser CLI (install via npm i -g agent-browser, brew install agent-browser, or cargo install agent-browser)" .
+
+oc:req_44b201b6 a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "Chrome/Chromium browser (auto-downloaded via agent-browser install, or existing Chrome/Brave/Playwright/Puppeteer installation detected)" .
+
+oc:req_6242dd3e a oc:RequirementEnvVar ;
+    oc:isOptional true ;
+    oc:requirementValue "AGENT_BROWSER_CONTENT_BOUNDARIES" .
+
+oc:req_a8c43c03 a oc:RequirementEnvVar ;
+    oc:isOptional true ;
+    oc:requirementValue "AGENT_BROWSER_DEFAULT_TIMEOUT" .
+
+oc:req_b7f5a376 a oc:RequirementEnvVar ;
+    oc:isOptional true ;
+    oc:requirementValue "AGENT_BROWSER_HEADED" .
+
+oc:req_e4ace3cb a oc:RequirementEnvVar ;
+    oc:isOptional true ;
+    oc:requirementValue "AGENT_BROWSER_ENCRYPTION_KEY" .
+
+oc:req_fe79ff87 a oc:RequirementEnvVar ;
+    oc:isOptional true ;
+    oc:requirementValue "AGENT_BROWSER_ACTION_POLICY" .
+

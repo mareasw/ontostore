@@ -1,0 +1,73 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_vercel_labs_agent_browser_snapshot_refs a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "snapshot-refs" ;
+    skos:broader "interaction model" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/agent-browser" ;
+    oc:contentHash "c2aa75f5a3c1b34a72d53c06b68cc97d8a3c295134257d48f315cdff1c06455d" ;
+    oc:differentia "uses compact element references from page snapshots to reduce context usage for browser automation agents" ;
+    oc:extends oc:skill_vercel_labs_agent_browser ;
+    oc:handlesFailure oc:ElementNotVisible,
+        oc:RefNotFound ;
+    oc:hasArgumentHint "snapshot command and @ref notation" ;
+    oc:hasCategory "automation" ;
+    oc:impartsKnowledge oc:kn_2002e6e4,
+        oc:kn_849aa27e,
+        oc:kn_97af9107,
+        oc:kn_a9a0cde1,
+        oc:kn_d1a5a636,
+        oc:kn_ef0dbf4d ;
+    oc:isUserInvocable false ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:PageLoaded ;
+    oc:resolvesIntent "capture page structure as snapshot",
+        "interact with web page elements using compact refs",
+        "reduce token usage during browser automation" ;
+    oc:yieldsState oc:RefsAssigned,
+        oc:SnapshotCaptured .
+
+oc:kn_2002e6e4 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When working with pages that contain iframes" ;
+    oc:directiveContent "Iframe content is only expanded one level deep; cross-origin iframes blocking accessibility tree access are silently skipped; empty iframes are omitted." ;
+    oc:hasRationale "Deeply nested or cross-origin iframes cannot be reliably accessed; agents must be aware of this limitation to avoid assuming iframe content is always available." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_849aa27e a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When a snapshot output is too large or when only a region (e.g., a form, a modal) is relevant" ;
+    oc:directiveContent "For complex pages with many elements, snapshot a specific container element (e.g., `agent-browser snapshot @e9`) instead of the full page to reduce noise." ;
+    oc:hasRationale "Targeted snapshots reduce context usage further and make element identification less ambiguous." .
+
+oc:kn_97af9107 a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "Always — this is the core performance advantage of the ref model" ;
+    oc:directiveContent "Using refs reduces browser interaction context from ~3000-5000 tokens (full DOM/HTML parsing) to ~200-400 tokens (compact snapshot + @ref interaction)." ;
+    oc:hasRationale "Dramatic token savings allow more complex multi-step workflows within context windows." .
+
+oc:kn_a9a0cde1 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "Before any click, fill, or type action on a freshly opened or navigated page" ;
+    oc:directiveContent "Always run `agent-browser snapshot -i` before interacting with any page elements to obtain valid refs." ;
+    oc:hasRationale "Refs do not exist until a snapshot is taken; interacting without refs causes 'ref not found' errors." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_d1a5a636 a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "On any ref resolution failure" ;
+    oc:directiveContent "When encountering 'ref not found' errors or elements not visible in snapshot, re-snapshot the page. For off-screen elements, scroll first then re-snapshot. For dynamic content, wait then re-snapshot." ;
+    oc:hasRationale "Page state may have changed or elements may not yet be rendered; re-snapshoting captures the current DOM state." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_ef0dbf4d a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "After any action that mutates the DOM or triggers navigation" ;
+    oc:directiveContent "Refs are invalidated whenever the page changes — navigation, dynamic content loading, dropdowns opening, modals appearing all invalidate existing refs." ;
+    oc:hasRationale "Reusing stale refs silently targets wrong elements or fails, because @e IDs are reassigned on each snapshot." ;
+    oc:severityLevel "CRITICAL" .
+

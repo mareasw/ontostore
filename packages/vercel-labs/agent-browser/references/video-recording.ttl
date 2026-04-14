@@ -1,0 +1,81 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_vercel_labs_agent_browser_video_recording a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "video-recording" ;
+    skos:broader "Browser automation recording sub-skill" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/agent-browser" ;
+    oc:contentHash "c2c12bd8c44e5d36fbb94cfc376180d47507d3c26a7ee8876b892fc700dcf332" ;
+    oc:dependsOnSkill oc:skill_agent_browser ;
+    oc:differentia "Captures browser interactions as WebM video for debugging, documentation, and CI/CD evidence" ;
+    oc:extends oc:skill_vercel_labs_agent_browser ;
+    oc:handlesFailure oc:CodecUnavailable,
+        oc:DiskSpaceExhausted,
+        oc:RecordingNotStarted ;
+    oc:hasAllowedTool "Bash" ;
+    oc:hasArgumentHint "output-file-path (e.g., ./demo.webm)" ;
+    oc:hasCategory "automation" ;
+    oc:hasRequirement oc:req_2ca9ae52,
+        oc:req_33dc207f ;
+    oc:impartsKnowledge oc:kn_5c9256eb,
+        oc:kn_639868e0,
+        oc:kn_6792c232,
+        oc:kn_e5507b59,
+        oc:kn_fdd7b48d ;
+    oc:isUserInvocable true ;
+    oc:nature "Capability" ;
+    oc:requiresState oc:BrowserSessionActive ;
+    oc:resolvesIntent "capture debugging recordings of failed automation",
+        "create CI/CD test evidence recordings",
+        "generate documentation videos of browser workflows",
+        "record browser automation as video",
+        "restart or manage video recordings during browser sessions" ;
+    oc:yieldsState oc:VideoRecordingCreated .
+
+oc:kn_5c9256eb a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When starting a recording with 'record start'" ;
+    oc:directiveContent "Use descriptive filenames that include context such as test name, flow name, and date/timestamp." ;
+    oc:hasRationale "Descriptive filenames make recordings searchable and identifiable among many artifacts, especially in CI/CD pipelines." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_639868e0 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Always — inherent limitation of the recording feature" ;
+    oc:directiveContent "Recording adds slight overhead to automation and large recordings can consume significant disk space. Some headless environments may have codec limitations." ;
+    oc:hasRationale "Awareness of these constraints prevents unexpected performance degradation or failed recordings in constrained environments." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_6792c232 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When recording for documentation or demonstration purposes" ;
+    oc:directiveContent "Add deliberate wait pauses (500-1000ms) between actions to make recordings viewable by humans." ;
+    oc:hasRationale "Automated actions execute too quickly for humans to follow; pauses give viewers time to perceive each step." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_e5507b59 a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "During any active recording session" ;
+    oc:directiveContent "Video recordings produce .webm files on disk and consume CPU/disk I/O during capture. Multiple recordings (without stopping) can accumulate." ;
+    oc:hasRationale "Unmonitored recording can fill disk space and degrade system performance, especially in long-running CI pipelines." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_fdd7b48d a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When recording any browser automation session" ;
+    oc:directiveContent "Always use trap-based cleanup to stop recordings on exit or error, ensuring no orphaned recording processes." ;
+    oc:hasRationale "Without cleanup traps, failed automation leaves recording processes running and incomplete video files." ;
+    oc:severityLevel "HIGH" .
+
+oc:req_2ca9ae52 a oc:RequirementHardware ;
+    oc:isOptional false ;
+    oc:requirementValue "Sufficient disk space for video output" .
+
+oc:req_33dc207f a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "agent-browser CLI" .
+

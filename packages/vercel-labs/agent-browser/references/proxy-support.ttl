@@ -1,0 +1,67 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_vercel_labs_agent_browser_proxy_support a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "proxy-support" ;
+    skos:broader "network configuration guide" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/agent-browser" ;
+    oc:contentHash "4c44ba60d9397523109fdbdf1d972739691856c5bf6bf1587fc58793c71b4671" ;
+    oc:dependsOnSkill oc:skill_agent_browser ;
+    oc:differentia "configures HTTP, HTTPS, and SOCKS proxy routing for the agent-browser CLI to enable geo-testing, rate-limit avoidance, and corporate network access" ;
+    oc:extends oc:skill_vercel_labs_agent_browser ;
+    oc:hasAllowedTool "Bash" ;
+    oc:hasArgumentHint "--proxy <proxy-url> or HTTP_PROXY/HTTPS_PROXY/ALL_PROXY environment variable" ;
+    oc:hasCategory "automation" ;
+    oc:impartsKnowledge oc:kn_31dc2a80,
+        oc:kn_48082b52,
+        oc:kn_a1a33ac9,
+        oc:kn_ff4dbe87,
+        oc:kn_ffc3acdb ;
+    oc:isUserInvocable true ;
+    oc:nature "reference" ;
+    oc:resolvesIntent "access external sites via corporate proxy",
+        "avoid rate limiting with rotating proxies",
+        "bypass proxy for specific domains",
+        "configure proxy for browser automation",
+        "route browser traffic through proxy",
+        "test websites from different geo-locations" .
+
+oc:kn_31dc2a80 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When performing large-scale web scraping or data collection tasks" ;
+    oc:directiveContent "Rotate through multiple proxy endpoints and add polite delays (e.g., sleep 1) between requests when scraping at scale to distribute load and avoid IP bans." ;
+    oc:hasRationale "Single-proxy scraping concentrates all requests on one IP, making rate-limiting and blocking likely." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_48082b52 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before executing any browser automation task that depends on proxy connectivity" ;
+    oc:directiveContent "Verify proxy connectivity with a simple request (e.g., curl -x <proxy> https://httpbin.org/ip) before running full browser automation through the proxy." ;
+    oc:hasRationale "Proxy failures during complex automation waste time and produce ambiguous errors; pre-flight checks isolate proxy issues early." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_a1a33ac9 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When configuring proxy in any environment with mixed internal/external traffic" ;
+    oc:directiveContent "Always set NO_PROXY for localhost, internal domains, and CDN resources to avoid unnecessarily routing local or static traffic through the proxy." ;
+    oc:hasRationale "Routing local traffic through a proxy adds latency, wastes proxy resources, and may break internal connectivity." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_ff4dbe87 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When configuring proxy settings for any browser automation task" ;
+    oc:directiveContent "Use environment variables (HTTP_PROXY, HTTPS_PROXY, ALL_PROXY) rather than hardcoding proxy URLs in CLI flags or scripts to avoid credential leakage and enable configuration flexibility." ;
+    oc:hasRationale "Hardcoded credentials in scripts are a security risk and make configuration changes harder across environments." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_ffc3acdb a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When encountering certificate errors through corporate or inspection proxies" ;
+    oc:directiveContent "Do not use --ignore-https-errors in production environments to bypass SSL/TLS errors caused by proxy SSL inspection." ;
+    oc:hasRationale "Suppressing SSL errors disables certificate validation entirely, enabling man-in-the-middle attacks and compromising security." ;
+    oc:severityLevel "CRITICAL" .
+
