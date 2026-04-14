@@ -1,0 +1,92 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_financial_services_plugin_deck_refresh a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "deck-refresh" ;
+    skos:broader "Presentation update workflow" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/financial-services-plugin/deck-refresh" ;
+    oc:contentHash "b09356b6b7c5b3cbeabcc2d08fb0a33628c3eafaad73bf8f7c8f971db3c6ec1e" ;
+    oc:differentia "that swaps numerical values across an existing deck while preserving all formatting, with a mandatory approval gate before any edits" ;
+    oc:handlesFailure oc:InvalidInput,
+        oc:PermissionDenied ;
+    oc:hasAllowedTool "Edit",
+        "Glob",
+        "Grep",
+        "Read",
+        "Write",
+        "ask_user_question" ;
+    oc:hasArgumentHint "old-to-new value mapping or updated data source file" ;
+    oc:hasCategory "document" ;
+    oc:hasDescription "Updates a presentation with new numbers — quarterly refreshes, earnings updates, comp rolls, rebased market data. Use whenever the user asks to \"update the deck with Q4 numbers\", \"refresh the comps\", \"roll this forward\", \"swap in the new earnings\", \"change all the $485M to $512M\", or any request to swap figures across an existing deck without rebuilding it." ;
+    oc:hasName "deck-refresh" ;
+    oc:impartsKnowledge oc:kn_567716c1,
+        oc:kn_5f5b29da,
+        oc:kn_68083a29,
+        oc:kn_7babdcb6,
+        oc:kn_7e25f4fe,
+        oc:kn_a199aaab,
+        oc:kn_ea488cfc ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:FileExists ;
+    oc:resolvesIntent "refresh comparable company data",
+        "refresh deck with new quarterly data",
+        "roll forward financial figures in a deck",
+        "swap values across slides",
+        "update earnings data in presentation",
+        "update presentation numbers" ;
+    oc:yieldsState oc:DocumentUpdated .
+
+oc:kn_567716c1 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "During Phase 2 when scanning for all instances of values to change" ;
+    oc:directiveContent "Never use a simple find-replace. A number like $485M may appear as '$0.485B', '485' on a chart axis, or '$485.0 million' in a footnote. You must find every variant across every location type." ;
+    oc:hasRationale "Find-replace misses variant representations, leaving a deck with inconsistent numbers that erodes credibility in a client-facing setting" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_5f5b29da a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When editing any slide element during Phase 4 execution" ;
+    oc:directiveContent "The deck's existing formatting is correct by definition; make the smallest possible edit that accomplishes the change. You are a surgeon, not a renovator." ;
+    oc:hasRationale "The deck was designed by someone who spent time on it; altering formatting risks breaking visual consistency and professional quality" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_68083a29 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "During Phase 2 discovery and Phase 3 plan presentation" ;
+    oc:directiveContent "Flag all derived numbers (growth rates, share percentages, margins computed from base values) rather than silently recalculating or silently leaving them. The user decides whether to touch them." ;
+    oc:hasRationale "Derived numbers are second-order effects the user would miss; silently changing them risks incorrect assumptions, while silently leaving them creates stale data" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_7babdcb6 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When editing any chart element during Phase 4" ;
+    oc:directiveContent "Chart data series values must be updated so bars/lines actually move — editing just the label without the underlying data leaves a chart that lies." ;
+    oc:hasRationale "A chart with updated labels but unchanged underlying data misrepresents the information and is worse than an obvious error" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_7e25f4fe a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Always — between Phase 2 (discovery) and Phase 4 (execution)" ;
+    oc:directiveContent "Never edit a single value until the user has reviewed and approved the full change plan showing every instance of every old value and what it will become." ;
+    oc:hasRationale "This is a destructive operation on a carefully crafted deck; an unapproved change to the wrong number or location is a quiet disaster that undermines trust" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_a199aaab a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "After Phase 4 execution, before reporting completion" ;
+    oc:directiveContent "When a number gets longer (e.g., $485M → $1,205M), it may overflow its text box or push a table column width. Run visual verification checks on every edited slide after changes." ;
+    oc:hasRationale "Overflow or layout breakage is visible to stakeholders and undermines the professional quality of the deliverable" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_ea488cfc a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing new values during Phase 4 execution" ;
+    oc:directiveContent "Match the deck's unit style, not the user's mapping. If the deck uses $MM and the mapping says $M, use $MM. Values change; style stays." ;
+    oc:hasRationale "Consistency within the deck matters more than consistency with the source data; mixing unit styles looks unprofessional" ;
+    oc:severityLevel "HIGH" .
+

@@ -1,0 +1,163 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_financial_services_plugin_initiating_coverage a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "initiating-coverage" ;
+    skos:broader "Multi-task workflow engine" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/financial-services-plugin/initiating-coverage" ;
+    oc:contentHash "134e530b0cb9cc1128f85e2b9db1415a980e4b0e8baac7d60820fbc3bd240738" ;
+    oc:dependsOnSkill oc:skill_create_viz,
+        oc:skill_docx_manipulation,
+        oc:skill_xlsx_manipulation ;
+    oc:differentia "Produces institutional-grade equity research initiation reports through a gated 5-task pipeline (research, modeling, valuation, charts, assembly) with strict prerequisite verification and single-task execution mode" ;
+    oc:extends oc:skill_dcf_valuation,
+        oc:skill_financial_modeling ;
+    oc:handlesFailure oc:InvalidInput,
+        oc:PrerequisitesNotMet,
+        oc:TaskDependencyMissing ;
+    oc:hasAlias "coverage report",
+        "equity research initiation",
+        "initiate coverage",
+        "initiation report",
+        "start coverage" ;
+    oc:hasArgumentHint "\"[task-number] for [company-name/ticker]\"" ;
+    oc:hasCategory "finance" ;
+    oc:hasDescription "Create institutional-quality equity research initiation reports through a 5-task workflow. Tasks must be executed individually with verified prerequisites - (1) company research, (2) financial modeling, (3) valuation analysis, (4) chart generation, (5) final report assembly. Each task produces specific deliverables (markdown docs, Excel models, charts, or DOCX reports). Tasks 3-5 have dependencies on earlier tasks." ;
+    oc:hasName "initiating-coverage" ;
+    oc:hasRequirement oc:req_196cdded,
+        oc:req_1bf9dd52,
+        oc:req_5178da22,
+        oc:req_8a4e490b,
+        oc:req_a1b35bce,
+        oc:req_ab0e75d8,
+        oc:req_b895bd5d,
+        oc:req_d5a53263,
+        oc:req_f4541c6f ;
+    oc:impartsKnowledge oc:kn_000d895e,
+        oc:kn_2cee06fb,
+        oc:kn_387a2bc7,
+        oc:kn_4cfb9b26,
+        oc:kn_835dc208,
+        oc:kn_9478182f,
+        oc:kn_bbe23a56,
+        oc:kn_ccaa35b6,
+        oc:kn_e199bd0a ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:CompanyIdentified,
+        oc:EnvironmentReady ;
+    oc:resolvesIntent "assemble institutional-quality investment report",
+        "build financial model for company coverage",
+        "create equity research initiation report",
+        "generate professional financial charts",
+        "initiate analyst coverage of a company",
+        "perform DCF and comparable company valuation" ;
+    oc:yieldsState oc:ChartsGenerated,
+        oc:FinancialModelCreated,
+        oc:InitiationReportDelivered,
+        oc:ResearchDocumentCreated,
+        oc:ValuationAnalysisComplete .
+
+oc:kn_000d895e a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When delivering any task output" ;
+    oc:directiveContent "Deliver ONLY the specified output files for each task. Do not create completion summaries, executive summaries, next steps documents, or any other extra documentation." ;
+    oc:hasRationale "Extra deliverables waste context and are not part of the professional equity research workflow" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_2cee06fb a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When formatting any document or table output" ;
+    oc:directiveContent "Use default font Times New Roman throughout all documents unless user specifies otherwise. Use 'A' suffix for actual/historical years and 'E' suffix for estimated/projected years in all tables." ;
+    oc:hasRationale "Consistent formatting meets institutional standards and prevents confusion between historical and projected figures" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_387a2bc7 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Always - this skill operates in single-task mode only" ;
+    oc:directiveContent "Never execute multiple tasks in sequence or automatically chain tasks. Execute exactly ONE task per user request and wait for explicit confirmation before proceeding." ;
+    oc:hasRationale "Quality control at each stage requires human review of outputs before proceeding; automated chaining risks compounding errors across dependent tasks" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_4cfb9b26 a oc:KnowledgeNode,
+        oc:PostFlightValidation ;
+    oc:appliesToContext "Before delivering the final report" ;
+    oc:directiveContent "After Task 5, verify: 30-50 pages, 10,000-15,000 words, 25-35 embedded charts, 12-20 tables, all 4 mandatory charts present, all citations are clickable hyperlinks, and numbers match the financial model exactly." ;
+    oc:hasRationale "Cross-validation between the DOCX report and XLSX model is essential for institutional credibility; any discrepancy undermines the entire analysis" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_835dc208 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When loading reference files from references/ directory" ;
+    oc:directiveContent "Load ONLY the reference file for the current task. These files are very large - loading multiple reference files at once wastes context. Read the appropriate task reference file at the start of the task." ;
+    oc:hasRationale "Each task reference file (12000-52000 bytes) contains detailed step-by-step instructions; loading multiple simultaneously would overwhelm context and dilute focus" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_9478182f a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Before starting any task with dependencies" ;
+    oc:directiveContent "Never start Tasks 3-5 without verifying all prerequisite task outputs exist and are accessible. Task 3 requires Task 2; Task 4 requires Tasks 1-3; Task 5 requires Tasks 1-4." ;
+    oc:hasRationale "Starting a dependent task without its prerequisites produces incomplete work that must be redone, wasting significant time and context" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_bbe23a56 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before starting any task execution" ;
+    oc:directiveContent "Before each task, verify: company name/ticker provided (Task 1), financial data access confirmed (Task 2), financial model exists (Task 3), all prior task outputs exist (Tasks 4-5). If verification fails, stop and inform user." ;
+    oc:hasRationale "Prerequisite verification prevents wasted effort on incomplete tasks and ensures each task has all required inputs" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_ccaa35b6 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When user makes an ambiguous or full-pipeline request" ;
+    oc:directiveContent "When user requests a full pipeline ('create initiation report for X'), always ask which specific task to start with rather than auto-selecting Task 1. Present the 5-task menu and let the user choose." ;
+    oc:hasRationale "Users may have partial work already completed or may want to start from a different point; assuming Task 1 wastes effort if prior work exists" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_e199bd0a a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing any section of research, report, or analysis" ;
+    oc:directiveContent "Never abbreviate or shortcut sections. Task 1 requires 6,000-8,000 words; Task 5 requires 10,000-15,000 words minimum with 30-50 pages. Full content, no placeholders like 'this section would include...'" ;
+    oc:hasRationale "Institutional-quality equity research demands comprehensive, complete analysis - abbreviated reports fail professional standards and are unusable by institutional investors" ;
+    oc:severityLevel "HIGH" .
+
+oc:req_196cdded a oc:RequirementAPI ;
+    oc:isOptional true ;
+    oc:requirementValue "SEC EDGAR for 10-K/10-Q filings access" .
+
+oc:req_1bf9dd52 a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "XLSX skill for Excel file reading and writing" .
+
+oc:req_5178da22 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Comparable companies and precedent transaction analysis" .
+
+oc:req_8a4e490b a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "DOCX skill for Word document creation and manipulation" .
+
+oc:req_a1b35bce a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "matplotlib/seaborn for chart generation (300 DPI)" .
+
+oc:req_ab0e75d8 a oc:RequirementAPI ;
+    oc:isOptional true ;
+    oc:requirementValue "Yahoo Finance or Bloomberg for historical stock price data" .
+
+oc:req_b895bd5d a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "DCF valuation methodology (WACC, terminal value, sensitivity analysis)" .
+
+oc:req_d5a53263 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Financial statement modeling (income statement, balance sheet, cash flow)" .
+
+oc:req_f4541c6f a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Equity research report structure and institutional formatting standards" .
+

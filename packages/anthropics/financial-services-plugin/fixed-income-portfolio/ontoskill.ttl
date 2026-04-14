@@ -1,0 +1,104 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_financial_services_plugin_fixed_income_portfolio a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "fixed-income-portfolio" ;
+    skos:broader "Portfolio analysis workflow" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/financial-services-plugin/fixed-income-portfolio" ;
+    oc:contentHash "4ec33de22605db36729427008dbf1cd270a8a9fbeb3a7cf8842d0398e97077f1" ;
+    oc:differentia "Aggregates bond pricing, reference data, cashflow projections, and scenario stress testing into comprehensive fixed income portfolio reviews with market-value weighted metrics" ;
+    oc:handlesFailure oc:PricingError,
+        oc:ReferenceDataUnavailable,
+        oc:ScenarioCalculationFailure ;
+    oc:hasArgumentHint "portfolio holdings with bond identifiers, optional benchmark" ;
+    oc:hasCategory "finance" ;
+    oc:hasDescription "Review fixed income portfolios by pricing multiple bonds, retrieving reference data, analyzing cashflows, and running scenario analysis. Use when reviewing bond portfolios, computing portfolio duration and DV01, analyzing cashflow waterfalls, stress testing rate scenarios, or assessing portfolio composition." ;
+    oc:hasName "fixed-income-portfolio" ;
+    oc:hasRequirement oc:req_0edfaedc,
+        oc:req_2f807448,
+        oc:req_7c274c51,
+        oc:req_c76e6eea,
+        oc:req_d0675087,
+        oc:req_e812d8c6 ;
+    oc:impartsKnowledge oc:kn_07de8418,
+        oc:kn_19d07003,
+        oc:kn_57d90d6b,
+        oc:kn_69bb9724,
+        oc:kn_95517261 ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:APIKeySet,
+        oc:BondHoldingsDefined ;
+    oc:resolvesIntent "analyze cashflow waterfalls",
+        "assess portfolio composition and risk exposure",
+        "compute portfolio duration and DV01",
+        "review bond portfolio",
+        "stress test rate scenarios" ;
+    oc:yieldsState oc:CashflowWaterfallGenerated,
+        oc:PortfolioCompositionAnalyzed,
+        oc:PortfolioPriced,
+        oc:ScenarioStressTestComplete .
+
+oc:kn_07de8418 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When analyzing bonds with embedded options that require option-adjusted metrics" ;
+    oc:directiveContent "Do not attempt to compute bond-level analytics (OAS, effective duration, key rate durations) manually — use the fixed_income_risk_analytics MCP tool instead." ;
+    oc:hasRationale "Embedded options create non-linear price behavior that cannot be accurately captured by simple duration/convexity calculations; the specialized tool handles these correctly." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_19d07003 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When performing a full portfolio review" ;
+    oc:directiveContent "Follow the 7-step tool chaining workflow: price all bonds → aggregate metrics → enrich with reference data → project cashflows → run scenarios → add curve context → synthesize review." ;
+    oc:hasRationale "Sequencing ensures all dependencies are satisfied — prices must exist before computing weighted metrics, and reference data enriches the priced bonds for composition analysis." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_57d90d6b a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When computing any portfolio-level metric from individual bond data" ;
+    oc:directiveContent "Always compute portfolio-level metrics as market-value weighted averages (yield, duration, convexity). Let MCP tools compute bond-level analytics; the agent aggregates and presents." ;
+    oc:hasRationale "Market-value weighting ensures metrics reflect the actual economic exposure of each position, not just equal-weighted averages that would misrepresent risk." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_69bb9724 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When running scenario analysis with yieldbook_scenario" ;
+    oc:directiveContent "Use standard rate shocks of -200bp, -100bp, -50bp, 0, +50bp, +100bp, +200bp for scenario analysis to provide a consistent stress testing framework." ;
+    oc:hasRationale "Standard symmetric shock levels enable consistent comparison across portfolios and time periods, and align with industry convention for fixed income stress testing." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_95517261 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When a benchmark is provided alongside the portfolio" ;
+    oc:directiveContent "Frame all portfolio metrics and comparisons relative to a benchmark when available, presenting active differences in basis points." ;
+    oc:hasRationale "Relative-to-benchmark framing is the standard in fixed income portfolio management and allows stakeholders to immediately assess active risk and positioning." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:req_0edfaedc a oc:RequirementTool ;
+    oc:isOptional true ;
+    oc:requirementValue "fixed_income_risk_analytics MCP tool" .
+
+oc:req_2f807448 a oc:RequirementTool ;
+    oc:isOptional true ;
+    oc:requirementValue "interest_rate_curve MCP tool" .
+
+oc:req_7c274c51 a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "yieldbook_bond_reference MCP tool" .
+
+oc:req_c76e6eea a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "yieldbook_cashflow MCP tool" .
+
+oc:req_d0675087 a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "yieldbook_scenario MCP tool" .
+
+oc:req_e812d8c6 a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "bond_price MCP tool" .
+

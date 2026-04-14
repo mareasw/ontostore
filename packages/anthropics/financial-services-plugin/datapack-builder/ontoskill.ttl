@@ -1,0 +1,97 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_financial_services_plugin_datapack_builder a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "datapack-builder" ;
+    skos:broader "Financial data pack generator" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/financial-services-plugin/datapack-builder" ;
+    oc:contentHash "f6f714dcfae5a1687094539eb1087c04d39e9b26f3f23a97d412b8a635cadd6d" ;
+    oc:dependsOnSkill oc:skill_xlsx_manipulation ;
+    oc:differentia "Extracts, normalizes, and standardizes financial data from CIMs, SEC filings, and other sources into investment committee-ready Excel workbooks with 8-tab structure, formula-based calculations, and documented assumptions" ;
+    oc:handlesFailure oc:DataIntegrityError,
+        oc:FileNotFound,
+        oc:InvalidInput ;
+    oc:hasArgumentHint "source documents (CIM, offering memorandum, SEC filings, or URLs) and optional company name" ;
+    oc:hasCategory "finance" ;
+    oc:hasDescription "Build professional financial services data packs from various sources including CIMs, offering memorandums, SEC filings, web search, or MCP servers. Extract, normalize, and standardize financial data into investment committee-ready Excel workbooks with consistent structure, proper formatting, and documented assumptions. Use for M&A due diligence, private equity analysis, investment committee materials, and standardizing financial reporting across portfolio companies. Do not use for simple financial calculations or working with already-completed data packs." ;
+    oc:hasName "datapack-builder" ;
+    oc:impartsKnowledge oc:kn_316aa16d,
+        oc:kn_3795b0ac,
+        oc:kn_6a747fc3,
+        oc:kn_84ca1f18,
+        oc:kn_9a21a0ea,
+        oc:kn_bbf363af,
+        oc:kn_cd311ed0,
+        oc:kn_fd9b1ae2 ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:EnvironmentReady,
+        oc:SourceDocumentsAvailable ;
+    oc:resolvesIntent "build financial data pack",
+        "build private equity analysis workbook",
+        "create investment committee materials",
+        "normalize financial data from CIMs and SEC filings into Excel",
+        "standardize financial reporting for M&A due diligence" ;
+    oc:yieldsState oc:DataPackCreated,
+        oc:WorkbookValidated .
+
+oc:kn_316aa16d a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "During Phase 5 quality control before final delivery" ;
+    oc:directiveContent "Before building, verify: balance sheet balances (Assets = Liabilities + Equity), cash flow ties to balance sheet changes, all subtotals sum correctly, and no formula errors (#REF!, #VALUE!, #DIV/0!)." ;
+    oc:hasRationale "Data packs with broken formulas or unbalanced balance sheets are immediately disqualified in investment committee review." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_3795b0ac a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When formatting any cell in the workbook" ;
+    oc:directiveContent "Financial data (revenue, EBITDA, costs) must use currency format ($#,##0.0). Operational data (units, stores, employees) must use number format (#,##0) with NO dollar signs. Percentages must use 0.0% format. Years must be text format to prevent comma insertion." ;
+    oc:hasRationale "Mixing formats confuses readers and misrepresents data. A store count shown as $100 looks like revenue; a year shown as 2,024 looks unprofessional." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_6a747fc3 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When executing the full data pack build" ;
+    oc:directiveContent "Follow the 6-phase workflow: (1) Document Processing & Extraction, (2) Normalization & Standardization, (3) Build Excel Workbook, (4) Scenario Building, (5) Quality Control, (6) Final Delivery. Do not skip phases." ;
+    oc:hasRationale "Skipping normalization or QC phases produces unreliable deliverables. The sequential phases ensure traceability and accuracy." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_84ca1f18 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When building any data pack tab" ;
+    oc:directiveContent "All calculations must be formula-based with zero hardcoded values. Every number must trace to its source document with page references." ;
+    oc:hasRationale "Hardcoded values break data integrity, prevent dynamic updates, and make the deliverable unreliable for investment decisions." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_9a21a0ea a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When building normalization adjustments and scenarios" ;
+    oc:directiveContent "When normalizing EBITDA, apply conservative Base Case adjustments (only clearly non-recurring items) for investment decisions, and present Management Case separately. Flag recurring 'one-time' charges with higher scrutiny." ;
+    oc:hasRationale "Management cases tend to be aggressive. Investment committee decisions require defensible, conservative estimates that survive scrutiny." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_bbf363af a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing formulas that reference other rows in the same sheet" ;
+    oc:directiveContent "Never use hardcoded row offsets (e.g., row-15) in formulas. Instead, track row numbers in variables or dictionaries as you write data, then reference those stored row numbers." ;
+    oc:hasRationale "Hardcoded offsets break silently when rows are added or removed, creating impossible-to-debug errors in the delivered Excel file." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_cd311ed0 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When creating a new data pack workbook" ;
+    oc:directiveContent "Use the standard 8-tab structure: Executive Summary, Historical Financials, Balance Sheet, Cash Flow, Operating Metrics, Property/Segment Performance, Market Analysis, Investment Highlights." ;
+    oc:hasRationale "Consistent tab structure enables IC members to navigate any data pack immediately, reducing review time and standardizing deliverables across deals." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_fd9b1ae2 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When applying cell formatting throughout the workbook" ;
+    oc:directiveContent "Font colors are mandatory: blue (RGB 0,0,255) for hardcoded inputs, black (RGB 0,0,0) for formulas, green (RGB 0,128,0) for cross-sheet links. Fill colors are optional unless requested." ;
+    oc:hasRationale "Font color coding tells reviewers instantly what is input vs. calculated vs. referenced, enabling faster and more accurate review." ;
+    oc:severityLevel "MEDIUM" .
+

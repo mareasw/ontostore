@@ -1,0 +1,119 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_financial_services_plugin_funding_digest a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "funding-digest" ;
+    skos:broader "Data-driven report generator" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/financial-services-plugin/funding-digest" ;
+    oc:contentHash "07be19455fb3a414a4c6b1d9b59253eb47a059ac9c971fc100b003e439d96bc8" ;
+    oc:dependsOnSkill oc:skill_pptx_manipulation ;
+    oc:differentia "that compiles recent funding rounds and capital markets activity into a polished single-slide PowerPoint briefing with key takeaways, valuation data, and Capital IQ deal links" ;
+    oc:handlesFailure oc:FileNotFound,
+        oc:InvalidInput,
+        oc:NetworkTimeout,
+        oc:PermissionDenied ;
+    oc:hasAllowedTool "get_company_summary_from_identifiers",
+        "get_competitors_from_identifiers",
+        "get_funding_summary_from_identifiers",
+        "get_info_from_identifiers",
+        "get_rounds_of_funding_from_identifiers",
+        "get_rounds_of_funding_info_from_transaction_ids" ;
+    oc:hasArgumentHint "sectors, time period, optional specific companies (e.g., 'AI and fintech, last 2 weeks')" ;
+    oc:hasCategory "finance" ;
+    oc:hasDescription "Generate a polished one-page PowerPoint slide summarizing key takeaways from recent funding rounds and notable capital markets activity across a user's watched sectors or companies. Use this skill when the user asks for a deal flow summary, weekly recap, funding digest, transaction roundup, or capital markets briefing. Triggers on: 'deal flow digest', 'weekly funding recap', 'deal roundup', 'transaction summary this week', 'what happened in [sector] this week', 'capital markets update', or any request to compile recent funding activity into a briefing slide. Produces a professional single-slide PPTX with key takeaways, valuation data, and Capital IQ deal links." ;
+    oc:hasName "funding-digest" ;
+    oc:impartsKnowledge oc:kn_05a26c61,
+        oc:kn_20c79945,
+        oc:kn_640947f8,
+        oc:kn_a6420534,
+        oc:kn_b111b8eb,
+        oc:kn_b9d49651,
+        oc:kn_c50bffe0,
+        oc:kn_d79e98fa,
+        oc:kn_e6c590d7,
+        oc:kn_ed4acd6f ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:APIKeySet,
+        oc:NetworkAvailable ;
+    oc:resolvesIntent "compile transaction roundup",
+        "create weekly funding recap",
+        "generate deal flow digest",
+        "produce funding briefing slide",
+        "summarize capital markets activity" ;
+    oc:yieldsState oc:DocumentCreated .
+
+oc:kn_05a26c61 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before any funding round queries, always batch all candidate identifiers into a single get_info_from_identifiers call" ;
+    oc:directiveContent "Pre-validate ALL company identifiers via get_info_from_identifiers before querying funding data. Check both resolution status and operating status ('Operating' vs 'Operating Subsidiary' vs other)." ;
+    oc:hasRationale "This single pre-validation step prevents the majority of empty-result issues caused by brand name mismatches, subsidiary companies, or defunct entities" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_20c79945 a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "Always, when generating any funding digest slide" ;
+    oc:directiveContent "The AI disclaimer 'Analysis is AI-generated — please confirm all outputs' MUST appear as a prominent yellow banner in the PowerPoint footer. The report is incomplete without it." ;
+    oc:hasRationale "Mandatory compliance requirement — AI-generated financial analysis must be clearly labeled" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_640947f8 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When generating company logos for the slide" ;
+    oc:directiveContent "Never use Clearbit (logo.clearbit.com) for company logos — it is deprecated and consistently fails. Use simple-icons npm package for known brands and sharp-generated initial-based fallback for others." ;
+    oc:hasRationale "Clearbit is unreliable and external logo CDNs require API keys or are blocked by network restrictions" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_a6420534 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When calling get_rounds_of_funding_from_identifiers" ;
+    oc:directiveContent "The 'role' parameter must be 'company_raising_funds' for deal flow digests (company perspective). Using 'company_investing_in_round_of_funding' returns empty results silently." ;
+    oc:hasRationale "Wrong role parameter returns empty results silently with no error message, causing false negatives" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_b111b8eb a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When pulling funding data for any company in the universe" ;
+    oc:directiveContent "Never use get_funding_summary_from_identifiers as the primary data source. Always use get_rounds_of_funding_from_identifiers as the primary tool; the summary tool is less reliable and can return errors or incomplete data." ;
+    oc:hasRationale "The summary tool can return errors or incomplete data even when detailed rounds exist, leading to silent data loss" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_b9d49651 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When triaging companies after pre-validation — DeepMind, GitHub, BeReal, Instagram, WhatsApp, YouTube are common examples" ;
+    oc:directiveContent "Subsidiary companies (status='Operating Subsidiary') will return zero independent funding rounds. Skip them for funding queries and note them as context instead." ;
+    oc:hasRationale "Their capital events are tracked at the parent level; querying them wastes API calls and produces misleading 'no activity' results" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_c50bffe0 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When processing large company universes (50+ companies) for funding rounds" ;
+    oc:directiveContent "Process company universes in batches of 15-20 identifiers. After each batch, check for empty results and retry with legal entity names or company_id before moving on." ;
+    oc:hasRationale "Batching prevents API timeouts and allows incremental error recovery without losing progress on the entire universe" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_d79e98fa a oc:KnowledgeNode,
+        oc:PostFlightValidation ;
+    oc:appliesToContext "After generating the PPTX file, before presenting to the user" ;
+    oc:directiveContent "QA the slide using markitdown for content verification, LibreOffice PDF conversion + pdftoppm for visual inspection, and manual Capital IQ URL validation for link correctness. Require at least one fix-and-verify cycle." ;
+    oc:hasRationale "Catches overlapping elements, text overflow, alignment issues, broken links, and data accuracy problems before delivery" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_e6c590d7 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing the single-slide PowerPoint layout" ;
+    oc:directiveContent "Use a monochrome-first color philosophy: black, white, and gray dominate. Color is used only where it carries semantic meaning (red for down rounds, green for standout metrics, blue for links) or in company logos. The slide should look correct on a black-and-white printer." ;
+    oc:hasRationale "Financial briefings demand visual restraint; excessive color undermines credibility and distracts from data" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_ed4acd6f a oc:FallbackStrategy,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When logo generation pipeline encounters installation failures" ;
+    oc:directiveContent "If simple-icons or sharp fail to install, fall back to pptxgenjs shape-based initials (gray ellipse + white text overlay) which require no external dependencies." ;
+    oc:hasRationale "Ensures the slide can always be completed even without npm package availability" ;
+    oc:severityLevel "LOW" .
+

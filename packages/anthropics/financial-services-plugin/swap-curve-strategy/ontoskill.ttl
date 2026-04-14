@@ -1,0 +1,81 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_financial_services_plugin_swap_curve_strategy a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "swap-curve-strategy" ;
+    skos:broader "rates strategy analysis" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/financial-services-plugin/swap-curve-strategy" ;
+    oc:contentHash "d603b0a973c480cba1544adaac2b48e57d87e9a12af99a399d3dfaaeeba13a7c" ;
+    oc:dependsOnSkill oc:skill_bond_relative_value,
+        oc:skill_macro_rates_monitor ;
+    oc:differentia "that chains swap pricing, government yield curves, and inflation breakevens to compute curve metrics and identify steepener/flattener/butterfly trade opportunities with DV01-neutral sizing" ;
+    oc:handlesFailure oc:APIKeySet,
+        oc:InvalidInput,
+        oc:NetworkTimeout ;
+    oc:hasAllowedTool "inflation_curve",
+        "interest_rate_curve",
+        "ir_swap",
+        "qa_macroeconomic",
+        "tscc_historical_pricing_summaries" ;
+    oc:hasArgumentHint "currency (e.g., USD, EUR) and optional trade tenor focus" ;
+    oc:hasCategory "finance" ;
+    oc:hasDescription "Analyze the interest rate swap curve by pricing swaps at multiple tenors, overlaying government and inflation curves, and identifying curve trade opportunities. Use when analyzing swap curves, computing swap spreads, decomposing real rates, identifying steepener/flattener/butterfly trades, or comparing swap rates across currencies." ;
+    oc:hasName "swap-curve-strategy" ;
+    oc:impartsKnowledge oc:kn_1475e96e,
+        oc:kn_22778e0e,
+        oc:kn_c73305a8,
+        oc:kn_e0e6a73c,
+        oc:kn_ef9fa417 ;
+    oc:isUserInvocable true ;
+    oc:nature "analytical" ;
+    oc:requiresState oc:APIKeySet,
+        oc:NetworkAvailable ;
+    oc:resolvesIntent "analyze swap curves",
+        "build swap curve with overlay of government and inflation curves",
+        "compare swap rates across currencies",
+        "compute swap spreads",
+        "decompose real rates from swap and inflation curves",
+        "identify curve trade opportunities (steepener, flattener, butterfly)",
+        "price interest rate swaps at multiple tenors" ;
+    oc:yieldsState oc:CurveTradeRecommended,
+        oc:SwapCurveAnalyzed .
+
+oc:kn_1475e96e a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When performing swap curve analysis" ;
+    oc:directiveContent "Do not attempt to manually price swaps or interpolate curves — let the MCP tools handle pricing and focus on analyzing the shape and recommending trades." ;
+    oc:hasRationale "The tools provide precise pricing; manual interpolation introduces errors and defeats the purpose of using institutional-grade data sources." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_22778e0e a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When synthesizing swap curve data into actionable analysis" ;
+    oc:directiveContent "Compute standard curve metrics (2s10s slope, 5s30s slope, 2s5s10s butterfly) and classify curve shape (Normal/Flat/Inverted/Humped) for historical context." ;
+    oc:hasRationale "Standard curve metrics provide a common language for curve shape analysis and enable comparison across time periods and market regimes." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_c73305a8 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When calling any MCP tool (ir_swap, interest_rate_curve, inflation_curve)" ;
+    oc:directiveContent "Use two-phase tool calls for all MCP tools: first list/discover available templates or curves, then price/calculate at specific tenors." ;
+    oc:hasRationale "The MCP tools require a discovery phase to identify available indices and tenors before pricing, preventing errors from invalid parameters." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_e0e6a73c a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When performing any swap curve analysis" ;
+    oc:directiveContent "Always build the full swap curve first, overlay the government curve to compute swap spreads, then add inflation breakevens for real rate decomposition — never skip this sequencing." ;
+    oc:hasRationale "Proper sequencing ensures each layer of analysis builds on the previous one, enabling accurate spread computation and real rate decomposition." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_ef9fa417 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When recommending curve trades (steepeners, flatteners, butterflies)" ;
+    oc:directiveContent "For every trade recommendation, include DV01-neutral sizing and carry/roll-down estimates." ;
+    oc:hasRationale "DV01-neutral sizing ensures equal risk exposure across trade legs, while carry/roll-down estimates quantify the P&L from simply holding the position over time." ;
+    oc:severityLevel "CRITICAL" .
+

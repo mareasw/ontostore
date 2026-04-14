@@ -1,0 +1,75 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_financial_services_plugin_bond_relative_value a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "bond-relative-value" ;
+    skos:broader "Fixed income analysis workflow" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/financial-services-plugin/bond-relative-value" ;
+    oc:contentHash "099a05d580638011c668e683b0c36a577f6b0a1600048fba8e74ff84b745ebaa" ;
+    oc:differentia "that decomposes bond spreads into risk-free, credit, and residual components and assesses richness or cheapness via scenario stress testing" ;
+    oc:handlesFailure oc:DataUnavailable,
+        oc:InvalidInput,
+        oc:NetworkTimeout ;
+    oc:hasArgumentHint "bond identifier (ISIN, RIC, or CUSIP)" ;
+    oc:hasCategory "finance" ;
+    oc:hasDescription "Perform relative value analysis on bonds by combining pricing, yield curve context, credit spreads, and scenario stress testing. Use when analyzing bond richness/cheapness, computing spread decomposition, comparing bonds, assessing bond value vs curves, or running rate shock scenarios." ;
+    oc:hasName "bond-relative-value" ;
+    oc:impartsKnowledge oc:kn_0d9d9322,
+        oc:kn_2eef3915,
+        oc:kn_36d92033,
+        oc:kn_7e55387c,
+        oc:kn_e11b6248 ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:APIKeySet,
+        oc:NetworkAvailable ;
+    oc:resolvesIntent "analyze bond relative value",
+        "assess bond richness or cheapness",
+        "compare bonds by spread",
+        "compute spread decomposition",
+        "decompose bond spreads into components",
+        "evaluate bond value vs yield curves",
+        "run rate shock scenarios on bonds" ;
+    oc:yieldsState oc:BondPriced,
+        oc:ScenarioAnalyzed,
+        oc:SpreadDecomposed .
+
+oc:kn_0d9d9322 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When performing any bond relative value assessment" ;
+    oc:directiveContent "Always decompose total spread into risk-free + credit + residual components. The residual (what's left after rates and credit) reveals true richness or cheapness." ;
+    oc:hasRationale "Without decomposition, you cannot distinguish whether spread compensation is justified by credit risk or represents a genuine mispricing opportunity" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_2eef3915 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When executing a full bond relative value analysis" ;
+    oc:directiveContent "Follow the strict tool chaining order: bond_price → interest_rate_curve → credit_curve → yieldbook_scenario → tscc_historical_pricing_summaries → synthesize." ;
+    oc:hasRationale "Each step builds on prior outputs — G-spread computation requires bond yield from pricing and government curve; residual spread requires G-spread and credit curve; scenarios complement the spread view" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_36d92033 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "After completing spread decomposition, before making a final recommendation" ;
+    oc:directiveContent "Use yieldbook_scenario with at least 5 parallel shifts (-100bp, -50bp, 0, +50bp, +100bp) to confirm the rich/cheap view holds under different rate environments." ;
+    oc:hasRationale "A spread signal that inverts under modest rate moves is not actionable; scenario stress testing confirms robustness of the relative value thesis" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_7e55387c a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When delivering any bond relative value analysis result" ;
+    oc:directiveContent "Present output with three mandatory sections: Spread Decomposition table, Scenario P&L table, and Rich/Cheap Summary with quantified bp threshold for recommendation change." ;
+    oc:hasRationale "Structured output ensures decision-makers can independently evaluate each component of the recommendation and understand sensitivity to rate moves" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_e11b6248 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When calling interest_rate_curve or credit_curve MCP tools" ;
+    oc:directiveContent "The interest_rate_curve and credit_curve tools require a two-phase call pattern: first list available curves, then calculate. Do not skip the list phase." ;
+    oc:hasRationale "These tools need curve identification from the list phase before calculation can proceed; skipping it will cause tool errors" ;
+    oc:severityLevel "HIGH" .
+

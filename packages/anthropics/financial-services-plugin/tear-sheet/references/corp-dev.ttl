@@ -1,0 +1,97 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_financial_services_plugin_tear_sheet_corp_dev a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "corp-dev" ;
+    skos:broader "Tear sheet generator" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/financial-services-plugin/tear-sheet" ;
+    oc:contentHash "be6033c08f0b90346ab64cc46336294aa644223621135a5aa8da03095be2afc0" ;
+    oc:differentia "Produces corporate development target evaluation profiles focused on strategic fit, integration analysis, and acquisition assessment using S&P Capital IQ data" ;
+    oc:extends oc:skill_anthropics_financial_services_plugin_tear_sheet ;
+    oc:handlesFailure oc:FileNotFound,
+        oc:InvalidInput,
+        oc:NetworkTimeout ;
+    oc:hasAllowedTool "Bash",
+        "Read",
+        "Write" ;
+    oc:hasArgumentHint "company name or ticker, optionally with acquirer context" ;
+    oc:hasCategory "finance" ;
+    oc:impartsKnowledge oc:kn_0298d62a,
+        oc:kn_3c020832,
+        oc:kn_4350a037,
+        oc:kn_506842f8,
+        oc:kn_67ed4efd,
+        oc:kn_701ea2dd,
+        oc:kn_9fc84c67,
+        oc:kn_b42b4e78 ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:APIKeySet,
+        oc:NetworkAvailable ;
+    oc:resolvesIntent "assess strategic fit of potential acquisition",
+        "create target profile for corp dev team",
+        "evaluate acquisition target",
+        "generate corp dev tear sheet",
+        "produce M&A target evaluation document" ;
+    oc:yieldsState oc:DocumentCreated .
+
+oc:kn_0298d62a a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "During Step 3 data retrieval and Step 3c verification" ;
+    oc:directiveContent "Write all retrieved MCP data to intermediate files immediately after each query step — do not defer writes. Before document generation, verify all files are present and use them (not conversation context) as the single source of truth." ;
+    oc:hasRationale "Data written to disk is protected from context degradation in long conversations; relying on conversation memory for financial data introduces fabrication risk." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_3c020832 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When retrieving and presenting the Financial Summary" ;
+    oc:directiveContent "Pull 4 fiscal years of financial data but display only 3; use the earliest year exclusively for computing YoY growth of the first displayed year. If R&D expense is not separately reported, note 'Not separately disclosed' rather than 'N/A'." ;
+    oc:hasRationale "R&D intensity signals IP value vs. services revenue — critical for acquisition assessment. Missing R&D disclosure itself is informative to a Corp Dev team." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_4350a037 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When the rendered document exceeds 2 pages" ;
+    oc:directiveContent "Enforce strict two-page discipline by following the numbered cut order: (1) Ownership Snapshot, (2) Customer Analysis prose, (3) Valuation Context prose, (4) Precedent Transactions, (5) Capital Structure prose, (6) Strategic Fit Analysis compression. Never cut sections 2, 5, or 8." ;
+    oc:hasRationale "Corp Dev profiles must not spill to a third page; the cut order preserves the most analytically valuable content while shedding expendable sections first." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_506842f8 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When generating any Corp Dev tear sheet" ;
+    oc:directiveContent "The Strategic Fit Analysis is the signature section and must never be skipped or compressed — it maps customer overlap, technology complement, and competitive displacement with analytical reasoning, not lists of company names." ;
+    oc:hasRationale "Corp Dev teams evaluate acquisitions through the lens of strategic fit; this section is the primary differentiator from other tear sheet types and drives acquisition decision-making." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_67ed4efd a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When generating Valuation Context for public company targets" ;
+    oc:directiveContent "Peer context in Valuation Context is essential, not optional. Always show 3-5 public peers with EV/Revenue (NTM), EV/EBITDA (NTM), revenue growth, and EBITDA margin. If peer multiples are unavailable, list peer names below the table." ;
+    oc:hasRationale "A company's multiples in isolation tell a Corp Dev team nothing — they need relative context to assess whether the target is cheap or rich versus the peer set." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_701ea2dd a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing the Strategic Relevance tagline in the Company Header" ;
+    oc:directiveContent "Frame Strategic Relevance from the acquirer's perspective: describe what the acquirer *gets*, not what the target *is*. Use neutral analytical language, not the target's marketing." ;
+    oc:hasRationale "Corp Dev teams already know their own company and need to understand the target's acquisition appeal; marketing language is a press release, not an evaluation." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_9fc84c67 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When writing the three Strategic Fit Analysis buckets (Customer Overlap, Technology/Product Complement, Competitive Displacement)" ;
+    oc:directiveContent "Strategic Fit Analysis bullets frequently balloon to 5-7 sentences, which is the primary driver of page 3 spillover. Enforce the hard 2-3 sentence limit per bucket; move excess detail to Integration Considerations." ;
+    oc:hasRationale "Length discipline in this section is the single most important page budget control; overflow here cascades into needing to cut higher-priority sections." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_b42b4e78 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing the Business & Product Overview section" ;
+    oc:directiveContent "Never paste the CIQ company summary verbatim — rewrite the Business & Product Overview in 4-6 sentences with a product and technology focus through an acquirer's lens." ;
+    oc:hasRationale "The CIQ summary is generic marketing prose; the Corp Dev audience needs an evaluative description that helps them spot overlaps and complements with their existing portfolio." ;
+    oc:severityLevel "HIGH" .
+

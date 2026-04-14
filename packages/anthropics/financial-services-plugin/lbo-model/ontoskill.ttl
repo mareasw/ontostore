@@ -1,0 +1,102 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_financial_services_plugin_lbo_model a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "lbo-model" ;
+    skos:broader "Financial model builder" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/financial-services-plugin/lbo-model" ;
+    oc:contentHash "64237e33e7301cb89823e92659789aaf3e5c50e07115abc4ef38a29b065e331a" ;
+    oc:dependsOnSkill oc:skill_audit_xls ;
+    oc:differentia "that populates LBO (Leveraged Buyout) Excel templates with dynamic formulas, validated calculations, and professional formatting for private equity transactions" ;
+    oc:extends oc:skill_xlsx_manipulation ;
+    oc:handlesFailure oc:InvalidInput,
+        oc:PermissionDenied ;
+    oc:hasAllowedTool "Bash",
+        "Edit",
+        "Glob",
+        "Read",
+        "Write" ;
+    oc:hasArgumentHint "template file (optional) + deal assumptions (entry multiple, leverage, growth rates, exit assumptions)" ;
+    oc:hasCategory "finance" ;
+    oc:hasDescription "This skill should be used when completing LBO (Leveraged Buyout) model templates in Excel for private equity transactions, deal materials, or investment committee presentations. The skill fills in formulas, validates calculations, and ensures professional formatting standards that adapt to any template structure." ;
+    oc:hasName "lbo-model" ;
+    oc:impartsKnowledge oc:kn_1d1f9fcd,
+        oc:kn_5ead80d2,
+        oc:kn_8ba54616,
+        oc:kn_9a05265e,
+        oc:kn_ca74d603,
+        oc:kn_de497a14,
+        oc:kn_e8467835,
+        oc:kn_f1ca98ea ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:FileExists,
+        oc:ToolInstalled ;
+    oc:resolvesIntent "build LBO model",
+        "complete leveraged buyout model",
+        "create LBO analysis for deal materials",
+        "fill LBO spreadsheet with formulas",
+        "populate LBO template",
+        "validate LBO model calculations" ;
+    oc:yieldsState oc:DocumentCreated .
+
+oc:kn_1d1f9fcd a oc:KnowledgeNode,
+        oc:PostFlightValidation ;
+    oc:appliesToContext "After completing all sections of the LBO model" ;
+    oc:directiveContent "Run the full verification checklist after completion: formula validation via recalc.py, section balancing, roll-forward consistency, IRR cash flow signs, sensitivity table center-cell accuracy, and formatting compliance." ;
+    oc:hasRationale "LBO models have many interdependent sections where a single wrong reference cascades. Systematic validation catches errors before the model reaches the user." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_5ead80d2 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When applying formatting to any cell in the LBO model" ;
+    oc:directiveContent "Use blue (0000FF) for hardcoded inputs, black (000000) for formulas, purple (800080) for same-tab links, green (008000) for cross-tab links. Keep fills to 3 blues + 1 grey + white only." ;
+    oc:hasRationale "Color conventions signal cell provenance so model users and reviewers can instantly distinguish inputs from calculations, reducing error risk." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_8ba54616 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When filling any calculated cell in the LBO model" ;
+    oc:directiveContent "Every calculation must be an Excel formula — never hardcode computed values into cells. Write formula strings (=B5*B6) not literal results (1250)." ;
+    oc:hasRationale "Hardcoded values make the model static and break dynamic updating when inputs change, defeating the purpose of a financial model." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_9a05265e a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "At the very start of any LBO model engagement, before writing any formulas" ;
+    oc:directiveContent "Before filling any formulas: map the template structure, understand the timeline columns, identify input vs formula cells by color/border conventions, read row labels carefully, check for existing formulas, and note sign conventions." ;
+    oc:hasRationale "Rushing to fill formulas without understanding template layout leads to misaligned references, overwritten existing formulas, and inconsistent sign conventions." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_ca74d603 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When building sensitivity/tables for IRR or MOIC analysis" ;
+    oc:directiveContent "Sensitivity tables must use odd dimensions (5×5 or 7×7) so there is a true center cell. Build axis values symmetrically around the base case and verify the center cell matches the model's actual output." ;
+    oc:hasRationale "Even dimensions lack a center cell, making it impossible to anchor the base case and verify the table is correctly wired to the model." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_de497a14 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When a user provides an LBO template file" ;
+    oc:directiveContent "Always use the provided template structure — copy it and adapt. Never build from scratch when a template is attached, even if it seems complex or has more features than needed." ;
+    oc:hasRationale "Templates encode institutional conventions, pre-built layouts, and expected output formats. Rebuilding from scratch risks losing these and producing inconsistent deliverables." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_e8467835 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When building debt schedules with interest calculations" ;
+    oc:directiveContent "Do NOT use ending or average balances for interest calculations — use beginning balance to break circular references. Pattern: Interest → Cash Flow → Paydown → Ending Balance." ;
+    oc:hasRationale "Interest referencing ending balance creates a circular reference (interest depends on paydown which depends on cash flow which depends on interest). Beginning balance breaks the cycle." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_f1ca98ea a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "Throughout the entire LBO model build process" ;
+    oc:directiveContent "Build section-by-section with user verification at each checkpoint: Sources & Uses → Operating Model → Debt Schedule → Returns → Sensitivity Tables. Stop and confirm before advancing." ;
+    oc:hasRationale "Later sections depend on earlier ones; catching a mistake in Sources & Uses after returns are built means rework everywhere. Incremental validation is faster than end-to-end debugging." ;
+    oc:severityLevel "HIGH" .
+

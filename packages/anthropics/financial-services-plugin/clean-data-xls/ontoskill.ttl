@@ -1,0 +1,82 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_financial_services_plugin_clean_data_xls a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "clean-data-xls" ;
+    skos:broader "Data cleaning operation" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/financial-services-plugin/clean-data-xls" ;
+    oc:contentHash "8f807b187c752363228dc0f153406ea1e686665f82fc23eb7aac42c73d450e2a" ;
+    oc:dependsOnSkill oc:skill_xlsx_manipulation ;
+    oc:differentia "that detects and fixes messy spreadsheet data (whitespace, casing, number-as-text, dates, duplicates, encoding) using helper-column formulas for transparency and incremental user confirmation" ;
+    oc:handlesFailure oc:InvalidInput,
+        oc:PermissionDenied ;
+    oc:hasAllowedTool "Bash",
+        "Edit",
+        "Read",
+        "Write" ;
+    oc:hasArgumentHint "range (optional, e.g. A1:F200) or full sheet" ;
+    oc:hasCategory "document" ;
+    oc:hasDescription "Clean up messy spreadsheet data — trim whitespace, fix inconsistent casing, convert numbers-stored-as-text, standardize dates, remove duplicates, and flag mixed-type columns. Use when data is messy, inconsistent, or needs prep before analysis. Triggers on \"clean this data\", \"clean up this sheet\", \"normalize this data\", \"fix formatting\", \"dedupe\", \"standardize this column\", \"this data is messy\"." ;
+    oc:hasName "clean-data-xls" ;
+    oc:impartsKnowledge oc:kn_18e2cdf1,
+        oc:kn_5b953cd7,
+        oc:kn_7a0c924a,
+        oc:kn_9a3fd332,
+        oc:kn_a65f0c6a,
+        oc:kn_ce918735 ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:FileExists ;
+    oc:resolvesIntent "clean spreadsheet data",
+        "fix formatting inconsistencies in spreadsheets",
+        "normalize data in Excel or xlsx files",
+        "remove duplicates from spreadsheet data",
+        "standardize column formats in Excel" ;
+    oc:yieldsState oc:DataCleaned .
+
+oc:kn_18e2cdf1 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "During Step 4 (Apply) of the cleaning workflow" ;
+    oc:directiveContent "Apply fixes incrementally by category (whitespace → casing → number conversion → dates → dedup), showing a sample of what changed and getting confirmation before moving to the next category." ;
+    oc:hasRationale "Incremental confirmation prevents compounding errors and gives the user control over each transformation step." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_5b953cd7 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When scanning for data quality issues in Step 2" ;
+    oc:directiveContent "Detect and handle all nine issue categories: whitespace, inconsistent casing, numbers-stored-as-text (including stray $, %, commas), mixed date formats, duplicate/near-duplicate rows, blanks, mixed-type columns, encoding problems (mojibake), and Excel error values (#REF!, #N/A, #VALUE!, #DIV/0!)." ;
+    oc:hasRationale "A comprehensive sweep across all common data quality dimensions ensures no issues are missed that would compromise downstream analysis." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_7a0c924a a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When applying destructive operations like removing duplicates, filling blanks, or overwriting originals" ;
+    oc:directiveContent "Never overwrite original data in place without explicit user confirmation. Only do so when no sensible formula equivalent exists (e.g., encoding/mojibake repair)." ;
+    oc:hasRationale "In-place overwrites are irreversible and can destroy source data that may be needed for auditing or rollback." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_9a3fd332 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When determining the execution environment at the start of the cleaning task" ;
+    oc:directiveContent "Use Office JS (Excel.run) when running inside Excel as an Office Add-in; use Python/openpyxl when operating on standalone .xlsx files." ;
+    oc:hasRationale "Using the native API for each environment ensures correct file handling and access to spreadsheet features like formulas." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_a65f0c6a a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When applying any fix that has a formula equivalent (TRIM, UPPER, VALUE, DATEVALUE, etc.)" ;
+    oc:directiveContent "Prefer writing formulas in adjacent helper columns over computing cleaned values in Python and overwriting originals. This keeps transformations transparent, auditable, and reversible." ;
+    oc:hasRationale "Formula-based cleaning preserves the original data and makes it possible for users to trace exactly how each value was transformed." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_ce918735 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before applying any cleaning operations" ;
+    oc:directiveContent "Profile each column before making changes: detect dominant type (text/number/date), identify outliers, and present a summary table of all issues with counts and proposed fixes before touching any data." ;
+    oc:hasRationale "Profiling first ensures the agent understands the data's shape and can propose targeted, accurate fixes rather than blind bulk operations." ;
+    oc:severityLevel "HIGH" .
+

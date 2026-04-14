@@ -1,0 +1,83 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_financial_services_plugin_dcf_model_troubleshooting a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "troubleshooting" ;
+    skos:broader "Troubleshooting guide" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/financial-services-plugin/dcf-model" ;
+    oc:contentHash "6e605b455032973465f685535251a7d2d889a2dad9b05ba8d6dfc01f801b28d0" ;
+    oc:differentia "Diagnoses and resolves common DCF model errors including formula errors, unreasonable valuations, and case selector failures" ;
+    oc:extends oc:skill_anthropics_financial_services_plugin_dcf_model ;
+    oc:handlesFailure oc:FormulaError,
+        oc:InvalidInput ;
+    oc:hasArgumentHint "error description or symptom" ;
+    oc:hasCategory "finance" ;
+    oc:impartsKnowledge oc:kn_6cb531a9,
+        oc:kn_7c12fb01,
+        oc:kn_a3666622,
+        oc:kn_ae82edfa,
+        oc:kn_af896ebd,
+        oc:kn_c5838d72,
+        oc:kn_cb5af778 ;
+    oc:isUserInvocable false ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:DocumentCreated ;
+    oc:resolvesIntent "diagnose unreasonable valuation results",
+        "fix DCF model errors",
+        "resolve spreadsheet formula errors in DCF models",
+        "troubleshoot DCF case selector" ;
+    oc:yieldsState oc:ValidationErrorResolved .
+
+oc:kn_6cb531a9 a oc:KnowledgeNode,
+        oc:SuccessIndicator ;
+    oc:appliesToContext "After setting up or troubleshooting the case selector" ;
+    oc:directiveContent "A working case selector should update all consolidation column values immediately when the selector cell is manually changed between 1, 2, and 3." ;
+    oc:hasRationale "Manual testing is the most reliable way to confirm that scenario switching propagates correctly through all dependent formulas" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_7c12fb01 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When implied price is unreasonably high in the DCF output" ;
+    oc:directiveContent "Terminal value should never exceed 80% of Enterprise Value. Terminal growth must remain below WACC." ;
+    oc:hasRationale "A terminal value dominating EV indicates the model is deriving most value from perpetuity assumptions rather than forecasted cash flows, making the valuation unreliable" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_a3666622 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When recalc.py shows #REF! errors in the DCF model" ;
+    oc:directiveContent "#REF! errors typically occur when formulas reference wrong rows after headers were inserted into the spreadsheet." ;
+    oc:hasRationale "Inserting rows shifts references, breaking formulas that weren't planned with correct row positions" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_ae82edfa a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When the case selector (1/2/3) is not properly updating projection values" ;
+    oc:directiveContent "Case selector consolidation column may not update when switching scenarios if INDEX/OFFSET formulas lack absolute references for the selector cell." ;
+    oc:hasRationale "Relative references get offset when formulas are copied, causing the selector reference to point to the wrong cell" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_af896ebd a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "Before writing formulas or after #REF! errors appear" ;
+    oc:directiveContent "Prevent #REF! errors by defining all row positions BEFORE writing any formulas. If already broken, rebuild with correct row references." ;
+    oc:hasRationale "Proactive layout planning avoids cascading reference failures across interconnected DCF formula chains" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_c5838d72 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "When implied price is far too low or too high" ;
+    oc:directiveContent "When valuation results seem unreasonable, systematically verify: net debt vs net cash correctness, WACC reasonableness, projection conservatism, and terminal growth assumptions." ;
+    oc:hasRationale "Unreasonable outputs almost always trace back to one of these four assumption categories, making systematic checking efficient" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_cb5af778 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing any formula that involves division in the DCF model" ;
+    oc:directiveContent "Always wrap divisions in IF statements to handle zero divisors: =IF([Divisor]=0,0,[Numerator]/[Divisor])" ;
+    oc:hasRationale "Empty cells or zero values in divisors cause #DIV/0! errors that cascade through dependent formulas" ;
+    oc:severityLevel "MEDIUM" .
+

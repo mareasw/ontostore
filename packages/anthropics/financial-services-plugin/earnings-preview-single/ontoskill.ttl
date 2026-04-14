@@ -1,0 +1,148 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_financial_services_plugin_earnings_preview_single a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "earnings-preview-single" ;
+    skos:broader "Equity research report generator" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/financial-services-plugin/earnings-preview-single" ;
+    oc:contentHash "94d283e10618c96468b42f6799ee4950bd391bfbea44f129a7d57c96eae58cdd" ;
+    oc:differentia "that produces a concise 4-5 page single-company earnings preview HTML report using S&P Capital IQ and Kensho Grounding data sources, with multi-phase research, intermediate file persistence, and mandatory source traceability" ;
+    oc:handlesFailure oc:FileNotFound,
+        oc:InvalidInput,
+        oc:NetworkTimeout,
+        oc:PermissionDenied ;
+    oc:hasAllowedTool "bash",
+        "cat",
+        "mkdir" ;
+    oc:hasArgumentHint "ticker (single stock ticker symbol, e.g., 'WMT', 'AAPL')" ;
+    oc:hasCategory "finance" ;
+    oc:hasDescription "Generate a concise 4-5 page equity research earnings preview for a single company. Analyzes the most recent earnings transcript, competitor landscape, valuation, and recent news to produce a professional HTML report." ;
+    oc:hasName "earnings-preview-single" ;
+    oc:hasRequirement oc:req_08845357,
+        oc:req_8480b86b,
+        oc:req_867d7f90,
+        oc:req_90cf754e,
+        oc:req_a23058d3 ;
+    oc:impartsKnowledge oc:kn_065e03d3,
+        oc:kn_32cdc922,
+        oc:kn_46d9f2f3,
+        oc:kn_5f87ee54,
+        oc:kn_6b8400e3,
+        oc:kn_71fcfc18,
+        oc:kn_a3937a8b,
+        oc:kn_a3e73284,
+        oc:kn_d4199ecc,
+        oc:kn_e046a5ce,
+        oc:kn_ecb203c7 ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:APIKeySet,
+        oc:NetworkAvailable,
+        oc:SystemAuthenticated ;
+    oc:resolvesIntent "analyze upcoming quarterly earnings for a company",
+        "create professional equity research HTML report",
+        "generate earnings preview report",
+        "research company financials and competitor landscape before earnings" ;
+    oc:yieldsState oc:DocumentCreated .
+
+oc:kn_065e03d3 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "All report body text including narrative, bullets, tables, and blockquotes" ;
+    oc:directiveContent "Every claim in the report — numeric AND non-numeric — must be wrapped in an <a href=\"#ref-N\" class=\"data-ref\"> hyperlink pointing to its corresponding appendix entry. Every number must be a clickable link — no plain-text figures allowed." ;
+    oc:hasRationale "Full source traceability is the hallmark of institutional-quality equity research. Hyperlinked claims allow readers to verify every data point and build trust in the analysis." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_32cdc922 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "All report writing in Phase 7" ;
+    oc:directiveContent "The report must be concise — target 4-5 printed pages. Use tight, punchy bullet points instead of long paragraphs. Every sentence must earn its place. The report has two halves: narrative (pages 1-2) and figures (pages 3-5)." ;
+    oc:hasRationale "Sell-side equity research is consumed by time-constrained portfolio managers. Density and directness are valued over verbosity. A concise report signals confidence and command of the material." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_46d9f2f3 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "All derived calculations in Phase 6 (Verification)" ;
+    oc:directiveContent "For any multi-step calculation (implied quarterly figures from guidance, LTM P/E, y/y growth rates, segment changes), write out each step explicitly and verify intermediate results before using them in the next step. When in doubt, recompute from raw data rather than reusing a previously calculated intermediate." ;
+    oc:hasRationale "Cascading arithmetic errors are the most common defect in automated financial reports. Explicit step-by-step verification prevents a single miscalculation from propagating through the entire analysis." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_5f87ee54 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "All data collection phases — no exceptions" ;
+    oc:directiveContent "The ONLY permitted data sources are Kensho Grounding MCP (search) and S&P Global MCP (kfinance). Never use WebSearch, WebFetch, brave_search, google_search, or any generic web/internet search tool — even if Kensho returns no results or is temporarily unavailable." ;
+    oc:hasRationale "Ensures data provenance is fully traceable to licensed, authoritative financial data sources and prevents hallucinated or unverified information from entering the report." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_6b8400e3 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When quoting management in blockquote tags throughout the report" ;
+    oc:directiveContent "Never paraphrase, rearrange, combine sentences, or 'clean up' management quotes. When using blockquote formatting, the text MUST be a verbatim copy-paste from the transcript — word for word, including filler words. If you cannot find the exact phrase, paraphrase without blockquote formatting instead." ;
+    oc:hasRationale "Verbatim accuracy is non-negotiable in professional research. Misquoting management — even with good intentions — can mislead investors and damage credibility." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_71fcfc18 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "Stock return calculations for competitor comparison" ;
+    oc:directiveContent "When computing comparative stock returns, ALL tickers MUST use the exact same start and end dates. Identify the first trading date that appears in ALL tickers' data and use that as the common base date. Do not use different base dates for different tickers." ;
+    oc:hasRationale "Using different base dates for different tickers produces misleading relative performance figures, making a stock appear to outperform or underperform when the difference is just a date alignment artifact." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_a3937a8b a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When labeling report title, headers, tables, and all fiscal period references" ;
+    oc:directiveContent "NEVER infer the fiscal quarter from the calendar report date. Always use the fiscal quarter and fiscal year exactly as stated in the earnings call name returned by the API (e.g., 'Walmart Q4 FY2026 Earnings Call' means Q4 FY2026). Many companies have non-standard fiscal years." ;
+    oc:hasRationale "Fiscal year misalignment is a common source of error in financial reporting. Using the wrong quarter label undermines the entire report's credibility." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_a3e73284 a oc:Idempotency,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Throughout all research phases and before report generation" ;
+    oc:directiveContent "All raw data from MCP tool calls MUST be written to files in /tmp/earnings-preview/ immediately after each tool call returns — before moving to the next call. Before generating the HTML report, ALL intermediate files MUST be read back into context. The files — not conversation memory — are the single source of truth." ;
+    oc:hasRationale "Context window compression can silently corrupt or summarize earlier data. File-based persistence ensures every number, quote, and source URL in the final report is accurate and verifiable." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_d4199ecc a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Workflow execution order — must be followed strictly" ;
+    oc:directiveContent "Complete ALL research and data collection (Phases 1-5) and verification (Phase 6) BEFORE writing any part of the HTML report. Do not interleave research with report writing." ;
+    oc:hasRationale "Interleaving research with writing leads to incomplete data in early report sections and forces retroactive corrections. Sequential execution ensures all data is available before any narrative is committed." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_e046a5ce a oc:KnowledgeNode,
+        oc:PostFlightValidation ;
+    oc:appliesToContext "Final quality check before output" ;
+    oc:directiveContent "Before finalizing the report, scan every number in the report body. Verify: (1) every number is wrapped in an <a> tag, (2) every appendix row has specific source detail (not just 'S&P Capital IQ'), (3) every calculated formula has hyperlinked components, (4) every Kensho claim has a source URL." ;
+    oc:hasRationale "Systematic completeness checking catches the most common omissions in automated report generation — missing hyperlinks, vague sourcing, and broken cross-references." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_ecb203c7 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "All P/E ratio calculations and displays throughout the report" ;
+    oc:directiveContent "All valuation ratios must be explicitly labeled as LTM (Last Twelve Months) or NTM (Next Twelve Months). Never use 'trailing' or 'forward'. LTM uses the sum of the most recent 4 reported quarters. NTM uses the sum of the next 4 quarterly consensus mean EPS estimates — NOT a single annual figure." ;
+    oc:hasRationale "Ambiguous ratio labeling is a frequent source of confusion in equity research. Standardized LTM/NTM terminology ensures clarity and comparability across the peer group." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:req_08845357 a oc:RequirementAPI ;
+    oc:isOptional false ;
+    oc:requirementValue "S&P Global MCP (kfinance) — get_info_from_identifiers, get_company_summary_from_identifiers, get_next_earnings_from_identifiers, get_latest_earnings_from_identifiers, get_transcript_from_key_dev_id, get_competitors_from_identifiers, get_prices_from_identifiers, get_financial_line_item_from_identifiers, get_capitalization_from_identifiers, get_consensus_estimates_from_identifiers, get_segments_from_identifiers, get_earnings_from_identifiers, get_latest" .
+
+oc:req_8480b86b a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Financial modeling — P/E ratios, margins, y/y growth, LTM/NTM calculations" .
+
+oc:req_867d7f90 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Chart.js — HTML5 charting library for financial visualizations" .
+
+oc:req_90cf754e a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Equity research report writing — sell-side analyst style, concise financial narrative" .
+
+oc:req_a23058d3 a oc:RequirementAPI ;
+    oc:isOptional false ;
+    oc:requirementValue "Kensho Grounding MCP (search) — web search for news, estimates, analyst ratings, sector intelligence" .
+

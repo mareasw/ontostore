@@ -1,0 +1,104 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_financial_services_plugin_ib_check_deck a oc:ExecutableSkill,
+        oc:Skill ;
+    dcterms:identifier "ib-check-deck" ;
+    skos:broader "quality assurance tool" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/financial-services-plugin/ib-check-deck" ;
+    oc:contentHash "2213ef1e8c4ab4f34c9ad466050ea1a16737c1ec7bb320647accad10f6200916" ;
+    oc:differentia "reviews investment banking pitch decks for number consistency, data-narrative alignment, language polish, and formatting across all slides using automated number extraction and domain-specific terminology standards" ;
+    oc:handlesFailure oc:FileNotFound,
+        oc:InvalidInput ;
+    oc:hasAllowedTool "Bash",
+        "Read",
+        "Write" ;
+    oc:hasArgumentHint "pptx file path or live deck reference" ;
+    oc:hasCategory "document" ;
+    oc:hasDescription "Investment banking presentation quality checker. Reviews a pitch deck or client-ready presentation for (1) number consistency across slides, (2) data-narrative alignment, (3) language polish against IB standards, (4) visual and formatting QC. Use whenever the user asks to review, check, QC, proof, or do a final pass on a deck, pitch, or client materials — including requests like \"check my numbers\", \"reconcile figures across slides\", \"is this client-ready\", or \"what am I missing before I send this out\"." ;
+    oc:hasName "ib-check-deck" ;
+    oc:hasPayload oc:payload_2213ef1e8c4ab4f3 ;
+    oc:impartsKnowledge oc:kn_1d265021,
+        oc:kn_2149871f,
+        oc:kn_29f19d61,
+        oc:kn_649331db,
+        oc:kn_6c61d133,
+        oc:kn_92701ff5,
+        oc:kn_a7e664c1,
+        oc:kn_dd042570 ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:FileExists ;
+    oc:resolvesIntent "QC presentation before client delivery",
+        "check number consistency across slides",
+        "polish IB language in client materials",
+        "reconcile figures across slides",
+        "review pitch deck for errors",
+        "verify data-narrative alignment in presentations" ;
+    oc:yieldsState oc:DocumentReviewed,
+        oc:InconsistenciesReported .
+
+oc:kn_1d265021 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When generating the deck check report" ;
+    oc:directiveContent "Lead the output report with critical issues (number mismatches, factual errors). If no criticals exist, explicitly state 'no number inconsistencies found' — that absence is itself a finding." ;
+    oc:hasRationale "IB professionals need immediate confidence on the most damaging issues; an explicit 'all clear' on numbers is as valuable as finding errors" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_2149871f a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When performing visual and formatting QC on slides" ;
+    oc:directiveContent "Never skip visual verification even when text extraction looks clean — missing chart source citations, overlapping elements, and overflow issues don't appear in text dumps." ;
+    oc:hasRationale "A chart with no source citation looks the same as a properly sourced one in the text dump, but is a critical omission in client-facing materials" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_29f19d61 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When mapping narrative claims to supporting data" ;
+    oc:directiveContent "When checking data-narrative alignment, verify plausibility of claims — e.g., '#1 in a $100B market' with $200M revenue is only 0.2% share, which contradicts the #1 claim." ;
+    oc:hasRationale "Quiet misalignments where charts are edited but narratives aren't updated are the most common undetected errors in pitch decks" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_649331db a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before starting any deck review" ;
+    oc:directiveContent "Identify the execution environment (PowerPoint add-in vs chat) and source deck accordingly — read from live deck in add-in, from uploaded .pptx in chat." ;
+    oc:hasRationale "The skill is read-and-report only, but the data source differs between environments" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_6c61d133 a oc:Idempotency,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When re-running the check after fixes" ;
+    oc:directiveContent "Running this skill multiple times on the same deck produces identical results unless the deck has been modified between runs." ;
+    oc:hasRationale "Read-only nature guarantees no state mutation; results are deterministic for a given input" ;
+    oc:severityLevel "LOW" .
+
+oc:kn_92701ff5 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When reporting any number inconsistency or data alignment issue" ;
+    oc:directiveContent "Always preserve slide-level attribution for every finding — cite specific slide numbers (e.g., '$500M appears on slides 3 and 8, but slide 15 shows $485M')." ;
+    oc:hasRationale "Slide-level attribution makes findings actionable and verifiable by the reviewer" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_a7e664c1 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When reading and extracting content from large presentations" ;
+    oc:directiveContent "For decks with 30+ slides, write extracted text to a file for the number-checking script rather than holding in working memory." ;
+    oc:hasRationale "Large decks exceed reliable working memory capacity; file-based extraction ensures completeness" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_dd042570 a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "Always, throughout execution" ;
+    oc:directiveContent "This skill is explicitly read-and-report only — it makes no edits to the presentation." ;
+    oc:hasRationale "Preserves the original deck integrity; the user controls all changes based on the report" ;
+    oc:severityLevel "LOW" .
+
+oc:payload_2213ef1e8c4ab4f3 a oc:ExecutionPayload ;
+    oc:code "python scripts/extract_numbers.py {input_file} --check" ;
+    oc:executor "python" ;
+    oc:timeout 60000 .
+

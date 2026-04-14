@@ -1,0 +1,76 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_financial_services_plugin_funding_digest_sector_seeds a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "sector-seeds" ;
+    skos:broader "Reference data" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/financial-services-plugin/funding-digest" ;
+    oc:contentHash "cfd70496a5823d4d2b95626e043c2e4c3e2f5f55f9f2a4e3c834d44c6a1205e9" ;
+    oc:differentia "that provides pre-validated seed company lists by sector for bootstrapping company universe discovery in funding analysis" ;
+    oc:extends oc:skill_anthropics_financial_services_plugin_funding_digest ;
+    oc:handlesFailure oc:CompanySubsidiary,
+        oc:IdentifierNotFound ;
+    oc:hasArgumentHint "sector name (e.g., 'AI / Machine Learning', 'Cybersecurity', 'Climate Tech')" ;
+    oc:hasCategory "finance" ;
+    oc:impartsKnowledge oc:kn_300b5c1f,
+        oc:kn_4cb412b3,
+        oc:kn_84854cc9,
+        oc:kn_ba5f37ed,
+        oc:kn_e7a04f4d,
+        oc:kn_f25f1012 ;
+    oc:isUserInvocable false ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:SectorSpecified ;
+    oc:resolvesIntent "bootstrap company universe by sector",
+        "find seed companies for a sector",
+        "resolve company identifier aliases",
+        "validate sector-specific company seeds" ;
+    oc:yieldsState oc:CompanyUniverseBootstrapped,
+        oc:SeedCompaniesSelected .
+
+oc:kn_300b5c1f a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before building the company universe for a funding digest" ;
+    oc:directiveContent "Validate that seed companies are still active and relevant before using them — companies pivot, merge, or shut down. Check that get_info_from_identifiers returns operational status, not 'Operating Subsidiary'." ;
+    oc:hasRationale "Stale seeds waste processing and produce empty funding rounds; pre-validation ensures all seeds contribute meaningful data." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_4cb412b3 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "After selecting initial seeds for a sector" ;
+    oc:directiveContent "Always expand seed lists via get_competitors_from_identifiers and validate with get_info_from_identifiers — seeds are starting points, not exhaustive universes." ;
+    oc:hasRationale "Seed lists are intentionally non-exhaustive; competitor expansion captures the full relevant universe for accurate funding analysis." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_84854cc9 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When a seed company identifier returns empty results" ;
+    oc:directiveContent "When a brand name fails to resolve in get_info_from_identifiers, try the S&P Global legal name alias (e.g., 'Together AI' → 'Together Computer, Inc.'). If that fails, use the company_id directly." ;
+    oc:hasRationale "S&P Global indexes by legal entity name, not consumer brand name. Brand-to-legal-name mismatches are common and resolvable via the alias table." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_ba5f37ed a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When selecting seed companies for any sector" ;
+    oc:directiveContent "Never use excluded companies as seeds — they are subsidiaries, shut down, or absorbed (e.g., DeepMind, Inflection AI, Adept AI, Convoy, Shockwave Medical, BeReal, Lemon8, Temu). They will resolve in S&P Global but return zero funding rounds." ;
+    oc:hasRationale "Using subsidiaries or defunct companies wastes API calls and produces empty funding results, degrading the quality of the funding digest." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_e7a04f4d a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When the user's sector does not match any listed category" ;
+    oc:directiveContent "For niche sub-sectors not listed in the seed reference, ask the user for 2–3 example companies to use as seeds rather than guessing." ;
+    oc:hasRationale "Guessing seeds for unknown sub-sectors risks irrelevant or non-existent companies; user-provided examples ensure accuracy." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_f25f1012 a oc:Idempotency,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When the user's funding digest has a geographic scope beyond the US" ;
+    oc:directiveContent "These seed lists skew toward US-based companies. For geographic filtering (Europe, Asia), the competitor expansion step is especially important to capture regional players." ;
+    oc:hasRationale "US bias in seed lists means non-US companies are underrepresented; competitor expansion compensates for this gap." ;
+    oc:severityLevel "MEDIUM" .
+
