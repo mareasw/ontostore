@@ -1,0 +1,120 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_n8n_io_n8n_create_pr a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "create-pr" ;
+    skos:broader "GitHub workflow automation" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/n8n-io/n8n/create-pr" ;
+    oc:contentHash "3c9ddef7716467051d12265a966cfcedb5d766898558d6416fe17fcebe2aa827" ;
+    oc:dependsOnSkill oc:skill_create_issue ;
+    oc:differentia "creates pull requests with conventional commit-style titles that pass n8n's check-pr-title CI validation, using gh CLI" ;
+    oc:extends oc:skill_n8n_conventions ;
+    oc:handlesFailure oc:CIValidationFailed,
+        oc:NetworkTimeout,
+        oc:PermissionDenied ;
+    oc:hasAllowedTool "Bash(gh:*)",
+        "Bash(git:*)",
+        "Glob",
+        "Grep",
+        "Read" ;
+    oc:hasArgumentHint "No arguments required — analyzes current git state and staged changes automatically" ;
+    oc:hasCategory "development" ;
+    oc:hasDescription "Creates GitHub pull requests with properly formatted titles that pass the check-pr-title CI validation. Use when creating PRs, submitting changes for review, or when the user says /pr or asks to create a pull request." ;
+    oc:hasName "create-pr" ;
+    oc:hasRequirement oc:req_333cda1a,
+        oc:req_3374d3f9,
+        oc:req_49491178,
+        oc:req_a27ff6a2,
+        oc:req_fca87098 ;
+    oc:impartsKnowledge oc:kn_0a022331,
+        oc:kn_1e7ad5a4,
+        oc:kn_42db0935,
+        oc:kn_6645913a,
+        oc:kn_99dfd259,
+        oc:kn_b5672677,
+        oc:kn_d7b6cd55 ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:BranchWithCommits,
+        oc:EnvironmentReady,
+        oc:GitRepositoryInitialized ;
+    oc:resolvesIntent "create PR with proper title format",
+        "create pull request",
+        "push branch and open draft PR",
+        "submit changes for review" ;
+    oc:yieldsState oc:BranchPushed,
+        oc:PullRequestCreated .
+
+oc:kn_0a022331 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When determining changelog visibility and breaking change notation" ;
+    oc:directiveContent "Append (no-changelog) suffix to the PR title for types like refactor, test, docs, build, ci, and chore to exclude them from changelog generation. Breaking changes add an exclamation mark before the colon (e.g. feat(API)!)." ;
+    oc:hasRationale "Proper changelog tagging ensures release notes are accurate and consumers are alerted to breaking changes." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_1e7ad5a4 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When a plan file exists matching the current branch's ticket ID" ;
+    oc:directiveContent "Before creating the PR, check for a matching plan file in .claude/plans/ (derived from the branch ticket ID), ask the user if they want to include it as a collapsible <details> section, and only include it with explicit approval." ;
+    oc:hasRationale "Including implementation plans provides reviewers with context about the intended approach, but should be opt-in to avoid cluttering PR descriptions unnecessarily." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_42db0935 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before generating the PR title or body" ;
+    oc:directiveContent "Run git status, git diff --stat, and git log origin/master..HEAD --oneline to understand the current state before determining type, scope, and summary." ;
+    oc:hasRationale "Analyzing actual changes ensures the PR title accurately reflects what was done, preventing mismatches between title and content." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_6645913a a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When creating any pull request" ;
+    oc:directiveContent "Always create PRs as drafts (gh pr create --draft) to allow for review before marking ready, and include the full PR body template from .github/pull_request_template.md with summary, related links, and checklist sections." ;
+    oc:hasRationale "Draft PRs signal work-in-progress and prevent accidental merges before review is complete. The template ensures consistent documentation standards." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_99dfd259 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Always, when generating any PR title" ;
+    oc:directiveContent "PR title must match the regex ^(feat|fix|perf|test|docs|refactor|build|ci|chore|revert)(\\([a-zA-Z0-9 ]+( Node)?\\))?!?: [A-Z].+[^.]$ — type is required, scope is optional in parentheses, summary must start with a capital letter and not end with a period." ;
+    oc:hasRationale "The check-pr-title CI will reject PRs that do not conform to this exact pattern, blocking merge." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_b5672677 a oc:KnowledgeNode,
+        oc:SecurityImplication ;
+    oc:appliesToContext "When creating PRs for security fixes — audit every public-facing artifact before pushing" ;
+    oc:directiveContent "This repo is public. Never expose the attack vector in branch names, PR titles, commit messages, PR body, Linear URLs, test names, or code comments. Describe what the code does, not what threat it prevents." ;
+    oc:hasRationale "Leaking vulnerability details in public artifacts allows attackers to identify and exploit the vulnerability before users patch." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_d7b6cd55 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When composing the PR title summary section" ;
+    oc:directiveContent "Use imperative present tense in the summary (e.g. 'Add' not 'Added'), capitalize the first letter, and never include a trailing period or ticket IDs in the title." ;
+    oc:hasRationale "Consistent tense and formatting across all PR titles enables automated changelog generation and readable git history." ;
+    oc:severityLevel "HIGH" .
+
+oc:req_333cda1a a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "gh CLI (GitHub CLI)" .
+
+oc:req_3374d3f9 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "conventional commit format" .
+
+oc:req_49491178 a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "git" .
+
+oc:req_a27ff6a2 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "n8n PR title conventions" .
+
+oc:req_fca87098 a oc:RequirementEnvVar ;
+    oc:isOptional false ;
+    oc:requirementValue "GITHUB_TOKEN or gh auth" .
+

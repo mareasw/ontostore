@@ -1,0 +1,129 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_n8n_io_n8n_create_issue a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "create-issue" ;
+    skos:broader "Issue tracker integration" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/n8n-io/n8n/create-issue" ;
+    oc:contentHash "e9a89578a20210fb04f407b4e9b0853cb5e939455f10199cd02ad2cf4c03bbda" ;
+    oc:dependsOnSkill oc:skill_n8n_conventions ;
+    oc:differentia "that creates Linear tickets or GitHub issues following n8n organizational conventions with mandatory preview-then-confirm workflow" ;
+    oc:handlesFailure oc:InvalidInput,
+        oc:NetworkTimeout,
+        oc:PermissionDenied ;
+    oc:hasAllowedTool "gh",
+        "mcp__linear-server__create_attachment",
+        "mcp__linear-server__list_issues",
+        "mcp__linear-server__save_issue",
+        "mcp__notion__notion-search" ;
+    oc:hasArgumentHint "[linear|github] <description of the issue>" ;
+    oc:hasCategory "automation" ;
+    oc:hasDescription "Create Linear tickets or GitHub issues following n8n conventions. Use when the user asks to create a ticket, file a bug, open an issue, or says /create-issue." ;
+    oc:hasName "create-issue" ;
+    oc:hasRequirement oc:req_697f5a17,
+        oc:req_7cc79d57 ;
+    oc:impartsKnowledge oc:kn_00c5d363,
+        oc:kn_010f1b58,
+        oc:kn_1b4c63b7,
+        oc:kn_2e508153,
+        oc:kn_386444e8,
+        oc:kn_49042db6,
+        oc:kn_638b370d,
+        oc:kn_812fe427,
+        oc:kn_948aecc5,
+        oc:kn_9fae6931 ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:NetworkAvailable,
+        oc:SystemAuthenticated ;
+    oc:resolvesIntent "create GitHub issue",
+        "create Linear ticket",
+        "create feature request ticket",
+        "create tech debt ticket",
+        "file a bug report",
+        "open an issue",
+        "report a bug" ;
+    oc:yieldsState oc:IssueCreated .
+
+oc:kn_00c5d363 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When user mentions one exists while creating the other" ;
+    oc:directiveContent "When both a Linear ticket and GitHub issue exist for the same problem, cross-link them: add GitHub URL to Linear as link attachment, and add Linear URL to GitHub issue body." ;
+    oc:hasRationale "Cross-linking ensures traceability between internal and external issue tracking systems" ;
+    oc:severityLevel "LOW" .
+
+oc:kn_010f1b58 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When user describes a feature request and targets GitHub" ;
+    oc:directiveContent "GitHub issues are bug-only. Never file feature requests as GitHub issues — redirect to the community forum or suggest a Linear ticket instead." ;
+    oc:hasRationale "The n8n GitHub issue tracker enforces this policy; blank issues are disabled and feature requests get closed" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_1b4c63b7 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before creating any issue" ;
+    oc:directiveContent "Before creating a Linear ticket, verify Linear MCP is connected. Before creating a GitHub issue, verify gh CLI is authenticated with 'gh auth status'. Also check for duplicates using list_issues if the description sounds like it may already exist." ;
+    oc:hasRationale "Prevents authentication failures mid-creation and avoids duplicate issues in the tracker" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_2e508153 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When drafting issue descriptions and labeling" ;
+    oc:directiveContent "Always apply a type label (bug, feature, enhancement, tech debt, spike, doc) to Linear tickets. Always include reproduction steps for bugs. Use the appropriate description template (bug, feature, tech debt, or spike) based on issue type." ;
+    oc:hasRationale "Structured templates ensure all necessary context is captured for triage and assignment, reducing back-and-forth" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_386444e8 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When setting priority on Linear tickets" ;
+    oc:directiveContent "Never set Urgent (1) priority unless user explicitly says 'urgent', 'P0', 'production down', or 'security vulnerability'. Never set None (0). Default to Normal (3)." ;
+    oc:hasRationale "Priority inflation causes alert fatigue and undermines genuine production emergencies" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_49042db6 a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When team assignment cannot be determined from Notion lookup" ;
+    oc:directiveContent "If Notion MCP is unavailable or team lookup fails, fall back to known teams: Engineering (N8N), AI, NODES, Identity & Access (IAM), Catalysts (CAT), Lifecycle & Governance (LIGO), Cloud Platform, Docs (DOC). Always ask the user if team is not obvious." ;
+    oc:hasRationale "Ensures tickets are never left without team assignment, which would stall triage" ;
+    oc:severityLevel "LOW" .
+
+oc:kn_638b370d a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Always before creating any Linear ticket or GitHub issue" ;
+    oc:directiveContent "Never create issues without presenting a preview first and obtaining explicit user confirmation. Never skip the preview-confirm step." ;
+    oc:hasRationale "Prevents creation of malformed or incorrect issues that require cleanup, and respects user ownership of the tracker" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_812fe427 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When applying labels to any issue" ;
+    oc:directiveContent "Never apply triage-state, release, or docs-automation labels on Linear. Never manually apply labels on GitHub issues — let triage automation handle it." ;
+    oc:hasRationale "These labels are managed by automation pipelines; manual application causes conflicts and incorrect state tracking" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_948aecc5 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When setting status on Linear tickets" ;
+    oc:directiveContent "Never create issues in Triage status. Default to Backlog. Use Todo only when work is planned for the current cycle. Never set In Progress, Review, or Done at creation time." ;
+    oc:hasRationale "Triage is reserved for externally-reported issues from automated pipelines. Agent-created tickets have known context and should skip triage." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_9fae6931 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When determining target platform for issue creation" ;
+    oc:directiveContent "If the user provides a team key (e.g., AI, NODE, N8N) target Linear. If they say 'GitHub', 'GH issue', or 'open source' target GitHub. If ambiguous, always ask the user which platform they want." ;
+    oc:hasRationale "Correct platform selection avoids having to recreate or migrate issues later" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:req_697f5a17 a oc:RequirementTool ;
+    oc:isOptional true ;
+    oc:requirementValue "cli:gh" .
+
+oc:req_7cc79d57 a oc:RequirementAPI ;
+    oc:isOptional true ;
+    oc:requirementValue "mcp:linear" .
+

@@ -1,0 +1,87 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_n8n_io_n8n_spec_driven_development a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "spec-driven-development" ;
+    skos:broader "Development workflow" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/n8n-io/n8n/spec-driven-development" ;
+    oc:contentHash "1cd29a949809c03300148de5d3f49df609bbc0e5990e49458c86dddea8957d3e" ;
+    oc:dependsOnSkill oc:skill_n8n_conventions ;
+    oc:differentia "that maintains bidirectional synchronization between specification documents and implementation code" ;
+    oc:handlesFailure oc:SpecCodeDriftDetected,
+        oc:SpecNotFound ;
+    oc:hasAllowedTool "Bash",
+        "Edit",
+        "Glob",
+        "Grep",
+        "Read",
+        "Write" ;
+    oc:hasArgumentHint "feature name or spec file path (optional)" ;
+    oc:hasCategory "development" ;
+    oc:hasDescription "Keeps implementation and specs in sync. Use when working on a feature that has a spec in .claude/specs/, when the user says /spec, or when starting implementation of a documented feature. Also use when the user asks to verify implementation against a spec or update a spec after changes." ;
+    oc:hasName "spec-driven-development" ;
+    oc:impartsKnowledge oc:kn_0abce9b4,
+        oc:kn_1a1c5b1e,
+        oc:kn_6eb94230,
+        oc:kn_950185e4,
+        oc:kn_9abc54c6,
+        oc:kn_ab987175 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady,
+        oc:FileExists ;
+    oc:resolvesIntent "create spec for new feature",
+        "detect spec-code drift",
+        "implement feature from spec",
+        "self-review code against spec",
+        "update spec after code changes",
+        "verify implementation against spec" ;
+    oc:yieldsState oc:SpecCodeAligned,
+        oc:SpecVerified .
+
+oc:kn_0abce9b4 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "During implementation when a better approach is found, user requests a change, or a constraint is discovered" ;
+    oc:directiveContent "Never leave spec and code out of sync within the same session. When diverging from the spec, update the spec immediately — do not defer." ;
+    oc:hasRationale "Deferred spec updates are technical debt that compounds rapidly and defeats the purpose of spec-driven development." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_1a1c5b1e a oc:KnowledgeNode,
+        oc:PostFlightValidation ;
+    oc:appliesToContext "After completing implementation of a feature" ;
+    oc:directiveContent "After completing work, run a spec verification pass: re-read the spec alongside implementation, check API endpoints, config/env vars, module structure, type definitions, and TODO items. Update spec for any drift and flag unresolved gaps to the user." ;
+    oc:hasRationale "A verification pass catches accumulated drift that individual updates may miss, and ensures nothing was overlooked during the implementation session." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_6eb94230 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When implementing any feature with a spec" ;
+    oc:directiveContent "Follow the core loop: Read spec → Implement → Verify alignment → Update spec or code → Repeat. Complete the full verification pass after finishing work." ;
+    oc:hasRationale "This iterative loop ensures continuous alignment and catches drift early before it propagates across dependent modules." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_950185e4 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Always, when working on any feature that has a spec" ;
+    oc:directiveContent "Specs are the source of truth for architectural decisions, API contracts, and implementation scope. Neither spec nor code leads exclusively — they must stay in sync bidirectionally." ;
+    oc:hasRationale "Bidirectional sync prevents both spec rot (stale specs) and cowboy coding (undocumented decisions), ensuring the spec remains a living document." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_9abc54c6 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before beginning any implementation work" ;
+    oc:directiveContent "Before starting work, find and read the full spec in .claude/specs/. Understand scope, decisions, API contracts, and open questions before writing any code. If no spec exists for a non-trivial task, ask the user whether to create one." ;
+    oc:hasRationale "Coding without understanding the spec leads to rework, conflicting decisions, and implementation that doesn't match architectural intent." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_ab987175 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When creating or updating spec files" ;
+    oc:directiveContent "Spec files must live in .claude/specs/ as markdown. Use ## Implementation TODO with checkboxes to track progress. Strike through or annotate deliberately skipped items with a reason." ;
+    oc:hasRationale "Consistent spec file conventions enable discoverability and machine-parseable progress tracking across the team." ;
+    oc:severityLevel "MEDIUM" .
+

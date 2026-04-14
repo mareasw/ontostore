@@ -1,0 +1,103 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_n8n_io_n8n_node_add_oauth a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "node-add-oauth" ;
+    skos:broader "OAuth2 integration scaffold" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/n8n-io/n8n/node-add-oauth" ;
+    oc:contentHash "dd4088a970bcf0622ce840bb289ffa4e238087262dd549818362d76774ba88d1" ;
+    oc:differentia "generates the credential file, node wiring, tests, and CLI constant sync required to add OAuth2 Authorization Code support to an existing n8n node" ;
+    oc:extends oc:skill_n8n_conventions ;
+    oc:handlesFailure oc:InvalidInput,
+        oc:TestFailure,
+        oc:TypeCheckFails ;
+    oc:hasAllowedTool "Bash",
+        "Edit",
+        "Glob",
+        "Grep",
+        "Read",
+        "Write" ;
+    oc:hasArgumentHint "[node-name] [optional: custom-scopes flag or scope list]" ;
+    oc:hasCategory "development" ;
+    oc:hasDescription "Add OAuth2 credential support to an existing n8n node — creates the credential file, updates the node, adds tests, and keeps the CLI constant in sync. Use when the user says /node-add-oauth." ;
+    oc:hasName "node-add-oauth" ;
+    oc:impartsKnowledge oc:kn_2df33a26,
+        oc:kn_6c5ffc95,
+        oc:kn_741ea00e,
+        oc:kn_7d08fa82,
+        oc:kn_86a35ac8,
+        oc:kn_9548314e,
+        oc:kn_b31305c2,
+        oc:kn_ea9327b9 ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:CodebaseAvailable,
+        oc:NodeExists ;
+    oc:resolvesIntent "add OAuth2 support to an n8n node",
+        "add authorization code flow to n8n node",
+        "create OAuth2 credential for n8n node",
+        "integrate third-party OAuth2 with n8n node" ;
+    oc:yieldsState oc:OAuth2CredentialCreated,
+        oc:TestsPassing,
+        oc:TypeCheckPasses .
+
+oc:kn_2df33a26 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When custom scopes are enabled for the credential" ;
+    oc:directiveContent "When CUSTOM_SCOPES is enabled, the credential name MUST be added to `GENERIC_OAUTH2_CREDENTIALS_WITH_EDITABLE_SCOPE` in `packages/cli/src/constants.ts`. Without this, n8n deletes the user's custom scope on OAuth2 reconnect." ;
+    oc:hasRationale "The CLI constant array is the authoritative registry of credentials that allow scope editing; omission causes silent data loss on reconnect." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_6c5ffc95 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When defining scopes in the credential file" ;
+    oc:directiveContent "Use `defaultScopes` at the module level as the single source of truth — it populates both `enabledScopes` default and the `scope` expression fallback." ;
+    oc:hasRationale "Duplicating scope lists in multiple locations leads to drift and bugs; a single constant ensures consistency." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_741ea00e a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "At the start of any OAuth2 credential implementation" ;
+    oc:directiveContent "Before starting, read comparable existing OAuth2 credential files (e.g., DiscordOAuth2Api.credentials.ts, MicrosoftTeamsOAuth2Api.credentials.ts) to understand the codebase conventions." ;
+    oc:hasRationale "Following established patterns ensures consistency and reduces review friction in the n8n codebase." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_7d08fa82 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When creating any OAuth2 credential file for n8n" ;
+    oc:directiveContent "Never add an `authenticate` or `test` block to the OAuth2 credential file — the `oAuth2Api` base class handles Bearer token injection automatically and the OAuth dance validates the credential." ;
+    oc:hasRationale "Adding these blocks would conflict with the framework's built-in OAuth2 machinery and break token injection." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_86a35ac8 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When researching OAuth2 endpoints (Step 2)" ;
+    oc:directiveContent "Determine early whether the service is a standard service (token works directly against instance URL) or a gateway service (requires cloudId/workspace ID lookup after token exchange). This affects GenericFunctions.ts routing logic significantly." ;
+    oc:hasRationale "Gateway services like Atlassian require a site-ID cache and a helper function; standard services only need a simple else-if branch. Choosing the wrong pattern requires rework." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_9548314e a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When updating the node file's credentials array and version options" ;
+    oc:directiveContent "Keep the `default` field on the version/auth parameter unchanged — existing workflows must not be affected by adding OAuth2 support." ;
+    oc:hasRationale "Changing the default auth method would silently break all existing workflows using the node with the previous credential type." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_b31305c2 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "After completing all file modifications (Step 10)" ;
+    oc:directiveContent "Run `pnpm typecheck`, `pnpm lint`, and `pnpm test` after all files are created/modified. Never skip typecheck. If constants.ts was changed, also run typecheck in packages/cli." ;
+    oc:hasRationale "Type errors and lint failures are common when wiring new credentials; catching them before commit prevents CI failures." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_ea9327b9 a oc:KnowledgeNode,
+        oc:RequiresHumanClarification ;
+    oc:appliesToContext "When parsing arguments (Step 0) and researching endpoints (Step 2)" ;
+    oc:directiveContent "Ask the user whether custom scopes should be supported if the argument doesn't make it clear. Also ask for OAuth2 endpoint URLs if they cannot be confidently determined from documentation." ;
+    oc:hasRationale "The custom-scopes decision affects 4 out of 10 steps (credential template, CLI constant, test cases, scope expression). Getting it wrong late requires significant rework." ;
+    oc:severityLevel "MEDIUM" .
+
