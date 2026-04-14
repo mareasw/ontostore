@@ -1,0 +1,85 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_java_to_kotlin_micronaut a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "micronaut" ;
+    skos:broader "Conversion guide" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/kotlin/kotlin-agent-skills/kotlin-tooling-java-to-kotlin" ;
+    oc:contentHash "4d5f9ba64acc694cdade9d374e43548f083bacb40d2995ce424c4ff8c7836edd" ;
+    oc:differentia "that handles Java-to-Kotlin migration for Micronaut framework source code, covering DI, annotations, AOP, and configuration patterns" ;
+    oc:extends oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_java_to_kotlin ;
+    oc:handlesFailure oc:AOPProxyBreakingChange,
+        oc:AnnotationSiteTargetConflict,
+        oc:InvalidInput ;
+    oc:hasArgumentHint "Java source files containing io.micronaut.* imports" ;
+    oc:hasCategory "development" ;
+    oc:hasRequirement oc:req_6fe95f84,
+        oc:req_d3a69503,
+        oc:req_fb75b88e ;
+    oc:impartsKnowledge oc:kn_01cc7f60,
+        oc:kn_049c7dda,
+        oc:kn_18df920c,
+        oc:kn_9b39039f,
+        oc:kn_ce942cec ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:JavaSourceIdentified,
+        oc:MicronautImportsDetected ;
+    oc:resolvesIntent "convert micronaut java code to kotlin",
+        "migrate micronaut dependency injection to kotlin",
+        "refactor micronaut configuration properties to kotlin",
+        "translate micronaut annotations and AOP patterns to kotlin" ;
+    oc:yieldsState oc:KotlinConversionComplete,
+        oc:MicronautAnnotationsPreserved .
+
+oc:kn_01cc7f60 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When converting Micronaut classes that use field injection to Kotlin" ;
+    oc:directiveContent "Replace @Inject field injection with primary constructor parameters as private val to eliminate lateinit var and make dependencies immutable." ;
+    oc:hasRationale "Kotlin's primary constructor idiom is more concise and type-safe than field injection; constructor injection is already Micronaut's default mechanism." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_049c7dda a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting any Micronaut class that uses AOP or bean factory annotations" ;
+    oc:directiveContent "Classes annotated with AOP interceptor annotations (@Around, @Introduction, @Cacheable) must be declared `open` in Kotlin because Micronaut generates subclass proxies at compile time." ;
+    oc:hasRationale "Kotlin classes are final by default; without `open`, Micronaut's compile-time proxy generation will fail with a subclassing error." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_18df920c a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting Micronaut classes with a single constructor to Kotlin" ;
+    oc:directiveContent "Never use @Inject on a Kotlin primary constructor when it is the only constructor — Micronaut auto-discovers single constructors and @Inject is redundant noise." ;
+    oc:hasRationale "Removing @Inject simplifies the code and avoids unnecessary annotation imports while preserving Micronaut's compile-time DI behavior." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_9b39039f a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting Micronaut @ConfigurationProperties-annotated Java classes to Kotlin" ;
+    oc:directiveContent "Convert @ConfigurationProperties classes to open classes with lateinit var for required String properties and var with defaults for primitives." ;
+    oc:hasRationale "Micronaut requires configuration property classes to be open for subclass-based lifecycle management; mutable properties are needed because values are injected post-construction." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_ce942cec a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When converting any @Value-annotated field or parameter from Java to Kotlin" ;
+    oc:directiveContent "Escape the dollar sign in @Value annotations as \\${...} rather than ${...} to prevent Kotlin string template interpolation." ;
+    oc:hasRationale "Kotlin interprets ${...} inside strings as template expressions; the backslash escape ensures Micronaut receives the literal property placeholder." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:req_6fe95f84 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Micronaut framework annotations and DI model" .
+
+oc:req_d3a69503 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Kotlin primary constructors and class modifiers" .
+
+oc:req_fb75b88e a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Java-to-Kotlin conversion fundamentals" .
+

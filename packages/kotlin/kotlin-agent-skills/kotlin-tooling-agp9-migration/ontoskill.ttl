@@ -1,0 +1,129 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_agp9_migration a oc:ExecutableSkill,
+        oc:Skill ;
+    dcterms:identifier "kotlin-tooling-agp9-migration" ;
+    skos:broader "Migration procedure" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/kotlin/kotlin-agent-skills/kotlin-tooling-agp9-migration" ;
+    oc:contentHash "5a39061984c31d74367740ad17a570d880c55287e7e505827ec2326c732c8a47" ;
+    oc:differentia "guides KMP projects from AGP 8.x to AGP 9.0+, handling plugin replacement, module splitting, DSL migration, built-in Kotlin support, and the new default project structure" ;
+    oc:handlesFailure oc:BuildFailure,
+        oc:PluginIncompatible,
+        oc:VersionMismatch ;
+    oc:hasAllowedTool "Bash",
+        "Edit",
+        "Glob",
+        "Grep",
+        "Read",
+        "Write" ;
+    oc:hasArgumentHint "project-root-directory" ;
+    oc:hasCategory "development" ;
+    oc:hasDescription """Migrates Kotlin Multiplatform (KMP) projects to Android Gradle Plugin 9.0+. Handles plugin replacement (com.android.kotlin.multiplatform.library), module splitting, DSL migration, and the new default project structure. Use when upgrading AGP, when build fails due to KMP+AGP incompatibility, or when the user mentions AGP 9.0, android multiplatform plugin, KMP migration, or com.android.kotlin.multiplatform.library.
+""" ;
+    oc:hasName "kotlin-tooling-agp9-migration" ;
+    oc:hasPackageName "kotlin" ;
+    oc:hasPayload oc:payload_5a39061984c31d74 ;
+    oc:impartsKnowledge oc:kn_22eb68a3,
+        oc:kn_23e4121a,
+        oc:kn_2f4e3aa7,
+        oc:kn_315dac66,
+        oc:kn_3a312c20,
+        oc:kn_7825691f,
+        oc:kn_894b2f49,
+        oc:kn_8a611014,
+        oc:kn_a9b0fcaf,
+        oc:kn_bf2f3386 ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:FileExists,
+        oc:ToolInstalled ;
+    oc:resolvesIntent "fix build failures from KMP+AGP incompatibility",
+        "migrate KMP project to AGP 9.0",
+        "migrate kapt to KSP or legacy-kapt",
+        "remove kotlin-android plugin for built-in Kotlin support",
+        "replace com.android.library with com.android.kotlin.multiplatform.library",
+        "restructure multi-platform KMP project for AGP 9.0",
+        "split monolithic composeApp into per-platform modules",
+        "update Gradle and AGP versions for KMP compatibility" ;
+    oc:yieldsState oc:BuildConfigurationMigrated,
+        oc:ProjectRestructured .
+
+oc:kn_22eb68a3 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When splitting KMP modules into shared library + platform app modules" ;
+    oc:directiveContent "Use distinct namespaces for each module (e.g., com.example.shared vs com.example.app). The KMP library plugin produces a single variant — move all build-type, flavor, and application-specific configuration to the application module." ;
+    oc:hasRationale "Duplicate namespaces cause R class collisions. Single-variant architecture means the library module cannot support build types, product flavors, signing configs, or minification" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_23e4121a a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When a module applies both kotlin.multiplatform and com.android.application" ;
+    oc:directiveContent "AGP 9.0 does not support com.android.application combined with org.jetbrains.kotlin.multiplatform in the same module. Splitting KMP+app modules is mandatory, not optional." ;
+    oc:hasRationale "This is a hard breaking change in AGP 9.0 — the combination will fail at build time" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_2f4e3aa7 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When updating version numbers during migration" ;
+    oc:directiveContent "AGP 9.0 requires Gradle 9.1.0+, JDK 17+, SDK Build Tools 36.0.0, and KGP 2.0.0+ (2.3.0+ recommended). KSP requires 2.3.1+ for AGP 9.0 compatibility." ;
+    oc:hasRationale "Version mismatches cause cryptic errors. These are hard minimum requirements, not recommendations" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_315dac66 a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When third-party plugins cause build failures with AGP 9.0" ;
+    oc:directiveContent "If blocked by plugin incompatibilities during migration, temporarily set android.builtInKotlin=false and/or android.newDsl=false in gradle.properties. Always ask the user before opting out and remind them these are temporary measures." ;
+    oc:hasRationale "Opt-out flags unblock progress while waiting for plugin updates, but they will be removed in future AGP versions and mask the need for proper migration" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_3a312c20 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When the project has many modules and a big-bang migration is too risky" ;
+    oc:directiveContent "For large multi-module projects, migrate module-by-module: set android.builtInKotlin=false globally, apply com.android.built-in-kotlin per migrated module, and remove the global opt-out once all modules are migrated." ;
+    oc:hasRationale "Incremental migration limits blast radius of errors and allows validating each module independently" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_7825691f a oc:KnowledgeNode,
+        oc:PostFlightValidation ;
+    oc:appliesToContext "After completing all migration steps" ;
+    oc:directiveContent "After migration, verify: ./gradlew build succeeds, all platform targets build, tests pass, no com.android.library or org.jetbrains.kotlin.android remain in KMP modules, source sets use correct names (androidMain, androidHostTest, androidDeviceTest), and no deprecation warnings." ;
+    oc:hasRationale "Many migration issues are silent until a specific build path is exercised. Full validation catches issues before they reach production" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_894b2f49 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When migrating any KMP library module that uses Android resources or publishes consumer ProGuard rules" ;
+    oc:directiveContent "Android resources are NOT processed by default with com.android.kotlin.multiplatform.library. You must explicitly enable them with androidResources { enable = true } or resource references will silently fail. Consumer ProGuard rules are silently dropped if not migrated to the new DSL location consumerProguardFiles.add(file(...))." ;
+    oc:hasRationale "Both issues fail silently — no build error, but runtime crashes or incorrect behavior in release builds. This is a very common migration pitfall" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_8a611014 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before starting any migration on a real project" ;
+    oc:directiveContent "Before migrating, inventory all third-party plugins and check against PLUGIN-COMPATIBILITY.md. Some plugins (detekt <2.0, ktlint, SQLDelight, Paparazzi, protobuf) require opt-out flags. New Relic and Huawei AGConnect have no workaround." ;
+    oc:hasRationale "Incompatible plugins can completely block the migration. Knowing which flags are needed upfront avoids cryptic build failures midway through" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_a9b0fcaf a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "Before starting any AGP 9.0 migration" ;
+    oc:directiveContent "Always run scripts/analyze-project.sh or manually inventory all plugins, modules, and versions before making any migration changes. Classify each module into Path A (library swap), Path B (app split), or Path C (full restructure) before proceeding." ;
+    oc:hasRationale "Premature changes without understanding the project structure can cause cascading build failures and make rollback difficult" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_bf2f3386 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When editing build.gradle.kts files for any module targeting AGP 9.0" ;
+    oc:directiveContent "Do not apply org.jetbrains.kotlin.android or org.jetbrains.kotlin.kapt in AGP 9.0 modules. AGP 9.0 has built-in Kotlin support; these plugins conflict. Migrate kapt to KSP or com.android.legacy-kapt." ;
+    oc:hasRationale "Applying kotlin-android causes build failure due to conflicting Kotlin compilation. kapt is incompatible with built-in Kotlin and will error" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:payload_5a39061984c31d74 a oc:ExecutionPayload ;
+    oc:code "bash scripts/analyze-project.sh {project_root}" ;
+    oc:executor "shell" ;
+    oc:timeout 30000 .
+

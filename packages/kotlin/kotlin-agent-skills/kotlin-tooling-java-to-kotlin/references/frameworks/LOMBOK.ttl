@@ -1,0 +1,75 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_java_to_kotlin_lombok a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "lombok" ;
+    skos:broader "Conversion guide" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/kotlin/kotlin-agent-skills/kotlin-tooling-java-to-kotlin" ;
+    oc:contentHash "b7f2e11b740261ebec3a9afcd2fa4a7a0c82f082433986c4ba1ba62c64b0bf25" ;
+    oc:dependsOnSkill oc:skill_kotlin_tooling_java_to_kotlin ;
+    oc:differentia "maps Lombok annotations to idiomatic Kotlin equivalents, removing all Lombok dependencies during Java-to-Kotlin migration" ;
+    oc:extends oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_java_to_kotlin ;
+    oc:handlesFailure oc:AnnotationConflict,
+        oc:InvalidInput ;
+    oc:hasArgumentHint "java source file with lombok imports" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_18371652,
+        oc:kn_18f04782,
+        oc:kn_afea82d6,
+        oc:kn_bfbb3bbc,
+        oc:kn_e62c5ce2,
+        oc:kn_f048b6f9 ;
+    oc:isUserInvocable false ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:SourceFileDetected ;
+    oc:resolvesIntent "convert lombok @Value to kotlin immutable data class",
+        "convert lombok annotations to kotlin",
+        "map lombok @Builder to kotlin defaults",
+        "map lombok @Data to kotlin data class",
+        "map lombok @Slf4j to kotlin companion logger",
+        "remove lombok from java code during kotlin migration" ;
+    oc:yieldsState oc:IdiomaticKotlinGenerated,
+        oc:LombokAnnotationsRemoved .
+
+oc:kn_18371652 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting Lombok @Builder annotation" ;
+    oc:directiveContent "For @Builder, prefer default parameter values with named arguments. Only create an explicit builder pattern if the Java code has complex builder logic beyond simple setters." ;
+    oc:hasRationale "Kotlin's default parameters and named arguments provide the same ergonomics as builders without the boilerplate of a separate builder class" .
+
+oc:kn_18f04782 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When any lombok.* import is detected in Java source being converted" ;
+    oc:directiveContent "Never convert Lombok annotations to Lombok in Kotlin code — remove ALL Lombok annotations entirely and replace with idiomatic Kotlin equivalents. Lombok has no place in Kotlin code." ;
+    oc:hasRationale "Lombok is a Java-only compile-time annotation processor that manipulates bytecode; it is incompatible with Kotlin's compiler and design philosophy" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_afea82d6 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When determining nullability of converted properties" ;
+    oc:directiveContent "Java reference types without nullability annotations should be converted to nullable Kotlin types (e.g., String?). Kotlin val replaces Lombok val directly." ;
+    oc:hasRationale "Java fields default to null unless proven otherwise; respecting this avoids NullPointerException at runtime while maintaining type safety" .
+
+oc:kn_bfbb3bbc a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting service or component classes annotated with @Slf4j and constructor-injection Lombok annotations" ;
+    oc:directiveContent "Convert @Slf4j to a companion object with an explicit LoggerFactory.getLogger(MyClass::class.java) declaration, and replace @RequiredArgsConstructor with a primary constructor using val parameters." ;
+    oc:hasRationale "Kotlin companion objects are the idiomatic place for static-like members, and primary constructors with val parameters replace constructor-injection boilerplate" .
+
+oc:kn_e62c5ce2 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting @Data or @Value on classes that are JPA @Entity types" ;
+    oc:directiveContent "Do NOT use data class for JPA entities. Use regular open class with properties instead, because data classes break Hibernate proxies." ;
+    oc:hasRationale "Hibernate uses proxy objects for lazy loading, and data class equals/hashCode break proxy identity semantics causing subtle bugs" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_f048b6f9 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before starting Java-to-Kotlin conversion" ;
+    oc:directiveContent "Detect Lombok usage by scanning for lombok.* imports before attempting conversion. The conversion strategy depends on which specific Lombok annotations are present." ;
+    oc:hasRationale "Lombok annotations generate boilerplate at compile time in Java; the converter must know which code was auto-generated to produce correct Kotlin output" .
+

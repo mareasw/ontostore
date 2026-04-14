@@ -1,0 +1,83 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_java_to_kotlin_mockito a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "mockito" ;
+    skos:broader "mocking framework conversion guide" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/kotlin/kotlin-agent-skills/kotlin-tooling-java-to-kotlin" ;
+    oc:contentHash "221bdf1fae8def5ca083e84cf829b252baceea065eca10a42fa7279d6f8be23e" ;
+    oc:differentia "translates Java Mockito test code to either Kotlin MockK (idiomatic) or mockito-kotlin wrappers, covering stubbing, verification, argument capture, and coroutine support" ;
+    oc:extends oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_java_to_kotlin ;
+    oc:handlesFailure oc:InvalidInput ;
+    oc:hasArgumentHint "Java test file or Mockito code snippet to convert" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_315f4c0d,
+        oc:kn_5752c14f,
+        oc:kn_7489ab58,
+        oc:kn_7ebae135,
+        oc:kn_93750ff8,
+        oc:kn_b9f28886,
+        oc:kn_fd96c313 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:FileExists ;
+    oc:resolvesIntent "convert mockito tests to kotlin syntax",
+        "convert mockito tests to mockk",
+        "keep mockito with kotlin-friendly wrappers",
+        "migrate java mocking code to kotlin",
+        "translate mockito stubs and verifies to mockk equivalents" ;
+    oc:yieldsState oc:DocumentCreated .
+
+oc:kn_315f4c0d a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When the class under test or its collaborators contain suspend functions" ;
+    oc:directiveContent "For suspending functions, use coEvery/coVerify instead of every/verify. Standard every/verify blocks will fail on coroutine functions." ;
+    oc:hasRationale "MockK provides dedicated coroutine-aware stubbing and verification to handle Kotlin's suspend functions correctly within test contexts" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_5752c14f a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When keeping Mockito in a Kotlin test file rather than converting to MockK" ;
+    oc:directiveContent "Do not use Mockito's when() in Kotlin without backtick-escaping, as 'when' is a Kotlin keyword. If keeping Mockito, always use the mockito-kotlin whenever() wrapper instead." ;
+    oc:hasRationale "Kotlin reserves 'when' as a keyword, requiring backtick-escaping (Mockito.`when`) which is ugly and error-prone; mockito-kotlin's whenever() avoids this entirely" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_7489ab58 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting Java Mockito test classes that use @Before setUp to create mocks" ;
+    oc:directiveContent "Eliminate @Before setUp methods by initializing mocks inline with property declarations (e.g., val repo = mockk<Repo>()). MockK mocks do not require a runner or lifecycle method for initialization." ;
+    oc:hasRationale "Inline initialization is more idiomatic Kotlin, reduces boilerplate, and works because MockK mocks are ready to use upon construction without requiring a test runner" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_7ebae135 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting Mockito ArgumentCaptor usage to MockK" ;
+    oc:directiveContent "Use MockK's slot<T>() with capture(slot) instead of ArgumentCaptor. Access the captured value via slot.captured rather than captor.getValue()." ;
+    oc:hasRationale "MockK slots provide a more type-safe and Kotlin-idiomatic API for capturing arguments compared to Mockito's reflection-based ArgumentCaptor" ;
+    oc:severityLevel "LOW" .
+
+oc:kn_93750ff8 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When Mockito imports (org.mockito.*) are detected in Java test code" ;
+    oc:directiveContent "Convert Mockito to MockK when the project already uses MockK or is doing a full Kotlin migration. Only keep Mockito with mockito-kotlin wrappers if the project explicitly wants to retain Mockito." ;
+    oc:hasRationale "MockK is the idiomatic Kotlin mocking library with first-class coroutine support, relaxed mocks, and reified generics; using it maintains consistency in a Kotlin codebase" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_b9f28886 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting Mockito matchers to MockK equivalents" ;
+    oc:directiveContent "MockK's eq(x) is often unnecessary — MockK matches exact values by default. Only use matchers like any() when you explicitly need loose matching." ;
+    oc:hasRationale "Unlike Mockito which requires explicit eq() for literal values when any matchers are present in the same stub, MockK infers exact matching for plain values, reducing verbosity" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_fd96c313 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting @InjectMocks annotations from Mockito to MockK" ;
+    oc:directiveContent "MockK has no direct equivalent to @InjectMocks — use constructor injection instead. Refactor the class under test to receive its dependencies via constructor parameters." ;
+    oc:hasRationale "Constructor injection is already the recommended pattern in Kotlin and Spring; MockK's design encourages this by not providing a field-injection analog" ;
+    oc:severityLevel "MEDIUM" .
+

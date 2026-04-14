@@ -1,0 +1,67 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_cocoapods_spm_migration_cocoapods_extras_patterns a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "cocoapods-extras-patterns" ;
+    skos:broader "Detection and cleanup pattern catalog" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/kotlin/kotlin-agent-skills/kotlin-tooling-cocoapods-spm-migration" ;
+    oc:contentHash "38e9886bc1a3706b4b9fdfd51f38940ce47708e8d524276df160ca8af530f629" ;
+    oc:differentia "Identifies non-standard CocoaPods glue code in build.gradle.kts files and categorizes it for safe removal or user consultation during SPM migration" ;
+    oc:extends oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_cocoapods_spm_migration ;
+    oc:handlesFailure oc:AmbiguousPatternDetected ;
+    oc:hasArgumentHint "build.gradle.kts file content" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_3f93161f,
+        oc:kn_805d4d59,
+        oc:kn_9674a9b1,
+        oc:kn_cc46e6fe,
+        oc:kn_dfd512a3 ;
+    oc:isUserInvocable false ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:BuildGradleFileAvailable ;
+    oc:resolvesIntent "categorize cocoaPods glue code for removal safety",
+        "cleanup cocoaPods-related dead code after SPM migration",
+        "detect cocoaPods workarounds in build.gradle.kts",
+        "identify extra pod configurations needing migration analysis" ;
+    oc:yieldsState oc:CleanupCategoriesAssigned,
+        oc:CocoaPodsExtrasCatalogued .
+
+oc:kn_3f93161f a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "During Phase 1 detection (step 11) and Phase 6.4 cleanup" ;
+    oc:directiveContent "Categorize detected CocoaPods patterns into two groups: 'safe to remove without consultation' (podspec metadata, noPodspec(), Podfile references, dead tasks) and 'requires user analysis' (extraOpts, moduleName, cinterop defFiles, compiler flags)." ;
+    oc:hasRationale "Some CocoaPods workarounds encode real integration requirements that must be manually translated to SPM; others are pure metadata or dead glue code. Conflating the two risks silently dropping necessary configuration." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_805d4d59 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When evaluating build.gradle.kts for CocoaPods references post-migration" ;
+    oc:directiveContent "Any code that references Pods.xcodeproj, Pods/ directory, .xcworkspace files, or podspec files is dead code after migration and must be removed — these artifacts will no longer exist under SPM." ;
+    oc:hasRationale "The SPM integration does not generate any of these CocoaPods-specific artifacts, so any tasks or paths referencing them will fail at build time." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_9674a9b1 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "During Phase 6 cleanup when removing CocoaPods glue code from build.gradle.kts" ;
+    oc:directiveContent "Never blindly remove pod(\"...\", extraOpts = ...) or pod(\"...\", moduleName = ...) directives without analyzing whether equivalent flags are needed in swiftPMDependencies." ;
+    oc:hasRationale "Extra options and custom module names often encode compilation flags or Clang module mappings that must be translated to SPM equivalents, not simply discarded." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_cc46e6fe a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When scanning for task wiring that hooks into CocoaPods plugin tasks" ;
+    oc:directiveContent "Custom Gradle tasks registered via tasks.named(\"podInstall\") { finalizedBy(...) } or tasks.register(\"fixXcodeProject\") that patch Xcode project files are CocoaPods-specific workarounds and become dead code — they must be identified and removed entirely." ;
+    oc:hasRationale "The CocoaPods Gradle plugin tasks (podInstall, podSetup, generatePodspec) no longer exist after migration, so any task wiring depending on them will cause build configuration failures." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_dfd512a3 a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When custom cinterop blocks reference CocoaPods header paths" ;
+    oc:directiveContent "When encountering cinterop defFile configurations for pod headers, present the findings to the user and explain that SPM may handle headers automatically — but do not remove without confirmation." ;
+    oc:hasRationale "SwiftPM's native import may resolve header exposure automatically, but some projects have non-standard header layouts that still require manual cinterop configuration under SPM." ;
+    oc:severityLevel "MEDIUM" .
+

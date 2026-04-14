@@ -1,0 +1,96 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_java_to_kotlin_retrofit a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "retrofit" ;
+    skos:broader "Conversion guide" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/kotlin/kotlin-agent-skills/kotlin-tooling-java-to-kotlin" ;
+    oc:contentHash "b79fd49230bb9cf2b9a2b05ddb772de8ba4b5d80ddc00dc7b3a33550e2988f22" ;
+    oc:dependsOnSkill oc:skill_kotlin_tooling_java_to_kotlin ;
+    oc:differentia "that handles Retrofit/OkHttp Java-to-Kotlin migration with coroutine support" ;
+    oc:extends oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_java_to_kotlin ;
+    oc:handlesFailure oc:InvalidInput ;
+    oc:hasAllowedTool "Edit",
+        "Glob",
+        "Grep",
+        "Read",
+        "Write" ;
+    oc:hasArgumentHint "Java source files using retrofit2.* or okhttp3.* imports" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_3c0f8e2c,
+        oc:kn_6a2b3348,
+        oc:kn_b66badf6,
+        oc:kn_cf7025c4,
+        oc:kn_e005e434,
+        oc:kn_eb087e2b,
+        oc:kn_f5d7479a,
+        oc:kn_ff357c8f ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:FileExists ;
+    oc:resolvesIntent "convert okhttp interceptors to kotlin SAM lambdas",
+        "convert retrofit java interfaces to kotlin suspend functions",
+        "migrate okhttp client configuration from java to kotlin",
+        "transform retrofit Call<T> return types to kotlin coroutines" ;
+    oc:yieldsState oc:DocumentCreated .
+
+oc:kn_3c0f8e2c a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When deciding between Response<T> and direct T return types for suspend functions" ;
+    oc:directiveContent "For endpoints where HTTP status codes matter, keep Response<T> as the return type with suspend fun. For simple cases, return T directly and let Retrofit throw on non-2xx responses." ;
+    oc:hasRationale "Balances error-handling granularity with API simplicity — not every endpoint needs manual status code inspection." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_6a2b3348 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When setting up Retrofit for coroutine support" ;
+    oc:directiveContent "Do not add a separate CoroutineCallAdapterFactory when using Retrofit 2.6.0+ with suspend functions. The built-in support is sufficient." ;
+    oc:hasRationale "Adding the external adapter is redundant and can cause conflicts with Retrofit's native suspend function support." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_b66badf6 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When converting Java Retrofit methods returning Call<Void>" ;
+    oc:directiveContent "Convert Call<Void> to Response<Unit> when HTTP status code checking is needed, or Unit directly when it is not." ;
+    oc:hasRationale "Unit is Kotlin's equivalent of Java's Void, and Response<Unit> preserves the ability to inspect the HTTP status code." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_cf7025c4 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before starting Retrofit interface conversion" ;
+    oc:directiveContent "Verify Retrofit version is 2.6.0 or higher before converting Call<T> to suspend functions. Earlier versions require the coroutine call adapter factory." ;
+    oc:hasRationale "Retrofit 2.6.0 introduced native suspend function support — earlier versions will fail at runtime without an adapter." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_e005e434 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting OkHttpClient configuration and interceptor code" ;
+    oc:directiveContent "Convert OkHttpClient.Builder Java chains to Kotlin using .apply {} or .also {} blocks for grouping related configuration. Use SAM conversion for Interceptor: Interceptor { chain -> chain.proceed(chain.request()) }." ;
+    oc:hasRationale "apply/also blocks produce more idiomatic Kotlin and group related config visually, while SAM conversion eliminates verbose anonymous class boilerplate." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_eb087e2b a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When converting any Retrofit service interface" ;
+    oc:directiveContent "All Retrofit annotations (@GET, @POST, @PUT, @DELETE, @PATCH, @HTTP, @Headers, @Header, @HeaderMap, @Path, @Query, @QueryMap, @Body, @Field, @FieldMap, @Part, @PartMap, @FormUrlEncoded, @Multipart, @Streaming) transfer directly with zero changes." ;
+    oc:hasRationale "Retrofit annotations are JVM annotations that work identically in Kotlin — no conversion needed, preserving correctness." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_f5d7479a a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When converting OkHttp RequestBody creation code" ;
+    oc:directiveContent "Convert RequestBody.create(mediaType, content) to content.toRequestBody(mediaType) using the okhttp3-kotlin-extensions artifact or okhttp-bom with Kotlin extensions." ;
+    oc:hasRationale "The Kotlin extension functions provide a more idiomatic API and are the recommended approach for OkHttp usage in Kotlin." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_ff357c8f a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When converting Retrofit service interface methods" ;
+    oc:directiveContent "Replace all Call<T> return types with suspend fun returning T directly. This requires Retrofit 2.6.0+ which has built-in coroutine support." ;
+    oc:hasRationale "Eliminates the Callback<T> async pattern entirely, producing idiomatic Kotlin coroutine code that is simpler and less error-prone." ;
+    oc:severityLevel "CRITICAL" .
+

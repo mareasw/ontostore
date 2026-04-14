@@ -1,0 +1,84 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_agp9_migration_version_matrix a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "version-matrix" ;
+    skos:broader "Version compatibility reference" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/kotlin/kotlin-agent-skills/kotlin-tooling-agp9-migration" ;
+    oc:contentHash "81537c09a682c476beec70fe7b0075799b7393857f2227164709b66a2446c256" ;
+    oc:differentia "Provides minimum and recommended versions for all components in a KMP AGP 9.0 migration, along with upgrade paths and validation commands" ;
+    oc:extends oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_agp9_migration ;
+    oc:handlesFailure oc:InvalidInput ;
+    oc:hasAllowedTool "Bash" ;
+    oc:hasArgumentHint "component-name (optional, e.g. 'KGP', 'KSP', 'Compose')" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_28fc7b07,
+        oc:kn_52f2aa26,
+        oc:kn_58ea291a,
+        oc:kn_6c7d48af,
+        oc:kn_70d2b6ec,
+        oc:kn_a9ccf9b0,
+        oc:kn_dc51de58 ;
+    oc:isUserInvocable false ;
+    oc:nature "Reference" ;
+    oc:requiresState oc:EnvironmentReady,
+        oc:ToolInstalled ;
+    oc:resolvesIntent "check version compatibility for AGP 9.0 migration",
+        "determine minimum and recommended versions for KMP migration components",
+        "plan upgrade path from AGP 8.x to AGP 9.0",
+        "validate version setup for KMP AGP 9.0 migration" ;
+    oc:yieldsState oc:VersionCompatibilityVerified .
+
+oc:kn_28fc7b07 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When the project uses KSP (e.g., Room KMP, annotation processing)" ;
+    oc:directiveContent "KSP must be at least 2.3.1 for AGP 9.0 support. KSP 2.3.3+ is strongly recommended because earlier versions still use the deprecated compilerOptions KGP API, which may conflict with other Gradle plugins." ;
+    oc:hasRationale "KSP versions below 2.3.1 lack AGP 9.0 compatibility entirely; 2.3.3+ migrated away from deprecated APIs that cause plugin conflicts." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_52f2aa26 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When configuring Compose Multiplatform in the build" ;
+    oc:directiveContent "The Compose Compiler Plugin version is automatically tied to KGP — use org.jetbrains.kotlin.plugin.compose and do not specify a separate version since KGP 2.0." ;
+    oc:hasRationale "Decoupling the Compose compiler version from KGP was eliminated in KGP 2.0; manual version specification causes mismatch errors." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_58ea291a a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Before starting any AGP 9.0 migration" ;
+    oc:directiveContent "AGP 9.0 requires Gradle 9.1.0+ minimum, JDK 17+ minimum, and SDK Build Tools 36.0.0 — earlier versions of these tools will not work." ;
+    oc:hasRationale "These are hard runtime dependencies enforced by AGP 9.0; builds will fail if these minimums are not met." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_6c7d48af a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When planning a migration from AGP 8.x with older Kotlin plugin versions" ;
+    oc:directiveContent "The recommended upgrade order from AGP 8.x + KGP 1.9.x is: (1) upgrade KGP to 2.0.0+, (2) migrate kotlinOptions to compilerOptions, (3) upgrade Gradle to 9.1.0, (4) upgrade AGP to 9.0.1+, (5) migrate to com.android.kotlin.multiplatform.library, (6) upgrade KGP to 2.3.0+." ;
+    oc:hasRationale "Step-by-step ordering avoids breaking changes — KGP 2.0 and compilerOptions migration can happen on AGP 8.x first, reducing risk." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_70d2b6ec a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before beginning AGP 9.0 migration steps" ;
+    oc:directiveContent "Before starting migration, run compatibility validation commands: check Gradle version (./gradlew --version), verify AGP and KGP versions in buildEnvironment output, and confirm the KMP library plugin is recognized via tasks listing." ;
+    oc:hasRationale "Validating the current toolchain versions prevents wasting time on migrations that will fail due to unmet prerequisites." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_a9ccf9b0 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When choosing an IDE for KMP AGP 9.0 development" ;
+    oc:directiveContent "IntelliJ IDEA does not support AGP 9.0 as of version 2026.1 — use Android Studio (Otter 3 / 2025.2.3+) for Android-targeted development. IntelliJ can still be used for non-Android KMP targets (JVM, iOS, JS/Wasm)." ;
+    oc:hasRationale "Only Android Studio has the necessary AGP 9.0 and KMP library plugin IDE support; IntelliJ lacks the required Android integration." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_dc51de58 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When selecting KGP version after initial migration" ;
+    oc:directiveContent "Target KGP 2.3.0+ as the recommended version for best KMP library plugin compatibility, improved source set inference, and stable Compose compiler integration." ;
+    oc:hasRationale "KGP 2.3.0+ resolves edge cases with multiplatform source set inference and provides the most reliable experience with the KMP AGP 9.0 library plugin." ;
+    oc:severityLevel "MEDIUM" .
+

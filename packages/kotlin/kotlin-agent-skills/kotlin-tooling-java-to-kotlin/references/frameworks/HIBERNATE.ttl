@@ -1,0 +1,78 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_java_to_kotlin_hibernate a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "hibernate" ;
+    skos:broader "conversion guide" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/kotlin/kotlin-agent-skills/kotlin-tooling-java-to-kotlin" ;
+    oc:contentHash "02cf14d4d56cba141682bd8bfd5154d2018822a3aca6f477d8fb48bb91e08277" ;
+    oc:differentia "specializes Java-to-Kotlin translation for Hibernate/JPA entity classes, covering annotation targeting, identity semantics, proxy requirements, and relationship mapping" ;
+    oc:extends oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_java_to_kotlin ;
+    oc:handlesFailure oc:AnnotationTargetMismatch,
+        oc:IdentitySemanticsViolation,
+        oc:ProxyCreationFailure ;
+    oc:hasArgumentHint "Java file with javax.persistence.*, jakarta.persistence.*, or org.hibernate.* imports" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_2949a1cf,
+        oc:kn_4e2d2b0b,
+        oc:kn_9011e910,
+        oc:kn_9ddda411,
+        oc:kn_c8714518,
+        oc:kn_cec6ff6b ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:FileExists,
+        oc:JpaImportsDetected ;
+    oc:resolvesIntent "convert hibernate jpa entity to kotlin",
+        "handle hibernate proxy requirements in kotlin",
+        "map jpa relationships in kotlin",
+        "migrate jpa annotations from java to kotlin",
+        "translate java entity class to kotlin" ;
+    oc:yieldsState oc:HibernateEntityConverted .
+
+oc:kn_2949a1cf a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting entity relationships and cascade configurations" ;
+    oc:directiveContent "Convert Java cascade array syntax {CascadeType.ALL} to Kotlin bracket syntax [CascadeType.ALL]. Use MutableList for @OneToMany collections so Hibernate can manage the relationship." ;
+    oc:hasRationale "Kotlin uses brackets [] for array annotations instead of Java's curly braces {}. MutableList is required because Hibernate needs to replace the collection implementation with its own managed wrapper." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_4e2d2b0b a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting any JPA @Entity class from Java to Kotlin" ;
+    oc:directiveContent "Never use Kotlin data classes for @Entity classes. Data classes generate equals/hashCode based on all properties, which breaks Hibernate's identity semantics and proxy creation." ;
+    oc:hasRationale "Hibernate uses identity-based equality (database primary key) for entities, not property-based equality. Data class equals/hashCode would use all properties, causing broken lazy loading, detached entity issues, and proxy failures." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_9011e910 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When declaring any @Entity or @MappedSuperclass class in Kotlin" ;
+    oc:directiveContent "All JPA entity classes and their mutable properties must be declared `open` so Hibernate can create runtime proxies via subclassing." ;
+    oc:hasRationale "Kotlin classes are final by default. Hibernate creates CGLIB or ByteBuddy proxies by subclassing entities at runtime. Final classes prevent proxy creation, causing LazyInitializationException on lazy-loaded associations." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_9ddda411 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When placing JPA annotations on Kotlin entity properties" ;
+    oc:directiveContent "Use @field: annotation site targets for all JPA annotations (@Id, @Column, @GeneratedValue, @ManyToOne, @OneToMany, @JoinColumn) to ensure they target the backing field rather than the getter or constructor parameter." ;
+    oc:hasRationale "Kotlin annotations default to targeting parameters or getters depending on context. Hibernate expects annotations on fields. Without @field: targeting, Hibernate will not find the mapping metadata and will throw MappingException." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_c8714518 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting @Embeddable value objects from Java to Kotlin" ;
+    oc:directiveContent "@Embeddable classes CAN be Kotlin data classes because Hibernate does not proxy them. Use default values for all constructor parameters to satisfy the no-arg constructor requirement." ;
+    oc:hasRationale "@Embeddable classes are value objects inlined into the owning entity's table. Since Hibernate never creates proxies for embeddables, data class semantics are safe and provide useful equals/hashCode/toString/copy." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_cec6ff6b a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing JPA entity identity in Kotlin" ;
+    oc:directiveContent "Place @Id and @GeneratedValue on a mutable property (open var) inside the class body with a protected setter, rather than in the primary constructor. Provide a protected no-arg constructor delegating to the primary constructor with default values." ;
+    oc:hasRationale "The ID is typically assigned by the database, so it should be nullable and mutable. A protected no-arg constructor satisfies Hibernate's proxy instantiation requirement while keeping the primary constructor expressive." ;
+    oc:severityLevel "HIGH" .
+

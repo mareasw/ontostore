@@ -1,0 +1,84 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_java_to_kotlin_guice a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "guice" ;
+    skos:broader "Conversion guide" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/kotlin/kotlin-agent-skills/kotlin-tooling-java-to-kotlin" ;
+    oc:contentHash "7ca1991006f3e009a18f4bf5276a02873c87c75201b34ba69eb0cc5c2cdcf0f5" ;
+    oc:differentia "handles Google Guice dependency injection annotations and patterns when translating Java to Kotlin" ;
+    oc:extends oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_java_to_kotlin ;
+    oc:handlesFailure oc:AnnotationSiteTargetMismatch,
+        oc:ReservedKeywordConflict ;
+    oc:hasArgumentHint "Java source file containing com.google.inject.* imports" ;
+    oc:hasCategory "development" ;
+    oc:hasRequirement oc:req_59e369d7,
+        oc:req_7c96aa9a,
+        oc:req_ac6112d2 ;
+    oc:impartsKnowledge oc:kn_2a9ef4ba,
+        oc:kn_3c8f3542,
+        oc:kn_530150bc,
+        oc:kn_61969bc6,
+        oc:kn_9731506b ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:GuiceImportsPresent,
+        oc:JavaSourceDetected ;
+    oc:resolvesIntent "convert guice-injected java classes to kotlin",
+        "handle guice provider and singleton patterns in kotlin conversion",
+        "migrate @Inject @Named @Provides annotations from java to kotlin",
+        "translate guice module bindings to kotlin" ;
+    oc:yieldsState oc:AnnotationSiteTargetsApplied,
+        oc:GuiceCodeConverted .
+
+oc:kn_2a9ef4ba a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting Guice module bindings that use .in() scope methods" ;
+    oc:directiveContent "Do not use .in(Singleton::class.java) without backtick-escaping — `in` is a Kotlin keyword. Write it as .`in`(Singleton::class.java) instead." ;
+    oc:hasRationale "The word 'in' is a reserved keyword in Kotlin; unescaped usage causes a compilation error. Backtick-escaping is required for calling Java methods named with Kotlin keywords." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_3c8f3542 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When encountering Provider<T> usage in Java source" ;
+    oc:directiveContent "Only suggest replacing Provider<T> with Kotlin lazy delegation when the sole purpose is deferred initialization outside of Guice-managed contexts. Keep Provider<T> as-is within Guice injection graphs." ;
+    oc:hasRationale "Provider<T> is integral to Guice's scoping and injection lifecycle; replacing it with Kotlin lazy in a Guice-managed context breaks dependency injection semantics." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_530150bc a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting Guice modules with @Provides methods and configure() bindings" ;
+    oc:directiveContent "Keep @Provides methods as regular functions and preserve AbstractModule.configure() overrides. Guice's binding DSL works with Kotlin class references (Foo::class.java) without changes." ;
+    oc:hasRationale "Guice modules are Java-centric but interoperate cleanly with Kotlin; no special wrapper or DSL is needed, minimizing conversion risk." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_61969bc6 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting any Java class that uses @Inject constructor injection" ;
+    oc:directiveContent "Place @Inject before the constructor keyword in Kotlin's primary constructor. Convert Java constructor parameters to private val properties in the primary constructor parameter list." ;
+    oc:hasRationale "Kotlin's primary constructor syntax requires annotations to precede the constructor keyword; combining injection with property declaration in one line yields idiomatic Kotlin." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_9731506b a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When @Named qualifier appears on constructor-injected parameters" ;
+    oc:directiveContent "Use @param:Named (not @Named alone) on constructor parameters to ensure the annotation targets the JVM parameter rather than the Kotlin property or field." ;
+    oc:hasRationale "Kotlin generates both a constructor parameter and a backing property; without the @param: site target, Guice cannot resolve the named binding at the correct annotation site, leading to injection failures." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:req_59e369d7 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Google Guice API (AbstractModule, @Inject, @Provides, @Singleton, @Named, Provider<T>)" .
+
+oc:req_7c96aa9a a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Kotlin constructor syntax and primary constructor conventions" .
+
+oc:req_ac6112d2 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Kotlin annotation site targets (@param:, @field:, @property:)" .
+

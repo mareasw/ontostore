@@ -1,0 +1,90 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_java_to_kotlin_spring a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "spring" ;
+    skos:broader "conversion guide" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/kotlin/kotlin-agent-skills/kotlin-tooling-java-to-kotlin" ;
+    oc:contentHash "b07412f7dbcd9cb7d543370e69e6e9d0faf4f4bd74608a0586fa0be93c881ae8" ;
+    oc:differentia "handles Spring Framework idioms when translating Java source to idiomatic Kotlin" ;
+    oc:extends oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_java_to_kotlin ;
+    oc:handlesFailure oc:AnnotationMigrationFailed,
+        oc:CompilationError ;
+    oc:hasArgumentHint "Java source file with org.springframework.* imports" ;
+    oc:hasCategory "development" ;
+    oc:hasRequirement oc:req_09e92987,
+        oc:req_1894ac46,
+        oc:req_743380d7 ;
+    oc:impartsKnowledge oc:kn_1f7e1ef5,
+        oc:kn_54c09465,
+        oc:kn_8ae5126e,
+        oc:kn_a6ea55d7,
+        oc:kn_d6d41673,
+        oc:kn_f710b25c ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:FileExists,
+        oc:JavaSourceIdentified ;
+    oc:resolvesIntent "convert Spring Boot application from Java to Kotlin",
+        "migrate Spring Data repositories and configuration properties to Kotlin",
+        "translate Spring annotations and dependency injection to Kotlin idioms" ;
+    oc:yieldsState oc:SpringConverted .
+
+oc:kn_1f7e1ef5 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting Spring Boot application entry points and annotation array parameters" ;
+    oc:directiveContent "Replace Java array initializer syntax in annotation parameters with Kotlin arrayOf() and prefer top-level main function with runApplication<T>() over companion-object main." ;
+    oc:hasRationale "runApplication is a Spring Boot Kotlin extension that is more idiomatic than SpringApplication.run; arrayOf() is Kotlin's array literal syntax for annotations." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_54c09465 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting Spring classes that use proxy-based features (AOP, CGLIB proxying)" ;
+    oc:directiveContent "Classes annotated with @Transactional or @ConfigurationProperties must remain open — do not make them final." ;
+    oc:hasRationale "Spring creates CGLIB proxies via subclassing; final classes prevent proxy creation and cause runtime errors." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_8ae5126e a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting Spring Data interfaces and configuration property classes" ;
+    oc:directiveContent "Convert Spring Data repository Optional<T> return types to Kotlin nullable T? and use data class for immutable @ConfigurationProperties; use lateinit var for mutable ones." ;
+    oc:hasRationale "Nullable types are Kotlin-idiomatic replacements for Optional, and data classes give equals/hashCode/copy for free when immutability is appropriate." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_a6ea55d7 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting Spring Boot main class with varargs parameter" ;
+    oc:directiveContent "The *args spread operator is mandatory when passing String[] CLI arguments to SpringApplication.run() or runApplication<T>() in Kotlin." ;
+    oc:hasRationale "Kotlin requires explicit spread for Java varargs arrays; omitting it causes a compilation error." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_d6d41673 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting any Spring component with constructor injection" ;
+    oc:directiveContent "Never keep @Autowired on a single-constructor class when converting to Kotlin — Spring auto-discovers the primary constructor, making the annotation redundant." ;
+    oc:hasRationale "Redundant @Autowired clutters Kotlin code and contradicts the idiomatic pattern of using primary constructor parameters for dependency injection." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_f710b25c a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting @Value annotations that reference property placeholders" ;
+    oc:directiveContent "Escape $ in @Value SpEL expressions with \\${...} to prevent Kotlin string template interpolation." ;
+    oc:hasRationale "Kotlin interprets ${...} as string templates; without escaping, compilation fails or silently substitutes unintended values." ;
+    oc:severityLevel "HIGH" .
+
+oc:req_09e92987 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Spring Framework annotations and dependency injection patterns" .
+
+oc:req_1894ac46 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Spring Boot Kotlin extensions (runApplication, allopen plugin)" .
+
+oc:req_743380d7 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Kotlin primary constructors, spread operator, and string templates" .
+

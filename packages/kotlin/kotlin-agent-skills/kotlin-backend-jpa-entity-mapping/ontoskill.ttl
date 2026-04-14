@@ -1,0 +1,94 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_kotlin_kotlin_agent_skills_kotlin_backend_jpa_entity_mapping a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "kotlin-backend-jpa-entity-mapping" ;
+    skos:broader "Persistence design guide" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/kotlin/kotlin-agent-skills/kotlin-backend-jpa-entity-mapping" ;
+    oc:contentHash "f0757abea27dccd23d65d44276de86c29e3b70c81deb36c48966b0d3999ceaeb" ;
+    oc:differentia "enforces Kotlin-specific JPA entity correctness, covering identity semantics, equality contracts, uniqueness constraints, and ORM trap avoidance for Spring Data JPA and Hibernate projects" ;
+    oc:handlesFailure oc:InvalidInput ;
+    oc:hasArgumentHint "Kotlin JPA entity class or persistence-related error description" ;
+    oc:hasCategory "development" ;
+    oc:hasDescription """Model Kotlin persistence code correctly for Spring Data JPA and Hibernate. Covers entity design, identity and equality, uniqueness constraints, relationships, fetch plans, and common ORM (Object-Relational Mapping) traps  specific to Kotlin. Use when creating or reviewing JPA (Java Persistence API)  entities, diagnosing N+1 or LazyInitializationException, placing indexes and  uniqueness rules, or preventing Kotlin-specific bugs such as data class  entities and broken equals/hashCode.
+""" ;
+    oc:hasName "kotlin-backend-jpa-entity-mapping" ;
+    oc:impartsKnowledge oc:kn_23d31e94,
+        oc:kn_31ccff63,
+        oc:kn_401072f0,
+        oc:kn_651445f3,
+        oc:kn_7150277a,
+        oc:kn_72170348,
+        oc:kn_a7a0e025,
+        oc:kn_e6e98c51 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "create JPA entities in Kotlin",
+        "design correct equals/hashCode for JPA entities",
+        "diagnose LazyInitializationException in Kotlin JPA",
+        "diagnose N+1 query problems in Spring Data JPA",
+        "place uniqueness constraints and indexes on JPA entities",
+        "review Kotlin persistence code for ORM anti-patterns" ;
+    oc:yieldsState oc:DocumentCreated .
+
+oc:kn_23d31e94 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When diagnosing or fixing N+1 query problems in Spring Data JPA" ;
+    oc:directiveContent "Diagnose N+1 by inspecting actual SQL query counts or enabling SQL logs, not by guessing from annotations. Then apply targeted fetch solutions: @EntityGraph, JOIN FETCH, batch fetching, or DTO projection." ;
+    oc:hasRationale "Annotation-based guessing can miss the real query pattern. Targeted solutions address the specific fetch plan rather than blanket FetchType.EAGER which masks the underlying issue." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_31ccff63 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before creating or reviewing JPA entity classes in a Kotlin project" ;
+    oc:directiveContent "Verify kotlin(\"plugin.jpa\") or equivalent no-arg compiler plugin is configured when JPA entities exist in the project. Ensure entity classes and their members are compatible with Hibernate proxying." ;
+    oc:hasRationale "Hibernate requires no-arg constructors and open classes/methods for proxy generation. Without the JPA plugin, Kotlin classes are final by default and lack no-arg constructors, causing runtime proxy failures." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_401072f0 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When designing entity relationships or performing batch operations" ;
+    oc:directiveContent "Bidirectional associations must be maintained on both sides in domain methods. Half-updated graphs cause subtle bugs. Also, bulk updates/deletes bypass the persistence context, making subsequent reads potentially stale." ;
+    oc:hasRationale "ORM in-memory state and database state can diverge when only one side of a bidirectional association is updated, or when bulk operations skip lifecycle callbacks and the first-level cache." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_651445f3 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When implementing toString on JPA entities or logging/debugging entity instances" ;
+    oc:directiveContent "Do not reference lazy-loaded collections or associations in toString(). Use only immediate, eagerly-available fields." ;
+    oc:hasRationale "toString, debug logging, JSON serialization, and IDE inspection can all trigger lazy loads outside an active Hibernate session, causing LazyInitializationException." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_7150277a a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When implementing idempotent API operations (e.g., reserve stock for order X)" ;
+    oc:directiveContent "Enforce uniqueness at both the database constraint level AND the application check level. Database constraints guarantee correctness; application checks provide clean error messages." ;
+    oc:hasRationale "Application-only checks have race conditions under concurrent requests; database-only checks produce raw DataIntegrityViolationException. Both layers together cover the common case and the race." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_72170348 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When creating or reviewing any JPA entity class in Kotlin" ;
+    oc:directiveContent "Never use Kotlin data class for JPA entities. Data class generates equals/hashCode from all fields, corrupting Set/Map membership after state changes, and its copy() creates detached duplicates of managed entities." ;
+    oc:hasRationale "Hibernate relies on identity semantics that data class breaks: all-field equality changes after persist, lazy-loaded proxy fields cause false inequality, and copy() bypasses the persistence context." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_a7a0e025 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When troubleshooting LazyInitializationException or designing entity relationships" ;
+    oc:directiveContent "Do not use FetchType.EAGER everywhere to silence lazy loading symptoms. This masks the real fetch plan problem and causes Cartesian explosion with multiple bag fetches." ;
+    oc:hasRationale "Eager fetching is a blunt instrument that loads all associations regardless of use case, degrading performance and potentially causing Cartesian product issues with multiple collections." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_e6e98c51 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When defining equals/hashCode on any JPA entity" ;
+    oc:directiveContent "Implement ID-based equals with a class-constant hashCode. equals should compare by ID only (with a guard for unsaved id=0 entities), and hashCode should return javaClass.hashCode() to remain stable across dirty tracking." ;
+    oc:hasRationale "ID-based equality is stable under proxy unwrapping and state mutation. A class-constant hashCode prevents Set/Map corruption when Hibernate dirty-tracks field changes after persistence." ;
+    oc:severityLevel "CRITICAL" .
+

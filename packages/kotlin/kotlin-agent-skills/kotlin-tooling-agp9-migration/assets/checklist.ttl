@@ -1,0 +1,68 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_agp9_migration_checklist a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "checklist" ;
+    skos:broader "Verification checklist" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/kotlin/kotlin-agent-skills/kotlin-tooling-agp9-migration" ;
+    oc:contentHash "bccb1adb33a00368e09b94d4cce19b3f3b60da0dab6441664249c078d3dce31c" ;
+    oc:differentia "Validates KMP AGP 9.0 migration completeness across plugin configuration, DSL changes, build logic, ProGuard, and multi-platform build targets" ;
+    oc:extends oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_agp9_migration ;
+    oc:handlesFailure oc:BuildFailure,
+        oc:DeprecatedAPIFound,
+        oc:MigrationIncomplete ;
+    oc:hasArgumentHint "project-path (optional: root directory of the migrated KMP project)" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_6e3623d7,
+        oc:kn_890a60b2,
+        oc:kn_93764f63,
+        oc:kn_b790360e,
+        oc:kn_eb2dcbfd ;
+    oc:isUserInvocable true ;
+    oc:nature "Checklist" ;
+    oc:requiresState oc:MigrationCompleted ;
+    oc:resolvesIntent "audit post-migration configuration",
+        "check for removed AGP APIs and deprecated DSL",
+        "validate KMP migration completeness",
+        "verify AGP 9 migration" ;
+    oc:yieldsState oc:MigrationVerified .
+
+oc:kn_6e3623d7 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When verifying KMP library module configuration" ;
+    oc:directiveContent "Each KMP library module must have a unique namespace different from the app module; android.uniquePackageNames=true is the AGP 9.0 default." ;
+    oc:hasRationale "AGP 9.0 enforces unique package names by default; duplicate namespaces cause build conflicts." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_890a60b2 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "KMP library modules only; non-KMP modules use different migration paths" ;
+    oc:directiveContent "Source sets must be renamed to androidMain, androidHostTest, androidDeviceTest and the top-level android {} block must be replaced with androidLibrary {} inside kotlin {}." ;
+    oc:hasRationale "AGP 9.0 restructures the DSL for KMP library modules; using old source set names or block structure causes configuration errors." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_93764f63 a oc:KnowledgeNode,
+        oc:PostFlightValidation ;
+    oc:appliesToContext "After completing AGP 9.0 migration changes, before declaring migration done" ;
+    oc:directiveContent "Run ./gradlew build and platform-specific build commands (Android, iOS, Desktop, Wasm) to verify the migration produced working binaries across all targets." ;
+    oc:hasRationale "A migration that compiles but doesn't build for all targets is incomplete; multi-platform verification catches target-specific regressions." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_b790360e a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When auditing build logic and convention plugins post-migration" ;
+    oc:directiveContent "Never leave references to removed APIs: BaseExtension, AppExtension, LibraryExtension, applicationVariants, libraryVariants, variantFilter, or android.enableLegacyVariantApi." ;
+    oc:hasRationale "These APIs are removed in AGP 9.0 and will cause compilation failures or silent misconfiguration if referenced." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_eb2dcbfd a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before running post-migration builds" ;
+    oc:directiveContent "Verify no removed gradle.properties keys remain: android.enableLegacyVariantApi, android.r8.integratedResourceShrinking, android.enableNewResourceShrinker.preciseShrinking." ;
+    oc:hasRationale "Retained removed properties cause Gradle configuration failures that may be confusing to diagnose." ;
+    oc:severityLevel "MEDIUM" .
+

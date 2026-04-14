@@ -1,0 +1,117 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_java_to_kotlin a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "kotlin-tooling-java-to-kotlin" ;
+    skos:broader "Code conversion skill" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/kotlin/kotlin-agent-skills/kotlin-tooling-java-to-kotlin" ;
+    oc:contentHash "759a0c552791ec0d6d0e095706bf2ea633a41a00f589faea16a7c3bb66e88906" ;
+    oc:differentia "converts Java source files to idiomatic Kotlin using a disciplined 4-step methodology with 5 invariants, supporting framework-aware conversion for Spring, Lombok, Hibernate, Jackson, Micronaut, Quarkus, Dagger/Hilt, RxJava, JUnit, Guice, Retrofit, and Mockito" ;
+    oc:handlesFailure oc:CompilationError,
+        oc:TestFailure ;
+    oc:hasAllowedTool "Bash",
+        "Edit",
+        "Glob",
+        "Grep",
+        "Read",
+        "Write" ;
+    oc:hasArgumentHint "file-path or directory-path of .java files to convert" ;
+    oc:hasCategory "development" ;
+    oc:hasDescription """Use when converting Java source files to idiomatic Kotlin, when user mentions "java to kotlin", "j2k", "convert java", "migrate java to kotlin", or when working with .java files that need to become .kt files. Handles framework-aware conversion for Spring, Lombok, Hibernate, Jackson, Micronaut, Quarkus, Dagger/Hilt, RxJava, JUnit, Guice, Retrofit, and Mockito.
+""" ;
+    oc:hasName "kotlin-tooling-java-to-kotlin" ;
+    oc:impartsKnowledge oc:kn_024518aa,
+        oc:kn_22cf0eb5,
+        oc:kn_451ecd6b,
+        oc:kn_8bc8981b,
+        oc:kn_91e4c8d0,
+        oc:kn_9ba37aab,
+        oc:kn_a36d0ae5,
+        oc:kn_aa0e6c9a,
+        oc:kn_ac90491e,
+        oc:kn_df8cf1d6 ;
+    oc:isUserInvocable true ;
+    oc:nature "Tool" ;
+    oc:requiresState oc:FileExists ;
+    oc:resolvesIntent "batch convert Java package to Kotlin",
+        "convert Java to Kotlin",
+        "convert Java with framework annotations to Kotlin",
+        "migrate Java files to idiomatic Kotlin",
+        "translate Java source code to Kotlin" ;
+    oc:yieldsState oc:FileConverted,
+        oc:TestsPassing .
+
+oc:kn_024518aa a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting multiple Java files or an entire package to Kotlin" ;
+    oc:directiveContent "When batch converting, sort files by dependency order and convert leaf dependencies first (files that don't import other files in the conversion set), then work upward. This prevents broken references during incremental conversion." ;
+    oc:hasRationale "Converting dependencies before dependents ensures that each converted file can compile against already-Kotlin code, reducing cascading compilation errors." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_22cf0eb5 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When converting files in a Git-tracked project" ;
+    oc:directiveContent "Preserve git blame history by using a two-phase commit strategy: first `git mv` to rename the .java file to .kt, commit; then replace the content with converted Kotlin code, commit again." ;
+    oc:hasRationale "A delete + create pattern destroys git blame history. The rename-then-modify pattern allows git to track the file across the rename, preserving line-level attribution." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_451ecd6b a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting Java classes annotated with @Entity, @Table, or using Hibernate/JPA imports" ;
+    oc:directiveContent "Never use Kotlin data classes for JPA/Hibernate entities. Data classes generate equals/hashCode based on all properties, which breaks Hibernate's identity semantics and proxy creation. Use regular open classes instead." ;
+    oc:hasRationale "Hibernate creates CGLIB proxies via subclassing and relies on identity-based equality. Data class equals/hashCode breaks lazy loading and session management." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_8bc8981b a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When Java method names or fields collide with Kotlin reserved keywords" ;
+    oc:directiveContent "When a Kotlin keyword conflicts with a Java identifier (when, in, is, object, fun, val, var), backtick-escape the identifier in Kotlin. For internal APIs, prefer renaming to a non-keyword alternative." ;
+    oc:hasRationale "Keyword conflicts cause compilation errors. Backtick escaping preserves API compatibility while renaming is cleaner for non-public APIs." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_91e4c8d0 a oc:KnowledgeNode,
+        oc:PostFlightValidation ;
+    oc:appliesToContext "After converting each Java file (Step 4 verification)" ;
+    oc:directiveContent "After conversion, verify: (1) the .kt file compiles without errors, (2) all existing tests pass, (3) no new compiler warnings, (4) all annotations preserved with correct site targets, (5) no behavioral changes, (6) Javadoc converted to KDoc." ;
+    oc:hasRationale "Post-conversion verification catches semantic drift, dropped annotations, and broken framework integration before moving to the next file." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_9ba37aab a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When encountering Java types without nullability annotations in converted code" ;
+    oc:directiveContent "Never leave Java platform types (T!) in converted Kotlin code. Always add explicit type declarations with correct nullability (T or T?) based on analysis of the Java source, documentation, and call sites." ;
+    oc:hasRationale "Platform types bypass Kotlin's null-safety system, deferring null checks to runtime and negating one of the primary benefits of Kotlin migration." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_a36d0ae5 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "At the start of every Java-to-Kotlin conversion (Step 0)" ;
+    oc:directiveContent "Before conversion, scan the Java file's import statements to detect which frameworks are in use. Load ONLY the matching framework reference files to keep context focused and avoid polluting the conversion with irrelevant rules." ;
+    oc:hasRationale "Framework-specific conversion rules (annotation targets, class openness, DI patterns) are critical for correctness but loading all guides at once wastes context and increases hallucination risk." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_aa0e6c9a a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting Java classes with framework annotations (Jackson, JPA, validation, DI qualifiers)" ;
+    oc:directiveContent "Annotation site targets must be explicitly specified when converting Java annotations that target fields: use @field: for field-targeted annotations, @get: for getter-targeted, @set: for setter-targeted, @param: for constructor parameter-targeted. When Java annotates both field and getter, apply both @field: and @get: in Kotlin." ;
+    oc:hasRationale "Kotlin properties have multiple annotation targets (field, getter, setter, param). Without explicit site targets, annotations may be applied to the wrong element, causing silent runtime failures in serialization, persistence, or dependency injection." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_ac90491e a oc:Idempotency,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When batch converting or retrying failed conversions" ;
+    oc:directiveContent "Re-running conversion on an already-converted .kt file should detect it and skip or offer to re-convert from the original .java source if still available." ;
+    oc:hasRationale "Avoids overwriting hand-tweaked Kotlin code or creating double-converted files with corrupted semantics." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_df8cf1d6 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting any Java file to Kotlin" ;
+    oc:directiveContent "Always follow the 4-step conversion process: (1) faithful 1:1 translation preserving exact Java semantics, (2) nullability & mutability audit (val/var, nullable types), (3) collection type conversion (Java mutable → Kotlin types), (4) idiomatic transformations (properties, string templates, lambdas). After each step, check 5 invariants; if any is violated, revert and redo." ;
+    oc:hasRationale "The 4-step process prevents semantic drift by ensuring faithfulness before idiomatization. The 5 invariants guarantee behavioral equivalence at every stage." ;
+    oc:severityLevel "CRITICAL" .
+
