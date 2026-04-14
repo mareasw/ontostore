@@ -1,0 +1,97 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_vercel_labs_agent_browser_commands a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "commands" ;
+    skos:broader "command reference documentation" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/agent-browser" ;
+    oc:contentHash "b2b65677a3b318d5124f2e44243ffe2bca44c4e71f0b923f164a6cdb2fe4591d" ;
+    oc:dependsOnSkill oc:skill_agent_browser ;
+    oc:differentia "provides exhaustive CLI syntax and option catalog for the agent-browser browser automation tool covering navigation, interaction, snapshot, network, tabs, frames, and debugging commands" ;
+    oc:extends oc:skill_vercel_labs_agent_browser ;
+    oc:handlesFailure oc:BrowserNotConnected,
+        oc:CommandNotFound,
+        oc:ElementNotFound ;
+    oc:hasArgumentHint "command-name or command category (e.g. 'snapshot', 'interactions', 'navigation')" ;
+    oc:hasCategory "automation" ;
+    oc:impartsKnowledge oc:kn_3504909b,
+        oc:kn_5a596681,
+        oc:kn_5c289335,
+        oc:kn_85b0b993,
+        oc:kn_c8343ab5,
+        oc:kn_d205f87b,
+        oc:kn_ea446f64,
+        oc:kn_ecde70e6 ;
+    oc:isUserInvocable true ;
+    oc:nature "reference" ;
+    oc:requiresState oc:ToolInstalled ;
+    oc:resolvesIntent "capture screenshots and PDFs from browser",
+        "debug browser sessions",
+        "find available browser automation commands",
+        "handle iframes and tabs in agent-browser",
+        "interact with web page elements using agent-browser",
+        "look up agent-browser command syntax",
+        "manage browser state cookies and storage",
+        "navigate web pages with agent-browser" ;
+    oc:yieldsState oc:BrowserCommandAvailable .
+
+oc:kn_3504909b a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When interacting with elements that may change between snapshot and interaction, or when building reusable automation flows" ;
+    oc:directiveContent "Use semantic locators (find text, find label, find role) as an alternative to @ref when elements are dynamic or refs may become stale across page changes." ;
+    oc:hasRationale "Semantic locators provide human-readable, intent-based element selection that is more resilient to DOM structure changes." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_5a596681 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When executing JavaScript via agent-browser eval command" ;
+    oc:directiveContent "Never use raw eval with complex JavaScript containing nested quotes or special characters. Use eval -b (base64) or eval --stdin instead." ;
+    oc:hasRationale "Shell escaping of complex JS is error-prone and leads to silent failures or incorrect behavior; base64 or stdin bypasses shell escaping entirely." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_5c289335 a oc:Idempotency,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When entering text into form fields" ;
+    oc:directiveContent "The fill command clears the field before typing, while type appends. Choose based on whether you need to replace or add to existing content." ;
+    oc:hasRationale "Using fill ensures a known starting state (idempotent), while type preserves existing content for incremental input." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_85b0b993 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When working with deeply nested iframe structures" ;
+    oc:directiveContent "Only one level of iframe nesting is resolved in snapshots; iframes within iframes are not automatically expanded." ;
+    oc:hasRationale "Deep iframe nesting is rare and resolution cost grows exponentially; for nested iframes, explicitly switch frame context." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_c8343ab5 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Before clicking, filling, or interacting with any page element" ;
+    oc:directiveContent "Always take a snapshot with -i (interactive elements only) before attempting interactions, then use the @ref identifiers it returns to target elements." ;
+    oc:hasRationale "Using @refs from snapshots ensures reliable element targeting and avoids brittle CSS selectors that may change." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_d205f87b a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "At the start of any browser automation workflow" ;
+    oc:directiveContent "Before any browser interaction, ensure agent-browser is installed and a browser session is active (via open or connect)." ;
+    oc:hasRationale "All commands require an active browser session; commands will fail silently or with unclear errors without one." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_ea446f64 a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When automating flows that require authentication or complex setup" ;
+    oc:directiveContent "Use state save/load to persist authentication and browser state across sessions, avoiding repeated login flows." ;
+    oc:hasRationale "Saving and restoring state eliminates redundant setup steps and handles scenarios where sessions expire between automation runs." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_ecde70e6 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When working with pages containing iframes" ;
+    oc:directiveContent "For iframe interaction: iframes are auto-detected in snapshots and their refs work directly. For scoped operations, use frame @ref to switch context, then frame main to return." ;
+    oc:hasRationale "Nested iframe content is automatically inlined in snapshots at one level deep, so most iframe interactions work without explicit frame switching." ;
+    oc:severityLevel "MEDIUM" .
+

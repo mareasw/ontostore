@@ -1,0 +1,100 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_vercel_labs_agent_browser_authentication a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "authentication" ;
+    skos:broader "authentication pattern guide" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/agent-browser" ;
+    oc:contentHash "8ccc30f2613523630cf3771a07d71339676d93c63623631a4206521c6d78d2e5" ;
+    oc:differentia "that documents login flows, session persistence, OAuth, 2FA, and credential management for automated browser sessions using agent-browser" ;
+    oc:extends oc:skill_vercel_labs_agent_browser ;
+    oc:handlesFailure oc:AuthenticationFailed,
+        oc:SessionExpired,
+        oc:TokenRefreshRequired ;
+    oc:hasAllowedTool "agent-browser",
+        "bash" ;
+    oc:hasArgumentHint "auth-state-file path or profile name" ;
+    oc:hasCategory "automation" ;
+    oc:impartsKnowledge oc:kn_06908ba4,
+        oc:kn_0b093785,
+        oc:kn_266db1bd,
+        oc:kn_3172c6bb,
+        oc:kn_63fa5cb4,
+        oc:kn_b5c068bb,
+        oc:kn_b65de72d,
+        oc:kn_f78a72d6 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:BrowserRunning,
+        oc:NetworkAvailable ;
+    oc:resolvesIntent "authenticate browser sessions",
+        "handle OAuth/SSO login flows",
+        "handle token refresh in automated sessions",
+        "handle two-factor authentication",
+        "import auth from existing Chrome browser",
+        "manage persistent browser profiles",
+        "save and restore authentication state",
+        "set HTTP basic auth and cookies for browser automation" ;
+    oc:yieldsState oc:BrowserAuthenticated,
+        oc:SessionStateSaved .
+
+oc:kn_06908ba4 a oc:KnowledgeNode,
+        oc:SecurityImplication ;
+    oc:appliesToContext "When saving or storing any authentication state file" ;
+    oc:directiveContent "State files contain session tokens in plaintext. Always add them to .gitignore, delete when no longer needed, and set AGENT_BROWSER_ENCRYPTION_KEY for encryption at rest." ;
+    oc:hasRationale "Plaintext state files can leak session tokens if committed to version control or accessed by unauthorized processes" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_0b093785 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When encountering two-factor authentication during automated login" ;
+    oc:directiveContent "For 2FA flows, use --headed mode and wait with a long timeout for manual completion, then save state immediately after for reuse." ;
+    oc:hasRationale "2FA is designed to require human interaction; manual completion in headed mode with state persistence is the most reliable approach" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_266db1bd a oc:KnowledgeNode,
+        oc:PostFlightValidation ;
+    oc:appliesToContext "After completing any login flow" ;
+    oc:directiveContent "After login, verify authentication succeeded by checking the current URL is the dashboard/protected page, not the login page, and take a snapshot to confirm page content." ;
+    oc:hasRationale "Login forms can fail silently or redirect to error pages; explicit verification prevents downstream automation from operating in an unauthenticated state" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_3172c6bb a oc:KnowledgeNode,
+        oc:SecurityImplication ;
+    oc:appliesToContext "When importing auth from an existing Chrome browser session via remote debugging" ;
+    oc:directiveContent "Using --remote-debugging-port on Chrome exposes full browser control on localhost. Any local process can connect and read cookies or execute JS. Only use on trusted machines and close Chrome when done." ;
+    oc:hasRationale "Remote debugging port opens unrestricted access to the browser, creating a local privilege escalation vector" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_63fa5cb4 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When authenticating against sites with complex multi-step login flows" ;
+    oc:directiveContent "For sites with complex OAuth, SSO, or 2FA, the fastest approach is to import auth from an already-authenticated Chrome session using --auto-connect state save rather than automating the entire flow." ;
+    oc:hasRationale "Automating complex auth flows is fragile; reusing an existing browser session avoids redirect handling, popup management, and MFA timing issues" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_b5c068bb a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When filling login forms in automated browser sessions" ;
+    oc:directiveContent "Never hardcode credentials in automation scripts. Always use environment variables like $APP_USERNAME and $APP_PASSWORD." ;
+    oc:hasRationale "Hardcoded credentials in scripts are a security risk and make credential rotation difficult" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_b65de72d a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When choosing a session persistence strategy" ;
+    oc:directiveContent "Use --profile for long-lived identity persistence across restarts, --session-name for lightweight cookie+localStorage persistence, and explicit state save/load for portable state files." ;
+    oc:hasRationale "Each persistence mechanism trades off convenience, scope, and portability differently; matching the right one to the use case reduces complexity" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_f78a72d6 a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When restoring authentication state that may have expired" ;
+    oc:directiveContent "When loading saved state, verify the session is still valid by checking if the URL redirects to a login page. If expired, perform a fresh login and overwrite the state file." ;
+    oc:hasRationale "Session tokens have finite lifetimes; detecting expiration and re-authenticating prevents silent failures in automated workflows" ;
+    oc:severityLevel "HIGH" .
+

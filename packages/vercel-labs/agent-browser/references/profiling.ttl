@@ -1,0 +1,69 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_vercel_labs_agent_browser_profiling a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "profiling" ;
+    skos:broader "Browser automation profiling capability" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/agent-browser" ;
+    oc:contentHash "15f1e6c7994d7471a274dc1476992d0ec178acd91f8b626e0d6f24a4dbef738f" ;
+    oc:differentia "Captures Chrome DevTools performance traces during browser automation for performance analysis and regression detection" ;
+    oc:extends oc:skill_vercel_labs_agent_browser ;
+    oc:handlesFailure oc:BrowserUnresponsive,
+        oc:ProfileCaptureTimeout ;
+    oc:hasAllowedTool "Bash" ;
+    oc:hasArgumentHint "trace output file path (e.g., ./trace.json)" ;
+    oc:hasCategory "automation" ;
+    oc:impartsKnowledge oc:kn_283bbf36,
+        oc:kn_a05f51e3,
+        oc:kn_abf853bc,
+        oc:kn_d73d7266,
+        oc:kn_ed1bb36c ;
+    oc:isUserInvocable true ;
+    oc:nature "Tool" ;
+    oc:requiresState oc:BrowserRunning ;
+    oc:resolvesIntent "capture chrome trace",
+        "check performance regressions in CI",
+        "diagnose slow page loads",
+        "profile browser performance",
+        "profile user interactions" ;
+    oc:yieldsState oc:ProfileCaptured .
+
+oc:kn_283bbf36 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When stopping a profiling session on a page that may be frozen or unresponsive" ;
+    oc:directiveContent "The profiler stop command has a 30-second timeout. If the browser becomes unresponsive, the stop command may fail." ;
+    oc:hasRationale "Chrome DevTools Protocol data collection requires a responsive browser process; unresponsive browsers cannot flush trace data" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_a05f51e3 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When running profiler start, always pair with a timely profiler stop" ;
+    oc:directiveContent "Do not leave profiling running indefinitely. Stop profiling promptly after capturing the area of interest, as trace data accumulates in memory and is capped at 5 million events." ;
+    oc:hasRationale "Unbounded profiling consumes memory and risks hitting the 5 million event cap, losing data or degrading browser performance" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_abf853bc a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When choosing a browser for profiling tasks" ;
+    oc:directiveContent "Profiling only works with Chromium-based browsers (Chrome, Edge). It is not supported on Firefox or WebKit." ;
+    oc:hasRationale "The profiler relies on Chrome DevTools Protocol tracing APIs which are specific to Chromium" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_d73d7266 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When deciding when to start/stop profiling relative to page navigation and user actions" ;
+    oc:directiveContent "For diagnosing slow page loads, start profiling before navigation and stop after network idle. For profiling user interactions, navigate first, then start profiling before the interaction and stop after." ;
+    oc:hasRationale "Proper scoping ensures the trace captures the relevant performance data without extraneous noise from unrelated activity" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_ed1bb36c a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before executing profiler start" ;
+    oc:directiveContent "Ensure a Chromium-based browser is running and accessible via agent-browser before starting the profiler." ;
+    oc:hasRationale "The profiler depends on an active browser session instrumented via Chrome DevTools Protocol" ;
+    oc:severityLevel "CRITICAL" .
+
