@@ -1,0 +1,101 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_coreyhaines31_marketingskills_analytics_tracking_gtm_implementation a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "gtm-implementation" ;
+    skos:broader "Implementation guide" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/coreyhaines31/marketingskills/analytics-tracking" ;
+    oc:contentHash "112da33832439d2ae0b2729e5031fc927df444cd1ae8eb20542d45c1b5690f52" ;
+    oc:differentia "provides Google Tag Manager container configuration patterns including tags, triggers, variables, data layer patterns, and consent management for analytics tracking deployment" ;
+    oc:extends oc:skill_coreyhaines31_marketingskills_analytics_tracking ;
+    oc:handlesFailure oc:ConsentBlocked,
+        oc:TagNotFiring,
+        oc:VariableValueMismatch ;
+    oc:hasArgumentHint "tracking requirements (e.g., GA4 events, ecommerce tracking, pixel setup)" ;
+    oc:hasCategory "automation" ;
+    oc:hasRequirement oc:req_0b5c39bc,
+        oc:req_98234e2a,
+        oc:req_9ea2a603,
+        oc:req_c22b0c41 ;
+    oc:impartsKnowledge oc:kn_30a828d4,
+        oc:kn_420ffc10,
+        oc:kn_6b1a2b11,
+        oc:kn_6c96a5d8,
+        oc:kn_8a2e903c,
+        oc:kn_8e411402 ;
+    oc:isUserInvocable true ;
+    oc:nature "Reference" ;
+    oc:requiresState oc:GTMContainerCreated,
+        oc:SiteAccessible ;
+    oc:resolvesIntent "configure GA4 and Facebook Pixel via GTM",
+        "configure Google Tag Manager tags and triggers",
+        "debug GTM container issues",
+        "implement GTM tracking",
+        "implement consent management in GTM",
+        "set up data layer pushes for events" ;
+    oc:yieldsState oc:DataLayerImplemented,
+        oc:GTMContainerConfigured,
+        oc:TrackingTagsDeployed .
+
+oc:kn_30a828d4 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When implementing ecommerce tracking events (view_item, add_to_cart, purchase)" ;
+    oc:directiveContent "Always clear the ecommerce object with dataLayer.push({ ecommerce: null }) before pushing a new ecommerce event to prevent data merging with previous pushes." ;
+    oc:hasRationale "GTM merges dataLayer objects; stale ecommerce data from previous events will contaminate subsequent events if not explicitly cleared." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_420ffc10 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When creating or naming any GTM tag, trigger, or variable" ;
+    oc:directiveContent "Use the naming convention [Type] - [Description] - [Detail] for all GTM components (tags, triggers, variables) to maintain container readability." ;
+    oc:hasRationale "Consistent naming prevents confusion in large containers and enables team collaboration without conflicts." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_6b1a2b11 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When debugging GTM tags in Preview Mode" ;
+    oc:directiveContent "When a tag is not firing, check trigger conditions first, then verify dataLayer push structure and timing, then check tag sequencing dependencies." ;
+    oc:hasRationale "This ordered debugging approach covers the three most common failure causes in order of frequency." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_6c96a5d8 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When implementing consent management with GTM Consent Mode" ;
+    oc:directiveContent "Set consent defaults to denied (analytics_storage and ad_storage) before GTM loads, then update to granted via consent callback to comply with privacy regulations." ;
+    oc:hasRationale "Loading tags before consent is granted violates GDPR and similar regulations; Consent Mode ensures tags fire only after explicit user consent." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_8a2e903c a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "When setting up GTM on any page" ;
+    oc:directiveContent "Initialize the dataLayer (window.dataLayer = window.dataLayer || []) in the <head> BEFORE the GTM container snippet to ensure page-load data is available when tags fire." ;
+    oc:hasRationale "GTM reads the dataLayer at container load; if initialized after the container, page-level data will be missed by tags that fire on All Pages." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_8e411402 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When publishing GTM container versions" ;
+    oc:directiveContent "Never publish a GTM version without descriptive version notes listing all added/modified tags, triggers, variables, and which browsers were tested." ;
+    oc:hasRationale "Without detailed version notes, rollback and auditing become extremely difficult, especially in team environments." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:req_0b5c39bc a oc:RequirementAPI ;
+    oc:isOptional true ;
+    oc:requirementValue "Google Tag Manager" .
+
+oc:req_98234e2a a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Google Tag Manager interface" .
+
+oc:req_9ea2a603 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "GA4 Measurement ID" .
+
+oc:req_c22b0c41 a oc:RequirementKnowledge ;
+    oc:isOptional true ;
+    oc:requirementValue "Facebook Pixel ID" .
+

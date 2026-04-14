@@ -1,0 +1,97 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_coreyhaines31_marketingskills_revops_automation_playbooks a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "automation-playbooks" ;
+    skos:broader "Platform-specific workflow recipe library" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/coreyhaines31/marketingskills/revops" ;
+    oc:contentHash "567efd379af6102e7eec95b7a630f29451c5a16ad93c4ae91a97d52ccb8428ea" ;
+    oc:differentia "Provides ready-to-implement automation playbooks for HubSpot workflows, Salesforce Flows, scheduling tool integrations, and Zapier cross-tool patterns covering the full revenue lifecycle" ;
+    oc:extends oc:skill_coreyhaines31_marketingskills_revops ;
+    oc:handlesFailure oc:RoutingRuleMisconfigured,
+        oc:SLABreachDetected,
+        oc:WebhookDeliveryFailed ;
+    oc:hasArgumentHint "platform (e.g., HubSpot, Salesforce, Zapier) and workflow type (e.g., MQL routing, SLA escalation, meeting booking, deal handoff)" ;
+    oc:hasCategory "automation" ;
+    oc:impartsKnowledge oc:kn_3f8bebf7,
+        oc:kn_5d35aea5,
+        oc:kn_6349237a,
+        oc:kn_703409dc,
+        oc:kn_a8e58f29,
+        oc:kn_ca1e88d6,
+        oc:kn_ca86f37b,
+        oc:kn_d1f85d53 ;
+    oc:isUserInvocable false ;
+    oc:nature "Reference" ;
+    oc:requiresState oc:CRMConfigured,
+        oc:SystemAuthenticated ;
+    oc:resolvesIntent "build cross-tool automation with Zapier",
+        "build stale deal detection and pipeline hygiene automations",
+        "configure Salesforce Flows for pipeline management",
+        "create meeting scheduling integrations with Calendly or SavvyCal",
+        "design closed-won handoff to customer success",
+        "implement CRM automation workflows",
+        "set up MQL routing and SLA escalation" ;
+    oc:yieldsState oc:AutomationWorkflowsConfigured,
+        oc:PipelineHygieneMonitoringActive,
+        oc:SLAEscalationActive .
+
+oc:kn_3f8bebf7 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "When setting up meeting scheduling integrations and meeting-booked automations" ;
+    oc:directiveContent "Verify webhook connectivity between scheduling tools (Calendly/SavvyCal) and CRM before activating meeting-based automations, and ensure email-to-contact matching logic handles edge cases (new vs. existing contacts)." ;
+    oc:hasRationale "Broken webhooks or failed contact matching silently drops meetings from the automation pipeline, leaving reps unprepared and leads untracked." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_5d35aea5 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When building recycled lead nurture re-entry workflows" ;
+    oc:directiveContent "Do not reset fit score when recycling rejected leads back to nurture — only reset engagement score to baseline." ;
+    oc:hasRationale "The fit score reflects who the lead is (ICP match), which doesn't change on rejection. Resetting it causes good-fit leads to be permanently lost from the pipeline." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_6349237a a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When building MQL SLA breach detection and escalation automation" ;
+    oc:directiveContent "Design SLA escalation workflows with graduated severity: notify rep first (12h), then manager (24h), then reassign (48h), rather than escalating immediately." ;
+    oc:hasRationale "Graduated escalation gives reps fair chance to respond while ensuring no lead goes unworked beyond the maximum SLA window." .
+
+oc:kn_703409dc a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When defining lifecycle stage promotion triggers for lead scoring models" ;
+    oc:directiveContent "Use meeting booking as a high-intent signal that auto-promotes leads to MQL, since a booked meeting indicates stronger buying intent than most digital engagement signals." ;
+    oc:hasRationale "Someone who books a meeting has demonstrated significantly more intent than someone who downloaded content, yet many teams treat them identically." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_a8e58f29 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When configuring stale deal detection alerts for pipeline hygiene" ;
+    oc:directiveContent "Set stale deal thresholds at 2x the average time for each pipeline stage and customize per stage rather than using a single global threshold." ;
+    oc:hasRationale "Different stages have different natural durations (Discovery: 14 days vs. Proposal: 10 days vs. Negotiation: 21 days). A single threshold would generate false positives or miss genuinely stale deals." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_ca1e88d6 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When configuring MQL alert and assignment automations in any CRM" ;
+    oc:directiveContent "Always exclude already-owned leads from round-robin MQL assignment workflows to prevent disrupting existing rep relationships." ;
+    oc:hasRationale "Reassigning an owned contact to a different rep via round-robin creates confusion and can damage the prospect relationship." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_ca86f37b a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "When building Zapier cross-tool patterns for lead scoring sync" ;
+    oc:directiveContent "Cross-tool Zapier automations that sync lead scores to multiple systems (retargeting audiences, analytics platforms, SDR sequences) can create data conflicts if the CRM is not the single source of truth." ;
+    oc:hasRationale "Without a clear canonical data source, multiple tools may update contact status simultaneously, causing race conditions and data drift." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_d1f85d53 a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When a prospect fails to attend a scheduled meeting" ;
+    oc:directiveContent "Implement a no-show workflow that waits 30 minutes after a missed meeting, then sends a reschedule email and creates a follow-up task for the next business day." ;
+    oc:hasRationale "No-shows represent lost high-intent opportunities. Immediate automated follow-up within 30 minutes dramatically increases reschedule rates, while second no-shows should be flagged for manual review." ;
+    oc:severityLevel "MEDIUM" .
+

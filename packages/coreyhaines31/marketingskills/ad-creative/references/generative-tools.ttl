@@ -1,0 +1,105 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_coreyhaines31_marketingskills_ad_creative_generative_tools a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "generative-tools" ;
+    skos:broader "Generative AI tool catalog" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/coreyhaines31/marketingskills/ad-creative" ;
+    oc:contentHash "4f33f5eb65c4b8f11360492de50b504053990c41abba1d480b535976cded389d" ;
+    oc:differentia "Covers image generation, video generation, voice synthesis, and code-based video tools for producing ad visuals at scale, with decision trees, cost comparisons, platform specs, and API examples" ;
+    oc:extends oc:skill_coreyhaines31_marketingskills_ad_creative ;
+    oc:handlesFailure oc:APIKeySet,
+        oc:NetworkTimeout ;
+    oc:hasArgumentHint "creative-need (e.g., \"static ad images\", \"video ads with voiceover\", \"templated video at scale\")" ;
+    oc:hasCategory "marketing" ;
+    oc:hasRequirement oc:req_3be5ab03,
+        oc:req_4ddbc0ff,
+        oc:req_5a7f35fd,
+        oc:req_9d25a614 ;
+    oc:impartsKnowledge oc:kn_32b8efc4,
+        oc:kn_4e93eab9,
+        oc:kn_82551860,
+        oc:kn_89134636,
+        oc:kn_8baa64d4,
+        oc:kn_8e274458,
+        oc:kn_9834f4f7 ;
+    oc:isUserInvocable false ;
+    oc:nature "Reference" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "build templated video ads at scale with Remotion",
+        "choose the right generative tool for ad creative",
+        "compare costs across AI image and video generation tools",
+        "create video ads with AI video generators",
+        "generate ad images using AI",
+        "generate brand-consistent ad visuals across variations",
+        "produce voiceover tracks for ads" ;
+    oc:yieldsState oc:AdVideoProduced,
+        oc:AdVisualsGenerated,
+        oc:VoiceoverGenerated .
+
+oc:kn_32b8efc4 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When producing ad creative at scale (100+ variations)" ;
+    oc:directiveContent "Use a hybrid workflow: generate hero creative with AI generators (Nano Banana, Flux, Veo) for exploratory quality, then build Remotion templates based on winning patterns and batch-produce variations with data feeds." ;
+    oc:hasRationale "AI generators excel at creative exploration but are non-deterministic and expensive at scale; Remotion provides deterministic, brand-perfect output at near-zero marginal cost for templated variations." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_4e93eab9 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When generating any ad image via AI tools" ;
+    oc:directiveContent "Always request platform-specific image dimensions in generation prompts: 1080x1080 for Meta Feed, 1080x1920 for Stories/Reels, 1200x628 for Google Display, 1200x675 for Twitter/X. Incorrect dimensions require cropping that degrades ad quality." ;
+    oc:hasRationale "Platforms have specific aspect ratio and resolution requirements. Generating images at wrong dimensions wastes generation credits and produces sub-optimal ad placements." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_82551860 a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "When budgeting for scaled ad creative production" ;
+    oc:directiveContent "Cost for 100 ad variations: ~$1-6 for static images (Flux/Ideogram), ~$225 for 100 × 15-sec AI videos (Veo Fast), ~$0 for 100 Remotion videos (self-hosted), ~$22 for hybrid (10 AI hero + 90 Remotion)." ;
+    oc:hasRationale "Cost differences between approaches are massive (100x+). Understanding cost profiles helps choose the right tool for the production stage." .
+
+oc:kn_89134636 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When producing 50+ video ads with the same structure but different data (products, headlines, names)" ;
+    oc:directiveContent "Do not use AI video generators for templated, data-driven production at scale. Use Remotion instead for deterministic, pixel-perfect output with dynamic data insertion." ;
+    oc:hasRationale "AI video generators produce unique output each time with no guarantee of brand consistency, and cannot insert dynamic data like names or prices. Cost per variation is orders of magnitude higher than Remotion." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_8baa64d4 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When writing prompts for AI image generation tools" ;
+    oc:directiveContent "Include platform-specific dimensions directly in your generation prompts to avoid post-generation cropping or resizing. For example, append '1080x1080 pixels, 1:1 aspect ratio' for Meta Feed images." ;
+    oc:hasRationale "Generating at the correct size from the start produces sharper output and avoids distortion from post-processing." .
+
+oc:kn_8e274458 a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When producing video ads with tools that output silent video" ;
+    oc:directiveContent "When a video generator lacks native audio (Runway Gen-4, Remotion), generate voiceover separately with ElevenLabs or OpenAI TTS, then combine with ffmpeg: `ffmpeg -i video.mp4 -i voiceover.mp3 -c:v copy -c:a aac output.mp4`." ;
+    oc:hasRationale "Not all video generators include audio. Having a compositing fallback ensures you can always add voiceover without re-generating video content." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_9834f4f7 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When selecting a generative AI tool for ad creative production" ;
+    oc:directiveContent "Match tool to need using the decision tree: Ideogram for text-in-image, Flux for product consistency, Nano Banana Pro for quick iterations, Remotion for templated/data-driven video, Veo for vertical social video, Seedance for high-volume low-cost video." ;
+    oc:hasRationale "Each tool has distinct strengths — choosing wrong leads to wasted budget, poor text rendering, inconsistent branding, or lack of scalability." .
+
+oc:req_3be5ab03 a oc:RequirementAPI ;
+    oc:isOptional true ;
+    oc:requirementValue "At least one generative AI API key (Gemini, Replicate/BFL, Ideogram, OpenAI, ElevenLabs, etc.)" .
+
+oc:req_4ddbc0ff a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Understanding of ad platform image specs and aspect ratios" .
+
+oc:req_5a7f35fd a oc:RequirementTool ;
+    oc:isOptional true ;
+    oc:requirementValue "ffmpeg (for compositing video + audio tracks)" .
+
+oc:req_9d25a614 a oc:RequirementTool ;
+    oc:isOptional true ;
+    oc:requirementValue "Node.js + Remotion (for code-based video production)" .
+
