@@ -1,0 +1,107 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_code_claude_opus_4_5_migration a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "claude-opus-4-5-migration" ;
+    skos:broader "Migration utility" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-code/claude-opus-4-5-migration" ;
+    oc:contentHash "afb3140e206502f96a154570d5ff801a910e712c29fb82afab3592186e52eefc" ;
+    oc:differentia "that updates codebases, API calls, and prompts from Sonnet 4.0, Sonnet 4.5, or Opus 4.1 to Claude Opus 4.5" ;
+    oc:hasArgumentHint "codebase path or project directory to migrate" ;
+    oc:hasCategory "development" ;
+    oc:hasDescription "Migrate prompts and code from Claude Sonnet 4.0, Sonnet 4.5, or Opus 4.1 to Opus 4.5. Use when the user wants to update their codebase, prompts, or API calls to use Opus 4.5. Handles model string updates and prompt adjustments for known Opus 4.5 behavioral differences. Does NOT migrate Haiku 4.5." ;
+    oc:hasName "claude-opus-4-5-migration" ;
+    oc:hasRequirement oc:req_ac3b0687,
+        oc:req_c27b11bd,
+        oc:req_ca239ccc ;
+    oc:impartsKnowledge oc:kn_09f9948b,
+        oc:kn_445adfd1,
+        oc:kn_6baf9f67,
+        oc:kn_74d2da50,
+        oc:kn_8b9af15a,
+        oc:kn_aeff819e,
+        oc:kn_ea618c21,
+        oc:kn_fdd5b8e7 ;
+    oc:isUserInvocable true ;
+    oc:nature "Tool" ;
+    oc:requiresState oc:DirectoryWritable,
+        oc:FileExists ;
+    oc:resolvesIntent "adjust prompts for opus 4.5 behavior",
+        "migrate to opus 4.5",
+        "replace sonnet model references with opus",
+        "update model strings to opus 4.5",
+        "upgrade claude model version" ;
+    oc:yieldsState oc:MigrationComplete .
+
+oc:kn_09f9948b a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When updating API calls that contain beta headers" ;
+    oc:directiveContent "Remove the context-1m-2025-08-07 beta header if present — it is not yet supported with Opus 4.5. Leave a comment noting this." ;
+    oc:hasRationale "Using an unsupported beta header with Opus 4.5 will cause API errors" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_445adfd1 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When deciding whether to modify system prompts beyond model string updates" ;
+    oc:directiveContent "Only apply prompt adjustments (tool overtriggering, over-engineering, code exploration, frontend design, thinking sensitivity) if the user explicitly requests them or reports a specific issue. By default, just update model strings." ;
+    oc:hasRationale "Premature prompt changes may introduce unnecessary complexity or break working configurations" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_6baf9f67 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When user reports issues related to 'thinking' behavior without extended thinking enabled" ;
+    oc:directiveContent "When extended thinking is not enabled (no 'thinking' parameter in the API request), Opus 4.5 is sensitive to the word 'think' and its variants. Replace with alternatives like 'consider', 'evaluate', or 'believe'." ;
+    oc:hasRationale "The word 'think' can trigger unintended extended thinking behavior in Opus 4.5 when the feature is not configured" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_74d2da50 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When updating API calls to use Opus 4.5" ;
+    oc:directiveContent "Add the effort parameter set to 'high' during migration, using the beta flag 'effort-2025-11-24' in API calls. This is the default configuration for best performance with Opus 4.5." ;
+    oc:hasRationale "The effort parameter controls token spending eagerness and 'high' provides the best performance for Opus 4.5" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_8b9af15a a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When adding any prompt adjustment snippet to an existing system prompt" ;
+    oc:directiveContent "When integrating prompt snippets, don't just append them — use XML tags to organize additions, match existing prompt style, and place snippets in logical locations near related content." ;
+    oc:hasRationale "Thoughtless snippet insertion degrades prompt coherence and may cause conflicting instructions" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_aeff819e a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When identifying source model strings to replace" ;
+    oc:directiveContent "Do NOT migrate any Haiku models (e.g., claude-haiku-4-5-20251001). Only migrate Sonnet 4.0, Sonnet 4.5, and Opus 4.1 model strings." ;
+    oc:hasRationale "Haiku models serve a different use case and are not part of the Opus 4.5 migration path" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_ea618c21 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Always, before making any changes" ;
+    oc:directiveContent "Before migration, search the codebase for all model strings and API calls to identify the platform (Anthropic API, AWS Bedrock, Google Vertex AI, Azure AI Foundry) and all models that need updating." ;
+    oc:hasRationale "Different platforms use different model string formats; incorrect identification will produce invalid model strings" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_fdd5b8e7 a oc:KnowledgeNode,
+        oc:PostFlightValidation ;
+    oc:appliesToContext "After completing all model string and prompt updates" ;
+    oc:directiveContent "After migration, summarize all changes made and tell the user: 'If you encounter any issues with Opus 4.5, let me know and I can help adjust your prompts.'" ;
+    oc:hasRationale "A change summary ensures transparency and the offer of further help catches post-migration issues early" ;
+    oc:severityLevel "LOW" .
+
+oc:req_ac3b0687 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Familiarity with Anthropic API, AWS Bedrock, Google Vertex AI, and Azure AI Foundry model string formats" .
+
+oc:req_c27b11bd a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Understanding of Claude model behavioral differences across versions" .
+
+oc:req_ca239ccc a oc:RequirementTool ;
+    oc:isOptional true ;
+    oc:requirementValue "Code search tool (Grep/Glob) for finding model strings in codebase" .
+

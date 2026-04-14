@@ -1,0 +1,93 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_code_command_development_frontmatter_reference a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "frontmatter-reference" ;
+    skos:broader "reference documentation" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-code/command-development" ;
+    oc:contentHash "db1ea175ca4b0bb7d11c75cb8a7d00b353ea7cf4df2027b4263e45ded4d39475" ;
+    oc:differentia "that specifies all YAML frontmatter fields available for slash command configuration including description, allowed-tools, model, argument-hint, and disable-model-invocation" ;
+    oc:extends oc:skill_anthropics_claude_code_command_development ;
+    oc:hasAllowedTool "Read" ;
+    oc:hasArgumentHint "[field-name]" ;
+    oc:hasCategory "development" ;
+    oc:hasRequirement oc:req_b804d761 ;
+    oc:impartsKnowledge oc:kn_389b68a8,
+        oc:kn_54b7e841,
+        oc:kn_62d87efe,
+        oc:kn_6a2a09fa,
+        oc:kn_a1a163f9,
+        oc:kn_b308b98c,
+        oc:kn_baa66058,
+        oc:kn_ff3dfb5f ;
+    oc:isUserInvocable false ;
+    oc:nature "Concept" ;
+    oc:resolvesIntent "configure command metadata like description, tools, and model",
+        "look up command frontmatter fields",
+        "understand YAML frontmatter syntax for slash commands",
+        "validate command frontmatter" .
+
+oc:kn_389b68a8 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing the description field in command frontmatter" ;
+    oc:directiveContent "Description must be under ~60 characters and should start with a verb. Avoid redundant phrasing like 'This command...'" ;
+    oc:hasRationale "The description is displayed in /help output and must be scannable and concise for discoverability." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_54b7e841 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When configuring allowed-tools that include Bash" ;
+    oc:directiveContent "Never use bare 'Bash' in allowed-tools without a command filter. Always specify as Bash(command-prefix:*)." ;
+    oc:hasRationale "A bare 'Bash' entry with no filter grants unrestricted shell access, negating the security benefit of specifying allowed-tools." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_62d87efe a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When considering setting disable-model-invocation: true" ;
+    oc:directiveContent "disable-model-invocation should be used sparingly — only for commands requiring human judgment, destructive operations, or interactive workflows." ;
+    oc:hasRationale "Excessive use of disable-model-invocation limits Claude's autonomy and reduces the value of command composability." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_6a2a09fa a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When creating or editing any slash command" ;
+    oc:directiveContent "Start minimal — add frontmatter fields only when needed. Commands work without any frontmatter." ;
+    oc:hasRationale "Unnecessary frontmatter adds complexity and maintenance burden; the system provides sensible defaults for all fields." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_a1a163f9 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When setting the model field in command frontmatter" ;
+    oc:directiveContent "Valid model values are only: sonnet, opus, haiku. Any other value is invalid and will cause errors." ;
+    oc:hasRationale "The frontmatter parser only recognizes these three Claude model identifiers; invalid values break command loading." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_b308b98c a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When choosing the model field value" ;
+    oc:directiveContent "Use haiku for simple/formulaic commands, sonnet as default for balanced tasks, and opus only for genuinely complex analysis or architectural decisions." ;
+    oc:hasRationale "Model selection affects both cost and latency. Over-provisioning to opus wastes resources while under-provisioning to haiku may produce poor results for complex tasks." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_baa66058 a oc:KnowledgeNode,
+        oc:SecurityImplication ;
+    oc:appliesToContext "When specifying the allowed-tools field in command frontmatter" ;
+    oc:directiveContent "Always use the most restrictive allowed-tools that works. Use command filters for Bash (e.g., Bash(git:*) not plain Bash). Avoid allowed-tools: '*'." ;
+    oc:hasRationale "Overly permissive tool access expands the attack surface if a command is invoked with unexpected input, especially for Bash where unrestricted access allows arbitrary command execution." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_ff3dfb5f a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before finalizing any slash command file" ;
+    oc:directiveContent "Before committing a command, validate: YAML syntax is correct, description is under 60 chars, allowed-tools uses proper format (Bash(x:*) not bare Bash), model is a valid value if specified, argument-hint matches positional arguments ($1, $2, etc.)." ;
+    oc:hasRationale "Invalid frontmatter silently breaks command loading or causes confusing runtime behavior." ;
+    oc:severityLevel "HIGH" .
+
+oc:req_b804d761 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "YAML syntax for frontmatter blocks" .
+

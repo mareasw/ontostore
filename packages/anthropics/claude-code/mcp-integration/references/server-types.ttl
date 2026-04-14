@@ -1,0 +1,99 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_code_mcp_integration_server_types a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "server-types" ;
+    skos:broader "Reference guide" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-code/mcp-integration" ;
+    oc:contentHash "7b06c7ea92e255218897189c550a32cbad1daa173e78e40ec94524fc9a1fb36b" ;
+    oc:differentia "that documents all four MCP server transport types (stdio, SSE, HTTP, WebSocket) with configuration patterns, lifecycle details, and selection criteria for Claude Code plugin integration" ;
+    oc:extends oc:skill_anthropics_claude_code_mcp_integration ;
+    oc:handlesFailure oc:InvalidInput,
+        oc:NetworkTimeout,
+        oc:PermissionDenied ;
+    oc:hasCategory "development" ;
+    oc:hasRequirement oc:req_1ba55f7d,
+        oc:req_92ac3524,
+        oc:req_dfff536e ;
+    oc:impartsKnowledge oc:kn_01c7924b,
+        oc:kn_07cf98a7,
+        oc:kn_48a63680,
+        oc:kn_9502aa46,
+        oc:kn_9a17e37d,
+        oc:kn_dfa1f516,
+        oc:kn_dfb27fec ;
+    oc:isUserInvocable false ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "choose MCP server transport type",
+        "configure HTTP MCP server",
+        "configure SSE MCP server",
+        "configure WebSocket MCP server",
+        "configure stdio MCP server",
+        "migrate between MCP server types",
+        "troubleshoot MCP server connections" ;
+    oc:yieldsState oc:MCPServerConfigured .
+
+oc:kn_01c7924b a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When connecting to hosted MCP services via SSE" ;
+    oc:directiveContent "Prefer OAuth when available for SSE connections — Claude Code handles the full OAuth flow automatically including browser prompts, token storage, and refresh." ;
+    oc:hasRationale "Automatic OAuth management eliminates manual token handling, reduces security risk, and provides seamless user experience with automatic token refresh." .
+
+oc:kn_07cf98a7 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When troubleshooting MCP server connection failures" ;
+    oc:directiveContent "Stray print/console.log statements in stdio servers, incorrect SSL certificates on SSE servers, and missing heartbeat on WebSocket connections are the most common failure modes." ;
+    oc:hasRationale "These issues account for the majority of MCP integration failures and should be checked first before deeper debugging." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_48a63680 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When developing stdio MCP servers" ;
+    oc:directiveContent "Never log to stdout in stdio servers — stdout is reserved for MCP protocol JSON-RPC messages. Use stderr for logging." ;
+    oc:hasRationale "Writing anything other than JSON-RPC to stdout corrupts the MCP protocol stream and causes communication failures between Claude Code and the server." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_9502aa46 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When selecting an MCP server transport type for a plugin" ;
+    oc:directiveContent "Use stdio for local tools/custom servers, SSE for hosted services with OAuth, HTTP for REST APIs with token auth, and WebSocket for real-time bidirectional communication." ;
+    oc:hasRationale "Each transport type is optimized for different communication patterns, latency requirements, and authentication mechanisms; choosing the wrong type leads to poor performance or failed integrations." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_9a17e37d a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When setting up MCP server configurations that need to work across multiple environments" ;
+    oc:directiveContent "Use environment variables like ${API_URL} and ${API_TOKEN} in server configurations to enable dev/prod environment switching without code changes." ;
+    oc:hasRationale "Environment-variable-driven configuration allows the same plugin to connect to different server instances without modifying the configuration file." .
+
+oc:kn_dfa1f516 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When configuring stdio-type MCP servers" ;
+    oc:directiveContent "Always use absolute paths or ${CLAUDE_PLUGIN_ROOT} for stdio server commands, and set PYTHONUNBUFFERED=1 for Python servers." ;
+    oc:hasRationale "Relative paths break when the working directory changes; unbuffered Python output ensures MCP protocol messages are not delayed by Python's output buffering." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_dfb27fec a oc:KnowledgeNode,
+        oc:SecurityImplication ;
+    oc:appliesToContext "When configuring any networked MCP server (SSE, HTTP, WebSocket)" ;
+    oc:directiveContent "Always use HTTPS/WSS for network connections, never hardcode tokens, use environment variables for secrets, and rotate tokens regularly." ;
+    oc:hasRationale "Unencrypted connections expose credentials and data; hardcoded tokens leak via version control and cannot be rotated without code changes." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:req_1ba55f7d a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Claude Code plugin configuration structure" .
+
+oc:req_92ac3524 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "JSON-RPC message format" .
+
+oc:req_dfff536e a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "MCP (Model Context Protocol) fundamentals" .
+

@@ -1,0 +1,117 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_code_hook_development a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "hook-development" ;
+    skos:broader "Development skill" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-code/hook-development" ;
+    oc:contentHash "9a9e4506368b7ab55a4850c00606c15b9b2ff714be0383d6656c323e4c617bf2" ;
+    oc:differentia "provides comprehensive guidance for creating and implementing Claude Code plugin hooks with event-driven automation, prompt-based and command-based hook types, and security validation patterns" ;
+    oc:extends oc:skill_plugin_structure ;
+    oc:handlesFailure oc:HookTimeout,
+        oc:InvalidJSON,
+        oc:PermissionDenied ;
+    oc:hasAllowedTool "Bash",
+        "Edit",
+        "Read",
+        "Write" ;
+    oc:hasArgumentHint "hook event type (PreToolUse, PostToolUse, Stop, SubagentStop, SessionStart, SessionEnd, UserPromptSubmit, PreCompact, Notification) or hook creation request" ;
+    oc:hasCategory "development" ;
+    oc:hasDescription "This skill should be used when the user asks to \"create a hook\", \"add a PreToolUse/PostToolUse/Stop hook\", \"validate tool use\", \"implement prompt-based hooks\", \"use ${CLAUDE_PLUGIN_ROOT}\", \"set up event-driven automation\", \"block dangerous commands\", or mentions hook events (PreToolUse, PostToolUse, Stop, SubagentStop, SessionStart, SessionEnd, UserPromptSubmit, PreCompact, Notification). Provides comprehensive guidance for creating and implementing Claude Code plugin hooks with focus on advanced prompt-based hooks API." ;
+    oc:hasName "hook-development" ;
+    oc:impartsKnowledge oc:kn_2519d0ca,
+        oc:kn_41eed823,
+        oc:kn_4cc60569,
+        oc:kn_72bb25bc,
+        oc:kn_737c3eb4,
+        oc:kn_9fc01922,
+        oc:kn_a448471e,
+        oc:kn_cfcf869c,
+        oc:kn_eb5ff56b,
+        oc:kn_fba476b5 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady,
+        oc:PluginDirectoryExists ;
+    oc:resolvesIntent "add PreToolUse/PostToolUse/Stop hooks",
+        "block dangerous commands with hook validation",
+        "create hooks for Claude Code plugins",
+        "implement prompt-based hooks for context-aware decisions",
+        "migrate from command hooks to prompt-based hooks",
+        "set up event-driven automation for Claude Code",
+        "validate tool use with event-driven automation" ;
+    oc:yieldsState oc:HookScriptsCreated,
+        oc:HooksConfigured .
+
+oc:kn_2519d0ca a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When choosing hook type for a specific event" ;
+    oc:directiveContent "Prompt-based hooks are only fully supported on Stop, SubagentStop, UserPromptSubmit, and PreToolUse events. Using them on other events (SessionStart, SessionEnd, PostToolUse, PreCompact, Notification) may not work as expected." ;
+    oc:hasRationale "The LLM-driven prompt evaluation only works on events where the Claude runtime can process the prompt response. Other events require command hooks." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_41eed823 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When upgrading existing command-based hooks to prompt-based hooks" ;
+    oc:directiveContent "When migrating from command hooks to prompt hooks, convert hard-coded string patterns to natural language criteria, test with edge cases the old hook missed, and keep old scripts archived for reference." ;
+    oc:hasRationale "Prompt hooks handle variations and context that bash pattern matching misses, but the migration should be incremental and well-tested to avoid regressions." .
+
+oc:kn_4cc60569 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before deploying hooks to a production plugin" ;
+    oc:directiveContent "Before deploying hooks, always: (1) lint scripts with hook-linter.sh, (2) validate hooks.json with validate-hook-schema.sh, (3) test with test-hook.sh using sample inputs, (4) verify in claude --debug mode." ;
+    oc:hasRationale "The provided utility scripts catch common issues like missing shebangs, unquoted variables, invalid JSON, and wrong hook structure before they cause problems in live sessions." .
+
+oc:kn_72bb25bc a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing multiple hooks for the same event/matcher combination" ;
+    oc:directiveContent "Never assume hook execution order. All matching hooks within a single event run in parallel, not sequentially. Hooks cannot see each other's output." ;
+    oc:hasRationale "Parallel execution means hooks are independent and non-deterministic in ordering. Designing sequential dependencies between parallel hooks causes silent failures and race conditions." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_737c3eb4 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing command hook bash scripts" ;
+    oc:directiveContent "Always quote all bash variables, use `set -euo pipefail`, validate all input fields, and output errors to stderr (>&2) with exit code 2 for denials and exit code 0 for approvals." ;
+    oc:hasRationale "Unquoted variables enable injection attacks. Missing error flags cause silent failures. Wrong exit codes confuse the hook runtime. Proper error handling prevents security vulnerabilities and debugging nightmares." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_9fc01922 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When deciding between hook types for a new hook" ;
+    oc:directiveContent "Use prompt-based hooks for complex, context-aware validation logic. Reserve command hooks for fast deterministic checks (< 50ms), external tool integrations, and performance-critical paths. For best results, combine both in a hybrid approach." ;
+    oc:hasRationale "Prompt hooks leverage LLM reasoning for nuanced decisions but are slower (30s default). Command hooks are deterministic and fast but limited to scripted logic. The hybrid approach gets the best of both." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_a448471e a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When modifying hook configuration or scripts" ;
+    oc:directiveContent "Hooks cannot be hot-swapped during a session. Changes to hooks.json or hook scripts require restarting Claude Code (exit and run `claude` again). Always validate and test hooks before deploying." ;
+    oc:hasRationale "Hooks are loaded at session start and cached. In-session edits have no effect, which can lead to confusion during development if the developer expects live updates." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_cfcf869c a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "When designing hook performance characteristics" ;
+    oc:directiveContent "Default timeouts are 60s for command hooks and 30s for prompt hooks. Keep hooks well under these limits. Use caching, minimize I/O, and leverage the parallel execution model for independent checks." ;
+    oc:hasRationale "Long-running hooks block the Claude Code workflow and can time out, causing unpredictable behavior. Performance-conscious design ensures smooth user experience." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_eb5ff56b a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing hook command configurations and scripts" ;
+    oc:directiveContent "Always use ${CLAUDE_PLUGIN_ROOT} for file references in hook commands instead of hardcoded absolute paths. This ensures portability across different installations." ;
+    oc:hasRationale "Hardcoded paths break when the plugin is installed in a different directory. Using the plugin root variable ensures the hook works regardless of installation location." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_fba476b5 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When creating hook configuration for plugins vs user settings" ;
+    oc:directiveContent "Plugin hooks.json uses a wrapper format with a `hooks` field containing event arrays. Settings format (.claude/settings.json) uses direct format with events at the top level. Never mix these formats." ;
+    oc:hasRationale "The two formats serve different contexts. Plugin hooks need the wrapper for metadata and namespacing. User settings use flat format for simplicity. Mixing them causes parsing failures." ;
+    oc:severityLevel "HIGH" .
+

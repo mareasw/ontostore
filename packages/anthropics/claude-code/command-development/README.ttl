@@ -1,0 +1,94 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_code_command_development_readme a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "readme" ;
+    skos:broader "Development skill" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-code/command-development" ;
+    oc:contentHash "dd4ba7eded93d7ba698f05ec63d06d110a6b5543664af359b005dd976ce811b8" ;
+    oc:differentia "provides comprehensive guidance on creating Claude Code slash commands including file format, YAML frontmatter, dynamic arguments, file references, bash execution, plugin-specific features, and integration with agents/skills/hooks" ;
+    oc:extends oc:skill_anthropics_claude_code_command_development ;
+    oc:handlesFailure oc:FileNotFound,
+        oc:InvalidInput ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_2a794dca,
+        oc:kn_3372ab7c,
+        oc:kn_4771e669,
+        oc:kn_6245e76a,
+        oc:kn_cbc4a9b0,
+        oc:kn_cc33ae7d,
+        oc:kn_d9685a9e,
+        oc:kn_da850f06 ;
+    oc:isUserInvocable false ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "add command to plugin",
+        "configure command frontmatter",
+        "create plugin command with scripts",
+        "create slash command",
+        "define command arguments",
+        "integrate command with plugin agents and skills",
+        "organize commands with namespacing",
+        "write custom command" ;
+    oc:yieldsState oc:DocumentCreated .
+
+oc:kn_2a794dca a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When creating new commands" ;
+    oc:directiveContent "Start with minimal frontmatter (just description), then add fields like allowed-tools, model, argument-hint as needed. All frontmatter fields are optional." ;
+    oc:hasRationale "Over-configuring commands upfront adds unnecessary complexity. Incremental addition ensures each field serves a clear purpose." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_3372ab7c a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When commands accept user-provided arguments or depend on files/resources" ;
+    oc:directiveContent "Validate arguments and resource existence early in the command body using bash checks (e.g., test -f, grep patterns) before performing main logic." ;
+    oc:hasRationale "Early validation provides clear error messages and prevents confusing failures mid-execution. It also documents the command's preconditions." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_4771e669 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When using bash execution in command bodies" ;
+    oc:directiveContent "Bash execution (!`syntax`) requires allowed-tools to include Bash with the appropriate command filter. Without it, the bash command will fail silently or produce unexpected results." ;
+    oc:hasRationale "Commands that use bash execution without declaring Bash in allowed-tools will fail at runtime because Claude lacks the permission to execute the command." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_6245e76a a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When writing any slash command content" ;
+    oc:directiveContent "Commands must be written as instructions FOR Claude (agent consumption), not messages TO the user. Write directives about what Claude should do, not descriptions of what the command will do." ;
+    oc:hasRationale "Command content becomes Claude's instructions at invocation time. Writing for human consumption results in Claude receiving unclear or non-actionable prompts." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_cbc4a9b0 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing and naming slash commands" ;
+    oc:directiveContent "Each command should have a single, clear responsibility. One command, one task. Use verb-noun naming pattern (e.g., review-pr, fix-issue)." ;
+    oc:hasRationale "Single-responsibility commands are easier to discover, test, and maintain. They compose better into workflows than monolithic multi-purpose commands." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_cc33ae7d a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing the description frontmatter field" ;
+    oc:directiveContent "Keep command descriptions under 60 characters, start with a verb (Review, Deploy, Generate), and be specific about what the command does." ;
+    oc:hasRationale "Short, actionable descriptions make commands discoverable in /help output and help users quickly understand command purpose." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_d9685a9e a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When referencing plugin files, scripts, templates, or configuration in plugin commands" ;
+    oc:directiveContent "For plugin commands, always use ${CLAUDE_PLUGIN_ROOT} for plugin-internal paths instead of relative or hardcoded paths. This ensures portability across installations." ;
+    oc:hasRationale "Hardcoded or relative paths break when the plugin is installed in different locations. ${CLAUDE_PLUGIN_ROOT} resolves to the plugin's absolute path at runtime." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_da850f06 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When configuring allowed-tools in command frontmatter" ;
+    oc:directiveContent "Never use overly permissive allowed-tools like Bash(*) or wildcard '*' unless absolutely necessary. Use command-specific filters like Bash(git:*), Bash(npm:*), or Bash(kubectl:*)." ;
+    oc:hasRationale "Overly permissive tool access creates security risks and violates the principle of least privilege. Specific filters limit blast radius and document the command's actual requirements." ;
+    oc:severityLevel "HIGH" .
+

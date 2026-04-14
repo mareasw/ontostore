@@ -1,0 +1,80 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_code_command_development_testing_strategies a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "testing-strategies" ;
+    skos:broader "Testing methodology framework" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-code/command-development" ;
+    oc:contentHash "e6ccf78d85c23bc58582dbc8b91731c4e412568705ed2c87ac699a1ded9adc67" ;
+    oc:dependsOnSkill oc:skill_command_development ;
+    oc:differentia "that provides a 7-level systematic testing strategy for validating slash commands before deployment, covering syntax validation, frontmatter field checks, manual invocation, argument handling, file references, bash execution, and integration testing with automated test suites and CI/CD integration" ;
+    oc:extends oc:skill_anthropics_claude_code_command_development ;
+    oc:handlesFailure oc:ArgumentSubstitutionError,
+        oc:CommandExecutionError,
+        oc:FrontmatterValidationError,
+        oc:YAMLValidationError ;
+    oc:hasArgumentHint "[command-name] [test-level]" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_729aa6ef,
+        oc:kn_abe23b0d,
+        oc:kn_e5b325f8,
+        oc:kn_e6a3c88a,
+        oc:kn_e7070b0c,
+        oc:kn_fe797756 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:CommandFileCreated ;
+    oc:resolvesIntent "create automated test suite for commands",
+        "debug failed command tests",
+        "set up CI/CD testing for commands",
+        "test slash command before deployment",
+        "validate command structure and frontmatter" ;
+    oc:yieldsState oc:CommandValidated,
+        oc:TestSuiteConfigured .
+
+oc:kn_729aa6ef a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When creating or reviewing any slash command file" ;
+    oc:directiveContent "Always validate YAML frontmatter for exactly 2 '---' markers, correct field types, valid model values (sonnet, opus, haiku), and description length under 60 characters before considering a command ready for use." ;
+    oc:hasRationale "Invalid frontmatter causes silent failures where commands don't appear in /help or execute with wrong configuration." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_abe23b0d a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When debugging command discovery or invocation failures" ;
+    oc:directiveContent "When a command fails to appear in /help, check file location (.claude/commands/), verify .md extension, confirm valid YAML frontmatter markers, check file permissions (chmod 644), and restart Claude Code with --debug." ;
+    oc:hasRationale "The most common command issues stem from file placement, permissions, or YAML syntax errors — a systematic check resolves most problems quickly." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_e5b325f8 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When testing commands that accept arguments ($1, $2, $ARGUMENTS)" ;
+    oc:directiveContent "Never skip edge case testing for arguments — always test: no args, single arg, multiple args, extra args, special characters (spaces, quotes, slashes), and empty strings. Skipping these leads to commands that break on real user input." ;
+    oc:hasRationale "Users naturally provide unexpected inputs; untested argument patterns cause confusing errors and poor user experience." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_e6a3c88a a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When planning command testing strategy" ;
+    oc:directiveContent "Follow a 7-level testing hierarchy: syntax validation → frontmatter validation → manual invocation → argument testing → file reference testing → bash execution testing → integration testing. Each level builds on the previous and catches progressively more complex issues." ;
+    oc:hasRationale "A layered testing approach ensures basic structural issues are caught before more complex functional testing, saving time and providing clear diagnostic signals." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_e7070b0c a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When establishing a command development workflow for a team" ;
+    oc:directiveContent "Automate validation using pre-commit hooks and CI/CD pipelines. Use validate-command.sh for structure and validate-frontmatter.sh for field correctness. Integrate with GitHub Actions to catch regressions on every push." ;
+    oc:hasRationale "Automated validation catches issues early and consistently, preventing broken commands from reaching users." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_fe797756 a oc:KnowledgeNode,
+        oc:SecurityImplication ;
+    oc:appliesToContext "When testing commands that use !` bash execution syntax" ;
+    oc:directiveContent "Test bash execution security by verifying that commands with restricted allowed-tools cannot execute disallowed operations. Create test commands that attempt forbidden actions and confirm they are blocked." ;
+    oc:hasRationale "Improperly restricted bash execution can allow commands to perform destructive or unauthorized operations on the system." ;
+    oc:severityLevel "CRITICAL" .
+

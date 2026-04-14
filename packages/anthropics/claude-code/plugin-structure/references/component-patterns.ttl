@@ -1,0 +1,82 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_code_plugin_structure_component_patterns a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "component-patterns" ;
+    skos:broader "Reference guide" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-code/plugin-structure" ;
+    oc:contentHash "38681792a6aba4f06d3c391b20b04060263f1fbaacc5880cc0cafe0543d37f91" ;
+    oc:differentia "catalogs advanced directory organization patterns for Claude Code plugin components (commands, agents, skills, hooks, scripts) with scaling guidance and cross-component architecture strategies" ;
+    oc:extends oc:skill_anthropics_claude_code_plugin_structure ;
+    oc:handlesFailure oc:InvalidDirectoryStructure ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_359c9a36,
+        oc:kn_59bbd96d,
+        oc:kn_92eed852,
+        oc:kn_96c5be29,
+        oc:kn_bbe54b58,
+        oc:kn_c5903029,
+        oc:kn_e66b3e1e ;
+    oc:isUserInvocable false ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:PluginManifestCreated ;
+    oc:resolvesIntent "choose appropriate directory structure for plugin scale",
+        "design cross-component shared resource architecture",
+        "organize plugin components effectively",
+        "scale plugin organization from simple to complex",
+        "structure commands agents skills hooks and scripts in a plugin" ;
+    oc:yieldsState oc:ComponentStructureDesigned .
+
+oc:kn_359c9a36 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When multiple plugin components need shared logic or utilities" ;
+    oc:directiveContent "Use a shared lib/ directory at plugin root for cross-component utilities, referenced via ${CLAUDE_PLUGIN_ROOT}/lib/ to enable code reuse across commands, agents, hooks, and skills." ;
+    oc:hasRationale "Centralized shared resources prevent duplication, ensure consistent behavior, and simplify maintenance across component types" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_59bbd96d a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When building plugins with optional features or plugin families" ;
+    oc:directiveContent "For modular or extensible plugins, use a 'plugin within plugin' pattern with core/ and extensions/ directories, listing all paths explicitly in the manifest commands/agents arrays." ;
+    oc:hasRationale "This pattern enables independent development of extension modules while maintaining a single manifest-driven discovery mechanism" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_92eed852 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When using hierarchical or nested command directory structures" ;
+    oc:directiveContent "Claude Code does NOT support nested command discovery automatically — when using hierarchical directory structures, you must explicitly list each leaf directory as a custom path in plugin.json." ;
+    oc:hasRationale "Auto-discovery only scans top-level directories; without explicit custom paths, nested commands will be silently ignored" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_96c5be29 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When designing agent directory organization" ;
+    oc:directiveContent "Organize agents by role for manual invocation, by capability for automatic selection, or by workflow stage for pipeline automation — choose the pattern that matches your primary usage mode." ;
+    oc:hasRationale "Different organization patterns optimize for different interaction modes; mismatched patterns reduce discoverability" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_bbe54b58 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When organizing hooks with event-based separation into multiple JSON files" ;
+    oc:directiveContent "Claude Code does not support ${file:...} references in hooks.json — use a build script to combine separate event-type JSON files into a single hooks.json." ;
+    oc:hasRationale "File reference syntax is not parsed by Claude Code; only a combined hooks.json will be loaded correctly" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_c5903029 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When deciding plugin directory organization pattern" ;
+    oc:directiveContent "Start with a flat structure and reorganize into categorized or hierarchical layouts only when component count justifies it — flat for 5-15 commands, categorized for 15+, hierarchical for 20+." ;
+    oc:hasRationale "Premature categorization adds configuration complexity without benefit; structure should evolve with scale" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_e66b3e1e a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "When designing directory structure for large plugins" ;
+    oc:directiveContent "Avoid deep directory nesting and minimize custom path declarations — deeply nested structures and large manifest configurations increase component discovery and loading time during initialization." ;
+    oc:hasRationale "Component registration happens during Claude Code initialization; excessive nesting and configuration slows startup" ;
+    oc:severityLevel "LOW" .
+

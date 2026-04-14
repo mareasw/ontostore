@@ -1,0 +1,87 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_code_mcp_integration_tool_usage a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "tool-usage" ;
+    skos:broader "Integration guide" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-code/mcp-integration" ;
+    oc:contentHash "8dd0005d7ba6cd2d24e72f9e6102c129b7445fc818e14656ad9ebaef6621a7a6" ;
+    oc:differentia "that defines how to invoke, configure, and optimize MCP tools within Claude Code plugin commands and agents" ;
+    oc:extends oc:skill_anthropics_claude_code_mcp_integration ;
+    oc:handlesFailure oc:NetworkTimeout,
+        oc:PermissionDenied,
+        oc:ToolNotFound ;
+    oc:hasArgumentHint "plugin-name, server-name, tool-name" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_0d795bbc,
+        oc:kn_322e967c,
+        oc:kn_4fd4a3f2,
+        oc:kn_761f6ea9,
+        oc:kn_87672beb,
+        oc:kn_bdc3ad2f,
+        oc:kn_fe792bc0 ;
+    oc:isUserInvocable false ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:MCPServerConfigured,
+        oc:ToolInstalled ;
+    oc:resolvesIntent "configure MCP tool permissions",
+        "handle MCP tool errors",
+        "optimize MCP tool call patterns",
+        "use MCP tools in agents",
+        "use MCP tools in commands" ;
+    oc:yieldsState oc:ToolCallsOptimized,
+        oc:ToolUsageConfigured .
+
+oc:kn_0d795bbc a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When configuring allowed-tools in command frontmatter" ;
+    oc:directiveContent "Avoid using wildcard tool allowances like mcp__plugin_asana_asana__* unless the command truly needs access to all tools from a server. Prefer explicit tool listing in allowed-tools frontmatter." ;
+    oc:hasRationale "Wildcards grant broader access than typically needed, violating least-privilege and potentially exposing destructive operations." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_322e967c a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When optimizing MCP tool call performance" ;
+    oc:directiveContent "Batch queries with filters rather than making many individual calls. Use parallel tool calls when operations don't depend on each other. Cache expensive results for reuse." ;
+    oc:hasRationale "Minimizing the number of MCP round-trips reduces latency and improves responsiveness, especially for batch operations." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_4fd4a3f2 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When beginning to integrate any MCP server's tools" ;
+    oc:directiveContent "Use the /mcp command to discover available tools, their full names, schemas, and descriptions before writing commands or agents that reference them." ;
+    oc:hasRationale "Tool schemas define required and optional parameters; referencing them ensures correct tool usage and avoids runtime errors." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_761f6ea9 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "When troubleshooting or first setting up MCP tool usage" ;
+    oc:directiveContent "Before using MCP tools, verify the server is configured, connected (check with /mcp), tool names match exactly (case-sensitive), and authentication is valid. Restart Claude Code after configuration changes." ;
+    oc:hasRationale "Most MCP tool failures stem from misconfiguration, authentication issues, or stale connections rather than code bugs." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_87672beb a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing commands vs agents that use MCP tools" ;
+    oc:directiveContent "Commands require tools to be pre-allowed in the frontmatter allowed-tools field, whereas agents can use any tool Claude determines necessary without pre-approval." ;
+    oc:hasRationale "Commands are user-triggered and need explicit permission boundaries; agents operate more autonomously and rely on Claude's judgment for tool selection." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_bdc3ad2f a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing tool call instructions in commands or agents" ;
+    oc:directiveContent "Always validate required parameters before calling an MCP tool, handle errors gracefully with user-friendly messages, and never expose internal error details to the user." ;
+    oc:hasRationale "Pre-validation prevents unnecessary API calls. User-friendly error messages improve the experience and help users self-correct issues." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_fe792bc0 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When referencing any MCP tool in commands or agents" ;
+    oc:directiveContent "MCP tools are referenced using the naming convention mcp__plugin_<plugin-name>_<server-name>__<tool-name>. This prefix must be used exactly and is case-sensitive." ;
+    oc:hasRationale "The naming convention ensures tools from different plugins and servers are uniquely identifiable and don't collide." ;
+    oc:severityLevel "CRITICAL" .
+
