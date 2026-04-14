@@ -1,0 +1,102 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_n8n_io_n8n_reproduce_bug a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "reproduce-bug" ;
+    skos:broader "Bug reproduction framework" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/n8n-io/n8n/reproduce-bug" ;
+    oc:contentHash "48412abee6332b9181c968c11848e05f8ea731d98cf93541c73d900b23c44773" ;
+    oc:dependsOnSkill oc:skill_linear_issue ;
+    oc:differentia "Systematically reproduces bugs from Linear ticket context by writing failing regression tests with confidence scoring" ;
+    oc:handlesFailure oc:BailoutTriggered,
+        oc:TestPassedUnexpectedly,
+        oc:UnconfirmedBug ;
+    oc:hasAllowedTool "Bash",
+        "Edit",
+        "Glob",
+        "Grep",
+        "Read",
+        "Write" ;
+    oc:hasArgumentHint "Linear ticket context (title, description, comments) as input" ;
+    oc:hasCategory "development" ;
+    oc:hasDescription "Reproduce a bug from a Linear ticket with a failing test. Expects the full ticket context (title, description, comments) to be provided as input." ;
+    oc:hasName "reproduce-bug" ;
+    oc:impartsKnowledge oc:kn_1fbdd759,
+        oc:kn_61d735c4,
+        oc:kn_80d1d762,
+        oc:kn_9f144991,
+        oc:kn_b4cb89a5,
+        oc:kn_d8de1f73,
+        oc:kn_e60f282d,
+        oc:kn_eb01c05e ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "analyze bug from ticket context",
+        "create test that confirms or denies bug hypothesis",
+        "reproduce a bug from a Linear ticket",
+        "trace code path to identify root cause",
+        "write a failing regression test for a bug" ;
+    oc:yieldsState oc:BugReproduced,
+        oc:FailingTestWritten .
+
+oc:kn_1fbdd759 a oc:KnowledgeNode,
+        oc:SuccessIndicator ;
+    oc:appliesToContext "When scoring the reproduction result (Step 8)" ;
+    oc:directiveContent "A CONFIRMED result requires the test to fail consistently and the failure mode to match the stated hypothesis. Classify as LIKELY if failure differs slightly." ;
+    oc:hasRationale "Rigorous confidence classification ensures downstream consumers know how much trust to place in the reproduction." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_61d735c4 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When selecting where and how to write the reproduction test (Step 2)" ;
+    oc:directiveContent "Route the test strategy based on the affected area (node operation, credential, trigger, binary data, execution engine, CLI/API, config, editor UI, E2E) to select the correct test layer and pattern." ;
+    oc:hasRationale "n8n has a monorepo with distinct test infrastructures per area. Using the wrong test layer wastes time and may not reach the buggy code path." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_80d1d762 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When researching the bug, never search for or reference existing fix PRs" ;
+    oc:directiveContent "Do not look at existing fix PRs — the goal is to reproduce from signals alone." ;
+    oc:hasRationale "Looking at fix PRs biases the reproduction and defeats the purpose of independent bug confirmation." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_9f144991 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When encountering any of these conditions during reproduction attempts" ;
+    oc:directiveContent "Hard bailout triggers require immediate stop: real third-party API credentials needed, race condition/timing-dependent, specific cloud/enterprise infrastructure, or manual UI interaction that can't be scripted." ;
+    oc:hasRationale "These conditions make automated reproduction infeasible and further attempts will waste time without reliable results." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_b4cb89a5 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When initial reproduction attempt does not trigger the failure" ;
+    oc:directiveContent "Maximum 3 attempts before declaring UNCONFIRMED. On each failed attempt, revisit the hypothesis and try a different test approach or layer." ;
+    oc:hasRationale "Diminishing returns set in quickly; capping attempts prevents infinite loops and forces a decision." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_d8de1f73 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Always, throughout the entire reproduction process" ;
+    oc:directiveContent "Never fix the bug — only reproduce it with a failing regression test. The goal is to confirm the bug exists, not to resolve it." ;
+    oc:hasRationale "Separating reproduction from fixing keeps the workflow focused and produces clear evidence for whoever will implement the fix." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_e60f282d a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before and during test execution (Step 8)" ;
+    oc:directiveContent "Run tests from the package directory (e.g., pushd packages/nodes-base && pnpm test <file> && popd). Always redirect build output with pnpm build > build.log 2>&1." ;
+    oc:hasRationale "Running tests from the wrong directory fails due to monorepo workspace resolution. Redirecting build output keeps the terminal clean for test results." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_eb01c05e a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "After writing the failing regression test (Step 7 onward)" ;
+    oc:directiveContent "Leave test files in place as evidence but do not commit unless asked. Test files are artifacts of reproduction, not deliverables for the main branch." ;
+    oc:hasRationale "Test files serve as reproducible evidence of the bug but should not be committed without explicit request to avoid polluting the codebase." ;
+    oc:severityLevel "MEDIUM" .
+

@@ -1,0 +1,71 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_n8n_io_n8n_loom_transcript a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "loom-transcript" ;
+    skos:broader "API client" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/n8n-io/n8n/loom-transcript" ;
+    oc:contentHash "97040f1ecccb11cdb7d14d43ff7eb1f3ae37615d8a91effdb9acbae10f616059" ;
+    oc:differentia "fetches and displays full transcripts from Loom video URLs using Loom's public GraphQL API" ;
+    oc:handlesFailure oc:InvalidInput,
+        oc:NetworkTimeout,
+        oc:ResourceNotFound ;
+    oc:hasAllowedTool "Bash",
+        "WebFetch" ;
+    oc:hasArgumentHint "[loom-url]" ;
+    oc:hasCategory "productivity" ;
+    oc:hasDescription "Fetch and display the full transcript from a Loom video URL. Use when the user wants to get or read a Loom transcript." ;
+    oc:hasName "loom-transcript" ;
+    oc:impartsKnowledge oc:kn_56ea105d,
+        oc:kn_8242b4ea,
+        oc:kn_ac7cf1fa,
+        oc:kn_b8cfdceb,
+        oc:kn_f2ebf3ca ;
+    oc:isUserInvocable true ;
+    oc:nature "Tool" ;
+    oc:requiresState oc:NetworkAvailable ;
+    oc:resolvesIntent "extract text from loom video",
+        "fetch loom transcript",
+        "get loom video captions",
+        "read loom video transcript" ;
+    oc:yieldsState oc:TranscriptFetched .
+
+oc:kn_56ea105d a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "On API error or missing transcript data" ;
+    oc:directiveContent "If GraphQL returns a GenericError, report the message to the user. If both source_url and captions_source_url are null, inform the user that no transcript is available. If the video ID cannot be extracted, ask for a valid Loom URL." ;
+    oc:hasRationale "Graceful error handling prevents confusion and guides the user toward resolution." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_8242b4ea a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Always, when calling Loom GraphQL endpoints" ;
+    oc:directiveContent "No authentication or cookies are required — Loom's transcript API is publicly accessible for any shared video." ;
+    oc:hasRationale "Simplifies execution since no credential management or session handling is needed." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_ac7cf1fa a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before executing any GraphQL requests" ;
+    oc:directiveContent "Validate that the input URL matches one of the supported Loom URL formats and extract the 32-character hex video ID before making any API calls." ;
+    oc:hasRationale "Prevents wasted API calls and provides immediate user feedback on malformed URLs." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_b8cfdceb a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When downloading transcript data from Loom API" ;
+    oc:directiveContent "Prefer VTT captions as the primary transcript source since they include proper timestamps; fall back to JSON transcript only if VTT is unavailable." ;
+    oc:hasRationale "VTT format provides timestamp-aligned text which yields a better reading experience with time markers." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_f2ebf3ca a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When presenting transcript results to the user" ;
+    oc:directiveContent "Only English transcripts are available through the Loom GraphQL API. Transcripts are auto-generated and may contain minor errors." ;
+    oc:hasRationale "Sets correct expectations about transcript accuracy and language availability; non-English videos will likely fail or return empty results." ;
+    oc:severityLevel "MEDIUM" .
+

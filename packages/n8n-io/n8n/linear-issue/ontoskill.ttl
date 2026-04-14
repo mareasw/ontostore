@@ -1,0 +1,123 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_n8n_io_n8n_linear_issue a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "linear-issue" ;
+    skos:broader "issue analysis workflow" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/n8n-io/n8n/linear-issue" ;
+    oc:contentHash "6d0fbc01ada68b3ce22071d2c796945720153a521662caf70c1a9c3dffb68a02" ;
+    oc:dependsOnSkill oc:skill_loom_transcript ;
+    oc:differentia "fetches and synthesizes comprehensive context from Linear issues including attachments, related resources, node popularity, and effort estimation for the n8n platform" ;
+    oc:extends oc:skill_n8n_conventions ;
+    oc:handlesFailure oc:NetworkTimeout,
+        oc:PermissionDenied,
+        oc:ResourceNotFound ;
+    oc:hasAllowedTool "Grep",
+        "Read",
+        "curl",
+        "gh",
+        "mcp__linear__get_issue",
+        "mcp__linear__list_comments",
+        "mcp__notion__notion-fetch" ;
+    oc:hasArgumentHint "[issue-id]" ;
+    oc:hasCategory "development" ;
+    oc:hasDescription "Fetch and analyze Linear issue with all related context. Use when starting work on a Linear ticket, analyzing issues, or gathering context about a Linear issue." ;
+    oc:hasName "linear-issue" ;
+    oc:hasRequirement oc:req_4f4e07e2,
+        oc:req_7aef040e,
+        oc:req_81ee6f2b,
+        oc:req_a86664a0,
+        oc:req_d71f6c59 ;
+    oc:impartsKnowledge oc:kn_099d9d57,
+        oc:kn_4f78395e,
+        oc:kn_978bcaeb,
+        oc:kn_dcaea3d9,
+        oc:kn_e55a033a,
+        oc:kn_f29ba119,
+        oc:kn_f4ce8c10 ;
+    oc:isUserInvocable true ;
+    oc:nature "work" ;
+    oc:requiresState oc:NetworkAvailable,
+        oc:SystemAuthenticated ;
+    oc:resolvesIntent "analyze linear issue",
+        "estimate effort for linear ticket",
+        "fetch linear ticket context",
+        "gather issue details for development work",
+        "identify affected n8n node from issue",
+        "summarize linear issue with related context" ;
+    oc:yieldsState oc:ContextGathered,
+        oc:IssueAnalyzed .
+
+oc:kn_099d9d57 a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "When assessing effort after all context is gathered" ;
+    oc:directiveContent "Effort estimation uses T-shirt sizes (XS: ≤1hr, S: ≤1day, M: 2-3 days, L: 3-5 days, XL: ≥6 days) based on scope, complexity, testing needs, risk, dependencies, and documentation requirements." ;
+    oc:hasRationale "Standardized sizing provides consistent estimates that the team can use for sprint planning and resource allocation." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_4f78395e a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When analyzing any Linear issue, scanning attachments is mandatory" ;
+    oc:directiveContent "Images and Loom videos in both the issue description AND all comments must be fetched and analyzed — they often contain critical context like error messages, UI states, or reproduction steps that text alone cannot convey." ;
+    oc:hasRationale "Skipping visual content leads to incomplete understanding and misestimated effort, since screenshots and videos frequently contain the most actionable debugging information." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_978bcaeb a oc:FallbackStrategy,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When an optional dependency is missing during execution" ;
+    oc:directiveContent "When optional tools (Notion MCP, Loom transcript skill, curl) are unavailable, gracefully degrade by noting the links in the summary and telling the user to check them manually." ;
+    oc:hasRationale "Graceful degradation ensures the analysis still provides value without blocking on non-essential resources." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_dcaea3d9 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When the issue is identified as node-specific" ;
+    oc:directiveContent "Use the node-popularity.json file to classify affected nodes as High (≥0.8), Medium (0.4–0.8), or Low (<0.4) popularity, and include the raw score in the summary." ;
+    oc:hasRationale "Popularity classification helps prioritize work and assess risk — changes to high-popularity nodes require more careful testing." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_e55a033a a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "At the start of issue analysis workflow" ;
+    oc:directiveContent "Fetch the issue details and comments together in the same step to gather complete context upfront before proceeding to deeper analysis." ;
+    oc:hasRationale "Batch-fetching avoids context gaps early and prevents the agent from making assumptions based on incomplete data." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_f29ba119 a oc:KnowledgeNode,
+        oc:PostFlightValidation ;
+    oc:appliesToContext "At the end of the analysis workflow, before presenting results" ;
+    oc:directiveContent "Before presenting the summary, verify a checklist: all images downloaded/viewed, all Loom transcripts fetched, all GitHub links resolved, comments listed, node-specificity checked, and effort estimated." ;
+    oc:hasRationale "The checklist ensures no critical context was missed and provides a complete, reliable summary to the user." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_f4ce8c10 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Before beginning any issue analysis" ;
+    oc:directiveContent "If a required tool (Linear MCP or GitHub CLI) is missing or unauthenticated, stop immediately and tell the user what needs to be set up before continuing." ;
+    oc:hasRationale "Without required tools, the skill cannot function and proceeding would produce misleading or incomplete results." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:req_4f4e07e2 a oc:RequirementAPI ;
+    oc:isOptional true ;
+    oc:requirementValue "mcp__notion" .
+
+oc:req_7aef040e a oc:RequirementKnowledge ;
+    oc:isOptional true ;
+    oc:requirementValue "loom-transcript skill" .
+
+oc:req_81ee6f2b a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "gh" .
+
+oc:req_a86664a0 a oc:RequirementAPI ;
+    oc:isOptional false ;
+    oc:requirementValue "mcp__linear" .
+
+oc:req_d71f6c59 a oc:RequirementTool ;
+    oc:isOptional true ;
+    oc:requirementValue "curl" .
+
