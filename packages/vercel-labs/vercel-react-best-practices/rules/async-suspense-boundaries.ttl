@@ -1,0 +1,58 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_vercel_labs_vercel_react_best_practices_async_suspense_boundaries a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "async-suspense-boundaries" ;
+    skos:broader "React rendering pattern" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
+    oc:contentHash "de05fedac2eb7ae563b887b5a424464ec3dfaf84e5b7797467ebe2a796ac8afc" ;
+    oc:differentia "uses Suspense boundaries to stream data into components independently, allowing wrapper UI to paint immediately while async data loads in isolated regions" ;
+    oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_341d133d,
+        oc:kn_3b2a46ad,
+        oc:kn_3c0096e2,
+        oc:kn_bf75aa3a,
+        oc:kn_f1908506 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:resolvesIntent "optimize initial page paint with suspense boundaries",
+        "share promises across multiple React components with use()",
+        "stream async data into React components without blocking layout" .
+
+oc:kn_341d133d a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When deciding whether to apply Suspense streaming vs traditional await" ;
+    oc:directiveContent "Do not use Suspense boundaries for async data when the data is critical for layout decisions, SEO-critical above-the-fold content, small fast queries, or when layout shift from loading→content transitions is unacceptable." ;
+    oc:hasRationale "The trade-off is faster initial paint vs potential layout shift and deferred critical content — each use case has different priorities." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_3b2a46ad a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing component trees with async data dependencies" ;
+    oc:directiveContent "Push async data fetching as deep into the component tree as possible, wrapping only the data-dependent component in a Suspense boundary." ;
+    oc:hasRationale "This isolates loading state to the smallest possible subtree, allowing all surrounding UI to render immediately." .
+
+oc:kn_3c0096e2 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When multiple components in the same Suspense boundary need the same fetch result" ;
+    oc:directiveContent "Use React.use() with a shared promise object passed as a prop when multiple sibling components need the same async data." ;
+    oc:hasRationale "Sharing the promise via props ensures only one network request occurs and both components suspend and resolve together." .
+
+oc:kn_bf75aa3a a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing async React Server Components or Next.js pages" ;
+    oc:directiveContent "Never await data at the top of an async page component that wraps layout elements (sidebar, header, footer) that don't depend on that data." ;
+    oc:hasRationale "Awaiting data at the page level blocks the entire page render including unrelated static layout elements, dramatically slowing initial paint." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_f1908506 a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "When implementing Suspense-based streaming patterns" ;
+    oc:directiveContent "Using Suspense boundaries for async data introduces a trade-off: faster initial paint at the cost of potential layout shift when skeleton/placeholder content is replaced by actual data." ;
+    oc:hasRationale "Layout shift from loading fallback to real content can degrade perceived UX even if Time-to-First-Paint improves. Choose based on UX priorities." .
+

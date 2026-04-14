@@ -1,0 +1,64 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_vercel_labs_vercel_react_best_practices_rerender_lazy_state_init a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "rerender-lazy-state-init" ;
+    skos:broader "React performance optimization pattern" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
+    oc:contentHash "4ae844740f266fc8cbf050701230286624a2440ec5be67b9a63d9edc3c580573" ;
+    oc:differentia "that avoids re-running expensive initializers on every render by passing a function to useState" ;
+    oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
+    oc:hasArgumentHint "React component with useState hooks" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_2a53c03f,
+        oc:kn_2b0d7a74,
+        oc:kn_3f418fad,
+        oc:kn_5caef01b,
+        oc:kn_ff8179c1 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:ReactComponentReady ;
+    oc:resolvesIntent "fix lazy state initialization anti-pattern",
+        "optimize useState initialization",
+        "prevent wasted computation on re-renders" ;
+    oc:yieldsState oc:StateOptimized .
+
+oc:kn_2a53c03f a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing useState hooks with non-trivial initial value computation" ;
+    oc:directiveContent "Use lazy state initialization (pass a function to useState) when the initial value involves localStorage/sessionStorage access, building data structures (indexes, maps), DOM reads, or heavy transformations." ;
+    oc:hasRationale "The function form (() => expensiveValue) is only invoked by React on the initial mount, skipping the computation on all subsequent re-renders." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_2b0d7a74 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When initializing useState with computed values like JSON.parse, buildSearchIndex, or localStorage reads" ;
+    oc:directiveContent "Never pass a raw expensive expression directly to useState — it will execute on every render even though the result is discarded after initialization." ;
+    oc:hasRationale "Without the function form, React evaluates the initial value expression on every render call, wasting CPU cycles and potentially causing performance degradation in frequently re-rendering components." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_3f418fad a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When the initial value computation is trivially cheap" ;
+    oc:directiveContent "Do NOT use lazy initialization for simple primitives (useState(0)), direct prop references (useState(props.value)), or cheap literals (useState({})) — the function wrapper adds unnecessary overhead and noise." ;
+    oc:hasRationale "Over-optimizing trivial initializers adds code complexity without measurable performance benefit. Reserve the pattern for genuinely expensive computations." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_5caef01b a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When evaluating whether to apply lazy state initialization" ;
+    oc:directiveContent "Distinguish between initialization cost and re-render cost: only lazy-initialize when the initialization cost multiplied by re-render frequency creates a measurable performance impact." ;
+    oc:hasRationale "The impact is proportional to how often the component re-renders and how expensive the initializer is. High-frequency re-renderers with expensive initializers benefit most." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_ff8179c1 a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "When writing the initializer function passed to useState" ;
+    oc:directiveContent "Lazy initialization functions should be pure — they must not cause side effects or rely on mutable external state that changes between renders." ;
+    oc:hasRationale "React only calls the initializer once, but if it has side effects, debugging becomes harder and behavior becomes unpredictable if the component is ever remounted." ;
+    oc:severityLevel "MEDIUM" .
+

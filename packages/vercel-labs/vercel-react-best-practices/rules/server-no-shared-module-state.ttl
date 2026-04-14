@@ -1,0 +1,66 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_vercel_labs_vercel_react_best_practices_server_no_shared_module_state a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "server-no-shared-module-state" ;
+    skos:broader "Server-side rendering guideline" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
+    oc:contentHash "4d869bf1cd2f1632e5ca4c0e64b1cf0e71c5f5a0f940bc8a22174d205e735ed7" ;
+    oc:differentia "prevents concurrency bugs by prohibiting mutable module-level state for request-scoped data in RSC and SSR" ;
+    oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
+    oc:handlesFailure oc:DataLeak,
+        oc:RaceCondition ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_06a33a3f,
+        oc:kn_3b0a2d68,
+        oc:kn_94dd8c12,
+        oc:kn_9815cd3b,
+        oc:kn_d1806bae ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "avoid shared module state in server components",
+        "fix race conditions in SSR",
+        "prevent request data leaks in concurrent renders",
+        "write thread-safe React Server Components" ;
+    oc:yieldsState oc:ServerComponentSafe .
+
+oc:kn_06a33a3f a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing server components or SSR client components that handle per-request data" ;
+    oc:directiveContent "Never use mutable module-level variables to store request-scoped data (e.g., currentUser, request ID) in React Server Components or SSR-rendered client components." ;
+    oc:hasRationale "Server renders run concurrently in the same process; mutable module state is shared across all requests, causing race conditions, cross-request contamination, and security bugs where one user's data appears in another user's response." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_3b0a2d68 a oc:KnowledgeNode,
+        oc:SecurityImplication ;
+    oc:appliesToContext "When server renders execute concurrently for different users" ;
+    oc:directiveContent "Cross-request contamination from shared module state can cause one user's private data to appear in another user's response." ;
+    oc:hasRationale "This is a data leak vulnerability that violates user privacy and can expose sensitive information across authenticated sessions." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_94dd8c12 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When evaluating whether a module-level variable is safe on the server" ;
+    oc:directiveContent "Treat module scope on the server as process-wide shared memory, not request-local state." ;
+    oc:hasRationale "This mental model prevents accidental sharing of request data and makes the concurrency implications of module-level state explicit." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_9815cd3b a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When architecting data flow in server components" ;
+    oc:directiveContent "Pass request-scoped data through the component render tree via props rather than relying on shared module state." ;
+    oc:hasRationale "Props are inherently request-local and thread-safe because each concurrent render gets its own component instance with its own prop values." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_d1806bae a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When considering whether module-level state is acceptable" ;
+    oc:directiveContent "Safe exceptions for module-level state are limited to: immutable static assets/config loaded once, intentionally shared caches keyed correctly, and process-wide singletons that never store request- or user-specific mutable data." ;
+    oc:hasRationale "These exceptions are safe because they either never change after initialization or are explicitly designed for cross-request reuse without per-request mutation." ;
+    oc:severityLevel "MEDIUM" .
+

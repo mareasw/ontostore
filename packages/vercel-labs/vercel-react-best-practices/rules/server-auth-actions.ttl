@@ -1,0 +1,66 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_vercel_labs_vercel_react_best_practices_server_auth_actions a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "server-auth-actions" ;
+    skos:broader "Security pattern" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
+    oc:contentHash "a2ca8aa102839251c7971ec784560fab943c20b36fe6f80365d4110c13260c23" ;
+    oc:differentia "that enforces authentication and authorization inside Next.js Server Actions as if they were public API endpoints" ;
+    oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
+    oc:handlesFailure oc:InvalidInput,
+        oc:UnauthorizedAccess ;
+    oc:hasArgumentHint "server-action-code" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_0333fdb1,
+        oc:kn_794f413e,
+        oc:kn_cbd3baf8,
+        oc:kn_d5930adb,
+        oc:kn_dbeb4f60 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:ServerActionCodeWritten ;
+    oc:resolvesIntent "prevent unauthorized access to server mutations",
+        "secure server actions with authentication",
+        "validate input and authorize users in server actions" ;
+    oc:yieldsState oc:ServerActionSecured .
+
+oc:kn_0333fdb1 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When reasoning about security boundaries in Next.js applications" ;
+    oc:directiveContent "Every Server Action should be auditable as a standalone public API endpoint—assume no external context or caller guarantees." ;
+    oc:hasRationale "Server Actions are RPC-style endpoints accessible over HTTP; treating them as isolated public endpoints ensures defense in depth." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_794f413e a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "When reviewing or auditing Server Actions before deployment" ;
+    oc:directiveContent "Before shipping a Server Action, verify it contains an explicit authentication check (e.g., verifySession()) and an authorization check (e.g., role/ownership verification) inside the function body." ;
+    oc:hasRationale "Missing internal auth checks create a direct attack surface for unauthorized mutations." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_cbd3baf8 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When implementing any Server Action that modifies data" ;
+    oc:directiveContent "Follow the validate-then-authenticate-then-authorize-then-mutate pattern: first validate input with a schema (e.g., Zod), then verify authentication, then check authorization, and only then perform the mutation." ;
+    oc:hasRationale "Layered validation ensures malformed input is rejected cheaply before hitting auth logic, and unauthorized users are rejected before any database writes." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_d5930adb a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing auth strategy for Server Actions" ;
+    oc:directiveContent "Never rely solely on middleware, layout guards, or page-level checks to protect Server Actions—always verify authentication and authorization inside each Server Action function body." ;
+    oc:hasRationale "Server Actions can be invoked directly via HTTP, bypassing any client-side or middleware-based guards." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_dbeb4f60 a oc:KnowledgeNode,
+        oc:SecurityImplication ;
+    oc:appliesToContext "When writing any Next.js Server Action" ;
+    oc:directiveContent "Server Actions ('use server') are exposed as public endpoints and can be invoked directly, bypassing any page-level or middleware authentication guards." ;
+    oc:hasRationale "Next.js documentation explicitly states to treat Server Actions with the same security considerations as public-facing API endpoints." ;
+    oc:severityLevel "CRITICAL" .
+

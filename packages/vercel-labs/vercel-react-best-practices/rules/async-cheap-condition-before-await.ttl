@@ -1,0 +1,64 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_vercel_labs_vercel_react_best_practices_async_cheap_condition_before_await a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "async-cheap-condition-before-await" ;
+    skos:broader "Async optimization pattern" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
+    oc:contentHash "03107c1f70a293cd58a8abc5474c5548e20ea4efdf01b6d45aae7ad0ac1cb32c" ;
+    oc:differentia "Evaluates cheap synchronous conditions before expensive async flag lookups to short-circuit unnecessary network or database work" ;
+    oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
+    oc:handlesFailure oc:InvalidInput ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_2b36cc49,
+        oc:kn_921b191f,
+        oc:kn_bb42338f,
+        oc:kn_cd1b18b7,
+        oc:kn_f27c8887 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "avoid unnecessary async calls",
+        "optimize async conditional logic",
+        "short-circuit flag checks with sync guards" ;
+    oc:yieldsState oc:AsyncConditionOptimized .
+
+oc:kn_2b36cc49 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When considering reordering conditions for optimization" ;
+    oc:directiveContent "Keep the original (un-optimized) order if the synchronous condition is expensive, depends on the async flag result, or side effects must run in a fixed order." ;
+    oc:hasRationale "Reordering conditions that depend on the flag value or that have side-effect ordering requirements would change program behavior and introduce bugs." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_921b191f a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "When getFlag involves any form of remote or cached-but-expensive lookup" ;
+    oc:directiveContent "Skipping async calls on cold paths removes the full latency cost of network, feature-flag service, React.cache, or DB round-trips for every request where the sync guard fails." ;
+    oc:hasRationale "The performance benefit scales with the percentage of requests where the cheap condition is false, as those requests entirely avoid the async overhead." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_bb42338f a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing compound conditions that mix synchronous checks with async flag lookups (flag && cheapCondition patterns)" ;
+    oc:directiveContent "Always evaluate cheap synchronous conditions (local props, request metadata, already-loaded state) before awaiting async flag values or remote lookups." ;
+    oc:hasRationale "Evaluating the cheap condition first short-circuits the async call entirely when the synchronous guard fails, avoiding unnecessary network, feature-flag service, or database costs." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_cd1b18b7 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing conditional branches that use both async and sync conditions" ;
+    oc:directiveContent "Never await a flag or remote value before checking a cheap synchronous condition that could make the entire branch unreachable." ;
+    oc:hasRationale "Paying for the async call when the compound condition can never be true wastes resources on the cold path, especially when getFlag hits the network or a feature-flag service." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_f27c8887 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When architecting conditional async logic in React/Next.js components and server actions" ;
+    oc:directiveContent "This pattern is a specialization of 'Defer Await Until Needed' — defer async work until all synchronous guards have been validated." ;
+    oc:hasRationale "General principle of deferred computation applies specifically to compound boolean conditions mixing sync and async values." ;
+    oc:severityLevel "MEDIUM" .
+

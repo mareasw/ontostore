@@ -1,0 +1,75 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_vercel_labs_vercel_react_best_practices_js_tosorted_immutable a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "js-tosorted-immutable" ;
+    skos:broader "React/JavaScript best practice" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
+    oc:contentHash "d0a5e1b0fec48a0a81397957e2f068e224329f7c42cb5feeed8aae6fa64025e8" ;
+    oc:differentia "prescribes using .toSorted() instead of .sort() to maintain array immutability in React state and props" ;
+    oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
+    oc:handlesFailure oc:BrowserCompatibilityIssue ;
+    oc:hasArgumentHint "React component code using array sort operations" ;
+    oc:hasCategory "development" ;
+    oc:hasRequirement oc:req_42d61229,
+        oc:req_eef6ab74 ;
+    oc:impartsKnowledge oc:kn_3f84e043,
+        oc:kn_5f85b31d,
+        oc:kn_72e8b106,
+        oc:kn_7a5d6424,
+        oc:kn_99de701d ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:CodebaseReady ;
+    oc:resolvesIntent "apply immutable array methods in JavaScript",
+        "prevent mutation bugs when sorting arrays",
+        "sort arrays immutably in React" ;
+    oc:yieldsState oc:ImmutableArrayPatternsApplied .
+
+oc:kn_3f84e043 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When performing any array transformation in React code" ;
+    oc:directiveContent "Prefer the family of immutable array methods (.toSorted(), .toReversed(), .toSpliced(), .with()) over their mutating counterparts (.sort(), .reverse(), .splice(), bracket assignment)." ;
+    oc:hasRationale "Using the immutable method family consistently reduces the cognitive load of remembering which methods mutate and which don't, preventing entire classes of bugs." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_5f85b31d a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When sorting arrays in React components, especially inside useMemo, callbacks, or effects" ;
+    oc:directiveContent "Use .toSorted() to create a new sorted array without mutating the original, preserving React's expectation that props and state are read-only." ;
+    oc:hasRationale "React relies on reference equality to detect changes; mutating arrays in place prevents React from correctly identifying updates and can corrupt parent component state." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_72e8b106 a oc:FallbackStrategy,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When targeting older browser or Node.js versions that lack native .toSorted() support" ;
+    oc:directiveContent "For environments that don't support .toSorted() (pre-Chrome 110, pre-Safari 16, pre-Firefox 115, pre-Node.js 20), use the spread pattern: [...items].sort() as a fallback." ;
+    oc:hasRationale "The spread operator creates a shallow copy before sorting, achieving the same immutability guarantee as .toSorted() in environments where it's unavailable." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_7a5d6424 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When sorting arrays derived from React props or state" ;
+    oc:directiveContent "Never use .sort() on props or state arrays in React components — it mutates the original array in place, violating React's immutability contract." ;
+    oc:hasRationale "Props/state mutations break React's immutability model and cause stale closure bugs where mutated arrays inside callbacks or effects lead to unexpected behavior." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_99de701d a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "When reviewing or writing code that uses .sort()" ;
+    oc:directiveContent ".sort() has a hidden side effect of mutating the original array, unlike most array methods that return new arrays. This is a common source of bugs in React." ;
+    oc:hasRationale "Developers often assume .sort() returns a new array like .map() or .filter() do, but it returns the same reference after in-place mutation, breaking assumptions about data integrity." ;
+    oc:severityLevel "HIGH" .
+
+oc:req_42d61229 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Understanding of React immutability model and array mutation pitfalls" .
+
+oc:req_eef6ab74 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Familiarity with .toSorted() and other immutable array methods (toReversed, toSpliced, with)" .
+

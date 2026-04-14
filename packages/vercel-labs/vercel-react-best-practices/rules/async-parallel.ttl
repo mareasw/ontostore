@@ -1,0 +1,61 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_vercel_labs_vercel_react_best_practices_async_parallel a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "async-parallel" ;
+    skos:broader "async optimization pattern" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
+    oc:contentHash "6d2f841896279e976dfcdc1ac89e70771ac188baadfd43c096b5706cb838b961" ;
+    oc:differentia "replaces sequential await chains with Promise.all() for independent concurrent operations" ;
+    oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_146a5b41,
+        oc:kn_1ae2975f,
+        oc:kn_6bac050c,
+        oc:kn_76d7b930,
+        oc:kn_b22a01cd ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:resolvesIntent "eliminate sequential await waterfalls",
+        "optimize async operations for parallel execution",
+        "reduce network round trips in concurrent fetches" .
+
+oc:kn_146a5b41 a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "When using Promise.all() for batched operations" ;
+    oc:directiveContent "With Promise.all(), if any single promise rejects, the entire batch fails — all concurrently-executing operations are lost." ;
+    oc:hasRationale "The all-or-nothing failure mode means one failing request kills the entire set; consider Promise.allSettled() when partial results are acceptable." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_1ae2975f a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "When measuring async function performance with multiple independent calls" ;
+    oc:directiveContent "Parallel execution reduces total latency from sum(N operations) to max(N operations), typically yielding 2-10× improvement." ;
+    oc:hasRationale "Network-bound operations benefit most since latency is additive in sequential mode but overlaps in parallel mode." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_6bac050c a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing async functions with multiple independent data fetches or computations" ;
+    oc:directiveContent "Never use sequential await calls for operations that have no interdependencies — each await blocks the event loop unnecessarily." ;
+    oc:hasRationale "Sequential awaits serialize independent operations, multiplying latency by the number of operations instead of running them in a single batch." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_76d7b930 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When multiple async operations do not depend on each other's results" ;
+    oc:directiveContent "Use Promise.all() to execute independent async operations concurrently, collecting all results in a single destructured assignment." ;
+    oc:hasRationale "Promise.all() collapses N round trips into 1, yielding 2-10× performance improvement for independent operations." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_b22a01cd a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When evaluating whether operations can be parallelized" ;
+    oc:directiveContent "Only apply Promise.all() when operations are truly independent — if operation B requires the result of operation A, they must remain sequential." ;
+    oc:hasRationale "Incorrect parallelization of dependent operations causes race conditions and undefined behavior." ;
+    oc:severityLevel "HIGH" .
+

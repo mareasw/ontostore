@@ -1,0 +1,65 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_vercel_labs_vercel_react_best_practices_client_swr_dedup a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "client-swr-dedup" ;
+    skos:broader "Data-fetching pattern" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
+    oc:contentHash "644652c39c6cc00de8d1c77a7273612e868dc3f7edda30764164c12ec0f764a3" ;
+    oc:differentia "uses SWR library to automatically deduplicate, cache, and revalidate API requests across React component instances" ;
+    oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
+    oc:handlesFailure oc:FetchError,
+        oc:NetworkTimeout ;
+    oc:hasArgumentHint "React component or data-fetching pattern to optimize" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_0a1fa670,
+        oc:kn_16be6b52,
+        oc:kn_9ad5aa27,
+        oc:kn_e34e3202,
+        oc:kn_f215fb17 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "deduplicate API requests",
+        "handle mutations with SWR",
+        "implement SWR caching strategy",
+        "optimize data fetching in React" ;
+    oc:yieldsState oc:DataCached,
+        oc:RequestDeduplicated .
+
+oc:kn_0a1fa670 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When configuring SWR across multiple components or pages" ;
+    oc:directiveContent "All SWR hooks sharing the same key must use the same fetcher function and data shape to maintain cache consistency." ;
+    oc:hasRationale "Mismatched fetchers for the same key can cause type errors, stale data, or unexpected revalidation behavior." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_16be6b52 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When fetching static or configuration data that does not change" ;
+    oc:directiveContent "Use useImmutableSWR for data that never changes (e.g., config, static content) to prevent unnecessary revalidation." ;
+    oc:hasRationale "Immutable SWR avoids background revalidation rounds, saving network resources and improving performance for truly static data." .
+
+oc:kn_9ad5aa27 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When implementing data mutations (create, update, delete) in React components" ;
+    oc:directiveContent "Use useSWRMutation for write operations (POST/PUT/DELETE) instead of useSWR, then trigger cache revalidation after mutation completes." ;
+    oc:hasRationale "useSWRMutation separates read and write concerns, providing explicit mutation triggers and enabling cache revalidation only when needed." .
+
+oc:kn_e34e3202 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When fetching data in React components that may be shared across multiple instances" ;
+    oc:directiveContent "Never use raw fetch inside useEffect for data that may be requested by multiple component instances — each instance will trigger a separate network request." ;
+    oc:hasRationale "Without deduplication, multiple components requesting the same endpoint create N identical network requests, wasting bandwidth and causing inconsistent state." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_f215fb17 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When multiple React components need the same data" ;
+    oc:directiveContent "Use SWR's key-based deduplication so that multiple component instances referencing the same key share a single request." ;
+    oc:hasRationale "SWR automatically deduplicates requests by key, ensuring only one fetch per key is in-flight at a time, reducing network load and keeping state synchronized." .
+

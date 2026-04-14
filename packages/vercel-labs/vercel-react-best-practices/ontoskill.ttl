@@ -1,0 +1,96 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_vercel_labs_vercel_react_best_practices a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "vercel-react-best-practices" ;
+    skos:broader "Performance optimization knowledge base" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
+    oc:contentHash "b0a18cda10b9fdf2a36d9621ff9cfb616932d8d782865940b15340b77841c457" ;
+    oc:differentia "contains 69 prioritized rules across 8 categories for React and Next.js applications authored by Vercel Engineering" ;
+    oc:handlesFailure oc:InvalidInput ;
+    oc:hasArgumentHint "React/Next.js code or component to optimize or review" ;
+    oc:hasCategory "development" ;
+    oc:hasDescription "React and Next.js performance optimization guidelines from Vercel Engineering. This skill should be used when writing, reviewing, or refactoring React/Next.js code to ensure optimal performance patterns. Triggers on tasks involving React components, Next.js pages, data fetching, bundle optimization, or performance improvements." ;
+    oc:hasName "vercel-react-best-practices" ;
+    oc:hasPackageName "vercel-react-best-practices" ;
+    oc:impartsKnowledge oc:kn_001bff9b,
+        oc:kn_04d61b2d,
+        oc:kn_2b1421ad,
+        oc:kn_7bdecc00,
+        oc:kn_905b43ba,
+        oc:kn_d6e9187a,
+        oc:kn_eadac712,
+        oc:kn_fdcc40f0 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "eliminate data fetching waterfalls",
+        "guide code generation with performance patterns",
+        "minimize unnecessary re-renders in React",
+        "optimize React component performance",
+        "reduce bundle size in Next.js applications",
+        "refactor React/Next.js code using best practices",
+        "review React/Next.js code for performance anti-patterns",
+        "write performant server components" ;
+    oc:yieldsState oc:CodeOptimized .
+
+oc:kn_001bff9b a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When importing from large libraries like lucide-react, @mui/material, or any package with barrel file exports" ;
+    oc:directiveContent "Import directly from source files instead of barrel files (index.js re-exporters), or use Next.js optimizePackageImports config to transform barrel imports automatically" ;
+    oc:hasRationale "Barrel files can load thousands of unused modules adding 200-800ms per cold start; optimizePackageImports preserves TypeScript types while eliminating the barrel import cost" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_04d61b2d a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing React Server Components or SSR code" ;
+    oc:directiveContent "Never use mutable module-level variables for request-scoped data in RSC/SSR. Server renders run concurrently in the same process and can cross-contaminate request data" ;
+    oc:hasRationale "Concurrent server renders sharing mutable module state cause race conditions, cross-request contamination, and security bugs where one user's data appears in another user's response" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_2b1421ad a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When deciding which performance optimizations to apply during code review or refactoring" ;
+    oc:directiveContent "Prioritize rules by impact: first eliminate async waterfalls (CRITICAL), then optimize bundle size (CRITICAL), then server-side performance (HIGH), then client-side fetching, re-renders, rendering, JS perf, and advanced patterns in descending priority" ;
+    oc:hasRationale "Waterfalls yield the largest gains (2-10× improvement) while JS micro-optimizations are incremental; focusing on high-impact rules first maximizes return on effort" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_7bdecc00 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing server-side data fetching functions that may be called multiple times within a single request" ;
+    oc:directiveContent "Use React.cache() with primitive arguments for per-request deduplication of server-side database queries, auth checks, and non-fetch async work. Never pass inline objects as arguments to cached functions" ;
+    oc:hasRationale "React.cache() uses Object.is shallow equality; inline objects create new references each call preventing cache hits, while primitives enable value-based deduplication" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_905b43ba a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When updating state based on current state value, especially inside useCallback or event handlers" ;
+    oc:directiveContent "Use functional setState updates (setItems(curr => [...curr, newItem])) instead of referencing state variables directly in callbacks, to create stable callback references and prevent stale closures" ;
+    oc:hasRationale "Functional updates eliminate the need for state dependencies in useCallback, prevent stale closure bugs, and produce stable references that don't trigger child re-renders" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_d6e9187a a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing data fetching code with multiple independent async operations" ;
+    oc:directiveContent "Never await independent async operations sequentially; use Promise.all() for independent operations to eliminate waterfalls, which are the #1 performance killer" ;
+    oc:hasRationale "Sequential awaits add full network latency for each operation, multiplying response times by the number of operations" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_eadac712 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When a state value is computable from other state or props" ;
+    oc:directiveContent "Calculate derived state during render instead of storing it in state or updating it via effects. If a value can be computed from current props/state, derive it inline" ;
+    oc:hasRationale "Using effects for derived state causes redundant renders and state drift; deriving during render is simpler, has no timing issues, and avoids unnecessary effect cycles" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_fdcc40f0 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing React components that need to access parent scope variables" ;
+    oc:directiveContent "Never define components inside other components; always extract them to module scope and pass props. Inline component definitions create new component types on every render causing full remounts" ;
+    oc:hasRationale "React sees a different component type each render, destroying all state, DOM, and re-running effects — symptoms include input fields losing focus and animations restarting" ;
+    oc:severityLevel "HIGH" .
+

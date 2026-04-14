@@ -1,0 +1,64 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_vercel_labs_vercel_react_best_practices_server_cache_lru a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "server-cache-lru" ;
+    skos:broader "Caching strategy" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
+    oc:contentHash "1924b64561841923b88a657085097a0aeba3e0ba2d5470b9f5c15cc10d6ae70f" ;
+    oc:differentia "uses in-memory LRU cache to share data across sequential server requests in React/Next.js applications" ;
+    oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
+    oc:handlesFailure oc:CacheMiss ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_43a980aa,
+        oc:kn_91fd34bd,
+        oc:kn_b19d94ba,
+        oc:kn_bb8c4f1a,
+        oc:kn_fdc9083b ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "cache data across requests",
+        "implement LRU caching in server components",
+        "optimize cross-request data sharing",
+        "reduce database queries for sequential user actions" ;
+    oc:yieldsState oc:LRUCacheConfigured .
+
+oc:kn_43a980aa a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing data fetching for multi-step user workflows" ;
+    oc:directiveContent "Use an LRU cache when sequential user actions hit multiple endpoints needing the same data within seconds." ;
+    oc:hasRationale "Avoids redundant database queries for data that was recently fetched in a prior request, improving response latency and reducing DB load." .
+
+oc:kn_91fd34bd a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When deploying to traditional serverless platforms without Fluid Compute" ;
+    oc:directiveContent "In traditional serverless environments, each invocation runs in isolation, so in-memory LRU caches will not persist across invocations." ;
+    oc:hasRationale "Cold starts and isolated execution mean the LRU cache is empty on each new invocation; use Redis or similar external storage for cross-process caching instead." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_b19d94ba a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "When deploying on Vercel with Fluid Compute enabled" ;
+    oc:directiveContent "With Vercel Fluid Compute, LRU caching is especially effective because concurrent requests share the same function instance and in-memory cache." ;
+    oc:hasRationale "Fluid Compute keeps function instances warm and shared, allowing in-memory caches to persist across requests without external storage like Redis." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_bb8c4f1a a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When deciding between React.cache() and LRU caching" ;
+    oc:directiveContent "React.cache() only works within a single request — it cannot share data across multiple sequential requests." ;
+    oc:hasRationale "Using React.cache() for cross-request scenarios will result in cache misses and unnecessary database queries." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_fdc9083b a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When initializing an LRU cache instance" ;
+    oc:directiveContent "Configure LRU cache with both max entry count (e.g., 1000) and TTL (e.g., 5 minutes) to balance memory usage and data freshness." ;
+    oc:hasRationale "Without bounds, an in-memory cache can grow unbounded and cause memory leaks; TTL ensures stale data is evicted automatically." ;
+    oc:severityLevel "MEDIUM" .
+

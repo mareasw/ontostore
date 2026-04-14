@@ -1,0 +1,63 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_vercel_labs_vercel_react_best_practices_js_cache_property_access a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "js-cache-property-access" ;
+    skos:broader "Performance optimization technique" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
+    oc:contentHash "73e47431e74878a927061bf0ddc7cd91a7556cb35d2573f3421e82300d9ae311" ;
+    oc:differentia "caches deeply nested property access and array length lookups outside of hot loops to eliminate redundant traversals" ;
+    oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_1e935818,
+        oc:kn_4e3a02a9,
+        oc:kn_94497988,
+        oc:kn_a192d5bb,
+        oc:kn_a3fecc42 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:CodeUnderTest ;
+    oc:resolvesIntent "improve JavaScript loop performance",
+        "optimize property access in loops",
+        "reduce redundant lookups in hot paths" ;
+    oc:yieldsState oc:LoopOptimized .
+
+oc:kn_1e935818 a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "When evaluating which optimizations to prioritize in a codebase" ;
+    oc:directiveContent "Impact is LOW-MEDIUM: reduces per-iteration overhead but is unlikely to be the dominant bottleneck unless the loop body is otherwise very lightweight and iterations are very high." ;
+    oc:hasRationale "Property caching is a micro-optimization; it should be applied in hot paths but should not displace higher-impact architectural optimizations." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_4e3a02a9 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Before applying property caching in a loop" ;
+    oc:directiveContent "This optimization only applies when the cached value is guaranteed to remain constant across all loop iterations." ;
+    oc:hasRationale "If the property value or array length could change during iteration, caching would produce incorrect results by reading a stale snapshot." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_94497988 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When authoring any loop in JavaScript or TypeScript" ;
+    oc:directiveContent "Never place deeply nested property chains (e.g., obj.a.b.c.d) inside a loop body when the value does not change across iterations." ;
+    oc:hasRationale "Repeated nested lookups multiply the cost of the traversal by the number of iterations, creating an avoidable O(N × depth) overhead that can be reduced to O(depth)." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_a192d5bb a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing index-based for-loops over arrays in performance-sensitive code" ;
+    oc:directiveContent "Cache array .length in a local variable when using a classic for-loop, rather than re-accessing the property on every iteration." ;
+    oc:hasRationale "Although modern JS engines often optimize .length access, explicitly caching it is a low-cost, deterministic micro-optimization that eliminates any ambiguity in hot paths." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_a3fecc42 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing loops that reference object properties, especially nested ones, inside the loop body" ;
+    oc:directiveContent "Cache deeply nested property access (e.g., obj.config.settings.value) in a local constant before entering a loop, rather than performing the traversal on every iteration." ;
+    oc:hasRationale "Each property lookup in a hot loop is multiplied by N iterations; caching reduces N lookups to 1, lowering instruction count and improving throughput." ;
+    oc:severityLevel "MEDIUM" .
+

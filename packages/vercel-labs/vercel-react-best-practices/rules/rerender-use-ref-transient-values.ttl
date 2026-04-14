@@ -1,0 +1,57 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_vercel_labs_vercel_react_best_practices_rerender_use_ref_transient_values a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "rerender-use-ref-transient-values" ;
+    skos:broader "React performance optimization pattern" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
+    oc:contentHash "f1a649af9d1d0b5c762f6c9c4c1c70c90d7df82aa10296ee87aadb78c1b76c54" ;
+    oc:differentia "stores frequently-changing transient values in useRef instead of useState to avoid unnecessary re-renders" ;
+    oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
+    oc:handlesFailure oc:InvalidInput ;
+    oc:hasArgumentHint "React component code that updates state on frequent events" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_51510244,
+        oc:kn_589dbcfc,
+        oc:kn_ba3f50a6,
+        oc:kn_df85b2b0 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:ReactComponentExists ;
+    oc:resolvesIntent "avoid re-renders on frequent updates like mouse tracking or intervals",
+        "decide when to use useRef vs useState in React components",
+        "optimize React component re-rendering for transient values" ;
+    oc:yieldsState oc:ReactComponentOptimized .
+
+oc:kn_51510244 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Always, when using useRef for values that also affect visual output" ;
+    oc:directiveContent "Ref value changes (ref.current = newValue) are synchronous and imperative — they will not cause a re-render, so any UI that depends on the ref value must be updated imperatively via DOM access." ;
+    oc:hasRationale "This is the fundamental trade-off: refs give you performance but require manual DOM synchronization instead of declarative React rendering." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_589dbcfc a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When optimizing components that track fast-changing values affecting visual output (e.g., positioning an element based on mouse coordinates)" ;
+    oc:directiveContent "When using useRef for transient values that affect the DOM, combine with a ref callback to imperatively mutate the DOM node's style or properties directly, bypassing React's rendering cycle." ;
+    oc:hasRationale "Direct DOM manipulation via refs avoids the overhead of React's reconciliation loop, which is unnecessary for simple style changes on a single element." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_ba3f50a6 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When implementing event handlers that fire rapidly (mousemove, scroll, requestAnimationFrame)" ;
+    oc:directiveContent "Do not store high-frequency transient values (mouse coordinates, interval counters, temporary flags) in useState if they don't directly control rendered output through JSX." ;
+    oc:hasRationale "Each setState call schedules a re-render, so high-frequency updates cause excessive rendering and jank, degrading performance." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_df85b2b0 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When choosing between useState and useRef for a value in a React component" ;
+    oc:directiveContent "Use useRef for values that change frequently and do not need to trigger a re-render (e.g., mouse positions, intervals, transient flags). Reserve useState for values that directly drive UI rendering." ;
+    oc:hasRationale "Updating a ref does not trigger a re-render, avoiding performance overhead from frequent state updates that don't need to be reflected in the virtual DOM." ;
+    oc:severityLevel "MEDIUM" .
+

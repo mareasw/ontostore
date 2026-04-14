@@ -1,0 +1,57 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_vercel_labs_vercel_react_best_practices_advanced_init_once a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "advanced-init-once" ;
+    skos:broader "React initialization pattern" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
+    oc:contentHash "3e4dc22173eb0e2b6dcf583e3babd862b8696328f8f59aee7c4d746c5bc05f6c" ;
+    oc:differentia "ensures app-wide initialization runs exactly once per app load rather than per component mount using module-level guards" ;
+    oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
+    oc:handlesFailure oc:DuplicateInitialization ;
+    oc:hasArgumentHint "React component with app-wide initialization logic" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_0bc4a24f,
+        oc:kn_18afea35,
+        oc:kn_36cb2018,
+        oc:kn_7c6a3796 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "avoid duplicate initialization in React development mode",
+        "initialize app once per load",
+        "prevent re-running side effects on component remount" ;
+    oc:yieldsState oc:AppInitialized .
+
+oc:kn_0bc4a24f a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When debugging duplicate initialization during React development" ;
+    oc:directiveContent "React StrictMode in development intentionally double-mounts components, causing useEffect cleanup and re-execution. This is by design and will not occur in production." ;
+    oc:hasRationale "Developers may observe unexpected double execution and incorrectly assume it's a bug; understanding StrictMode behavior prevents misdiagnosis." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_18afea35 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing React components that need one-time app initialization" ;
+    oc:directiveContent "Do not place app-wide initialization logic (e.g., loadFromStorage, checkAuthToken) inside a bare useEffect([]) in a component. Components can remount and effects will re-run, causing duplicate initialization." ;
+    oc:hasRationale "In development mode, React StrictMode double-invokes effects, and in production, component remounting (e.g., due to Suspense or routing) will also re-run effects, leading to duplicate side effects." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_36cb2018 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing one-time initialization for a React application" ;
+    oc:directiveContent "Use a module-level guard variable (e.g., let didInit = false) inside useEffect to ensure initialization runs exactly once per app load, or move initialization to the entry module's top level." ;
+    oc:hasRationale "Module-level state persists across remounts because the module is evaluated once, providing a reliable single-execution guarantee regardless of component lifecycle." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_7c6a3796 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When evaluating where to place initialization code in a React app" ;
+    oc:directiveContent "If the initialization truly only needs to happen once per app load and has no dependency on component state or props, it should not live inside a component at all — prefer top-level module initialization." ;
+    oc:hasRationale "Moving init outside components eliminates the component lifecycle entirely from the equation, making the code simpler and the guarantee stronger." ;
+    oc:severityLevel "LOW" .
+

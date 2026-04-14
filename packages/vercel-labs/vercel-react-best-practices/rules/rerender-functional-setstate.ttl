@@ -1,0 +1,78 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_vercel_labs_vercel_react_best_practices_rerender_functional_setstate a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "rerender-functional-setstate" ;
+    skos:broader "React state management pattern" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
+    oc:contentHash "5e68df6b2ae8058e67f476ff1ac67bde159f5a9d18df439e46eabcdeb7b52e58" ;
+    oc:differentia "uses functional setState updates to prevent stale closures and stabilize callback references" ;
+    oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
+    oc:handlesFailure oc:StaleClosureDetected,
+        oc:UnnecessaryRecreationIdentified ;
+    oc:hasArgumentHint "React component code using useState with callbacks" ;
+    oc:hasCategory "development" ;
+    oc:hasRequirement oc:req_c0233aa4,
+        oc:req_cdad24b4 ;
+    oc:impartsKnowledge oc:kn_4600ad1f,
+        oc:kn_5fb26715,
+        oc:kn_74237f31,
+        oc:kn_af229d93,
+        oc:kn_c2bff44a ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:ReactComponentWithState ;
+    oc:resolvesIntent "fix React state update bugs",
+        "optimize React useCallback dependencies",
+        "prevent stale closures in React useState callbacks",
+        "stabilize callback references in React components" ;
+    oc:yieldsState oc:StableCallbacksEstablished,
+        oc:StaleClosureRiskMitigated .
+
+oc:kn_4600ad1f a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing useCallback, useMemo, or any closure that calls setState based on current state" ;
+    oc:directiveContent "Never reference a state variable directly inside a useCallback or useMemo that updates that same state — always use the functional update form (e.g., setItems(curr => ...) instead of setItems([...items, ...]))." ;
+    oc:hasRationale "Direct state references in closures capture stale values if the dependency is omitted, or cause unnecessary callback recreations if the dependency is included — both are bugs." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_5fb26715 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When updating React state based on its current value, especially inside useCallback, event handlers, or async operations" ;
+    oc:directiveContent "Use functional setState updates (setItems(curr => ...)) whenever the new state depends on the previous state value." ;
+    oc:hasRationale "Functional updates guarantee access to the latest state without needing to add state to dependency arrays, yielding stable callback references and eliminating stale closure bugs." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_74237f31 a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "Always, when functional setState is adopted" ;
+    oc:directiveContent "Using functional setState with empty dependency arrays produces stable callback references that never change across renders, which can simplify memoization of child components." ;
+    oc:hasRationale "Stable references are a side benefit beyond correctness — they improve performance by avoiding unnecessary re-renders downstream." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_af229d93 a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "When optimizing React component render performance" ;
+    oc:directiveContent "Functional setState updates eliminate the need to include state in useCallback dependency arrays, preventing callback recreation on every state change and reducing unnecessary child re-renders." ;
+    oc:hasRationale "Stable callback references mean memoized child components receiving these callbacks via props will not re-render when unrelated state changes occur." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_c2bff44a a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When deciding between direct vs functional setState" ;
+    oc:directiveContent "If setState's new value references the current state variable, switch to the functional form; if setting to a static value or a value derived only from props/arguments, direct form is fine." ;
+    oc:hasRationale "Functional updates add no value when state is being set to a completely independent value, but are essential for correctness when previous state is involved." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:req_c0233aa4 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "React hooks (useState, useCallback)" .
+
+oc:req_cdad24b4 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "JavaScript closures and dependency arrays" .
+

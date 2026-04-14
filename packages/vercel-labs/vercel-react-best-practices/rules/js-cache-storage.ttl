@@ -1,0 +1,66 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_vercel_labs_vercel_react_best_practices_js_cache_storage a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "js-cache-storage" ;
+    skos:broader "Performance optimization pattern" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
+    oc:contentHash "11b826b0433898c1ece2d3547010d8e77db9fb240185748c45db91493de9b6cc" ;
+    oc:differentia "caches synchronous Web Storage API reads in memory using Map-based memoization to reduce expensive I/O operations" ;
+    oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
+    oc:handlesFailure oc:InvalidInput ;
+    oc:hasArgumentHint "storage key to cache" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_00213bd5,
+        oc:kn_07336573,
+        oc:kn_4d5257b6,
+        oc:kn_709afe03,
+        oc:kn_7162e568 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "cache cookie reads",
+        "cache localStorage calls",
+        "optimize storage reads",
+        "reduce synchronous I/O overhead" ;
+    oc:yieldsState oc:CacheInitialized .
+
+oc:kn_00213bd5 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When accessing browser storage APIs in JavaScript" ;
+    oc:directiveContent "Never read from localStorage, sessionStorage, or document.cookie on every function call without caching — these are synchronous blocking I/O operations." ;
+    oc:hasRationale "Synchronous storage reads block the main thread and are expensive; repeated reads in hot code paths compound the performance cost." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_07336573 a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "When a storage key is read multiple times during a session" ;
+    oc:directiveContent "Caching storage reads reduces N synchronous I/O operations down to 1 initial read plus N-1 Map lookups (O(1) each)." ;
+    oc:hasRationale "Map lookups are orders of magnitude faster than localStorage reads; the performance benefit scales with access frequency." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_4d5257b6 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When implementing in-memory storage caching" ;
+    oc:directiveContent "Use a plain Map for storage caching rather than a React hook, so the cache is usable across utilities, event handlers, and non-component code." ;
+    oc:hasRationale "Hook-based caching only works inside React components; a Map works everywhere and provides the same memoization benefit without framework coupling." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_709afe03 a oc:Idempotency,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When implementing setLocalStorage or similar write-through caching" ;
+    oc:directiveContent "The write-through cache pattern (updating both storage and cache on set) ensures idempotent reads after writes within the same session." ;
+    oc:hasRationale "Keeping the in-memory cache in sync with storage on writes guarantees subsequent reads return the correct value without hitting storage again." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_7162e568 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When localStorage or cookies may be modified by another browser tab or server-set cookies" ;
+    oc:directiveContent "Cache invalidation listeners must be registered when storage can change externally — listen for the 'storage' event for cross-tab changes and 'visibilitychange' for tab reactivation." ;
+    oc:hasRationale "Without invalidation, stale cached values will be served indefinitely, leading to incorrect application state." ;
+    oc:severityLevel "CRITICAL" .
+

@@ -1,0 +1,65 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_vercel_labs_vercel_react_best_practices_bundle_conditional a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "bundle-conditional" ;
+    skos:broader "Bundle optimization technique" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
+    oc:contentHash "09c8259c3efb04fc0abb8e412ccbda217c222ae8118516283e571c995fe3a7d4" ;
+    oc:differentia "defers loading of large modules until feature activation using dynamic imports" ;
+    oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
+    oc:handlesFailure oc:DynamicImportFailed ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_289ae94f,
+        oc:kn_641be575,
+        oc:kn_ba9188c5,
+        oc:kn_ca3d84e9,
+        oc:kn_d87a6d77 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:ReactComponentMounted ;
+    oc:resolvesIntent "lazy-load modules conditionally",
+        "optimize SSR bundle by deferring client-only imports",
+        "reduce initial bundle size" ;
+    oc:yieldsState oc:BundleSizeOptimized,
+        oc:ModuleConditionallyLoaded .
+
+oc:kn_289ae94f a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When implementing conditional loading inside useEffect" ;
+    oc:directiveContent "Guard against repeated imports by checking if data has already been loaded (e.g., `if (enabled && !frames)`) before triggering a dynamic import." ;
+    oc:hasRationale "Without a loaded-state check, re-enabling a feature would re-fetch and re-parse the module, causing unnecessary network requests and state thrashing." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_641be575 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing components with optional or toggled features" ;
+    oc:directiveContent "Do not import large animation frames, datasets, or heavy libraries at the top level of a component that may never be used." ;
+    oc:hasRationale "Static imports are always included in the bundle regardless of whether the feature is activated, wasting bandwidth and parse time." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_ba9188c5 a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When using dynamic import() for conditional loading" ;
+    oc:directiveContent "Handle dynamic import failures with a .catch() handler that gracefully disables the feature (e.g., setting enabled state to false)." ;
+    oc:hasRationale "Network failures or module loading errors should not crash the entire component; graceful degradation preserves the rest of the UI." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_ca3d84e9 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When dynamically importing modules in components that run during server-side rendering" ;
+    oc:directiveContent "Use `typeof window !== 'undefined'` guard around dynamic imports to prevent bundling client-only modules into the SSR bundle." ;
+    oc:hasRationale "Without this guard, the module gets resolved and included in the server bundle, increasing server bundle size and potentially breaking SSR if the module relies on browser APIs." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_d87a6d77 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When building components that depend on heavy data or large third-party modules" ;
+    oc:directiveContent "Load large data or modules only when the feature that requires them is activated, using dynamic import() triggered by state changes." ;
+    oc:hasRationale "Deferring module loading reduces initial JavaScript bundle size and improves Time to Interactive for the majority of users who may never activate the feature." ;
+    oc:severityLevel "HIGH" .
+

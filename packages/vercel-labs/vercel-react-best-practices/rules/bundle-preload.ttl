@@ -1,0 +1,64 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_vercel_labs_vercel_react_best_practices_bundle_preload a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "bundle-preload" ;
+    skos:broader "Performance optimization technique" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
+    oc:contentHash "d1f7cc28da7cd5ab249acd287edc5b761afcfb194e9cb62cd44c5f3543db2de2" ;
+    oc:differentia "preloads heavy JavaScript bundles based on user intent signals such as hover, focus, or feature flags to reduce perceived latency" ;
+    oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_0397a7c9,
+        oc:kn_4799294f,
+        oc:kn_64e22568,
+        oc:kn_c15acbb8,
+        oc:kn_c5e3707b ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "conditionally load heavy dependencies",
+        "optimize bundle loading performance",
+        "preload modules on user interaction",
+        "reduce perceived latency in React apps" ;
+    oc:yieldsState oc:BundlePreloaded .
+
+oc:kn_0397a7c9 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When adding preloading to a React application" ;
+    oc:directiveContent "Do not preload all heavy modules unconditionally on page load; instead, tie preloading to specific user intent signals." ;
+    oc:hasRationale "Unconditional preloading wastes bandwidth and CPU on modules the user may never need, defeating the purpose of code splitting." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_4799294f a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "When using void import for preloading" ;
+    oc:directiveContent "Dynamic `import()` calls trigger network requests and module caching in the browser, even when the result is discarded with `void`." ;
+    oc:hasRationale "Agents should understand that preload is not free — it consumes network and parse resources, so it should only happen when there is high likelihood the user will need the module." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_64e22568 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing preload logic that runs during server-side rendering" ;
+    oc:directiveContent "Always guard dynamic imports with `typeof window !== 'undefined'` to prevent bundling preloaded modules into the SSR bundle." ;
+    oc:hasRationale "Without this check, the preloaded module gets included in the server bundle, increasing server bundle size and slowing the build." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_c15acbb8 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When a component uses a heavy dependency like a rich text editor or charting library" ;
+    oc:directiveContent "Preload heavy bundles proactively based on user intent signals (hover, focus, feature flags) rather than waiting for the user to trigger the full load." ;
+    oc:hasRationale "Preloading reduces the perceived latency the user experiences between clicking and the feature being ready." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_c5e3707b a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When deciding between fire-and-forget preload vs initialized preload" ;
+    oc:directiveContent "Use `void import(...)` for side-effect-free preloading where you only need the module cached; use `.then(mod => mod.init())` when initialization logic must run." ;
+    oc:hasRationale "Void import keeps the preload lightweight and avoids executing module side effects prematurely, while `.then()` is needed when the module requires explicit initialization." ;
+    oc:severityLevel "MEDIUM" .
+

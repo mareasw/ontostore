@@ -1,0 +1,66 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_vercel_labs_vercel_react_best_practices_advanced_event_handler_refs a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "advanced-event-handler-refs" ;
+    skos:broader "React optimization pattern" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
+    oc:contentHash "a3097edeecfb2ff6851cd66ed8cdf0617c3c88180504bee824aa6e75a215bbbc" ;
+    oc:differentia "stores callbacks in refs to maintain stable event subscriptions without re-subscribing on handler changes" ;
+    oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
+    oc:handlesFailure oc:InvalidInput ;
+    oc:hasArgumentHint "React hook or component with event handler effects" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_07bbfe2a,
+        oc:kn_0c4f2ff8,
+        oc:kn_105e5b21,
+        oc:kn_7436cbea,
+        oc:kn_f417a0db ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "create stable event listener hooks",
+        "optimize event handler subscriptions",
+        "prevent unnecessary re-subscription in effects",
+        "use refs for callback stability" ;
+    oc:yieldsState oc:DocumentCreated .
+
+oc:kn_07bbfe2a a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When React 18.3+ or later with useEffectEvent is available" ;
+    oc:directiveContent "Prefer useEffectEvent over manual ref-based handler stabilization when using latest React versions" ;
+    oc:hasRationale "useEffectEvent provides a cleaner, built-in API for the same ref-stabilization pattern, reducing boilerplate and potential for mistakes" ;
+    oc:severityLevel "LOW" .
+
+oc:kn_0c4f2ff8 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When creating custom hooks for event listeners or subscriptions" ;
+    oc:directiveContent "Store event handler callbacks in refs and read from the ref inside the effect listener to decouple subscription lifetime from handler identity" ;
+    oc:hasRationale "This pattern ensures the subscription remains stable while always calling the latest version of the handler, avoiding stale closure bugs without re-subscription overhead" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_105e5b21 a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "When implementing the handlerRef pattern in custom hooks" ;
+    oc:directiveContent "The ref-stabilization pattern mutates ref.current on every handler change, which is a safe side effect that does not trigger re-renders" ;
+    oc:hasRationale "Understanding that ref mutations are safe side effects is crucial — they don't trigger re-renders and are the intended mechanism for this pattern" ;
+    oc:severityLevel "LOW" .
+
+oc:kn_7436cbea a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "When evaluating subscription-heavy components like those with window or document event listeners" ;
+    oc:directiveContent "Without ref-stabilization, event listeners are removed and re-added on every render cycle, causing unnecessary DOM churn" ;
+    oc:hasRationale "Each addEventListener/removeEventListener cycle has a cost, and in rapid re-render scenarios this can degrade performance and cause missed events during the transition" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_f417a0db a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing useEffect hooks that add event listeners or subscriptions" ;
+    oc:directiveContent "Never include callback handlers directly in useEffect dependency arrays if the effect sets up subscriptions, as this causes re-subscription on every render" ;
+    oc:hasRationale "Including the handler in the dependency array causes the effect to tear down and re-setup the subscription every time the handler reference changes, which is typically every render" ;
+    oc:severityLevel "HIGH" .
+
