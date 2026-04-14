@@ -1,0 +1,110 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_cocoapods_spm_migration_common_pods_mapping a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "common-pods-mapping" ;
+    skos:broader "Dependency mapping guide" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/kotlin/kotlin-agent-skills/kotlin-tooling-cocoapods-spm-migration" ;
+    oc:contentHash "fe29a0c9c983435b4fb8f7cc2c26e1bf9e3d5fc173d69fcdd6b9d35b5240ceff" ;
+    oc:differentia "Translates popular CocoaPods pod declarations to SwiftPM package declarations for KMP projects, with per-product cinterop notes, importedClangModules overrides, and bundled-klib compatibility guidance" ;
+    oc:extends oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_cocoapods_spm_migration ;
+    oc:handlesFailure oc:ModuleNotFound,
+        oc:SymbolConflictDetected,
+        oc:VersionMismatch ;
+    oc:hasArgumentHint "pod-name or library-name (e.g., \"FirebaseAuth\", \"GoogleMaps\")" ;
+    oc:hasCategory "development" ;
+    oc:hasRequirement oc:req_53378b1e,
+        oc:req_934d0305,
+        oc:req_c3fa2aa4 ;
+    oc:impartsKnowledge oc:kn_092c4f61,
+        oc:kn_17bfdda3,
+        oc:kn_56322405,
+        oc:kn_66e5cd29,
+        oc:kn_bb4c9648,
+        oc:kn_c00c44af,
+        oc:kn_ce161467,
+        oc:kn_e2d62b26 ;
+    oc:isUserInvocable true ;
+    oc:nature "Reference" ;
+    oc:requiresState oc:CocoaPodsDependenciesIdentified,
+        oc:SPMConfigurationInProgress ;
+    oc:resolvesIntent "find correct importedClangModules for Firebase products",
+        "handle bundled cinterop klibs when migrating to SwiftPM",
+        "map CocoaPods dependencies to SwiftPM equivalents",
+        "migrate Firebase pods to Swift Package Manager in KMP",
+        "resolve version constraint differences between CocoaPods and SPM" ;
+    oc:yieldsState oc:ImportedClangModulesIdentified,
+        oc:PodsMappedToSwiftPM .
+
+oc:kn_092c4f61 a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When a project uses dev.gitlive Firebase KMP libraries and migrates from CocoaPods to SPM" ;
+    oc:directiveContent "For dev.gitlive/firebase-kotlin-sdk, add per-product -F linkerOpts pointing to $BUILT_PRODUCTS_DIR/<product> for each Firebase framework, and set isStatic = true for the Kotlin/Native framework." ;
+    oc:hasRationale "dev.gitlive klibs have CocoaPods-era linker flags baked in. With SPM, Firebase frameworks land in per-product subdirectories that the K/N linker doesn't search. isStatic = true avoids dyld 'Library not loaded' crashes since SPM Firebase products are static libraries." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_17bfdda3 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When migrating any Firebase pod from CocoaPods to SwiftPM" ;
+    oc:directiveContent "Never mix Firebase products across CocoaPods and SPM. All Firebase pods must be migrated to SPM at once to avoid dyld crashes from duplicate transitive dependencies (gRPC, abseil, leveldb, BoringSSL, nanopb)." ;
+    oc:hasRationale "Firebase products share a single repository and common transitive C++ dependencies. Partial migration causes these dependencies to be linked twice with conflicting symbols, causing runtime crashes like 'Symbol not found: _OBJC_CLASS_$_FIRFirestore'." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_56322405 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When configuring swiftPMDependencies for Firebase products with binary xcframework distributions" ;
+    oc:directiveContent "Several Firebase products require importedClangModules that differ from their SPM product name: FirebaseDatabase→FirebaseDatabaseInternal, FirebaseFirestore→FirebaseFirestoreInternal, FirebaseRemoteConfig→FirebaseRemoteConfigInternal, FirebaseInAppMessaging-Beta→FirebaseInAppMessagingInternal." ;
+    oc:hasRationale "These Firebase products distribute as binary xcframeworks where the internal Clang module exposed to Objective-C has a different name than the SPM product. Without the correct importedClangModules, the KMP cinterop compiler cannot discover the Objective-C headers." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_66e5cd29 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When a KMP wrapper library (like KMPNotifier or dev.gitlive) bundles pre-built cinterop klibs using the cocoapods.* package namespace" ;
+    oc:directiveContent "Do not replace cocoapods.* imports with swiftPMImport.* for libraries that bundle their own cinterop klibs (e.g., KMPNotifier's cocoapods.FirebaseMessaging namespace). These imports resolve to the library's bundled klib, not actual CocoaPods infrastructure." ;
+    oc:hasRationale "The bundled klib provides Kotlin bindings for the native SDK. Replacing these imports would break the dependency on the library's pre-built bindings, causing compilation errors." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_bb4c9648 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "After migrating FirebaseCrashlytics from CocoaPods to SwiftPM" ;
+    oc:directiveContent "For Firebase Crashlytics, ensure a dSYM upload run script phase is added at the END of Xcode build phases pointing to the SPM checkout path, and set Debug Information Format to 'DWARF with dSYM File' for all configurations." ;
+    oc:hasRationale "Crashlytics requires dSYM uploads to function. The run script path changes from the CocoaPods checkout location to the SPM SourcePackages checkout location." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_c00c44af a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When declaring Firebase SwiftPM dependencies in build.gradle.kts" ;
+    oc:directiveContent "Set discoverModulesImplicitly = false for Firebase and explicitly list only the Clang modules you need in importedClangModules." ;
+    oc:hasRationale "Firebase's transitive C++ dependencies (gRPC, abseil, leveldb, BoringSSL) contain Clang modules that fail cinterop. Implicit discovery would attempt to process all of them and break the build." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_ce161467 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When migrating GoogleMaps pod to SwiftPM" ;
+    oc:directiveContent "GoogleMaps SPM package requires exact() versioning — from() will fail to resolve. Also requires iOS-only platform constraint (setOf(iOS()))." ;
+    oc:hasRationale "The Google Maps SPM package does not support semantic version ranges and only resolves with exact version pins." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_e2d62b26 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting any pod version declaration to SwiftPM version syntax" ;
+    oc:directiveContent "Preserve version constraint semantics from the CocoaPods block: exact pins (version = 'X.Y.Z' without ~>) must use exact() in SPM; optimistic constraints (~>) should use from()." ;
+    oc:hasRationale "Using from() for an exact CocoaPods pin can resolve to a newer version with removed or renamed symbols, breaking cinterop API compatibility." ;
+    oc:severityLevel "HIGH" .
+
+oc:req_53378b1e a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "CocoaPods to SPM migration patterns" .
+
+oc:req_934d0305 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "KMP swiftPMDependencies DSL syntax" .
+
+oc:req_c3fa2aa4 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Kotlin/Native cinterop and Clang module system" .
+

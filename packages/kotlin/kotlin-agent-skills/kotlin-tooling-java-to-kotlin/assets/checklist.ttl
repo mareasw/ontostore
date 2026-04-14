@@ -1,0 +1,119 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_java_to_kotlin_checklist a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "checklist" ;
+    skos:broader "Verification checklist" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/kotlin/kotlin-agent-skills/kotlin-tooling-java-to-kotlin" ;
+    oc:contentHash "b2cafa681d87c3d6b9ce730954943ccc306e0c3c5d96f3f7eb0d6726d108bb40" ;
+    oc:differentia "that validates correctness of Java-to-Kotlin conversions across compilation, semantics, annotations, nullability, collections, idioms, and framework-specific concerns" ;
+    oc:extends oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_java_to_kotlin ;
+    oc:handlesFailure oc:CompilationFailed,
+        oc:SemanticDrift,
+        oc:TestFailure ;
+    oc:hasAllowedTool "Bash",
+        "Glob",
+        "Grep",
+        "Read" ;
+    oc:hasCategory "development" ;
+    oc:hasRequirement oc:req_56295435,
+        oc:req_6dd12ad0,
+        oc:req_b5b7554b ;
+    oc:impartsKnowledge oc:kn_07d809d0,
+        oc:kn_0cecc9d8,
+        oc:kn_45f14072,
+        oc:kn_8e79c075,
+        oc:kn_a8b21a5f,
+        oc:kn_bd0bfead,
+        oc:kn_d7c1b1cc,
+        oc:kn_e3986a4d,
+        oc:kn_ed73cc3b ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:FileConverted ;
+    oc:resolvesIntent "check kotlin idioms applied properly",
+        "ensure framework-specific compatibility after conversion",
+        "preserve documentation and api signatures during conversion",
+        "validate semantic equivalence after conversion",
+        "verify java-to-kotlin conversion correctness" ;
+    oc:yieldsState oc:ConversionVerified .
+
+oc:kn_07d809d0 a oc:KnowledgeNode,
+        oc:PostFlightValidation ;
+    oc:appliesToContext "After completing and verifying a file conversion" ;
+    oc:directiveContent "Confirm the file was renamed via 'git mv' (not delete + create) and that the rename commit is separate from any content changes" ;
+    oc:hasRationale "Preserving git history through rename tracking allows blame/annotate to follow code across the Java-to-Kotlin transition" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_0cecc9d8 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When processing documentation in any converted file" ;
+    oc:directiveContent "Convert Javadoc to proper KDoc: {@code} → backticks, {@link} → bracket links, <p> → blank lines, preserve @param/@return/@throws tags" ;
+    oc:hasRationale "KDoc is the idiomatic documentation format for Kotlin and renders correctly in IntelliJ and Dokka documentation generation" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_45f14072 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When reviewing semantic correctness of any conversion" ;
+    oc:directiveContent "Never introduce new side-effects or behavioral changes during conversion — the Kotlin code must be behaviorally equivalent to the Java original" ;
+    oc:hasRationale "Java-to-Kotlin conversion is a refactoring, not a redesign. Behavioral changes introduce regressions invisible to tests" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_8e79c075 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Immediately after converting each Java file" ;
+    oc:directiveContent "Run this checklist after every single Java-to-Kotlin file conversion, not in batch after all files are converted" ;
+    oc:hasRationale "Catching issues per-file prevents compounding errors across multiple converted files and keeps the git history clean" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_a8b21a5f a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting Java JPA entity classes to Kotlin" ;
+    oc:directiveContent "Never use data classes for JPA/Hibernate entities; they must be open classes with a no-arg constructor" ;
+    oc:hasRationale "Hibernate requires proxyable classes with no-arg constructors. Data classes are final by default and their generated equals/hashCode can conflict with lazy-loaded associations" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_bd0bfead a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting annotations, especially for frameworks like Jackson, Hibernate, or Spring" ;
+    oc:directiveContent "Use correct Kotlin annotation site targets (@field:, @get:, @set:, @param:) where the original Java annotations applied to specific elements" ;
+    oc:hasRationale "Kotlin generates implicit getters/setters/constructor params, so annotations may attach to the wrong target without explicit site prefixes, causing silent framework misconfiguration" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_d7c1b1cc a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When converting Java files that use Lombok (@Data, @Getter, @Setter, @Builder, etc.)" ;
+    oc:directiveContent "Lombok annotations must be completely removed and replaced with Kotlin language equivalents (data class, companion object, lazy delegates, etc.) before the file compiles" ;
+    oc:hasRationale "Lombok is a compile-time annotation processor for Java and has no Kotlin equivalent; leaving Lombok annotations causes compilation failures" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_e3986a4d a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When validating semantic correctness of a converted file" ;
+    oc:directiveContent "Verify all public API signatures are preserved: method names, parameter types, and return types must match the original Java exactly" ;
+    oc:hasRationale "Any API signature change breaks binary compatibility for callers that haven't been converted yet" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_ed73cc3b a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When reviewing nullability and Kotlin idioms in converted code" ;
+    oc:directiveContent "Use val for all immutable variables/properties and var only when the Java original explicitly mutates the variable; apply Kotlin idioms (string templates, when expressions, smart casts, elvis operator) where they improve clarity" ;
+    oc:hasRationale "Using val by default enforces immutability, a core Kotlin best practice; applying idioms makes the code maintainable for Kotlin developers" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:req_56295435 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Framework-specific Kotlin requirements (Spring, Hibernate, Jackson, etc.)" .
+
+oc:req_6dd12ad0 a oc:RequirementTool ;
+    oc:isOptional true ;
+    oc:requirementValue "Kotlin compiler (kotlinc)" .
+
+oc:req_b5b7554b a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Java and Kotlin language differences" .
+

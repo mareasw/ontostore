@@ -1,0 +1,92 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_java_to_kotlin_conversion_methodology a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "conversion-methodology" ;
+    skos:broader "Code conversion methodology" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/kotlin/kotlin-agent-skills/kotlin-tooling-java-to-kotlin" ;
+    oc:contentHash "b83aaed4331d632065008872bb5db9898f4bb3c14a76b73e166b2509ab48f4ea" ;
+    oc:differentia "that transforms Java source into idiomatic Kotlin through a 4-step precognition process with 5 invariants, progressively refining faithfulness, nullability, collections, and idiom quality" ;
+    oc:extends oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_java_to_kotlin ;
+    oc:handlesFailure oc:InvalidInput,
+        oc:InvariantViolation ;
+    oc:hasArgumentHint "Java source code to convert" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_069e9c66,
+        oc:kn_3cf862c3,
+        oc:kn_53b6c114,
+        oc:kn_6b012169,
+        oc:kn_75a48f0d,
+        oc:kn_a677538f,
+        oc:kn_dfe9457a,
+        oc:kn_fac23a94 ;
+    oc:isUserInvocable false ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:JavaSourceProvided ;
+    oc:resolvesIntent "apply structured Java-to-Kotlin transformation",
+        "convert Java to Kotlin",
+        "preserve behavior while modernizing Java to Kotlin",
+        "translate Java code to idiomatic Kotlin" ;
+    oc:yieldsState oc:InvariantsVerified,
+        oc:KotlinCodeGenerated .
+
+oc:kn_069e9c66 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "During Step 2 (nullability & mutability refinement)" ;
+    oc:directiveContent "Only express types as non-null where the Java code proves it can never be null (e.g., `Objects.requireNonNull`, explicit null checks with non-null default). In all other cases, use Kotlin nullable types. Use `val` instead of `var` for never-modified variables." ;
+    oc:hasRationale "Java's type system doesn't enforce nullability, so defaulting to nullable preserves the original contract. Asserting non-null only where the Java author explicitly guarantees it prevents runtime NPEs." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_3cf862c3 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "During Step 4 (idiomatic transformations)" ;
+    oc:directiveContent "In Step 4, replace Java getters/setters with Kotlin properties, use string templates instead of concatenation, prefer the Elvis operator for null defaults, and introduce lambdas where they simplify complexity while preserving exact behaviour." ;
+    oc:hasRationale "These transformations make the output genuinely idiomatic Kotlin rather than Java-in-Kotlin-syntax, improving readability and maintainability." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_53b6c114 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "After each step of the precognition process" ;
+    oc:directiveContent "After each of the 4 steps, explicitly verify all 5 invariants (no new side-effects, annotations preserved, package/imports preserved, Javadoc→KDoc preserved, valid Kotlin). If any invariant fails, revert to the previous step and recalculate." ;
+    oc:hasRationale "The invariants act as a safety net ensuring progressive transformation never drifts from behavioral equivalence. Reverting on failure prevents cascading errors." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_6b012169 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "During Step 3 (collection type conversion)" ;
+    oc:directiveContent "Java mutable collections (`List`, `Set`, `Map`) should map to Kotlin `MutableList`, `MutableSet`, `MutableMap` unless the Java code explicitly uses immutable wrappers like `Collections.unmodifiableList()` — in that case use the read-only Kotlin variant (`List`, `Set`, `Map`)." ;
+    oc:hasRationale "Java collections are mutable by default; using Kotlin read-only types would change mutability semantics. Only explicitly guarded collections should map to read-only types." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_75a48f0d a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Always, enforced as Invariant 2 in every step" ;
+    oc:directiveContent "Annotations must preserve their Java targets using Kotlin annotation site targets: `@field:`, `@get:`, `@set:`, `@param:`. All annotations and their targets must be preserved exactly across every step." ;
+    oc:hasRationale "Mis-targeted annotations silently break serialization frameworks (Jackson, JPA), dependency injection, and validation logic — often without compile-time errors." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_a677538f a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "During Step 1 (faithful translation)" ;
+    oc:directiveContent "Java classes that are implicitly open MUST be converted as Kotlin classes that are explicitly `open`, using the `open` keyword. Java constructors that inject into fields should use the Kotlin primary constructor; additional constructor logic uses secondary constructors." ;
+    oc:hasRationale "Kotlin classes are final by default, so failing to add `open` changes the type hierarchy and breaks subclasses. Primary constructor placement is idiomatic and preserves field injection semantics." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_dfe9457a a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "Always, for every Java-to-Kotlin conversion" ;
+    oc:directiveContent "Always apply the 4-step precognition process in strict order: (1) faithful 1:1 translation, (2) nullability & mutability refinement, (3) collection type conversion, (4) idiomatic transformations. Output code after each step." ;
+    oc:hasRationale "The incremental approach ensures behavioural correctness is established before any optimization, preventing subtle bugs from being introduced by premature idiomatic changes." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_fac23a94 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "During all steps, enforced as Invariant 3" ;
+    oc:directiveContent "Never remove Java imports even if they become unused after conversion (e.g., `java.util.Objects` after removing `Objects.requireNonNull`), unless they shadow Kotlin names (e.g., `java.util.List` shadows Kotlin's `List`)." ;
+    oc:hasRationale "Preserving imports ensures the converted file remains a drop-in replacement and avoids breaking reflection-based or classpath-sensitive tooling that depends on import presence." ;
+    oc:severityLevel "MEDIUM" .
+

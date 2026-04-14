@@ -1,0 +1,70 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_java_to_kotlin_quarkus a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "quarkus" ;
+    skos:broader "conversion guide" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/kotlin/kotlin-agent-skills/kotlin-tooling-java-to-kotlin" ;
+    oc:contentHash "d0c708e5cf05598fa04760a1696bf2ad396f67933324ebaae51f475f4ec88d5a" ;
+    oc:dependsOnSkill oc:skill_kotlin_tooling_java_to_kotlin ;
+    oc:differentia "that handles Quarkus-specific patterns (CDI, JAX-RS, Panache) when translating Java to Kotlin" ;
+    oc:extends oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_java_to_kotlin ;
+    oc:handlesFailure oc:AnnotationTargetMismatch,
+        oc:MissingNoArgConstructor,
+        oc:PanacheEntityFinalClass ;
+    oc:hasArgumentHint "Java source files containing Quarkus/CDI/JAX-RS imports" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_24abb96a,
+        oc:kn_36b90b73,
+        oc:kn_501a6a8b,
+        oc:kn_c245bf4f,
+        oc:kn_f272fd63 ;
+    oc:isUserInvocable false ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:JavaSourceLoaded ;
+    oc:resolvesIntent "convert Panache entities from Java to Kotlin",
+        "convert Quarkus Java code to Kotlin",
+        "migrate Quarkus REST endpoints to Kotlin",
+        "translate CDI beans from Java to Kotlin" ;
+    oc:yieldsState oc:CDICompliant,
+        oc:KotlinSourceGenerated .
+
+oc:kn_24abb96a a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting any class annotated with @ApplicationScoped, @RequestScoped, or @Dependent" ;
+    oc:directiveContent "CDI beans must have a no-arg constructor (package-private or public). Satisfy this in Kotlin by giving all constructor parameters default values, or by adding a secondary no-arg constructor." ;
+    oc:hasRationale "The CDI specification mandates a no-arg constructor for bean instantiation; Kotlin's default primary constructor with parameters does not satisfy this requirement." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_36b90b73 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting Panache ORM entity classes" ;
+    oc:directiveContent "Panache entities must be declared as open class (NOT data class), extend PanacheEntity or PanacheEntityBase, and keep fields as open mutable properties." ;
+    oc:hasRationale "Panache enhances field access at build time via bytecode manipulation, which requires open classes and mutable properties. Data classes are final and incompatible." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_501a6a8b a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When converting Java classes that use @Inject on fields" ;
+    oc:directiveContent "Replace @Inject field injection with an @Inject-annotated primary constructor. CDI requires @Inject on the constructor when multiple constructors exist; with a single constructor, Quarkus discovers it automatically." ;
+    oc:hasRationale "Kotlin idiomatic constructor injection aligns with CDI's contract and avoids mutable field injection, which is non-idiomatic in Kotlin." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_c245bf4f a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting REST endpoint classes and CDI beans" ;
+    oc:directiveContent "Preserve JAX-RS annotations (@Path, @GET, @POST, @PUT, @DELETE, @Produces, @Consumes) exactly as-is with no annotation site target needed. Preserve scope annotations (@ApplicationScoped, @RequestScoped, @Dependent) exactly." ;
+    oc:hasRationale "These annotations are consumed by the Quarkus runtime at bytecode level and do not need Kotlin-specific annotation site targets." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_f272fd63 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting @ConfigProperty field injection from Java to Kotlin" ;
+    oc:directiveContent "For @ConfigProperty, use it on constructor parameters with a default value (e.g., val greeting: String = \"\") to simultaneously satisfy CDI's no-arg constructor requirement and Quarkus config injection." ;
+    oc:hasRationale "Default values allow the no-arg constructor path to compile while still enabling Quarkus to inject the configured value via the @Inject constructor." ;
+    oc:severityLevel "HIGH" .
+

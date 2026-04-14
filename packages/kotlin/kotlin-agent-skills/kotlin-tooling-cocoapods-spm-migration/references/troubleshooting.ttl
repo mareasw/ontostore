@@ -1,0 +1,137 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_cocoapods_spm_migration_troubleshooting a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "troubleshooting" ;
+    skos:broader "Diagnostic reference" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/kotlin/kotlin-agent-skills/kotlin-tooling-cocoapods-spm-migration" ;
+    oc:contentHash "623103542d82a94f63810e8e99ed195b207b6320f9f1aef58e9c86a2882713eb" ;
+    oc:differentia "catalogs symptoms, root causes, and solutions for common failures during KMP CocoaPods-to-SwiftPM migration, including Gradle errors, linker issues, build phase problems, Firebase-specific edge cases, and rollback procedures" ;
+    oc:extends oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_cocoapods_spm_migration ;
+    oc:handlesFailure oc:DyldCrash,
+        oc:GradleSyncFailed,
+        oc:ImportNotFound,
+        oc:LinkerError,
+        oc:SandboxingError,
+        oc:XcodeBuildPhaseError ;
+    oc:hasArgumentHint "error symptom or error log excerpt" ;
+    oc:hasCategory "development" ;
+    oc:hasRequirement oc:req_0c311b87,
+        oc:req_0c96571e,
+        oc:req_a95f9b0f ;
+    oc:impartsKnowledge oc:kn_3b52976e,
+        oc:kn_3f871977,
+        oc:kn_41ffee7e,
+        oc:kn_52afae3b,
+        oc:kn_7b9945c9,
+        oc:kn_8ce30144,
+        oc:kn_9e82bc51,
+        oc:kn_ad160ddf,
+        oc:kn_c56a7b28,
+        oc:kn_c8f5c735,
+        oc:kn_d57e3930 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:MigrationInProgress ;
+    oc:resolvesIntent "diagnose migration build failure",
+        "fix linker errors after CocoaPods to SwiftPM migration",
+        "perform rollback from failed SwiftPM migration",
+        "resolve Firebase-specific SPM migration issues",
+        "resolve import not found errors after migration",
+        "troubleshoot Xcode build phase problems in migrated KMP project" ;
+    oc:yieldsState oc:BuildErrorDiagnosed,
+        oc:MigrationRecovered .
+
+oc:kn_3b52976e a oc:KnowledgeNode,
+        oc:RollbackProcedure ;
+    oc:appliesToContext "When all troubleshooting approaches have been exhausted and the migration cannot be completed" ;
+    oc:directiveContent "Rollback is a last resort only after exhausting all diagnostic approaches. Steps: (1) git checkout all modified files, (2) restore cocoapods plugin and block in build.gradle.kts, (3) revert all imports from swiftPMImport.* back to cocoapods.*, (4) run pod install, (5) open .xcworkspace in Xcode." ;
+    oc:hasRationale "Rollback restores the project to a known-working CocoaPods state, but should be avoided because it discards all migration progress" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_3f871977 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "When modifying ENABLE_USER_SCRIPT_SANDBOXING in the Xcode project" ;
+    oc:directiveContent "After disabling User Script Sandboxing in Xcode (required for Gradle build phases), always run ./gradlew --stop to restart the Gradle daemon. The daemon caches environment state that may be stale after the pbxproj change." ;
+    oc:hasRationale "The Gradle daemon may retain cached state from before the sandboxing change, causing checkSandboxAndWriteProtection failures" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_41ffee7e a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When diagnosing unresolved reference errors and verifying whether classes exist in generated vs. bundled klibs" ;
+    oc:directiveContent "Use klib dump-metadata-signatures to inspect klib contents and verify which classes are available in swiftPMImport vs. bundled in third-party dependency klibs. Empty output for a class means it's not in that klib." ;
+    oc:hasRationale "The klib dump tool provides definitive evidence of which namespaces and classes a compiled klib exposes, resolving ambiguity about import paths" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_52afae3b a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When integrateEmbedAndSign appears to succeed but the Xcode project is unchanged" ;
+    oc:directiveContent "If integrateEmbedAndSign completes without modifying the Xcode project, search build.gradle.kts for EmbedAndSign disabler code (taskGraph.whenReady filters, tasks.matching blocks) and remove it before re-running." ;
+    oc:hasRationale "CocoaPods-era workarounds that disabled EmbedAndSign tasks to avoid conflicts inadvertently disable the SwiftPM integration tasks too" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_7b9945c9 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When deciding which Firebase pods to migrate in Phase 3" ;
+    oc:directiveContent "All Firebase products must be migrated to SPM at once — never split Firebase dependencies across CocoaPods and SPM. Shared transitive dependencies (gRPC, abseil, leveldb, BoringSSL) cause duplicate/conflicting symbols and dyld crashes when linked by both package managers." ;
+    oc:hasRationale "Firebase products share transitive C++ dependencies; mixing package managers for the same suite causes Symbol not found and _OBJC_CLASS_$ errors at runtime" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_8ce30144 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When configuring importedClangModules for Firebase Swift packages" ;
+    oc:directiveContent "Several Firebase products have SPM product names that differ from their internal Clang module names (e.g., FirebaseDatabase → FirebaseDatabaseInternal, FirebaseFirestore → FirebaseFirestoreInternal). Use the internal module names in importedClangModules." ;
+    oc:hasRationale "Firebase exposes ObjC headers through Clang modules with 'Internal' suffixes that differ from the public SPM product names; using product names causes Unresolved Reference errors" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_9e82bc51 a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "When changing isStatic from false to true in framework configuration" ;
+    oc:directiveContent "Switching from dynamic to static framework (isStatic = true) requires three follow-up actions: (1) re-run integrateLinkagePackage to regenerate Package.swift with type: .none, (2) remove any 'Embed Frameworks' copy phase for the KMP framework, (3) add linker flags (e.g., -framework Accelerate, -weak_framework CoreML) to OTHER_LDFLAGS in the Xcode project." ;
+    oc:hasRationale "Static frameworks are archived into .a files and must not be embedded as dynamic frameworks; the K/N linker no longer resolves system framework flags that the dynamic linker previously handled" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_ad160ddf a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When configuring framework binaries for projects using dev.gitlive:firebase-kotlin-sdk or similar CocoaPods-era wrapper klibs" ;
+    oc:directiveContent "When using dev.gitlive:firebase-* with SPM, isStatic = true is mandatory. Dynamic frameworks cause dyld runtime crashes because Firebase SPM products are static libraries not embedded in the app bundle." ;
+    oc:hasRationale "The K/N linker creates LC_LOAD_DYLIB entries for dynamic frameworks, but Firebase SPM static frameworks are not in the runtime @rpath, causing dyld: Library not loaded crashes at app launch" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_c56a7b28 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When any build failure occurs after migrating from CocoaPods to SwiftPM" ;
+    oc:directiveContent "Do NOT revert the migration as a first response to build failures. Instead, read the full error log, identify the failure type, re-check migration phases, and apply targeted fixes." ;
+    oc:hasRationale "Premature rollback wastes the completed migration work; most failures are caused by missed steps or misconfigurations that have targeted fixes" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_c8f5c735 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When cinterop errors mention grpc, absl, leveldb, openssl_grpc, or other C++ modules from Firebase's dependency graph" ;
+    oc:directiveContent "For Firebase cinterop failures on C++ modules (gRPC, abseil, leveldb, BoringSSL), set discoverModulesImplicitly = false and explicitly list only needed Clang modules to prevent Kotlin from attempting cinterop on incompatible C++ transitive dependencies." ;
+    oc:hasRationale "The default discoverModulesImplicitly = true attempts cinterop on every Clang module including C++ ones that are incompatible, causing build failures" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_d57e3930 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When transforming import statements in Phase 4 and when diagnosing 'Unresolved reference' errors after migration" ;
+    oc:directiveContent "Some third-party KMP libraries (e.g., KMPNotifier) bundle pre-built cinterop klibs with cocoapods.* namespaces. The swiftPMDependencies generator skips these to avoid duplicates, so cocoapods.* imports for those classes must be preserved, not converted to swiftPMImport.*" ;
+    oc:hasRationale "Converting bundled-klib imports to swiftPMImport.* causes Unresolved Reference errors because those bindings are deliberately not generated by the cinterop generator" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:req_0c311b87 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Swift Package Manager and Xcode project structure" .
+
+oc:req_0c96571e a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "CocoaPods integration patterns in KMP projects" .
+
+oc:req_a95f9b0f a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Kotlin Multiplatform build system and Gradle configuration" .
+

@@ -1,0 +1,66 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_java_to_kotlin_dagger_hilt a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "dagger-hilt" ;
+    skos:broader "framework-aware conversion guide" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/kotlin/kotlin-agent-skills/kotlin-tooling-java-to-kotlin" ;
+    oc:contentHash "ed52d352e63f7675677fa2ffb5f37ef97554a34b5176c34861031839031ac4b9" ;
+    oc:dependsOnSkill oc:skill_kotlin_tooling_java_to_kotlin ;
+    oc:differentia "handles Dagger 2, Hilt, and Hilt Jetpack annotation translation when converting Java dependency injection code to idiomatic Kotlin" ;
+    oc:extends oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_java_to_kotlin ;
+    oc:handlesFailure oc:AnnotationSiteTargetConflict,
+        oc:ConstructorInjectionSyntaxError ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_04eef8d5,
+        oc:kn_13880b99,
+        oc:kn_7174da4b,
+        oc:kn_baf3789a,
+        oc:kn_ede44970 ;
+    oc:isUserInvocable false ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:DaggerHiltFrameworkDetected ;
+    oc:resolvesIntent "convert dagger/hilt java code to kotlin",
+        "migrate hilt viewmodel and module classes to kotlin",
+        "translate dependency injection annotations from java to kotlin" ;
+    oc:yieldsState oc:DaggerHiltConversionApplied .
+
+oc:kn_04eef8d5 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting any Java class with @Inject on the constructor" ;
+    oc:directiveContent "Always place @Inject before the constructor keyword in Kotlin's primary constructor — never on a secondary constructor or field." ;
+    oc:hasRationale "Kotlin's annotation syntax requires @Inject before 'constructor' in the primary constructor to be recognized by Dagger's annotation processor." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_13880b99 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting any Dagger annotation that references a component class" ;
+    oc:directiveContent "Convert Java class literals like SingletonComponent.class to Kotlin's SingletonComponent::class syntax throughout all Dagger annotations." ;
+    oc:hasRationale "Kotlin uses ::class for class references instead of Java's .class syntax, and this applies to all Dagger annotations including @InstallIn, @Component, and @Subcomponent." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_7174da4b a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When converting classes using @AssistedInject / @AssistedFactory pattern" ;
+    oc:directiveContent "For @AssistedInject, replace @Inject on the constructor and place @Assisted parameters alongside regular injected parameters in the primary constructor." ;
+    oc:hasRationale "@AssistedInject replaces @Inject as the constructor annotation, and @Assisted parameters integrate naturally into Kotlin's primary constructor parameter list." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_baf3789a a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When converting Application, Activity, Fragment, or ViewModel classes with Hilt annotations" ;
+    oc:directiveContent "Preserve Hilt Android annotations (@HiltAndroidApp, @AndroidEntryPoint, @HiltViewModel) and scoping annotations (@Singleton, @ActivityScoped, @ViewModelScoped, @FragmentScoped) exactly as-is — no annotation site targets needed." ;
+    oc:hasRationale "Hilt's annotation processor targets these annotations correctly on Kotlin classes without use-site targets. Adding targets like @field: or @get: can break Hilt's code generation." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_ede44970 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting Dagger @Module classes with @Provides or @Binds methods" ;
+    oc:directiveContent "Convert @Module classes containing only static @Provides methods to Kotlin 'object' declarations; keep modules with abstract @Binds methods as abstract classes." ;
+    oc:hasRationale "Using 'object' for purely static modules produces cleaner Kotlin and avoids unnecessary companion object boilerplate. Abstract classes with @Binds must remain abstract for Dagger's code generation." ;
+    oc:severityLevel "HIGH" .
+

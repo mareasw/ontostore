@@ -1,0 +1,105 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_agp9_migration_migration_app_split a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "migration-app-split" ;
+    skos:broader "module restructure guide" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/kotlin/kotlin-agent-skills/kotlin-tooling-agp9-migration" ;
+    oc:contentHash "77b614b62dd495d4954414cfbafdbd1ee4c888ead08ee8c4df20db64ad23f2bb" ;
+    oc:differentia "that splits a monolithic KMP + Android application module into separate shared KMP library and pure Android application modules for AGP 9.0 compatibility" ;
+    oc:extends oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_agp9_migration ;
+    oc:handlesFailure oc:BuildFailed,
+        oc:ManifestActivityNotFound,
+        oc:NamespaceCollision,
+        oc:PluginConflict ;
+    oc:hasArgumentHint "module-name (e.g. composeApp)" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_20ad185e,
+        oc:kn_2dc6213e,
+        oc:kn_3687e603,
+        oc:kn_44e4b7c0,
+        oc:kn_54107a3f,
+        oc:kn_740005e1,
+        oc:kn_a8e51255,
+        oc:kn_c16d41be,
+        oc:kn_d8ec77b8 ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:ModuleClassifiedAsAppSplit,
+        oc:ProjectAnalyzed ;
+    oc:resolvesIntent "create androidApp module from monolithic composeApp",
+        "migrate com.android.application + kotlin.multiplatform to AGP 9",
+        "separate composeApp into shared and androidApp modules",
+        "split KMP Android app module for AGP 9" ;
+    oc:yieldsState oc:AndroidAppModuleCreated,
+        oc:AppModuleSplit,
+        oc:SettingsGradleUpdated,
+        oc:SharedModuleCreated .
+
+oc:kn_20ad185e a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When configuring the new androidApp module's build.gradle.kts" ;
+    oc:directiveContent "Do NOT apply org.jetbrains.kotlin.android to the androidApp module. AGP 9.0's com.android.application plugin has built-in Kotlin support and applying kotlin-android separately will cause a conflict error." ;
+    oc:hasRationale "AGP 9.0 bundles Kotlin compilation. The separate kotlin-android plugin registers competing Kotlin compilation tasks that conflict with the built-in ones" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_2dc6213e a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When the split involves renaming the KMP module and the project has iOS targets" ;
+    oc:directiveContent "If the project has iOS targets and the module is renamed from composeApp to shared, update: (1) baseName in binaries.framework to 'Shared', (2) Xcode Run Script build phase to use :shared:embedAndSignAppleFrameworkForXcode, (3) all Swift import statements from 'ComposeApp' to 'Shared', (4) framework search paths in Xcode Build Settings." ;
+    oc:hasRationale "The framework name is derived from baseName in the Gradle config. If baseName changes, iOS consumers must update their imports, build scripts, and search paths or the app will fail to link" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_3687e603 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When moving the manifest from androidMain to androidApp/src/main" ;
+    oc:directiveContent "After moving AndroidManifest.xml, the android:name attribute on <activity> must use the fully qualified class name in its new location. The shared module may still need a minimal manifest (just <manifest> with no <application>)." ;
+    oc:hasRationale "The old manifest may have relied on directory-relative class resolution. After moving, the class is in a different module/package path and the fully qualified name is required" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_44e4b7c0 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When configuring the shared module's build.gradle.kts after splitting" ;
+    oc:directiveContent "Use com.android.kotlin.multiplatform.library (not com.android.library) for the shared KMP module, and place Android config inside kotlin { android { } } instead of a top-level android { } block." ;
+    oc:hasRationale "The new KMP library plugin is the AGP 9.0 replacement for com.android.library in KMP contexts. It uses the kotlin { android { } } DSL block rather than a separate top-level android block" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_54107a3f a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When deciding which files to move during the split" ;
+    oc:directiveContent "Move only Android application concerns to androidApp: Activities, Application class, AndroidManifest.xml, app-level resources (launcher icons, app theme), and ProGuard rules. Keep all commonMain code, expect/actual declarations, iOS/desktop targets, and shared resources in the shared module." ;
+    oc:hasRationale "Over-moving shared code into androidApp defeats the purpose of KMP sharing. Under-moving app concerns leaves application-only config in a library module where it is invalid" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_740005e1 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before and after performing the module split" ;
+    oc:directiveContent "Before splitting, verify the module applies both com.android.application and org.jetbrains.kotlin.multiplatform plugins. After splitting, verify: (1) namespaces differ, (2) settings.gradle.kts includes both :shared and :androidApp, (3) androidApp has implementation(project(\":shared\")), (4) AndroidManifest.xml moved to androidApp with correct android:name on <activity>." ;
+    oc:hasRationale "Missing any of these checks leads to build failures that are hard to diagnose because they involve cross-module dependencies and manifest merging" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_a8e51255 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When setting namespace in both build.gradle.kts files after the split" ;
+    oc:directiveContent "The namespace for shared and androidApp modules must be unique (e.g. com.example.shared vs com.example.app). Colliding namespaces produce duplicate R class errors at compile time." ;
+    oc:hasRationale "Android resource generation uses the namespace to create R class packages. Duplicate namespaces cause the compiler to generate conflicting R classes" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_c16d41be a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When migrating any KMP module that applies both com.android.application and kotlin.multiplatform plugins" ;
+    oc:directiveContent "AGP 9.0 does not support com.android.application combined with org.jetbrains.kotlin.multiplatform in the same module. You must split the monolithic module." ;
+    oc:hasRationale "This is a hard incompatibility in AGP 9.0 — the build will fail if both plugins are applied to the same module" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_d8ec77b8 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting the old composeApp module to the shared library module" ;
+    oc:directiveContent "Application-only properties (applicationId, versionCode, versionName, targetSdk, buildTypes, productFlavors) must NOT appear in the shared KMP library module. These belong exclusively in the androidApp module." ;
+    oc:hasRationale "The KMP library plugin produces a single variant and does not support application-level configuration. Including these properties will cause Gradle configuration errors" ;
+    oc:severityLevel "HIGH" .
+

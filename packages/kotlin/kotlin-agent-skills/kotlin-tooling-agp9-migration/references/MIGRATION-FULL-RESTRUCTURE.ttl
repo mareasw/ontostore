@@ -1,0 +1,102 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_agp9_migration_migration_full_restructure a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "migration-full-restructure" ;
+    skos:broader "Migration guide" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/kotlin/kotlin-agent-skills/kotlin-tooling-agp9-migration" ;
+    oc:contentHash "3cb0f06dd7c213603b39b086fe33685fa00d56d14bfbd59c53569a5faa1e21ef" ;
+    oc:differentia "Extracts all platform entry points from a monolithic KMP module into per-platform application modules for AGP 9.0 compatibility" ;
+    oc:extends oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_agp9_migration ;
+    oc:handlesFailure oc:BuildFailure,
+        oc:MissingEntryPoint,
+        oc:NamespaceCollision,
+        oc:XcodeBuildFailure ;
+    oc:hasArgumentHint "project directory path (root of KMP project)" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_046ecf45,
+        oc:kn_193f61bc,
+        oc:kn_3896c7d9,
+        oc:kn_a373a96a,
+        oc:kn_b34b3f59,
+        oc:kn_ba8088d8,
+        oc:kn_c460b4a1,
+        oc:kn_e4f981bf ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:AGP9MigrationStarted,
+        oc:AndroidAppExtracted,
+        oc:ProjectAnalyzed ;
+    oc:resolvesIntent "configure full multi-platform KMP project structure",
+        "extract desktop app module from monolithic KMP module",
+        "extract web/wasm app module from monolithic KMP module",
+        "rename composeApp to shared module",
+        "restructure KMP project into per-platform modules",
+        "update Xcode project after module rename" ;
+    oc:yieldsState oc:DesktopAppExtracted,
+        oc:FullRestructureComplete,
+        oc:ModuleRenamedToShared,
+        oc:SettingsGradleUpdated,
+        oc:WebAppExtracted,
+        oc:XcodeProjectUpdated .
+
+oc:kn_046ecf45 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When performing a full restructure of a monolithic KMP module" ;
+    oc:directiveContent "Apply Path B (Android app split) first before extracting desktop, web, or other platform modules. The Android split is mandatory; full restructure is layered on top." ;
+    oc:hasRationale "The Android split is a hard prerequisite for AGP 9.0 compliance. Platform extractions build on the resulting shared library module." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_193f61bc a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When cleaning up the shared module after extracting platform app modules" ;
+    oc:directiveContent "Do NOT keep platform application targets (jvm('desktop') with application block, wasmJs with binaries.executable()) in the shared module after extraction. Remove them entirely or keep only as library targets without executable config." ;
+    oc:hasRationale "Leaving executable targets in shared conflicts with the library role and causes build errors with the com.android.kotlin.multiplatform.library plugin." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_3896c7d9 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When not all platforms use Compose Multiplatform for UI" ;
+    oc:directiveContent "For projects where iOS uses native SwiftUI and does not want Compose Multiplatform, split shared into sharedLogic (no Compose) and sharedUI (optional Compose) to minimize the shared surface area." ;
+    oc:hasRationale "Forcing Compose dependencies on platforms that use native UI bloats binary size and introduces unnecessary dependencies." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_a373a96a a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before beginning the full restructure process" ;
+    oc:directiveContent "Before starting full restructure, verify that all platform entry points (main functions) exist in the monolithic module and identify their exact locations (desktopMain, wasmJsMain, etc.)." ;
+    oc:hasRationale "Missing or misidentified entry points lead to incomplete extractions and runtime failures on affected platforms." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_b34b3f59 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When restructuring iOS platform support" ;
+    oc:directiveContent "iOS framework export configuration (binaries.framework with baseName) MUST stay in the shared module, not move to iosApp. The iosApp module is typically an Xcode project that consumes the exported framework." ;
+    oc:hasRationale "The framework is built by the KMP Gradle build and consumed by Xcode. Moving it out of shared breaks the iOS build pipeline." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_ba8088d8 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "After completing all module extractions and before declaring migration done" ;
+    oc:directiveContent "After extraction, verify each app module builds independently before testing cross-module integration. Run ./gradlew :androidApp:assembleDebug, ./gradlew :desktopApp:run, ./gradlew :webApp:build separately." ;
+    oc:hasRationale "Isolating build failures to individual modules is far easier than debugging a full project build failure after multiple simultaneous changes." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_c460b4a1 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When creating desktopApp, webApp, or any per-platform application module" ;
+    oc:directiveContent "Each platform-specific application module should only contain its entry point (main function), platform-specific configuration, and a dependency on the shared module. All business logic and shared UI stays in the shared module." ;
+    oc:hasRationale "Keeps the architecture clean and ensures shared code remains truly cross-platform. Violating this creates duplicated logic and maintenance burden." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_e4f981bf a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "During the module rename step of full restructure" ;
+    oc:directiveContent "When renaming composeApp to shared, update ALL of: directory name, settings.gradle.kts include, cross-module dependency references (project(':composeApp') → project(':shared')), Xcode Run Script path, Swift import statements, framework baseName, and .idea workspace files." ;
+    oc:hasRationale "Incomplete rename causes build failures, broken imports, and stale IDE caches. The rename must be atomic across all configuration files." ;
+    oc:severityLevel "CRITICAL" .
+

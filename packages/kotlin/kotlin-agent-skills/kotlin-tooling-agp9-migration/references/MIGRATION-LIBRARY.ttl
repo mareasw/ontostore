@@ -1,0 +1,110 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_agp9_migration_migration_library a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "migration-library" ;
+    skos:broader "migration guide" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/kotlin/kotlin-agent-skills/kotlin-tooling-agp9-migration" ;
+    oc:contentHash "381928ff702602d6384b3fc08402f74dc48f1b20a2085419202ce4191f8caaaf" ;
+    oc:differentia "covers full AGP 8.x to 9.x migration for KMP library modules including plugin replacement, DSL restructuring, dependency configuration, test setup, and convention plugin refactoring" ;
+    oc:extends oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_agp9_migration ;
+    oc:handlesFailure oc:BuildCompilationFailed,
+        oc:PluginResolutionFailed,
+        oc:ProGuardRulesDropped ;
+    oc:hasArgumentHint "module build.gradle.kts path or module name" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_03e75661,
+        oc:kn_307168b0,
+        oc:kn_362a1ea4,
+        oc:kn_6e811792,
+        oc:kn_87489ac5,
+        oc:kn_88471461,
+        oc:kn_ace2b588,
+        oc:kn_bc23603a,
+        oc:kn_d2eaf212,
+        oc:kn_ebe9775f ;
+    oc:isUserInvocable true ;
+    oc:nature "reference" ;
+    oc:requiresState oc:GradleBuildFileExists,
+        oc:KmpLibraryModuleIdentified ;
+    oc:resolvesIntent "migrate KMP library module to AGP 9.0",
+        "migrate android block to kotlin android DSL",
+        "restructure build.gradle.kts for AGP 9 KMP library",
+        "update com.android.library to com.android.kotlin.multiplatform.library",
+        "update version catalog for AGP 9" ;
+    oc:yieldsState oc:LibraryModuleMigrated .
+
+oc:kn_03e75661 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When performing the full migration of any KMP library module" ;
+    oc:directiveContent "Use the Quick Checklist as a step-by-step verification guide: update plugin IDs → move android block → replace androidTarget → replace kotlinOptions → enable androidResources → enable tests → add withJava → migrate ProGuard → migrate dependencies → update convention plugins → rename test dirs → update root build file → run verification tasks." ;
+    oc:hasRationale "Missing any step can lead to silent failures (dropped ProGuard rules, ignored resources, missing tests) that are hard to diagnose later." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_307168b0 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When the migrated module contains any Android tests" ;
+    oc:directiveContent "Enable withHostTest {} for unit tests and withDeviceTest {} for instrumented tests explicitly in kotlin { android { } }. Test source sets are opt-in." ;
+    oc:hasRationale "The new plugin does not automatically create test source sets. Without explicit opt-in, test compilations will not be configured and test tasks will not exist." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_362a1ea4 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When migrating modules that declare consumer ProGuard files in android { defaultConfig { } }" ;
+    oc:directiveContent "Consumer ProGuard rules will be silently dropped if not explicitly migrated to kotlin { android { consumerProguardFiles.add(file(...)) } }" ;
+    oc:hasRationale "The old android {} block is gone, so consumerProguardFiles in defaultConfig has no equivalent location unless explicitly added in the new DSL. There is no build error — rules are simply lost." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_6e811792 a oc:KnowledgeNode,
+        oc:PostFlightValidation ;
+    oc:appliesToContext "After completing all migration changes to a KMP library module" ;
+    oc:directiveContent "After migration, run ./gradlew :module:assemble, ./gradlew :module:testAndroidHostTest (if host tests exist), and ./gradlew :module:assembleAndroidDeviceTest (if device tests exist) to verify correctness." ;
+    oc:hasRationale "These tasks exercise the full compilation and test pipeline. A successful assemble confirms plugin resolution, DSL correctness, and resource processing." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_87489ac5 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before beginning any KMP library module migration" ;
+    oc:directiveContent "Before starting migration, verify minimum version requirements: AGP 9.0.0+, Gradle 9.1.0+, KGP 2.0.0+ (2.3.0+ recommended)." ;
+    oc:hasRationale "The new com.android.kotlin.multiplatform.library plugin requires these minimum versions. Older versions will fail plugin resolution." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_88471461 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When configuring dependencies for a migrated KMP library module" ;
+    oc:directiveContent "Prefer putting dependencies inside kotlin { sourceSets { } } blocks rather than the top-level dependencies {} block. Use the top-level block only for special configurations like androidRuntimeClasspath that have no source set equivalent." ;
+    oc:hasRationale "Build variants (debug/release) are removed from the KMP library plugin, so variant-specific configurations like debugImplementation no longer exist. Source set dependencies are the canonical approach." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_ace2b588 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When configuring JVM target in the kotlin {} block" ;
+    oc:directiveContent "Replace kotlinOptions { jvmTarget = ... } with compilerOptions { jvmTarget.set(JvmTarget.JVM_11) }. The kotlinOptions DSL is removed in AGP 9.0." ;
+    oc:hasRationale "The new compilerOptions DSL is the replacement and supports a priority hierarchy: android-specific > top-level kotlin > jvmToolchain." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_bc23603a a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When migrating any KMP library module's build.gradle.kts" ;
+    oc:directiveContent "The android {} top-level block must be entirely moved into kotlin { android { } }. The old top-level android {} block has no effect with the new plugin." ;
+    oc:hasRationale "The new com.android.kotlin.multiplatform.library plugin unifies Android configuration under the KotlinMultiplatformExtension, eliminating the separate LibraryExtension." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_d2eaf212 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When updating the kotlin {} block in a KMP library module" ;
+    oc:directiveContent "Replace androidTarget {} with android {}. The androidTarget DSL is removed in favor of the new android {} block inside kotlin {}." ;
+    oc:hasRationale "AGP 9.x integrates Android target configuration directly into the Kotlin Multiplatform DSL, removing the intermediate androidTarget wrapper." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_ebe9775f a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When migrating modules that contain Android resources in src/androidMain/res/" ;
+    oc:directiveContent "Enable androidResources { enable = true } explicitly in kotlin { android { } } if the module uses any Android resources (res/, R class)." ;
+    oc:hasRationale "Android resource processing is opt-in with the new plugin. Without this, resources are silently ignored and R class generation does not happen." ;
+    oc:severityLevel "HIGH" .
+

@@ -1,0 +1,75 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_java_to_kotlin_jackson a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "jackson" ;
+    skos:broader "conversion guide" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/kotlin/kotlin-agent-skills/kotlin-tooling-java-to-kotlin" ;
+    oc:contentHash "c407201a3629f1af4117e3b6b99a0cbebb7f7b62ef14fb9c3bb7e55250ea86ef" ;
+    oc:differentia "handles Jackson annotation migration from Java to Kotlin with correct use-site targets" ;
+    oc:extends oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_java_to_kotlin ;
+    oc:handlesFailure oc:AnnotationTargetMismatch,
+        oc:SerializationBehaviorChanged ;
+    oc:hasArgumentHint "Java source file with com.fasterxml.jackson.* imports" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_0f047987,
+        oc:kn_4d3a09dd,
+        oc:kn_67dca8ab,
+        oc:kn_72f09794,
+        oc:kn_794d2c90,
+        oc:kn_92c79a9f ;
+    oc:isUserInvocable false ;
+    oc:nature "sub-skill" ;
+    oc:requiresState oc:JacksonImportsPresent,
+        oc:JavaSourceDetected ;
+    oc:resolvesIntent "apply correct Kotlin annotation site targets for Jackson",
+        "convert Jackson-annotated Java classes to Kotlin",
+        "preserve Jackson serialization behavior during Java-to-Kotlin conversion" ;
+    oc:yieldsState oc:JacksonAnnotationsConverted .
+
+oc:kn_0f047987 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When the project uses Jackson with Kotlin but lacks the Kotlin module dependency" ;
+    oc:directiveContent "If jackson-module-kotlin is absent from the project, note it but do NOT add it during conversion. The converter should preserve explicit annotations that work without the module." ;
+    oc:hasRationale "Adding dependencies is outside the scope of source conversion; the note serves as a reminder for the developer to consider adding it separately." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_4d3a09dd a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When converting Java classes using @JsonPOJOBuilder" ;
+    oc:directiveContent "Replace @JsonPOJOBuilder patterns with Kotlin primary constructor + @JsonCreator when converting to data classes. If not converting to a data class, preserve the builder pattern." ;
+    oc:hasRationale "Kotlin data classes with primary constructors make builder patterns unnecessary for Jackson deserialization, but non-data-class conversions should preserve the original pattern to avoid breaking changes." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_67dca8ab a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting any Jackson-annotated Java field+getter pair to a Kotlin property" ;
+    oc:directiveContent "When a Java field and its getter both carry the same Jackson annotation (e.g., @JsonProperty), the Kotlin property must receive BOTH @field: and @get: use-site targets to preserve identical serialization behavior." ;
+    oc:hasRationale "Kotlin properties unify fields and getters, so a single annotation target in Kotlin may not replicate Java's dual annotation coverage, causing Jackson to miss the annotation during either field or getter introspection." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_72f09794 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When converting Java classes with @JsonCreator static factories or annotated constructors" ;
+    oc:directiveContent "Preserve @JsonCreator on the Kotlin primary constructor for safe deserialization, even though the Jackson Kotlin module may make it redundant. Keep the companion object factory method for backward compatibility if the original Java had a static factory." ;
+    oc:hasRationale "Not all projects use the Jackson Kotlin module; retaining @JsonCreator ensures deserialization works regardless of module availability." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_794d2c90 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When simplifying Jackson annotations during conversion" ;
+    oc:directiveContent "Do NOT strip @field: or @get: targets from Jackson annotations assuming the Jackson Kotlin module handles them automatically. The module's presence is not guaranteed." ;
+    oc:hasRationale "Over-simplifying annotation targets can silently break serialization/deserialization in projects that don't include jackson-module-kotlin." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_92c79a9f a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When determining nullability of String-typed Jackson properties during conversion" ;
+    oc:directiveContent "Java String parameters without @NonNull or Objects.requireNonNull evidence should become nullable String? in Kotlin, since Java strings are nullable by default." ;
+    oc:hasRationale "Incorrect nullability can cause Jackson deserialization failures or alter API contract behavior." ;
+    oc:severityLevel "MEDIUM" .
+

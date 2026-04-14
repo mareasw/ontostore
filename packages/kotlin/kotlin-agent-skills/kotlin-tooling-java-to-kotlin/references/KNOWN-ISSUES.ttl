@@ -1,0 +1,107 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_java_to_kotlin_known_issues a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "known-issues" ;
+    skos:broader "Troubleshooting catalog" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/kotlin/kotlin-agent-skills/kotlin-tooling-java-to-kotlin" ;
+    oc:contentHash "581cce6cb0b8c353c2f573435c9b2ba36a0f3768aee755680c652dd4067e5e34" ;
+    oc:differentia "documents Java-to-Kotlin conversion pitfalls with concrete solutions and idiomatic mappings" ;
+    oc:extends oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_java_to_kotlin ;
+    oc:handlesFailure oc:KeywordConflictDetected,
+        oc:PlatformTypeDetected,
+        oc:SAMAmbiguityDetected ;
+    oc:hasCategory "development" ;
+    oc:hasRequirement oc:req_22067045,
+        oc:req_38fba323,
+        oc:req_d655cb0b ;
+    oc:impartsKnowledge oc:kn_031134f6,
+        oc:kn_466f4037,
+        oc:kn_517527ad,
+        oc:kn_57176522,
+        oc:kn_7ffae8c1,
+        oc:kn_b9446212,
+        oc:kn_f07a5c66,
+        oc:kn_ffb58e6b ;
+    oc:isUserInvocable false ;
+    oc:nature "Reference" ;
+    oc:requiresState oc:JavaSourceConverted ;
+    oc:resolvesIntent "avoid common pitfalls during Java-to-Kotlin migration",
+        "find idiomatic Kotlin equivalents for Java constructs",
+        "handle Kotlin keyword conflicts in converted code",
+        "resolve Java-to-Kotlin compilation errors after conversion" ;
+    oc:yieldsState oc:IdiomaticKotlinVerified,
+        oc:KotlinCompilationIssuesResolved .
+
+oc:kn_031134f6 a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When converting Java methods with generic wildcard or raw-type parameters" ;
+    oc:directiveContent "Map Java wildcards to Kotlin variance: ? extends T becomes out T (covariance/producer), ? super T becomes in T (contravariance/consumer). For raw types, analyze code to determine the most specific type parameter rather than defaulting to Any?." ;
+    oc:hasRationale "Incorrect variance mapping leads to type mismatch errors or loss of type safety; raw types defaulting to Any? discard valuable type information." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_466f4037 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting Java primitive arrays (int[], long[], double[], boolean[]) to Kotlin" ;
+    oc:directiveContent "Use specialized primitive array types (IntArray, LongArray, DoubleArray, BooleanArray) instead of generic Array<T> for Java primitive arrays to avoid boxing overhead." ;
+    oc:hasRationale "Using Array<Int> instead of IntArray causes per-element boxing overhead, which can significantly degrade performance in array-heavy code." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_517527ad a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converted Kotlin code must maintain a clean Java-callable API" ;
+    oc:directiveContent "Add @Throws annotations to Kotlin functions that throw checked exceptions whenever they are called from Java code. Add @JvmStatic for companion object methods, @JvmField for constants, and @JvmOverloads for functions with default parameters." ;
+    oc:hasRationale "Kotlin lacks checked exceptions and has different access patterns for companion object members; without JVM interop annotations, Java callers face awkward API shapes and cannot properly handle exceptions." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_57176522 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting Java static methods and constants to Kotlin" ;
+    oc:directiveContent "Prefer top-level functions for stateless utility methods (Java static methods without class coupling), companion object functions when logically tied to a class, and const val for compile-time constants (primitives and String)." ;
+    oc:hasRationale "Top-level functions are more idiomatic Kotlin than unnecessary companion objects; const val enables compile-time inlining for true constants." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_7ffae8c1 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When converting Java methods or fields whose names collide with Kotlin keywords" ;
+    oc:directiveContent "Java identifiers that are Kotlin reserved keywords (when, in, is, object, fun, val, var, typealias, as) will cause compilation errors after conversion. Use backtick-escaping or rename the identifier entirely." ;
+    oc:hasRationale "Kotlin's keyword set overlaps with common Java identifier names, and unescaped usage produces immediate compilation failures that block the migration." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_b9446212 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Whenever Java code without @Nullable/@NotNull annotations is referenced from Kotlin" ;
+    oc:directiveContent "Always add explicit type declarations with nullability annotations to eliminate Java platform types (T!). Analyze the Java source, documentation, and call sites to determine correct nullability." ;
+    oc:hasRationale "Platform types bypass Kotlin's null-safety system, deferring null checks to runtime and defeating one of the primary benefits of Kotlin migration." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_f07a5c66 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When calling overloaded Java methods from converted Kotlin code" ;
+    oc:directiveContent "Never use trailing lambda syntax when calling overloaded Java methods that accept different SAM interfaces — use explicit SAM constructor calls like Runnable { } or Callable { } instead." ;
+    oc:hasRationale "Trailing lambda syntax is ambiguous when multiple SAM overloads exist; the compiler cannot infer which interface the lambda should implement." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_ffb58e6b a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "After any Java-to-Kotlin conversion, before declaring it complete" ;
+    oc:directiveContent "Before marking a Java-to-Kotlin conversion as complete, verify: keyword conflicts are resolved, platform types are eliminated, SAM ambiguities are fixed, JVM interop annotations are applied where needed, and primitive arrays use specialized types." ;
+    oc:hasRationale "These are the most common and impactful issues that silently degrade code quality or cause runtime failures after conversion." ;
+    oc:severityLevel "HIGH" .
+
+oc:req_22067045 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "JVM interop annotations (@JvmStatic, @JvmField, @JvmOverloads, @Throws)" .
+
+oc:req_38fba323 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Java language features and constructs" .
+
+oc:req_d655cb0b a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Kotlin syntax and type system" .
+

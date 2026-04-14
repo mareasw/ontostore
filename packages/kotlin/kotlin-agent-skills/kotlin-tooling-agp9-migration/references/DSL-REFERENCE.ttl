@@ -1,0 +1,82 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_agp9_migration_dsl_reference a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "dsl-reference" ;
+    skos:broader "DSL mapping table" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/kotlin/kotlin-agent-skills/kotlin-tooling-agp9-migration" ;
+    oc:contentHash "aeeb39d3c4ce1d901e9e4d2b5be3b815b9e43169bb488e0c6661cba0ef5220d4" ;
+    oc:differentia "provides side-by-side field-level migration reference from AGP 8.x android {} DSL to AGP 9.x kotlin { android {} } DSL for KMP library projects" ;
+    oc:extends oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_agp9_migration ;
+    oc:handlesFailure oc:InvalidDSLSyntax ;
+    oc:hasArgumentHint "dsl-field-name or old-configuration-block" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_1fa2a0d1,
+        oc:kn_6b3923f6,
+        oc:kn_95e37c44,
+        oc:kn_a6e2d530,
+        oc:kn_ac152654,
+        oc:kn_c772adbd,
+        oc:kn_cc0ca8bf ;
+    oc:isUserInvocable false ;
+    oc:nature "reference" ;
+    oc:requiresState oc:MigrationPlanningComplete ;
+    oc:resolvesIntent "find new AGP 9 DSL syntax for an old AGP 8 field",
+        "identify removed or unsupported DSL elements in KMP library plugin",
+        "look up DSL migration mapping",
+        "migrate android block configuration to kotlin android block",
+        "resolve dependency configuration changes from AGP 8 to AGP 9" ;
+    oc:yieldsState oc:DSLMappingResolved .
+
+oc:kn_1fa2a0d1 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When the library includes Android resources (drawables, strings, layouts)" ;
+    oc:directiveContent "Android resources must be explicitly enabled via kotlin { android { androidResources { enable = true } } } — they are not processed by default in the KMP library plugin." ;
+    oc:hasRationale "Unlike the old com.android.library plugin, the KMP library plugin defaults to no resource processing to keep the multiplatform build lean" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_6b3923f6 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When migrating build type or flavor configuration from AGP 8.x library to AGP 9.x KMP library" ;
+    oc:directiveContent "The com.android.kotlin.multiplatform.library plugin produces a single build variant — buildTypes, productFlavors, and flavorDimensions are entirely removed. No variant-specific dependency configurations (debugImplementation, releaseImplementation) exist." ;
+    oc:hasRationale "KMP library model is intentionally single-variant; variant-aware logic must move to the app module or use expect/actual patterns" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_95e37c44 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When performing the top-level block migration for any KMP library build.gradle.kts" ;
+    oc:directiveContent "Migrate android {} to kotlin { android {} }, androidTarget {} to android {}, and move all SDK version fields (namespace, compileSdk, minSdk) directly into the new block. Remove defaultConfig wrapper — minSdk becomes a direct property." ;
+    oc:hasRationale "The nesting change is the foundational structural shift — every other field migration depends on getting the enclosing block correct" .
+
+oc:kn_a6e2d530 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When reviewing plugins {} block during migration" ;
+    oc:directiveContent "Do not apply org.jetbrains.kotlin.android plugin separately — it is built into com.android.application and com.android.library in AGP 9.0. Also remove useK2Uast from lint config as it is deprecated." ;
+    oc:hasRationale "Applying the Kotlin Android plugin separately causes classpath conflicts with the built-in Kotlin support in AGP 9.0" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_ac152654 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When the old module uses BuildConfig fields or buildConfig = true" ;
+    oc:directiveContent "buildConfig generation (buildConfigField, buildFeatures.buildConfig) is removed in the KMP library plugin. Use expect/actual or Gradle properties for compile-time constants instead." ;
+    oc:hasRationale "BuildConfig was Android-specific and incompatible with multiplatform expectations; replaced by expect/actual pattern" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_c772adbd a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When the old build script uses androidComponents {} for variant-aware customization" ;
+    oc:directiveContent "The androidComponents block is significantly reduced in scope: beforeVariants and finalizeDsl are not available, onVariants has limited support. The legacy variant API (android.enableLegacyVariantApi) is removed and will cause an error if set." ;
+    oc:hasRationale "Single-variant KMP library model eliminates the need for most variant APIs; code depending on them must be reworked or moved to the app module" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_cc0ca8bf a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When migrating dependency declarations from AGP 8.x to AGP 9.x KMP library" ;
+    oc:directiveContent "Dependencies must move from top-level configurations (implementation, api, testImplementation) to source-set-scoped blocks: androidMain.dependencies { }, getByName(\"androidHostTest\").dependencies { }, getByName(\"androidDeviceTest\").dependencies { }. kapt configurations are not supported — migrate to KSP." ;
+    oc:hasRationale "KMP uses source-set-based dependency scoping for multiplatform consistency; top-level Android configurations no longer exist" ;
+    oc:severityLevel "CRITICAL" .
+

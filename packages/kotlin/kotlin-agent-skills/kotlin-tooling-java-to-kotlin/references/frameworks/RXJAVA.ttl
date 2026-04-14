@@ -1,0 +1,95 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_java_to_kotlin_rxjava a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "rxjava" ;
+    skos:broader "Conversion guide" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/kotlin/kotlin-agent-skills/kotlin-tooling-java-to-kotlin" ;
+    oc:contentHash "87cad42db77a79c9c2a8bc24d051f0526300fb0682de239e30bbd88748608b82" ;
+    oc:differentia "Maps RxJava reactive types (Observable, Single, Completable) to Kotlin coroutines and Flow with operator equivalents and threading model translation" ;
+    oc:extends oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_java_to_kotlin ;
+    oc:handlesFailure oc:InvalidInput,
+        oc:MissingDependency ;
+    oc:hasArgumentHint "Java source file containing RxJava imports (io.reactivex.* or rx.*)" ;
+    oc:hasCategory "development" ;
+    oc:hasRequirement oc:req_36d9d903,
+        oc:req_7e6a744d,
+        oc:req_e233eef2,
+        oc:req_e30e2afe ;
+    oc:impartsKnowledge oc:kn_39ac9e0f,
+        oc:kn_62b7682e,
+        oc:kn_89e7e845,
+        oc:kn_d035c0b7,
+        oc:kn_e3dc7af0,
+        oc:kn_f95edfaf ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:RxJavaImportsDetected ;
+    oc:resolvesIntent "convert rxjava to kotlin coroutines",
+        "migrate rxjava to kotlin coroutines",
+        "replace rxjava operators with flow operators",
+        "translate rxjava observable to flow" ;
+    oc:yieldsState oc:RxJavaToFlowConverted .
+
+oc:kn_39ac9e0f a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When planning a gradual RxJava-to-coroutines migration" ;
+    oc:directiveContent "Use kotlinx-coroutines-rx2 or kotlinx-coroutines-rx3 bridge libraries with asFlow()/asObservable() for gradual migration at module boundaries rather than converting everything at once." ;
+    oc:hasRationale "Module-boundary interop allows incremental migration without breaking the build, reducing risk in large codebases" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_62b7682e a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When translating RxJava lifecycle management to Kotlin" ;
+    oc:directiveContent "Replace CompositeDisposable/Disposable patterns with CoroutineScope + structured concurrency. Cancelling the scope cancels all child coroutines and flow collections automatically." ;
+    oc:hasRationale "Structured concurrency is Kotlin's idiomatic replacement for manual disposable management and provides stronger guarantees about resource cleanup" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_89e7e845 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When translating subscribeOn/observeOn threading to Flow" ;
+    oc:directiveContent "Place flowOn(Dispatchers.IO) at the end of the Flow chain, not the beginning — it affects all upstream operators, analogous to RxJava's subscribeOn." ;
+    oc:hasRationale "Flow's flowOn is an upstream-only operator; placing it correctly ensures the entire pipeline runs on the desired dispatcher without redundancy" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_d035c0b7 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting RxJava type signatures to Kotlin" ;
+    oc:directiveContent "RxJava Observable/Flowable map to Flow<T>, Single maps to suspend fun returning T, Maybe maps to suspend fun returning T?, and Completable maps to suspend fun returning Unit. There is no 1:1 Flow equivalent — use the suspend function directly." ;
+    oc:hasRationale "Each RxJava type carries specific semantic guarantees (single value, optional value, no value, stream) that must be preserved in the Kotlin coroutine model" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_e3dc7af0 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting RxJava types that involve backpressure concerns" ;
+    oc:directiveContent "Do not introduce a separate Flowable-like type for backpressure handling — Flow has built-in backpressure via suspension. Map both Observable and Flowable directly to Flow." ;
+    oc:hasRationale "Kotlin Flow's suspend-based model inherently handles backpressure, making a separate type unnecessary and adding one would be unidiomatic" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_f95edfaf a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When translating RxJava operators to Kotlin Flow operators" ;
+    oc:directiveContent "Map RxJava's onErrorReturn to Flow's catch { emit(default) }, flatMap to flatMapMerge or flatMapConcat depending on concurrency needs, and doOnNext to onEach." ;
+    oc:hasRationale "Operator semantics differ slightly between RxJava and Flow; choosing the correct equivalent preserves the original program's behavior" ;
+    oc:severityLevel "HIGH" .
+
+oc:req_36d9d903 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "RxJava reactive types and operators" .
+
+oc:req_7e6a744d a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Kotlin coroutines and Flow API" .
+
+oc:req_e233eef2 a oc:RequirementTool ;
+    oc:isOptional true ;
+    oc:requirementValue "kotlinx-coroutines-rx2 or kotlinx-coroutines-rx3" .
+
+oc:req_e30e2afe a oc:RequirementTool ;
+    oc:isOptional true ;
+    oc:requirementValue "kotlinx-coroutines-core" .
+
