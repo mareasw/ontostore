@@ -1,0 +1,85 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_obra_superpowers_receiving_code_review a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "receiving-code-review" ;
+    skos:broader "Code review response methodology" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/obra/superpowers/receiving-code-review" ;
+    oc:contentHash "0efc7889cdbaad8375dd2c881ca089f07a22bcb42bc99580afb85296561258cd" ;
+    oc:differentia "that enforces technical verification before implementation, prohibits performative agreement, and requires reasoned pushback over blind compliance" ;
+    oc:handlesFailure oc:InvalidInput ;
+    oc:hasCategory "development" ;
+    oc:hasDescription "Use when receiving code review feedback, before implementing suggestions, especially if feedback seems unclear or technically questionable - requires technical rigor and verification, not performative agreement or blind implementation" ;
+    oc:hasName "receiving-code-review" ;
+    oc:impartsKnowledge oc:kn_1b25bc02,
+        oc:kn_2c88b71f,
+        oc:kn_4198bfbe,
+        oc:kn_ada0d98e,
+        oc:kn_b3fff1db,
+        oc:kn_c712522e,
+        oc:kn_de926156,
+        oc:kn_df0417ca ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:SystemAuthenticated ;
+    oc:resolvesIntent "evaluate code review suggestions",
+        "implement review feedback incrementally",
+        "push back on incorrect review feedback",
+        "receive code review feedback",
+        "respond to code review comments" ;
+    oc:yieldsState oc:CodeReviewed .
+
+oc:kn_1b25bc02 a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "When responding to inline code review comments on GitHub PRs" ;
+    oc:directiveContent "When replying to inline GitHub review comments, reply in the comment thread using gh api repos/{owner}/{repo}/pulls/{pr}/comments/{id}/replies, not as a top-level PR comment." ;
+    oc:hasRationale "Thread replies maintain conversation context; top-level comments lose the association with the specific code being discussed" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_2c88b71f a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When receiving feedback from external reviewers (non-human-partner)" ;
+    oc:directiveContent "Treat external review feedback as suggestions to evaluate, not orders to follow. Verify against codebase reality, check for breakage, and push back with technical reasoning when wrong." ;
+    oc:hasRationale "External reviewers may lack full context about the codebase, existing architecture decisions, or platform constraints" .
+
+oc:kn_4198bfbe a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When processing code review feedback, always" ;
+    oc:directiveContent "Follow the READ → UNDERSTAND → VERIFY → EVALUATE → RESPOND → IMPLEMENT pattern when receiving code review feedback." ;
+    oc:hasRationale "This sequential pattern ensures feedback is technically evaluated before any implementation begins, preventing errors from blind compliance" .
+
+oc:kn_ada0d98e a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When feedback contains multiple items and some are unclear" ;
+    oc:directiveContent "If any feedback item is unclear, stop and clarify ALL unclear items before implementing anything — never partially implement." ;
+    oc:hasRationale "Items may be related; partial understanding leads to wrong implementation that must be redone" .
+
+oc:kn_b3fff1db a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When implementing verified code review feedback" ;
+    oc:directiveContent "Implement multi-item feedback in priority order: blocking issues (breaks, security) first, then simple fixes (typos, imports), then complex fixes (refactoring, logic). Test each fix individually." ;
+    oc:hasRationale "Priority ordering prevents regressions and ensures the most critical issues are resolved first with individual verification" .
+
+oc:kn_c712522e a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When receiving any code review feedback, always" ;
+    oc:directiveContent "Never respond to code review feedback with performative agreement like 'You're absolutely right!' or 'Great point!' — this is an explicit violation." ;
+    oc:hasRationale "Performative agreement bypasses technical verification and signals agreement before evaluation, undermining code quality" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_de926156 a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When initial pushback was incorrect" ;
+    oc:directiveContent "If you pushed back on feedback and were wrong, state the correction factually without apology or defending why you pushed back. E.g., 'You were right - I checked X and it does Y. Implementing now.'" ;
+    oc:hasRationale "Factual correction maintains technical credibility and keeps the review process moving forward without social noise" .
+
+oc:kn_df0417ca a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When reviewer suggests adding or properly implementing a feature" ;
+    oc:directiveContent "Apply YAGNI check when reviewers suggest 'implementing properly': grep the codebase for actual usage before adding features." ;
+    oc:hasRationale "Unused features add maintenance burden without value; if nothing calls it, remove it rather than improve it" .
+

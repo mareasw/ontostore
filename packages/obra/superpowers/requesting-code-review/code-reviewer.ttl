@@ -1,0 +1,71 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_obra_superpowers_requesting_code_review_code_reviewer a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "code-reviewer" ;
+    skos:broader "Code review agent" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/obra/superpowers/requesting-code-review" ;
+    oc:contentHash "7f5328dca12cb200005ae9d4386f63a9b0acb735ece57f82db206b4a3189ccae" ;
+    oc:dependsOnSkill oc:skill_requesting_code_review ;
+    oc:differentia "that evaluates code changes against requirements and categorizes issues by severity for production readiness assessment" ;
+    oc:extends oc:skill_obra_superpowers_requesting_code_review ;
+    oc:handlesFailure oc:GitDiffFailed,
+        oc:InvalidInput ;
+    oc:hasAllowedTool "Bash" ;
+    oc:hasArgumentHint "WHAT_WAS_IMPLEMENTED, PLAN_OR_REQUIREMENTS, BASE_SHA, HEAD_SHA" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_05ae5ef2,
+        oc:kn_2a7f6c8b,
+        oc:kn_74653a9d,
+        oc:kn_a61851a7,
+        oc:kn_c9573da2 ;
+    oc:isUserInvocable false ;
+    oc:nature "Work" ;
+    oc:requiresState oc:GitRepositoryAvailable ;
+    oc:resolvesIntent "assess production readiness",
+        "categorize code issues by severity",
+        "compare implementation against requirements",
+        "provide actionable code review feedback",
+        "review code changes" ;
+    oc:yieldsState oc:CodeReviewed,
+        oc:ProductionReadinessAssessed .
+
+oc:kn_05ae5ef2 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When reporting any issue in a review" ;
+    oc:directiveContent "Every issue must include file:line reference, what's wrong, why it matters, and how to fix (if not obvious). Avoid vague feedback like 'improve error handling'." ;
+    oc:hasRationale "Actionable, specific feedback reduces round-trips and helps developers actually fix problems rather than guess what the reviewer means" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_2a7f6c8b a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When evaluating the testing section of a review" ;
+    oc:directiveContent "Check tests that actually test logic rather than just mocking through, and verify edge cases and integration coverage exist where needed." ;
+    oc:hasRationale "Tests that only exercise mocks give false confidence in correctness without actually validating behavior" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_74653a9d a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before starting any code review" ;
+    oc:directiveContent "Before reviewing, gather the git diff stats and full diff between BASE_SHA and HEAD_SHA, and review the plan/requirements to understand what was intended." ;
+    oc:hasRationale "Without the full diff and requirements context, a reviewer cannot determine whether the implementation matches the spec or if scope creep occurred" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_a61851a7 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing any review verdict" ;
+    oc:directiveContent "Never say 'looks good' without actually checking the code, and never give feedback on code you didn't review." ;
+    oc:hasRationale "Rubber-stamping reviews undermines the entire purpose of code review and allows defects into production" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_c9573da2 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When reviewing any code changes" ;
+    oc:directiveContent "Always categorize issues by actual severity: Critical (bugs, security, data loss), Important (architecture, missing features, test gaps), Minor (style, optimization, docs). Never mark nitpicks as Critical." ;
+    oc:hasRationale "Severity inflation desensitizes developers and dilutes focus on genuinely dangerous issues" ;
+    oc:severityLevel "HIGH" .
+

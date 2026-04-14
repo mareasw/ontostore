@@ -1,0 +1,81 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_obra_superpowers_verification_before_completion a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "verification-before-completion" ;
+    skos:broader "Verification methodology" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/obra/superpowers/verification-before-completion" ;
+    oc:contentHash "b8677a7625a63908fa74cc66ab4487f796359093702c47899d6acde4fe1adf46" ;
+    oc:dependsOnSkill oc:skill_using_superpowers ;
+    oc:differentia "that mandates fresh evidence before any completion or success claim, enforcing a strict gate function of identify-run-read-verify across all work states" ;
+    oc:extends oc:skill_systematic_debugging ;
+    oc:handlesFailure oc:BuildFailure,
+        oc:TestFailure,
+        oc:VerificationFailed ;
+    oc:hasArgumentHint "claim-to-verify (e.g., 'tests pass', 'build succeeds', 'bug fixed')" ;
+    oc:hasCategory "development" ;
+    oc:hasDescription "Use when about to claim work is complete, fixed, or passing, before committing or creating PRs - requires running verification commands and confirming output before making any success claims; evidence before assertions always" ;
+    oc:hasName "verification-before-completion" ;
+    oc:impartsKnowledge oc:kn_033d7ce9,
+        oc:kn_15bb43f7,
+        oc:kn_51c24e56,
+        oc:kn_a3082c86,
+        oc:kn_a4caee8e,
+        oc:kn_f734b179 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "audit agent delegation results independently",
+        "confirm build success with exit codes",
+        "prevent false completion claims by requiring fresh evidence",
+        "validate bug fixes with actual test output",
+        "verify requirements are met with line-by-line checklists",
+        "verify work is complete before claiming completion" ;
+    oc:yieldsState oc:VerificationCompleted .
+
+oc:kn_033d7ce9 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing or verifying regression tests for bug fixes" ;
+    oc:directiveContent "For regression tests, enforce a red-green cycle: write test → run (pass) → revert fix → run (MUST FAIL) → restore fix → run (pass). A test that never failed red does not prove it catches the bug." ;
+    oc:hasRationale "Regression tests that pass without ever failing may not actually catch the regression they were written to prevent" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_15bb43f7 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When tempted to claim success or express confidence without fresh evidence" ;
+    oc:directiveContent "Never use hedging language like 'should work', 'probably passes', 'seems correct', or express premature satisfaction ('Great!', 'Done!', 'Perfect!') before running verification commands." ;
+    oc:hasRationale "These phrases are rationalization patterns that historically preceded false completion claims and shipped broken code" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_51c24e56 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "Always, before expressing satisfaction or claiming any task is done" ;
+    oc:directiveContent "Follow the 5-step gate function before every claim: IDENTIFY the proving command, RUN it fully and freshly, READ the complete output and exit code, VERIFY output confirms the claim, then and only THEN make the claim." ;
+    oc:hasRationale "Skipping any step converts verification into dishonesty — each step is a load-bearing element of truthful reporting" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_a3082c86 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Before any positive statement about work state — tests, builds, fixes, requirements, agent results" ;
+    oc:directiveContent "No completion or success claim may be made without fresh verification evidence obtained in the current message/session. Previous runs, confidence, or extrapolation are never sufficient." ;
+    oc:hasRationale "From 24 failure memories: false claims eroded trust, shipped broken code, and caused costly rework. The human partner explicitly said 'I don't believe you.'" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_a4caee8e a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before any integration action — commit, push, PR creation, task completion" ;
+    oc:directiveContent "Before committing, pushing, or creating a PR, re-read the plan, create a line-by-line checklist, verify each item with evidence, and report any gaps before claiming phase completion." ;
+    oc:hasRationale "Tests passing alone does not mean requirements are met; line-by-line verification catches missing requirements that tests may not cover" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_f734b179 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When delegating work to agents or receiving agent completion reports" ;
+    oc:directiveContent "Never trust agent or sub-agent success reports at face value. Always independently check VCS diffs and verify actual changes before reporting completion." ;
+    oc:hasRationale "Agents can report success without having made the correct changes; independent verification is the only reliable proof" ;
+    oc:severityLevel "HIGH" .
+

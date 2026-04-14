@@ -1,0 +1,83 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_obra_superpowers_requesting_code_review a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "requesting-code-review" ;
+    skos:broader "Quality assurance workflow" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/obra/superpowers/requesting-code-review" ;
+    oc:contentHash "f39ca847f32dc560b1ec784dd50e86831f4e9197a1862a8a0946f9fbc23ee053" ;
+    oc:dependsOnSkill oc:skill_executing_plans,
+        oc:skill_subagent_driven_development ;
+    oc:differentia "that dispatches a dedicated code-reviewer subagent with isolated context to evaluate git diffs against requirements before merging or proceeding" ;
+    oc:handlesFailure oc:InvalidGitRange,
+        oc:ReviewFailed ;
+    oc:hasAllowedTool "Bash",
+        "Task" ;
+    oc:hasArgumentHint "WHAT_WAS_IMPLEMENTED, PLAN_OR_REQUIREMENTS, BASE_SHA, HEAD_SHA, DESCRIPTION" ;
+    oc:hasCategory "development" ;
+    oc:hasDescription "Use when completing tasks, implementing major features, or before merging to verify work meets requirements" ;
+    oc:hasName "requesting-code-review" ;
+    oc:impartsKnowledge oc:kn_6cf8910a,
+        oc:kn_89f74c8c,
+        oc:kn_9bee4859,
+        oc:kn_a1dc274f,
+        oc:kn_a41807c9,
+        oc:kn_c480caa4 ;
+    oc:isUserInvocable true ;
+    oc:nature "WorkflowStrategy" ;
+    oc:requiresState oc:CodeCommitted,
+        oc:GitAvailable ;
+    oc:resolvesIntent "catch issues before merge",
+        "request code review",
+        "review code changes for production readiness",
+        "verify work meets requirements" ;
+    oc:yieldsState oc:CodeReviewed,
+        oc:IssuesIdentified,
+        oc:ProductionReadinessAssessed .
+
+oc:kn_6cf8910a a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When deciding whether to request or act on code review" ;
+    oc:directiveContent "Never skip review because 'it's simple', ignore Critical issues, proceed with unfixed Important issues, or argue with valid technical feedback without substantive reasoning." ;
+    oc:hasRationale "Skipping review on 'simple' changes is exactly how subtle bugs and regressions enter production; unresolved Important issues compound over time." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_89f74c8c a oc:KnowledgeNode,
+        oc:PostFlightValidation ;
+    oc:appliesToContext "When acting on review feedback" ;
+    oc:directiveContent "After review, fix Critical issues immediately, fix Important issues before proceeding, note Minor issues for later — then continue with the next task." ;
+    oc:hasRationale "Prioritized triage prevents Critical and Important issues from being buried under Minor suggestions, ensuring code quality doesn't degrade." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_9bee4859 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When dispatching any subagent for code review" ;
+    oc:directiveContent "Dispatch the code-reviewer subagent with precisely crafted context — never your session's full history — to keep the reviewer focused on the work product and preserve your own context for continued work." ;
+    oc:hasRationale "Feeding session history to the reviewer would pollute its focus and waste context tokens on irrelevant thought process details." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_a1dc274f a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Always, before every code review request" ;
+    oc:directiveContent "Before dispatching the reviewer, obtain BASE_SHA and HEAD_SHA git commit references to define the exact diff range to be reviewed." ;
+    oc:hasRationale "Without precise git SHAs, the reviewer cannot identify which changes to evaluate, leading to incomplete or misdirected reviews." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_a41807c9 a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When receiving review feedback that seems incorrect" ;
+    oc:directiveContent "If the reviewer appears wrong, push back with technical reasoning and show code/tests that prove correctness — but request clarification first rather than dismissing feedback outright." ;
+    oc:hasRationale "Reviewers may have context you lack; requesting clarification resolves misunderstandings while still allowing justified pushback." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_c480caa4 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When completing any implementation task or preparing to merge code" ;
+    oc:directiveContent "Review early, review often — after each task in subagent-driven development, after completing major features, and always before merge to main." ;
+    oc:hasRationale "Catching issues early prevents compounding errors and reduces the cost of fixes downstream." ;
+    oc:severityLevel "HIGH" .
+

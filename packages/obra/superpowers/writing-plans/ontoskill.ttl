@@ -1,0 +1,84 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_obra_superpowers_writing_plans a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "writing-plans" ;
+    skos:broader "Implementation planning methodology" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/obra/superpowers/writing-plans" ;
+    oc:contentHash "19850ceb4d50770ed99535e818f13c2669e15e64d4b6069aedca7ec2c42c5e28" ;
+    oc:dependsOnSkill oc:skill_brainstorming ;
+    oc:differentia "decomposes specs into bite-sized, TDD-oriented tasks with complete code, exact file paths, and zero placeholders for agentic execution" ;
+    oc:handlesFailure oc:InvalidInput ;
+    oc:hasArgumentHint "spec or requirements document path" ;
+    oc:hasCategory "development" ;
+    oc:hasDescription "Use when you have a spec or requirements for a multi-step task, before touching code" ;
+    oc:hasName "writing-plans" ;
+    oc:impartsKnowledge oc:kn_0adafba1,
+        oc:kn_291f5978,
+        oc:kn_378e3abf,
+        oc:kn_3f61bce4,
+        oc:kn_a8b0f9ba,
+        oc:kn_ab6ddcd0,
+        oc:kn_d30743ed ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:DirectoryWritable ;
+    oc:resolvesIntent "create implementation plan from spec",
+        "decompose requirements into executable tasks",
+        "hand off plan for subagent or inline execution",
+        "write TDD-oriented plan document" ;
+    oc:yieldsState oc:DocumentCreated .
+
+oc:kn_0adafba1 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing any plan task or step" ;
+    oc:directiveContent "Never include placeholders like 'TBD', 'TODO', 'implement later', 'add appropriate error handling', or 'write tests for the above' without actual code. Every step must contain the exact content an engineer needs." ;
+    oc:hasRationale "Placeholders defeat the purpose of a plan — they shift the design burden to execution time, causing context switches and poor decisions under pressure." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_291f5978 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Before writing task definitions in the plan" ;
+    oc:directiveContent "Map file structure before defining tasks. Each file should have one clear responsibility. Files that change together should live together. Split by responsibility, not by technical layer." ;
+    oc:hasRationale "File structure locks in decomposition decisions and ensures each task produces self-contained changes that make sense independently." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_378e3abf a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "At the start of plan creation, before task decomposition" ;
+    oc:directiveContent "Before writing the plan, check if the spec covers multiple independent subsystems. If so, suggest breaking it into separate plans — one per subsystem — each producing working, testable software on its own." ;
+    oc:hasRationale "A single plan spanning independent subsystems creates unnecessary coupling and prevents parallel execution." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_3f61bce4 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When decomposing tasks into steps" ;
+    oc:directiveContent "Each step must be one atomic action taking 2-5 minutes: write failing test, run test, implement minimal code, run test, commit — as separate steps, never combined." ;
+    oc:hasRationale "Fine granularity ensures deterministic execution, clear progress tracking, and safe rollback points at every commit." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_a8b0f9ba a oc:KnowledgeNode,
+        oc:RollbackProcedure ;
+    oc:appliesToContext "At the end of every task in the plan" ;
+    oc:directiveContent "Each task must end with a git commit step using conventional commit messages, creating safe rollback points throughout the plan." ;
+    oc:hasRationale "Frequent commits provide granular rollback capability and clear progress markers during execution." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_ab6ddcd0 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When writing any task step that involves code, commands, or tests" ;
+    oc:directiveContent "Assume the plan executor is a skilled developer with zero codebase context and limited test design knowledge. Provide complete code, exact file paths, exact commands with expected output, and explicit test code in every relevant step." ;
+    oc:hasRationale "Agentic executors may lack project-specific context. Complete, self-contained instructions prevent wrong assumptions and reduce the need for clarifications." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_d30743ed a oc:KnowledgeNode,
+        oc:PostFlightValidation ;
+    oc:appliesToContext "After completing all plan tasks, before saving" ;
+    oc:directiveContent "After writing the complete plan, run three self-review checks: (1) spec coverage — every requirement maps to a task, (2) placeholder scan — no red-flag patterns exist, (3) type consistency — function names and signatures match across all tasks." ;
+    oc:hasRationale "Plans written in one pass inevitably contain inconsistencies. Self-review catches name mismatches, missing requirements, and placeholder drift before execution." ;
+    oc:severityLevel "HIGH" .
+

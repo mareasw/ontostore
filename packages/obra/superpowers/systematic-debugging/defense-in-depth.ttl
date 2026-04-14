@@ -1,0 +1,67 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_obra_superpowers_systematic_debugging_defense_in_depth a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "defense-in-depth" ;
+    skos:broader "debugging validation strategy" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/obra/superpowers/systematic-debugging" ;
+    oc:contentHash "1e175fb86fc357e58c6aebf5441e481e1b7868b4380c0456b63a17eefbd18ba7" ;
+    oc:differentia "applies validation at every layer data passes through to make bugs structurally impossible rather than merely fixed" ;
+    oc:extends oc:skill_obra_superpowers_systematic_debugging ;
+    oc:handlesFailure oc:SingleLayerInsufficient,
+        oc:ValidationBypassed ;
+    oc:hasArgumentHint "bug description or data flow to validate" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_11940185,
+        oc:kn_1d803bf4,
+        oc:kn_735a523e,
+        oc:kn_7f50d8e6,
+        oc:kn_e51ff8f8 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:BugRootCauseIdentified ;
+    oc:resolvesIntent "add defense-in-depth validation to data flows",
+        "apply multi-layer validation after fixing a bug",
+        "make a bug structurally impossible",
+        "prevent bug recurrence through layered defenses" ;
+    oc:yieldsState oc:MultiLayerValidationApplied .
+
+oc:kn_11940185 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When fixing any bug caused by invalid data" ;
+    oc:directiveContent "Validate at EVERY layer data passes through — entry point, business logic, environment guards, and debug instrumentation — not just at one point." ;
+    oc:hasRationale "Single validation can be bypassed by different code paths, refactoring, or mocks. Multiple layers make the bug structurally impossible rather than merely fixed." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_1d803bf4 a oc:KnowledgeNode,
+        oc:PostFlightValidation ;
+    oc:appliesToContext "After applying defense-in-depth validation" ;
+    oc:directiveContent "After adding multi-layer validation, test that each layer catches the bug independently by bypassing earlier layers and verifying later layers still catch it." ;
+    oc:hasRationale "All four layers are necessary — during testing, each layer caught bugs the others missed. Without independent testing, you cannot confirm redundancy is effective." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_735a523e a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When adding validation after a bug fix" ;
+    oc:directiveContent "Do not stop at a single validation point after fixing a bug. One check is never sufficient." ;
+    oc:hasRationale "During testing, each layer catches bugs the others missed: different code paths bypass entry validation, mocks bypass business logic, edge cases need environment guards." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_7f50d8e6 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When applying defense-in-depth after root cause analysis" ;
+    oc:directiveContent "When you find a bug: (1) Trace the data flow to find origin and usage, (2) Map all checkpoints where data passes through, (3) Add validation at each layer, (4) Test each layer independently by trying to bypass earlier layers." ;
+    oc:hasRationale "Systematic data flow tracing ensures no validation gap remains. Testing each layer independently confirms redundancy works." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_e51ff8f8 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing validation for any data flow" ;
+    oc:directiveContent "Use four distinct validation layers: Layer 1 (Entry Point) rejects obviously invalid input at API boundaries, Layer 2 (Business Logic) ensures data makes sense for the operation, Layer 3 (Environment Guards) prevents dangerous operations in specific contexts like tests, Layer 4 (Debug Instrumentation) captures context for forensics." ;
+    oc:hasRationale "Each layer serves a distinct purpose and catches different failure modes — entry validation catches most bugs, business logic catches edge cases, environment guards prevent context-specific dangers, debug logging helps when other layers fail." ;
+    oc:severityLevel "MEDIUM" .
+
