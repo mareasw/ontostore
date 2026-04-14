@@ -1,0 +1,88 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_obra_superpowers_writing_skills_anthropic_best_practices a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "anthropic-best-practices" ;
+    skos:broader "Authoring guide" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/obra/superpowers/writing-skills" ;
+    oc:contentHash "20914c2fda31670c75fe91710e18a53d413ce0d00b5102acfa251d75c9226e3f" ;
+    oc:differentia "that teaches how to write effective Anthropic Agent Skills that Claude can discover and use, covering conciseness, progressive disclosure, workflow design, evaluation, and anti-patterns" ;
+    oc:extends oc:skill_obra_superpowers_writing_skills ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_2deaa3c4,
+        oc:kn_38644a9c,
+        oc:kn_52cad150,
+        oc:kn_659e7176,
+        oc:kn_6a7d12ff,
+        oc:kn_6fa7bd7e,
+        oc:kn_76f17ede,
+        oc:kn_cd9d4c1c ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:resolvesIntent "avoid common skill authoring anti-patterns",
+        "design skill descriptions for discoverability",
+        "evaluate and iterate on skills",
+        "organize skill content across multiple files",
+        "structure skill files for progressive disclosure",
+        "write effective skills for Claude agents" .
+
+oc:kn_2deaa3c4 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When deciding how prescriptive to make skill instructions" ;
+    oc:directiveContent "Match the level of specificity to task fragility: use high freedom (text-based instructions) when multiple approaches are valid, medium freedom (pseudocode/parameterized scripts) when a preferred pattern exists, low freedom (exact scripts, no parameters) when operations are fragile and error-prone." ;
+    oc:hasRationale "Over-constraining flexible tasks wastes tokens and reduces quality; under-constraining fragile tasks causes errors and inconsistency." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_38644a9c a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When writing the YAML frontmatter description field" ;
+    oc:directiveContent "Write descriptions in third person (e.g., 'Processes Excel files'), include both what the Skill does AND when to use it, and incorporate specific trigger terms. Description is critical for skill selection among potentially 100+ available Skills." ;
+    oc:hasRationale "The description is pre-loaded into the system prompt at startup and is the primary mechanism for skill discovery. Vague or first-person descriptions cause discovery failures." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_52cad150 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing any SKILL.md content" ;
+    oc:directiveContent "The context window is a public good. Keep SKILL.md concise — only add context Claude doesn't already have. Challenge each piece: 'Does Claude really need this?', 'Can I assume Claude knows this?', 'Does this paragraph justify its token cost?'" ;
+    oc:hasRationale "Every token in SKILL.md competes with conversation history, system prompt, and other loaded skills. Concise skills perform better and leave room for actual work." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_659e7176 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When organizing skill directory structure for any non-trivial skill" ;
+    oc:directiveContent "Use progressive disclosure: SKILL.md as a table of contents pointing to detailed materials loaded only when needed. Organize reference files by domain so Claude loads only relevant context. Scripts are executed (not loaded into context), so only their output consumes tokens." ;
+    oc:hasRationale "This filesystem-based architecture means large reference files, datasets, and documentation consume zero context tokens until actually accessed, maximizing the available context for work." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_6a7d12ff a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When structuring skill directory layout and content" ;
+    oc:directiveContent "Keep SKILL.md body under 500 lines. Keep file references one level deep from SKILL.md — never nest references (SKILL.md → advanced.md → details.md). All reference files should link directly from SKILL.md." ;
+    oc:hasRationale "Claude may partially read deeply nested files using head commands, resulting in incomplete information. One-level-deep references ensure Claude reads complete files when needed." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_6fa7bd7e a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When developing and iterating on any skill" ;
+    oc:directiveContent "Use the iterative Claude A / Claude B development pattern: Claude A helps design and refine the skill, Claude B tests it on real tasks. Observe Claude B's behavior (unexpected exploration paths, missed connections, ignored content) and feed insights back to Claude A." ;
+    oc:hasRationale "Real agent behavior reveals gaps that assumptions cannot predict. This observe-refine-test cycle produces skills grounded in actual usage rather than imagined requirements." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_76f17ede a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before sharing or deploying any skill" ;
+    oc:directiveContent "Before finalizing a skill, verify: description is specific with key terms, SKILL.md is under 500 lines, no time-sensitive info, consistent terminology, examples are concrete, file references are one level deep, at least three evaluations exist, and scripts have explicit error handling with justified constants." ;
+    oc:hasRationale "This comprehensive checklist catches the most common skill quality issues before they reach users." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_cd9d4c1c a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When authoring all skill content and scripts" ;
+    oc:directiveContent "Never include time-sensitive information directly in skill content. Instead, use an 'old patterns' section for deprecated approaches. Never use Windows-style backslash paths. Never present multiple library options without a clear default. Never write scripts that punt error handling to Claude." ;
+    oc:hasRationale "Time-sensitive info becomes wrong and degrades trust. Backslash paths fail on Unix. Unnecessary options confuse. Scripts should handle errors explicitly for reliability." ;
+    oc:severityLevel "MEDIUM" .
+

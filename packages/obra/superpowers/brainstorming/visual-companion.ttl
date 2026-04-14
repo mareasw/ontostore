@@ -1,0 +1,107 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_obra_superpowers_brainstorming_visual_companion a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "visual-companion" ;
+    skos:broader "browser-based visual brainstorming companion" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/obra/superpowers/brainstorming" ;
+    oc:contentHash "a2bc6fc47d0df1df981d02f707a16225b147f462e7059175ad2bc5e6dd29fcae" ;
+    oc:dependsOnSkill oc:skill_brainstorming ;
+    oc:differentia "serves HTML mockups and interactive options to a browser for visual feedback during brainstorming sessions, with bidirectional communication between terminal and browser" ;
+    oc:extends oc:skill_obra_superpowers_brainstorming ;
+    oc:handlesFailure oc:FileWriteFailed,
+        oc:ServerNotReachable ;
+    oc:hasArgumentHint "project-dir path for session persistence" ;
+    oc:hasCategory "productivity" ;
+    oc:impartsKnowledge oc:kn_3cb52132,
+        oc:kn_3eebc93f,
+        oc:kn_42609fd1,
+        oc:kn_7560c9f2,
+        oc:kn_8aceb153,
+        oc:kn_cd56261a,
+        oc:kn_d607d774,
+        oc:kn_e3092835,
+        oc:kn_e6f65309,
+        oc:kn_ee4df86e ;
+    oc:isUserInvocable true ;
+    oc:nature "technique" ;
+    oc:requiresState oc:DirectoryWritable,
+        oc:ServerRunning ;
+    oc:resolvesIntent "compare designs side-by-side visually",
+        "display architecture diagrams and UI wireframes",
+        "gather visual preference feedback from users",
+        "present visual options for user selection",
+        "show visual mockups during brainstorming" ;
+    oc:yieldsState oc:UserSelectionCaptured,
+        oc:VisualContentDisplayed .
+
+oc:kn_3cb52132 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "When launching the visual companion server" ;
+    oc:directiveContent "Pass --project-dir when starting the server so mockups persist in .superpowers/brainstorm/ and survive server restarts. Without it, files go to /tmp and get cleaned up. Remind user to add .superpowers/ to .gitignore." ;
+    oc:hasRationale "Persisted mockups can be referenced later in the project. /tmp cleanup causes loss of visual artifacts that may be needed for review" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_3eebc93f a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When transitioning from browser-based visual questions back to terminal-based discussion" ;
+    oc:directiveContent "Push a 'waiting' or 'continuing in terminal' screen when returning to terminal-only conversation. This prevents the user from staring at stale visual content while the conversation has moved to non-visual topics." ;
+    oc:hasRationale "Stale content on screen causes confusion about whether the user should still be looking at the browser or responding in terminal" .
+
+oc:kn_42609fd1 a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "When reading user interaction data from state_dir/events" ;
+    oc:directiveContent "The events file at $STATE_DIR/events is automatically cleared when a new screen is pushed. The full event stream shows the user's exploration path including multiple clicks before settling." ;
+    oc:hasRationale "The click pattern reveals hesitation and preference evolution — the last click is typically the final selection but intermediate clicks can reveal useful insights" .
+
+oc:kn_7560c9f2 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When launching the server on different platforms" ;
+    oc:directiveContent "On Windows, the script auto-detects foreground mode which blocks the tool call. Use run_in_background: true on the Bash tool call. On Codex, the script auto-detects CODEX_CI and uses foreground mode. On Gemini CLI, use --foreground with background execution." ;
+    oc:hasRationale "Platform-specific process management differs — backgrounding behavior determines whether the server survives across conversation turns" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_8aceb153 a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When user interaction data is missing or server is unreachable" ;
+    oc:directiveContent "If $STATE_DIR/events doesn't exist, the user didn't interact with the browser — use only their terminal text for feedback. If the server URL is unreachable (common in remote/containerized setups), bind a non-loopback host with --host 0.0.0.0 and --url-host localhost." ;
+    oc:hasRationale "Graceful degradation ensures the brainstorming session can continue even when browser interaction fails or is unavailable" .
+
+oc:kn_cd56261a a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing HTML files to screen_dir" ;
+    oc:directiveContent "Write content fragments by default (just the inner content). Only write full HTML documents starting with <!DOCTYPE or <html when you need complete control over the page. The server auto-wraps fragments in the frame template." ;
+    oc:hasRationale "Fragments are simpler, less error-prone, and automatically get the frame template's CSS theme, selection indicator, and interactive infrastructure" .
+
+oc:kn_d607d774 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "Before each iteration of the visual feedback loop" ;
+    oc:directiveContent "The server auto-exits after 30 minutes of inactivity. Before each write, check that $STATE_DIR/server-info exists and server-stopped does not exist. Restart with start-server.sh if the server has shut down." ;
+    oc:hasRationale "Long brainstorming sessions can exceed the inactivity timeout, and attempting to write to a dead server silently fails" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_e3092835 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When deciding whether to push content to the browser vs keeping it in terminal" ;
+    oc:directiveContent "Use the browser when content is inherently visual (mockups, diagrams, layouts, spatial relationships). Use the terminal when content is text or tabular (requirements, tradeoff lists, conceptual choices). A question ABOUT a UI topic is not automatically a visual question." ;
+    oc:hasRationale "Sending text-based questions to the browser adds friction without benefit; sending visual content to the terminal loses the spatial information that makes it meaningful" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_e6f65309 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When writing HTML content to screen_dir" ;
+    oc:directiveContent "Never reuse filenames — each screen gets a fresh file with a semantic name. Use version suffixes like layout-v2.html for iterations. Use the Write tool, never cat/heredoc." ;
+    oc:hasRationale "Reusing filenames can cause browser caching issues and makes it impossible to track iteration history. cat/heredoc dumps noise into the terminal output" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_ee4df86e a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing HTML content for visual options" ;
+    oc:directiveContent "Do not present more than 2-4 options per screen. Keep mockups focused on layout and structure rather than pixel-perfect design. Scale fidelity to the question being asked." ;
+    oc:hasRationale "Too many options overwhelm the user and make comparison difficult. Overly detailed mockups shift focus from the actual decision to implementation details" ;
+    oc:severityLevel "MEDIUM" .
+

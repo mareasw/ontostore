@@ -1,0 +1,84 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_obra_superpowers_finishing_a_development_branch a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "finishing-a-development-branch" ;
+    skos:broader "Development workflow completion guide" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/obra/superpowers/finishing-a-development-branch" ;
+    oc:contentHash "c39fe6fea5a3145ef26daee8f6ffbd2807577353fd4590b95ef93d0961ac13b3" ;
+    oc:dependsOnSkill oc:skill_verification_before_completion ;
+    oc:differentia "Presents structured options (merge, PR, keep, discard) for integrating completed implementation work and cleans up git resources" ;
+    oc:handlesFailure oc:ConfirmationDenied,
+        oc:MergeConflict,
+        oc:PushRejected,
+        oc:TestsFailing ;
+    oc:hasAllowedTool "Bash" ;
+    oc:hasArgumentHint "None - skill auto-detects branch and worktree state" ;
+    oc:hasCategory "development" ;
+    oc:hasDescription "Use when implementation is complete, all tests pass, and you need to decide how to integrate the work - guides completion of development work by presenting structured options for merge, PR, or cleanup" ;
+    oc:hasName "finishing-a-development-branch" ;
+    oc:impartsKnowledge oc:kn_17ace61b,
+        oc:kn_4278de8e,
+        oc:kn_579d24ba,
+        oc:kn_655b308e,
+        oc:kn_e14c6993,
+        oc:kn_e97b2557 ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:ImplementationComplete,
+        oc:TestsPassing ;
+    oc:resolvesIntent "clean up git worktree after branch completion",
+        "create pull request from feature branch",
+        "decide how to integrate completed development work",
+        "discard incomplete or unwanted branch work",
+        "merge feature branch to base branch" ;
+    oc:yieldsState oc:BranchIntegrated,
+        oc:PullRequestCreated,
+        oc:WorktreeCleaned .
+
+oc:kn_17ace61b a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "During worktree cleanup phase (Step 5)" ;
+    oc:directiveContent "Only clean up worktrees for Options 1 (merge) and 4 (discard). Preserve worktrees for Option 2 (PR) and Option 3 (keep as-is)." ;
+    oc:hasRationale "PRs may need follow-up commits from the same worktree. Kept branches explicitly signal the user wants to preserve the workspace." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_4278de8e a oc:KnowledgeNode,
+        oc:SecurityImplication ;
+    oc:appliesToContext "When user selects Option 4 (Discard)" ;
+    oc:directiveContent "Require exact typed 'discard' confirmation before deleting any branch or worktree. Never delete work without explicit confirmation." ;
+    oc:hasRationale "Accidental deletion of work is irreversible and can destroy hours of implementation effort." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_579d24ba a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before offering merge/PR/discard options (Step 1)" ;
+    oc:directiveContent "Always run the project's full test suite before presenting any integration options. If tests fail, stop immediately and report failures." ;
+    oc:hasRationale "Merging or pushing broken code creates downstream problems and failing PRs that waste review time." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_655b308e a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Always, enforced at Step 1 gate" ;
+    oc:directiveContent "Never proceed with merge, PR creation, or any integration action while tests are failing." ;
+    oc:hasRationale "The entire workflow is predicated on verified working code. Bypassing this gate negates the purpose of the skill." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_e14c6993 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When presenting completion options to the user (Step 3)" ;
+    oc:directiveContent "Present exactly 4 structured options: local merge, push+PR, keep as-is, or discard. Do not add open-ended questions or explanations." ;
+    oc:hasRationale "Open-ended questions like 'What should I do next?' create ambiguity and decision paralysis. Structured options ensure clear, actionable choices." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_e97b2557 a oc:KnowledgeNode,
+        oc:PostFlightValidation ;
+    oc:appliesToContext "When executing Option 1 (Merge Locally)" ;
+    oc:directiveContent "After a local merge, re-run the test suite on the merged result before deleting the feature branch." ;
+    oc:hasRationale "Merge conflicts or integration issues can introduce test failures even when both branches passed independently." ;
+    oc:severityLevel "HIGH" .
+

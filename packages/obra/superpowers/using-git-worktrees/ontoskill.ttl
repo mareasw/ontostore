@@ -1,0 +1,78 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_obra_superpowers_using_git_worktrees a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "using-git-worktrees" ;
+    skos:broader "Git workspace management skill" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/obra/superpowers/using-git-worktrees" ;
+    oc:contentHash "d8ae72ab8b3185d35d078f9fe77b3410de1868d93a8c7fcb42f6f59a325b1ddf" ;
+    oc:dependsOnSkill oc:skill_brainstorming ;
+    oc:differentia "creates isolated git worktrees with systematic directory selection, safety verification, and automated project setup for parallel development" ;
+    oc:handlesFailure oc:DependencyInstallFailure,
+        oc:GitWorktreeConflict,
+        oc:TestFailure ;
+    oc:hasAllowedTool "Bash",
+        "Glob",
+        "Grep",
+        "Read",
+        "Write" ;
+    oc:hasArgumentHint "branch-name (for the new worktree branch)" ;
+    oc:hasCategory "development" ;
+    oc:hasDescription "Use when starting feature work that needs isolation from current workspace or before executing implementation plans - creates isolated git worktrees with smart directory selection and safety verification" ;
+    oc:hasName "using-git-worktrees" ;
+    oc:impartsKnowledge oc:kn_102c2e85,
+        oc:kn_8f253479,
+        oc:kn_9d3c39e4,
+        oc:kn_d2deadc5,
+        oc:kn_fff296d8 ;
+    oc:isUserInvocable true ;
+    oc:nature "Tool" ;
+    oc:requiresState oc:DirectoryWritable,
+        oc:SystemAuthenticated ;
+    oc:resolvesIntent "create isolated git workspace",
+        "create parallel development branch workspace",
+        "prepare isolated environment for implementation",
+        "set up worktree for feature development" ;
+    oc:yieldsState oc:EnvironmentReady,
+        oc:TestsPassing,
+        oc:WorktreeCreated .
+
+oc:kn_102c2e85 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "After dependency installation in the newly created worktree" ;
+    oc:directiveContent "Always run baseline tests in the new worktree to establish a clean verification state before any implementation begins." ;
+    oc:hasRationale "A clean test baseline is essential for distinguishing whether later test failures are caused by new changes or were pre-existing." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_8f253479 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "After creating the worktree and before running baseline tests" ;
+    oc:directiveContent "Auto-detect project type from marker files (package.json, Cargo.toml, requirements.txt, pyproject.toml, go.mod) and run appropriate dependency installation." ;
+    oc:hasRationale "Hardcoding setup commands breaks on projects using different tools; auto-detection ensures the worktree is properly initialized regardless of stack." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_9d3c39e4 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When creating worktrees in .worktrees/ or worktrees/ directories inside the project" ;
+    oc:directiveContent "Always verify project-local worktree directories are git-ignored using `git check-ignore` before creating any worktree." ;
+    oc:hasRationale "Prevents accidentally committing worktree contents to the repository, which pollutes git status and can corrupt the repo." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_d2deadc5 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When selecting where to create worktrees" ;
+    oc:directiveContent "Follow directory priority order: existing directory > CLAUDE.md preference > ask user. Prefer .worktrees/ (hidden) over worktrees/ (visible)." ;
+    oc:hasRationale "Ensures consistency with project conventions and avoids creating redundant or conflicting directory structures." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_fff296d8 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "After running project setup and baseline test verification in the new worktree" ;
+    oc:directiveContent "Never proceed with failing baseline tests without explicitly asking the user for permission to continue." ;
+    oc:hasRationale "Failing baseline tests mean you cannot distinguish new bugs from pre-existing issues, making all subsequent work unverifiable." ;
+    oc:severityLevel "HIGH" .
+

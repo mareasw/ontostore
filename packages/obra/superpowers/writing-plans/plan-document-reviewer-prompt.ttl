@@ -1,0 +1,68 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_obra_superpowers_writing_plans_plan_document_reviewer_prompt a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "plan-document-reviewer-prompt" ;
+    skos:broader "review template" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/obra/superpowers/writing-plans" ;
+    oc:contentHash "6fce2aa83c63715697e9dd86050c820716100b91efbd9f12bab8477ecc060256" ;
+    oc:dependsOnSkill oc:skill_writing_plans ;
+    oc:differentia "that dispatches a subagent to verify plan completeness, spec alignment, and buildability before implementation" ;
+    oc:extends oc:skill_obra_superpowers_writing_plans ;
+    oc:handlesFailure oc:PlanIncomplete,
+        oc:PlanSpecMismatch ;
+    oc:hasArgumentHint "PLAN_FILE_PATH and SPEC_FILE_PATH" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_07d364cf,
+        oc:kn_0ea276f1,
+        oc:kn_3b5d01cd,
+        oc:kn_8602584a,
+        oc:kn_d8e0ae01 ;
+    oc:isUserInvocable false ;
+    oc:nature "prompt" ;
+    oc:requiresState oc:PlanDocumentWritten ;
+    oc:resolvesIntent "check plan-spec alignment",
+        "review plan document",
+        "validate task decomposition",
+        "verify plan completeness" ;
+    oc:yieldsState oc:PlanReviewed .
+
+oc:kn_07d364cf a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before invoking the plan reviewer subagent" ;
+    oc:directiveContent "Before dispatching the reviewer, ensure both the complete plan file and the source spec file are available as inputs." ;
+    oc:hasRationale "The reviewer needs both documents to assess spec alignment and completeness; missing either document makes the review ineffective." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_0ea276f1 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When determining plan review status" ;
+    oc:directiveContent "Do not block approval for minor wording, stylistic preferences, or 'nice to have' suggestions." ;
+    oc:hasRationale "Blocking on trivial issues creates unnecessary delays; only serious gaps (missing requirements, contradictions, placeholders, vague tasks) should block." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_3b5d01cd a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When reviewing a plan document for approval" ;
+    oc:directiveContent "Only flag issues that would cause real problems during implementation — an implementer building the wrong thing or getting stuck is an issue." ;
+    oc:hasRationale "Over-flagging minor stylistic or wording issues dilutes review value and slows down the planning-to-implementation cycle." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_8602584a a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When making the final approval decision" ;
+    oc:directiveContent "Approve the plan unless there are serious gaps — missing spec requirements, contradictory steps, placeholder content, or unactionable tasks." ;
+    oc:hasRationale "A bias toward approval keeps the workflow moving; the bar for rejection should be clear, actionable problems that would impede implementation." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_d8e0ae01 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When performing plan document review" ;
+    oc:directiveContent "The reviewer must evaluate four categories: Completeness, Spec Alignment, Task Decomposition, and Buildability." ;
+    oc:hasRationale "These four categories cover the essential quality dimensions that determine whether a plan can be successfully implemented." ;
+    oc:severityLevel "HIGH" .
+

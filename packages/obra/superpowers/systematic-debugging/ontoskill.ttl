@@ -1,0 +1,118 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_obra_superpowers_systematic_debugging a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "systematic-debugging" ;
+    skos:broader "Debugging methodology" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/obra/superpowers/systematic-debugging" ;
+    oc:contentHash "873b71b560fecfd3922ce48c59d6f7cdb592cf23842c2a35a0e5d9951f2a3c28" ;
+    oc:differentia "Enforces a strict four-phase process of root cause investigation, pattern analysis, hypothesis testing, and implementation with explicit safeguards against rationalization and shortcut-taking" ;
+    oc:extends oc:skill_test_driven_development,
+        oc:skill_verification_before_completion ;
+    oc:handlesFailure oc:ArchitecturalProblemDetected,
+        oc:FixFailed,
+        oc:HypothesisDisproven ;
+    oc:hasAllowedTool "Bash",
+        "Glob",
+        "Grep",
+        "Read" ;
+    oc:hasArgumentHint "description of the bug, test failure, or unexpected behavior" ;
+    oc:hasCategory "development" ;
+    oc:hasDescription "Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes" ;
+    oc:hasName "systematic-debugging" ;
+    oc:impartsKnowledge oc:kn_272db3c3,
+        oc:kn_58cb80db,
+        oc:kn_651ea40c,
+        oc:kn_65df4551,
+        oc:kn_7bb910f7,
+        oc:kn_d2000a6d,
+        oc:kn_db084ecd,
+        oc:kn_f396507a,
+        oc:kn_f9532b81,
+        oc:kn_fc49bd5d ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:BugObserved,
+        oc:ErrorReproducible ;
+    oc:resolvesIntent "avoid symptom-level patches",
+        "debug test failures",
+        "find root causes before fixing",
+        "fix production issues systematically",
+        "investigate bugs and unexpected behavior",
+        "trace errors through call stacks" ;
+    oc:yieldsState oc:BugResolved,
+        oc:RootCauseIdentified .
+
+oc:kn_272db3c3 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When encountering ANY bug, test failure, or unexpected behavior" ;
+    oc:directiveContent "Never propose fixes without completing root cause investigation first. Symptom fixes are failure — they mask the underlying issue and create new bugs." ;
+    oc:hasRationale "Fixing symptoms without understanding root cause leads to thrashing, wasted time (2-3 hours vs 15-30 minutes), and introduction of new bugs" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_58cb80db a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "During Phase 1 (Root Cause Investigation) and Phase 2 (Pattern Analysis)" ;
+    oc:directiveContent "Read error messages, stack traces, and reference implementations completely — every line, every error code, every file path. Don't skim." ;
+    oc:hasRationale "Partial understanding guarantees bugs. Error messages often contain the exact solution. Skimming reference implementations is the most common source of pattern implementation bugs." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_651ea40c a oc:Idempotency,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When cycling through the four phases of debugging" ;
+    oc:directiveContent "Systematic debugging is an iterative loop: failed hypotheses feed back into Phase 1 with new evidence. Each iteration narrows the search space." ;
+    oc:hasRationale "Debugging is not linear — it is a convergent process. Each failed hypothesis eliminates one possibility and provides evidence for the next iteration." .
+
+oc:kn_65df4551 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When debugging systems with multiple components (CI → build → signing, API → service → database)" ;
+    oc:directiveContent "In multi-component systems, add diagnostic instrumentation at EVERY component boundary before proposing fixes. Log data entering and exiting each layer, verify environment/config propagation." ;
+    oc:hasRationale "Without evidence at each boundary, you cannot determine which component is failing. Instrumented runs reveal the failing layer definitively." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_7bb910f7 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "During Phase 3 (Hypothesis and Testing) of systematic debugging" ;
+    oc:directiveContent "Always test the smallest possible change to validate a single hypothesis. One variable at a time, never fix multiple things at once." ;
+    oc:hasRationale "Testing multiple changes simultaneously makes it impossible to isolate what worked and introduces confounding variables" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_d2000a6d a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When tests are flaky or use setTimeout/sleep to wait for async operations" ;
+    oc:directiveContent "Do not use arbitrary timeouts (sleep, setTimeout) in tests to guess at timing. Replace with condition-based waiting that polls for the actual condition." ;
+    oc:hasRationale "Arbitrary timeouts create race conditions — tests pass on fast machines but fail under load or in CI. Condition-based waiting eliminates flakiness (60% → 100% pass rate in practice)." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_db084ecd a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When multiple attempted fixes have failed to resolve the issue" ;
+    oc:directiveContent "If 3 or more fix attempts have failed, stop fixing and question the architecture. Each failed fix revealing new problems in different places signals a fundamental design flaw." ;
+    oc:hasRationale "Repeated fix failures indicate the problem is architectural, not implementational. Continuing to patch is wasted effort — discuss with human partner before attempting more fixes." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_f396507a a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "After successfully identifying and fixing a root cause" ;
+    oc:directiveContent "After fixing a root cause, add validation at every layer data passes through (entry point, business logic, environment guards, debug instrumentation). Make the bug structurally impossible." ;
+    oc:hasRationale "Single validation points can be bypassed by different code paths, refactoring, or mocks. Defense-in-depth at all layers ensures the bug cannot recur." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_f9532b81 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When errors manifest deep in the call stack or far from their origin" ;
+    oc:directiveContent "Trace bugs backward through the call chain to find the original trigger, then fix at the source. Never fix where the error appears if you can trace further up." ;
+    oc:hasRationale "Bugs often originate far from where they surface. Fixing at the symptom point leaves the root cause intact and the bug can recur through different code paths." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_fc49bd5d a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When a hypothesis test or fix attempt fails" ;
+    oc:directiveContent "When a fix doesn't work, STOP immediately. Do not add more fixes on top. Return to Phase 1 and re-analyze with the new information gathered from the failed attempt." ;
+    oc:hasRationale "Stacking fixes compounds complexity and makes it impossible to reason about cause and effect. Each failed attempt provides valuable evidence for re-analysis." ;
+    oc:severityLevel "HIGH" .
+

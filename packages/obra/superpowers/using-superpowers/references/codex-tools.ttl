@@ -1,0 +1,76 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_obra_superpowers_using_superpowers_codex_tools a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "codex-tools" ;
+    skos:broader "tool mapping" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/obra/superpowers/using-superpowers" ;
+    oc:contentHash "9014e6746c9a6d3af9eeb9608f1ad637ee334e5a12d178747e3042937fc3da2b" ;
+    oc:dependsOnSkill oc:skill_using_superpowers ;
+    oc:differentia "translates Claude Code tool names and patterns to OpenAI Codex platform equivalents, enabling cross-platform skill execution" ;
+    oc:extends oc:skill_obra_superpowers_using_superpowers ;
+    oc:handlesFailure oc:FeatureNotEnabled,
+        oc:PermissionDenied ;
+    oc:hasAllowedTool "Bash",
+        "Edit",
+        "Read",
+        "Write",
+        "close_agent",
+        "spawn_agent",
+        "update_plan",
+        "wait" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_462054ff,
+        oc:kn_4a5427cf,
+        oc:kn_aea0bc85,
+        oc:kn_f26df223,
+        oc:kn_fd802b99 ;
+    oc:isUserInvocable false ;
+    oc:nature "reference" ;
+    oc:requiresState oc:EnvironmentReady,
+        oc:ToolInstalled ;
+    oc:resolvesIntent "detect execution environment for git operations",
+        "dispatch subagents on Codex platform",
+        "handle sandbox-limited git operations in Codex App",
+        "translate tool references between agent platforms" ;
+    oc:yieldsState oc:ToolMappingResolved .
+
+oc:kn_462054ff a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When translating named agent dispatch from Claude Code skills to Codex" ;
+    oc:directiveContent "When a skill references a named agent type (e.g., superpowers:code-reviewer), find and read the agent's prompt file, fill template placeholders, then spawn a 'worker' agent with the filled content as the message parameter." ;
+    oc:hasRationale "Codex lacks a named agent registry, so named dispatch must be manually resolved to generic worker agents with the appropriate prompt content injected via message." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_4a5427cf a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When dispatching any subagent via spawn_agent on Codex" ;
+    oc:directiveContent "Use task-delegation framing ('Your task is...') rather than persona framing ('You are...') when composing spawn_agent messages, and wrap instructions in XML tags for authoritative treatment by the model." ;
+    oc:hasRationale "Codex's spawn_agent message parameter is user-level input, not a system prompt, so structured framing maximizes instruction adherence and prevents the agent from summarizing instead of executing." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_aea0bc85 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before executing using-git-worktrees or finishing-a-development-branch skills" ;
+    oc:directiveContent "Before skills that create worktrees or finish branches, run read-only git commands to detect environment: check if GIT_DIR != GIT_COMMON (already in worktree) or if BRANCH is empty (detached HEAD)." ;
+    oc:hasRationale "Environment detection prevents redundant worktree creation and informs the agent whether git operations are possible in the current context." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_f26df223 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "During finishing-a-development-branch or git operations in Codex App sandbox" ;
+    oc:directiveContent "When the Codex sandbox has a detached HEAD (externally managed worktree), the agent cannot branch, push, or create PRs. Instead, commit all work and inform the user to use the App's native controls for branch creation, push, and PR." ;
+    oc:hasRationale "Externally managed worktrees block write git operations; the agent must hand off to the user rather than attempting blocked commands." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_fd802b99 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Before executing any skill that dispatches parallel or sub-agents" ;
+    oc:directiveContent "Multi-agent features (spawn_agent, wait, close_agent) require [features] multi_agent = true in ~/.codex/config.toml before skills like dispatching-parallel-agents or subagent-driven-development can be used." ;
+    oc:hasRationale "Without this config flag, spawn_agent is unavailable and any skill depending on multi-agent dispatch will fail at runtime." ;
+    oc:severityLevel "CRITICAL" .
+

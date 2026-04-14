@@ -1,0 +1,80 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_obra_superpowers_using_superpowers_copilot_tools a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "copilot-tools" ;
+    skos:broader "tool mapping reference" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/obra/superpowers/using-superpowers" ;
+    oc:contentHash "5e0e9248e8bd965a28c8721bed24ddfa44a1ee66a89ee275da4a8260fe636e02" ;
+    oc:differentia "translates Claude Code tool names to Copilot CLI equivalents for cross-platform skill execution" ;
+    oc:extends oc:skill_obra_superpowers_using_superpowers ;
+    oc:hasAllowedTool "bash",
+        "create",
+        "edit",
+        "fetch_copilot_cli_documentation",
+        "glob",
+        "grep",
+        "list_agents",
+        "list_bash",
+        "read_agent",
+        "read_bash",
+        "report_intent",
+        "skill",
+        "sql",
+        "stop_bash",
+        "store_memory",
+        "task",
+        "view",
+        "web_fetch",
+        "write_bash" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_1ded01e6,
+        oc:kn_76b8938a,
+        oc:kn_9a32f6d1,
+        oc:kn_b105796d,
+        oc:kn_cb6790cf ;
+    oc:isUserInvocable false ;
+    oc:nature "Concept" ;
+    oc:resolvesIntent "find Copilot CLI equivalent for a Claude Code tool",
+        "translate tool names between Claude Code and Copilot CLI",
+        "understand Copilot CLI agent types and async shell sessions" .
+
+oc:kn_1ded01e6 a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "When running long-running commands or needing parallel shell operations on Copilot CLI" ;
+    oc:directiveContent "Copilot CLI supports persistent async shell sessions (bash with async:true, write_bash, read_bash, stop_bash, list_bash) which have no Claude Code equivalent and offer background command execution." ;
+    oc:hasRationale "Async shell sessions enable non-blocking command execution unique to Copilot CLI, providing capabilities beyond Claude Code." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_76b8938a a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When executing any skill that references Claude Code tool names on Copilot CLI" ;
+    oc:directiveContent "When a skill references Claude Code tools (Read, Write, Edit, Bash, Grep, Glob, Skill, WebFetch, Task), substitute with the Copilot CLI equivalents (view, create, edit, bash, grep, glob, skill, web_fetch, task)." ;
+    oc:hasRationale "Skills are authored against Claude Code's tool names but must be translated to work correctly on Copilot CLI." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_9a32f6d1 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When dispatching subagents via the task tool on Copilot CLI" ;
+    oc:directiveContent "Named plugin agents (e.g. superpowers:code-reviewer) are discovered automatically from installed plugins — do not hardcode agent type mappings for them." ;
+    oc:hasRationale "Plugin-based agents are dynamic and discovered at runtime, not statically mapped." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_b105796d a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When a skill requires task tracking on Copilot CLI" ;
+    oc:directiveContent "Use TodoWrite equivalent via the sql tool querying the built-in todos table, not a dedicated todo tool." ;
+    oc:hasRationale "Copilot CLI uses a SQLite-backed approach for task management rather than a dedicated tool." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_cb6790cf a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When a skill calls for WebSearch or plan mode on Copilot CLI" ;
+    oc:directiveContent "WebSearch and EnterPlanMode/ExitPlanMode have no Copilot CLI equivalents. Use web_fetch with a search engine URL for search, and stay in the main session for planning." ;
+    oc:hasRationale "Some Claude Code capabilities do not exist in Copilot CLI; workarounds must be used to avoid failures." ;
+    oc:severityLevel "HIGH" .
+

@@ -1,0 +1,89 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_obra_superpowers_executing_plans a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "executing-plans" ;
+    skos:broader "workflow execution methodology" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/obra/superpowers/executing-plans" ;
+    oc:contentHash "579c273284741d486650d3bd900a65c2d13e52ba29114d27e9abe44c9ffb69ee" ;
+    oc:dependsOnSkill oc:skill_finishing_a_development_branch,
+        oc:skill_using_git_worktrees,
+        oc:skill_writing_plans ;
+    oc:differentia "that systematically loads, critically reviews, and sequentially executes a written implementation plan with mandatory verification checkpoints and human escalation on blockers" ;
+    oc:handlesFailure oc:BlockerEncountered,
+        oc:PlanAmbiguous,
+        oc:VerificationFailed ;
+    oc:hasCategory "development" ;
+    oc:hasDescription "Use when you have a written implementation plan to execute in a separate session with review checkpoints" ;
+    oc:hasName "executing-plans" ;
+    oc:impartsKnowledge oc:kn_1741a0f5,
+        oc:kn_34faab65,
+        oc:kn_6d5152ba,
+        oc:kn_7251c3dd,
+        oc:kn_95784c25,
+        oc:kn_98067cd8,
+        oc:kn_bdbaef28 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady,
+        oc:PlanWritten ;
+    oc:resolvesIntent "complete planned development tasks with verification",
+        "execute an implementation plan",
+        "follow a written plan step by step",
+        "manage plan execution with review checkpoints" ;
+    oc:yieldsState oc:AllTasksCompleted,
+        oc:PlanExecuted .
+
+oc:kn_1741a0f5 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When platform supports subagent execution" ;
+    oc:directiveContent "If subagents are available (e.g., Claude Code, Codex), use subagent-driven-development instead of this skill for significantly higher quality work." ;
+    oc:hasRationale "Subagent-based parallel execution produces better results than sequential execution by an individual agent." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_34faab65 a oc:KnowledgeNode,
+        oc:SecurityImplication ;
+    oc:appliesToContext "Before beginning any implementation work" ;
+    oc:directiveContent "Never start implementation on main/master branch without explicit user consent; use git worktrees for isolation." ;
+    oc:hasRationale "Working directly on main/master risks destabilizing the primary branch and contaminating it with incomplete or broken changes." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_6d5152ba a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When encountering blockers, unclear instructions, or repeated verification failures during execution" ;
+    oc:directiveContent "Never force through blockers or guess at unclear instructions — stop and ask for clarification immediately." ;
+    oc:hasRationale "Guessing leads to incorrect implementations that compound errors and waste more time than a quick clarification." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_7251c3dd a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When plan changes occur mid-execution" ;
+    oc:directiveContent "Return to the review step when the partner updates the plan or the fundamental approach needs rethinking, rather than continuing on an outdated plan." ;
+    oc:hasRationale "Continuing with a stale or invalidated plan wastes effort and may introduce conflicts with the updated direction." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_95784c25 a oc:Idempotency,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "During sequential task execution within the plan" ;
+    oc:directiveContent "Each task should be marked in_progress, executed with its steps followed exactly, verified as specified, then marked completed before moving to the next." ;
+    oc:hasRationale "Bite-sized steps with explicit state tracking ensures no steps are skipped and progress is recoverable." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_98067cd8 a oc:KnowledgeNode,
+        oc:PostFlightValidation ;
+    oc:appliesToContext "Upon completion of all plan tasks" ;
+    oc:directiveContent "After all tasks are complete and verified, invoke the finishing-a-development-branch skill to finalize the work." ;
+    oc:hasRationale "Proper branch completion ensures tests pass, options are presented to the user, and integration is handled correctly." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_bdbaef28 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before beginning any task execution" ;
+    oc:directiveContent "Always review the plan critically before starting execution; raise any concerns or questions with the human partner before proceeding." ;
+    oc:hasRationale "Catching plan issues upfront prevents wasted effort and rework downstream." ;
+    oc:severityLevel "HIGH" .
+

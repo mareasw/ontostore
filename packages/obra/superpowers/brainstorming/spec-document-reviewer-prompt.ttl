@@ -1,0 +1,67 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_obra_superpowers_brainstorming_spec_document_reviewer_prompt a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "spec-document-reviewer-prompt" ;
+    skos:broader "review template" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/obra/superpowers/brainstorming" ;
+    oc:contentHash "12cb5ed58aef41b8da6fbb505547c71ca3f5658c83b66ca6e556c936308b3189" ;
+    oc:dependsOnSkill oc:skill_brainstorming ;
+    oc:differentia "dispatches a subagent to verify spec documents are complete, consistent, and ready for implementation planning" ;
+    oc:extends oc:skill_obra_superpowers_brainstorming ;
+    oc:handlesFailure oc:FileNotFound,
+        oc:InvalidInput ;
+    oc:hasArgumentHint "SPEC_FILE_PATH" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_033d227e,
+        oc:kn_8b246715,
+        oc:kn_92b5bd5a,
+        oc:kn_d1669a9d,
+        oc:kn_fb84e655 ;
+    oc:isUserInvocable false ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:DocumentCreated ;
+    oc:resolvesIntent "check spec readiness for planning",
+        "dispatch spec reviewer subagent",
+        "review spec document",
+        "verify spec completeness" ;
+    oc:yieldsState oc:SpecReviewed .
+
+oc:kn_033d227e a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before dispatching the spec reviewer" ;
+    oc:directiveContent "Verify the spec file exists at the specified path before dispatching the reviewer subagent" ;
+    oc:hasRationale "Dispatching a reviewer against a non-existent file wastes agent cycles and produces confusing results" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_8b246715 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When performing any spec document review" ;
+    oc:directiveContent "Check spec documents across five dimensions: Completeness (TODOs, placeholders, TBDs), Consistency (internal contradictions), Clarity (ambiguous requirements), Scope (focused for single plan), and YAGNI (unrequested features, over-engineering)." ;
+    oc:hasRationale "These five categories cover the most common failure modes that would derail implementation planning" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_92b5bd5a a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Before dispatching the spec reviewer" ;
+    oc:directiveContent "Spec must be written to docs/superpowers/specs/ before dispatching the reviewer subagent" ;
+    oc:hasRationale "The reviewer needs a persisted document to analyze; dispatching before the spec exists would be premature" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_d1669a9d a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When reviewing any spec document for completeness and readiness" ;
+    oc:directiveContent "Only flag issues that would cause real problems during implementation planning — missing sections, contradictions, or requirements ambiguous enough to be interpreted multiple ways. Minor wording, style, and depth differences are not actionable issues." ;
+    oc:hasRationale "Over-flagging trivial issues wastes cycles and erodes trust in the review process; the reviewer's value is in catching problems that would lead to a flawed implementation plan" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_fb84e655 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When making the final approval decision on a spec" ;
+    oc:directiveContent "Approve the spec unless there are serious gaps that would lead to a flawed plan. Recommendations are advisory and do not block approval." ;
+    oc:hasRationale "The default posture should be to approve and move forward; only genuine planning blockers should prevent approval, keeping the process lean" .
+

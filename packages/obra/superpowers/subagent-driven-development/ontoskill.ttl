@@ -1,0 +1,123 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_obra_superpowers_subagent_driven_development a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "subagent-driven-development" ;
+    skos:broader "Development workflow" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/obra/superpowers/subagent-driven-development" ;
+    oc:contentHash "f13a0d51d25ab2e48ac631a6ce2a66a3d936c0b92b0de1dd85bc533f36924860" ;
+    oc:dependsOnSkill oc:skill_writing_plans ;
+    oc:differentia "delegates implementation tasks to specialized subagents with isolated context and enforces two-stage review (spec compliance then code quality) for each task within the current session" ;
+    oc:extends oc:skill_executing_plans ;
+    oc:handlesFailure oc:CodeQualityReviewFailed,
+        oc:GitConflict,
+        oc:SpecReviewFailed,
+        oc:SubagentBlocked,
+        oc:SubagentNeedsContext ;
+    oc:hasAllowedTool "Bash",
+        "Git",
+        "Read",
+        "Task",
+        "TodoWrite" ;
+    oc:hasArgumentHint "implementation plan file path" ;
+    oc:hasCategory "development" ;
+    oc:hasDescription "Use when executing implementation plans with independent tasks in the current session" ;
+    oc:hasName "subagent-driven-development" ;
+    oc:impartsKnowledge oc:kn_68f9e5c0,
+        oc:kn_6981f812,
+        oc:kn_83f2265d,
+        oc:kn_b3936a19,
+        oc:kn_bdef54b0,
+        oc:kn_be590122,
+        oc:kn_c9c0bab8,
+        oc:kn_ca55c8b0,
+        oc:kn_cf6816bd,
+        oc:kn_dd6dd380 ;
+    oc:isUserInvocable true ;
+    oc:nature "Process" ;
+    oc:requiresState oc:ImplementationPlanReady,
+        oc:WorkspaceIsolated ;
+    oc:resolvesIntent "coordinate parallel-safe task execution in current session",
+        "dispatch focused subagents per task",
+        "execute implementation plan with independent tasks",
+        "review code quality of implemented code",
+        "review spec compliance of implemented code" ;
+    oc:yieldsState oc:AllTasksCompleted,
+        oc:CodeQualityApproved,
+        oc:FinalReviewComplete,
+        oc:SpecReviewPassed .
+
+oc:kn_68f9e5c0 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When running two-stage review after each task implementation" ;
+    oc:directiveContent "Spec compliance review MUST pass before code quality review begins. Never reverse this order." ;
+    oc:hasRationale "Code quality review is wasted effort if the implementation doesn't match the spec. Spec compliance ensures the right thing was built before evaluating how well it was built." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_6981f812 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When dispatching any subagent (implementer, spec reviewer, code quality reviewer)" ;
+    oc:directiveContent "Provide the full text of each task to the subagent directly in the prompt. Never make subagents read the plan file themselves." ;
+    oc:hasRationale "Subagents have isolated context and should not waste tokens or risk confusion reading plan files. The controller curates exactly what's needed." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_83f2265d a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When implementer subagent asks questions before or during work" ;
+    oc:directiveContent "Never ignore subagent questions or rush them into implementation. Answer clearly and completely before letting them proceed." ;
+    oc:hasRationale "Subagent questions surface ambiguities or missing context. Ignoring them leads to incorrect implementations and wasted review cycles." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_b3936a19 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When handling reviewer feedback" ;
+    oc:directiveContent "If a reviewer finds issues, the same implementer subagent fixes them and the reviewer re-reviews. Repeat the loop until approved. Never skip re-review." ;
+    oc:hasRationale "Review loops ensure fixes actually address the issues found. Skipping re-review defeats the purpose of the quality gate." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_bdef54b0 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When dispatching implementer subagents for tasks" ;
+    oc:directiveContent "Never dispatch multiple implementation subagents in parallel — they will create file conflicts. Implement sequentially, one task at a time." ;
+    oc:hasRationale "Parallel implementation subagents working on the same codebase will produce conflicting changes that cannot be cleanly merged." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_be590122 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When selecting models for subagent dispatch" ;
+    oc:directiveContent "Use the least powerful model that can handle each role: cheap/fast models for mechanical tasks (1-2 files, clear spec), standard models for integration tasks (multi-file coordination), and most capable models for architecture/design/review tasks." ;
+    oc:hasRationale "Optimizing model selection per task reduces cost and increases speed without sacrificing quality. Most implementation tasks are mechanical when the plan is well-specified." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_c9c0bab8 a oc:KnowledgeNode,
+        oc:PostFlightValidation ;
+    oc:appliesToContext "When all individual tasks have passed their per-task reviews" ;
+    oc:directiveContent "After all tasks are complete, dispatch a final code reviewer subagent for the entire implementation, then use finishing-a-development-branch to complete integration." ;
+    oc:hasRationale "Per-task reviews catch local issues but may miss cross-task integration problems. A holistic final review ensures the complete implementation is coherent." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_ca55c8b0 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before beginning any task dispatch" ;
+    oc:directiveContent "Set up an isolated workspace (git worktree) before starting subagent-driven development to avoid contaminating the main branch." ;
+    oc:hasRationale "Isolation ensures incomplete or broken work from subagents never affects the main development branch." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_cf6816bd a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "At the beginning of subagent-driven development execution" ;
+    oc:directiveContent "Extract all tasks with full text and context upfront from the plan file once, then create a TodoWrite with all tasks before starting dispatch." ;
+    oc:hasRationale "Reading the plan once and extracting everything eliminates repeated file reading overhead and ensures the controller has complete awareness of all tasks." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_dd6dd380 a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When handling implementer status reports" ;
+    oc:directiveContent "When an implementer subagent returns BLOCKED, never retry with the same model unchanged. Either provide more context, re-dispatch with a more capable model, break the task into smaller pieces, or escalate to the human." ;
+    oc:hasRationale "If the subagent said it's stuck, something fundamental needs to change. Forcing the same approach guarantees the same failure." ;
+    oc:severityLevel "HIGH" .
+
