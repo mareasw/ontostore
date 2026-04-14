@@ -1,0 +1,66 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_vercel_labs_vercel_react_best_practices_rerender_no_inline_components a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "rerender-no-inline-components" ;
+    skos:broader "React performance anti-pattern guide" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
+    oc:contentHash "1cc32907a770272524ba682eef9e7efdd8ad4533b6f89b718a1fcd7d1d0eb6a3" ;
+    oc:differentia "identifies inline component definitions as a cause of full remounting on every render and prescribes extracting components with explicit props" ;
+    oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
+    oc:handlesFailure oc:EffectsReRunUnexpectedly,
+        oc:InputLosesFocus ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_0b55d4d9,
+        oc:kn_626277fb,
+        oc:kn_cd28f4b5,
+        oc:kn_e2ebc876,
+        oc:kn_f99dfd52 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:ReactComponentWritten ;
+    oc:resolvesIntent "fix component remounting on every render",
+        "identify and resolve inline component anti-pattern",
+        "optimize React component rendering performance",
+        "prevent input fields from losing focus on keystroke" ;
+    oc:yieldsState oc:ComponentsExtractedToModuleScope .
+
+oc:kn_0b55d4d9 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When diagnosing mysterious state loss or UI flickering in React applications" ;
+    oc:directiveContent "Symptoms of inline component definitions include: input fields losing focus on every keystroke, animations restarting unexpectedly, useEffect cleanup/setup running on every parent render, and scroll position resetting inside the component." ;
+    oc:hasRationale "These symptoms are the observable consequences of React destroying and recreating the full component subtree on each parent render cycle." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_626277fb a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "During code review or performance audit of React applications" ;
+    oc:directiveContent "Audit codebases for component definitions nested inside other component function bodies as a high-priority performance review item." ;
+    oc:hasRationale "This anti-pattern is common when developers want to avoid prop drilling, but the performance cost of remounting is severe and easily avoidable." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_cd28f4b5 a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "When evaluating the performance impact of component structure decisions" ;
+    oc:directiveContent "Inline component definitions cause full DOM recreation, state destruction, effect re-execution, and loss of internal component state on every parent render." ;
+    oc:hasRationale "This is not just a re-render cost — it is a full unmount/mount cycle which is significantly more expensive than a reconciliation pass." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_e2ebc876 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When a child component needs data from its parent" ;
+    oc:directiveContent "Always extract nested components to module scope and pass needed data via props instead of closing over parent variables." ;
+    oc:hasRationale "Props make data flow explicit, keep component references stable across renders, and preserve child component state and DOM nodes." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_f99dfd52 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing React components that need access to parent scope variables" ;
+    oc:directiveContent "Never define a component inside another component's function body. Each render creates a new component type, causing React to fully unmount and remount it, destroying all state and DOM." ;
+    oc:hasRationale "React identifies components by reference identity. A new function definition on every render is a new identity, triggering full remount instead of reconciliation." ;
+    oc:severityLevel "CRITICAL" .
+

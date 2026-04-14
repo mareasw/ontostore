@@ -1,0 +1,65 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_vercel_labs_vercel_react_best_practices_rerender_derived_state_no_effect a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "rerender-derived-state-no-effect" ;
+    skos:broader "React performance optimization pattern" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
+    oc:contentHash "cb11ec76f50aa7b6847269f02d79b120c889a30d9ecd2c1d578f75144419c77a" ;
+    oc:differentia "calculates derived state during render instead of storing redundant state or using useEffect, avoiding extra re-renders and state drift" ;
+    oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
+    oc:handlesFailure oc:RedundantRenderDetected,
+        oc:StateDriftDetected ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_1bacfd7d,
+        oc:kn_596f75dc,
+        oc:kn_b0240a86,
+        oc:kn_edd2a2f5,
+        oc:kn_ee47280c ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:ReactComponentExists ;
+    oc:resolvesIntent "eliminate redundant state and effects for derived values",
+        "fix state drift caused by syncing props to state in effects",
+        "optimize React component rendering" ;
+    oc:yieldsState oc:DerivedStateOptimized .
+
+oc:kn_1bacfd7d a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing useEffect hooks in React components" ;
+    oc:directiveContent "Do not use useEffect to synchronize state that is purely derived from props or other state variables." ;
+    oc:hasRationale "Effects run after render, causing a second render cycle. For derived state, this is both unnecessary and introduces a window where state is inconsistent." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_596f75dc a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing React component state architecture" ;
+    oc:directiveContent "If a value can be computed from current props or state, derive it directly in the render body as a plain variable assignment." ;
+    oc:hasRationale "Deriving during render is synchronous, avoids extra render cycles, and guarantees the derived value is always consistent with its inputs." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_b0240a86 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When a value is a pure function of existing props/state" ;
+    oc:directiveContent "Never store values in state or update them in useEffect when they can be computed directly from existing props or state during render." ;
+    oc:hasRationale "Storing derived values in state creates redundant re-renders (the effect triggers a second render) and can cause state drift where the derived value is temporarily out of sync with its source data." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_edd2a2f5 a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "When evaluating the performance cost of derived state patterns" ;
+    oc:directiveContent "Using useEffect to sync derived state causes an extra render cycle per source state change: first the source change renders, then the effect fires and sets state, triggering a second render." ;
+    oc:hasRationale "Each redundant render has a real performance cost, especially in complex component trees. Eliminating these is a low-effort, high-impact optimization." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_ee47280c a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When props change and component state needs to reflect those changes" ;
+    oc:directiveContent "Prefer derived values or keyed resets over setting state in effects solely in response to prop changes." ;
+    oc:hasRationale "Derived values are always in sync with props by definition. Keyed resets (changing the key to remount) are a React-idiomatic way to reset state when props change fundamentally." ;
+    oc:severityLevel "MEDIUM" .
+

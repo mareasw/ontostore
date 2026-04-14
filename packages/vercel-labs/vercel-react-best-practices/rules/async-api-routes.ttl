@@ -1,0 +1,77 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_vercel_labs_vercel_react_best_practices_async_api_routes a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "async-api-routes" ;
+    skos:broader "Performance optimization pattern" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
+    oc:contentHash "523338540d73427dc14c0cbb19f2741ebccdf8b105a7b2c1b33d2905cf237a42" ;
+    oc:differentia "Prevents sequential waterfall chains in API routes and Server Actions by starting independent async operations immediately and awaiting them in parallel" ;
+    oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
+    oc:handlesFailure oc:DependencyCycleDetected,
+        oc:PromiseRejected ;
+    oc:hasArgumentHint "api-route-or-server-action-code" ;
+    oc:hasCategory "development" ;
+    oc:hasRequirement oc:req_31b1cd92,
+        oc:req_38224c68 ;
+    oc:impartsKnowledge oc:kn_763d5d93,
+        oc:kn_8f7d43d2,
+        oc:kn_97fa501c,
+        oc:kn_b00fb621,
+        oc:kn_de9997a4 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "improve api response times",
+        "optimize api route performance",
+        "parallelize async operations in server actions",
+        "prevent waterfall chains in api routes" ;
+    oc:yieldsState oc:AsyncOperationsParallelized .
+
+oc:kn_763d5d93 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When multiple async operations have been started and their results are needed together" ;
+    oc:directiveContent "Use Promise.all to await multiple independent results simultaneously once their promises are already in flight." ;
+    oc:hasRationale "Promise.all collects results in parallel rather than sequentially, reducing total wait time to the duration of the longest operation." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_8f7d43d2 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing API route handlers or Server Actions with multiple async calls" ;
+    oc:directiveContent "Never sequentially await independent async operations in API routes or Server Actions — each unnecessary await creates a waterfall delay." ;
+    oc:hasRationale "Sequential awaits on independent operations waste time waiting for operations that could run concurrently, causing 2-10× slower response times." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_97fa501c a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing API routes and Server Actions with multiple async operations" ;
+    oc:directiveContent "Start all independent async operations immediately by invoking them without await, storing the promises, then awaiting results only when needed." ;
+    oc:hasRationale "Starting promises immediately maximizes parallelism — operations begin executing as soon as they are called, not when they are awaited." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_b00fb621 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When API routes have more than 3-4 interdependent async operations with non-trivial dependency graphs" ;
+    oc:directiveContent "For complex dependency chains, consider using 'better-all' to automatically maximize parallelism based on operation dependencies." ;
+    oc:hasRationale "Manual promise orchestration becomes error-prone with complex dependency graphs; automated tools ensure maximum parallelism without missed dependencies." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_de9997a4 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When restructuring sequential awaits into parallel patterns" ;
+    oc:directiveContent "Operations that depend on the result of a prior operation must still await that prior result before starting — only truly independent operations can be parallelized." ;
+    oc:hasRationale "Data dependencies cannot be eliminated — if operation B needs output from operation A, A must complete before B starts. Incorrect parallelization causes runtime errors." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:req_31b1cd92 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Next.js API Routes and Server Actions" .
+
+oc:req_38224c68 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "JavaScript/TypeScript async/await and Promise.all" .
+

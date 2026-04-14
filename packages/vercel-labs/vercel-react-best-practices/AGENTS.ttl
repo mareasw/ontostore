@@ -1,0 +1,94 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_vercel_labs_vercel_react_best_practices_agents a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "agents" ;
+    skos:broader "Performance optimization knowledge base" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
+    oc:contentHash "d317411c6b025561bb47607cf35ad8a00ef130dfb93d16b3bab6a6d157ec26b4" ;
+    oc:differentia "containing 69+ prioritized rules across 8 categories for React and Next.js applications, organized by impact severity from critical waterfall elimination to incremental JavaScript micro-optimizations" ;
+    oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
+    oc:handlesFailure oc:InvalidInput ;
+    oc:hasArgumentHint "React/Next.js code or component to optimize, review, or generate" ;
+    oc:hasCategory "development" ;
+    oc:hasPackageName "vercel-react-best-practices" ;
+    oc:impartsKnowledge oc:kn_228493b2,
+        oc:kn_4e5b18b1,
+        oc:kn_514481e7,
+        oc:kn_631eff47,
+        oc:kn_747af9c7,
+        oc:kn_88cd20cb,
+        oc:kn_aa9e88e0,
+        oc:kn_f7522cd6 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:ReactProjectExists ;
+    oc:resolvesIntent "apply correct data fetching patterns in React Server Components",
+        "generate performant React components following Vercel best practices",
+        "implement proper memoization and re-render optimization in React",
+        "optimize React and Next.js application performance",
+        "refactor React code to eliminate waterfalls and reduce bundle size",
+        "review React/Next.js code for performance anti-patterns" ;
+    oc:yieldsState oc:CodeOptimized,
+        oc:PerformanceRulesApplied .
+
+oc:kn_228493b2 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When updating state based on current state value, especially inside useCallback or async operations" ;
+    oc:directiveContent "Use functional setState updates (setItems(curr => [...curr, newItem])) instead of referencing state variables directly in callbacks. This produces stable callback references and prevents stale closures." ;
+    oc:hasRationale "Functional updates eliminate the most common React closure bug — stale state references in callbacks. They also remove the need for state in dependency arrays, producing stable callback references that don't cause child re-renders." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_4e5b18b1 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing React Server Components or SSR code that handles per-request data like current user" ;
+    oc:directiveContent "Never use mutable module-level variables to store request-scoped data in Server Components. Servers render concurrently in the same process, causing cross-request data leaks and race conditions." ;
+    oc:hasRationale "Module scope on the server is process-wide shared memory, not request-local state. Concurrent requests can overwrite each other's data, causing security bugs where one user sees another user's data." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_514481e7 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing any async code in React components, API routes, or Server Actions" ;
+    oc:directiveContent "Never use sequential await for independent async operations. Always use Promise.all() to execute independent operations concurrently, and start promises immediately (don't await until the result is needed)." ;
+    oc:hasRationale "Sequential awaits create waterfalls — the #1 performance killer. Each sequential await adds full network latency, yielding 2-10× slowdowns. This is the highest-impact optimization category." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_631eff47 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing React component code, especially when parent variables need to be accessed" ;
+    oc:directiveContent "Never define components inside other components. This creates a new component type on every render, causing React to fully remount the child — destroying all state, DOM nodes, and re-running effects." ;
+    oc:hasRationale "Inline component definitions cause remounting on every parent render. Symptoms include input fields losing focus, animations restarting, and effects re-running unexpectedly. Always pass props instead." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_747af9c7 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When using React.cache() for per-request deduplication on the server" ;
+    oc:directiveContent "React.cache() uses shallow equality (Object.is) for cache keys. Never pass inline objects as arguments to cached functions — each call creates a new reference, preventing cache hits." ;
+    oc:hasRationale "Inline objects like getUser({ uid: 1 }) create new references each call, so React.cache() never hits. Store the object in a variable and pass the same reference to get cache hits." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_88cd20cb a oc:KnowledgeNode,
+        oc:SecurityImplication ;
+    oc:appliesToContext "When writing Next.js Server Actions (functions with 'use server')" ;
+    oc:directiveContent "Always authenticate and authorize inside each Server Action. Server Actions are public endpoints callable directly — do not rely on middleware, layout guards, or page-level checks." ;
+    oc:hasRationale "Server Actions are exposed as public HTTP endpoints. Without internal auth checks, anyone can invoke mutations like deleteUser directly, bypassing page-level protections." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_aa9e88e0 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When passing props from React Server Components to Client Components" ;
+    oc:directiveContent "Only pass the fields the client actually uses across RSC boundaries. The Server/Client boundary serializes all object properties into the HTML response, directly impacting page weight." ;
+    oc:hasRationale "Serializing unnecessary fields (e.g., 50 fields when only 1 is used) bloats the HTML payload and slows page load. Minimize the data crossing the serialization boundary." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_f7522cd6 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When reviewing or refactoring an existing React/Next.js codebase for performance" ;
+    oc:directiveContent "Apply rules by priority: first eliminate waterfalls and optimize bundle size (CRITICAL), then server-side performance (HIGH), then re-render optimization (MEDIUM), then JavaScript micro-optimizations (LOW). Focus on the highest-impact changes first." ;
+    oc:hasRationale "The 8 categories are ordered by measurable impact. Waterfall elimination yields 2-10× improvements. Bundle optimization reduces 200-800ms import costs. Lower categories provide incremental gains that compound but are less impactful individually." ;
+    oc:severityLevel "HIGH" .
+

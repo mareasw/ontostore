@@ -1,0 +1,67 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_vercel_labs_vercel_react_best_practices_client_localstorage_schema a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "client-localstorage-schema" ;
+    skos:broader "Best practice pattern" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
+    oc:contentHash "0fb7cdf9dc93fdf22f87e3669f953fb9d4ac9b0be42eec4a29fe9a2560610b88" ;
+    oc:differentia "that governs versioning, minimization, and safe access of localStorage data in client-side applications" ;
+    oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
+    oc:handlesFailure oc:QuotaExceeded,
+        oc:StorageDisabled ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_083dd7e3,
+        oc:kn_34428fb5,
+        oc:kn_576aacc7,
+        oc:kn_69ce6257,
+        oc:kn_e2426995 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "migrate localStorage schema between versions",
+        "minimize localStorage storage size",
+        "safely read and write localStorage",
+        "version localStorage data" ;
+    oc:yieldsState oc:DataMinimized,
+        oc:LocalStorageVersioned .
+
+oc:kn_083dd7e3 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When writing any data to localStorage" ;
+    oc:directiveContent "Always prefix localStorage keys with a version identifier (e.g., 'userConfig:v2') to enable schema evolution and safe migration between versions." ;
+    oc:hasRationale "Version prefixes allow backward-compatible migration paths and prevent schema conflicts when the data shape changes across application releases." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_34428fb5 a oc:KnowledgeNode,
+        oc:SecurityImplication ;
+    oc:appliesToContext "When deciding what data to persist client-side" ;
+    oc:directiveContent "Do not store authentication tokens, PII, or internal API flags in localStorage as it is accessible to any JavaScript on the same origin." ;
+    oc:hasRationale "localStorage is vulnerable to XSS attacks; sensitive data stored there can be exfiltrated by malicious scripts, leading to account compromise or data leaks." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_576aacc7 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Every localStorage read or write operation" ;
+    oc:directiveContent "Always wrap localStorage.getItem() and localStorage.setItem() calls in try-catch blocks." ;
+    oc:hasRationale "These calls throw in incognito/private browsing modes (Safari, Firefox), when storage quota is exceeded, or when storage is disabled by browser policy." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_69ce6257 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When caching server response data client-side" ;
+    oc:directiveContent "Never store full API response objects in localStorage — extract and persist only the minimal fields the UI actually needs." ;
+    oc:hasRationale "Storing entire objects wastes quota, increases parse cost, and risks persisting sensitive data like tokens, PII, or internal flags." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_e2426995 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When changing the shape of persisted localStorage data across application versions" ;
+    oc:directiveContent "Implement explicit migration functions that read old version data, transform it to the new schema, save it under the new key, and remove the old key." ;
+    oc:hasRationale "Explicit migration ensures users retain their preferences across deployments without manual reset, and cleaning up old keys prevents stale data conflicts." ;
+    oc:severityLevel "MEDIUM" .
+

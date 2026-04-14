@@ -1,0 +1,75 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_vercel_labs_vercel_react_best_practices_js_index_maps a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "js-index-maps" ;
+    skos:broader "Performance optimization pattern" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
+    oc:contentHash "5df1bdc2cfabb2c98abd55d26762e5c18189535c2e686184f426082e62920391" ;
+    oc:differentia "replaces repeated O(n) Array.find() calls with O(1) Map lookups by pre-building an index map" ;
+    oc:extends oc:skill_vercel_labs_vercel_react_best_practices,
+        oc:skill_vercel_react_best_practices ;
+    oc:hasArgumentHint "code with repeated .find() calls on arrays" ;
+    oc:hasCategory "development" ;
+    oc:hasRequirement oc:req_8e8338aa,
+        oc:req_ac6cbfed ;
+    oc:impartsKnowledge oc:kn_0c654bb3,
+        oc:kn_74390329,
+        oc:kn_978fd226,
+        oc:kn_d664cae6,
+        oc:kn_f53da489 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "convert array find to map lookup",
+        "optimize repeated array lookups",
+        "reduce algorithmic complexity in data joins" ;
+    oc:yieldsState oc:CodeOptimized .
+
+oc:kn_0c654bb3 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing data transformation or join logic in JavaScript/TypeScript" ;
+    oc:directiveContent "Never use Array.find() inside a loop or .map() callback when the lookup key is consistent across iterations — this creates O(n×m) complexity." ;
+    oc:hasRationale "Each .find() iterates the entire array linearly; nesting it inside another iteration multiplies the cost quadratically." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_74390329 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing data processing pipelines or data-joining logic" ;
+    oc:directiveContent "Prefer pre-computing index structures (Map, Object lookup) over performing repeated linear searches, especially when the data size or iteration count is non-trivial." ;
+    oc:hasRationale "Index structures trade a small upfront O(n) cost for O(1) per-lookup, yielding better overall algorithmic performance." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_978fd226 a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "When evaluating whether to adopt this pattern for a given dataset size" ;
+    oc:directiveContent "Building a Map from an array is O(n) one-time; subsequent .get() calls are O(1). For N items looked up against M items, total cost drops from O(N×M) to O(N+M)." ;
+    oc:hasRationale "The crossover point where Map indexing beats repeated .find() is at very small N and M; for most real-world datasets the improvement is significant." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_d664cae6 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When building an index Map from an array of objects" ;
+    oc:directiveContent "The Map index approach assumes the lookup key is unique in the target array. Duplicate keys will silently overwrite earlier entries." ;
+    oc:hasRationale "Map.set() replaces existing entries for the same key, so data loss can occur if keys are not unique." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_f53da489 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When processing or joining two arrays where one is repeatedly searched by a key" ;
+    oc:directiveContent "When you have multiple .find() calls by the same key on an array, build a Map index once and use .get() for O(1) lookups instead of O(n) scans." ;
+    oc:hasRationale "Converting repeated O(n) lookups to a single O(n) index build plus O(1) lookups reduces total operations dramatically — e.g., 1000 orders × 1000 users drops from 1M ops to 2K ops." ;
+    oc:severityLevel "HIGH" .
+
+oc:req_8e8338aa a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "JavaScript/TypeScript Map API" .
+
+oc:req_ac6cbfed a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Big-O time complexity basics" .
+

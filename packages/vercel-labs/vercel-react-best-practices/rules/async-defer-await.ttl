@@ -1,0 +1,56 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_vercel_labs_vercel_react_best_practices_async_defer_await a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "async-defer-await" ;
+    skos:broader "Async optimization pattern" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
+    oc:contentHash "f3c142d090615abdcc99d31c123be37b31f0f1ed8d9ec9f7789a3bc6883ae0fb" ;
+    oc:differentia "defers await operations into code branches where their results are actually consumed, avoiding unnecessary blocking of unused code paths" ;
+    oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
+    oc:handlesFailure oc:InvalidInput ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_8b429644,
+        oc:kn_b871b76b,
+        oc:kn_d2550ce0,
+        oc:kn_d83c3f2c ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "avoid blocking unused code paths with premature awaits",
+        "improve performance of conditional async logic",
+        "optimize async functions by deferring await" ;
+    oc:yieldsState oc:AsyncFunctionOptimized .
+
+oc:kn_8b429644 a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "When evaluating whether to apply deferred await optimization" ;
+    oc:directiveContent "This optimization is most valuable when the skipped branch is frequently taken or when the deferred operation is expensive (e.g., network fetches, permission checks)." ;
+    oc:hasRationale "The performance gain scales with the frequency of the skipped branch and the cost of the deferred operation — infrequently skipped paths with cheap awaits yield negligible improvement." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_b871b76b a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When structuring async functions with guard clauses or conditional logic" ;
+    oc:directiveContent "Never await all async calls at the top of a function before checking cheap synchronous conditions or early-return conditions that don't need those results." ;
+    oc:hasRationale "Top-level awaits unconditionally block the function even when the results are only needed in specific branches, degrading performance for all other paths." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_d2550ce0 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing async functions with conditional branches or early returns" ;
+    oc:directiveContent "Move await operations into the branches where the awaited value is actually consumed, not before conditional checks that may short-circuit." ;
+    oc:hasRationale "Awaiting before a conditional that may skip using the result wastes time on an unnecessary blocking operation, especially impactful when the skipped branch is frequently taken or the deferred operation is expensive." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_d83c3f2c a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When multiple await calls exist in a function with multiple early-return points" ;
+    oc:directiveContent "Order async operations by dependency and likelihood of early return: check conditions that can short-circuit first, then fetch data only when all guards pass." ;
+    oc:hasRationale "Sequential dependency-ordered fetching minimizes wasted work — if a cheap check (like resource existence) fails, expensive checks (like permission fetching) are skipped entirely." ;
+    oc:severityLevel "MEDIUM" .
+

@@ -1,0 +1,66 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_vercel_labs_vercel_react_best_practices_js_batch_dom_css a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "js-batch-dom-css" ;
+    skos:broader "Performance optimization pattern" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
+    oc:contentHash "480b891b9eaf96e929dc1e964274a4828e3a78009b7d00ccd965a0d425215959" ;
+    oc:differentia "prevents layout thrashing by batching DOM style writes separately from layout reads to avoid forced synchronous reflows" ;
+    oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
+    oc:handlesFailure oc:ReflowDetected ;
+    oc:hasArgumentHint "element or component with DOM style operations" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_1799c055,
+        oc:kn_37cb34c0,
+        oc:kn_3a84bd95,
+        oc:kn_86b8b70f,
+        oc:kn_ee89c42e ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:DOMReady ;
+    oc:resolvesIntent "avoid layout thrashing in JavaScript",
+        "batch CSS reads and writes to prevent reflow",
+        "improve rendering performance in React components",
+        "optimize DOM style mutations" ;
+    oc:yieldsState oc:LayoutThrashingPrevented .
+
+oc:kn_1799c055 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When using refs to imperatively manipulate DOM styles in React effects" ;
+    oc:directiveContent "In React, accessing offsetWidth or getBoundingClientRect inside a useEffect that also sets inline styles causes layout thrashing per render cycle." ;
+    oc:hasRationale "React's useEffect runs after paint in some cases, but synchronous layout reads between style mutations still force the browser to recalculate layout immediately, negating React's batching optimizations." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_37cb34c0 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When performing any DOM style mutations in JavaScript or React useEffect hooks" ;
+    oc:directiveContent "Never interleave DOM style writes with layout property reads (offsetWidth, getBoundingClientRect, getComputedStyle) as each read between writes forces a synchronous reflow." ;
+    oc:hasRationale "Interleaved reads and writes cause the browser to flush its style calculation queue repeatedly, creating a cascade of forced synchronous layouts that degrade rendering performance." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_3a84bd95 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When reading any geometric or computed style property from the DOM" ;
+    oc:directiveContent "Properties that force synchronous layout include offsetWidth, offsetHeight, offsetTop, offsetLeft, scrollTop, scrollLeft, scrollWidth, scrollHeight, clientTop, clientLeft, clientWidth, clientHeight, getBoundingClientRect(), and getComputedStyle()." ;
+    oc:hasRationale "These properties require the browser to have an up-to-date layout to return correct values, so accessing them invalidates any pending style change batch and forces immediate recalculation." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_86b8b70f a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When both reading layout properties and writing styles in the same function or effect" ;
+    oc:directiveContent "Batch all style writes together in one phase, then perform all layout reads in a separate phase afterward — or read all layout values first, then write all styles." ;
+    oc:hasRationale "Batching allows the browser to coalesce multiple style invalidations into a single reflow cycle, dramatically reducing layout computation cost." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_ee89c42e a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When setting multiple visual properties on an element, especially in React components" ;
+    oc:directiveContent "Prefer CSS classes over inline styles for applying multiple property changes simultaneously." ;
+    oc:hasRationale "CSS classes are cached by the browser, provide better separation of concerns, are easier to maintain, and inherently batch all property changes into a single operation." ;
+    oc:severityLevel "MEDIUM" .
+

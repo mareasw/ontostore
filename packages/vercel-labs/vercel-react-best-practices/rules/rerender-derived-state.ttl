@@ -1,0 +1,62 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_vercel_labs_vercel_react_best_practices_rerender_derived_state a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "rerender-derived-state" ;
+    skos:broader "React rendering optimization pattern" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
+    oc:contentHash "1c326bb67b01fb084eb00c8911b0a7cff54681c2315b629f88e49b64eaa6481d" ;
+    oc:differentia "subscribes to derived boolean state instead of continuous values to minimize unnecessary re-renders" ;
+    oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
+    oc:hasArgumentHint "React component code using continuous value subscriptions" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_3269c3ed,
+        oc:kn_65c6139f,
+        oc:kn_841db74f,
+        oc:kn_b45723c5,
+        oc:kn_c944c369 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:resolvesIntent "optimize media query subscriptions",
+        "reduce re-render frequency in React components",
+        "subscribe to derived state efficiently" .
+
+oc:kn_3269c3ed a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "When evaluating the rendering cost of state subscriptions" ;
+    oc:directiveContent "Subscribing to continuous values like window width causes re-renders proportional to pixel changes; subscribing to derived booleans limits re-renders to discrete state transitions." ;
+    oc:hasRationale "Understanding the order-of-magnitude difference between continuous and discrete subscriptions is essential for predicting component performance under user interaction." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_65c6139f a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "When designing any component that reads external browser state" ;
+    oc:directiveContent "Before adding a state subscription to a component, ask: 'Do I need the full continuous range, or just a derived boolean/categorical result?'" ;
+    oc:hasRationale "This check prevents the most common cause of unnecessary re-renders in responsive UIs before the code is even written." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_841db74f a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When building responsive components that switch between mobile and desktop layouts" ;
+    oc:directiveContent "Use useMediaQuery('(max-width: 767px)') instead of useWindowWidth() followed by a comparison like width < 768." ;
+    oc:hasRationale "The media query approach lets the browser handle threshold detection natively and only notifies the component when the boolean result flips, reducing re-renders from O(pixels) to O(threshold crossings)." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_b45723c5 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When subscribing to browser APIs like window dimensions, scroll position, or other continuous values in React components" ;
+    oc:directiveContent "Never subscribe to continuously-changing values (like window width in pixels) when you only need a boolean threshold comparison, as it triggers re-renders on every pixel change." ;
+    oc:hasRationale "Continuous value subscriptions cause excessive re-renders (potentially dozens per second during resize), destroying performance for a result that only needs a discrete boolean." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_c944c369 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing component subscriptions to external browser state (dimensions, breakpoints, preferences)" ;
+    oc:directiveContent "Subscribe to the most derived form of state you need — prefer boolean media query results over raw continuous measurements." ;
+    oc:hasRationale "Deriving boolean state at the subscription boundary means React only re-renders when the derived value actually changes, not on every intermediate update." ;
+    oc:severityLevel "HIGH" .
+

@@ -1,0 +1,64 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_vercel_labs_vercel_react_best_practices_bundle_dynamic_imports a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "bundle-dynamic-imports" ;
+    skos:broader "Code-splitting pattern" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
+    oc:contentHash "401817a7369f315fc5a68a1095742ff7d53d0461906880dc9d64a41495ee1986" ;
+    oc:differentia "uses next/dynamic to lazy-load heavy components not required on initial render, reducing bundle size and improving TTI/LCP" ;
+    oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
+    oc:handlesFailure oc:InvalidInput ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_4b7a234f,
+        oc:kn_8690d899,
+        oc:kn_8b7979a5,
+        oc:kn_9b8a903a,
+        oc:kn_e1129166 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "implement code-splitting for Next.js applications",
+        "optimize Time to Interactive (TTI) and Largest Contentful Paint (LCP)",
+        "reduce initial bundle size by lazy-loading heavy components" ;
+    oc:yieldsState oc:BundleOptimized .
+
+oc:kn_4b7a234f a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "When measuring Core Web Vitals for Next.js pages using heavy components" ;
+    oc:directiveContent "Dynamic imports have a direct positive impact on TTI and LCP by deferring heavy JavaScript execution until the component is actually needed." ;
+    oc:hasRationale "The main bundle shrinks significantly, enabling faster parse/execute times for the initial page load." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_8690d899 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When importing large UI libraries or editors in Next.js components" ;
+    oc:directiveContent "Never statically import heavy components (like Monaco Editor) that are not needed on initial render, as this bloats the main chunk (e.g., ~300KB added)." ;
+    oc:hasRationale "Static imports force heavy dependencies into the main bundle, directly degrading TTI and LCP metrics." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_8b7979a5 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When a component is large and not required during initial page render" ;
+    oc:directiveContent "Use `next/dynamic` to wrap heavy component imports with `dynamic(() => import(...), { ssr: false })` so they load on demand." ;
+    oc:hasRationale "Dynamic imports separate heavy code into its own chunk loaded only when needed, keeping the initial bundle small." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_9b8a903a a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When dynamically importing browser-dependent or non-SSR-compatible components" ;
+    oc:directiveContent "Set `ssr: false` on dynamic imports for components that are client-only (e.g., code editors, charting libraries) to avoid server-side rendering errors and unnecessary SSR overhead." ;
+    oc:hasRationale "Client-only components may reference browser APIs (window, document) that don't exist during SSR, causing runtime errors." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_e1129166 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When evaluating which components to code-split" ;
+    oc:directiveContent "Apply dynamic imports to any component whose library adds more than ~30-50KB to the bundle and is not visible or interactive on initial page load." ;
+    oc:hasRationale "The overhead of an additional network request is justified when the deferred chunk is large enough to meaningfully slow initial render." ;
+    oc:severityLevel "LOW" .
+

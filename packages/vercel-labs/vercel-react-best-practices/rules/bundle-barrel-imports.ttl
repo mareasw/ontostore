@@ -1,0 +1,67 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_vercel_labs_vercel_react_best_practices_bundle_barrel_imports a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "bundle-barrel-imports" ;
+    skos:broader "Performance optimization guideline" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
+    oc:contentHash "e648f6d54525f07a691357040ca5bff6ea3424788a91ff63812adb29622a671b" ;
+    oc:differentia "avoids barrel file imports to reduce bundle size and module loading time in React/Next.js applications" ;
+    oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
+    oc:handlesFailure oc:BuildPerformanceDegraded,
+        oc:TypeResolutionFailed ;
+    oc:hasArgumentHint "package-name or import statement" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_0ea003bf,
+        oc:kn_3e917cc1,
+        oc:kn_48e7212b,
+        oc:kn_6e67e4cd,
+        oc:kn_733f66c7 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:ReactProjectExists ;
+    oc:resolvesIntent "configure Next.js optimizePackageImports for affected libraries",
+        "identify and fix barrel file import patterns",
+        "optimize bundle size by avoiding barrel imports",
+        "reduce dev boot time and cold start latency" ;
+    oc:yieldsState oc:BarrelImportsOptimized .
+
+oc:kn_0ea003bf a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When using direct deep imports as an alternative to optimizePackageImports" ;
+    oc:directiveContent "Some libraries (notably lucide-react) do not ship .d.ts files for their deep import paths, so direct imports like 'lucide-react/dist/esm/icons/check' resolve to implicit 'any' types under strict mode." ;
+    oc:hasRationale "TypeScript strict/noImplicitAny will flag these imports as errors, breaking the build — prefer optimizePackageImports or verify subpath type exports first" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_3e917cc1 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When considering whether tree-shaking will handle barrel file overhead" ;
+    oc:directiveContent "Tree-shaking cannot optimize barrel imports when a library is marked as external (not bundled), and bundling it to enable tree-shaking makes builds substantially slower due to full module graph analysis." ;
+    oc:hasRationale "This is a fundamental limitation of the bundler's external package handling — optimizePackageImports sidesteps the issue entirely" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_48e7212b a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When working in Next.js 13.5+ projects with barrel-exporting libraries" ;
+    oc:directiveContent "Use Next.js experimental.optimizePackageImports in next.config.js as the primary solution — it automatically transforms barrel imports to direct source imports at build time while preserving TypeScript support." ;
+    oc:hasRationale "This approach preserves full TypeScript type safety, editor autocompletion, and standard import syntax while still eliminating barrel import overhead" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_6e67e4cd a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "When evaluating whether barrel import optimization is worth implementing" ;
+    oc:directiveContent "Eliminating barrel imports yields 15-70% faster dev boot, 28% faster builds, 40% faster cold starts, and significantly faster HMR. Libraries commonly affected: lucide-react, @mui/material, @mui/icons-material, @tabler/icons-react, react-icons, lodash, ramda, date-fns, rxjs, react-use." ;
+    oc:hasRationale "These are empirically measured improvements from Vercel's optimization work across common React ecosystem libraries" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_733f66c7 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When importing from popular icon, component, or utility libraries" ;
+    oc:directiveContent "Never import from barrel files (index re-export entry points) for large libraries like lucide-react, @mui/material, lodash, or react-icons — they can load 1,000-10,000 unused modules." ;
+    oc:hasRationale "Barrel imports cause 200-800ms import cost per library on every cold start and can add 2-4+ seconds to dev boot time" ;
+    oc:severityLevel "CRITICAL" .
+

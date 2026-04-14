@@ -1,0 +1,72 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_vercel_labs_vercel_react_best_practices_js_request_idle_callback a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "js-request-idle-callback" ;
+    skos:broader "Performance optimization technique" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
+    oc:contentHash "ee08f83905b4011abbc33d594033157d77561b5bbd9b36b04f0f409581ffec32" ;
+    oc:differentia "defers non-critical JavaScript work to browser idle periods using requestIdleCallback to keep the main thread responsive" ;
+    oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
+    oc:handlesFailure oc:BrowserUnsupported ;
+    oc:hasArgumentHint "non-critical task function" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_07f8b7db,
+        oc:kn_1b696552,
+        oc:kn_38d89800,
+        oc:kn_6c8d8010,
+        oc:kn_82b75817,
+        oc:kn_ebc641b8 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:BrowserEnvironment ;
+    oc:resolvesIntent "chunk large data processing tasks",
+        "defer non-critical work",
+        "keep UI responsive during background tasks",
+        "optimize main thread usage",
+        "schedule analytics and telemetry" ;
+    oc:yieldsState oc:MainThreadResponsive,
+        oc:NonCriticalWorkScheduled .
+
+oc:kn_07f8b7db a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When handling events like search, navigation, or form submissions" ;
+    oc:directiveContent "Do not run analytics tracking, state persistence, or prefetching synchronously on the main thread during user interactions." ;
+    oc:hasRationale "Running non-critical work synchronously blocks the main thread, causing jank and reducing perceived performance during user interactions." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_1b696552 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When categorizing work as critical vs. non-critical for scheduling" ;
+    oc:directiveContent "Use requestIdleCallback for analytics/telemetry, saving state to localStorage/IndexedDB, prefetching resources, processing non-urgent data, and lazy initialization of non-critical features." ;
+    oc:hasRationale "These tasks don't block user perception of responsiveness and can safely run during idle periods without degrading UX." .
+
+oc:kn_38d89800 a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "When processing large datasets or batch operations via requestIdleCallback" ;
+    oc:directiveContent "When chunking large tasks with requestIdleCallback, aim for sub-50ms chunks by checking deadline.timeRemaining() to stay within idle periods." ;
+    oc:hasRationale "Chunks exceeding 50ms risk encroaching on the next frame budget (16ms) and causing visible jank, defeating the purpose of idle scheduling." .
+
+oc:kn_6c8d8010 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When deciding whether to defer work with requestIdleCallback" ;
+    oc:directiveContent "Never use requestIdleCallback for user-initiated actions that need immediate feedback, rendering updates the user is waiting for, or time-sensitive operations." ;
+    oc:hasRationale "Deferring critical work would introduce unacceptable latency for user-facing interactions and defeat the purpose of responsive UI." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_82b75817 a oc:FallbackStrategy,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When implementing requestIdleCallback in production code" ;
+    oc:directiveContent "Provide a fallback using setTimeout(cb, 1) for browsers that do not support requestIdleCallback." ;
+    oc:hasRationale "requestIdleCallback is not supported in all browsers (notably Safari lacked support for a long time); a setTimeout fallback ensures the work still gets done." .
+
+oc:kn_ebc641b8 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When scheduling work that must eventually run but isn't immediately critical" ;
+    oc:directiveContent "Use the timeout option (e.g., { timeout: 2000 }) to guarantee that important deferred work like analytics still fires within a reasonable window even if the browser stays busy." ;
+    oc:hasRationale "Without a timeout, requestIdleCallback may be starved indefinitely if the browser never enters an idle state, causing important work to never execute." .
+

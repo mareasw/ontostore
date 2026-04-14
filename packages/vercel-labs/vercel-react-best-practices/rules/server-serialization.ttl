@@ -1,0 +1,75 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_vercel_labs_vercel_react_best_practices_server_serialization a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "server-serialization" ;
+    skos:broader "Performance optimization pattern" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
+    oc:contentHash "f4c7d68b29c82381baad059c4a7f09e868e71ec9c3115a26ad3ae7d24c0dfe1f" ;
+    oc:differentia "minimizes data transfer size across React Server/Client component boundaries by passing only necessary fields as props" ;
+    oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
+    oc:handlesFailure oc:InvalidInput ;
+    oc:hasArgumentHint "React Server Component code with server-to-client prop passing" ;
+    oc:hasCategory "development" ;
+    oc:hasRequirement oc:req_c6070870,
+        oc:req_fdc566ca ;
+    oc:impartsKnowledge oc:kn_0115cf63,
+        oc:kn_644604f7,
+        oc:kn_86eb60ed,
+        oc:kn_a6644817,
+        oc:kn_f80792e1 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "improve page load performance by minimizing serialization overhead",
+        "optimize server-to-client prop passing in React Server Components",
+        "reduce serialized data size at RSC boundaries" ;
+    oc:yieldsState oc:DocumentCreated .
+
+oc:kn_0115cf63 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When passing props across React Server/Client boundaries ('use client' directives)" ;
+    oc:directiveContent "Never pass entire data objects (e.g., full API responses) from Server Components to Client Components as props. Only pass the individual fields the client component actually uses." ;
+    oc:hasRationale "All object properties are serialized into strings and embedded in the HTML response and subsequent RSC requests, directly impacting page weight and load time." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_644604f7 a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "When evaluating page load performance in Next.js applications using React Server Components" ;
+    oc:directiveContent "Page weight and load time scale linearly with the number and size of serialized props at RSC boundaries. Reducing serialized fields from 50 to 1 can dramatically cut payload size." ;
+    oc:hasRationale "Serialized prop data is embedded directly in the HTML response, making it a blocking factor for initial page load and subsequent navigations." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_86eb60ed a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "During code review and refactoring of RSC applications" ;
+    oc:directiveContent "Audit every Server-to-Client component boundary and verify that each prop passed is actually consumed by the client component. If a client component uses N fields from a M-field object, pass N individual props, not the whole object." ;
+    oc:hasRationale "Passing a 50-field object when only 1 field is used serializes 49 unnecessary fields into the HTML, ballooning page weight." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_a6644817 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing the interface between Server Components and Client Components" ;
+    oc:directiveContent "Destructure or pick only the specific fields needed by the client component before passing them as props. Pass primitive values (strings, numbers) instead of complex objects when possible." ;
+    oc:hasRationale "Serialization at the RSC boundary converts all properties to strings and embeds them in the response, so every unused field adds unnecessary payload size." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_f80792e1 a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "Always, whenever data crosses the Server/Client boundary" ;
+    oc:directiveContent "All data passed from Server Components to Client Components is serialized into strings and embedded in the HTML response and RSC request payloads, directly increasing transfer size." ;
+    oc:hasRationale "This is the fundamental mechanism of RSC boundary communication — understanding it is essential to making informed decisions about what to serialize." ;
+    oc:severityLevel "HIGH" .
+
+oc:req_c6070870 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "TypeScript/React prop typing patterns" .
+
+oc:req_fdc566ca a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "React Server Components architecture and Server/Client boundary mechanics" .
+

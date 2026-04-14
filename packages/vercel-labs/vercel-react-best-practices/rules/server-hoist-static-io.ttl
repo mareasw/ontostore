@@ -1,0 +1,66 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_vercel_labs_vercel_react_best_practices_server_hoist_static_io a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "server-hoist-static-io" ;
+    skos:broader "Performance optimization pattern" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
+    oc:contentHash "5abea4dd882b13661bd5f7dfb93f9e547d5f08176c61c448ade91b210ed5d49f" ;
+    oc:differentia "hoists static file/network I/O operations to module level so they execute once at import time rather than on every request invocation in Next.js server-side code" ;
+    oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
+    oc:handlesFailure oc:InvalidInput ;
+    oc:hasArgumentHint "Next.js route handler or server function file path" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_05f49cf3,
+        oc:kn_08c28656,
+        oc:kn_13068e78,
+        oc:kn_38b48410,
+        oc:kn_fd8e0d98 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "eliminate redundant file reads in serverless functions",
+        "improve OG image generation performance",
+        "optimize server route handler performance",
+        "reduce repeated static I/O in Next.js route handlers" ;
+    oc:yieldsState oc:OptimizedIO .
+
+oc:kn_05f49cf3 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When hoisting async I/O to module level in route handlers" ;
+    oc:directiveContent "Use async fetch/readFile at module level with Promise.all() inside the handler to await already-started promises, rather than blocking synchronous reads." ;
+    oc:hasRationale "Starting promises at module level and awaiting them in the handler gives the best of both worlds: early initiation and non-blocking concurrency without cold-start serialization." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_08c28656 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When loading static assets (fonts, logos, config files, templates) in Next.js route handlers or server functions" ;
+    oc:directiveContent "Hoist static I/O operations (fetch, readFileSync, fs.readFile) to module level so they execute once when the module is first imported, not on every request invocation." ;
+    oc:hasRationale "Module-level code runs once per function instance lifecycle; request-level code runs on every invocation, causing redundant I/O that degrades performance." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_13068e78 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Before applying the hoisting pattern to any I/O operation" ;
+    oc:directiveContent "Do NOT hoist I/O to module level for assets that vary per request, change at runtime, are very large (memory pressure), or contain sensitive data that should not persist in memory." ;
+    oc:hasRationale "Hoisting these cases would cause stale data, excessive memory consumption, or security risks from persistent in-memory sensitive values." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_38b48410 a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "When deploying to Vercel or any serverless platform" ;
+    oc:directiveContent "With Vercel Fluid Compute, module-level caching is especially effective because multiple concurrent requests share the same function instance, keeping static assets warm in memory. In traditional serverless, cold starts re-execute module-level code but warm invocations reuse loaded assets." ;
+    oc:hasRationale "Understanding the serverless lifecycle (cold start vs warm invocation) determines the actual performance benefit of module-level hoisting." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_fd8e0d98 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing GET handlers in app/api routes, OG image generation, or any server function processing repeated requests" ;
+    oc:directiveContent "Never perform static file reads or network fetches inside request handler bodies when the asset does not vary per request." ;
+    oc:hasRationale "Performing I/O inside the handler body causes the same asset to be loaded on every single request, multiplying latency and resource consumption unnecessarily." ;
+    oc:severityLevel "CRITICAL" .
+

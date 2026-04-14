@@ -1,0 +1,57 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_vercel_labs_vercel_react_best_practices_server_parallel_nested_fetching a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "server-parallel-nested-fetching" ;
+    skos:broader "Performance optimization pattern" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
+    oc:contentHash "ad5d9656984d4a959997a2367bf59cc6632297b4634a1dd13a087939d83f30b3" ;
+    oc:differentia "chains dependent async fetches within individual Promise.all items so that a slow parent fetch does not block nested fetches for other items" ;
+    oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
+    oc:handlesFailure oc:NetworkTimeout ;
+    oc:hasArgumentHint "nested async fetch code to optimize" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_00372aac,
+        oc:kn_4bc3c504,
+        oc:kn_9503f656,
+        oc:kn_9ed693de ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "eliminate server-side waterfalls",
+        "optimize nested data fetching",
+        "parallelize dependent async operations" ;
+    oc:yieldsState oc:DataFetched .
+
+oc:kn_00372aac a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When fetching nested/dependent data in server components or RSC" ;
+    oc:directiveContent "Never separate nested dependent fetches into sequential Promise.all calls, as a single slow item in the first batch blocks all items in the second batch." ;
+    oc:hasRationale "Sequential Promise.all phases create a waterfall where the second phase cannot begin until the slowest item in the first phase completes, wasting available parallelism." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_4bc3c504 a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "When evaluating fetch performance for N items with nested dependencies" ;
+    oc:directiveContent "Correct parallel nested fetching reduces total wait time from O(max_parent + max_child) to O(max(parent+child_per_item)), effectively eliminating cross-item blocking." ;
+    oc:hasRationale "With sequential Promise.all, total time is dominated by the slowest parent plus the slowest child; with chaining, total time is dominated only by the slowest combined parent+child pair." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_9503f656 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When mapping over items that each require a secondary fetch based on the first fetch's result" ;
+    oc:directiveContent "Chain dependent fetches within each item's promise using .then() so each item independently resolves its full dependency chain." ;
+    oc:hasRationale "Independent chaining means only the item with the slow parent fetch is delayed; all other items proceed to their nested fetches immediately." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_9ed693de a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing any data-fetching architecture in React Server Components" ;
+    oc:directiveContent "Structure async data fetching to minimize the critical path: each logical unit of work should be self-contained and not gated by unrelated units." ;
+    oc:hasRationale "Self-contained promise chains prevent unrelated data dependencies from creating artificial serialization points." ;
+    oc:severityLevel "MEDIUM" .
+

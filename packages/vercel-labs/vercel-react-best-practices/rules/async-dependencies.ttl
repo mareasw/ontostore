@@ -1,0 +1,57 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_vercel_labs_vercel_react_best_practices_async_dependencies a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "async-dependencies" ;
+    skos:broader "Async parallelization pattern" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
+    oc:contentHash "16ef469f877e30c6b8e1e1b4bc3e527312fa3c6318cb785a4eca186ea236131a" ;
+    oc:differentia "maximizes concurrency by resolving task dependencies automatically so each operation starts at the earliest possible moment" ;
+    oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
+    oc:handlesFailure oc:DependencyResolutionFailed ;
+    oc:hasArgumentHint "async operations with inter-task dependencies" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_963b94f6,
+        oc:kn_ae88324e,
+        oc:kn_f2669d25,
+        oc:kn_fb0c4b0c ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "eliminate unnecessary sequential awaits",
+        "optimize data fetching concurrency",
+        "parallelize async operations with dependencies" ;
+    oc:yieldsState oc:AsyncOperationsOptimized .
+
+oc:kn_963b94f6 a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "When evaluating whether to refactor async data fetching" ;
+    oc:directiveContent "Dependency-based parallelization yields 2-10× improvement over naive sequential+parallel patterns when tasks have partial dependencies." ;
+    oc:hasRationale "The performance gain comes from eliminating unnecessary serialization points where independent operations are blocked waiting for unrelated tasks." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_ae88324e a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When fetching multiple resources where some depend on results of others" ;
+    oc:directiveContent "Never use Promise.all() for operations where some tasks depend on others — it forces unnecessary sequential waiting when a dependency chain exists after the parallel barrier." ;
+    oc:hasRationale "Sequential awaits after Promise.all() block independent tasks that could have started earlier, losing 2-10× potential performance improvement." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_f2669d25 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When choosing between dependency-based parallelization approaches" ;
+    oc:directiveContent "Use `better-all` library for complex dependency graphs between async operations; use manual promise chaining with Promise.all() when avoiding extra dependencies." ;
+    oc:hasRationale "`better-all` provides a declarative API for expressing inter-task dependencies via `this.$.taskName`, while manual promise chaining is a zero-dependency alternative with equivalent semantics." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_fb0c4b0c a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When structuring async data fetching with partial dependencies" ;
+    oc:directiveContent "Create all promises upfront and chain dependencies via .then() before awaiting, so dependent tasks begin as soon as their prerequisite resolves rather than waiting for a global barrier." ;
+    oc:hasRationale "Starting each task at the earliest possible moment maximizes parallelism and minimizes total latency." ;
+    oc:severityLevel "HIGH" .
+

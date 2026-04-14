@@ -1,0 +1,61 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_vercel_labs_vercel_react_best_practices_js_length_check_first a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "js-length-check-first" ;
+    skos:broader "Performance optimization technique" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
+    oc:contentHash "8b54a311c826b299272f29187fc58bc55772a04c4a72eeb29456ee96dc9fc624" ;
+    oc:differentia "checks array length before expensive comparison operations to enable early exit when lengths differ" ;
+    oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_0c943778,
+        oc:kn_141842a1,
+        oc:kn_174d70e8,
+        oc:kn_95e922c7,
+        oc:kn_d6f94ba2 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:resolvesIntent "avoid unnecessary expensive operations on arrays",
+        "improve performance of hot-path comparisons",
+        "optimize array comparisons" .
+
+oc:kn_0c943778 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When comparing arrays in JavaScript/TypeScript" ;
+    oc:directiveContent "Always check array lengths before performing expensive comparison operations (sorting, deep equality, serialization). If lengths differ, the arrays cannot be equal, so return immediately." ;
+    oc:hasRationale "Length comparison is O(1) while sort-based comparison is O(n log n); avoiding the expensive path when lengths differ yields significant savings in hot paths like event handlers and render loops." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_141842a1 a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "When evaluating performance characteristics of array comparison code" ;
+    oc:directiveContent "The optimized approach has O(1) best-case (lengths differ) and O(n log n) worst-case (lengths match, full sort and compare). It also avoids allocating memory for joined strings." ;
+    oc:hasRationale "In real-world applications with frequently differing array lengths, the best case dominates and provides substantial performance improvement over the naive approach." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_174d70e8 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing any comparison or equality-check function" ;
+    oc:directiveContent "Apply early-exit / guard clause patterns at the start of comparison functions: check cheap conditions (lengths, types, references) before expensive ones (sorting, deep equality, serialization)." ;
+    oc:hasRationale "Guard clauses reduce cognitive complexity and improve performance by eliminating unnecessary work upfront." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_95e922c7 a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "When sorting arrays during comparison operations" ;
+    oc:directiveContent "Using Array.prototype.sort() mutates the original array. Use Array.prototype.toSorted() instead to avoid side effects on input data." ;
+    oc:hasRationale "Mutating input arrays can cause subtle bugs in callers that don't expect their data to be reordered, especially in React render paths where referential integrity matters." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_d6f94ba2 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When implementing array equality or change-detection functions" ;
+    oc:directiveContent "Never unconditionally sort and join arrays for comparison without first checking lengths, as this always incurs O(n log n) cost plus memory overhead for joined strings." ;
+    oc:hasRationale "Running two O(n log n) sorts plus string joining and comparison is wasteful when a simple O(1) length check can short-circuit the entire operation." ;
+    oc:severityLevel "HIGH" .
+
