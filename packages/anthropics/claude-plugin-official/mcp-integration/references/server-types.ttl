@@ -1,0 +1,72 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_plugin_official_mcp_integration_server_types a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "server-types" ;
+    skos:broader "Reference guide" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/mcp-integration" ;
+    oc:contentHash "7b06c7ea92e255218897189c550a32cbad1daa173e78e40ec94524fc9a1fb36b" ;
+    oc:differentia "that classifies and documents all four MCP server transport types (stdio, SSE, HTTP, WebSocket) with configuration patterns, authentication methods, lifecycle details, and selection criteria for Claude Code plugins" ;
+    oc:extends oc:skill_anthropics_claude_plugin_official_mcp_integration ;
+    oc:hasArgumentHint "transport-type (stdio|sse|http|ws)" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_775c5cb5,
+        oc:kn_7a65e4ab,
+        oc:kn_a13de427,
+        oc:kn_a2ae58b5,
+        oc:kn_acc35e8a,
+        oc:kn_dc2830b7 ;
+    oc:isUserInvocable false ;
+    oc:nature "Concept" ;
+    oc:resolvesIntent "choose MCP server type",
+        "compare MCP server types",
+        "configure MCP server transport",
+        "migrate between MCP server types",
+        "troubleshoot MCP server connections" .
+
+oc:kn_775c5cb5 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When configuring stdio MCP servers in plugin .mcp.json files" ;
+    oc:directiveContent "Use ${CLAUDE_PLUGIN_ROOT} variable for relative paths in stdio server configuration, and set PYTHONUNBUFFERED=1 for Python servers to ensure immediate output flushing." ;
+    oc:hasRationale "Plugin root variable ensures portability across installations. Python buffering can delay JSON-RPC responses causing timeouts." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_7a65e4ab a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When selecting an MCP server transport type for a Claude Code plugin" ;
+    oc:directiveContent "Choose MCP server type based on deployment context: stdio for local tools, SSE for hosted services with OAuth, HTTP for REST APIs with token auth, WebSocket for real-time bidirectional communication." ;
+    oc:hasRationale "Each transport type has distinct latency, statefulness, authentication, and reconnection characteristics that determine suitability for different use cases." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_a13de427 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When developing or debugging stdio-type MCP servers" ;
+    oc:directiveContent "For stdio servers, never log to stdout — stdout is reserved for MCP JSON-RPC protocol messages. Always log to stderr instead." ;
+    oc:hasRationale "Stray print/console.log statements on stdout corrupt the JSON-RPC message stream and break communication between Claude Code and the server process." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_a2ae58b5 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When configuring any MCP server type" ;
+    oc:directiveContent "Pass configuration via args or env variables, not stdin. Use environment variable references like ${API_KEY} for sensitive values. Implement reconnection logic for SSE and WebSocket transports." ;
+    oc:hasRationale "Environment variables enable secure, portable configuration across dev/prod environments. Reconnection logic ensures resilience for long-running sessions." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_acc35e8a a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When configuring SSE, HTTP, or WebSocket MCP servers" ;
+    oc:directiveContent "Always use HTTPS/WSS for network transports, never unencrypted HTTP or WS connections. Never hardcode tokens in configuration." ;
+    oc:hasRationale "Unencrypted connections expose credentials and data to interception. Hardcoded tokens create security vulnerabilities and make rotation difficult." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_dc2830b7 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When troubleshooting SSE server connection or authentication failures" ;
+    oc:directiveContent "SSE server connection failures can result from cached OAuth tokens — clearing cached tokens and re-authenticating resolves most OAuth flow issues." ;
+    oc:hasRationale "Stale or expired OAuth tokens may not trigger automatic refresh in all cases, requiring manual cache clearing." ;
+    oc:severityLevel "LOW" .
+

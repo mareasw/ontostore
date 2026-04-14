@@ -1,0 +1,148 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_plugin_official_build_mcp_app a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "build-mcp-app" ;
+    skos:broader "MCP server extension" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/build-mcp-app" ;
+    oc:contentHash "055668e79f3b6b608c39ad484832fe0f853abd06cac7f6c3f605419dd7ede91f" ;
+    oc:differentia "adds interactive UI widgets (forms, pickers, confirmations, charts) rendered inline in chat via iframe sandbox, using the ext-apps SDK" ;
+    oc:extends oc:skill_build_mcp_server ;
+    oc:handlesFailure oc:CSPViolation,
+        oc:ConnectionFailed,
+        oc:ResourceNotFound ;
+    oc:hasAllowedTool "Bash",
+        "Edit",
+        "Glob",
+        "Read",
+        "Write" ;
+    oc:hasArgumentHint "MCP server project with widget requirements (type: picker, form, confirm, progress, display, carousel)" ;
+    oc:hasCategory "development" ;
+    oc:hasDescription "This skill should be used when the user wants to build an \"MCP app\", add \"interactive UI\" or \"widgets\" to an MCP server, \"render components in chat\", build \"MCP UI resources\", make a tool that shows a \"form\", \"picker\", \"dashboard\" or \"confirmation dialog\" inline in the conversation, or mentions \"apps SDK\" in the context of MCP. Use AFTER the build-mcp-server skill has settled the deployment model, or when the user already knows they want UI widgets." ;
+    oc:hasName "build-mcp-app" ;
+    oc:hasRequirement oc:req_286d1c67,
+        oc:req_57886265,
+        oc:req_6c3f16c0,
+        oc:req_77f1f93b,
+        oc:req_7e62bdca,
+        oc:req_ea0a7a4b ;
+    oc:impartsKnowledge oc:kn_8107f614,
+        oc:kn_84637c8e,
+        oc:kn_8ef0f772,
+        oc:kn_a3084e35,
+        oc:kn_a6ce5271,
+        oc:kn_b997b003,
+        oc:kn_c7b3f6f5,
+        oc:kn_dcef32cd,
+        oc:kn_e6a51ae1,
+        oc:kn_ecfc9577 ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:EnvironmentReady,
+        oc:NodeInstalled ;
+    oc:resolvesIntent "add form or picker widget to MCP server",
+        "build MCP UI resources with iframe-based widgets",
+        "build MCP app with interactive UI widgets",
+        "create confirmation dialog or dashboard widget for MCP",
+        "render interactive components inline in chat" ;
+    oc:yieldsState oc:MCPServerRunning,
+        oc:UIResourcesRegistered .
+
+oc:kn_8107f614 a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When a widget renders as a blank rectangle or behaves unexpectedly" ;
+    oc:directiveContent "Open the iframe's own DevTools console (not the host's main console) to debug CSP violations and widget failures. In Claude Desktop, switch the Console context dropdown from 'top' to the widget's iframe." ;
+    oc:hasRationale "CSP violations and uncaught exceptions only surface in the iframe's console context; the host's main console stays silent on these errors." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_84637c8e a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "When implementing tool handlers for widget-enabled tools" ;
+    oc:directiveContent "Widgets are optional at runtime — hosts without the apps surface simply ignore _meta.ui and render the tool's text/JSON content directly. Always return meaningful text data alongside the widget reference so degradation is automatic." ;
+    oc:hasRationale "Graceful degradation ensures tools work across all MCP hosts, not just those supporting the apps surface." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_8ef0f772 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing descriptions for registerAppTool" ;
+    oc:directiveContent "Tool descriptions must mention the widget explicitly (e.g., 'Opens an interactive picker'). Claude only sees the tool description when deciding what to call — the description is what makes it choose a widget tool instead of guessing a value." ;
+    oc:hasRationale "Without explicit widget mention in the description, Claude may bypass the tool or call it without intending the UI interaction." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_a3084e35 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When registering widget resources via registerAppResource" ;
+    oc:directiveContent "Widget HTML resources MUST use mime type 'text/html;profile=mcp-app' (RESOURCE_MIME_TYPE) — this is how the host identifies and renders the resource as an interactive iframe rather than displaying raw HTML source." ;
+    oc:hasRationale "Without the correct mime type, the host treats the resource as plain text content instead of an interactive UI surface." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_a6ce5271 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When initializing the App class in widget JavaScript" ;
+    oc:directiveContent "Set event handlers (ontoolresult, ontoolinput) BEFORE calling await app.connect() — the tool result may arrive immediately after connection and be lost if the handler isn't registered." ;
+    oc:hasRationale "The connection is asynchronous and the host may pipe data immediately; handler registration after connect creates a race condition." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_b997b003 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When deciding whether to add a widget to a tool" ;
+    oc:directiveContent "Before building a widget, check if MCP elicitation covers the need. Use elicitation for simple confirmations (yes/no), short enum picks, and flat forms. Reserve widgets for searchable lists, visual previews, charts, and live-updating progress." ;
+    oc:hasRationale "Elicitation is spec-native, zero UI code, and works in any compliant host. Widgets add complexity — use them only when elicitation cannot meet the interaction need." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_c7b3f6f5 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When implementing links, navigation, or images in widget HTML" ;
+    oc:directiveContent "All outbound navigation from widgets must use app.openLink({url}). window.open() and <a target='_blank'> are blocked by the iframe sandbox attribute. Images from external URLs must be fetched server-side and inlined as data: URLs." ;
+    oc:hasRationale "The sandbox CSP blocks popups, cross-origin navigation, and external image loading — these restrictions are fundamental to the security model and cannot be relaxed." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_dcef32cd a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing widget-enabled tools" ;
+    oc:directiveContent "One widget per tool. Build focused, single-purpose widgets — a picker picks, a chart displays. Split complex interactions into multiple tools with dedicated widgets rather than one mega-widget." ;
+    oc:hasRationale "Claude reasons about individual tools far better than compound ones; focused widgets produce clearer result shapes and more reliable behavior." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_e6a51ae1 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing widget HTML/JS for iframe rendering" ;
+    oc:directiveContent "Do NOT import the ext-apps App class from a CDN like esm.sh — the iframe's CSP blocks transitive dependency fetches and the widget renders as a blank rectangle." ;
+    oc:hasRationale "The sandbox CSP restricts script-src to inline only; CDN imports fail silently with no error in the host's main console." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_ecfc9577 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When iterating on widget HTML during development" ;
+    oc:directiveContent "Claude Desktop caches UI resources aggressively. After editing widget HTML, fully quit the application (⌘Q / Alt+F4) and relaunch — window-close is insufficient to force a cold resource re-fetch." ;
+    oc:hasRationale "Cached resources cause stale widget renders that mask code changes, leading to confusing debugging sessions." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:req_286d1c67 a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "@modelcontextprotocol/sdk" .
+
+oc:req_57886265 a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "Node.js runtime" .
+
+oc:req_6c3f16c0 a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "@modelcontextprotocol/ext-apps" .
+
+oc:req_77f1f93b a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "MCP protocol fundamentals (tools, resources)" .
+
+oc:req_7e62bdca a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "zod" .
+
+oc:req_ea0a7a4b a oc:RequirementTool ;
+    oc:isOptional true ;
+    oc:requirementValue "express" .
+

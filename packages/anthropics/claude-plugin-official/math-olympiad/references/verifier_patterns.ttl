@@ -1,0 +1,135 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_plugin_official_math_olympiad_verifier_patterns a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "verifier-patterns" ;
+    skos:broader "Proof verification methodology" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/math-olympiad" ;
+    oc:contentHash "b72657c916d5cd0baa464d5ad59fce9fedb6f870f46b8dd9610632b08a591f56" ;
+    oc:dependsOnSkill oc:skill_math_olympiad ;
+    oc:differentia "that applies reasoning-only mental checks to catch systematic self-verification failures in mathematical proofs, especially competition mathematics" ;
+    oc:extends oc:skill_anthropics_claude_plugin_official_math_olympiad ;
+    oc:handlesFailure oc:CircularReasoningDetected,
+        oc:HypothesisViolationDetected,
+        oc:OvergeneralizationDetected ;
+    oc:hasArgumentHint "candidate proof or argument to verify" ;
+    oc:hasCategory "research" ;
+    oc:impartsKnowledge oc:kn_17317020,
+        oc:kn_2ad30dba,
+        oc:kn_2b0f3652,
+        oc:kn_3b8d96f5,
+        oc:kn_9352436b,
+        oc:kn_990e6d24,
+        oc:kn_b6f75fc8,
+        oc:kn_bb7345b5,
+        oc:kn_d9cf2899,
+        oc:kn_da97bd51,
+        oc:kn_ea662c7d,
+        oc:kn_ef97c475,
+        oc:kn_f61ba635 ;
+    oc:isUserInvocable false ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:ProofCandidateAvailable ;
+    oc:resolvesIntent "catch hidden proof errors",
+        "detect overgeneralization in proofs",
+        "identify circular reasoning",
+        "validate mathematical argument structure",
+        "verify proof correctness" ;
+    oc:yieldsState oc:ProofErrorDetected,
+        oc:ProofVerified .
+
+oc:kn_17317020 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When multiple proof strategies are blocked by the same apparent obstruction" ;
+    oc:directiveContent "When the same obstruction kills 3+ independent approaches, go back to the original object before any reduction and check the disputed property directly — the obstruction may live only in the proxy." ;
+    oc:hasRationale "Derived obstructions often arise from the reduction itself rather than the base problem; checking the original object directly can eliminate the perceived barrier" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_2ad30dba a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When comparing the strength of mathematical statements with different domains" ;
+    oc:directiveContent "Before claiming one statement is strictly stronger than another based on domain size, make quantifiers explicit: shrinking the domain under ∀ weakens the statement (fewer obligations), while shrinking under ∃ strengthens it (fewer candidates)." ;
+    oc:hasRationale "Backwards strength claims from domain-size reasoning are a pervasive error; the quantifier direction determines whether a smaller domain is harder or easier to satisfy" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_2b0f3652 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When estimating oscillatory sums in analytic number theory or harmonic analysis" ;
+    oc:directiveContent "Before concluding a sum Σₖ Xₖ = O(1) is too hard because the absolute sum gives O(K), compute the mean of Xₖ over the varying parameter — orthogonality or equidistribution may force the mean to zero, converting K terms of size 1 into √K fluctuations." ;
+    oc:hasRationale "Separating mean from fluctuation can dramatically simplify the target; many 'hard' sums collapse when their zero-mean structure is recognized" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_3b8d96f5 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When constructing diagonalization arguments in computational complexity" ;
+    oc:directiveContent "Before claiming a diagonalization argument places something in NP, write the diagonalization as a formula and count quantifier alternations — certifying 'no small circuit computes x' is a ∀ over circuits, placing it in Σ₂ not NP." ;
+    oc:hasRationale "Quantifier counting errors are the standard way diagonalization proofs jump a level in the hierarchy; Kannan's theorem gives Σ₂ᴾ ⊄ SIZE, not NP ⊄ SIZE, precisely for this reason" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_9352436b a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "After completing a proof verification that found no errors" ;
+    oc:directiveContent "Always run Pattern 18 (tautological reduction check) and Pattern 19 (derived vs base obstruction) after any positive finding — these catch the two most common self-verification failures." ;
+    oc:hasRationale "Positive findings create false confidence; these two patterns specifically target the circular reasoning and proxy-obstruction errors that self-verification is blind to" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_990e6d24 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When a proof feels suspiciously short or clean for the claimed result" ;
+    oc:directiveContent "Before accepting a one-line proof as complete, extract its key step as a lemma in full generality and test with a 2×2 counterexample — if the general lemma is false but the specific conclusion holds, there is hidden structure that constitutes the real proof." ;
+    oc:hasRationale "Overly concise proofs often rely on lemmas that are false in general but coincidentally true in the specific case due to hidden structure; identifying that structure is the actual proof" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_b6f75fc8 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When a proof relies on a pattern observed from small examples" ;
+    oc:directiveContent "Never accept a pattern confirmed only on trivially small cases — identify where the structure first becomes nontrivial and verify the claim survives at least one case beyond that threshold." ;
+    oc:hasRationale "Small cases often have forced degeneracies (e.g., only 1×2 blocks) that mask the real structure; the first nontrivial case is where claims typically fail" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_bb7345b5 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When a divergent-looking sum is claimed to be bounded via analytic continuation" ;
+    oc:directiveContent "Never accept 'bounded by ζ(s)' or similar analytic continuation arguments without checking the bounding function at the boundary of the claimed range — a pole there means the original sum diverges." ;
+    oc:hasRationale "The analytic continuation of a sum is not the sum itself; evaluating at a pole produces a meaningless bound" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_d9cf2899 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When a proof claims a result for a broad class of objects" ;
+    oc:directiveContent "Never accept a proof that would, upon specialization to the most famous object in its class (e.g., ζ(s), Ramsey number), settle a known open problem — the argument likely treats a generic property that the canonical hard instance does not possess." ;
+    oc:hasRationale "Overly general claims that would resolve famous conjectures almost always contain a hidden gap where a generic property was assumed but the hard instance fails to satisfy it" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_da97bd51 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When beginning to solve a competition mathematics problem" ;
+    oc:directiveContent "Before solving a problem, write down 2–3 readings of the statement and flag whichever makes the problem trivial — if your interpretation yields a one-liner for a 7-point problem, you have likely chosen the wrong reading." ;
+    oc:hasRationale "Olympiad problems routinely plant easy misreadings; 63 'technically correct' solutions versus 13 'meaningfully correct' ones demonstrates the scale of this trap" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_ea662c7d a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When a proof reduces a conjecture to a seemingly simpler claim" ;
+    oc:directiveContent "When a reduction chain ends at 'estimate X would finish it,' substitute the chain's own already-proven identities into X — if you recover the starting conjecture, the chain went in a circle." ;
+    oc:hasRationale "Tautological reductions are the most common circular reasoning pattern; they feel like progress because intermediate identities are genuine, but the final gap is the original problem in disguise" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_ef97c475 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When a proof invokes a formula or identity without restating its scope" ;
+    oc:directiveContent "For any identity used in a proof, trace it to where it was first introduced and verify the standing assumptions at that point still hold at the point of use — never silently generalize from a special case." ;
+    oc:hasRationale "Formulas derived under special assumptions (e.g., 2-piece Cantor sets) are routinely applied to more general settings (e.g., m-piece sets) where the formula differs by a constant factor" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_f61ba635 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When applying a cited theorem to an object in a proof" ;
+    oc:directiveContent "Never trust that an object satisfies a theorem's hypotheses because it has the right label — re-derive the hypotheses from the definition and check inclusion from scratch." ;
+    oc:hasRationale "Near-synonyms like 'bounded' vs 'bounded on the line' or 'entire' vs 'analytic on a domain' routinely slip past self-verification and produce false applications" ;
+    oc:severityLevel "HIGH" .
+

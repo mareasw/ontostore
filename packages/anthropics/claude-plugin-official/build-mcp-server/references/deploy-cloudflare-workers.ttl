@@ -1,0 +1,93 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_plugin_official_build_mcp_server_deploy_cloudflare_workers a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "deploy-cloudflare-workers" ;
+    skos:broader "deployment guide" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/build-mcp-server" ;
+    oc:contentHash "b72abb420638510187da33b3e5348c6e8b5f319821b339d646517efbb3c8084c" ;
+    oc:differentia "deploys MCP servers to Cloudflare Workers with zero-to-live URL in two commands using the McpAgent runtime" ;
+    oc:extends oc:skill_anthropics_claude_plugin_official_build_mcp_server ;
+    oc:handlesFailure oc:BuildError,
+        oc:DeploymentFailed ;
+    oc:hasArgumentHint "project-name for the MCP server" ;
+    oc:hasCategory "development" ;
+    oc:hasRequirement oc:req_13884422,
+        oc:req_37abe107,
+        oc:req_4c7d6de7,
+        oc:req_f5d063de ;
+    oc:impartsKnowledge oc:kn_4261df90,
+        oc:kn_9ee79a5b,
+        oc:kn_cc5dcffe,
+        oc:kn_cf4fcc00,
+        oc:kn_eb3683df,
+        oc:kn_ff8a12b4 ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:CloudflareAuthenticated,
+        oc:NodeInstalled ;
+    oc:resolvesIntent "configure Cloudflare Workers for MCP with Durable Objects",
+        "deploy MCP server to Cloudflare Workers",
+        "get a live HTTPS URL for an MCP server",
+        "scaffold a Workers-native MCP server" ;
+    oc:yieldsState oc:LiveURLAvailable,
+        oc:MCPServerDeployed .
+
+oc:kn_4261df90 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When configuring external API authentication" ;
+    oc:directiveContent "Store upstream API keys via `npx wrangler secret put KEY_NAME`, then read them inside init() using `env.KEY_NAME`. Never hardcode secrets in source." ;
+    oc:hasRationale "Wrangler secrets are encrypted at rest and injected at runtime via the env object, providing secure credential management without exposing values in code." .
+
+oc:kn_9ee79a5b a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing tool logic for a Cloudflare Workers MCP server" ;
+    oc:directiveContent "Use McpAgent as the base class — it handles streamable-HTTP transport, session routing, and Durable Object plumbing automatically. Your code only touches this.server, which is the same McpServer class from the SDK." ;
+    oc:hasRationale "Abstracting transport and session management into McpAgent lets you focus solely on tool registration using the standard SDK API." .
+
+oc:kn_cc5dcffe a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When renaming the exported McpAgent class" ;
+    oc:directiveContent "If you rename the MyMCP class, you MUST update both new_sqlite_classes and class_name in wrangler.jsonc to match the new name." ;
+    oc:hasRationale "Cloudflare's Durable Objects binding requires the class name to match across the TypeScript export and the wrangler configuration, or deployment and runtime routing will fail." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_cf4fcc00 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before deploying to production" ;
+    oc:directiveContent "Run `npx wrangler dev` to test locally at http://localhost:8787/mcp before deploying. Verify tool responses before running `npx wrangler deploy`." ;
+    oc:hasRationale "Local testing catches configuration errors, missing dependencies, and tool logic bugs before they reach the live URL." .
+
+oc:kn_eb3683df a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When choosing between Cloudflare Workers and Express scaffold" ;
+    oc:directiveContent "This scaffold is Workers-native and is NOT compatible with the Express scaffold from remote-http-scaffold.md. Different runtime. If you need portability across hosts, stick with Express." ;
+    oc:hasRationale "Workers uses a different runtime (V8 isolates, not Node.js), so code portability between the two scaffolds is not guaranteed." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_ff8a12b4 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When adding authentication to a Cloudflare Workers MCP server" ;
+    oc:directiveContent "For OAuth, use the `cloudflare/ai/demos/remote-mcp-github-oauth` template which wires @cloudflare/workers-oauth-provider to gate /mcp behind token checks." ;
+    oc:hasRationale "The workers-oauth-provider handles the authorization server side (CIMD/DCR endpoints, token issuance, consent UI) as a drop-in wrapper around your McpAgent." .
+
+oc:req_13884422 a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "Cloudflare account" .
+
+oc:req_37abe107 a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "npm/node" .
+
+oc:req_4c7d6de7 a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "wrangler CLI" .
+
+oc:req_f5d063de a oc:RequirementKnowledge ;
+    oc:isOptional true ;
+    oc:requirementValue "McpServer SDK API (registerTool)" .
+

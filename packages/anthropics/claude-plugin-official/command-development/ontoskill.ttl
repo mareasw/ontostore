@@ -1,0 +1,99 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_plugin_official_command_development a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "command-development" ;
+    skos:broader "development guide" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/command-development" ;
+    oc:contentHash "bc091b9dd0cd7d02ecff3e842ef483d70800c1f632278f874dd6500435abeb4d" ;
+    oc:dependsOnSkill oc:skill_skill_development ;
+    oc:differentia "that teaches how to create, configure, and distribute Claude Code slash commands using Markdown files with YAML frontmatter, dynamic arguments, file references, and bash execution" ;
+    oc:handlesFailure oc:FileNotFound,
+        oc:InvalidInput,
+        oc:PermissionDenied ;
+    oc:hasArgumentHint "command-name or feature-area" ;
+    oc:hasCategory "development" ;
+    oc:hasDescription "This skill should be used when the user asks to \"create a slash command\", \"add a command\", \"write a custom command\", \"define command arguments\", \"use command frontmatter\", \"organize commands\", \"create command with file references\", \"interactive command\", \"use AskUserQuestion in command\", or needs guidance on slash command structure, YAML frontmatter fields, dynamic arguments, bash execution in commands, user interaction patterns, or command development best practices for Claude Code." ;
+    oc:hasName "command-development" ;
+    oc:impartsKnowledge oc:kn_293fca31,
+        oc:kn_3d88d97c,
+        oc:kn_428716a7,
+        oc:kn_489b50e5,
+        oc:kn_547b58b8,
+        oc:kn_964c461d,
+        oc:kn_965802f3,
+        oc:kn_a49c4a2f ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "build interactive commands with AskUserQuestion",
+        "create plugin commands using CLAUDE_PLUGIN_ROOT",
+        "create slash commands",
+        "define command arguments and frontmatter",
+        "distribute commands via marketplace",
+        "integrate commands with agents, skills, and hooks",
+        "organize commands with namespacing",
+        "test and validate slash commands",
+        "write custom commands for Claude Code" ;
+    oc:yieldsState oc:CommandCreated .
+
+oc:kn_293fca31 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When configuring allowed-tools in frontmatter" ;
+    oc:directiveContent "Use the most restrictive allowed-tools setting possible. Prefer Bash(git:*) over Bash(*), and only specify tools that differ from conversation permissions." ;
+    oc:hasRationale "Minimal tool access reduces security surface and prevents unintended side effects. Overly permissive settings can lead to destructive operations." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_3d88d97c a oc:Idempotency,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When creating commands for distribution or shared team use" ;
+    oc:directiveContent "Commands designed for marketplace distribution should be idempotent—safe to run multiple times without side effects. Use flag files or state checks to detect prior execution." ;
+    oc:hasRationale "Distributed commands may be invoked accidentally or repeatedly. Idempotent design prevents duplicate operations and ensures consistent behavior." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_428716a7 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing any slash command prompt content" ;
+    oc:directiveContent "Commands must be written as instructions FOR Claude (agent consumption), not as messages TO users. Write directives telling Claude what to do, not descriptions of what will happen." ;
+    oc:hasRationale "Commands become Claude's instructions when invoked. Writing them as user-facing descriptions results in Claude explaining rather than executing." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_489b50e5 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When developing new slash commands" ;
+    oc:directiveContent "Start minimal with no frontmatter, then incrementally add description, argument-hint, allowed-tools, and model as needed. Test each addition before adding more complexity." ;
+    oc:hasRationale "Progressive complexity addition ensures each feature works independently and makes debugging easier. Over-engineering upfront leads to hard-to-diagnose failures." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_547b58b8 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When creating command YAML frontmatter" ;
+    oc:directiveContent "Keep description field under 60 characters, use verb-noun naming pattern for command files, and always provide argument-hint when commands accept arguments." ;
+    oc:hasRationale "Short descriptions display cleanly in /help output. Verb-noun naming (e.g., review-pr, fix-issue) makes commands discoverable. Argument hints enable autocomplete and usability." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_964c461d a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When creating plugin commands that reference internal files" ;
+    oc:directiveContent "Never use relative paths (./scripts/) in plugin commands. Always use ${CLAUDE_PLUGIN_ROOT} for portable, cross-installation path resolution." ;
+    oc:hasRationale "Relative paths resolve against the current working directory, not the plugin directory. This causes file-not-found errors when the user runs the command from a different directory." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_965802f3 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When deciding between command arguments vs interactive prompts" ;
+    oc:directiveContent "For simple values (file paths, numbers, names), use command arguments ($1, $2). For complex decisions requiring trade-off explanations, use AskUserQuestion tool with 2-4 options per question." ;
+    oc:hasRationale "Arguments enable scriptable, fast invocations. AskUserQuestion provides context for informed decisions but slows automation. Matching the approach to complexity optimizes user experience." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_a49c4a2f a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When building commands that accept user input or depend on external resources" ;
+    oc:directiveContent "Always validate inputs early in commands: check argument existence, file paths, environment values, and plugin resources before executing main logic. Provide helpful error messages with corrective suggestions." ;
+    oc:hasRationale "Early validation prevents partial execution and confusing downstream errors. Helpful error messages reduce support burden and improve user experience." ;
+    oc:severityLevel "HIGH" .
+

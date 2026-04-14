@@ -1,0 +1,97 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_plugin_official_agent_development a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "agent-development" ;
+    skos:broader "Development methodology" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/agent-development" ;
+    oc:contentHash "d415e802151635d2bfdc0f729818abd5990f908baabe8e65612c4ffe51b725cd" ;
+    oc:dependsOnSkill oc:skill_plugin_structure ;
+    oc:differentia "that defines the structure, triggering conditions, system prompt design, and validation rules for creating autonomous agent subprocesses in Claude Code plugins" ;
+    oc:extends oc:skill_skill_development ;
+    oc:handlesFailure oc:FileNotFound,
+        oc:InvalidInput ;
+    oc:hasArgumentHint "agent-description or agent-purpose" ;
+    oc:hasCategory "development" ;
+    oc:hasDescription "This skill should be used when the user asks to \"create an agent\", \"add an agent\", \"write a subagent\", \"agent frontmatter\", \"when to use description\", \"agent examples\", \"agent tools\", \"agent colors\", \"autonomous agent\", or needs guidance on agent structure, system prompts, triggering conditions, or agent development best practices for Claude Code plugins." ;
+    oc:hasName "agent-development" ;
+    oc:impartsKnowledge oc:kn_135dda45,
+        oc:kn_218866b2,
+        oc:kn_2f95a686,
+        oc:kn_47872879,
+        oc:kn_772da25f,
+        oc:kn_a77fdcb5,
+        oc:kn_ee1502df,
+        oc:kn_f756ecb2 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "add an agent to a plugin",
+        "configure agent frontmatter (model, color, tools)",
+        "create an agent",
+        "define agent triggering conditions",
+        "design agent system prompts",
+        "validate agent file structure",
+        "write a subagent" ;
+    oc:yieldsState oc:DocumentCreated .
+
+oc:kn_135dda45 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing any agent system prompt body" ;
+    oc:directiveContent "Write system prompts in second person ('You are...', 'You will...'), include clear responsibilities, step-by-step process, quality standards, defined output format, and edge case handling. Keep under 10,000 characters." ;
+    oc:hasRationale "Structured, second-person prompts provide unambiguous behavioral guidance for autonomous operation, while length limits prevent diminishing returns" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_218866b2 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing agent descriptions for reliable triggering" ;
+    oc:directiveContent "Include 2-4 concrete <example> blocks in the description field covering explicit requests, proactive triggering, and implicit requests, each with Context, user, assistant, and commentary sections." ;
+    oc:hasRationale "The description field with examples is the primary mechanism by which Claude determines when to invoke an agent; insufficient or vague examples lead to missed or incorrect triggers" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_2f95a686 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When creating new agents efficiently" ;
+    oc:directiveContent "Use the AI-assisted generation pattern: describe agent needs, feed to Claude with the agent-creation-system-prompt, get JSON output (identifier, whenToUse, systemPrompt), then convert to agent markdown file with frontmatter." ;
+    oc:hasRationale "AI-assisted generation produces comprehensive, pattern-consistent agents faster than manual creation while following proven internal patterns from Claude Code" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_47872879 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When configuring agent frontmatter tools field" ;
+    oc:directiveContent "Never grant agents more tool access than they need. Use the tools field to restrict to minimum required tools following the principle of least privilege." ;
+    oc:hasRationale "Over-privileged agents can cause unintended side effects, data corruption, or security issues during autonomous operation" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_772da25f a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When agent triggering is unreliable or inconsistent" ;
+    oc:directiveContent "Agents may fail to trigger if description examples don't include relevant keywords, context doesn't match actual usage, or commentary doesn't clearly explain triggering logic. Debug by adding more diverse examples." ;
+    oc:hasRationale "Triggering failures are the most common agent development issue and are almost always caused by inadequate or overly narrow description examples" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_a77fdcb5 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When naming any agent" ;
+    oc:directiveContent "Agent identifiers must be 3-50 characters, lowercase letters/numbers/hyphens only, start and end with alphanumeric, and avoid generic names like 'helper' or 'assistant'." ;
+    oc:hasRationale "Identifier format constraints ensure reliable namespacing, invocation, and auto-discovery of agents in the agents/ directory" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_ee1502df a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before deploying or testing any newly created agent" ;
+    oc:directiveContent "Always validate agent files with scripts/validate-agent.sh after creation to verify frontmatter structure, required fields, name format, description quality, example blocks, and system prompt completeness." ;
+    oc:hasRationale "Validation catches structural errors that would prevent agent discovery or cause runtime failures" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_f756ecb2 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When deciding whether to create an agent vs a command" ;
+    oc:directiveContent "Agents are FOR autonomous work, commands are FOR user-initiated actions. Always distinguish between agent and command use cases before creating either." ;
+    oc:hasRationale "Mixing autonomous and user-initiated paradigms leads to poorly structured plugins and unreliable behavior" ;
+    oc:severityLevel "HIGH" .
+

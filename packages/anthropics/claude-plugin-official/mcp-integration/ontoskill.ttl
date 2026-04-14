@@ -1,0 +1,90 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_plugin_official_mcp_integration a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "mcp-integration" ;
+    skos:broader "integration guide" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/mcp-integration" ;
+    oc:contentHash "92bbe3613210fdcd28dde7dbc3e6e3653ff783ea61f40768f5bdd5ea3219af94" ;
+    oc:dependsOnSkill oc:skill_plugin_structure ;
+    oc:differentia "that configures Model Context Protocol servers within Claude Code plugins for external service connectivity" ;
+    oc:handlesFailure oc:AuthenticationFailed,
+        oc:ConfigurationError,
+        oc:ConnectionFailed ;
+    oc:hasArgumentHint "MCP server type or service name (stdio, SSE, HTTP, WebSocket)" ;
+    oc:hasCategory "development" ;
+    oc:hasDescription "This skill should be used when the user asks to \"add MCP server\", \"integrate MCP\", \"configure MCP in plugin\", \"use .mcp.json\", \"set up Model Context Protocol\", \"connect external service\", mentions \"${CLAUDE_PLUGIN_ROOT} with MCP\", or discusses MCP server types (SSE, stdio, HTTP, WebSocket). Provides comprehensive guidance for integrating Model Context Protocol servers into Claude Code plugins for external tool and service integration." ;
+    oc:hasName "mcp-integration" ;
+    oc:impartsKnowledge oc:kn_18de83c2,
+        oc:kn_52f1bd49,
+        oc:kn_6d3d1648,
+        oc:kn_72e96c38,
+        oc:kn_bf3046f3,
+        oc:kn_c0f501cb,
+        oc:kn_c54b4732 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady,
+        oc:PluginInstalled ;
+    oc:resolvesIntent "add MCP server to plugin",
+        "configure MCP integration",
+        "connect external service via MCP",
+        "create .mcp.json configuration",
+        "integrate MCP tools in commands and agents",
+        "set up Model Context Protocol" ;
+    oc:yieldsState oc:MCPServerConfigured,
+        oc:MCPToolsAvailable .
+
+oc:kn_18de83c2 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "After modifying MCP server configuration or when tools are not appearing as expected" ;
+    oc:directiveContent "Configuration changes to .mcp.json or mcpServers require restarting Claude Code to take effect. The /mcp command is the primary diagnostic tool for verifying server connectivity and available tools." ;
+    oc:hasRationale "MCP servers connect during plugin load and tool discovery happens at startup. Using /mcp reveals the current state without guessing." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_52f1bd49 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When retrieving multiple items or records from an MCP-provided API" ;
+    oc:directiveContent "Avoid making many individual MCP tool calls in a loop when a single batched query with filters can retrieve all needed data at once." ;
+    oc:hasRationale "Individual calls in a loop cause N network round-trips versus 1 batched call, dramatically increasing latency and potentially hitting rate limits." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_6d3d1648 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When selecting which MCP server transport type to configure" ;
+    oc:directiveContent "Choose MCP server type based on use case: stdio for local tools/custom servers, SSE for hosted cloud services with OAuth, HTTP for REST APIs with token auth, WebSocket for real-time bidirectional communication." ;
+    oc:hasRationale "Each transport has distinct characteristics — stdio offers lowest latency for local processes, SSE handles OAuth automatically, HTTP is stateless and simple, WebSocket enables real-time streaming. Mismatched choices lead to unnecessary complexity." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_72e96c38 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing .mcp.json or inline mcpServers configuration referencing local files, commands, or scripts" ;
+    oc:directiveContent "Use ${CLAUDE_PLUGIN_ROOT} for all file path references in MCP configuration to ensure portability across different installation environments." ;
+    oc:hasRationale "Hardcoded absolute paths break when the plugin is installed in a different location on another machine. The variable resolves to the correct path at runtime." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_bf3046f3 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When configuring any network-based MCP server (SSE, HTTP, WebSocket)" ;
+    oc:directiveContent "Always use HTTPS/WSS for remote MCP server connections, never HTTP or plain WS. Hardcoding tokens in configuration files or committing them to git is strictly prohibited." ;
+    oc:hasRationale "Using unencrypted connections exposes tokens and data to interception. Hardcoded tokens in config files are a common credential leak vector." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_c0f501cb a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing commands that use MCP tools" ;
+    oc:directiveContent "Pre-allow specific MCP tools in command frontmatter using the full mcp__plugin_<plugin>_<server>__<tool> naming format. Avoid wildcard patterns like mcp__plugin_*__* unless the command truly needs unrestricted access." ;
+    oc:hasRationale "Specific tool allowances enforce least-privilege security, prevent accidental destructive operations, and make the command's dependencies explicit for review." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_c54b4732 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before publishing or deploying a plugin with MCP integration" ;
+    oc:directiveContent "Before shipping an MCP-integrated plugin, validate: MCP configuration is valid JSON, server URLs are accessible, required environment variables are documented in README, tools appear in /mcp output, authentication works, and error cases are handled." ;
+    oc:hasRationale "MCP failures at runtime are opaque to users — pre-flight validation catches configuration errors, missing env vars, and connectivity issues before they affect end users." ;
+    oc:severityLevel "HIGH" .
+

@@ -1,0 +1,68 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_plugin_official_mcp_integration_authentication a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "authentication" ;
+    skos:broader "Authentication pattern guide" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/mcp-integration" ;
+    oc:contentHash "9f3ca61a857a15cc4c0dea9143365b0c49cae558690089dd61f6434186c702ce" ;
+    oc:differentia "covers all MCP server authentication methods including OAuth, bearer tokens, environment variables, and dynamic headers with security best practices for Claude Code plugins" ;
+    oc:extends oc:skill_anthropics_claude_plugin_official_mcp_integration ;
+    oc:handlesFailure oc:PermissionDenied ;
+    oc:hasArgumentHint "MCP server type or authentication method" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_0cfb7981,
+        oc:kn_80e42fba,
+        oc:kn_bca0222c,
+        oc:kn_d54fc92b,
+        oc:kn_e982b172 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "configure MCP server authentication",
+        "implement multi-tenant authentication for MCP",
+        "secure MCP server with token-based auth",
+        "set up OAuth for MCP server",
+        "troubleshoot MCP authentication issues" ;
+    oc:yieldsState oc:APIKeySet,
+        oc:SystemAuthenticated .
+
+oc:kn_0cfb7981 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When configuring MCP servers that use short-lived tokens, HMAC signing, or time-based authentication" ;
+    oc:directiveContent "Use the headersHelper script mechanism for tokens that change, expire, or require dynamic computation like HMAC signatures or JWTs, rather than static environment variables." ;
+    oc:hasRationale "Static headers cannot accommodate dynamic token refresh or request signing without manual user intervention" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_80e42fba a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When connecting to enterprise services that require client certificates" ;
+    oc:directiveContent "Mutual TLS (mTLS) is not directly supported in MCP configuration. Use a stdio server wrapper that handles mTLS internally as a workaround." ;
+    oc:hasRationale "MCP configuration only supports headers, environment variables, and OAuth — certificate-based auth must be handled by an intermediary process" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_bca0222c a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When configuring authentication for SSE or HTTP MCP servers that support OAuth" ;
+    oc:directiveContent "Prefer OAuth over token-based authentication when the MCP server supports it. Claude Code handles the entire OAuth 2.0 flow automatically including token storage and refresh." ;
+    oc:hasRationale "OAuth provides better security, automatic token lifecycle management, and requires no manual credential handling by users or plugins" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_d54fc92b a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing MCP server configuration in plugin manifest files" ;
+    oc:directiveContent "Never hardcode tokens, API keys, or credentials directly in plugin configuration JSON files. Always use environment variable substitution syntax like ${API_TOKEN}." ;
+    oc:hasRationale "Hardcoded credentials can be committed to version control, leaked in logs, and are impossible to rotate without code changes" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_e982b172 a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When MCP server returns 401 Unauthorized or 403 Forbidden errors" ;
+    oc:directiveContent "For authentication failures (401/403), check: token is set in environment, token hasn't expired, token has correct permissions, and header format includes 'Bearer' prefix. Use 'claude --debug' to inspect authentication flow." ;
+    oc:hasRationale "Most auth failures stem from missing/misconfigured environment variables, expired tokens, or incorrect header formatting — systematic checking resolves most issues" ;
+    oc:severityLevel "HIGH" .
+

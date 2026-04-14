@@ -1,0 +1,64 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_plugin_official_claude_automation_recommender_subagent_templates a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "subagent-templates" ;
+    skos:broader "Recommendation catalog" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/claude-automation-recommender" ;
+    oc:contentHash "7f9a107d8619ff96fea07d5a17da31b269cec0ee343e5a9ff643c0d6cb4ba944" ;
+    oc:dependsOnSkill oc:skill_claude_automation_recommender ;
+    oc:differentia "that provides templated subagent configurations with detection heuristics for automated codebase analysis tasks" ;
+    oc:extends oc:skill_anthropics_claude_plugin_official_claude_automation_recommender ;
+    oc:handlesFailure oc:InvalidInput ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_3ab47594,
+        oc:kn_7a30d694,
+        oc:kn_7beae50d,
+        oc:kn_90d2382d,
+        oc:kn_e394857b ;
+    oc:isUserInvocable false ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:CodebaseAnalyzed,
+        oc:DirectoryWritable ;
+    oc:resolvesIntent "configure code review subagents",
+        "generate subagent agent files",
+        "recommend subagents for codebase analysis",
+        "select appropriate Claude model for subagent tasks" ;
+    oc:yieldsState oc:SubagentConfigured .
+
+oc:kn_3ab47594 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When configuring tool access for any subagent" ;
+    oc:directiveContent "Grant subagents the minimum tool set needed for their task: read-only tools for reviews and analysis, add Write for code generation, add Bash only for migrations and testing that require execution." ;
+    oc:hasRationale "Principle of least privilege reduces the risk of unintended side effects and keeps subagent behavior predictable." .
+
+oc:kn_7a30d694 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When analyzing a codebase to recommend subagents" ;
+    oc:directiveContent "Match subagent recommendations to detected codebase patterns: auth/payment code → security-reviewer, few test files → test-writer, API routes → api-documenter, ORM/SQL usage → performance-analyzer, frontend frameworks → ui-reviewer, outdated packages → dependency-updater." ;
+    oc:hasRationale "Pattern-based detection ensures recommendations are relevant and actionable rather than generic." .
+
+oc:kn_7beae50d a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When generating or recommending subagent configurations" ;
+    oc:directiveContent "Subagents should be placed in .claude/agents/ as markdown files (e.g., code-reviewer.md, security-reviewer.md, test-writer.md)." ;
+    oc:hasRationale "Claude Code's agent discovery system scans the .claude/agents/ directory for available subagents." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_90d2382d a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When configuring security-reviewer or any security-scoped subagent" ;
+    oc:directiveContent "Security reviewer subagents should be configured with read-only tools (Read, Grep, Glob) only — never grant Write or Bash access." ;
+    oc:hasRationale "Read-only access prevents the security reviewer from accidentally modifying code or executing commands that could introduce vulnerabilities." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_e394857b a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When selecting a Claude model for any subagent" ;
+    oc:directiveContent "Use sonnet model as the default for most review and analysis subagents; use opus only for complex migrations and architecture tasks requiring deep reasoning; use haiku for simple repetitive checks." ;
+    oc:hasRationale "Sonnet provides the best balance of quality and speed for most code analysis tasks. Opus is overkill for routine reviews but necessary for multi-step migration reasoning." .
+

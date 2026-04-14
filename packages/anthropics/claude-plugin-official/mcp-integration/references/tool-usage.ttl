@@ -1,0 +1,89 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_plugin_official_mcp_integration_tool_usage a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "tool-usage" ;
+    skos:broader "Integration guide" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/mcp-integration" ;
+    oc:contentHash "8dd0005d7ba6cd2d24e72f9e6102c129b7445fc818e14656ad9ebaef6621a7a6" ;
+    oc:dependsOnSkill oc:skill_mcp_integration ;
+    oc:differentia "that teaches MCP tool invocation patterns, naming conventions, parameter handling, and performance optimization for Claude Code plugin commands and agents" ;
+    oc:extends oc:skill_anthropics_claude_plugin_official_mcp_integration ;
+    oc:handlesFailure oc:AuthenticationError,
+        oc:RateLimitExceeded,
+        oc:ToolCallFailed,
+        oc:ToolNotFound ;
+    oc:hasArgumentHint "command or agent configuration context" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_56d9e183,
+        oc:kn_ac210eda,
+        oc:kn_b6f47d08,
+        oc:kn_ba250f2b,
+        oc:kn_c9dc6881,
+        oc:kn_ec32ef39,
+        oc:kn_f5f2828d ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:MCPServerConfigured ;
+    oc:resolvesIntent "configure tool access in command frontmatter",
+        "discover available MCP tools",
+        "handle MCP tool errors",
+        "optimize MCP tool performance",
+        "use MCP tools in agents",
+        "use MCP tools in commands" ;
+    oc:yieldsState oc:ToolUsageConfigured,
+        oc:ToolsAccessible .
+
+oc:kn_56d9e183 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When writing command frontmatter that uses MCP tools" ;
+    oc:directiveContent "Pre-allow specific MCP tools in command frontmatter using the allowed-tools array. Only use wildcards (e.g., mcp__plugin_asana_asana__*) when the command truly needs access to all tools from a server." ;
+    oc:hasRationale "Explicit tool allowlists limit the blast radius of a command and ensure Claude only uses tools the developer intended" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_ac210eda a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before executing any MCP tool call in a command or agent" ;
+    oc:directiveContent "Before calling an MCP tool, validate all required parameters are present and correctly formatted. Check authentication status for the target service." ;
+    oc:hasRationale "Pre-validation prevents unnecessary API calls, provides better error messages, and avoids rate limiting" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_b6f47d08 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When handling MCP tool call failures in commands and agents" ;
+    oc:directiveContent "Never expose raw internal error details (e.g., 'MCP tool returned 403') to users. Instead provide actionable error messages with remediation steps." ;
+    oc:hasRationale "Raw errors confuse users and leak implementation details; actionable messages guide users toward resolution" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_ba250f2b a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When MCP tools are expected but not appearing or not functioning" ;
+    oc:directiveContent "If tools are not available, check: MCP server configured correctly, server connected via /mcp, tool names match exactly (case-sensitive), and restart Claude Code after config changes." ;
+    oc:hasRationale "Most tool availability issues stem from misconfiguration, naming mismatches, or stale connections that require a restart" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_c9dc6881 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When referencing any MCP tool in command frontmatter or agent instructions" ;
+    oc:directiveContent "Use the naming format mcp__plugin_<plugin-name>_<server-name>__<tool-name> to reference MCP tools in commands and agents. Tool names are case-sensitive." ;
+    oc:hasRationale "Consistent naming ensures Claude correctly resolves and calls the intended tool from the right MCP server" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_ec32ef39 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When choosing between implementing functionality as a command vs an agent" ;
+    oc:directiveContent "Agents have broader tool access than commands — they can use any tool Claude determines necessary without pre-allowed lists. Commands require explicit tool allowlists in frontmatter." ;
+    oc:hasRationale "Commands are scoped and predictable; agents are autonomous and flexible. Choose based on the needed level of tool access control." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_f5f2828d a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing command or agent workflows that make multiple MCP tool calls" ;
+    oc:directiveContent "Batch MCP queries with filters instead of making many individual queries. Cache expensive results for reuse. Make parallel calls when tools don't depend on each other." ;
+    oc:hasRationale "Batching, caching, and parallelism reduce latency, avoid rate limits, and improve user experience" ;
+    oc:severityLevel "MEDIUM" .
+

@@ -1,0 +1,92 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_plugin_official_build_mcpb_local_security a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "local-security" ;
+    skos:broader "Security methodology" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/build-mcpb" ;
+    oc:contentHash "7813aae1084e050537241956ba835adceb710804871894b53a9adcdeb3736241" ;
+    oc:differentia "that hardens local MCP servers against prompt injection, path traversal, command injection, and data leakage by applying defense-in-depth at the tool handler level" ;
+    oc:extends oc:skill_anthropics_claude_plugin_official_build_mcpb ;
+    oc:handlesFailure oc:CommandInjectionAttempt,
+        oc:PathTraversalDetected,
+        oc:ResourceLimitExceeded ;
+    oc:hasArgumentHint "(not directly invoked — applied as a reference during MCP server development)" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_3f737242,
+        oc:kn_4725f388,
+        oc:kn_61978501,
+        oc:kn_63409822,
+        oc:kn_9e854d84,
+        oc:kn_ab5b3b9f,
+        oc:kn_acf99290,
+        oc:kn_f3796e78 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:ToolInstalled ;
+    oc:resolvesIntent "apply security best practices when building MCPB packages",
+        "prevent command injection in MCP tool handlers",
+        "prevent path traversal in MCP tool handlers",
+        "secure a local MCP server against prompt injection attacks" ;
+    oc:yieldsState oc:SecurityHardened .
+
+oc:kn_3f737242 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When determining allowed filesystem boundaries for an MCP server" ;
+    oc:directiveContent "Check if the host supports roots/list before hardcoding a root directory from config. Use spec-native workspace boundaries when available, falling back to config or cwd. Validate every path against the allowed set regardless of source." ;
+    oc:hasRationale "Using host-provided roots ensures user-approved workspace boundaries rather than developer-assumed defaults, which is the spec-native approach to scope limitation" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_4725f388 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before releasing or distributing an MCPB package" ;
+    oc:directiveContent "Before shipping: verify every path parameter has containment checks, no shell-based exec calls exist, read/write tools are split with proper annotations, size caps are in place, secrets are never logged or returned, and adversarial inputs have been tested (../../etc/passwd, ; rm -rf ~, oversized files)." ;
+    oc:hasRationale "This checklist catches the most common and dangerous vulnerability classes in local MCP servers before they reach users" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_61978501 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When spawning processes from MCP tool handlers" ;
+    oc:directiveContent "Never pass user input through a shell (no exec() with template strings, no shell=True). Always use execFile with array-args (Node) or subprocess with array argv (Python). Validate each flag against an allowlist if the tool accepts flags." ;
+    oc:hasRationale "Shell interpolation of user input enables arbitrary command execution — the most catastrophic class of vulnerability in local servers" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_63409822 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When accepting any file path parameter in a tool handler" ;
+    oc:directiveContent "Never validate path traversal by checking if the string contains '..'. Always use resolve() + relative() (Node) or Path.resolve() + is_relative_to() (Python) to normalize and check containment against a root directory." ;
+    oc:hasRationale "String-based checks miss encoded sequences and symlink-based escapes; resolve+relative handles all normalization including symlinks and encoded traversal" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_9e854d84 a oc:KnowledgeNode,
+        oc:SecurityImplication ;
+    oc:appliesToContext "When handling API keys, tokens, or any secret material in tool handlers" ;
+    oc:directiveContent "Tool results flow into the chat transcript. Never log secrets, never return secrets in tool results, and redact sensitive values before returning. Config secrets marked sensitive: true are delivered via env var from the OS keychain." ;
+    oc:hasRationale "Anything returned in a tool result is visible to the user and any log export; secrets in transcripts create persistent disclosure vectors" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_ab5b3b9f a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When any tool handler returns file contents, listings, or search results" ;
+    oc:directiveContent "Cap all unbounded outputs: file reads (e.g., 1MB max), directory listing entry counts, and search result match counts. Return truncated results with a size notice rather than full content." ;
+    oc:hasRationale "Claude will request unbounded resources (e.g., a 4GB log file) without understanding the cost; caps prevent resource exhaustion and context window flooding" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_acf99290 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing the tool surface of an MCP server" ;
+    oc:directiveContent "Split read and write into separate tools. Default to read-only tools. Annotate with readOnlyHint: true on reads and destructiveHint: true on writes/deletes. Consider requiring user confirmation (elicitation) for destructive operations." ;
+    oc:hasRationale "Read-only tools cannot be weaponized into data loss regardless of what Claude is tricked into calling. Tool annotations let hosts surface appropriate permission UI (auto-approve reads, confirm destructive ops)" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_f3796e78 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When building any local MCP server packaged as MCPB" ;
+    oc:directiveContent "MCPB provides no sandbox, no permissions block, no filesystem scoping, and no network allowlist. The server process runs with the user's full privileges. Tool handlers are the only defense." ;
+    oc:hasRationale "Without platform-level enforcement, every tool must defensively validate its own inputs because prompt-injected content can make Claude call tools with malicious arguments" ;
+    oc:severityLevel "CRITICAL" .
+

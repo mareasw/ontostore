@@ -1,0 +1,63 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_plugin_official_plugin_settings_example_settings a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "example-settings" ;
+    skos:broader "template collection" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/plugin-settings" ;
+    oc:contentHash "f07209b6e2fb62d443ae07d01bc1674c6c741c352a04549bfa978e1f34b9769e" ;
+    oc:differentia "provides example YAML frontmatter configuration patterns for plugin settings files in .claude/ directory" ;
+    oc:extends oc:skill_anthropics_claude_plugin_official_plugin_settings ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_15a8cb0a,
+        oc:kn_698b12a5,
+        oc:kn_91dffa83,
+        oc:kn_c828ecde,
+        oc:kn_f9b2f2d6 ;
+    oc:isUserInvocable false ;
+    oc:nature "reference" ;
+    oc:resolvesIntent "configure plugin settings",
+        "create local settings file",
+        "implement feature flags in settings",
+        "set up multi-agent state files",
+        "understand plugin configuration format" .
+
+oc:kn_15a8cb0a a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing any plugin settings schema" ;
+    oc:directiveContent "Use the 'enabled' frontmatter key as the standard boolean toggle for activating/deactivating plugin behavior." ;
+    oc:hasRationale "A consistent 'enabled' field across all plugins allows uniform guard checks in hooks and predictable user experience." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_698b12a5 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When creating or reading any plugin configuration file" ;
+    oc:directiveContent "Plugin settings use YAML frontmatter in .local.md files under the .claude/ directory, separating configuration from documentation in the same file." ;
+    oc:hasRationale "YAML frontmatter provides machine-parseable config while the markdown body provides human-readable documentation, enabling both hooks and users to consume the same file." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_91dffa83 a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "After editing any .claude/*.local.md settings file" ;
+    oc:directiveContent "Settings changes require a Claude Code restart to take effect — hooks cannot be hot-swapped." ;
+    oc:hasRationale "Hook configurations are loaded at startup; in-memory state is not refreshed during a running session." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_c828ecde a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When writing bash hooks that consume plugin settings" ;
+    oc:directiveContent "Hooks should check for the existence of a settings file before attempting to read it, exiting gracefully (exit 0) if the file is not present." ;
+    oc:hasRationale "Plugins are optional — absence of a config file means the hook should be skipped cleanly rather than fail with an error." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_f9b2f2d6 a oc:KnowledgeNode,
+        oc:SecurityImplication ;
+    oc:appliesToContext "When setting up plugin configuration files in any project" ;
+    oc:directiveContent "All .claude/*.local.md and .claude/*.local.json files must be added to .gitignore to prevent committing user-local or sensitive configuration." ;
+    oc:hasRationale "Local settings may contain paths, credentials, or user-specific preferences that should not be shared with other contributors or pushed to remote repositories." ;
+    oc:severityLevel "CRITICAL" .
+

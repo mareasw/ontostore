@@ -1,0 +1,84 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_plugin_official_plugin_structure_advanced_plugin a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "advanced-plugin" ;
+    skos:broader "Reference example" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/plugin-structure" ;
+    oc:contentHash "3d24f5856048a94cb99fe2b8207d99f2f5d69325771b361d63ec73024290759c" ;
+    oc:differentia "that demonstrates enterprise-grade Claude Code plugin architecture with MCP server integration, multi-level component organization, shared libraries, security hooks, and environment-specific configuration" ;
+    oc:extends oc:skill_anthropics_claude_plugin_official_plugin_structure ;
+    oc:handlesFailure oc:InvalidInput ;
+    oc:hasArgumentHint "plugin use-case or complexity scenario (e.g., \"enterprise DevOps\", \"multi-environment deployment\")" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_10f91aac,
+        oc:kn_310aed19,
+        oc:kn_6c554176,
+        oc:kn_ad38d773,
+        oc:kn_bdea85ab,
+        oc:kn_becee06b,
+        oc:kn_d24f9efa ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "build enterprise-grade plugin with MCP integration",
+        "configure MCP servers in plugin",
+        "implement security hooks in plugin",
+        "organize complex plugin with multiple components",
+        "set up multi-level command and agent organization",
+        "understand advanced plugin architecture" ;
+    oc:yieldsState oc:DocumentCreated .
+
+oc:kn_10f91aac a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When a plugin has 5+ hook scripts spanning different concerns" ;
+    oc:directiveContent "Organize hook scripts by purpose (security/, quality/, workflow/) rather than by event type, and reference them via ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/<purpose>/<script>.sh in hooks.json." ;
+    oc:hasRationale "Purpose-based organization makes it easier to find, review, and audit security-critical scripts versus operational ones, and aligns with team ownership models" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_310aed19 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing plugins with 10+ components across multiple functional areas" ;
+    oc:directiveContent "Use multi-level directory organization for complex plugins: nest commands by function (ci/, monitoring/, admin/), agents by role (orchestration/, specialized/), and skills by domain (kubernetes-ops/, terraform-iac/, ci-cd-pipelines/)." ;
+    oc:hasRationale "Multi-level organization prevents flat directory sprawl and enables team ownership of specific subsystems, improving maintainability at enterprise scale" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_6c554176 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing security automation for plugins that handle sensitive infrastructure or deployments" ;
+    oc:directiveContent "Layer security hooks across the plugin lifecycle: use PreToolUse for secret scanning on writes, SessionStart for permission validation, PostToolUse for status tracking, and Stop for configuration auditing and team notification." ;
+    oc:hasRationale "Layered security hooks create defense-in-depth — catching secrets before they're written, validating permissions at session start, and auditing changes at session end covers multiple failure modes" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_ad38d773 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When multiple plugin components need common functionality like logging, authentication, or external service integration" ;
+    oc:directiveContent "Create a shared lib/ directory with core utilities (logger, config, auth), integrations (Slack, Datadog, PagerDuty), and helper functions (retry, validation) to reduce duplication across commands, agents, skills, and hooks." ;
+    oc:hasRationale "Shared libraries ensure consistent behavior across components, reduce code duplication, and make updates to shared logic (e.g., auth changes) a single-point modification" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_bdea85ab a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When writing any path reference inside plugin files (hooks.json, .mcp.json, SKILL.md, agent files)" ;
+    oc:directiveContent "Always use ${CLAUDE_PLUGIN_ROOT} for all intra-plugin path references in hook commands, MCP server args, and skill scripts — never hardcode absolute paths or use relative paths from working directory." ;
+    oc:hasRationale "Plugins install in different locations depending on OS, installation method, and user preferences. Hardcoded paths break portability across environments" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_becee06b a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When integrating multiple MCP servers into a plugin (e.g., kubernetes, terraform, github-actions)" ;
+    oc:directiveContent "Define MCP servers in a dedicated .mcp.json file (not inline in plugin.json) when the plugin has multiple servers, and use environment variable interpolation for secrets like KUBECONFIG, GITHUB_TOKEN, and AWS_REGION." ;
+    oc:hasRationale "External .mcp.json keeps the manifest lean, avoids embedding sensitive configuration in the manifest, and environment variable interpolation prevents hardcoding secrets" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_d24f9efa a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When building plugins that operate across multiple deployment environments" ;
+    oc:directiveContent "Use environment-specific config files (production.json, staging.json, development.json) in config/environments/ and reference templates in config/templates/ to separate configuration from code." ;
+    oc:hasRationale "Separating environment configuration from code prevents accidental production use of development settings and enables safe promotion through environments" ;
+    oc:severityLevel "MEDIUM" .
+

@@ -1,0 +1,119 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_plugin_official_agent_development_agent_creation_system_prompt a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "agent-creation-system-prompt" ;
+    skos:broader "Agent specification framework" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/agent-development" ;
+    oc:contentHash "35ea11d43d8462f7a281f9becd99e69fe1cdd9d80b4024cef7092a03f0f73ca1" ;
+    oc:dependsOnSkill oc:skill_agent_development ;
+    oc:differentia "that translates user requirements into precisely-tuned agent configurations via a structured system prompt, producing JSON output with identifier, whenToUse, and systemPrompt fields" ;
+    oc:extends oc:skill_anthropics_claude_plugin_official_agent_development ;
+    oc:handlesFailure oc:InvalidInput,
+        oc:ValidationError ;
+    oc:hasAllowedTool "Bash",
+        "Glob",
+        "Grep",
+        "Read",
+        "Write" ;
+    oc:hasArgumentHint "agent description or requirements (e.g., \"I need an agent that reviews pull requests for code quality issues\")" ;
+    oc:hasCategory "development" ;
+    oc:hasRequirement oc:req_154341f9,
+        oc:req_627d0bb4,
+        oc:req_af63fecd,
+        oc:req_d7e96392 ;
+    oc:impartsKnowledge oc:kn_2d620c95,
+        oc:kn_2eedc179,
+        oc:kn_34cbac5c,
+        oc:kn_394578ab,
+        oc:kn_7213aad8,
+        oc:kn_90a8fa25,
+        oc:kn_ab859d82,
+        oc:kn_b38f0bc2 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "convert agent specification to markdown file",
+        "create AI agent configuration",
+        "design agent triggering examples",
+        "generate agent system prompt",
+        "validate agent file structure" ;
+    oc:yieldsState oc:AgentConfigured,
+        oc:AgentFileCreated .
+
+oc:kn_2d620c95 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When extracting core intent for code-related agents" ;
+    oc:directiveContent "For code review agents, scope to recently written code by default — not the entire codebase — unless the user explicitly instructs otherwise. Consider project-specific context from CLAUDE.md files." ;
+    oc:hasRationale "Scoping to recent changes prevents overwhelming review output and aligns with the user's likely intent. CLAUDE.md context ensures agents align with established project patterns." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_2eedc179 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing any agent system prompt" ;
+    oc:directiveContent "Agent system prompts must follow a structured format: role description, core responsibilities, process steps, quality standards, output format, and edge cases — every instruction should add value." ;
+    oc:hasRationale "Structured prompts enable agents to operate autonomously with minimal additional guidance; vague or missing sections lead to unpredictable agent behavior." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_34cbac5c a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When debugging agent triggering issues" ;
+    oc:directiveContent "Generated agents may fail to trigger correctly if examples lack context blocks, commentary explaining triggering logic, or varied user message phrasings. Agent may also trigger too broadly if examples are generic." ;
+    oc:hasRationale "Triggering is the most common failure mode for generated agents. Well-crafted examples with full context and commentary are the primary mechanism for reliable activation." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_394578ab a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing the whenToUse/description field" ;
+    oc:directiveContent "Include 2-4 <example> blocks in the description covering: explicit request, implicit request, proactive trigger, and edge case. Always use the Agent tool in examples, not direct responses." ;
+    oc:hasRationale "Diverse triggering examples ensure the agent activates correctly across different user phrasings and proactive scenarios. Showing Agent tool usage in examples models correct invocation behavior." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_7213aad8 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing the agent systemPrompt field" ;
+    oc:directiveContent "System prompts must use second person ('You are...', 'You will...') and balance comprehensiveness with clarity. Target 500-5000 words: minimum viable ~500 words, standard ~1000-2000, comprehensive ~2000-5000. Avoid exceeding 10,000 words." ;
+    oc:hasRationale "Second person directly addresses the agent for maximum behavioral influence. Appropriate length ensures sufficient guidance without diminishing returns from excessive context." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_90a8fa25 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing agent responsibilities and process steps" ;
+    oc:directiveContent "Never use vague instructions like 'help the user' or 'provide assistance'. Every responsibility must be specific and actionable, and every process step must describe concrete actions." ;
+    oc:hasRationale "Generic instructions give the agent no operational guidance, resulting in inconsistent or unhelpful behavior. Specificity is the primary driver of agent quality." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_ab859d82 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before deploying any generated agent to the agents/ directory" ;
+    oc:directiveContent "Validate generated agent files using validate-agent.sh before deployment. Check: YAML frontmatter structure, required fields (name, description, model, color), field formats, system prompt length (20-10000 chars), and presence of <example> blocks." ;
+    oc:hasRationale "Validation catches structural errors, missing fields, and format violations that would cause runtime failures or incorrect agent behavior." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_b38f0bc2 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When creating the agent identifier field" ;
+    oc:directiveContent "Agent identifiers must use lowercase letters, numbers, and hyphens only, be 2-4 words joined by hyphens, and avoid generic terms like 'helper' or 'assistant'. Names must be 3-50 characters." ;
+    oc:hasRationale "Consistent naming conventions ensure agent identifiers are memorable, easy to type, and unambiguous in invocation contexts." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:req_154341f9 a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "LLM (Claude) for agent generation" .
+
+oc:req_627d0bb4 a oc:RequirementTool ;
+    oc:isOptional true ;
+    oc:requirementValue "Bash for running validate-agent.sh" .
+
+oc:req_af63fecd a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Understanding of agent frontmatter format (name, description, model, color, tools)" .
+
+oc:req_d7e96392 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Familiarity with <example> block syntax for triggering" .
+

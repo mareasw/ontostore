@@ -1,0 +1,102 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_plugin_official_plugin_structure_readme a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "readme" ;
+    skos:broader "Architectural reference guide" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/plugin-structure" ;
+    oc:contentHash "c7cb4931d6d71198cba6b552e4733b41940be56a65552a2ff7c5656750b95184" ;
+    oc:dependsOnSkill oc:skill_plugin_structure ;
+    oc:differentia "provides comprehensive Claude Code plugin directory layout, manifest configuration, and component organization patterns with progressive disclosure across core concepts, detailed references, and working examples" ;
+    oc:extends oc:skill_anthropics_claude_plugin_official_plugin_structure ;
+    oc:handlesFailure oc:InvalidInput ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_06c7f0b6,
+        oc:kn_0cb12132,
+        oc:kn_1c70a9c4,
+        oc:kn_1d7882be,
+        oc:kn_878add3b,
+        oc:kn_c3e8b565,
+        oc:kn_c8d92374,
+        oc:kn_f1356e49,
+        oc:kn_f680f11e ;
+    oc:isUserInvocable false ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "configure plugin.json manifest",
+        "create plugin scaffold",
+        "follow plugin naming conventions",
+        "organize plugin components",
+        "set up auto-discovery",
+        "troubleshoot plugin loading issues",
+        "understand plugin structure",
+        "use portable path references" ;
+    oc:yieldsState oc:PluginStructureUnderstood .
+
+oc:kn_06c7f0b6 a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "When configuring custom component paths in plugin.json" ;
+    oc:directiveContent "Custom paths in plugin.json supplement (do not replace) default directories. Components in both default locations AND custom paths will all load, and name conflicts between them will cause errors." ;
+    oc:hasRationale "The merge behavior loads from all sources simultaneously, so duplicate names across directories will conflict rather than override." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_0cb12132 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When planning or scaffolding a new plugin" ;
+    oc:directiveContent "Start with a minimal plugin (single command, minimal manifest) and expand to standard then advanced patterns as complexity grows. Add custom paths in manifest only when default auto-discovery is insufficient." ;
+    oc:hasRationale "Default auto-discovery handles standard layouts; premature optimization of directory structure adds complexity without benefit for simple plugins." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_1c70a9c4 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When naming any plugin component file or directory" ;
+    oc:directiveContent "Use kebab-case for all directory and file names: commands (e.g., code-review.md), agents (e.g., test-generator.md), skills (e.g., api-testing/), and plugin names in manifest." ;
+    oc:hasRationale "Consistent naming ensures reliable auto-discovery and prevents cross-platform issues with spaces or special characters." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_1d7882be a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "When validating a plugin before distribution or testing" ;
+    oc:directiveContent "Before considering a plugin complete, verify: plugin.json is in .claude-plugin/, all component directories are at root level, names use kebab-case, skill directories contain SKILL.md (not README.md), and all paths use ${CLAUDE_PLUGIN_ROOT}." ;
+    oc:hasRationale "These are the most common causes of plugins failing to load or components not being discovered." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_878add3b a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When referencing any file path within hook commands, MCP server args, script execution, or component files" ;
+    oc:directiveContent "Never hardcode absolute paths, use relative paths from working directory, or use home directory shortcuts in plugin files. Always use ${CLAUDE_PLUGIN_ROOT} for all intra-plugin references." ;
+    oc:hasRationale "Plugins install in different locations depending on user method (marketplace, local, npm), OS conventions, and preferences. Hardcoded paths break portability." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_c3e8b565 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When using hierarchical/categorized command structures with subdirectories" ;
+    oc:directiveContent "Claude Code does not support nested command discovery automatically. If organizing commands in subdirectories, explicitly list each subdirectory path in the manifest commands array." ;
+    oc:hasRationale "Auto-discovery only scans one level deep in the commands/ directory; nested directories require explicit manifest configuration." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_c8d92374 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When organizing plugin directory structure" ;
+    oc:directiveContent "All component directories (commands, agents, skills, hooks) MUST be at the plugin root level, NOT nested inside .claude-plugin/. Only the manifest goes inside .claude-plugin/." ;
+    oc:hasRationale "Auto-discovery scans specific root-level directories; placing components inside .claude-plugin/ prevents them from being discovered." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_f1356e49 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When structuring plugin documentation and skill content" ;
+    oc:directiveContent "Keep SKILL.md lean (~1600 words) focused on core concepts, move detailed information to references/ directory, and provide working examples in examples/ directory. Load deeper layers only as needed." ;
+    oc:hasRationale "Progressive disclosure manages context window usage efficiently — agents only load what the current task requires." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_f680f11e a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When creating or scaffolding any plugin" ;
+    oc:directiveContent "The plugin.json manifest MUST be located at .claude-plugin/plugin.json — this is the only valid location Claude Code recognizes for plugin discovery." ;
+    oc:hasRationale "Claude Code scans specifically for this path during plugin loading; any other location will cause the plugin to be invisible." ;
+    oc:severityLevel "CRITICAL" .
+

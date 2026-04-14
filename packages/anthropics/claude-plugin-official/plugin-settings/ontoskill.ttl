@@ -1,0 +1,100 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_plugin_official_plugin_settings a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "plugin-settings" ;
+    skos:broader "Configuration pattern" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/plugin-settings" ;
+    oc:contentHash "51360e7c368bc918dd3c85b62e1c9423547744879e025cc5c20f4cdb208fb3f1" ;
+    oc:dependsOnSkill oc:skill_plugin_structure ;
+    oc:differentia "uses .claude/plugin-name.local.md files with YAML frontmatter and markdown body to store per-project plugin settings and state" ;
+    oc:handlesFailure oc:FileNotFound,
+        oc:InvalidInput,
+        oc:PermissionDenied ;
+    oc:hasAllowedTool "AskUserQuestion",
+        "Bash",
+        "Read",
+        "Write" ;
+    oc:hasArgumentHint "plugin-name or settings query" ;
+    oc:hasCategory "development" ;
+    oc:hasDescription "This skill should be used when the user asks about \"plugin settings\", \"store plugin configuration\", \"user-configurable plugin\", \".local.md files\", \"plugin state files\", \"read YAML frontmatter\", \"per-project plugin settings\", or wants to make plugin behavior configurable. Documents the .claude/plugin-name.local.md pattern for storing plugin-specific configuration with YAML frontmatter and markdown content." ;
+    oc:hasName "plugin-settings" ;
+    oc:impartsKnowledge oc:kn_2f21d264,
+        oc:kn_36b990c7,
+        oc:kn_4bb7f425,
+        oc:kn_4f480c80,
+        oc:kn_542dba15,
+        oc:kn_77b2b05d,
+        oc:kn_865076e2,
+        oc:kn_c4f666f4 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:DirectoryWritable,
+        oc:FileExists ;
+    oc:resolvesIntent "create settings-driven hooks and commands",
+        "make plugin behavior configurable per-project",
+        "manage plugin state in .local.md files",
+        "read YAML frontmatter from local settings",
+        "store plugin configuration" ;
+    oc:yieldsState oc:DocumentCreated .
+
+oc:kn_2f21d264 a oc:FallbackStrategy,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When settings file is absent or fields are optional" ;
+    oc:directiveContent "Provide sensible defaults when the settings file doesn't exist or a field is missing, rather than failing." ;
+    oc:hasRationale "Plugins should work out-of-the-box without requiring users to create settings files; defaults enable graceful degradation." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_36b990c7 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before relying on parsed settings values in hook or command logic" ;
+    oc:directiveContent "Always validate file existence, frontmatter marker count (must have at least 2 '---' lines), and field types before using settings values." ;
+    oc:hasRationale "Invalid or corrupt settings files can cause unexpected behavior; validation catches issues early." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_4bb7f425 a oc:KnowledgeNode,
+        oc:SecurityImplication ;
+    oc:appliesToContext "When creating or documenting settings files" ;
+    oc:directiveContent "Settings files must be added to .gitignore (e.g., .claude/*.local.md) and set with user-only permissions (chmod 600) to prevent leaking configuration." ;
+    oc:hasRationale "Settings may contain sensitive data like paths, tokens, or internal coordination details that should not be committed or shared." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_4f480c80 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When parsing YAML frontmatter fields" ;
+    oc:directiveContent "Use sed/grep for simple scalar fields and yq for complex structures like nested objects and arrays." ;
+    oc:hasRationale "Simple sed/grep parsing avoids external dependencies while yq handles complex YAML correctly when available." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_542dba15 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When reading settings from hooks or commands" ;
+    oc:directiveContent "Always implement the quick-exit pattern: check if the settings file exists first, then check the enabled flag before parsing any fields." ;
+    oc:hasRationale "Avoids errors when plugin isn't configured and keeps hooks fast by skipping unnecessary file I/O." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_77b2b05d a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing any plugin that needs user-configurable settings or state persistence" ;
+    oc:directiveContent "Always use the .claude/plugin-name.local.md file path pattern with YAML frontmatter for structured config and markdown body for prompts or additional context." ;
+    oc:hasRationale "Provides a consistent, human-readable, gitignore-friendly pattern that works with standard bash parsing tools." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_865076e2 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "After creating or modifying any .local.md settings file" ;
+    oc:directiveContent "Settings changes require a Claude Code restart to take effect; hooks cannot be hot-swapped within a session." ;
+    oc:hasRationale "Hooks are loaded at session start; changes to settings files mid-session will not be picked up until restart." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_c4f666f4 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When updating settings file fields programmatically" ;
+    oc:directiveContent "Never use sed -i for in-place file updates on settings files; always use temp file + atomic mv to prevent corruption." ;
+    oc:hasRationale "Non-atomic updates can corrupt the file if the process is interrupted mid-write." ;
+    oc:severityLevel "CRITICAL" .
+

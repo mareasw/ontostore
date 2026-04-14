@@ -1,0 +1,106 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_plugin_official_build_mcp_server_remote_http_scaffold a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "remote-http-scaffold" ;
+    skos:broader "MCP server scaffold" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/build-mcp-server" ;
+    oc:contentHash "bd5d49e1f4caa895221b7e539bd7cd23ad2c7e2dff5e7cf0bf4b976ebbb178e4" ;
+    oc:dependsOnSkill oc:skill_build_mcp_server ;
+    oc:differentia "provides minimal working Streamable-HTTP MCP server templates in TypeScript (Express) and Python (FastMCP) with deployment and testing guidance" ;
+    oc:extends oc:skill_anthropics_claude_plugin_official_build_mcp_server ;
+    oc:handlesFailure oc:InvalidInput,
+        oc:NetworkTimeout,
+        oc:PermissionDenied ;
+    oc:hasArgumentHint "language preference (typescript or python)" ;
+    oc:hasCategory "development" ;
+    oc:hasRequirement oc:req_1a5b433b,
+        oc:req_71f5fa5d,
+        oc:req_eba9bfc4,
+        oc:req_fad69764 ;
+    oc:impartsKnowledge oc:kn_1bbb2221,
+        oc:kn_28df0881,
+        oc:kn_636148c6,
+        oc:kn_7fc7b1d4,
+        oc:kn_a8c5a802,
+        oc:kn_abf42cff,
+        oc:kn_f6b6e229 ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "bootstrap an MCP server in TypeScript or Python",
+        "create an MCP server with HTTP transport",
+        "scaffold a remote streamable-http MCP server",
+        "test and deploy a remote MCP server" ;
+    oc:yieldsState oc:MCPServerDeployed,
+        oc:MCPServerRunning .
+
+oc:kn_1bbb2221 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When wrapping APIs with 50+ endpoints as MCP tools" ;
+    oc:directiveContent "Prefer the search-then-execute pattern (2 tools: search_actions + execute_action) over registering 50+ individual tools when wrapping large API surfaces." ;
+    oc:hasRationale "Registering too many tools bloats the context window and degrades model performance. The catalog pattern lets the model discover actions on demand." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_28df0881 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before deploying a remote HTTP MCP server to production" ;
+    oc:directiveContent "Before deploying, verify: POST /mcp responds to initialize with capabilities, tools/list returns complete schemas, errors return structured MCP errors (not HTML 500s), CORS headers are set, Origin header is validated, MCP-Protocol-Version is honored, and secrets come from env vars." ;
+    oc:hasRationale "Skipping these checks leads to broken client connections, security vulnerabilities (DNS rebinding), and unhelpful error responses that break MCP clients." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_636148c6 a oc:KnowledgeNode,
+        oc:SecurityImplication ;
+    oc:appliesToContext "When configuring the /mcp POST endpoint" ;
+    oc:directiveContent "Validate the Origin header on /mcp endpoint to prevent DNS rebinding attacks — this is a spec MUST, not optional." ;
+    oc:hasRationale "Without Origin validation, malicious websites can make cross-origin requests to the MCP server, potentially exfiltrating data or triggering unwanted actions." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_7fc7b1d4 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When choosing between stateless and stateful StreamableHTTP transport modes" ;
+    oc:directiveContent "Use stateless mode (fresh transport per request, sessionIdGenerator: undefined) for most API-wrapping servers. Only use stateful sessions when tools genuinely share state across calls." ;
+    oc:hasRationale "Stateless mode is simpler, more scalable, and sufficient for the vast majority of MCP server use cases. Stateful adds complexity for rare coordination needs." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_a8c5a802 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When writing tool descriptions and docstrings" ;
+    oc:directiveContent "Set tool docstrings/descriptions to be terse and action-oriented — they land in Claude's context window verbatim." ;
+    oc:hasRationale "Verbose descriptions waste context tokens. Every character in a tool description is sent with every request, directly impacting token economy." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_abf42cff a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When guiding users to connect a remote MCP server to Claude Desktop or Claude.ai" ;
+    oc:directiveContent "Claude Desktop and Claude.ai remote servers must be configured via Settings → Connectors → Add custom connector, NOT via claude_desktop_config.json — remote servers configured there are ignored." ;
+    oc:hasRationale "The legacy JSON config file only supports local stdio servers. Remote HTTP servers require the new connector configuration flow." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_f6b6e229 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When creating an MCP server with interdependent tools" ;
+    oc:directiveContent "Include an instructions field on the server with guidance like 'Prefer search_items before calling get_item directly — IDs aren't guessable' to steer tool-use behavior." ;
+    oc:hasRationale "The instructions field is sent to the model and acts as a system prompt for tool selection, preventing inefficient tool call patterns." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:req_1a5b433b a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "express and zod (for TypeScript variant)" .
+
+oc:req_71f5fa5d a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "Node.js 20+ or Python 3.10+" .
+
+oc:req_eba9bfc4 a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "MCP Inspector (npx @modelcontextprotocol/inspector)" .
+
+oc:req_fad69764 a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "@modelcontextprotocol/sdk (TypeScript) or fastmcp (Python)" .
+

@@ -1,0 +1,78 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_plugin_official_claude_automation_recommender_hooks_patterns a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "hooks-patterns" ;
+    skos:broader "Pattern catalog" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/claude-automation-recommender" ;
+    oc:contentHash "7b6e91b53aa0f1ed471fd66e177de17a88c1d6620ce95f5c8e8cdfebd20d939e" ;
+    oc:differentia "that maps detected project configuration files to recommended Claude Code hooks for auto-formatting, type checking, protection, testing, and notifications" ;
+    oc:extends oc:skill_anthropics_claude_plugin_official_claude_automation_recommender ;
+    oc:handlesFailure oc:ConfigNotFound,
+        oc:ToolNotInstalled ;
+    oc:hasArgumentHint "project-directory or detected-config-files" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_02cc3008,
+        oc:kn_2c2282cc,
+        oc:kn_2d0e9870,
+        oc:kn_a41c3991,
+        oc:kn_e97eb037,
+        oc:kn_ec5bcac0 ;
+    oc:isUserInvocable false ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:CodebaseAnalyzed,
+        oc:EnvironmentReady ;
+    oc:resolvesIntent "configure auto-formatting hooks",
+        "configure notification hooks for Claude Code events",
+        "configure protection hooks for sensitive files",
+        "detect project tooling and suggest appropriate hooks",
+        "recommend hooks for Claude Code automation",
+        "set up test runner hooks" ;
+    oc:yieldsState oc:HooksRecommended,
+        oc:SettingsConfigured .
+
+oc:kn_02cc3008 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When configuring auto-formatting hooks" ;
+    oc:directiveContent "Use PostToolUse hooks on Edit/Write for auto-formatting and linting (Prettier, ESLint, Black, Ruff, gofmt, rustfmt) so code stays formatted without manual intervention." ;
+    oc:hasRationale "PostToolUse hooks fire after every file edit, ensuring formatting consistency is maintained passively." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_2c2282cc a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When analyzing a codebase to recommend hooks" ;
+    oc:directiveContent "Hook recommendations must be detection-driven: only suggest hooks when the corresponding tool configuration file exists in the project (e.g., .prettierrc → Prettier hook, tsconfig.json → TypeScript type-check hook)." ;
+    oc:hasRationale "Recommending hooks for tools not installed in the project creates noise and broken configurations." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_2d0e9870 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When configuring notification hooks" ;
+    oc:directiveContent "Notification hooks use specific matchers (permission_prompt, idle_prompt, auth_success, elicitation_dialog) to filter events. Each matcher triggers on a distinct Claude Code event type." ;
+    oc:hasRationale "Using the wrong matcher results in hooks that never fire or fire on unintended events." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_a41c3991 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When configuring protection hooks" ;
+    oc:directiveContent "Use PreToolUse hooks to block Edit/Write on sensitive paths (.env files, secrets, .git/) and lock files (package-lock.json, Cargo.lock, etc.) to prevent accidental corruption." ;
+    oc:hasRationale "Blocking edits to secrets and lock files prevents security exposure and package resolution breakage that would require manual recovery." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_e97eb037 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When the detected tooling does not match any known pattern" ;
+    oc:directiveContent "When a tool or framework is not listed in the known patterns catalog, use web search to find appropriate hooks before recommending anything." ;
+    oc:hasRationale "The pattern catalog covers common tools but cannot be exhaustive; web search ensures recommendations remain accurate and relevant." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_ec5bcac0 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When generating hook configuration output" ;
+    oc:directiveContent "Hooks are configured in .claude/settings.json. Recommend creating the .claude/ directory if it does not already exist before writing hook configurations." ;
+    oc:hasRationale "The settings file path is convention-bound; failing to ensure the directory exists will cause configuration to be lost or rejected." .
+
