@@ -1,0 +1,86 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_financial_services_plugin_equity_research a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "equity-research" ;
+    skos:broader "Equity research analysis framework" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/financial-services-plugin/equity-research" ;
+    oc:contentHash "6d104ffb67dedebe64e4d5e02d1b5fe87b54fe4ee58dd8ed1f9075806162aab7" ;
+    oc:differentia "Synthesizes IBES consensus estimates, company fundamentals, historical prices, and macroeconomic data into structured investment research snapshots with buy/hold/sell recommendations" ;
+    oc:handlesFailure oc:InvalidInput,
+        oc:NetworkTimeout,
+        oc:PermissionDenied ;
+    oc:hasAllowedTool "qa_company_fundamentals",
+        "qa_historical_equity_price",
+        "qa_ibes_consensus",
+        "qa_macroeconomic",
+        "tscc_historical_pricing_summaries" ;
+    oc:hasArgumentHint "company ticker or stock name" ;
+    oc:hasCategory "finance" ;
+    oc:hasDescription "Generate comprehensive equity research snapshots combining analyst consensus estimates, company fundamentals, historical prices, and macroeconomic context. Use when researching stocks, comparing estimates to actuals, analyzing company financials, assessing equity valuations, or building investment cases." ;
+    oc:hasName "equity-research" ;
+    oc:impartsKnowledge oc:kn_285ad136,
+        oc:kn_4f71c8d9,
+        oc:kn_61b8b5a4,
+        oc:kn_6b2436d0,
+        oc:kn_abc42a51,
+        oc:kn_b4362295,
+        oc:kn_ed206721 ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:APIKeySet ;
+    oc:resolvesIntent "analyze company financials and valuation",
+        "assess equity valuations with macro context",
+        "build investment cases with fair value ranges",
+        "compare analyst consensus estimates to actuals",
+        "generate equity research snapshots",
+        "research stocks and equity investments" ;
+    oc:yieldsState oc:DocumentCreated .
+
+oc:kn_285ad136 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "Always, as the final output format" ;
+    oc:directiveContent "Output must include standardized tables: Consensus Estimates, Financials Summary (3-5 years with trend), Valuation Summary, and an Investment Thesis section with recommendation, fair value range, bull/bear cases, catalysts, and conviction level." ;
+    oc:hasRationale "Standardized tabular format enables quick comparison across multiple research snapshots and ensures completeness" .
+
+oc:kn_4f71c8d9 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "Always, when executing an equity research analysis" ;
+    oc:directiveContent "Chain tools in a fixed 6-step sequence: consensus estimates → historical fundamentals → price performance → recent price detail → macro context → synthesize. Each step builds on the prior to form a complete investment narrative." ;
+    oc:hasRationale "Structured tool chaining ensures no critical data dimension is missed and the final synthesis has all required inputs" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_61b8b5a4 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When calling qa_ibes_consensus" ;
+    oc:directiveContent "Pull FY1 and FY2 consensus estimates (EPS, Revenue, EBITDA, DPS) with analyst count and dispersion. Always note dispersion as it signals consensus uncertainty." ;
+    oc:hasRationale "Dispersion among analyst estimates is a leading indicator of earnings surprise risk — high dispersion means wider potential outcomes" .
+
+oc:kn_6b2436d0 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When building the Valuation Summary table" ;
+    oc:directiveContent "Compute forward P/E from current price divided by consensus EPS (not trailing P/E). Present valuation metrics relative to sector peers and historical ranges." ;
+    oc:hasRationale "Forward multiples based on consensus estimates are more relevant for investment decisions than backward-looking trailing multiples" .
+
+oc:kn_abc42a51 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When synthesizing research findings into the final output" ;
+    oc:directiveContent "Every piece of data must connect to an investment thesis. The key question is always: where might consensus be wrong? Data without narrative connection is noise." ;
+    oc:hasRationale "Equity research is thesis-driven; raw data tables without interpretive context provide no actionable value to investors" .
+
+oc:kn_b4362295 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When calling qa_macroeconomic and writing macro context" ;
+    oc:directiveContent "Do not pull macro data without connecting it to the specific company's sector and operating environment. Generic macro commentary adds no value." ;
+    oc:hasRationale "Macro data is only useful insofar as it represents a tailwind or headwind for the specific company being analyzed" .
+
+oc:kn_ed206721 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before starting the tool chaining workflow" ;
+    oc:directiveContent "Verify that the target company has IBES coverage (analyst estimates exist) and that fundamentals data is available for at least 2 fiscal years before proceeding with full analysis." ;
+    oc:hasRationale "Companies without analyst coverage or sufficient fundamental history cannot produce a meaningful consensus-based research snapshot" .
+

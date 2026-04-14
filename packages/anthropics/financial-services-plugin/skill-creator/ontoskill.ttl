@@ -1,0 +1,103 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_financial_services_plugin_skill_creator a oc:ExecutableSkill,
+        oc:Skill ;
+    dcterms:identifier "skill-creator" ;
+    skos:broader "Meta-skill guide" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/financial-services-plugin/skill-creator" ;
+    oc:contentHash "3875339e1383a9c345dc2f15c005ef445c94b33db830031cec2238308373f5f6" ;
+    oc:dependsOnSkill oc:skill_skill_development ;
+    oc:differentia "that provides a structured methodology and tooling for creating, validating, and packaging modular Claude skills with bundled resources" ;
+    oc:handlesFailure oc:FileNotFound,
+        oc:InvalidInput,
+        oc:PermissionDenied ;
+    oc:hasArgumentHint "skill-name, skill requirements or description" ;
+    oc:hasCategory "development" ;
+    oc:hasDescription "Guide for creating effective skills. This skill should be used when users want to create a new skill (or update an existing skill) that extends Claude's capabilities with specialized knowledge, workflows, or tool integrations." ;
+    oc:hasName "skill-creator" ;
+    oc:hasPayload oc:payload_3875339e1383a9c3 ;
+    oc:impartsKnowledge oc:kn_03bc30c0,
+        oc:kn_596494b1,
+        oc:kn_6816f022,
+        oc:kn_8397b4f9,
+        oc:kn_9e91def3,
+        oc:kn_cc504742,
+        oc:kn_d2ad9a0d,
+        oc:kn_d4583cd4 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "create a new skill",
+        "design skill architecture",
+        "package a skill for distribution",
+        "plan skill resources",
+        "update an existing skill",
+        "validate a skill structure" ;
+    oc:yieldsState oc:DocumentCreated,
+        oc:FileDownloaded .
+
+oc:kn_03bc30c0 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When deciding how to encode a skill's procedural knowledge" ;
+    oc:directiveContent "Match the degree of freedom to task fragility: low freedom (specific scripts) for fragile/consistency-critical operations, medium freedom (pseudocode with parameters) for preferred patterns with acceptable variation, high freedom (text instructions) when multiple approaches are valid." ;
+    oc:hasRationale "Over-constraining flexible tasks wastes tokens; under-constraining fragile tasks invites errors. The bridge-vs-field metaphor: narrow bridges need guardrails, open fields allow many routes." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_596494b1 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing or editing any SKILL.md" ;
+    oc:directiveContent "Keep SKILL.md body under 500 lines and prefer concise examples over verbose explanations. The context window is a shared, finite resource — every token must justify its cost." ;
+    oc:hasRationale "Skills share the context window with system prompts, conversation history, and other skills. Bloated skills degrade overall agent performance." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_6816f022 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before distributing or sharing a skill" ;
+    oc:directiveContent "Always run `scripts/package_skill.py` which auto-validates frontmatter format, naming conventions, description completeness, and directory structure before packaging." ;
+    oc:hasRationale "The packaging script catches common errors (missing fields, bad names, invalid YAML) that would break skill activation." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_8397b4f9 a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "When running init_skill.py or package_skill.py" ;
+    oc:directiveContent "The packaging script creates a .skill file (ZIP format) in the current or specified output directory. The init script creates a directory tree with example placeholder files in scripts/, references/, and assets/." ;
+    oc:hasRationale "Understanding what files are created and where helps avoid surprises and ensures proper cleanup of placeholder files." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_9e91def3 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When deciding what files to include in a skill directory" ;
+    oc:directiveContent "Do NOT create extraneous documentation files like README.md, CHANGELOG.md, QUICK_REFERENCE.md, or INSTALLATION_GUIDE.md. A skill should only contain files that directly support its functionality." ;
+    oc:hasRationale "Auxiliary documentation adds clutter and confusion. Skills are for AI agent consumption, not human-facing project documentation." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_cc504742 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing skill structure and content organization" ;
+    oc:directiveContent "Use progressive disclosure: metadata always loaded (~100 words), SKILL.md body loaded on trigger (<5k words), bundled resources loaded only as needed. Reference files from SKILL.md and describe when to read them." ;
+    oc:hasRationale "Three-level loading prevents context bloat while ensuring deep domain knowledge remains accessible when needed." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_d2ad9a0d a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When writing YAML frontmatter for SKILL.md" ;
+    oc:directiveContent "Frontmatter must contain only `name` and `description` fields. Put ALL triggering/when-to-use information in the description, not in the body — the body is only loaded after the skill triggers." ;
+    oc:hasRationale "Claude reads frontmatter to decide when to activate the skill. Body content is invisible at trigger time, so 'when to use' sections in the body are useless." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_d4583cd4 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When organizing reference files and directory structure" ;
+    oc:directiveContent "Avoid deeply nested references — keep references one level deep from SKILL.md. For reference files longer than 100 lines, include a table of contents at the top." ;
+    oc:hasRationale "Deep nesting makes resources undiscoverable. A TOC lets Claude assess scope without reading the entire file." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:payload_3875339e1383a9c3 a oc:ExecutionPayload ;
+    oc:code "python scripts/init_skill.py <skill-name> --path <output-directory>" ;
+    oc:executor "python" ;
+    oc:timeout 30000 .
+

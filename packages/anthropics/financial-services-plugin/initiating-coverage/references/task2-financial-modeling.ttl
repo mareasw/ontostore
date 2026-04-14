@@ -1,0 +1,115 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_financial_services_plugin_initiating_coverage_task2_financial_modeling a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "task2-financial-modeling" ;
+    skos:broader "Financial model builder" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/financial-services-plugin/initiating-coverage" ;
+    oc:contentHash "8e2d203984b37953fd0dc0e9b2dd23ed5aadafd68037e8ff29a0f86d3d3cecc0" ;
+    oc:differentia "Extracts historical financials from SEC filings and builds comprehensive 6-tab Excel models with 3-statement projections, revenue breakdowns by product/geography/channel, operating expense detail, DCF inputs, and bull/base/bear scenarios for equity research initiation coverage" ;
+    oc:extends oc:skill_anthropics_financial_services_plugin_initiating_coverage ;
+    oc:handlesFailure oc:DataReconciliationFailed,
+        oc:FileNotFound,
+        oc:InvalidInput ;
+    oc:hasArgumentHint "company name or ticker, with optional pre-extracted historical financials file" ;
+    oc:hasCategory "finance" ;
+    oc:impartsKnowledge oc:kn_0c690ee2,
+        oc:kn_260846a8,
+        oc:kn_56a69f4a,
+        oc:kn_88478904,
+        oc:kn_8a8d18e3,
+        oc:kn_968b66c3,
+        oc:kn_a395dd7a,
+        oc:kn_d1ed6377,
+        oc:kn_eddab3c1,
+        oc:kn_fbd5d19a ;
+    oc:isUserInvocable false ;
+    oc:nature "Work" ;
+    oc:requiresState oc:CompanyFinancialDataAvailable ;
+    oc:resolvesIntent "build 3-statement financial model",
+        "build balance sheet model",
+        "build cash flow model",
+        "build financial model",
+        "build income statement model",
+        "create equity research financial model",
+        "create financial scenarios",
+        "create revenue projections by product and geography",
+        "extract historical financials from SEC filings",
+        "generate DCF inputs for valuation" ;
+    oc:yieldsState oc:DCFInputsReady,
+        oc:FinancialModelCreated .
+
+oc:kn_0c690ee2 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When constructing the Scenarios tab" ;
+    oc:directiveContent "Build three scenarios (Bull/Base/Bear) with clearly differentiated assumptions for revenue CAGR, margins, and CapEx, and document the rationale for each scenario's assumptions." ;
+    oc:hasRationale "Scenario analysis demonstrates analytical rigor and provides a range of outcomes that supports more informed investment decisions in the initiation report." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_260846a8 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When constructing the Revenue Model tab" ;
+    oc:directiveContent "Revenue modeling is the most critical and detailed component — build granular breakdowns by product/category (20-30 rows), geography (15-20 rows), and channel, showing absolute values, % of total, and YoY growth for each line." ;
+    oc:hasRationale "Revenue is the top-line driver of the entire model; granular revenue breakdowns enable accurate segment analysis, mix-shift detection, and more defensible projection assumptions." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_56a69f4a a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "After building both product and geographic revenue breakdowns in the Revenue Model tab" ;
+    oc:directiveContent "Revenue by product total must equal revenue by geography total, which must equal total revenue across all tabs — verify this cross-tab reconciliation after completing the Revenue Model." ;
+    oc:hasRationale "If revenue totals do not tie across breakdowns, the Income Statement and all downstream calculations will be inconsistent and unreliable." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_88478904 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "At the very beginning of Task 2 before any model construction" ;
+    oc:directiveContent "Before starting financial modeling, verify access to 3-5 years of financial data: for public companies confirm 10-K and recent 10-Qs from SEC EDGAR, for private companies gather available statements or estimates." ;
+    oc:hasRationale "Without sufficient historical data, the model cannot establish reliable trend baselines for projections, rendering all forward-looking estimates speculative." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_8a8d18e3 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When building any formula in projected years of the model" ;
+    oc:directiveContent "Never hardcode numbers in projection formulas — all projected values must flow from assumption inputs so changing a single assumption cascades through the entire model." ;
+    oc:hasRationale "Hardcoded numbers destroy model dynamism and create reconciliation errors when assumptions change, making the model unreliable for scenario analysis." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_968b66c3 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "After completing the Balance Sheet tab for all historical and projected years" ;
+    oc:directiveContent "The balance sheet must balance for every year — Total Assets must equal Total Liabilities plus Equity. Include a balance check row that flags imbalances in red." ;
+    oc:hasRationale "An unbalanced balance sheet indicates a fundamental error in the model's accounting logic, invalidating all downstream outputs including DCF and scenarios." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_a395dd7a a oc:KnowledgeNode,
+        oc:PostFlightValidation ;
+    oc:appliesToContext "After completing all 6 tabs and before delivering the model" ;
+    oc:directiveContent "After completing the model, run a 10-point quality check: verify formulas update dynamically, balance sheet balances all years, no circular references exist, no hardcoded projection numbers, cross-sheet links work, revenue totals tie across tabs, and color coding is consistent." ;
+    oc:hasRationale "A single formula error or broken link can cascade through the model and produce materially wrong valuation outputs in downstream Tasks 3-5." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_d1ed6377 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When formatting and structuring all tabs in the financial model" ;
+    oc:directiveContent "Include named ranges for key inputs/outputs, grouped rows for collapsibility, and clear units labeling ($ thousands vs $ millions) throughout the model." ;
+    oc:hasRationale "Named ranges improve formula readability and reduce errors; grouped rows enable reviewers to navigate complexity; unit labels prevent scale misinterpretation." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_eddab3c1 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When executing the full financial modeling task from start to finish" ;
+    oc:directiveContent "Follow the 9-step sequential workflow: (1) Extract historicals, (2) Model revenue, (3) Model operating expenses, (4) Build income statement, (5) Build cash flow statement, (6) Build balance sheet, (7) Build DCF inputs, (8) Build scenarios, (9) Quality check." ;
+    oc:hasRationale "This sequence ensures each statement builds on prior outputs — revenue feeds income statement, income statement feeds cash flow, and all three feed balance sheet, DCF inputs, and scenarios." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_fbd5d19a a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When formatting any cell in the financial model" ;
+    oc:directiveContent "Use industry-standard color coding: blue text for hardcoded inputs, black text for formulas and calculations, green text for links to other sheets, red text for errors or flags that must be resolved." ;
+    oc:hasRationale "Color coding enables instant visual auditing — anyone reviewing the model can distinguish assumptions from calculations and identify broken links or errors." ;
+    oc:severityLevel "HIGH" .
+

@@ -1,0 +1,97 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_financial_services_plugin_bond_futures_basis a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "bond-futures-basis" ;
+    skos:broader "Fixed income analysis skill" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/financial-services-plugin/bond-futures-basis" ;
+    oc:contentHash "db01887af17867593b72fe610a3ae4fcdd6c6fea2eb22430a87705f4cc71fc6a" ;
+    oc:differentia "that chains MCP pricing tools to compute bond futures basis, identify cheapest-to-deliver bonds, and evaluate basis trade opportunities via implied repo rate comparison" ;
+    oc:handlesFailure oc:DataUnavailable,
+        oc:InvalidInput,
+        oc:NetworkTimeout ;
+    oc:hasAllowedTool "bond_future_price",
+        "bond_price",
+        "credit_curve",
+        "interest_rate_curve",
+        "tscc_historical_pricing_summaries" ;
+    oc:hasArgumentHint "bond futures contract RIC (e.g., FGBL#, TYc1)" ;
+    oc:hasCategory "finance" ;
+    oc:hasDescription "Analyze the bond futures basis by pricing futures, identifying the cheapest-to-deliver, and comparing with yield curves to assess delivery option value and basis trading opportunities. Use when analyzing bond futures, computing the basis, identifying CTD bonds, calculating implied repo rates, or evaluating basis trades." ;
+    oc:hasName "bond-futures-basis" ;
+    oc:hasRequirement oc:req_0fc0e134,
+        oc:req_375ffcaa,
+        oc:req_4a69e819,
+        oc:req_706c011e,
+        oc:req_dea72182 ;
+    oc:impartsKnowledge oc:kn_098f0a8d,
+        oc:kn_5f2353f1,
+        oc:kn_902afa0f,
+        oc:kn_f3da64d7,
+        oc:kn_f4163310 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:APIKeySet ;
+    oc:resolvesIntent "analyze bond futures basis",
+        "assess delivery option value",
+        "calculate gross and net basis",
+        "compute implied repo rate",
+        "evaluate basis trade opportunities",
+        "identify cheapest-to-deliver bond" ;
+    oc:yieldsState oc:BasisAnalysisComplete .
+
+oc:kn_098f0a8d a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When computing the implied repo vs market repo comparison in basis assessment" ;
+    oc:directiveContent "Use the short-end rate from interest_rate_curve as a repo rate proxy when comparing implied repo to market repo." ;
+    oc:hasRationale "The short end of the government yield curve approximates the financing rate available in repo markets for the delivery period, providing a market-consistent benchmark." .
+
+oc:kn_5f2353f1 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When adding historical context to the basis analysis" ;
+    oc:directiveContent "Use tscc_historical_pricing_summaries for a 3-month daily history of both the future and the CTD bond to establish basis trend, volatility, and current percentile context." ;
+    oc:hasRationale "Historical basis context is essential for determining whether current basis levels are extreme or normal, informing trade sizing and risk assessment." .
+
+oc:kn_902afa0f a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When executing the tool chaining workflow" ;
+    oc:directiveContent "Let MCP tools compute prices and analytics; the agent should interpret and present results rather than performing manual calculations." ;
+    oc:hasRationale "MCP pricing tools have access to real-time market data and established pricing models. Manual computation by the agent risks errors and stale data." .
+
+oc:kn_f3da64d7 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When performing any bond futures basis analysis" ;
+    oc:directiveContent "Always price the future first to identify CTD and delivery basket, then price the CTD bond separately, compute basis metrics, and finally overlay yield curve context. Never skip this ordering." ;
+    oc:hasRationale "The CTD bond is determined by the future's pricing output, so the bond_price call depends on bond_future_price results. The sequential chaining ensures data consistency across the analysis." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_f4163310 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When interpreting basis metrics for trade recommendations" ;
+    oc:directiveContent "The net basis (BNOC) represents embedded delivery option value. Compare implied repo to market repo to determine if futures are rich (implied repo < market repo) or cheap (implied repo > market repo)." ;
+    oc:hasRationale "Net basis isolates the delivery option from carry. The implied repo vs market repo comparison is the core rich/cheap signal for basis traders." .
+
+oc:req_0fc0e134 a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "bond_future_price" .
+
+oc:req_375ffcaa a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "bond_price" .
+
+oc:req_4a69e819 a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "tscc_historical_pricing_summaries" .
+
+oc:req_706c011e a oc:RequirementTool ;
+    oc:isOptional true ;
+    oc:requirementValue "credit_curve" .
+
+oc:req_dea72182 a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "interest_rate_curve" .
+

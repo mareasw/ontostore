@@ -1,0 +1,136 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_financial_services_plugin_tear_sheet a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "tear-sheet" ;
+    skos:broader "Document generator" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/financial-services-plugin/tear-sheet" ;
+    oc:contentHash "56aeddebabbd51fc3f0a159c415273bd8526b9fdcd17631bf26e4c615ae80e5c" ;
+    oc:differentia "Produces audience-specific company tear sheets (DOCX) by retrieving live financial data from S&P Capital IQ via Kensho MCP tools, computing derived metrics, and formatting with precise professional styling across four audience templates (Equity Research, IB/M&A, Corp Dev, Sales/BD)" ;
+    oc:handlesFailure oc:FileNotFound,
+        oc:InvalidInput,
+        oc:NetworkTimeout,
+        oc:PermissionDenied ;
+    oc:hasAllowedTool "Bash",
+        "MCP (S&P Global / Kensho)",
+        "Read",
+        "Write" ;
+    oc:hasArgumentHint "company name or ticker, audience type (equity-research|ib-ma|corp-dev|sales-bd), optional comparable companies, optional page length preference" ;
+    oc:hasCategory "finance" ;
+    oc:hasDescription "Generate professional company tear sheets using S&P Capital IQ data via the Kensho LLM-ready API MCP server. Use this skill whenever the user asks for a tear sheet, company one-pager, company profile, fact sheet, company snapshot, or company overview document — especially when they mention a specific company name or ticker. Also trigger when users ask for equity research summaries, M&A company profiles, corporate development target profiles, sales/BD meeting prep documents, or any concise single-company financial summary. This skill supports four audience types: equity research, investment banking/M&A, corporate development, and sales/business development. If the user doesn't specify an audience, ask. Works for both public and private companies." ;
+    oc:hasName "tear-sheet" ;
+    oc:impartsKnowledge oc:kn_08fb4ce8,
+        oc:kn_23e87e88,
+        oc:kn_38c570ea,
+        oc:kn_687c7fd4,
+        oc:kn_6eadcbce,
+        oc:kn_7d221ef4,
+        oc:kn_9a08f1d6,
+        oc:kn_befa35b1,
+        oc:kn_cd1549e4,
+        oc:kn_e3dc863f,
+        oc:kn_ef8a817a,
+        oc:kn_f67eb56f ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:APIKeySet,
+        oc:NetworkAvailable,
+        oc:SystemAuthenticated ;
+    oc:resolvesIntent "analyze company financials with audience-specific framing",
+        "build M&A company profile",
+        "create company one-pager or profile",
+        "create corporate development target profile",
+        "generate company fact sheet or snapshot",
+        "generate company tear sheet",
+        "prepare sales or BD meeting briefing document",
+        "produce equity research snapshot" ;
+    oc:yieldsState oc:DocumentCreated .
+
+oc:kn_08fb4ce8 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When considering management team sections for any tear sheet type" ;
+    oc:directiveContent "No S&P Global tool returns executive or management data. Do not populate management names, titles, or biographical details from training data. If a management section appears in a template, omit it entirely." ;
+    oc:hasRationale "Management data from training will be stale. Including outdated executive information in a professional deliverable is worse than omitting it." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_23e87e88 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "For every tear sheet generation request" ;
+    oc:directiveContent "Execute the workflow in strict order: (1) Identify inputs including audience type, (2) Read audience-specific reference file, (3) Pull data via MCP tools with immediate file writes, (3b) Calculate derived metrics with validation, (3c) Verify data files, (4) Format as DOCX. Do not skip or reorder steps." ;
+    oc:hasRationale "The sequential order ensures data integrity — validation happens before document generation, and intermediate files serve as the authoritative data source." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_38c570ea a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before and during data retrieval steps (Step 3)" ;
+    oc:directiveContent "Always create /tmp/tear-sheet/ directory at the start and write data to structured intermediate files immediately after each MCP query. These files — not conversation context — are the single source of truth for every number in the document." ;
+    oc:hasRationale "Data persisted to disk is protected from context degradation in long conversations. Relying on conversation memory for financial data risks stale or corrupted values." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_687c7fd4 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When populating valuation and trading comps sections" ;
+    oc:directiveContent "Always include forward (NTM) multiples when available from the tools. Forward multiples are the primary valuation reference for equity research, IB/M&A, and corp dev audiences. Never show only trailing multiples when forward data is available." ;
+    oc:hasRationale "Analysts and bankers value companies on forward earnings. Showing only trailing multiples when forward data exists is a significant professional gap." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_6eadcbce a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "At the start of every tear sheet request" ;
+    oc:directiveContent "If the user doesn't specify an audience type, ask before proceeding. The four audience types (Equity Research, IB/M&A, Corp Dev, Sales/BD) produce fundamentally different documents with different sections, query plans, and formatting." ;
+    oc:hasRationale "Generating the wrong audience type wastes time and produces a document that doesn't match the user's professional context." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_7d221ef4 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When any financial data point is missing from MCP tool responses" ;
+    oc:directiveContent "Never fill data gaps with training knowledge — S&P Global tools are the only source for financial data. Label unknowns as 'N/A' or 'Not disclosed' rather than estimating or fabricating values." ;
+    oc:hasRationale "Training knowledge may be stale or wrong; tear sheets are professional deliverables where incorrect data destroys credibility and could influence investment decisions." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_9a08f1d6 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When querying historical financials for any audience type" ;
+    oc:directiveContent "Always pull 4 fiscal years of financial data even though only 3 are displayed. The fourth (earliest) year is needed to compute YoY revenue growth for the first displayed year. Without it, the earliest year's growth rate shows 'N/A' which looks like missing data." ;
+    oc:hasRationale "A single 'N/A' in a growth column undermines the professional appearance of the entire tear sheet, especially for equity research and IB audiences." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_befa35b1 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing Business Description, Business Overview, or Company Overview sections" ;
+    oc:directiveContent "Never paste the CIQ company summary verbatim into any tear sheet. Rewrite every narrative section for the specific audience type — concise and thesis-oriented for equity research, pitchbook prose for IB, product-focused for Corp Dev, plain language for Sales/BD." ;
+    oc:hasRationale "The CIQ summary is an input, not an output. Different audiences need fundamentally different framing of the same company information." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_cd1549e4 a oc:KnowledgeNode,
+        oc:PostFlightValidation ;
+    oc:appliesToContext "After all data collection and before DOCX generation (Step 3b)" ;
+    oc:directiveContent "In Step 3b, validate all derived metrics against raw data: verify margins = component/revenue, growth rates = (current-prior)/prior, segment totals sum to revenue, and EV/Revenue ≈ stated multiple. Flag failures as 'N/A' rather than publishing incorrect numbers." ;
+    oc:hasRationale "Quiet math errors in a tear sheet destroy credibility. Professional audiences (bankers, analysts, corp dev teams) will notice inconsistencies." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_e3dc863f a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When generating the DOCX document in Step 4" ;
+    oc:directiveContent "Use the provided component functions (createHeaderBanner, createSectionHeader, createTable, createBulletList, createFooter) exactly as specified. Do not write custom docx-js styling code. These functions enforce correct shading, border, and formatting conventions." ;
+    oc:hasRationale "Custom styling code is the primary source of rendering bugs — black backgrounds (ShadingType.SOLID), excessive whitespace from separate rule paragraphs, inconsistent bullet styles, and missing footers." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_ef8a817a a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When generating tear sheets for private companies" ;
+    oc:directiveContent "For private companies, skip stock price, 52-week range, beta, stock performance, consensus estimates, and trading comps. Lean into business overview, relationships, ownership structure, and whatever financials are available. Note 'Private Company' prominently in the header." ;
+    oc:hasRationale "Private company data is sparser in CIQ. Attempting to fill public-company-specific sections with unavailable data produces a document full of 'N/A' fields." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_f67eb56f a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When computing '% of Total' columns in segment tables" ;
+    oc:directiveContent "Use consolidated revenue as the denominator for segment percentage calculations, not the sum of segment revenues. The sum of segments often exceeds consolidated revenue due to intersegment eliminations." ;
+    oc:hasRationale "Using the sum of segments as the denominator produces percentages that don't align with the total revenue figure shown elsewhere, creating visible inconsistency." ;
+    oc:severityLevel "MEDIUM" .
+

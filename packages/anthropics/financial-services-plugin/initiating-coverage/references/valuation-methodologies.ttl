@@ -1,0 +1,111 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_financial_services_plugin_initiating_coverage_valuation_methodologies a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "valuation-methodologies" ;
+    skos:broader "Reference methodology guide" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/financial-services-plugin/initiating-coverage" ;
+    oc:contentHash "fed84dc2b45794cf2abd682db8f346820d61c316cbcd058ec386ea51351f1633" ;
+    oc:differentia "that provides comprehensive theoretical and procedural guidance on the three primary equity research valuation methodologies: DCF, Trading Comparables, and Precedent Transactions, including formulas, step-by-step processes, sensitivity analysis, and reconciliation frameworks" ;
+    oc:extends oc:skill_anthropics_financial_services_plugin_initiating_coverage ;
+    oc:handlesFailure oc:InsufficientComparableCompanies,
+        oc:InvalidDCFAssumptions,
+        oc:MissingFinancialData ;
+    oc:hasCategory "finance" ;
+    oc:hasRequirement oc:req_22a3f72f,
+        oc:req_7cdefd96,
+        oc:req_7db1114b,
+        oc:req_e3cc027e ;
+    oc:impartsKnowledge oc:kn_10ba6985,
+        oc:kn_13e2c37d,
+        oc:kn_4fb247af,
+        oc:kn_55723288,
+        oc:kn_8cdef59a,
+        oc:kn_aed40d24,
+        oc:kn_c2eb3cd5 ;
+    oc:isUserInvocable false ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:BalanceSheetDataAvailable,
+        oc:FinancialModelComplete,
+        oc:ProjectedFCFAvailable ;
+    oc:resolvesIntent "analyze precedent transactions for valuation",
+        "build valuation sensitivity tables",
+        "calculate WACC and terminal value",
+        "conduct trading comparables analysis",
+        "determine equity value and price per share",
+        "perform DCF valuation analysis",
+        "reconcile multiple valuation methodologies",
+        "select appropriate valuation multiples by sector" ;
+    oc:yieldsState oc:InvestmentRecommendationSet,
+        oc:PriceTargetDetermined,
+        oc:ValuationAnalysisComplete .
+
+oc:kn_10ba6985 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When projecting financials for a DCF model" ;
+    oc:directiveContent "Double-counting growth by projecting high revenue growth without corresponding CapEx and NWC investment, and ignoring cyclicality by not normalizing earnings for cyclical businesses." ;
+    oc:hasRationale "Growth requires investment. Omitting corresponding CapEx/NWC inflates FCF projections. Cyclical companies at peak earnings will appear undervalued if cyclicality is ignored." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_13e2c37d a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When building or auditing a DCF model" ;
+    oc:directiveContent "Never use net income instead of unlevered free cash flow in a DCF. Always use UFCF = EBIT(1-Tax Rate) + D&A - CapEx - Change in NWC, and match it with WACC as the discount rate." ;
+    oc:hasRationale "Using the wrong cash flow definition (e.g., net income or levered FCF) with WACC produces inconsistent and misleading valuations" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_4fb247af a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When reconciling valuation methodologies into a final price target" ;
+    oc:directiveContent "Always present a valuation range (Bear/Base/Bull) rather than a point estimate, and weight multiple methodologies: DCF (40-60%), Trading Comps (25-40%), Precedent Transactions (15-25%)." ;
+    oc:hasRationale "A single point estimate creates false precision. Weighted ranges from multiple methods provide a more defensible and institutionally credible valuation." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_55723288 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When calculating terminal value in a DCF using the perpetuity growth method" ;
+    oc:directiveContent "Terminal growth rate must not exceed long-term GDP growth (typically capped at 2-3%). Terminal value should represent less than 60-70% of total enterprise value." ;
+    oc:hasRationale "Exceeding GDP growth implies the company will eventually outgrow the entire economy, which is unsustainable. If terminal value exceeds 70% of EV, projections are likely too short." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_8cdef59a a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When completing any valuation analysis for an equity research report" ;
+    oc:directiveContent "Always perform 2-way sensitivity analysis on WACC vs. Terminal Growth Rate, and include statistical summary (max/75th/median/25th/min) in comparable company tables." ;
+    oc:hasRationale "Sensitivity tables demonstrate the range of outcomes and are expected in institutional research. Statistical summaries ensure comps analysis is rigorous and not cherry-picked." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_aed40d24 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When choosing primary multiples for comparable company analysis" ;
+    oc:directiveContent "Select valuation multiples based on company characteristics: EV/Revenue for unprofitable/high-growth, EV/EBITDA for capital-intensive, P/E for stable profitable companies, and sector-specific multiples (P/B for banks, EV/Production for oil & gas)." ;
+    oc:hasRationale "Different multiples capture different aspects of value. Using an inappropriate multiple (e.g., P/E for an unprofitable company) produces meaningless comparisons." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_c2eb3cd5 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before beginning Task 3 (Valuation Analysis) in the initiating-coverage workflow" ;
+    oc:directiveContent "Before starting valuation analysis, verify: financial model with 5-year projected FCF exists, projected revenue/EBITDA are available, balance sheet data (debt, cash, diluted shares) is accessible, and scenario parameters (Bull/Base/Bear) are defined." ;
+    oc:hasRationale "Valuation analysis cannot proceed without a complete financial model. Starting without prerequisites results in incomplete work and wasted effort." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:req_22a3f72f a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Financial statement analysis and free cash flow calculation" .
+
+oc:req_7cdefd96 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Comparable company selection criteria and multiple calculation" .
+
+oc:req_7db1114b a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "DCF theory and formulas including WACC, terminal value, and discounting" .
+
+oc:req_e3cc027e a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Precedent transaction identification and control premium analysis" .
+

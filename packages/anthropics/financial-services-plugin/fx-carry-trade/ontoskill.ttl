@@ -1,0 +1,109 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_financial_services_plugin_fx_carry_trade a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "fx-carry-trade" ;
+    skos:broader "FX analysis skill" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/financial-services-plugin/fx-carry-trade" ;
+    oc:contentHash "0eac23e8d4b485a95b4960b03e777a96dc58b4f1351f8ac4586dfd94355c6b68" ;
+    oc:differentia "combines spot rates, forward curves, vol surfaces, and historical data to evaluate carry trade opportunities with risk-adjusted metrics" ;
+    oc:handlesFailure oc:InsufficientPricingData,
+        oc:InvalidCurrencyPair,
+        oc:MarketDataUnavailable ;
+    oc:hasAllowedTool "fx_forward_curve",
+        "fx_forward_price",
+        "fx_spot_price",
+        "fx_vol_surface",
+        "interest_rate_curve",
+        "tscc_historical_pricing_summaries" ;
+    oc:hasArgumentHint "currency-pair (e.g., 'USD/JPY', 'AUD/JPY') and optional target tenor" ;
+    oc:hasCategory "finance" ;
+    oc:hasDescription "Evaluate FX carry trade opportunities by combining spot rates, forward points, interest rate differentials, volatility surface analysis, and historical price trends. Use when analyzing carry trades, comparing FX forward curves, assessing carry-to-vol ratios, or evaluating currency pair opportunities." ;
+    oc:hasName "fx-carry-trade" ;
+    oc:hasRequirement oc:req_40860d2c,
+        oc:req_52f2dda2,
+        oc:req_674f5c33,
+        oc:req_76fc1ceb,
+        oc:req_d106e722,
+        oc:req_f9043252 ;
+    oc:impartsKnowledge oc:kn_1557abdb,
+        oc:kn_4802b3da,
+        oc:kn_7921d8cc,
+        oc:kn_93e18bc4,
+        oc:kn_e726767f ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:NetworkAvailable,
+        oc:SystemAuthenticated ;
+    oc:resolvesIntent "analyze FX carry trade opportunities",
+        "assess carry trade risk via volatility surface analysis",
+        "compare FX forward curves for optimal tenor selection",
+        "compute carry-to-vol ratios across tenors",
+        "evaluate currency pair carry attractiveness" ;
+    oc:yieldsState oc:CarryProfileGenerated,
+        oc:CarryTradeRecommended,
+        oc:VolSurfaceAssessed .
+
+oc:kn_1557abdb a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Always, when synthesizing carry trade recommendations" ;
+    oc:directiveContent "The carry-to-vol ratio (annualized carry / ATM implied vol) is the primary risk-adjusted metric for evaluating carry trade attractiveness." ;
+    oc:hasRationale "A high carry-to-vol ratio indicates a trade earns significant carry per unit of volatility risk, enabling apples-to-apples comparison across pairs and tenors." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_4802b3da a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before starting the tool chaining workflow" ;
+    oc:directiveContent "Verify that all six MCP pricing tools (spot, forward, forward curve, vol surface, historical, interest rate curve) are available before beginning a carry analysis." ;
+    oc:hasRationale "The analysis requires chaining multiple tool calls in sequence; a missing tool will produce an incomplete carry profile and unreliable recommendation." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_7921d8cc a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Before issuing any carry trade recommendation" ;
+    oc:directiveContent "Never recommend a carry trade without overlaying the vol surface and checking historical spot trends for directional context." ;
+    oc:hasRationale "Carry trades are short-volatility by nature; rising vol is the primary risk signal. Ignoring vol surface skew and historical spot direction leads to incomplete risk assessment." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_93e18bc4 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When computing carry at each tenor to identify the sweet-spot tenor" ;
+    oc:directiveContent "Always map the full forward curve to find the optimal tenor before computing carry. Use the two-phase list-then-calculate approach for forward curves." ;
+    oc:hasRationale "Carry term structure is rarely flat; the optimal tenor may differ from the obvious choice. Mapping the full curve reveals where risk-adjusted carry is maximized." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_e726767f a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When calling fx_spot_price for any currency pair" ;
+    oc:directiveContent "Note the bid-ask spread from spot pricing as a liquidity indicator — wide spreads signal emerging-market or illiquid pairs that may have execution risk." ;
+    oc:hasRationale "Bid-ask spread is a quick proxy for market liquidity and transaction cost, directly impacting the realizable carry." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:req_40860d2c a oc:RequirementAPI ;
+    oc:isOptional false ;
+    oc:requirementValue "fx_forward_price MCP tool" .
+
+oc:req_52f2dda2 a oc:RequirementAPI ;
+    oc:isOptional false ;
+    oc:requirementValue "tscc_historical_pricing_summaries MCP tool" .
+
+oc:req_674f5c33 a oc:RequirementAPI ;
+    oc:isOptional false ;
+    oc:requirementValue "fx_spot_price MCP tool" .
+
+oc:req_76fc1ceb a oc:RequirementAPI ;
+    oc:isOptional false ;
+    oc:requirementValue "fx_vol_surface MCP tool" .
+
+oc:req_d106e722 a oc:RequirementAPI ;
+    oc:isOptional true ;
+    oc:requirementValue "interest_rate_curve MCP tool" .
+
+oc:req_f9043252 a oc:RequirementAPI ;
+    oc:isOptional false ;
+    oc:requirementValue "fx_forward_curve MCP tool" .
+

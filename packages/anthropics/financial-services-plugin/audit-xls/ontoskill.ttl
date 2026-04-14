@@ -1,0 +1,70 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_financial_services_plugin_audit_xls a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "audit-xls" ;
+    skos:broader "Spreadsheet audit methodology" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/financial-services-plugin/audit-xls" ;
+    oc:contentHash "12cc3668bc0257fa49f722b2e75c4f9c75053a6baf79e068f68cae644445af81" ;
+    oc:differentia "that scopes formula-level error detection and financial-model integrity checks (BS balance, cash tie-out, roll-forwards) with severity-ranked findings reports" ;
+    oc:handlesFailure oc:FileNotFound,
+        oc:InvalidInput,
+        oc:PermissionDenied ;
+    oc:hasArgumentHint "scope: selection | sheet | model" ;
+    oc:hasCategory "finance" ;
+    oc:hasDescription "Audit a spreadsheet for formula accuracy, errors, and common mistakes. Scopes to a selected range, a single sheet, or the entire model (including financial-model integrity checks like BS balance, cash tie-out, and logic sanity). Triggers on \"audit this sheet\", \"check my formulas\", \"find formula errors\", \"QA this spreadsheet\", \"sanity check this\", \"debug model\", \"model check\", \"model won't balance\", \"something's off in my model\", \"model review\"." ;
+    oc:hasName "audit-xls" ;
+    oc:impartsKnowledge oc:kn_082dafa1,
+        oc:kn_34d652a0,
+        oc:kn_d7d181cf,
+        oc:kn_eed35cd0,
+        oc:kn_f7486308 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:FileExists ;
+    oc:resolvesIntent "QA a spreadsheet before sharing",
+        "audit spreadsheet formulas for errors",
+        "check financial model integrity",
+        "debug financial models that won't balance",
+        "find formula mistakes in Excel" ;
+    oc:yieldsState oc:SpreadsheetAudited .
+
+oc:kn_082dafa1 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When auditing any financial model (MODEL scope)" ;
+    oc:directiveContent "BS balance must be verified first — if Total Assets ≠ Total Liabilities + Equity, everything downstream is suspect and no other checks matter until this is fixed." ;
+    oc:hasRationale "An unbalanced balance sheet means the fundamental accounting equation is broken, invalidating all derived calculations including cash flow and valuation." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_34d652a0 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When running formula-level checks at any scope" ;
+    oc:directiveContent "Hardcoded numbers inside formulas (e.g., =A1*1.05) are the #1 source of silent bugs in financial models — search aggressively for them." ;
+    oc:hasRationale "Hardcoded values embedded in formulas are invisible to downstream users, cannot be updated centrally, and produce wrong outputs without any visible error flags." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_d7d181cf a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When auditing cash flow statements, working capital changes, and debt schedules" ;
+    oc:directiveContent "Sign convention errors (positive vs negative for cash outflows) are extremely common in financial models — check them deliberately." ;
+    oc:hasRationale "Inconsistent sign conventions cause cascading errors in net cash calculations and are notoriously difficult to spot by visual inspection alone." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_eed35cd0 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "After completing the audit and presenting the findings table" ;
+    oc:directiveContent "Never modify the spreadsheet without asking the user first — always report findings and let the user request fixes." ;
+    oc:hasRationale "The audit role is read-only and advisory; making changes could introduce new errors or destroy intentional overrides without user awareness." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_f7486308 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When beginning any spreadsheet audit engagement" ;
+    oc:directiveContent "Scope determines audit depth: selection for quick formula checks, sheet for one-tab review, model for full financial-model integrity including BS balance, cash tie-out, roll-forwards, and model-type-specific bug patterns." ;
+    oc:hasRationale "Proper scoping prevents wasting time on deep model checks when the user only needs a quick formula review, and ensures thoroughness when the stakes are high." ;
+    oc:severityLevel "MEDIUM" .
+

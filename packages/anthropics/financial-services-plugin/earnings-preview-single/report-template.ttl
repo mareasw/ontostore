@@ -1,0 +1,89 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_financial_services_plugin_earnings_preview_single_report_template a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "report-template" ;
+    skos:broader "HTML report template" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/financial-services-plugin/earnings-preview-single" ;
+    oc:contentHash "8e2000571c615a4b6b66c85d487007ee2bf2e7fd3463103070eb6b174e6a64be" ;
+    oc:differentia "provides the complete self-contained HTML structure, CSS, Chart.js configuration, and formatting conventions for generating a single-company earnings preview report with interactive charts, data tables, and a traceable appendix" ;
+    oc:extends oc:skill_anthropics_financial_services_plugin_earnings_preview_single ;
+    oc:handlesFailure oc:ChartDataError,
+        oc:ReportGenerationFailed ;
+    oc:hasAllowedTool "Bash",
+        "Read",
+        "Write" ;
+    oc:hasArgumentHint "ticker (inherited from parent skill)" ;
+    oc:hasCategory "finance" ;
+    oc:impartsKnowledge oc:kn_30690486,
+        oc:kn_56c82bd6,
+        oc:kn_5c7cbd5d,
+        oc:kn_d3868fd7,
+        oc:kn_d68e6c30,
+        oc:kn_d943a331,
+        oc:kn_de110b64 ;
+    oc:isUserInvocable false ;
+    oc:nature "Template" ;
+    oc:requiresState oc:CalculationsVerified,
+        oc:IntermediateFilesLoaded,
+        oc:ResearchDataCollected ;
+    oc:resolvesIntent "create professional equity research layout",
+        "format data tables with color-coded financial metrics",
+        "generate HTML earnings preview report",
+        "render financial charts with Chart.js" ;
+    oc:yieldsState oc:EarningsPreviewReady,
+        oc:HTMLReportGenerated .
+
+oc:kn_30690486 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When creating any chart in the report" ;
+    oc:directiveContent "Use ONLY the pre-built Chart.js helper functions (createRevEpsChart, createMarginChart, createRevGrowthChart, createAnnotatedPriceChart, createCompPerfChart, createPEChart). Do NOT write custom inline Chart.js code. Each chart must be in its own <script> tag wrapped in try-catch." ;
+    oc:hasRationale "Pre-built helpers are debugged and consistent. Try-catch isolation ensures a bug in one chart does not prevent other charts from rendering." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_56c82bd6 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Always — this is mandatory for every report generated" ;
+    oc:directiveContent "The AI disclaimer 'Analysis is AI-generated — please confirm all outputs' must appear in exactly 3 places: the header banner, the footer banner, and as the first line of the appendix." ;
+    oc:hasRationale "Regulatory and ethical compliance requires prominent disclosure that the analysis is AI-generated and outputs need human verification." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_5c7cbd5d a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When writing any content in the report body HTML" ;
+    oc:directiveContent "Every factual claim in the report body must be wrapped in <a href=\"#ref-N\" class=\"data-ref\"> hyperlinks pointing to the corresponding Appendix row. Numbers, qualitative statements, and blockquotes all require traceable source links." ;
+    oc:hasRationale "Hyperlinked claims enable auditability and let readers verify every data point against its source derivation in the appendix." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_d3868fd7 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When populating the revenue growth bar chart" ;
+    oc:directiveContent "The Revenue Growth y/y chart (Figure 3) must only include quarters where both current and year-ago data exist — typically 4 bars, NOT 8. Do not fabricate growth data for quarters without a year-ago comparator." ;
+    oc:hasRationale "Showing 8 bars when only 4 have valid y/y comparisons misleads readers with fabricated base-period data." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_d68e6c30 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When generating the HTML report output" ;
+    oc:directiveContent "The report must be a single self-contained HTML file with embedded CSS, Chart.js loaded from CDN, print-friendly @media print styles, and responsive layout targeting 4-5 printed pages." ;
+    oc:hasRationale "Self-containment ensures the report can be shared as a single file, opened offline, and printed reliably without external dependencies beyond the CDN charts." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_d943a331 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing any text content in the report" ;
+    oc:directiveContent "Never use emojis anywhere in the report — headings, tables, chart labels, or body text. This is a professional equity research document." ;
+    oc:hasRationale "Emojis undermine the professional credibility expected in institutional equity research deliverables." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_de110b64 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When formatting any financial metric in the report" ;
+    oc:directiveContent "Format numbers consistently: Revenue $B with 1 decimal, EPS with 2 decimals, margins with 1 decimal and %, growth rates with +/- sign and 1 decimal, P/E ratios with 1 decimal and 'x' suffix. Color positive values green (pos class), negative red (neg class)." ;
+    oc:hasRationale "Consistent number formatting and color coding provides instant visual clarity on directionality of financial metrics." ;
+    oc:severityLevel "MEDIUM" .
+

@@ -1,0 +1,143 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_financial_services_plugin_comps_analysis a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "comps-analysis" ;
+    skos:broader "financial analysis tool" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/financial-services-plugin/comps-analysis" ;
+    oc:contentHash "057787cefb96a8817109239cd24f633124f22cc00c3c598e396cddc6b4fb17b8" ;
+    oc:dependsOnSkill oc:skill_xlsx_manipulation ;
+    oc:differentia "builds institutional-grade comparable company analyses with operating metrics, valuation multiples, and statistical benchmarking in spreadsheet format" ;
+    oc:extends oc:skill_financial_modeling ;
+    oc:handlesFailure oc:DataNotFound,
+        oc:InvalidInput,
+        oc:PermissionDenied ;
+    oc:hasAllowedTool "Bash",
+        "Edit",
+        "Glob",
+        "Read",
+        "Write" ;
+    oc:hasArgumentHint "company names or tickers, industry/sector" ;
+    oc:hasCategory "finance" ;
+    oc:hasDescription """Build institutional-grade comparable company analyses with operating metrics, valuation multiples, and statistical benchmarking in Excel/spreadsheet format.
+
+**Perfect for:**
+- Public company valuation (M&A, investment analysis)
+- Benchmarking performance vs. industry peers
+- Pricing IPOs or funding rounds
+- Identifying valuation outliers (over/under-valued)
+- Supporting investment committee presentations
+- Creating sector overview reports
+
+**Not ideal for:**
+- Private companies without comparable public peers
+- Highly diversified conglomerates
+- Distressed/bankrupt companies
+- Pre-revenue startups
+- Companies with unique business models""" ;
+    oc:hasName "comps-analysis" ;
+    oc:impartsKnowledge oc:kn_06d32c10,
+        oc:kn_28d9fa71,
+        oc:kn_3b1fc321,
+        oc:kn_6b007cc6,
+        oc:kn_88e25dec,
+        oc:kn_a72ff2b5,
+        oc:kn_bef4347c,
+        oc:kn_d401ddee,
+        oc:kn_dea0e67b,
+        oc:kn_e4f6a157,
+        oc:kn_f7c6092d ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:DataSourcesAvailable,
+        oc:ToolInstalled ;
+    oc:resolvesIntent "analyze public company valuation",
+        "benchmark companies against industry peers",
+        "build comparable company analysis",
+        "create comps spreadsheet with multiples",
+        "identify valuation outliers",
+        "support M&A investment analysis with peer comparison" ;
+    oc:yieldsState oc:AnalysisComplete,
+        oc:DocumentCreated .
+
+oc:kn_06d32c10 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When building any comps spreadsheet cell" ;
+    oc:directiveContent "Every derived value (margin, multiple, statistic) MUST be an Excel formula referencing input cells — never a pre-computed number pasted in. Only raw input data should be hardcoded." ;
+    oc:hasRationale "The model must update automatically when an input changes; a hardcoded margin is a silent bug waiting to happen." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_28d9fa71 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When gathering financial data for the analysis" ;
+    oc:directiveContent "Always follow data source hierarchy: (1) MCP data sources (S&P Kensho, FactSet, Daloopa) first, (2) Bloomberg/SEC EDGAR if MCPs unavailable, (3) NEVER use web search as primary data source." ;
+    oc:hasRationale "MCP sources provide verified, institutional-grade data with proper citations. Web search results can be outdated, inaccurate, or unreliable for financial analysis." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_3b1fc321 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "During the entire comps analysis build process" ;
+    oc:directiveContent "Build the comps sheet step-by-step with user verification at each stage: confirm header layout → confirm raw inputs → verify operating metrics → verify valuation multiples → add statistics." ;
+    oc:hasRationale "Catch errors early by confirming each section rather than building end-to-end and then presenting a potentially flawed analysis." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_6b007cc6 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When entering any raw input data" ;
+    oc:directiveContent "Every hardcoded input cell must have a comment citing the exact data source (with hyperlink when possible) OR explaining the assumption and reasoning." ;
+    oc:hasRationale "Enables audit trails, data verification, assumption transparency, and future updates — essential for institutional-grade credibility." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_88e25dec a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before building the comps analysis" ;
+    oc:directiveContent "Before starting, verify: peer group is truly comparable (similar business model, scale, geography), time periods are consistent, units are standardized (millions vs billions), and data sources are mapped." ;
+    oc:hasRationale "Non-comparable companies or inconsistent data will invalidate the entire analysis regardless of how well-formatted the output is." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_a72ff2b5 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When selecting metrics for the comps analysis" ;
+    oc:directiveContent "Use the 5-10 rule: 5 operating metrics and 5 valuation metrics = 10 total columns. If you have more than 15 metrics, you are including noise." ;
+    oc:hasRationale "Enough metrics to tell the story, not so many you lose the thread. Edit ruthlessly." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_bef4347c a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When building the valuation multiples section" ;
+    oc:directiveContent "Never input the same raw data twice. Valuation multiples MUST reference the operating metrics section cells (cross-reference rule)." ;
+    oc:hasRationale "Duplicate data entry creates inconsistency risk and makes updates error-prone." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_d401ddee a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When starting any comparable company analysis" ;
+    oc:directiveContent "Choose metrics based on the question being answered: valuation focus (EV/Revenue, EV/EBITDA, P/E), efficiency focus (margins, turnover), growth focus (CAGR, revenue growth), or cash generation (FCF metrics)." ;
+    oc:hasRationale "Structure drives insight — selecting the right 5-10 metrics for the specific question prevents unfocused analysis." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_dea0e67b a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When building valuation multiples and statistics" ;
+    oc:directiveContent "Never mix market cap and enterprise value in formulas, use different time periods for numerator and denominator (LTM vs quarterly), or calculate averages of percentages instead of using median." ;
+    oc:hasRationale "Mixing these produces misleading metrics that can lead to wrong investment decisions and undermine credibility." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_e4f6a157 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When adding statistics blocks after company data" ;
+    oc:directiveContent "Use quartile statistics (Max, 75th, Median, 25th, Min) for comparable metrics like margins and multiples, but NOT for size metrics like Revenue, EBITDA, or Market Cap." ;
+    oc:hasRationale "Quartiles show distribution and reveal what 'premium' vs 'discount' companies trade at. Size metrics are not comparable across different-scaled companies." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_f7c6092d a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When selecting comparable companies for the peer group" ;
+    oc:directiveContent "When in doubt about whether a company is a valid comp, exclude it. Better to have 3 perfect comps than 6 questionable ones." ;
+    oc:hasRationale "Including non-comparable companies distorts statistics and can mislead decision-makers more than having fewer data points." ;
+    oc:severityLevel "MEDIUM" .
+

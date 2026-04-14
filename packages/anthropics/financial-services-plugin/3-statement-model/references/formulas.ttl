@@ -1,0 +1,91 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_financial_services_plugin_3_statement_model_formulas a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "formulas" ;
+    skos:broader "Formula reference document" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/financial-services-plugin/3-statement-model" ;
+    oc:contentHash "5761041366248bba14782f72082b9396c7e47291491999ea85be1c9c2875df5e" ;
+    oc:differentia "defines all accounting formulas, linkages, and integrity checks for a 3-statement financial model" ;
+    oc:extends oc:skill_anthropics_financial_services_plugin_3_statement_model ;
+    oc:handlesFailure oc:BalanceCheckFailed,
+        oc:CashTieOutFailed ;
+    oc:hasCategory "finance" ;
+    oc:impartsKnowledge oc:kn_1b28f725,
+        oc:kn_45180e13,
+        oc:kn_45d1b8de,
+        oc:kn_758feef2,
+        oc:kn_8bdb5d84,
+        oc:kn_bdef1fef,
+        oc:kn_bf5273d2,
+        oc:kn_dee8d0ed ;
+    oc:isUserInvocable false ;
+    oc:nature "Reference" ;
+    oc:requiresState oc:TemplateStructureIdentified ;
+    oc:resolvesIntent "apply correct accounting formulas in financial models",
+        "calculate credit metrics and margins",
+        "compute NOL carryforwards and deferred tax assets",
+        "forecast line items using percentage-of-revenue method",
+        "validate model integrity with balance checks and tie-outs" ;
+    oc:yieldsState oc:FormulasApplied,
+        oc:ModelIntegrityValidated .
+
+oc:kn_1b28f725 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When building the debt schedule and linking interest to the income statement" ;
+    oc:directiveContent "Interest Expense should use beginning debt balance × interest rate to avoid circularity, unless iterative calculation is explicitly enabled." ;
+    oc:hasRationale "Interest → Net Income → Cash → Debt Balance → Interest creates a circular reference; using beginning balance breaks the loop" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_45180e13 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When projecting Income Statement line items (Cost of Revenue, S&M, G&A, R&D, SBC)" ;
+    oc:directiveContent "Use the % of Net Revenue method for forecasting operating expenses: each expense line = Net Revenue × its percentage assumption from the Assumptions tab." ;
+    oc:hasRationale "Percentage-of-revenue is the standard approach for projecting variable costs and operating expenses in financial models" .
+
+oc:kn_45d1b8de a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When populating any projection cell, roll-forward, or linkage in the model" ;
+    oc:directiveContent "Every formula cell must use an Excel formula, never a hardcoded computed value. Only historical actuals and assumption drivers may be hardcoded." ;
+    oc:hasRationale "Hardcoded values break model flexibility — assumptions changes won't propagate and integrity checks fail silently" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_758feef2 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When building the Cash Flow Statement and Retained Earnings schedule" ;
+    oc:directiveContent "SBC must be added back in CFO (non-cash) AND included in the Retained Earnings roll-forward. Retained Earnings formula: Prior RE + Net Income + SBC - Dividends = Ending RE." ;
+    oc:hasRationale "SBC is a non-cash expense that reduces Net Income but does not reduce cash; omitting it from either the CFO add-back or the RE roll-forward breaks both statements" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_8bdb5d84 a oc:KnowledgeNode,
+        oc:PostFlightValidation ;
+    oc:appliesToContext "After populating each major section of the 3-statement model" ;
+    oc:directiveContent "After completing each statement, run these mandatory checks: BS Balance (Assets - Liabilities - Equity = 0), Cash Tie-Out (BS Cash = CF Ending Cash), RE Roll-Forward (Prior RE + NI + SBC - Div = BS RE), DTA Tie-Out (NOL DTA = BS DTA)." ;
+    oc:hasRationale "These checks catch linkage errors between statements that are invisible without explicit verification" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_bdef1fef a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When calculating working capital changes for the Cash Flow Statement" ;
+    oc:directiveContent "An increase in an asset (AR, Inventory) is a use of cash (negative in CFO); an increase in a liability (AP) is a source of cash (positive in CFO)." ;
+    oc:hasRationale "Incorrect sign conventions on working capital changes are one of the most common model errors and cascade into wrong ending cash" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_bf5273d2 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When computing NOL carryforward schedules and tax calculations" ;
+    oc:directiveContent "NOL utilization is capped at 80% of EBT for post-2017 federal tax years. NOL cannot be created from thin air — only realized losses (EBT < 0) generate NOL. Beginning NOL for a new business must be 0." ;
+    oc:hasRationale "Post-2017 TCJA rules limit NOL usage to 80% of taxable income; violating this produces incorrect tax expense and deferred tax assets" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_dee8d0ed a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When calculating any profitability metric on the Income Statement" ;
+    oc:directiveContent "Always calculate Gross Profit from Net Revenue (not Gross Revenue). Net Revenue = Gross Revenue - Returns - Allowances - Discounts." ;
+    oc:hasRationale "Using Gross Revenue overstates top-line performance and produces incorrect margins downstream" ;
+    oc:severityLevel "CRITICAL" .
+

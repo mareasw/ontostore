@@ -1,0 +1,75 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_financial_services_plugin_3_statement_model_sec_filings a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "sec-filings" ;
+    skos:broader "data extraction reference" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/financial-services-plugin/3-statement-model" ;
+    oc:contentHash "9765c2f789b8d87baeca89b7f3a5ddc68d6068c06b39b4445224197d6e444e93" ;
+    oc:differentia "that maps SEC filing line items (10-K, 10-Q) to 3-statement financial model template fields with currency identification, cross-statement verification, and historical data requirements" ;
+    oc:extends oc:skill_anthropics_financial_services_plugin_3_statement_model ;
+    oc:handlesFailure oc:FileNotFound,
+        oc:InvalidInput ;
+    oc:hasArgumentHint "ticker or company CIK" ;
+    oc:hasCategory "finance" ;
+    oc:impartsKnowledge oc:kn_1c21c576,
+        oc:kn_5775dd45,
+        oc:kn_73f0beb6,
+        oc:kn_8937736e,
+        oc:kn_cc1d688b,
+        oc:kn_d8fe8978 ;
+    oc:isUserInvocable false ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:FileExists,
+        oc:NetworkAvailable ;
+    oc:resolvesIntent "extract financial data from SEC filings",
+        "identify reporting currency from SEC filings",
+        "map 10-K/10-Q line items to model template fields",
+        "verify cross-statement consistency in extracted filing data" ;
+    oc:yieldsState oc:DocumentCreated .
+
+oc:kn_1c21c576 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When encountering filing variations or non-standard presentations" ;
+    oc:directiveContent "When D&A is not broken out on the Income Statement, extract it from the Cash Flow Statement instead. When 'Other' line items are material, check the Notes for breakdowns." ;
+    oc:hasRationale "SEC filings use varied presentation formats; using alternative sources within the same filing preserves data completeness without fabrication." .
+
+oc:kn_5775dd45 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "After extracting data from SEC filings into a model template" ;
+    oc:directiveContent "Verify that IS Net Income equals CF starting Net Income and BS Cash equals CF Ending Cash for every extracted year." ;
+    oc:hasRationale "These cross-statement checks confirm data integrity and catch transcription or mapping errors before projections are built on faulty historicals." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_73f0beb6 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When mapping filing line items to model fields for any company" ;
+    oc:directiveContent "Do not ignore 'Other' line items that are material in size, and do not assume D&A is always broken out on the Income Statement — it may be embedded in COGS/SG&A and must be pulled from the Cash Flow Statement instead." ;
+    oc:hasRationale "Filing presentation varies significantly across companies. Assuming a standard layout without checking leads to misallocated or missing data." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_8937736e a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before extracting data from any SEC filing" ;
+    oc:directiveContent "Identify the reporting currency and scale (thousands, millions) from the filing cover page or statement headers before extracting any financial data." ;
+    oc:hasRationale "Currency and scale mismatches propagate silently through every line item, producing materially incorrect model outputs." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_cc1d688b a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When populating historical data in any financial model" ;
+    oc:directiveContent "Extract a minimum of 3 years of historical data for all three statements. Since 10-K provides only 2 years of Balance Sheet data, the 3rd year must be sourced from the prior year's 10-K." ;
+    oc:hasRationale "Incomplete historical data weakens trend analysis and makes projection assumptions unreliable." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_d8fe8978 a oc:KnowledgeNode,
+        oc:PostFlightValidation ;
+    oc:appliesToContext "After all SEC filing data has been extracted and entered into the model" ;
+    oc:directiveContent "Run the data extraction checklist after completing extraction: confirm currency/scale identified, 3 years of all three statements extracted, Net Income and Cash cross-checks pass, debt maturity schedule and D&A detail extracted, and non-recurring items flagged for normalization." ;
+    oc:hasRationale "A structured post-extraction review catches omissions and inconsistencies before the model progresses to projection and linking phases." ;
+    oc:severityLevel "HIGH" .
+

@@ -1,0 +1,113 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_financial_services_plugin_tear_sheet_equity_research a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "equity-research" ;
+    skos:broader "Tear sheet template" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/financial-services-plugin/tear-sheet" ;
+    oc:contentHash "4cdec49fad9382dcf291efcf7e23c3195aac3a864b7b853dac51018de882109f" ;
+    oc:differentia "Generates a dense single-page equity research snapshot with valuation multiples, consensus estimates, financial summary, and earnings highlights for buy-side/sell-side analysts" ;
+    oc:extends oc:skill_anthropics_financial_services_plugin_tear_sheet ;
+    oc:handlesFailure oc:FileNotFound,
+        oc:InvalidInput,
+        oc:NetworkTimeout,
+        oc:PermissionDenied ;
+    oc:hasAllowedTool "Bash",
+        "MCP",
+        "Read",
+        "Write" ;
+    oc:hasArgumentHint "company name or ticker, optional comparable companies" ;
+    oc:hasCategory "finance" ;
+    oc:hasRequirement oc:req_57886265,
+        oc:req_841cc02d,
+        oc:req_85b874f6 ;
+    oc:impartsKnowledge oc:kn_11d1f986,
+        oc:kn_26dcddb1,
+        oc:kn_38bdaf02,
+        oc:kn_6cba07fc,
+        oc:kn_77bd7d71,
+        oc:kn_8705be89,
+        oc:kn_9e355b5b,
+        oc:kn_e218c930 ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:APIKeySet,
+        oc:ToolInstalled ;
+    oc:resolvesIntent "build valuation and consensus report",
+        "create analyst investment snapshot",
+        "generate equity research tear sheet",
+        "produce company financial overview for analysts" ;
+    oc:yieldsState oc:DocumentCreated .
+
+oc:kn_11d1f986 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When executing Query 2 for historical financials" ;
+    oc:directiveContent "Always pull 4 fiscal years of financial data even though only 3 are displayed. The earliest year is needed to compute YoY revenue growth for the first displayed year." ;
+    oc:hasRationale "Without the fourth year, the earliest displayed year's growth rate shows 'N/A' which looks like missing data rather than a design choice" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_26dcddb1 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When the rendered document exceeds the single-page target" ;
+    oc:directiveContent "When constrained to one page, cut sections in strict priority order from the bottom: Stock Performance first (lowest analytical value), then Key Operating Metrics, then Earnings Highlights, and so on." ;
+    oc:hasRationale "The priority ordering ensures the most analytically valuable content (valuation, consensus, financials) is preserved while lower-value sections are sacrificed first" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_38bdaf02 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When populating the Consensus Estimates and analyst consensus block" ;
+    oc:directiveContent "Do not fabricate or estimate any consensus figure, analyst recommendation, or price target. If data is unavailable, omit the section or note 'N/A' / 'Consensus estimates not available.'" ;
+    oc:hasRationale "Fabricated consensus data destroys the tear sheet's credibility — analysts will immediately spot fabricated figures and discount everything else" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_6cba07fc a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When building the Valuation Snapshot table for equity research tear sheets" ;
+    oc:directiveContent "Forward (NTM) valuation multiples are mandatory when available from the tools. Never show only trailing multiples when forward data exists — analysts value companies on forward earnings." ;
+    oc:hasRationale "Showing only trailing multiples when forward data exists is a significant gap that undermines the tear sheet's analytical credibility for buy-side/sell-side audiences" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_77bd7d71 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When formatting the DOCX output for equity research tear sheets" ;
+    oc:directiveContent "This is the densest tear sheet type — it must feel noticeably more compressed than other templates. Use 8pt text for financial tables, 8.5pt for body text, 6pt spacing before section headers, and prioritize information over whitespace." ;
+    oc:hasRationale "Equity research tear sheets are conventionally single-page documents where density is the point — every half-point of font size and every pixel of spacing matters" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_8705be89 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing the Business Description section" ;
+    oc:directiveContent "Never paste the CIQ company summary verbatim into any tear sheet. Rewrite every narrative section for the audience — concise and thesis-oriented for equity research analysts." ;
+    oc:hasRationale "Verbatim CIQ summaries signal low-value output. Analysts need thesis-oriented framing that highlights what's changing, not Wikipedia-style overviews" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_9e355b5b a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing the Recent Earnings Highlights section" ;
+    oc:directiveContent "Lead earnings highlights with guidance if provided — use a bold 'Guidance:' prefix. Guidance is the single most actionable forward-looking data point for an analyst and should never be buried among operating highlights." ;
+    oc:hasRationale "Analysts prioritize forward-looking guidance over backward-looking results; burying guidance signals poor editorial judgment" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_e218c930 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before Step 4 (DOCX generation)" ;
+    oc:directiveContent "Verify all intermediate data files are present and populated before generating the document. Print a verification summary showing each file's status. Files — not conversation context — are the single source of truth." ;
+    oc:hasRationale "Relying on conversation context for financial data risks using stale or corrupted values from context degradation in long sessions" ;
+    oc:severityLevel "HIGH" .
+
+oc:req_57886265 a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "Node.js runtime" .
+
+oc:req_841cc02d a oc:RequirementAPI ;
+    oc:isOptional false ;
+    oc:requirementValue "S&P Capital IQ via Kensho LLM-ready API MCP server" .
+
+oc:req_85b874f6 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "docx-js for Word document generation" .
+

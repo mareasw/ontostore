@@ -1,0 +1,115 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_financial_services_plugin_fsi_strip_profile a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "fsi-strip-profile" ;
+    skos:broader "Document generator" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/financial-services-plugin/fsi-strip-profile" ;
+    oc:contentHash "865fa9da3af649b1d7b616e4cb4f5cb1d84054ad472456b2350fb7da2f437b73" ;
+    oc:differentia "that creates information-dense investment banking strip profiles (company profiles) for pitch books with quadrant layouts, financial tables, and charts using PptxGenJS" ;
+    oc:handlesFailure oc:FileNotFound,
+        oc:InvalidInput,
+        oc:PermissionDenied ;
+    oc:hasAllowedTool "Bash",
+        "Read",
+        "WebFetch",
+        "WebSearch",
+        "Write" ;
+    oc:hasArgumentHint "company name or ticker (e.g., 'Tesla (TSLA)', 'Nike')" ;
+    oc:hasCategory "finance" ;
+    oc:hasDescription "Creates professional investment banking strip profiles (company profiles) for pitch books, deal materials, and client presentations. Generates 1-4 information-dense slides with quadrant layouts, charts, and tables." ;
+    oc:hasName "fsi-strip-profile" ;
+    oc:impartsKnowledge oc:kn_05c17106,
+        oc:kn_134dae90,
+        oc:kn_2398d45e,
+        oc:kn_72a38048,
+        oc:kn_78295e63,
+        oc:kn_914ef7b0,
+        oc:kn_934755f7,
+        oc:kn_9c1d99d5,
+        oc:kn_bb33c127,
+        oc:kn_e59bd973 ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:NetworkAvailable ;
+    oc:resolvesIntent "build pitch book company profile",
+        "create IB strip profile with financials and charts",
+        "create strip profile for a company",
+        "generate investment banking company profile slides",
+        "produce company overview slides for deal materials" ;
+    oc:yieldsState oc:DocumentCreated .
+
+oc:kn_05c17106 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "After generating each slide and before showing to user" ;
+    oc:directiveContent "After creating each slide, convert to image using soffice and pdftoppm, then perform a mandatory visual review checking for text overlap, text cutoff, chart boundary violations, and quadrant bleed. Fix issues by reducing font size first, then shortening text, then adjusting positions." ;
+    oc:hasRationale "Programmatic slide generation frequently produces layout issues that are only visible when rendered; automated verification catches these before user review" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_134dae90 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When preparing financial data from multiple sources" ;
+    oc:directiveContent "Convert all financial amounts to a consistent currency and scale ($mm or $bn throughout, never mixed). Normalize before building slides." ;
+    oc:hasRationale "Mixed scales confuse readers and are a common error in junior banker deliverables; consistency is non-negotiable in IB materials" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_2398d45e a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When creating the first page of any strip profile" ;
+    oc:directiveContent "First slide must use the exact 4-quadrant layout: Company Overview (top-left), Business & Positioning (top-right), Key Financials (bottom-left), Stock/Recent Developments (bottom-right). Each quadrant must have a colored accent bar left of its header." ;
+    oc:hasRationale "The quadrant layout is the industry-standard strip profile format; deviating from it makes the output unusable in professional banking contexts" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_72a38048 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When laying out bullet-point content in quadrants" ;
+    oc:directiveContent "Use ONE textbox per section with header + all bullets inside. Do NOT create separate textboxes for each bullet. Use paraSpaceAfter for spacing rather than hardcoded gaps." ;
+    oc:hasRationale "Separate textboxes per bullet cause alignment drift and spacing inconsistencies; a single textbox with paragraph spacing is deterministic" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_78295e63 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When initializing any PptxGenJS presentation for strip profiles" ;
+    oc:directiveContent "Use 4:3 aspect ratio (LAYOUT_4x3) exclusively — this is standard IB pitch book format. Never use widescreen layouts." ;
+    oc:hasRationale "Investment banking standard format is 4:3; deviating from this signals unprofessional output to banking clients" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_914ef7b0 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "During slide-by-slide creation phase" ;
+    oc:directiveContent "You MUST create ONE slide at a time and get explicit user approval before proceeding to the next slide. Never create multiple slides without intermediate review." ;
+    oc:hasRationale "Iterative review prevents compounding layout errors and ensures each slide meets quality standards before building the next" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_934755f7 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing any strip profile slide" ;
+    oc:directiveContent "Maximum information density is the #1 goal — a busy executive must understand the entire company story in 30 seconds. Every quadrant must be filled to capacity with 6-8 bullets minimum." ;
+    oc:hasRationale "Investment banking strip profiles are reference documents used under extreme time pressure; sparse slides fail the core purpose" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_9c1d99d5 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "After research phase, before slide creation" ;
+    oc:directiveContent "Before building slides, print outline with 4-5 bullet points per item (actual numbers, no placeholders), print style choices (fonts, hex colors, chart types), and get explicit user alignment on the visual strategy." ;
+    oc:hasRationale "Front-loading alignment prevents wasted effort on slides that don't match the user's expectations" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_bb33c127 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When rendering financial data on any slide" ;
+    oc:directiveContent "NEVER use plain text prose or HTML tables for financial data. Always use native PptxGenJS tables (slide.addTable) or charts. Never use placeholder text — all data must be actual numbers." ;
+    oc:hasRationale "Plain text financials lack formatting precision and look unprofessional; HTML tables don't convert to PowerPoint properly" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_e59bd973 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When determining color scheme for any strip profile" ;
+    oc:directiveContent "Research the company's actual brand colors via web search before creating slides. Do not guess or assume colors. Use brand color for accent bars, chart highlights, and title styling." ;
+    oc:hasRationale "Using a company's actual brand colors demonstrates attention to detail and professionalism expected at GS/MS/JPM standard" ;
+    oc:severityLevel "MEDIUM" .
+

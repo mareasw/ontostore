@@ -1,0 +1,80 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_financial_services_plugin_option_vol_analysis a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "option-vol-analysis" ;
+    skos:broader "derivatives analysis workflow" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/financial-services-plugin/option-vol-analysis" ;
+    oc:contentHash "324dfa767c633d5b45068ef1ec82f2d161a7fc7576b0d71c7b5317617a8119a5" ;
+    oc:differentia "combines implied volatility surface data, option pricing with Greeks, and historical price data to assess implied vs realized volatility premiums and recommend vol trading strategies" ;
+    oc:handlesFailure oc:DataUnavailable,
+        oc:InvalidInput,
+        oc:NetworkTimeout ;
+    oc:hasAllowedTool "equity_vol_surface",
+        "fx_vol_surface",
+        "option_template_list",
+        "option_value",
+        "qa_historical_equity_price",
+        "tscc_historical_pricing_summaries" ;
+    oc:hasArgumentHint "underlying asset identifier (e.g., ticker symbol, RIC, FX pair)" ;
+    oc:hasCategory "finance" ;
+    oc:hasDescription "Analyze option volatility by combining vol surface data, option pricing with Greeks, and historical price data to assess implied vs realized volatility. Use when pricing options, analyzing volatility surfaces, computing Greeks, assessing vol premiums, or evaluating vol trading strategies." ;
+    oc:hasName "option-vol-analysis" ;
+    oc:impartsKnowledge oc:kn_82be170d,
+        oc:kn_9cba3e3d,
+        oc:kn_ae96a801,
+        oc:kn_c6273d51,
+        oc:kn_cc945cf9 ;
+    oc:isUserInvocable true ;
+    oc:nature "analytical" ;
+    oc:requiresState oc:APIKeySet,
+        oc:NetworkAvailable ;
+    oc:resolvesIntent "analyze option volatility",
+        "assess volatility surface shape and skew",
+        "compare implied vs realized volatility",
+        "compute realized volatility from historical prices",
+        "evaluate vol premium and trading strategies",
+        "price options with Greeks" ;
+    oc:yieldsState oc:GreeksComputed,
+        oc:VolPremiumAssessed,
+        oc:VolSurfaceAnalyzed .
+
+oc:kn_82be170d a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When analyzing any volatility surface snapshot" ;
+    oc:directiveContent "Extract ATM vol term structure, 25-delta risk reversals (skew), and butterflies (smile curvature) as the three key surface shape metrics." ;
+    oc:hasRationale "These three metrics capture the complete shape of the vol surface: level (ATM), directional bias (risk reversal), and convexity (butterfly), which together encode market expectations for direction, tail risk, and volatility of volatility." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_9cba3e3d a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Throughout the entire volatility analysis workflow" ;
+    oc:directiveContent "Let the MCP tools compute raw values — your role is to interpret results, synthesize across data sources, and recommend strategies. Route tool outputs into implied-vs-realized comparisons and surface shape analysis." ;
+    oc:hasRationale "The tools provide precise computational outputs; the analyst's value-add is in cross-referencing surface shape, Greeks, and historical comparisons to form actionable vol regime assessments and strategy recommendations." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_ae96a801 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When beginning any option volatility analysis" ;
+    oc:directiveContent "Always start from the vol surface first for the big picture, then price specific options for precise Greeks, then compare implied vol to realized vol computed from historical data. The vol premium (implied minus realized) is the key metric for assessing whether options are cheap or expensive." ;
+    oc:hasRationale "The vol surface encodes the market's aggregate view of future uncertainty across strikes and expiries, making it the foundational data layer from which all individual option prices are derived." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_c6273d51 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When selecting and calling vol surface tools by asset type" ;
+    oc:directiveContent "FX vol surfaces are quoted in delta space, not strike space. Use fx_vol_surface for currency pairs with delta-based inputs, and equity_vol_surface for equities/indices using RIC or RICROOT identifiers." ;
+    oc:hasRationale "FX and equity markets have different quoting conventions; mixing them leads to misinterpretation of surface shape and incorrect strike mapping." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_cc945cf9 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When computing implied-vs-realized volatility comparisons" ;
+    oc:directiveContent "Compute realized volatility over 20-day, 60-day, and 90-day windows from historical prices and compare to matching implied vol tenors (1M, 3M, 6M) to identify whether options are rich or cheap." ;
+    oc:hasRationale "Standardized windows enable consistent comparison across assets and time periods, and approximate alignment with common option tenors provides meaningful relative valuation." ;
+    oc:severityLevel "MEDIUM" .
+

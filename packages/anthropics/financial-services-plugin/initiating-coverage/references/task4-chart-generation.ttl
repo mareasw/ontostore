@@ -1,0 +1,162 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_financial_services_plugin_initiating_coverage_task4_chart_generation a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "task4-chart-generation" ;
+    skos:broader "Chart generation workflow" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/financial-services-plugin/initiating-coverage" ;
+    oc:contentHash "ab5be625db0687b3fa85ce9177f2f52b7ab7c5127e80c3e2c905a5821602554e" ;
+    oc:differentia "Produces 25-35 professional financial charts (PNG, 300 DPI) for equity research initiation reports by extracting data from prior research, financial model, and valuation tasks and rendering them with matplotlib/seaborn" ;
+    oc:extends oc:skill_anthropics_financial_services_plugin_initiating_coverage ;
+    oc:handlesFailure oc:IncompleteChartSet,
+        oc:LowResolutionOutput,
+        oc:MissingPrerequisiteData ;
+    oc:hasAllowedTool "bash",
+        "python" ;
+    oc:hasArgumentHint "company ticker or name (context from prior tasks)" ;
+    oc:hasCategory "finance" ;
+    oc:hasRequirement oc:req_02b3c31e,
+        oc:req_35247bff,
+        oc:req_5c06ed75,
+        oc:req_746aacc9,
+        oc:req_7922f00a,
+        oc:req_90e744ab,
+        oc:req_b5761c69,
+        oc:req_c3f5d782,
+        oc:req_fe6b6a53 ;
+    oc:impartsKnowledge oc:kn_161339c1,
+        oc:kn_19251bfb,
+        oc:kn_2b6b02f2,
+        oc:kn_3062c2ab,
+        oc:kn_3c263d2c,
+        oc:kn_5e7c9a21,
+        oc:kn_845db07c,
+        oc:kn_fa838f1d,
+        oc:kn_fd484159,
+        oc:kn_fdc75681 ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:CompanyResearchComplete,
+        oc:ExternalMarketDataAvailable,
+        oc:FinancialModelComplete,
+        oc:ValuationAnalysisComplete ;
+    oc:resolvesIntent "build chart package for report assembly",
+        "create DCF sensitivity heatmap",
+        "create revenue breakdown charts by product and geography",
+        "create valuation football field chart",
+        "generate financial charts for equity research report",
+        "produce publication-quality financial visualizations" ;
+    oc:yieldsState oc:ChartIndexCreated,
+        oc:ChartPackageReady,
+        oc:ChartsGenerated .
+
+oc:kn_161339c1 a oc:Idempotency,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When re-executing the chart generation workflow" ;
+    oc:directiveContent "Re-running chart generation overwrites existing chart files with identical names. This is safe for regeneration but will not append charts — previous optional charts with the same filenames will be replaced." ;
+    oc:hasRationale "Understanding idempotent behavior prevents accidental data loss when iterating on chart quality." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_19251bfb a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before generating any charts" ;
+    oc:directiveContent "Verify Tasks 1, 2, and 3 are fully complete before starting chart generation. Check that company research documents, financial model Excel file (all 6 tabs), and valuation tabs all exist and contain the required data." ;
+    oc:hasRationale "Charts depend on data from all three prior tasks. Starting without them results in incomplete or placeholder charts that degrade report quality." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_2b6b02f2 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When naming and indexing all chart output files" ;
+    oc:directiveContent "Number charts sequentially based on their position in the final report (chart_01, chart_02, etc.), not by creation order. Name files as chart_[NUMBER]_[DESCRIPTION].png." ;
+    oc:hasRationale "Sequential figure numbering aligned with report sections ensures clean embedding in Task 5 and matches standard equity research formatting conventions." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_3062c2ab a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When encountering common rendering issues during chart generation" ;
+    oc:directiveContent "If charts appear pixelated, verify dpi=300 in savefig(). If labels are cut off, use bbox_inches='tight'. If colors look unprofessional, switch to established palettes like Tableau10. If labels overlap, rotate 45 degrees or reduce font size." ;
+    oc:hasRationale "These five common issues have straightforward fixes that maintain output quality without requiring full re-generation." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_3c263d2c a oc:KnowledgeNode,
+        oc:PostFlightValidation ;
+    oc:appliesToContext "After completing all chart generation" ;
+    oc:directiveContent "After generating all charts, run verification: confirm all 4 mandatory charts exist with file sizes above 50KB, total chart count is 25-35, and chart_index.txt is created. Package all outputs into a single zip file." ;
+    oc:hasRationale "Systematic verification catches missing or corrupt files before Task 5 assembly, preventing downstream failures in report construction." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_5e7c9a21 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When rendering and saving every chart" ;
+    oc:directiveContent "All charts must be rendered at 300 DPI with a white background, consistent professional color scheme, figure numbering, source citations, and proper axis labels. Use plt.tight_layout() and bbox_inches='tight' to prevent text cutoff." ;
+    oc:hasRationale "Charts must be print-quality for institutional equity research reports. Inconsistent styling or low resolution undermines professional credibility." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_845db07c a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When planning chart scope and quantity" ;
+    oc:directiveContent "Target 25-35 total charts to achieve the required visual density of approximately 1 chart per 200-300 words in the final report. Create all 25 required charts first, then add 0-10 optional charts for richer storytelling." ;
+    oc:hasRationale "Institutional research reports require dense visual content. Insufficient charts lead to text-heavy pages; too many charts dilute the narrative." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_fa838f1d a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When prerequisite verification fails" ;
+    oc:directiveContent "Never create placeholder charts or skip charts due to missing prerequisite data. If Tasks 1, 2, or 3 are incomplete, stop immediately and inform the user which tasks need completion." ;
+    oc:hasRationale "Placeholder charts with fake or estimated data introduce factual errors into the research report, which is a serious compliance and credibility risk." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_fd484159 a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "When setting up the chart generation environment" ;
+    oc:directiveContent "Chart generation produces 25-35 PNG files and a chart_index.txt in the working directory, plus a final zip archive. Ensure the working directory is writable and has sufficient disk space (approximately 50-100MB for 35 high-res PNGs)." ;
+    oc:hasRationale "Large numbers of 300 DPI images consume significant disk space. Running out of space mid-generation corrupts the output package." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_fdc75681 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When creating the chart set" ;
+    oc:directiveContent "Four charts are mandatory and non-negotiable: chart_03 (Revenue by Product stacked area), chart_04 (Revenue by Geography stacked bar), chart_28 (DCF Sensitivity heatmap), and chart_32 (Valuation Football Field). These must all be present in the final output." ;
+    oc:hasRationale "These four charts are the critical visualizations for the financial analysis and valuation sections of the report. Missing any of them is a quality failure." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:req_02b3c31e a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "numpy" .
+
+oc:req_35247bff a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Company research from Task 1" .
+
+oc:req_5c06ed75 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Financial model from Task 2" .
+
+oc:req_746aacc9 a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "pandas" .
+
+oc:req_7922f00a a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "External market data (Yahoo Finance, Bloomberg)" .
+
+oc:req_90e744ab a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Valuation analysis from Task 3" .
+
+oc:req_b5761c69 a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "plotly" .
+
+oc:req_c3f5d782 a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "seaborn" .
+
+oc:req_fe6b6a53 a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "matplotlib" .
+

@@ -1,0 +1,75 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_financial_services_plugin_macro_rates_monitor a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "macro-rates-monitor" ;
+    skos:broader "Financial analysis framework" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/financial-services-plugin/macro-rates-monitor" ;
+    oc:contentHash "4046475a97a8017525f024852d3c9027f9eca822d741e43a210467b2eef4a962" ;
+    oc:differentia "that synthesizes macroeconomic indicators, yield curves, inflation breakevens, and swap rates into comprehensive macro-rates dashboards" ;
+    oc:handlesFailure oc:APIError,
+        oc:DataUnavailable ;
+    oc:hasAllowedTool "inflation_curve",
+        "interest_rate_curve",
+        "ir_swap",
+        "qa_macroeconomic",
+        "tscc_historical_pricing_summaries" ;
+    oc:hasArgumentHint "country or region (e.g., US, Eurozone, UK)" ;
+    oc:hasCategory "finance" ;
+    oc:hasDescription "Build macroeconomic and rates dashboards combining macro indicators, yield curves, inflation breakevens, and swap rates. Use when monitoring macro conditions, analyzing yield curve shape, decomposing real vs nominal rates, assessing policy rate expectations, or evaluating financial conditions." ;
+    oc:hasName "macro-rates-monitor" ;
+    oc:impartsKnowledge oc:kn_56035c33,
+        oc:kn_69b63894,
+        oc:kn_8d7cde9d,
+        oc:kn_97cbc137,
+        oc:kn_b08d9bc8 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:APIKeySet ;
+    oc:resolvesIntent "analyze yield curve shape and slope",
+        "assess policy rate expectations",
+        "build macro-rates dashboard",
+        "decompose real vs nominal rates",
+        "evaluate financial conditions",
+        "monitor macroeconomic conditions" ;
+    oc:yieldsState oc:DashboardCreated .
+
+oc:kn_56035c33 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When executing the full macro-rates monitoring workflow" ;
+    oc:directiveContent "Tool chaining must follow the sequence: macro indicators → yield curve snapshot → inflation decomposition → swap spreads → historical context → synthesis. Each step builds on prior outputs." ;
+    oc:hasRationale "Sequential chaining ensures that curve shape context informs real rate interpretation, and nominal/spread data is available before synthesis" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_69b63894 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When calling any of the rates/pricing MCP tools" ;
+    oc:directiveContent "The interest_rate_curve, inflation_curve, and ir_swap tools each require a two-phase call pattern: list/search first, then calculate/price. You cannot skip the first phase." ;
+    oc:hasRationale "The two-phase pattern ensures correct curve templates and parameters are selected before computation, preventing invalid pricing requests" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_8d7cde9d a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When building any macro-rates dashboard" ;
+    oc:directiveContent "Always assess four dimensions in order: (1) economic cycle position via GDP, employment, PMI; (2) central bank policy via policy rate and curve shape; (3) bond market signals via curve slope and real rates; (4) financial conditions via swap spreads and real rates. Start broad, then drill down." ;
+    oc:hasRationale "A structured four-pillar framework ensures no critical macro signal is missed and provides a coherent narrative from cycle to markets" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_97cbc137 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When searching for macro data series via qa_macroeconomic tool" ;
+    oc:directiveContent "When querying qa_macroeconomic, use wildcard mnemonic patterns (e.g., US*GDP*, US*CPI*, EZ*HICP*) and prefer seasonally adjusted series. Use monthly frequency for most indicators; GDP is quarterly." ;
+    oc:hasRationale "Wildcard patterns enable discovery of available mnemonics without memorizing codes; seasonal adjustment removes noise from the signal" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_b08d9bc8 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When synthesizing raw tool outputs into the dashboard" ;
+    oc:directiveContent "Compute derived metrics explicitly: real rates = nominal minus breakeven; swap spread = swap rate minus government yield; 2s10s slope = 10Y yield minus 2Y yield; 3M-10Y slope = 10Y yield minus 3M yield. Classify signals (accommodative/restrictive, normal/elevated/stressed) using these computed values." ;
+    oc:hasRationale "Derived metrics transform raw data into actionable signals that directly inform macro narrative and regime classification" ;
+    oc:severityLevel "MEDIUM" .
+
