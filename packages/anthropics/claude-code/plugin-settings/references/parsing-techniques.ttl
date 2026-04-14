@@ -1,0 +1,105 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_code_plugin_settings_parsing_techniques a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "parsing-techniques" ;
+    skos:broader "Reference guide" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-code/plugin-settings" ;
+    oc:contentHash "bc90aa020aa5fcbb3483d7316754450dcc91d086ee96f9304fa655e878f7712e" ;
+    oc:differentia "that documents bash parsing techniques for YAML-frontmatter markdown settings files used by Claude Code plugins" ;
+    oc:extends oc:skill_anthropics_claude_code_plugin_settings ;
+    oc:handlesFailure oc:FileNotFound,
+        oc:InvalidInput ;
+    oc:hasAllowedTool "Bash" ;
+    oc:hasArgumentHint "file-path to .claude/*.local.md settings file" ;
+    oc:hasCategory "development" ;
+    oc:hasRequirement oc:req_55e82463,
+        oc:req_72863421,
+        oc:req_93b06fc2,
+        oc:req_97018bf5 ;
+    oc:impartsKnowledge oc:kn_21f2447d,
+        oc:kn_331f1435,
+        oc:kn_92118de9,
+        oc:kn_a2aa8a65,
+        oc:kn_a4efa685,
+        oc:kn_e22a24c4,
+        oc:kn_e3918150 ;
+    oc:isUserInvocable false ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:FileExists ;
+    oc:resolvesIntent "extract frontmatter fields from markdown",
+        "parse settings files",
+        "update settings files atomically in bash",
+        "validate plugin configuration" ;
+    oc:yieldsState oc:ConfigurationValidated,
+        oc:SettingsParsed .
+
+oc:kn_21f2447d a oc:KnowledgeNode,
+        oc:SecurityImplication ;
+    oc:appliesToContext "When using extracted markdown body content in JSON output" ;
+    oc:directiveContent "Always use jq -n --arg for constructing JSON with user-controlled content from the markdown body; never interpolate shell variables directly into JSON strings." ;
+    oc:hasRationale "Direct interpolation of body content into JSON strings is vulnerable to injection and malformed JSON; jq --arg safely escapes special characters." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_331f1435 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing hook scripts that run on every tool invocation" ;
+    oc:directiveContent "Use lazy loading — perform quick in-memory checks (e.g., tool_name filter) before reading the settings file from disk." ;
+    oc:hasRationale "Settings file I/O on every tool call adds latency; short-circuiting with cheap checks avoids unnecessary disk access." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_92118de9 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When extracting multiple fields from a settings file" ;
+    oc:directiveContent "Never re-parse the settings file for each individual field; parse frontmatter once into a variable and extract all fields from the cached value." ;
+    oc:hasRationale "Repeated file I/O and parsing is wasteful; caching the frontmatter block and extracting fields from it avoids redundant disk reads and sed/grep invocations." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_a2aa8a65 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When extracting string field values from frontmatter" ;
+    oc:directiveContent "Handle three quote styles (unquoted, double-quoted, single-quoted) and three empty-value representations (bare colon, empty quotes, null) when parsing YAML values." ;
+    oc:hasRationale "YAML allows multiple representations of the same value; failing to handle all variants causes silent parsing failures where values appear empty or include surrounding quotes." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_a4efa685 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When updating any .claude/*.local.md settings file" ;
+    oc:directiveContent "Always use temp file + atomic move (mv) to update settings files, never write directly to the file being read." ;
+    oc:hasRationale "Direct writes can cause corruption if the process is interrupted mid-write; atomic mv ensures the file is always in a consistent state." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_e22a24c4 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before parsing any settings file" ;
+    oc:directiveContent "Validate that the settings file exists, is readable, and contains exactly 2 frontmatter markers (---) before attempting to parse fields." ;
+    oc:hasRationale "Missing or malformed files cause silent failures; early validation provides clear error messages and prevents downstream parse errors." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_e3918150 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When choosing a parsing strategy for frontmatter fields" ;
+    oc:directiveContent "Use sed/grep for simple flat fields and yq for complex nested YAML structures with lists and objects." ;
+    oc:hasRationale "sed/grep are universally available but fragile for nested structures; yq handles complex YAML correctly but adds a dependency that may not be installed." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:req_55e82463 a oc:RequirementTool ;
+    oc:isOptional true ;
+    oc:requirementValue "jq" .
+
+oc:req_72863421 a oc:RequirementTool ;
+    oc:isOptional true ;
+    oc:requirementValue "yq" .
+
+oc:req_93b06fc2 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Bash scripting with sed, grep, awk, jq" .
+
+oc:req_97018bf5 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "YAML frontmatter format in markdown files" .
+

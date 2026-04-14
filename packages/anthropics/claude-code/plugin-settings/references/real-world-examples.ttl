@@ -1,0 +1,80 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_code_plugin_settings_real_world_examples a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "real-world-examples" ;
+    skos:broader "Reference documentation" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-code/plugin-settings" ;
+    oc:contentHash "565c3af7f6190b7f4dbd9623c471bd2ca5b303432224e69165d18d2bdf62eac6" ;
+    oc:differentia "analyzes production implementations of the .claude/plugin-name.local.md settings pattern through multi-agent-swarm and ralph-wiggum plugin case studies, extracting reusable patterns, best practices, and anti-patterns" ;
+    oc:extends oc:skill_anthropics_claude_code_plugin_settings ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_18eacd16,
+        oc:kn_1f6448d4,
+        oc:kn_244967b7,
+        oc:kn_30d6afd0,
+        oc:kn_9aa1882e,
+        oc:kn_b1d2f766,
+        oc:kn_b55f986b ;
+    oc:isUserInvocable false ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "avoid anti-patterns when implementing plugin settings",
+        "implement atomic updates and quick-exit patterns for settings hooks",
+        "learn production patterns for .local.md settings files",
+        "see how multi-agent-swarm and ralph-wiggum use plugin settings",
+        "understand real-world plugin settings implementations" .
+
+oc:kn_18eacd16 a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When a parsed field is empty or null and the plugin requires it" ;
+    oc:directiveContent "When a critical settings field is empty or missing after parsing, treat the settings file as corrupt: log a warning to stderr, optionally remove the file, and exit cleanly rather than proceeding with undefined behavior." ;
+    oc:hasRationale "Silent failures from missing fields can cause unpredictable hook behavior; explicit cleanup and exit prevents cascading errors" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_1f6448d4 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When defining file paths in any hook, command, or agent that reads plugin settings" ;
+    oc:directiveContent "Use relative paths like .claude/plugin-name.local.md instead of absolute or hardcoded user paths when referencing settings files in hooks and scripts." ;
+    oc:hasRationale "Absolute paths break portability across machines and user accounts; relative paths work in any project checkout" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_244967b7 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing the schema for a new plugin settings file" ;
+    oc:directiveContent "Include an 'enabled' boolean field in settings frontmatter so users can temporarily deactivate a plugin without deleting its configuration file." ;
+    oc:hasRationale "Deleting and recreating files is error-prone; an enabled flag provides a clean toggle mechanism that preserves configuration" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_30d6afd0 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing any hook or script that reads .claude/plugin-name.local.md files" ;
+    oc:directiveContent "Always implement the quick-exit pattern: check if the settings file exists before any parsing, and return immediately if it doesn't. This ensures hooks are non-disruptive when the plugin isn't configured." ;
+    oc:hasRationale "Avoids errors and performance overhead when the plugin is not active in a project, making hooks universally safe to install" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_9aa1882e a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When parsing string fields from YAML frontmatter" ;
+    oc:directiveContent "Always strip surrounding quotes from YAML values using sed 's/^\"\\(.*\\)\"$/\\1/' because YAML allows both field: value and field: \"value\" syntax, and consumers may use either form." ;
+    oc:hasRationale "Without quote stripping, quoted values will retain their quotes, causing subtle comparison failures and unexpected behavior" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_b1d2f766 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When updating any .local.md settings file field programmatically" ;
+    oc:directiveContent "Never use sed -i or other non-atomic in-place file edits to update settings files. Always write to a temp file then atomically move it into place with mv." ;
+    oc:hasRationale "Non-atomic edits can corrupt the file if the process is interrupted mid-write, leaving the plugin in an undefined state" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_b55f986b a oc:Idempotency,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When the plugin settings file does not exist" ;
+    oc:directiveContent "The quick-exit pattern makes hooks idempotent: running them multiple times when no settings file exists produces the same safe result (exit 0)." ;
+    oc:hasRationale "Idempotent hooks can be safely installed globally without side effects on projects that don't use the plugin" ;
+    oc:severityLevel "LOW" .
+

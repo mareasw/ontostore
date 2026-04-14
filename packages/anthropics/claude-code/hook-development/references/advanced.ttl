@@ -1,0 +1,93 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_code_hook_development_advanced a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "advanced" ;
+    skos:broader "Hook pattern catalog" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-code/hook-development" ;
+    oc:contentHash "5b139ceeb6a3ef16555a6eef421e2642e6ca286b5527ee2b4e02c11ae5b75dd5" ;
+    oc:differentia "that provides advanced automation workflows, multi-stage validation, state sharing, and integration patterns for Claude Code hooks" ;
+    oc:extends oc:skill_anthropics_claude_code_hook_development ;
+    oc:handlesFailure oc:HookExecutionError,
+        oc:HookTimeout ;
+    oc:hasArgumentHint "hook-pattern-type (e.g., \"multi-stage validation\", \"state chaining\", \"security\", \"testing\")" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_03f4f781,
+        oc:kn_26f60e52,
+        oc:kn_719af6ce,
+        oc:kn_a09c0917,
+        oc:kn_aa118b5d,
+        oc:kn_ca6f98b4,
+        oc:kn_e76762a8,
+        oc:kn_f5cddf5a ;
+    oc:isUserInvocable true ;
+    oc:nature "Reference" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "implement multi-stage hook validation",
+        "implement security patterns in hooks",
+        "integrate hooks with external systems",
+        "optimize hook performance",
+        "share state between hooks",
+        "test advanced hook configurations" ;
+    oc:yieldsState oc:AdvancedHooksConfigured .
+
+oc:kn_03f4f781 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing multiple hooks for the same event (e.g., multiple PreToolUse hooks)" ;
+    oc:directiveContent "Never assume hooks run in a specific order within the same event — parallel hooks execute simultaneously, so do not rely on one hook's output as another's input within the same event." ;
+    oc:hasRationale "Parallel execution means hook ordering is non-deterministic; state sharing only works across sequential events (PreToolUse → PostToolUse), not within the same event." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_26f60e52 a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When writing hook scripts that parse JSON input or access files" ;
+    oc:directiveContent "Always handle missing files, unexpected input, and parse failures gracefully — return continue:true with a descriptive systemMessage rather than crashing." ;
+    oc:hasRationale "A crashed hook may block or silently fail; graceful degradation ensures the workflow continues while signaling the issue." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_719af6ce a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When configuring any hook in settings.json" ;
+    oc:directiveContent "Always set appropriate timeouts for each hook — command hooks typically need 2-5 seconds, prompt hooks may need 10-15 seconds. Long-running hooks will timeout and block the workflow." ;
+    oc:hasRationale "Without timeouts, a misbehaving hook can freeze the entire Claude Code workflow, degrading user experience." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_a09c0917 a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "When hooks perform expensive operations like file analysis or external API calls" ;
+    oc:directiveContent "Use caching for expensive validation results — hash the input (e.g., file path via md5sum) and store results in /tmp with a TTL (e.g., 5 minutes) to avoid redundant computation." ;
+    oc:hasRationale "Hooks run on every matching event; without caching, repeated operations on the same input waste CPU cycles and increase latency." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_aa118b5d a oc:KnowledgeNode,
+        oc:SecurityImplication ;
+    oc:appliesToContext "When hooks process content that may contain sensitive data" ;
+    oc:directiveContent "Implement secret detection in PreToolUse Write/Bash hooks to prevent accidental credential leakage, scanning content for patterns like api_key, password, secret, or token followed by long alphanumeric strings." ;
+    oc:hasRationale "Preventing secret leakage at the hook layer catches issues before they reach files, commits, or external systems." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_ca6f98b4 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing validation workflows that need both speed and intelligence" ;
+    oc:directiveContent "Combine fast deterministic command hooks with intelligent prompt hooks for layered validation — let command hooks handle obviously safe/unsafe cases quickly, and delegate complex analysis to prompt hooks." ;
+    oc:hasRationale "Command hooks are fast but limited in reasoning; prompt hooks are intelligent but slower and more expensive. Layering them optimizes both latency and accuracy." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_e76762a8 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before deploying hooks to production environments" ;
+    oc:directiveContent "Unit test hook scripts by piping JSON input directly into them and checking exit codes — exit 0 for approval, exit 2 for denial. Cover both safe and dangerous inputs." ;
+    oc:hasRationale "Hooks directly control tool execution; untested hooks can incorrectly block valid operations or allow dangerous ones." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_f5cddf5a a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing hook architectures that span multiple events" ;
+    oc:directiveContent "Keep hooks independent and stateless where possible. When state sharing is necessary, use temporary files with unique identifiers (e.g., $$ PID suffix) and only across sequential events." ;
+    oc:hasRationale "Independent hooks are easier to test, debug, and maintain. Stateful hooks introduce coupling and failure modes that are hard to diagnose." ;
+    oc:severityLevel "MEDIUM" .
+

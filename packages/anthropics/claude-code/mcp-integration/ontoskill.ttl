@@ -1,0 +1,117 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_code_mcp_integration a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "mcp-integration" ;
+    skos:broader "Integration framework" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-code/mcp-integration" ;
+    oc:contentHash "31043c6c231724469bb19a373d3cf04e1145f79eadd08c3dada5c0d7bd342809" ;
+    oc:dependsOnSkill oc:skill_plugin_structure ;
+    oc:differentia "that configures Model Context Protocol servers (stdio, SSE, HTTP, WebSocket) within Claude Code plugins to expose external service capabilities as structured tools" ;
+    oc:extends oc:skill_build_mcp_server ;
+    oc:handlesFailure oc:AuthenticationFailed,
+        oc:ConfigurationInvalid,
+        oc:ConnectionRefused,
+        oc:ToolDiscoveryFailed ;
+    oc:hasArgumentHint "MCP server configuration (type, URL, auth, or server type choice)" ;
+    oc:hasCategory "development" ;
+    oc:hasDescription "This skill should be used when the user asks to \"add MCP server\", \"integrate MCP\", \"configure MCP in plugin\", \"use .mcp.json\", \"set up Model Context Protocol\", \"connect external service\", mentions \"${CLAUDE_PLUGIN_ROOT} with MCP\", or discusses MCP server types (SSE, stdio, HTTP, WebSocket). Provides comprehensive guidance for integrating Model Context Protocol servers into Claude Code plugins for external tool and service integration." ;
+    oc:hasName "mcp-integration" ;
+    oc:impartsKnowledge oc:kn_0394d8d7,
+        oc:kn_2ce8b579,
+        oc:kn_5bfc4d5b,
+        oc:kn_71ffae5b,
+        oc:kn_873c1fcf,
+        oc:kn_9c12c04a,
+        oc:kn_a7adc11f,
+        oc:kn_bc78011e,
+        oc:kn_c948f04e,
+        oc:kn_d63854b6 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady,
+        oc:PluginStructureUnderstood ;
+    oc:resolvesIntent "add MCP server to plugin",
+        "configure MCP server types",
+        "create .mcp.json configuration",
+        "integrate external service via MCP",
+        "set up MCP authentication",
+        "use MCP tools in commands and agents" ;
+    oc:yieldsState oc:ExternalServiceConnected,
+        oc:MCPServerConfigured,
+        oc:MCPToolsAvailable .
+
+oc:kn_0394d8d7 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When referencing MCP tools in command allowed-tools or troubleshooting missing tools" ;
+    oc:directiveContent "MCP tool names follow the format mcp__plugin_<plugin-name>_<server-name>__<tool-name> and are case-sensitive. Configuration changes require restarting Claude Code to take effect." ;
+    oc:hasRationale "Mismatched tool names cause silent failures. Restart is required because configuration is parsed at plugin load time, not dynamically." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_2ce8b579 a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When MCP tools are unavailable or connection errors occur" ;
+    oc:directiveContent "When MCP server connection fails: check URL correctness, verify server is running (stdio), check network connectivity, review authentication config, and use claude --debug for detailed connection logs." ;
+    oc:hasRationale "Most MCP connection failures stem from incorrect URLs, missing environment variables, or stale authentication tokens. Systematic debugging resolves the majority of issues." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_5bfc4d5b a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When selecting which MCP server transport type to configure" ;
+    oc:directiveContent "Choose MCP server type based on use case: stdio for local tools/custom servers, SSE for hosted cloud services with OAuth, HTTP for REST APIs with token auth, WebSocket for real-time bidirectional communication." ;
+    oc:hasRationale "Each transport type has distinct advantages: stdio has lowest latency, SSE handles OAuth automatically, HTTP is stateless and simple, WebSocket enables streaming." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_71ffae5b a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "When designing command or agent workflows that call multiple MCP tools" ;
+    oc:directiveContent "Batch similar MCP tool requests into single calls with filters rather than making many individual queries. Use parallel calls for independent operations." ;
+    oc:hasRationale "Each MCP tool call involves network/process overhead. Batching reduces latency and avoids rate limiting, while parallel calls utilize available concurrency." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_873c1fcf a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When configuring any MCP server with authentication" ;
+    oc:directiveContent "Never hardcode tokens, API keys, or credentials directly in .mcp.json or plugin.json configuration files. Always use environment variable substitution (${VAR_NAME})." ;
+    oc:hasRationale "Hardcoded credentials can be committed to git, leaked in documentation, and exposed to anyone with access to the plugin source code." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_9c12c04a a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When referencing local server executables, config files, or scripts in .mcp.json" ;
+    oc:directiveContent "Use ${CLAUDE_PLUGIN_ROOT} for all file paths in MCP configuration to ensure portability across different installation environments." ;
+    oc:hasRationale "Absolute paths break when the plugin is installed in different locations. CLAUDE_PLUGIN_ROOT resolves to the correct directory at runtime." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_a7adc11f a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When configuring SSE, HTTP, or WebSocket MCP server URLs" ;
+    oc:directiveContent "Always use HTTPS/WSS URLs for network-based MCP servers, never plain HTTP/WS." ;
+    oc:hasRationale "Unencrypted connections expose authentication tokens and data to interception. Secure connections are mandatory for production use." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_bc78011e a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When configuring allowed-tools in command or agent frontmatter" ;
+    oc:directiveContent "Never use wildcard tool pre-approval (mcp__plugin_*__*) in command frontmatter. Always specify individual tool names." ;
+    oc:hasRationale "Wildcard approval grants access to all tools from a server, including potentially destructive operations, violating the principle of least privilege." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_c948f04e a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "After configuring an MCP server, before using tools in commands" ;
+    oc:directiveContent "Before testing MCP integration, verify: valid JSON configuration, correct server URL, required environment variables are set, and run /mcp command to confirm server appears with expected tools." ;
+    oc:hasRationale "Systematic verification catches configuration errors early and avoids confusing runtime failures during command execution." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_d63854b6 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When deciding between MCP configuration methods" ;
+    oc:directiveContent "Prefer dedicated .mcp.json at plugin root over inline mcpServers in plugin.json for better separation of concerns and easier maintenance, especially with multiple servers." ;
+    oc:hasRationale "Dedicated .mcp.json provides clear separation, easier debugging, and scales better when integrating multiple external services." ;
+    oc:severityLevel "MEDIUM" .
+

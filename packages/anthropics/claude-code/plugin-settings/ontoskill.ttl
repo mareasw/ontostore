@@ -1,0 +1,110 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_code_plugin_settings a oc:ExecutableSkill,
+        oc:Skill ;
+    dcterms:identifier "plugin-settings" ;
+    skos:broader "Configuration pattern" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-code/plugin-settings" ;
+    oc:contentHash "3d11b0865d06cab060fdb5e6d03a74a17bfcb7efb790d75563ef3f5642c9d2af" ;
+    oc:dependsOnSkill oc:skill_plugin_structure ;
+    oc:differentia "that uses YAML frontmatter in .claude/plugin-name.local.md files for per-project plugin settings and state management in Claude Code" ;
+    oc:handlesFailure oc:FileNotFound,
+        oc:InvalidInput,
+        oc:PermissionDenied ;
+    oc:hasAllowedTool "Bash",
+        "Edit",
+        "Glob",
+        "Grep",
+        "Read",
+        "Write" ;
+    oc:hasArgumentHint "plugin-name or settings-file-path" ;
+    oc:hasCategory "development" ;
+    oc:hasDescription "This skill should be used when the user asks about \"plugin settings\", \"store plugin configuration\", \"user-configurable plugin\", \".local.md files\", \"plugin state files\", \"read YAML frontmatter\", \"per-project plugin settings\", or wants to make plugin behavior configurable. Documents the .claude/plugin-name.local.md pattern for storing plugin-specific configuration with YAML frontmatter and markdown content." ;
+    oc:hasName "plugin-settings" ;
+    oc:hasPayload oc:payload_3d11b0865d06cab0 ;
+    oc:impartsKnowledge oc:kn_171e87bd,
+        oc:kn_1eda20bd,
+        oc:kn_42e1dd5e,
+        oc:kn_4f1ecca7,
+        oc:kn_4f2cbb48,
+        oc:kn_61541591,
+        oc:kn_d5e68c8c,
+        oc:kn_dc54d4c2 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:DirectoryWritable,
+        oc:FileExists ;
+    oc:resolvesIntent "configure plugin settings",
+        "create per-project plugin state files",
+        "make plugin behavior user-configurable",
+        "parse .local.md settings from hooks and commands",
+        "read YAML frontmatter from local.md files",
+        "store plugin configuration" ;
+    oc:yieldsState oc:PluginConfigured,
+        oc:SettingsFileCreated .
+
+oc:kn_171e87bd a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "After any modification to a .local.md settings file" ;
+    oc:directiveContent "Settings changes require a Claude Code restart to take effect — hooks cannot be hot-swapped within a session." ;
+    oc:hasRationale "Claude Code loads hook configurations at startup; modifying settings files mid-session will not change active hook behavior until restart." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_1eda20bd a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before using any parsed settings value in hook or command logic" ;
+    oc:directiveContent "Always provide sensible defaults when a settings file does not exist or a field is missing — never assume a field is present." ;
+    oc:hasRationale "Settings files are user-managed and optional; missing files or fields should not cause hooks to fail." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_42e1dd5e a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing any plugin that needs user-configurable settings or state persistence" ;
+    oc:directiveContent "Always use the .claude/plugin-name.local.md file path convention with YAML frontmatter for structured config and markdown body for prompts or additional context." ;
+    oc:hasRationale "This convention ensures consistency across plugins, keeps settings per-project, and enables a uniform parsing approach." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_4f1ecca7 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When updating any .local.md settings file from hooks or scripts" ;
+    oc:directiveContent "Never use sed -i for in-place file updates on settings files; always use a temp file plus atomic mv to prevent corruption on interruption." ;
+    oc:hasRationale "Non-atomic updates can leave the settings file in a corrupt state if the process is interrupted mid-write." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_4f2cbb48 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When parsing YAML frontmatter from bash scripts" ;
+    oc:directiveContent "Use sed/grep for simple key-value field extraction; only use yq for complex YAML structures (nested objects, lists requiring iteration)." ;
+    oc:hasRationale "yq adds a dependency that may not be available on all systems; sed/grep is universally available and sufficient for flat key-value pairs." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_61541591 a oc:Idempotency,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When hooks both read and write to the same settings file (e.g., loop counters)" ;
+    oc:directiveContent "Parsing settings files is idempotent; however, updating iteration counters or state fields is not — track state changes carefully." ;
+    oc:hasRationale "Stateful updates like incrementing iteration counters change file contents on each run, making the operation non-idempotent." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_d5e68c8c a oc:KnowledgeNode,
+        oc:SecurityImplication ;
+    oc:appliesToContext "When creating or reading settings files, especially those containing paths or user input" ;
+    oc:directiveContent "Always add .claude/*.local.md to .gitignore and validate settings file paths for traversal attempts (..) before use." ;
+    oc:hasRationale "Settings files may contain user-specific or sensitive configuration; committing them to git leaks per-user state, and unchecked paths enable directory traversal attacks." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_dc54d4c2 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When reading settings from hooks that run on every tool invocation" ;
+    oc:directiveContent "Always implement the quick-exit pattern: check file existence first, then check the enabled flag, before doing any heavy parsing." ;
+    oc:hasRationale "Hooks run frequently; the quick-exit pattern avoids unnecessary I/O and parsing overhead when the plugin is not configured or disabled." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:payload_3d11b0865d06cab0 a oc:ExecutionPayload ;
+    oc:code "bash scripts/validate-settings.sh .claude/plugin-name.local.md" ;
+    oc:executor "shell" ;
+    oc:timeout 10000 .
+

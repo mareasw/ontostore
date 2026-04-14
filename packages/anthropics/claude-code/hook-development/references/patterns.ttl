@@ -1,0 +1,81 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_code_hook_development_patterns a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "patterns" ;
+    skos:broader "Reference guide" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-code/hook-development" ;
+    oc:contentHash "cb607fca192bfa892fd198141b86dac9d0ca2c573a280b054b7beaa56fc9a8bf" ;
+    oc:differentia "provides 10 proven, reusable hook configuration patterns for common Claude Code hook use cases including security validation, test enforcement, context loading, notification logging, MCP monitoring, build verification, permission confirmation, code quality checks, flag-based activation, and configuration-driven behavior" ;
+    oc:extends oc:skill_anthropics_claude_code_hook_development ;
+    oc:handlesFailure oc:InvalidHookConfiguration ;
+    oc:hasAllowedTool "Bash" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_089e9218,
+        oc:kn_0a545b71,
+        oc:kn_49cc2568,
+        oc:kn_6b1d6d6a,
+        oc:kn_dba11fe7,
+        oc:kn_f828a666 ;
+    oc:isUserInvocable false ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "combine multiple hook patterns",
+        "find hook pattern for MCP tool monitoring",
+        "find hook pattern for build verification",
+        "find hook pattern for code quality checks",
+        "find hook pattern for configuration-driven hooks",
+        "find hook pattern for context loading on session start",
+        "find hook pattern for notification logging",
+        "find hook pattern for permission confirmation",
+        "find hook pattern for security validation",
+        "find hook pattern for temporarily active hooks",
+        "find hook pattern for test enforcement" ;
+    oc:yieldsState oc:HookPatternApplied .
+
+oc:kn_089e9218 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing a complete hook system for a project" ;
+    oc:directiveContent "Combine multiple hook patterns (PreToolUse + Stop + SessionStart) for comprehensive, multi-layered protection rather than relying on a single hook point." ;
+    oc:hasRationale "Layered hooks catch issues at different lifecycle stages — before action, after action, and at session boundaries — providing defense in depth." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_0a545b71 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing command-type hook scripts" ;
+    oc:directiveContent "Use early-exit (exit 0) in command hooks when conditions aren't met (e.g., flag file missing, strict mode off) to minimize overhead." ;
+    oc:hasRationale "Hooks fire on every matching event, so fast-path exits prevent unnecessary processing and keep the development workflow responsive." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_49cc2568 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When choosing hook type for a new pattern" ;
+    oc:directiveContent "Use prompt-type hooks for decision/validation logic and command-type hooks for side effects like logging, context loading, and running external tools." ;
+    oc:hasRationale "Prompt hooks leverage LLM reasoning for nuanced decisions (approve/deny/ask), while command hooks execute deterministic scripts reliably for automation tasks." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_6b1d6d6a a oc:KnowledgeNode,
+        oc:SecurityImplication ;
+    oc:appliesToContext "When implementing PreToolUse hooks for Write, Edit, or Bash tools" ;
+    oc:directiveContent "Security validation hooks should check for path traversal ('..'), system directories ('/etc'), credential files ('.env'), and destructive operations ('rm', 'delete', 'drop')." ;
+    oc:hasRationale "These checks prevent accidental or malicious modification of sensitive system files, credential exposure, and irreversible data loss." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_dba11fe7 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When creating hooks that may need to be temporarily disabled or have project-specific settings" ;
+    oc:directiveContent "Do not hardcode hook behavior directly; prefer flag files or JSON configuration to make hooks toggleable and configurable per project." ;
+    oc:hasRationale "Hardcoded hooks create friction when debugging, add overhead for checks that aren't always needed, and prevent team-specific customization without code changes." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_f828a666 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "When using flag-file-based hook activation patterns" ;
+    oc:directiveContent "Must restart Claude Code after creating or removing flag files for hooks to recognize the changes." ;
+    oc:hasRationale "Flag file presence is checked at hook registration time, not at runtime, so changes require a session restart to take effect." ;
+    oc:severityLevel "CRITICAL" .
+

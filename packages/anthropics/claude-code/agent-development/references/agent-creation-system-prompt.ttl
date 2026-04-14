@@ -1,0 +1,89 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_code_agent_development_agent_creation_system_prompt a oc:ExecutableSkill,
+        oc:Skill ;
+    dcterms:identifier "agent-creation-system-prompt" ;
+    skos:broader "Meta-prompt template" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-code/agent-development" ;
+    oc:contentHash "35ea11d43d8462f7a281f9becd99e69fe1cdd9d80b4024cef7092a03f0f73ca1" ;
+    oc:differentia "that generates structured agent configurations (identifier, whenToUse, systemPrompt) for Claude Code plugins by extracting user intent and designing expert personas" ;
+    oc:extends oc:skill_anthropics_claude_code_agent_development ;
+    oc:handlesFailure oc:FileNotFound,
+        oc:InvalidInput,
+        oc:ValidationError ;
+    oc:hasAllowedTool "Bash",
+        "Glob",
+        "Grep",
+        "Read",
+        "Write" ;
+    oc:hasArgumentHint "Agent description or requirements (e.g., \"I need an agent that reviews pull requests for code quality\")" ;
+    oc:hasCategory "development" ;
+    oc:hasPayload oc:payload_35ea11d43d8462f7 ;
+    oc:impartsKnowledge oc:kn_4d8fd500,
+        oc:kn_55c364bd,
+        oc:kn_5937c9d6,
+        oc:kn_b56b4678,
+        oc:kn_ce2bdbeb,
+        oc:kn_f733ccae ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:AgentRequirementsDescribed,
+        oc:DirectoryWritable ;
+    oc:resolvesIntent "convert agent requirements to structured JSON output",
+        "create agent system prompts",
+        "design agent triggering conditions with examples",
+        "generate agent configuration from user description" ;
+    oc:yieldsState oc:AgentConfigurationCreated,
+        oc:AgentFileWritten .
+
+oc:kn_4d8fd500 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing agents that review, analyze, or validate code" ;
+    oc:directiveContent "For code review agents, assume the user means recently written code, not the entire codebase, unless explicitly stated otherwise. Include both proactive (after code is written) and reactive (explicit request) triggering examples." ;
+    oc:hasRationale "Scoping to recent changes makes agents practical and efficient. Proactive examples enable automatic triggering after relevant work without requiring explicit user requests." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_55c364bd a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before generating any agent configuration" ;
+    oc:directiveContent "Before generating an agent, extract core intent from the user description, consider project-specific context from CLAUDE.md files, and validate that the output JSON contains exactly three fields: identifier, whenToUse, and systemPrompt." ;
+    oc:hasRationale "Intent extraction ensures the agent matches actual needs. CLAUDE.md alignment ensures consistency with project conventions. JSON structure validation prevents malformed agent files." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_5937c9d6 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing any agent system prompt" ;
+    oc:directiveContent "Agent system prompts must be written in second person ('You are...', 'You will...'), structured with clear responsibilities, step-by-step process, quality standards, output format, and edge case handling." ;
+    oc:hasRationale "Second-person address directly guides the agent's behavior. Structured sections ensure the agent has sufficient context to operate autonomously without additional guidance." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_b56b4678 a oc:KnowledgeNode,
+        oc:PostFlightValidation ;
+    oc:appliesToContext "After creating any agent markdown file" ;
+    oc:directiveContent "After generating an agent, validate with the validate-agent.sh script which checks: frontmatter structure, required fields (name, description, model, color), name format/length, description quality (examples, 'Use this agent when' pattern), and system prompt length/structure." ;
+    oc:hasRationale "Validation catches structural errors, missing fields, and quality issues before the agent is deployed. The script enforces all naming conventions and content requirements." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_ce2bdbeb a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When creating agent identifier names" ;
+    oc:directiveContent "Never create agent identifiers using generic terms like 'helper' or 'assistant'. Identifiers must use lowercase letters, numbers, and hyphens only, be 3-50 characters, start/end with alphanumeric, and clearly indicate the agent's primary function." ;
+    oc:hasRationale "Generic identifiers make agents indistinguishable and harder to trigger correctly. Precise identifiers improve discoverability and namespace clarity." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_f733ccae a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing agent description/triggering conditions" ;
+    oc:directiveContent "The 'whenToUse' description must start with 'Use this agent when...' and include 2-4 <example> blocks with Context, user message, assistant response, and <commentary> explaining why the agent triggers. Examples must show the assistant using the Agent tool, not responding directly." ;
+    oc:hasRationale "Structured examples with commentary are what Claude uses to determine when to invoke an agent. Without them, triggering becomes unreliable. The Agent tool pattern ensures proper delegation." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:payload_35ea11d43d8462f7 a oc:ExecutionPayload ;
+    oc:code "bash scripts/validate-agent.sh agents/{agent-name}.md" ;
+    oc:executor "shell" ;
+    oc:timeout 30 .
+

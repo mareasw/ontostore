@@ -1,0 +1,102 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_code_mcp_integration_authentication a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "authentication" ;
+    skos:broader "authentication configuration guide" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-code/mcp-integration" ;
+    oc:contentHash "9f3ca61a857a15cc4c0dea9143365b0c49cae558690089dd61f6434186c702ce" ;
+    oc:dependsOnSkill oc:skill_mcp_integration ;
+    oc:differentia "covers all MCP server authentication patterns including OAuth, bearer tokens, API keys, environment variables, and dynamic headers for Claude Code plugins" ;
+    oc:extends oc:skill_anthropics_claude_code_mcp_integration ;
+    oc:handlesFailure oc:NetworkTimeout,
+        oc:PermissionDenied ;
+    oc:hasArgumentHint "authentication method (oauth, bearer, api-key, env-vars, dynamic-headers)" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_059f92c9,
+        oc:kn_4897677a,
+        oc:kn_4aa3ca16,
+        oc:kn_7d82333c,
+        oc:kn_a993ead1,
+        oc:kn_d6503625,
+        oc:kn_dbd587c4,
+        oc:kn_e37b7cfa,
+        oc:kn_ff75b48b ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "configure MCP server authentication",
+        "document authentication requirements for MCP plugins",
+        "implement token-based authentication for MCP",
+        "secure MCP server credentials",
+        "set up OAuth for MCP servers",
+        "troubleshoot MCP authentication issues" ;
+    oc:yieldsState oc:SystemAuthenticated .
+
+oc:kn_059f92c9 a oc:Idempotency,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When using OAuth-based MCP servers over extended sessions" ;
+    oc:directiveContent "OAuth token refresh is automatic and idempotent — Claude Code handles refresh transparently. If refresh fails, the user is prompted to re-authenticate." ;
+    oc:hasRationale "Understanding that token refresh is handled automatically prevents users from unnecessarily re-authenticating or implementing redundant refresh logic" ;
+    oc:severityLevel "LOW" .
+
+oc:kn_4897677a a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "When setting up a new MCP server with token-based authentication" ;
+    oc:directiveContent "Before configuring authentication, test the endpoint separately with curl to verify token validity and correct header format: curl -H 'Authorization: Bearer $API_TOKEN' https://api.example.com/mcp/health should return 200 OK." ;
+    oc:hasRationale "Isolating authentication testing from the full MCP integration prevents conflating auth errors with configuration or connectivity errors" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_4aa3ca16 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When integrating with enterprise services requiring client certificate authentication" ;
+    oc:directiveContent "Mutual TLS (mTLS) is not directly supported in MCP configuration. Use a stdio server wrapper that handles mTLS negotiation as a workaround." ;
+    oc:hasRationale "MCP's JSON configuration schema does not support client certificate fields, requiring a process-based wrapper to terminate the TLS connection" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_7d82333c a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When configuring headers or authentication in MCP server JSON configuration" ;
+    oc:directiveContent "Never hardcode tokens, API keys, or credentials directly in plugin configuration files or commit them to version control. Always use environment variable substitution like ${API_TOKEN}." ;
+    oc:hasRationale "Hardcoded credentials leak through git history, logs, and screen shares, creating irrecoverable security vulnerabilities" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_a993ead1 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When authentication tokens are time-limited, require signing, or need per-request computation" ;
+    oc:directiveContent "For tokens that change, expire, or require dynamic generation (JWT, HMAC signatures, short-lived tokens), use the headersHelper script pattern pointing to a shell script in the plugin's scripts directory." ;
+    oc:hasRationale "Dynamic headers via helper scripts decouple token lifecycle management from static configuration, enabling automatic refresh without user intervention" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_d6503625 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When building or maintaining an MCP plugin that requires authentication" ;
+    oc:directiveContent "Always document all required environment variables, token permissions, and setup instructions with concrete examples in the plugin README." ;
+    oc:hasRationale "Clear authentication documentation is the single biggest factor in successful plugin adoption and reduces support burden" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_dbd587c4 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When choosing an authentication method for an MCP server configuration" ;
+    oc:directiveContent "Prefer OAuth when the service supports it; it is the easiest for users and provides automatic token refresh, scoped permissions, and secure credential management handled entirely by Claude Code." ;
+    oc:hasRationale "OAuth eliminates credential management burden on plugin developers and users, reducing security risk and configuration complexity" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_e37b7cfa a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When troubleshooting MCP authentication failures" ;
+    oc:directiveContent "For 401 errors: verify token is set, not expired, has correct permissions, and header format includes 'Bearer' prefix. For 403 errors: check scopes/permissions and workspace/tenant ID. For auth loops: clear cached tokens by signing out and back in." ;
+    oc:hasRationale "Systematic troubleshooting by HTTP status code quickly narrows the root cause between credential, permission, and configuration issues" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_ff75b48b a oc:KnowledgeNode,
+        oc:SecurityImplication ;
+    oc:appliesToContext "When configuring any MCP server URL or connection" ;
+    oc:directiveContent "Use HTTPS/WSS exclusively for all MCP server connections. Never use plain HTTP. OAuth tokens are encrypted at rest and not accessible to plugins." ;
+    oc:hasRationale "Plain HTTP exposes credentials and tokens to network interception; the secure token storage model prevents plugins from accessing raw OAuth tokens" ;
+    oc:severityLevel "CRITICAL" .
+

@@ -1,0 +1,95 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_code_command_development_advanced_workflows a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "advanced-workflows" ;
+    skos:broader "Workflow pattern guide" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-code/command-development" ;
+    oc:contentHash "eb258095b5a411b68377c96730effe597884a14b619cb0c1a7ab1c801d80a7d9" ;
+    oc:differentia "documents multi-step command sequences, state management, composition, and error handling patterns for Claude Code slash commands" ;
+    oc:extends oc:skill_anthropics_claude_code_command_development ;
+    oc:handlesFailure oc:FileNotFound,
+        oc:PermissionDenied ;
+    oc:hasAllowedTool "Bash",
+        "Read",
+        "Write" ;
+    oc:hasArgumentHint "null" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_1ccf6ab3,
+        oc:kn_1eb2d47b,
+        oc:kn_4212e492,
+        oc:kn_47f63de9,
+        oc:kn_59639e14,
+        oc:kn_66949727,
+        oc:kn_7b5deb83,
+        oc:kn_d18621ad ;
+    oc:isUserInvocable false ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "compose commands into complex automation sequences",
+        "coordinate state between related commands",
+        "create multi-step command workflows",
+        "implement error handling and rollback in command workflows",
+        "manage state across command invocations" ;
+    oc:yieldsState oc:DocumentCreated .
+
+oc:kn_1ccf6ab3 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When building state-carrying workflows that span multiple command runs" ;
+    oc:directiveContent "Never rely on implicit state between command invocations — always persist state to .local.md files and validate state format before consuming it." ;
+    oc:hasRationale "Implicit state is lost when sessions end or commands fail, breaking workflow continuity and making recovery impossible" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_1eb2d47b a oc:KnowledgeNode,
+        oc:RollbackProcedure ;
+    oc:appliesToContext "When executing deployment or modification workflows that change production state" ;
+    oc:directiveContent "Always save current state before performing destructive operations, enabling automatic rollback on failure via saved snapshots." ;
+    oc:hasRationale "Without saved pre-operation state, failures leave the system in an indeterminate state with no clean path back to the known-good configuration" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_4212e492 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing any multi-step interactive command workflow" ;
+    oc:directiveContent "Provide user decision points at critical junctures in workflows — especially before destructive operations, after failures, and when branching logic applies." ;
+    oc:hasRationale "Decision points give users control over workflow progression, prevent unwanted automated actions, and improve trust in the system" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_47f63de9 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When deploying workflows that should not run simultaneously" ;
+    oc:directiveContent "Use workflow locking (e.g., .claude/deployment.lock files) to prevent concurrent execution of workflows that modify shared state." ;
+    oc:hasRationale "Concurrent workflow execution can corrupt shared state, cause race conditions, and lead to unpredictable outcomes" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_59639e14 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing multi-step command workflows that span multiple invocations" ;
+    oc:directiveContent "Use .local.md files with YAML frontmatter for persistent workflow state across command invocations, enabling resume capability and clear progression tracking." ;
+    oc:hasRationale "Explicit state files allow workflows to be interrupted and resumed, and provide a clear audit trail of workflow progress" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_66949727 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When designing command composition patterns and chaining sequences" ;
+    oc:directiveContent "Each command in a composed workflow should have single responsibility — one command does one thing well — while meta-commands orchestrate them." ;
+    oc:hasRationale "Single-responsibility commands are easier to test, maintain, and reuse across different workflows" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_7b5deb83 a oc:Idempotency,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When updating workflow state files in .local.md" ;
+    oc:directiveContent "Workflow state writes should be atomic — write the complete state file in one operation rather than incrementally modifying it." ;
+    oc:hasRationale "Partial or interrupted writes leave state files in an inconsistent format, breaking state parsing and recovery logic" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_d18621ad a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When a multi-step workflow fails partway through execution" ;
+    oc:directiveContent "Implement checkpoint recovery by logging completed steps to a checkpoint file and providing a resume command that reads the last successful checkpoint." ;
+    oc:hasRationale "Checkpoint recovery avoids repeating expensive completed steps and provides a clear recovery path without full restart" ;
+    oc:severityLevel "MEDIUM" .
+
