@@ -1,0 +1,99 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_knowledge_work_plugins_data_context_extractor a oc:ExecutableSkill,
+        oc:Skill ;
+    dcterms:identifier "data-context-extractor" ;
+    skos:broader "Meta-skill" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/knowledge-work-plugins/data-context-extractor" ;
+    oc:contentHash "eec834c52b0666246b4f88fa2a0821aba453b984d9ec55d8d1ba4d342edffdbd" ;
+    oc:differentia "that extracts company-specific data warehouse tribal knowledge from analysts and generates tailored data analysis skills with reference documentation" ;
+    oc:extends oc:skill_skill_creator ;
+    oc:handlesFailure oc:InvalidInput,
+        oc:PlaceholderTextRemaining,
+        oc:SchemaDiscoveryFailed ;
+    oc:hasArgumentHint "\"company name and data warehouse type\" or path to existing skill for iteration mode" ;
+    oc:hasCategory "development" ;
+    oc:hasDescription """Generate or improve a company-specific data analysis skill by extracting tribal knowledge from analysts.
+BOOTSTRAP MODE - Triggers: "Create a data context skill", "Set up data analysis for our warehouse", "Help me create a skill for our database", "Generate a data skill for [company]" → Discovers schemas, asks key questions, generates initial skill with reference files
+ITERATION MODE - Triggers: "Add context about [domain]", "The skill needs more info about [topic]", "Update the data skill with [metrics/tables/terminology]", "Improve the [domain] reference" → Loads existing skill, asks targeted questions, appends/updates reference files
+Use when data analysts want Claude to understand their company's specific data warehouse, terminology, metrics definitions, and common query patterns.""" ;
+    oc:hasName "data-context-extractor" ;
+    oc:hasPayload oc:payload_eec834c52b066624 ;
+    oc:impartsKnowledge oc:kn_003d895c,
+        oc:kn_2b91e441,
+        oc:kn_57688997,
+        oc:kn_667b8ec0,
+        oc:kn_be7abad7,
+        oc:kn_d2483b68,
+        oc:kn_e1578a91 ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:DataWarehouseConnected,
+        oc:SchemaDiscoverable ;
+    oc:resolvesIntent "bootstrap a data context skill for a warehouse",
+        "create a company-specific data analysis skill",
+        "extract tribal knowledge from data analysts",
+        "generate data analysis reference documentation for a company database",
+        "improve an existing data skill with domain-specific context" ;
+    oc:yieldsState oc:ReferenceFilesCreated,
+        oc:SkillGenerated,
+        oc:SkillPackaged .
+
+oc:kn_003d895c a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "During Phase 2 knowledge extraction in Bootstrap Mode" ;
+    oc:directiveContent "Ask core questions conversationally, not all at once. Cover entity disambiguation, primary identifiers, key metrics, data hygiene, and common gotchas in a natural flow." ;
+    oc:hasRationale "Barraging analysts with all questions at once reduces answer quality. Conversational extraction surfaces implicit knowledge that structured forms miss." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_2b91e441 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "During schema discovery in Bootstrap Mode Phase 1" ;
+    oc:directiveContent "Focus on the 3-5 most-queried tables first. Don't try to document the entire schema—start with what analysts actually use." ;
+    oc:hasRationale "Completeness is the enemy of usefulness. Analysts overwhelmingly query a small subset of tables; documenting those well provides more value than shallow coverage of everything." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_57688997 a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "Always, during both Bootstrap and Iteration modes" ;
+    oc:directiveContent "This skill generates new files on disk (SKILL.md, reference markdown files, and a .zip package). It also reads schema metadata from the connected data warehouse." ;
+    oc:hasRationale "Agents must be aware of file system writes and warehouse read operations to avoid unintended overwrites or unnecessary queries." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_667b8ec0 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When generating SKILL.md and sample queries for any target warehouse" ;
+    oc:directiveContent "SQL in generated skills must use the correct dialect syntax for the target warehouse (BigQuery, Snowflake, PostgreSQL/Redshift, Databricks). Always include dialect-specific notes." ;
+    oc:hasRationale "Dialect differences (e.g., SAFE_DIVIDE vs DIV0, backtick vs quote quoting, date function syntax) cause immediate runtime errors if mismatched." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_be7abad7 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Before packaging and delivering any generated skill" ;
+    oc:directiveContent "Never deliver a generated skill that still contains placeholder text like [COMPANY], [PLACEHOLDER], or unfilled template markers." ;
+    oc:hasRationale "Placeholder text indicates incomplete extraction and will produce broken or nonsensical queries for end users." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_d2483b68 a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When user asks to improve or update an existing data skill" ;
+    oc:directiveContent "In Iteration Mode, always load and read the existing skill's SKILL.md and reference files first before proposing changes. Identify the specific gap (new domain, missing metrics, undocumented relationships) before making updates." ;
+    oc:hasRationale "Blindly appending content without understanding existing structure creates duplications and contradictions. Reading first ensures additive, non-breaking updates." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_e1578a91 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before running the packaging script or delivering the skill to the user" ;
+    oc:directiveContent "Validate generated skill structure before packaging: verify SKILL.md has frontmatter with name and description, entity disambiguation is clear, standard filters are documented, at least 2-3 sample queries per domain exist, and reference files are linked from the navigation section." ;
+    oc:hasRationale "Incomplete skills erode trust and require rework. The quality checklist catches gaps before delivery." ;
+    oc:severityLevel "HIGH" .
+
+oc:payload_eec834c52b066624 a oc:ExecutionPayload ;
+    oc:code "python scripts/package_data_skill.py <skill-folder-path> [output-directory]" ;
+    oc:executor "python" ;
+    oc:timeout 30000 .
+

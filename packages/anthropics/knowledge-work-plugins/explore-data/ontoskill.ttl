@@ -1,0 +1,88 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_knowledge_work_plugins_explore_data a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "explore-data" ;
+    skos:broader "Data profiling methodology" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/knowledge-work-plugins/explore-data" ;
+    oc:contentHash "b035a3b2645c231bd80006d32053fc0fc05c5dc90213b8ad5a69706b0bb4a101" ;
+    oc:differentia "generates comprehensive dataset profiles covering structure, quality, patterns, and relationships before analysis" ;
+    oc:handlesFailure oc:FileNotFound,
+        oc:InvalidInput,
+        oc:PermissionDenied ;
+    oc:hasArgumentHint "<table or file>" ;
+    oc:hasCategory "research" ;
+    oc:hasDescription "Profile and explore a dataset to understand its shape, quality, and patterns. Use when encountering a new table or file, checking null rates and column distributions, spotting data quality issues like duplicates or suspicious values, or deciding which dimensions and metrics to analyze." ;
+    oc:hasName "explore-data" ;
+    oc:impartsKnowledge oc:kn_07d96970,
+        oc:kn_3a26ef70,
+        oc:kn_3f220556,
+        oc:kn_63a97e33,
+        oc:kn_ae5b821e,
+        oc:kn_f240932c,
+        oc:kn_f3290181 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:NetworkAvailable ;
+    oc:resolvesIntent "check data quality issues",
+        "discover dimensions and metrics for analysis",
+        "explore a new table or file",
+        "identify data patterns and relationships",
+        "profile a dataset",
+        "understand column distributions and null rates" ;
+    oc:yieldsState oc:DataProfiled,
+        oc:DataQualityAssessed .
+
+oc:kn_07d96970 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When first encountering any dataset" ;
+    oc:directiveContent "Always classify columns into one of 7 types before profiling: Identifier, Dimension, Metric, Temporal, Text, Boolean, or Structural. This drives which profiling checks apply." ;
+    oc:hasRationale "Column classification determines the appropriate statistical measures and quality checks — applying numeric profiling to text columns wastes effort and produces noise." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_3a26ef70 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When assessing data quality for any column" ;
+    oc:directiveContent "Rate column completeness on a 4-tier scale: Green (>99% non-null), Yellow (95-99%), Orange (80-95%), Red (<80%). Flag columns with >5% nulls as warnings and >20% as alerts." ;
+    oc:hasRationale "Graduated severity tiers let users quickly separate cosmetic nulls from structurally missing data that could invalidate analyses." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_3f220556 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "At the start of every data exploration session" ;
+    oc:directiveContent "Before profiling, verify data access: resolve table name with schema prefixes for warehouse connections, or load and validate file format (CSV, Excel, Parquet, JSON) for file inputs. If neither is available, ask the user." ;
+    oc:hasRationale "Attempting to profile without confirmed data access wastes time and produces confusing errors; early resolution ensures a smooth profiling workflow." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_63a97e33 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When reviewing data quality flags in the profile output" ;
+    oc:directiveContent "Do not assume every flagged quality issue is a real problem — quality flags are heuristic and each should receive a quick investigation before acting." ;
+    oc:hasRationale "Over-reacting to heuristic flags wastes time and can lead to unnecessary data transformations that introduce new issues." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_ae5b821e a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When discovering patterns in numeric columns" ;
+    oc:directiveContent "For numeric distributions, characterize shape (normal, right-skewed, left-skewed, bimodal, power law, uniform) and flag strong correlations (|r| > 0.7) while explicitly noting correlation does not imply causation." ;
+    oc:hasRationale "Distribution shape informs which summary statistics are meaningful (e.g., mean is misleading for power-law distributions) and correlation flags prevent false causal inferences." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_f240932c a oc:KnowledgeNode,
+        oc:SuccessIndicator ;
+    oc:appliesToContext "When validating completeness of the profiling output" ;
+    oc:directiveContent "A successful profile includes: overview stats (rows, columns, date range), column details grouped by type, flagged quality issues with severity, and 3-5 recommended follow-up analyses." ;
+    oc:hasRationale "These four output sections ensure the profile is actionable — missing any section leaves the user without either a quality assessment or a clear next step." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_f3290181 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When profiling tables with 100 million+ rows" ;
+    oc:directiveContent "For very large tables (100M+ rows), use sampling for profiling queries rather than full-table scans. Mention to the user if exact counts are needed." ;
+    oc:hasRationale "Full-table profiling on massive datasets is prohibitively expensive in time and compute; sampling provides statistically valid estimates at a fraction of the cost." ;
+    oc:severityLevel "HIGH" .
+

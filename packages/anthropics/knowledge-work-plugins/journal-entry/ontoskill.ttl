@@ -1,0 +1,93 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_knowledge_work_plugins_journal_entry a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "journal-entry" ;
+    skos:broader "accounting workflow" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/knowledge-work-plugins/journal-entry" ;
+    oc:contentHash "71e2ce68c5f716df9d4c22e7e7ffb84b770f9e1de2bfcfe1e8f39e6e055c5392" ;
+    oc:differentia "prepares journal entries with proper debits, credits, supporting detail, and audit-ready review documentation for month-end close accruals and adjustments" ;
+    oc:handlesFailure oc:InvalidInput,
+        oc:PermissionDenied ;
+    oc:hasArgumentHint "<entry type> [period]" ;
+    oc:hasCategory "finance" ;
+    oc:hasDescription "Prepare journal entries with proper debits, credits, and supporting detail. Use when booking month-end accruals (AP, payroll, prepaid), recording depreciation or amortization, posting revenue recognition or deferred revenue adjustments, or documenting an entry for audit review." ;
+    oc:hasName "journal-entry" ;
+    oc:impartsKnowledge oc:kn_42911d19,
+        oc:kn_48508ddf,
+        oc:kn_4927b696,
+        oc:kn_62e0394f,
+        oc:kn_67347ec2,
+        oc:kn_7cc31c67,
+        oc:kn_adb9b27f,
+        oc:kn_e2d12cc1 ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "book month-end accruals",
+        "document journal entry for audit review",
+        "post revenue recognition adjustments",
+        "prepare journal entry",
+        "record depreciation or amortization" ;
+    oc:yieldsState oc:DocumentCreated .
+
+oc:kn_42911d19 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When generating any journal entry" ;
+    oc:directiveContent "Debits must equal credits in every journal entry before finalization. This is a non-negotiable accounting rule." ;
+    oc:hasRationale "Imbalanced entries violate double-entry bookkeeping principles and will be rejected by any ERP system or audit review." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_48508ddf a oc:KnowledgeNode,
+        oc:PostFlightValidation ;
+    oc:appliesToContext "After generating any journal entry" ;
+    oc:directiveContent "Run the 11-point review checklist after generating the entry: verify debits=credits, correct period, valid account codes, accurate amounts, clear memos, correct department coding, prior period consistency, proper reversal flag, supporting docs referenced, approval authority, and no unusual amounts." ;
+    oc:hasRationale "This checklist catches the most common JE errors before they reach the GL and reduces audit adjustments." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_4927b696 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When booking accrual-type journal entries (AP accrual, payroll accrual, prepaid amortization)" ;
+    oc:directiveContent "All accrual entries should have the reversal flag set appropriately. Accruals must auto-reverse in the subsequent period." ;
+    oc:hasRationale "Failure to reverse accruals leads to double-counting expenses in the following period, distorting financial statements." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_62e0394f a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When calculating any journal entry" ;
+    oc:directiveContent "Always pull prior period entries of the same type as reference before calculating a new entry. Compare amounts and flag any unusual or out-of-pattern values." ;
+    oc:hasRationale "Prior period comparison serves as an automated reasonableness check and catches calculation errors or missing items early." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_67347ec2 a oc:Idempotency,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When re-running for the same period/type combination" ;
+    oc:directiveContent "Running this skill multiple times for the same period and entry type may produce duplicate entries. Always compare output against existing posted entries before recommending posting." ;
+    oc:hasRationale "Duplicate journal entries double-count transactions and require manual reversal, creating audit trail noise." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_7cc31c67 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before calculating any journal entry" ;
+    oc:directiveContent "Gather trial balance, subledger detail, and prior period entries before beginning calculations. If no ERP or data warehouse is connected, prompt the user to provide source data." ;
+    oc:hasRationale "Journal entries calculated without source data are estimates prone to material errors and lack the supporting documentation required for audit." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_adb9b27f a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When finalizing any journal entry" ;
+    oc:directiveContent "Never post a journal entry without verifying it is consistent with prior period treatment of the same type." ;
+    oc:hasRationale "Inconsistent treatment between periods is a common audit finding and can indicate errors in methodology or assumptions." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_e2d12cc1 a oc:KnowledgeNode,
+        oc:SecurityImplication ;
+    oc:appliesToContext "Before outputting the finalized journal entry" ;
+    oc:directiveContent "Verify the entry is within the user's approval authority before finalizing. Flag entries that exceed materiality thresholds." ;
+    oc:hasRationale "Posting entries beyond one's approval authority violates segregation of duties controls and creates SOX compliance risk." ;
+    oc:severityLevel "HIGH" .
+

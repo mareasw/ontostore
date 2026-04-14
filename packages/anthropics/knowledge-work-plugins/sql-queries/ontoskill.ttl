@@ -1,0 +1,69 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_knowledge_work_plugins_sql_queries a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "sql-queries" ;
+    skos:broader "Cross-dialect SQL reference" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/knowledge-work-plugins/sql-queries" ;
+    oc:contentHash "50e006902f015ee3a2dde144531a809bef2216dce5161ea8fc18509ec65058e5" ;
+    oc:differentia "provides dialect-specific syntax, common analytical patterns, and performance optimization guidance for PostgreSQL, Snowflake, BigQuery, Redshift, and Databricks" ;
+    oc:handlesFailure oc:InvalidInput,
+        oc:SyntaxError ;
+    oc:hasArgumentHint "dialect and natural language description of the data need or query to write" ;
+    oc:hasCategory "development" ;
+    oc:hasDescription "Write correct, performant SQL across all major data warehouse dialects (Snowflake, BigQuery, Databricks, PostgreSQL, etc.). Use when writing queries, optimizing slow SQL, translating between dialects, or building complex analytical queries with CTEs, window functions, or aggregations." ;
+    oc:hasName "sql-queries" ;
+    oc:impartsKnowledge oc:kn_64300350,
+        oc:kn_714fd132,
+        oc:kn_74151392,
+        oc:kn_762a4c27,
+        oc:kn_f7ca69cb ;
+    oc:isUserInvocable false ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "build complex analytical queries with CTEs and window functions",
+        "debug and fix SQL errors",
+        "optimize slow SQL queries",
+        "translate SQL between dialects",
+        "write SQL queries across data warehouse dialects" ;
+    oc:yieldsState oc:QueryGenerated .
+
+oc:kn_64300350 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing queries for cost-sensitive or performance-critical workloads" ;
+    oc:directiveContent "Avoid SELECT * in BigQuery (billed per byte scanned), avoid cross-node data movement in Redshift (DS_BCAST/DS_DIST), and avoid traditional indexes in Snowflake (use clustering keys instead)." ;
+    oc:hasRationale "These anti-patterns lead to excessive costs, poor performance, or outright failure on the respective platforms" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_714fd132 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When optimizing query performance for a specific data warehouse" ;
+    oc:directiveContent "Optimize based on the specific warehouse: PostgreSQL (indexes, EXISTS over IN), Snowflake (clustering keys, warehouse sizing), BigQuery (partition filtering, avoid SELECT *), Redshift (DISTKEY/SORTKEY design), Databricks (OPTIMIZE/ZORDER, Photon engine)." ;
+    oc:hasRationale "Each warehouse has fundamentally different architectures — optimization strategies that work in one may be counterproductive in another" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_74151392 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing any query with JOINs, aggregations, or arithmetic" ;
+    oc:directiveContent "Always qualify column names with table aliases in JOINs, use NULLIF(denominator, 0) for division, and explicitly cast types when comparing different data types." ;
+    oc:hasRationale "These practices prevent ambiguous column errors, division by zero, and silent type coercion bugs" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_762a4c27 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing SQL for any data warehouse dialect" ;
+    oc:directiveContent "SQL syntax varies significantly across data warehouse dialects — always verify dialect-specific functions before writing queries. For example, BigQuery lacks ILIKE, uses DATE_ADD with INTERVAL syntax, and SAFE_DIVIDE is BigQuery-specific." ;
+    oc:hasRationale "Using wrong dialect syntax causes immediate query failures and can lead to subtle incorrect results rather than errors" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_f7ca69cb a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When writing analytical queries with multiple transformation stages" ;
+    oc:directiveContent "Always use CTEs (WITH clauses) to break complex queries into named, logical steps rather than nesting subqueries. Comment each CTE step with its purpose." ;
+    oc:hasRationale "CTEs dramatically improve readability, debuggability, and maintainability of complex SQL" ;
+    oc:severityLevel "HIGH" .
+

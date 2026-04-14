@@ -1,0 +1,67 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_knowledge_work_plugins_start a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "start" ;
+    skos:broader "Initialization routine" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/knowledge-work-plugins/start" ;
+    oc:contentHash "2e0dec7859c0cf7db8ced86bb87edce5a9c4cdf19bf6e7c21f0d77065a39083a" ;
+    oc:dependsOnSkill oc:skill_memory_management,
+        oc:skill_task_management ;
+    oc:differentia "bootstraps a productivity system by creating task files, memory files, and a dashboard, then interactively decoding the user's workplace shorthand from their existing task list" ;
+    oc:handlesFailure oc:FileNotFound,
+        oc:PermissionDenied ;
+    oc:hasCategory "productivity" ;
+    oc:hasDescription "Initialize the productivity system and open the dashboard. Use when setting up the plugin for the first time, bootstrapping working memory from your existing task list, or decoding the shorthand (nicknames, acronyms, project codenames) you use in your todos." ;
+    oc:hasName "start" ;
+    oc:impartsKnowledge oc:kn_208ea9e8,
+        oc:kn_381b7e9c,
+        oc:kn_4d1f78d6,
+        oc:kn_7a78c0d6,
+        oc:kn_f66b7c87 ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:DirectoryWritable ;
+    oc:resolvesIntent "bootstrap working memory from existing tasks",
+        "decode workplace shorthand (nicknames, acronyms, codenames)",
+        "initialize productivity system",
+        "open productivity dashboard",
+        "set up task management and memory" ;
+    oc:yieldsState oc:DocumentCreated,
+        oc:EnvironmentReady .
+
+oc:kn_208ea9e8 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When opening the dashboard for the user" ;
+    oc:directiveContent "Do NOT use `open` or `xdg-open` to launch the dashboard — in Cowork, the agent runs in a VM and shell open commands won't reach the user's browser." ;
+    oc:hasRationale "Shell open commands in a VM environment cannot reach the user's local browser, so the user must be told to open the file manually." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_381b7e9c a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "During the memory bootstrap phase on first run" ;
+    oc:directiveContent "The best source of workplace language is the user's actual task list. Real tasks contain real shorthand — analyze each task for nicknames, acronyms, project codenames, and internal jargon." ;
+    oc:hasRationale "Authentic task items contain organic workplace shorthand that is more accurate and useful than generic prompts or assumptions." .
+
+oc:kn_4d1f78d6 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When checking preconditions before running the start command" ;
+    oc:directiveContent "If memory is already initialized (CLAUDE.md and memory/ exist), skip bootstrap entirely and just open the dashboard." ;
+    oc:hasRationale "Re-running bootstrap on an existing memory system would overwrite accumulated context and waste the user's time." .
+
+oc:kn_7a78c0d6 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When gathering data from MCP sources (chat, email, documents, calendar)" ;
+    oc:directiveContent "If a connected data source isn't available during the comprehensive scan, skip it gracefully and note the gap rather than blocking." ;
+    oc:hasRationale "Partial context is better than failure; the system can fill gaps later through organic conversation and the update command." .
+
+oc:kn_f66b7c87 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When performing the optional comprehensive scan of messages, emails, documents, and calendar" ;
+    oc:directiveContent "When gathering comprehensive context, present findings grouped by confidence: ready-to-add (high), needs-clarification (ask user), low-frequency/unclear (note for later)." ;
+    oc:hasRationale "Confidence-tiered presentation reduces user fatigue and ensures high-confidence items are added quickly while ambiguous ones get proper review." .
+

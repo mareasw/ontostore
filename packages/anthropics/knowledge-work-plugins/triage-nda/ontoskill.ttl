@@ -1,0 +1,85 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_knowledge_work_plugins_triage_nda a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "triage-nda" ;
+    skos:broader "Legal document screening tool" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/knowledge-work-plugins/triage-nda" ;
+    oc:contentHash "53d9e1fcb882490c277b44bd90e26b99cb62a4a1e271ef2ad345a0536a07c4f9" ;
+    oc:differentia "that classifies incoming NDAs into GREEN/YELLOW/RED triage categories based on systematic screening against standard playbook criteria and generates structured triage reports with routing recommendations" ;
+    oc:handlesFailure oc:InvalidInput,
+        oc:MissingNdaPlaybook ;
+    oc:hasArgumentHint "<NDA file or text>" ;
+    oc:hasCategory "legal" ;
+    oc:hasDescription "Rapidly triage an incoming NDA and classify it as GREEN (standard approval), YELLOW (counsel review), or RED (full legal review). Use when a new NDA arrives from sales or business development, when screening for embedded non-solicits, non-competes, or missing carveouts, or when deciding whether an NDA can be signed under standard delegation." ;
+    oc:hasName "triage-nda" ;
+    oc:hasRequirement oc:req_ac3918c1,
+        oc:req_cbcc2dc5,
+        oc:req_e0d23c99 ;
+    oc:impartsKnowledge oc:kn_4d23560e,
+        oc:kn_796cfed1,
+        oc:kn_9d5fdba1,
+        oc:kn_e4998a9e,
+        oc:kn_f303e16e ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:DocumentProvided ;
+    oc:resolvesIntent "classify an NDA as green yellow or red",
+        "decide whether an NDA can be signed under standard delegation",
+        "evaluate an NDA against standard criteria",
+        "screen an NDA for problematic provisions",
+        "triage an NDA" ;
+    oc:yieldsState oc:NdaClassified,
+        oc:TriageReportGenerated .
+
+oc:kn_4d23560e a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Always, when presenting any NDA triage results" ;
+    oc:directiveContent "This skill assists with legal workflows but does not provide legal advice. All analysis must be reviewed by qualified legal professionals before being relied upon." ;
+    oc:hasRationale "Legal compliance and liability protection — AI-generated legal analysis cannot substitute for professional legal counsel" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_796cfed1 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When screening any NDA during Step 3 (Quick Screen) and Step 4 (Classify)" ;
+    oc:directiveContent "Never approve an NDA that contains embedded non-solicitation, non-compete, exclusivity, standstill, IP assignment/license grant, or broad residuals clauses without flagging as RED requiring full legal review." ;
+    oc:hasRationale "These provisions fundamentally change the nature of the agreement from a simple confidentiality obligation to substantive commercial restrictions" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_9d5fdba1 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When legal.local.md or equivalent playbook is not available" ;
+    oc:directiveContent "If no organization-specific NDA playbook is found, proceed with market-standard defaults: mutual obligations, 2-3 year term (up to 5 for trade secrets), standard carveouts, no non-solicits/non-competes, reasonable commercial jurisdiction. Clearly note that defaults are being used." ;
+    oc:hasRationale "Allows triage to proceed without blocking while maintaining transparency about the analysis basis" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_e4998a9e a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "During Step 4 classification and when encountering disguised commercial agreements" ;
+    oc:directiveContent "Classify conservatively: when in doubt between two tiers, assign the higher-risk tier (e.g., YELLOW over GREEN, RED over YELLOW). Flag any document that is labeled as an NDA but contains substantive commercial terms as RED immediately." ;
+    oc:hasRationale "Under-triage creates legal risk; over-triage only costs review time. Misclassified commercial terms in an NDA can create binding obligations beyond confidentiality" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_f303e16e a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "During Step 3 screening criterion #4 (Standard Carveouts)" ;
+    oc:directiveContent "All five standard carveouts must be verified present: (1) public knowledge, (2) prior possession, (3) independent development, (4) third-party receipt, (5) legal compulsion with notice. Missing independent development or legal compulsion carveouts should trigger RED classification." ;
+    oc:hasRationale "Missing carveouts create exposure to claims that independently developed or legally compelled disclosures constitute breach" ;
+    oc:severityLevel "HIGH" .
+
+oc:req_ac3918c1 a oc:RequirementTool ;
+    oc:isOptional true ;
+    oc:requirementValue "document reader (PDF, DOCX)" .
+
+oc:req_cbcc2dc5 a oc:RequirementKnowledge ;
+    oc:isOptional true ;
+    oc:requirementValue "NDA legal concepts (carveouts, residuals clauses, non-solicitation, non-compete, governing law)" .
+
+oc:req_e0d23c99 a oc:RequirementKnowledge ;
+    oc:isOptional true ;
+    oc:requirementValue "organization-specific NDA playbook (legal.local.md)" .
+

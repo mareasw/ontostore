@@ -1,0 +1,101 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_knowledge_work_plugins_cowork_plugin_customizer a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "cowork-plugin-customizer" ;
+    skos:broader "Plugin customization framework" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/knowledge-work-plugins/cowork-plugin-customizer" ;
+    oc:contentHash "448dd38df23eeacf5efe9a0d7b637949d1e86867dc185bb11cab1cc27aab96cd" ;
+    oc:dependsOnSkill oc:skill_plugin_structure ;
+    oc:differentia "that tailors a Claude Code plugin for a specific organization by discovering tool usage, replacing placeholders, and connecting MCPs" ;
+    oc:handlesFailure oc:FileNotFound,
+        oc:PermissionDenied ;
+    oc:hasAllowedTool "Bash",
+        "Edit",
+        "Glob",
+        "Grep",
+        "Read",
+        "Write" ;
+    oc:hasArgumentHint "plugin-name or customization target" ;
+    oc:hasCategory "productivity" ;
+    oc:hasDescription """Customize a Claude Code plugin for a specific organization's tools and workflows. Use when: customize plugin, set up plugin, configure plugin, tailor plugin, adjust plugin settings, customize plugin connectors, customize plugin skill, tweak plugin, modify plugin configuration.
+""" ;
+    oc:hasName "cowork-plugin-customizer" ;
+    oc:impartsKnowledge oc:kn_1a3a01e7,
+        oc:kn_1c29478c,
+        oc:kn_2645a7a7,
+        oc:kn_6654556e,
+        oc:kn_6e772a35,
+        oc:kn_73d8f35f,
+        oc:kn_8c14f120,
+        oc:kn_9717299c ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "configure plugin connectors and MCPs",
+        "customize a plugin for an organization",
+        "replace plugin placeholders with real organizational values",
+        "set up a generic plugin template",
+        "tailor plugin skills and workflows to match org tools" ;
+    oc:yieldsState oc:DocumentCreated .
+
+oc:kn_1a3a01e7 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When first determining customization mode after locating a plugin" ;
+    oc:directiveContent "If ~~ placeholders exist in the plugin, default to generic plugin setup mode unless the user explicitly requests scoped customization of a specific part." ;
+    oc:hasRationale "~~ placeholders indicate an unconfigured template that needs full setup, which is the most common and valuable starting point." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_1c29478c a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When navigating and customizing plugin file structure" ;
+    oc:directiveContent "Treat commands/*.md files the same as skills/*/SKILL.md files, since the Cowork UI presents them as a single 'Skills' concept." ;
+    oc:hasRationale "Legacy plugins may use commands/ directories, and failing to treat them equivalently would miss customization points." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_2645a7a7 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Immediately after locating the plugin directory" ;
+    oc:directiveContent "Before starting customization, run grep -rn '~~\\w' to detect whether the plugin is a generic template (has placeholders) or an already-configured plugin (no placeholders). This determines the entire workflow path." ;
+    oc:hasRationale "The presence or absence of placeholders fundamentally changes the customization approach from template fill-in to scoped/general modification." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_6654556e a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "All user-facing output including todo list items, questions, and summaries" ;
+    oc:directiveContent "Never expose technical placeholder syntax (~~) or internal customization mechanics to the user. Frame all output in terms of the plugin's capabilities and the organization's tools." ;
+    oc:hasRationale "Exposing internal implementation details creates confusion for non-technical users and undermines trust." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_6e772a35 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When packaging the plugin as a .plugin file after customization" ;
+    oc:directiveContent "Create the zip in /tmp/ first, then copy to the outputs folder. Never write directly to the outputs folder as it may fail due to permissions and leave behind temporary files." ;
+    oc:hasRationale "Direct writes to the outputs folder can fail due to permission constraints, leaving corrupt or partial artifacts." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_73d8f35f a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "During Phase 3 when resolving individual todo items" ;
+    oc:directiveContent "If the user's free-form input or knowledge MCPs provided a clear answer to a customization question, apply it directly without asking for confirmation. Only use AskUserQuestion when neither source provides an answer." ;
+    oc:hasRationale "Minimizing unnecessary questions reduces friction and respects the user's time while still gathering needed information." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_8c14f120 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "During all customization operations" ;
+    oc:directiveContent "Never change the name of the plugin or skill being customized. Do not rename directories, files, or the plugin/skill name fields." ;
+    oc:hasRationale "Renaming breaks internal references and the plugin's identity within the Cowork ecosystem." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_9717299c a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When find command returns no results for the plugin directory" ;
+    oc:directiveContent "If the plugin directory cannot be found, abort and inform the user that customizing plugins is only available in the desktop app's Cowork mode." ;
+    oc:hasRationale "Remote containers do not have access to mounted plugin directories, so customization is physically impossible outside the desktop app." ;
+    oc:severityLevel "CRITICAL" .
+

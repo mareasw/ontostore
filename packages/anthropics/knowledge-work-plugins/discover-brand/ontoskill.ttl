@@ -1,0 +1,99 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_knowledge_work_plugins_discover_brand a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "discover-brand" ;
+    skos:broader "brand material discovery orchestrator" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/knowledge-work-plugins/discover-brand" ;
+    oc:contentHash "6e884c3e89646b7dde5c95ec3b2cfa79dc51bf64f7f15b0e61379bea16e8763d" ;
+    oc:dependsOnSkill oc:skill_guideline_generation ;
+    oc:differentia "autonomously searches connected enterprise platforms to find, triage, and rank brand guidelines, style guides, and voice documents using a multi-phase algorithm with cross-source validation" ;
+    oc:handlesFailure oc:EmptySearchResults,
+        oc:NoPlatformsConnected,
+        oc:PermissionDenied ;
+    oc:hasAllowedTool "Read",
+        "Task",
+        "Write" ;
+    oc:hasArgumentHint "company name or confirmation to start discovery" ;
+    oc:hasCategory "marketing" ;
+    oc:hasDescription "This skill orchestrates autonomous discovery of brand materials across enterprise platforms (Notion, Confluence, Google Drive, Box, SharePoint, Figma, Gong, Granola, Slack). It should be used when the user asks to \"discover brand materials\", \"find brand documents\", \"search for brand guidelines\", \"audit brand content\", \"what brand materials do we have\", \"find our style guide\", \"where are our brand docs\", \"do we have a style guide\", \"discover brand voice\", \"brand content audit\", or \"find brand assets\"." ;
+    oc:hasName "discover-brand" ;
+    oc:impartsKnowledge oc:kn_2ca12230,
+        oc:kn_544f4d05,
+        oc:kn_554547e6,
+        oc:kn_8c147e66,
+        oc:kn_a9278b9a,
+        oc:kn_b40c9020,
+        oc:kn_bfba27b3,
+        oc:kn_e22366ca ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:EnvironmentReady,
+        oc:SystemAuthenticated ;
+    oc:resolvesIntent "audit brand content across connected platforms",
+        "discover brand materials across enterprise platforms",
+        "discover brand voice from multiple sources",
+        "find brand documents and style guides",
+        "search for brand guidelines" ;
+    oc:yieldsState oc:DiscoveryReportGenerated .
+
+oc:kn_2ca12230 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When Phase 2 triage produces no authoritative brand documents" ;
+    oc:directiveContent "When zero AUTHORITATIVE sources are found, adapt the scoring algorithm by raising OPERATIONAL trust weight to 0.9, CONVERSATIONAL to 0.85, and bumping inferred explicitness scores to 0.5." ;
+    oc:hasRationale "Without formal brand guidelines, conversational and operational sources become the primary evidence. Fixed weighting would under-rank these, leading to poor discovery results." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_544f4d05 a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When encountering platform access failures or empty results" ;
+    oc:directiveContent "If a platform returns permission errors, note the gap and continue with other platforms. If all searches return empty, flag as 'low coverage' and suggest manual document provision." ;
+    oc:hasRationale "Partial discovery from available platforms is more valuable than failing entirely. Low coverage flags inform the user that results may be incomplete and need supplementation." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_554547e6 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before starting brand discovery" ;
+    oc:directiveContent "Before launching discovery, validate that at least one document platform (Notion, Confluence, Google Drive, Box, SharePoint) is connected. If zero document platforms are connected, stop and inform the user." ;
+    oc:hasRationale "Brand guidelines and style guides almost always live on document storage platforms. Gong/Granola/Slack transcripts are valuable supplements but unlikely to contain formal brand documents." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_8c147e66 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "During source triage and ranking phase" ;
+    oc:directiveContent "Use a weighted composite scoring algorithm (Recency 30%, Explicitness 25%, Authority 20%, Specificity 15%, Cross-Source Consistency 10%) multiplied by category trust weight to rank discovered sources." ;
+    oc:hasRationale "This ensures the most relevant, recent, and authoritative brand materials surface first and feeds higher-quality input to guideline generation." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_a9278b9a a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When validating platform coverage before discovery" ;
+    oc:directiveContent "Do not search only supplementary platforms (Slack, Gong, Granola, Figma) without any document platforms. Do not proceed if zero document platforms are connected." ;
+    oc:hasRationale "Supplementary platforms contain conversational and contextual brand signals but not authoritative brand documents. Discovery results will be low-confidence without document platforms." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_b40c9020 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "During deep-fetch filtering in Phase 3" ;
+    oc:directiveContent "Exclude OPERATIONAL, CONVERSATIONAL, and CONTEXTUAL sources older than 12 months from deep fetch. Exclude STALE sources entirely. AUTHORITATIVE sources have no hard cutoff." ;
+    oc:hasRationale "Older non-authoritative content risks polluting discovery with outdated brand positioning. Authoritative sources remain valid regardless of age as they represent official brand definitions." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_bfba27b3 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "Before launching any discovery agent" ;
+    oc:directiveContent "Always orient the user with a brief explanation of the discovery process before starting, and wait for explicit confirmation. Keep scope confirmation to one question, not a questionnaire." ;
+    oc:hasRationale "Users need to understand what will happen and confirm before an autonomous agent searches their enterprise platforms. Minimizing friction during scope confirmation prevents user drop-off." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_e22366ca a oc:Idempotency,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Always — discovery is a pure read operation" ;
+    oc:directiveContent "Discovery is non-destructive and read-only across all platforms. Re-running discovery does not modify any source documents or existing brand materials." ;
+    oc:hasRationale "Users can safely re-run discovery without risk of corrupting or overwriting existing brand documents on any connected platform." ;
+    oc:severityLevel "LOW" .
+

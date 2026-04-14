@@ -1,0 +1,95 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_knowledge_work_plugins_brand_voice_enforcement a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "brand-voice-enforcement" ;
+    skos:broader "Content generation framework" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/knowledge-work-plugins/brand-voice-enforcement" ;
+    oc:contentHash "c926fef2102edbda9fba74d45b88832ad530cf0ad5235e4e9bf941185d332f8c" ;
+    oc:differentia "that applies existing brand voice guidelines to all sales and marketing content by loading voice constants, flexing tone by context, validating output, and explaining brand choices" ;
+    oc:extends oc:skill_discover_brand,
+        oc:skill_guideline_generation ;
+    oc:handlesFailure oc:BrandConflictDetected,
+        oc:BrandGuidelinesNotFound ;
+    oc:hasArgumentHint "content request (e.g., email, proposal, LinkedIn post, Slack message)" ;
+    oc:hasCategory "marketing" ;
+    oc:hasDescription "This skill applies brand guidelines to content creation. It should be used when the user asks to \"write an email\", \"draft a proposal\", \"create a pitch deck\", \"write a LinkedIn post\", \"draft a presentation\", \"write a Slack message\", \"draft sales content\", or any content creation request where brand voice should be applied. Also triggers on \"on-brand\", \"brand voice\", \"enforce voice\", \"apply brand guidelines\", \"brand-aligned content\", \"write in our voice\", \"use our brand tone\", \"make this sound like us\", \"rewrite this in our tone\", or \"this doesn't sound on-brand\". Not for generating guidelines from scratch (use guideline-generation) or discovering brand materials (use discover-brand)." ;
+    oc:hasName "brand-voice-enforcement" ;
+    oc:impartsKnowledge oc:kn_31592735,
+        oc:kn_37d4927e,
+        oc:kn_43039a49,
+        oc:kn_49d777d2,
+        oc:kn_56c34747,
+        oc:kn_7c7a4795,
+        oc:kn_8cc0ac92,
+        oc:kn_9513d0b7 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:BrandGuidelinesAvailable ;
+    oc:resolvesIntent "apply brand voice to content",
+        "enforce brand guidelines on drafts",
+        "rewrite content in brand tone",
+        "validate content against brand guidelines",
+        "write on-brand content" ;
+    oc:yieldsState oc:OnBrandContentGenerated .
+
+oc:kn_31592735 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Before every content generation request" ;
+    oc:directiveContent "When loading brand guidelines, check sources in strict order: (1) session context from earlier in conversation, (2) local file `.claude/brand-voice-guidelines.md` in the user's working folder, (3) ask the user. Stop at the first source found." ;
+    oc:hasRationale "Session-generated guidelines reflect the user's most recent intent; local files may be stale; asking the user is the fallback when no automated source exists" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_37d4927e a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When enforcing brand voice on any content piece" ;
+    oc:directiveContent "Do not apply all voice attributes at maximum intensity in every piece of content. Prioritize the 2-3 most relevant attributes for the content type and audience, and let others naturally recede." ;
+    oc:hasRationale "Overloading content with every brand attribute makes it feel mechanically assembled rather than naturally on-brand" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_43039a49 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When loading local brand guideline files" ;
+    oc:directiveContent "In Cowork environments, the agent runs from a plugin cache directory, not the user's project. Always resolve `.claude/brand-voice-guidelines.md` relative to the user's working folder, never from the agent's current working directory." ;
+    oc:hasRationale "Using a relative path from the agent's CWD will fail to find the guidelines file because the CWD is a plugin cache, not the user's project" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_49d777d2 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When determining skill scope" ;
+    oc:directiveContent "Not for generating brand guidelines from scratch (use guideline-generation skill) or discovering brand materials across platforms (use discover-brand skill). This skill only applies existing guidelines to content." ;
+    oc:hasRationale "Clear scope boundaries prevent duplication and ensure each skill handles its specific concern — discovery, generation, and enforcement are separate responsibilities" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_56c34747 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When setting tone for any content piece" ;
+    oc:directiveContent "Tone adjusts along three independent dimensions — formality, energy, and technical depth — based on a tone-by-context matrix that maps content types to appropriate tone settings." ;
+    oc:hasRationale "Decomposing tone into independent dimensions allows precise calibration for each audience and channel without changing the brand's core voice" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_7c7a4795 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Always when generating or reviewing content" ;
+    oc:directiveContent "Voice is constant, tone flexes by context. Voice defines WHO the brand is (personality, values, identity) and never changes. Tone defines HOW the brand speaks in a given moment (formality, energy, technical depth) and adapts to audience and content type." ;
+    oc:hasRationale "Confusing voice with tone leads to inconsistent brand application — brands that change personality across channels feel inauthentic, while brands that never adjust tone feel robotic" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_8cc0ac92 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "After every content generation output" ;
+    oc:directiveContent "After generating content, briefly highlight which brand guidelines were applied, explain key voice and tone decisions, note any adaptations for context, and offer to refine based on feedback." ;
+    oc:hasRationale "Transparency about brand application builds user trust and enables iterative refinement of both content and guidelines" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_9513d0b7 a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When a content request contradicts established brand guidelines" ;
+    oc:directiveContent "When the user's request conflicts with brand guidelines, explain the conflict clearly, provide a recommendation, and offer three options: follow guidelines strictly, adapt for context, or override. Default to adapting guidelines with an explanation of the tradeoff." ;
+    oc:hasRationale "Rigid enforcement creates friction; transparent adaptation preserves brand integrity while respecting user intent" ;
+    oc:severityLevel "MEDIUM" .
+

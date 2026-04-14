@@ -1,0 +1,71 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_knowledge_work_plugins_prospect a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "prospect" ;
+    skos:broader "Lead generation pipeline" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/knowledge-work-plugins/prospect" ;
+    oc:contentHash "7b1d3121b616894a0176dfc78f7e70b176e8caa1733321e554d5bdbdbfaf0a83" ;
+    oc:dependsOnSkill oc:skill_sequence_load ;
+    oc:differentia "that parses natural language ICP descriptions into Apollo API searches, enriches companies and contacts, and presents ranked lead tables with ICP fit scoring" ;
+    oc:handlesFailure oc:InvalidInput,
+        oc:NetworkTimeout,
+        oc:PermissionDenied ;
+    oc:hasArgumentHint "[describe your ideal customer]" ;
+    oc:hasCategory "automation" ;
+    oc:hasDescription "Full ICP-to-leads pipeline. Describe your ideal customer in plain English and get a ranked table of enriched decision-maker leads with emails and phone numbers." ;
+    oc:hasName "prospect" ;
+    oc:impartsKnowledge oc:kn_14a3752a,
+        oc:kn_a2caf8d6,
+        oc:kn_aae494a4,
+        oc:kn_dacf4e42,
+        oc:kn_e2b59fdc ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:APIKeySet,
+        oc:NetworkAvailable ;
+    oc:resolvesIntent "find leads matching ideal customer profile",
+        "generate enriched lead list from ICP description",
+        "prospect for decision-maker contacts",
+        "search for companies and contacts by criteria" ;
+    oc:yieldsState oc:LeadsGenerated .
+
+oc:kn_14a3752a a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Before Step 5 — enriching leads with contact data" ;
+    oc:directiveContent "Tell the user exactly how many credits will be consumed before enriching leads with apollo_people_bulk_match." ;
+    oc:hasRationale "Apollo credits are a finite, paid resource; transparency prevents unexpected costs" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_a2caf8d6 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When presenting the final lead table in Step 6" ;
+    oc:directiveContent "ICP Fit should be scored across four dimensions: title match, seniority match, company size match, and industry match. Strong = 4/4, Good = 3/4, Partial = 2/4." ;
+    oc:hasRationale "Consistent multi-dimensional scoring gives users a reliable signal for prioritization" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_aae494a4 a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "During lead enrichment in Step 5" ;
+    oc:directiveContent "Each enrichment call (apollo_people_bulk_match) consumes Apollo credits. Batch up to 10 leads per call and inform the user of total credit cost." ;
+    oc:hasRationale "Credit consumption has direct financial impact; batching optimizes credit usage" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_dacf4e42 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Steps 3 and 4 — narrowing from company search to contact search" ;
+    oc:directiveContent "Enrich only the top 10 companies from search results and scope people searches to enriched company domains rather than searching broadly." ;
+    oc:hasRationale "Targeted enrichment yields higher-quality leads and reduces API costs compared to broad searches" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_e2b59fdc a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before executing any Apollo API calls" ;
+    oc:directiveContent "At minimum, you need a title/role and an industry or company size from the ICP description before proceeding. If the ICP is vague, ask 1-2 clarifying questions." ;
+    oc:hasRationale "Vague ICPs produce irrelevant results and waste API credits" ;
+    oc:severityLevel "HIGH" .
+

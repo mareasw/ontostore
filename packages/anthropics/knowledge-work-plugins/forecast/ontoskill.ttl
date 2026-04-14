@@ -1,0 +1,68 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_knowledge_work_plugins_forecast a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "forecast" ;
+    skos:broader "Sales forecasting tool" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/knowledge-work-plugins/forecast" ;
+    oc:contentHash "ebca770a939a6cb0080e4b0ad61aca6d8c1d86f9f241ce1906ea19a7d9d9ff0b" ;
+    oc:differentia "that generates weighted pipeline forecasts with scenario analysis, commit vs. upside breakdown, and gap-to-quota recommendations from CRM data or manual input" ;
+    oc:handlesFailure oc:InsufficientData,
+        oc:InvalidInput ;
+    oc:hasArgumentHint "<period>" ;
+    oc:hasCategory "sales" ;
+    oc:hasDescription "Generate a weighted sales forecast with best/likely/worst scenarios, commit vs. upside breakdown, and gap analysis. Use when preparing a quarterly forecast call, assessing gap-to-quota from a pipeline CSV, deciding which deals to commit vs. call upside, or checking pipeline coverage against your number." ;
+    oc:hasName "forecast" ;
+    oc:impartsKnowledge oc:kn_5cd7c9f6,
+        oc:kn_646a48fd,
+        oc:kn_704cd672,
+        oc:kn_77ceec85,
+        oc:kn_b08e46d3 ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:PipelineDataAvailable ;
+    oc:resolvesIntent "analyze pipeline coverage against quota",
+        "assess gap to quota with recommendations",
+        "generate weighted sales forecast",
+        "identify commit vs upside deals",
+        "prepare quarterly forecast call" ;
+    oc:yieldsState oc:ForecastGenerated .
+
+oc:kn_5cd7c9f6 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When receiving pipeline data via CSV upload, paste, or description" ;
+    oc:directiveContent "Do not accept pipeline data without at minimum: deal name, amount, stage, and close date. Without these four fields, the forecast will be unreliable." ;
+    oc:hasRationale "These four fields are the minimum required to compute weighted forecast, stage analysis, and gap-to-quota calculations" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_646a48fd a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When classifying deals into commit vs. upside categories" ;
+    oc:directiveContent "Only commit deals you would bet on; upside is for everything else. Commit means high confidence, upside means possible but risky." ;
+    oc:hasRationale "Over-committing inflates forecast accuracy and erodes trust with leadership; honest commit/upside split improves forecast credibility" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_704cd672 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When evaluating whether pipeline is sufficient to meet quota" ;
+    oc:directiveContent "3x pipeline coverage is healthy; below 2x is risky. Use coverage ratio as a quick health check on pipeline adequacy." ;
+    oc:hasRationale "Historical sales data shows that weighted pipeline needs roughly 3x coverage to reliably hit quota given stage-based win rates" .
+
+oc:kn_77ceec85 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When calculating weighted forecast values from pipeline data" ;
+    oc:directiveContent "Stage probabilities default to: Closed Won 100%, Negotiation 80%, Proposal 60%, Evaluation 40%, Discovery 20%, Prospecting 10%. Must be overridden if the user's CRM uses different stage names or win rates." ;
+    oc:hasRationale "Default probabilities are industry averages; using incorrect probabilities for a specific sales org will produce misleading forecasts" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_b08e46d3 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When reviewing pipeline for risk flags and forecast accuracy" ;
+    oc:directiveContent "Stale close dates kill forecast accuracy. Push out deals that won't close in time. Deals with no activity in 14+ days should be flagged as at-risk regardless of stage." ;
+    oc:hasRationale "Close date accuracy and activity recency are stronger predictors of deal outcomes than stage alone; ignoring them produces over-optimistic forecasts" ;
+    oc:severityLevel "MEDIUM" .
+
