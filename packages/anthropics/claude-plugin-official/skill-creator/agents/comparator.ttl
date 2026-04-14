@@ -1,0 +1,77 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_plugin_official_skill_creator_comparator a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "comparator" ;
+    skos:broader "Evaluation agent" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/skill-creator" ;
+    oc:contentHash "fe1fc9787c495d864c5d6eada47396478572325fde1b33a96d78bf4b849b7a3e" ;
+    oc:differentia "that compares two outputs blindly without knowing which skill produced them, using a rubric-based scoring system" ;
+    oc:extends oc:skill_anthropics_claude_plugin_official_skill_creator ;
+    oc:handlesFailure oc:FileNotFound,
+        oc:InvalidInput ;
+    oc:hasAllowedTool "Glob",
+        "Read",
+        "Write" ;
+    oc:hasArgumentHint "output_a_path, output_b_path, eval_prompt, expectations" ;
+    oc:hasRequirement oc:req_a4bb58aa,
+        oc:req_d374a021 ;
+    oc:impartsKnowledge oc:kn_673122f6,
+        oc:kn_b40819a5,
+        oc:kn_d8cd7385,
+        oc:kn_ec15e964,
+        oc:kn_f24978d4 ;
+    oc:isUserInvocable false ;
+    oc:nature "Work" ;
+    oc:requiresState oc:FileExists ;
+    oc:resolvesIntent "compare two outputs",
+        "evaluate output quality",
+        "judge which output is better",
+        "run blind comparison",
+        "score outputs against rubric" ;
+    oc:yieldsState oc:DocumentCreated .
+
+oc:kn_673122f6 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Before evaluating outputs, during rubric generation" ;
+    oc:directiveContent "Generate a task-specific rubric with two dimensions (Content and Structure) before scoring, adapting criteria to the specific task type (e.g., PDF forms, documents, data outputs)." ;
+    oc:hasRationale "A standardized but adaptable rubric ensures consistent, fair evaluation across different task types while accounting for domain-specific quality criteria." .
+
+oc:kn_b40819a5 a oc:FallbackStrategy,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When both outputs are poor quality or both are high quality" ;
+    oc:directiveContent "If both outputs fail, pick the one that fails less badly. If both are excellent, pick the one that's marginally better based on specific cited examples." ;
+    oc:hasRationale "Even in edge cases, providing a directional winner is more actionable for skill improvement than declaring frequent ties." .
+
+oc:kn_d8cd7385 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Throughout the entire comparison process" ;
+    oc:directiveContent "Never attempt to infer which skill produced which output. Judge purely on output quality to maintain blind comparison integrity." ;
+    oc:hasRationale "Knowing or inferring the source skill introduces confirmation bias and defeats the purpose of blind evaluation." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_ec15e964 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When determining the winner between outputs A and B" ;
+    oc:directiveContent "Prioritize overall rubric score first, assertion pass rates second, and declare a TIE only as a last resort. Be decisive — one output is usually better, even if marginally." ;
+    oc:hasRationale "Decisive comparisons provide clearer signal for skill improvement. Rubric scores capture holistic quality while assertions are secondary evidence." .
+
+oc:kn_f24978d4 a oc:Idempotency,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When re-executing comparison on identical outputs" ;
+    oc:directiveContent "The comparison writes a deterministic JSON result to a specified path. Re-running on the same outputs should produce the same winner and rubric scores." ;
+    oc:hasRationale "Consistent evaluation results enable reliable skill quality tracking over time and across evaluation runs." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:req_a4bb58aa a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "JSON output writing capability" .
+
+oc:req_d374a021 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Ability to read and compare file/directory contents" .
+

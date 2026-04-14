@@ -1,0 +1,88 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_plugin_official_writing_hookify_rules a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "writing-hookify-rules" ;
+    skos:broader "Configuration skill" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/writing-hookify-rules" ;
+    oc:contentHash "69f5bf9b487a2b1d1e6b0f58ee4f8d4416cc4e5124c5fd2ea08f608c7e304277" ;
+    oc:differentia "guides creation of markdown-based hookify rules with YAML frontmatter that define regex patterns to watch for and contextual messages to display when patterns match during agent tool usage" ;
+    oc:extends oc:skill_hook_development ;
+    oc:handlesFailure oc:FileNotFound,
+        oc:InvalidInput ;
+    oc:hasArgumentHint "rule description or behavior to guard against" ;
+    oc:hasCategory "development" ;
+    oc:hasDescription "This skill should be used when the user asks to \"create a hookify rule\", \"write a hook rule\", \"configure hookify\", \"add a hookify rule\", or needs guidance on hookify rule syntax and patterns." ;
+    oc:hasName "writing-hookify-rules" ;
+    oc:impartsKnowledge oc:kn_1a19cdbc,
+        oc:kn_1ce8c53e,
+        oc:kn_281cd46d,
+        oc:kn_462f52af,
+        oc:kn_6895ef98,
+        oc:kn_c57e0dcb,
+        oc:kn_e6e11299 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:DirectoryWritable,
+        oc:EnvironmentReady ;
+    oc:resolvesIntent "add a hookify rule",
+        "configure hookify",
+        "create a hookify rule",
+        "define pattern-matching guardrails for agent behavior",
+        "learn hookify rule syntax and patterns",
+        "write a hook rule" ;
+    oc:yieldsState oc:HookifyRuleCreated .
+
+oc:kn_1a19cdbc a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing regex patterns for hookify rules" ;
+    oc:directiveContent "Do not write overly broad patterns like `log` that match unintended strings (login, dialog, catalog), nor overly specific patterns that only match exact paths. Prefer scoped patterns like `console\\.log\\(` or `rm\\s+-rf`." ;
+    oc:hasRationale "Overly broad patterns cause false positives that erode trust in the rule system; overly specific patterns miss variants of the targeted behavior." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_1ce8c53e a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When using advanced format with multiple conditions" ;
+    oc:directiveContent "All conditions in a multi-condition rule must match for the rule to trigger. Conditions are ANDed, not ORed." ;
+    oc:hasRationale "The hookify engine evaluates all conditions as a conjunction; if any condition fails, the entire rule does not fire. This prevents accidental partial matches." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_281cd46d a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "Always when creating hookify rules" ;
+    oc:directiveContent "Rules must be stored in `.claude/hookify.{descriptive-name}.local.md` files with YAML frontmatter containing name (required), enabled (required), event (required), and pattern or conditions." ;
+    oc:hasRationale "The hookify system scans for files matching this naming convention and parses the YAML frontmatter to determine rule activation, event binding, and pattern matching logic." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_462f52af a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When naming rules and writing message bodies" ;
+    oc:directiveContent "Rule names should use kebab-case starting with a verb (warn, prevent, block, require, check) and be descriptive and action-oriented. Good messages explain what was detected, why it matters, and suggest alternatives." ;
+    oc:hasRationale "Descriptive, verb-prefixed names make rules self-documenting and easier to manage. Informative messages help the agent understand the rationale and take corrective action rather than simply being blocked." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_6895ef98 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When authoring and iterating on hookify rule files" ;
+    oc:directiveContent "Rules are read dynamically on each tool use — changes take effect immediately without restart. Use unquoted patterns in YAML frontmatter to avoid double-backslash escaping issues." ;
+    oc:hasRationale "Dynamic loading enables rapid iteration. Using unquoted YAML patterns avoids the common pitfall where quoted strings require double backslashes for regex metacharacters like \\s." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_c57e0dcb a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "When creating hookify rule files" ;
+    oc:directiveContent "Hookify rules affect agent behavior by injecting contextual messages or blocking operations. Adding `.claude/*.local.md` to `.gitignore` prevents committing potentially project-specific guard rules to version control." ;
+    oc:hasRationale "Rules can block operations or alter agent behavior, which is powerful but can cause confusion if committed to shared repositories where other developers may not expect them." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_e6e11299 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before finalizing any hookify rule pattern" ;
+    oc:directiveContent "Test regex patterns before committing them using `python3 -c \"import re; print(re.search(r'pattern', 'test text'))\"` or an online Python-flavor regex tester like regex101.com." ;
+    oc:hasRationale "Regex errors in production rules cause silent failures — the rule simply won't match. Testing ensures the pattern behaves as intended against expected and edge-case inputs." ;
+    oc:severityLevel "MEDIUM" .
+

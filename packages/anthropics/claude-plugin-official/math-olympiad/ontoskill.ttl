@@ -1,0 +1,118 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_plugin_official_math_olympiad a oc:ExecutableSkill,
+        oc:Skill ;
+    dcterms:identifier "math-olympiad" ;
+    skos:broader "Competition math problem solver" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/math-olympiad" ;
+    oc:contentHash "84766ffdb312de59ac42d9c26f8d1e4844abd0b13a1127e0c5e45a30bba87acb" ;
+    oc:differentia "that uses multi-agent parallel solving with adversarial verification, dual context isolation, and calibrated abstention to produce verified proofs or honest abstentions for olympiad-level problems" ;
+    oc:handlesFailure oc:InvalidInput,
+        oc:PermissionDenied ;
+    oc:hasAllowedTool "Bash",
+        "Python" ;
+    oc:hasArgumentHint "competition math problem statement, proof to verify, or request to simplify a proof" ;
+    oc:hasCategory "research" ;
+    oc:hasDescription "Solve competition math problems (IMO, Putnam, USAMO, AIME) with adversarial verification that catches the errors self-verification misses. Activates when asked to 'solve this IMO problem', 'prove this olympiad inequality', 'verify this competition proof', 'find a counterexample', 'is this proof correct', or for any problem with 'IMO', 'Putnam', 'USAMO', 'olympiad', or 'competition math' in it. Uses pure reasoning (no tools) — then a fresh-context adversarial verifier attacks the proof using specific failure patterns, not generic 'check logic'. Outputs calibrated confidence — will say 'no confident solution' rather than bluff. If LaTeX is available, produces a clean PDF after verification passes." ;
+    oc:hasName "math-olympiad" ;
+    oc:hasPayload oc:payload_84766ffdb312de59 ;
+    oc:impartsKnowledge oc:kn_08692538,
+        oc:kn_178f8ae4,
+        oc:kn_3f9f1bc2,
+        oc:kn_5cb484e0,
+        oc:kn_622a946c,
+        oc:kn_82616eb7,
+        oc:kn_99ea2dc7,
+        oc:kn_c3a27a7f,
+        oc:kn_d57ff24c,
+        oc:kn_e555b3ff ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "find counterexamples to mathematical claims",
+        "generate clean LaTeX presentations of verified proofs",
+        "prove olympiad inequalities",
+        "simplify mathematical proofs",
+        "solve competition math problems",
+        "verify olympiad proofs" ;
+    oc:yieldsState oc:DocumentCreated .
+
+oc:kn_08692538 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When verification repeatedly finds holes that cannot be fixed" ;
+    oc:directiveContent "Calibrated abstention is mandatory: after 3 failed revise cycles, output 'no confident solution' with partial results. Wrong-and-confident is worse than honest abstain." ;
+    oc:hasRationale "The metric that matters is conditional accuracy — when the system says 'solved,' it should be right. Coverage at the cost of false positives degrades trust." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_178f8ae4 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "When preparing to launch parallel solver agents" ;
+    oc:directiveContent "Before launching solver agents, verify the problem statement is unambiguous, set opts.label on every agent() call with the problem ID (e.g., 'P3:solver:2'), and confirm starting angles are varied across parallel agents." ;
+    oc:hasRationale "Without labels, results from batch runs cannot be associated with problems. Without varied starting angles, parallel agents converge on the same approach." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_3f9f1bc2 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "Before beginning any problem-solving workflow" ;
+    oc:directiveContent "Always run an interpretation check before solving: list 2-3 readings of the problem, identify which makes it trivial vs hard, and solve the hard reading. Olympiad problems often plant easy misreadings as traps." ;
+    oc:hasRationale "The Aletheia case study found 50 of 63 'technically correct' solutions were for the wrong interpretation — solving the wrong problem is the dominant failure mode." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_5cb484e0 a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "After any ABSTAIN at the verify stage" ;
+    oc:directiveContent "When tight-budget workflow abstains, always launch one deep-mode agent before writing the final abstention — give it the partial proof, verifier gap descriptions, and bounded local computation access." ;
+    oc:hasRationale "Problems with √n or log n answers are often invisible to pure reasoning because the optimal structure is asymmetric; bounded computation can reveal patterns that pure reasoning misses." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_622a946c a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When deep-mode agents use bounded computation for recurrence problems" ;
+    oc:directiveContent "For recurrences with polynomial degree ≥ 2, never compute terms exactly — work in ℤ/2^m or track v_p(·) instead. Doubly-exponential growth means b_30 has trillions of digits." ;
+    oc:hasRationale "Exact computation of doubly-exponential sequences is infeasible and causes timeout; modular arithmetic or valuation tracking preserves the needed information symbolically." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_82616eb7 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When running adversarial verification on any proof" ;
+    oc:directiveContent "Never let a verifier see the solver's thinking trace — strip all reasoning blocks, false starts, and backtracking before verification. A verifier that sees the reasoning is biased toward agreement." ;
+    oc:hasRationale "Long chains of reasoning read as supporting evidence even when the conclusion is wrong — this is the #1 lever for verification quality, as demonstrated by self-verified 85.7% IMO success dropping to <5% under human grading." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_99ea2dc7 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When running multi-verifier vote-verify on candidate solutions" ;
+    oc:directiveContent "Use asymmetric vote thresholds: 4 HOLDS to confirm a proof, but only 2 HOLE FOUND to refute it. Apply pigeonhole early exit to save verification cost on clear cases." ;
+    oc:hasRationale "One flaky verifier shouldn't kill a correct proof, but two independent dissents is a real signal. Pigeonhole exit saves ~30% of verification calls when the outcome is already decided." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_c3a27a7f a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Always — in both tight-budget and deep-mode workflows" ;
+    oc:directiveContent "Never use web access, web search, or any network tool to look up problem solutions. Finding the answer on AoPS or a blog voids the proof and misrepresents the skill's capability." ;
+    oc:hasRationale "Olympiad solving must test actual reasoning capability, not retrieval. The orchestrator itself must also refrain from web-searching to 'help' the deep agent." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_d57ff24c a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When verifying any proof that makes a general claim about a class of objects" ;
+    oc:directiveContent "Do not claim a proof is correct if its specialization to a famous object (ζ, quadratic reciprocity, etc.) would settle a known open problem — this is the most reliable red flag for a hidden gap." ;
+    oc:hasRationale "If the argument's skeleton applies to a canonical hard instance and proves something open or false about it, there is always a gap at the step where the argument stops working for that instance." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_e555b3ff a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When stuck on a case-split proof where one branch closes easily but the other resists" ;
+    oc:directiveContent "When a proof splits into cases and one resists, step back before grinding — the hard case's hypothesis often implies something strong about an intermediate object that collapses both cases in a few lines." ;
+    oc:hasRationale "Case splits often obscure unified arguments; the variable being split on may take a known value under the hypothesis, making the entire split unnecessary." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:payload_84766ffdb312de59 a oc:ExecutionPayload ;
+    oc:code "bash scripts/check_latex.sh && bash scripts/compile_pdf.sh {body_tex} {output_dir}" ;
+    oc:executor "shell" ;
+    oc:timeout 120 .
+

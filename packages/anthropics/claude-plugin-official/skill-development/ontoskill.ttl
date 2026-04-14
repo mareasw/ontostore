@@ -1,0 +1,103 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_plugin_official_skill_development a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "skill-development" ;
+    skos:broader "Skill authoring guide" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/skill-development" ;
+    oc:contentHash "eee50852bb7fdada2b1b43ac506d14aa5ee0047415602afe2f15f744d9323ea6" ;
+    oc:differentia "that provides a structured methodology for creating, editing, and validating Claude Code plugin skills with progressive disclosure, imperative writing style, and proper directory structure" ;
+    oc:extends oc:skill_skill_creator ;
+    oc:handlesFailure oc:FileNotFound,
+        oc:InvalidInput ;
+    oc:hasAllowedTool "Bash",
+        "Edit",
+        "Glob",
+        "Grep",
+        "Read",
+        "Write" ;
+    oc:hasArgumentHint "skill-name, skill-purpose, trigger-phrases" ;
+    oc:hasCategory "development" ;
+    oc:hasDescription "This skill should be used when the user wants to \"create a skill\", \"add a skill to plugin\", \"write a new skill\", \"improve skill description\", \"organize skill content\", or needs guidance on skill structure, progressive disclosure, or skill development best practices for Claude Code plugins." ;
+    oc:hasName "skill-development" ;
+    oc:impartsKnowledge oc:kn_0a0f029a,
+        oc:kn_0cb83fc3,
+        oc:kn_58f03de2,
+        oc:kn_7040a8ad,
+        oc:kn_8fae0a52,
+        oc:kn_90976bd5,
+        oc:kn_ed451698,
+        oc:kn_ee448d09 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "add a skill to plugin",
+        "create a skill",
+        "design progressive disclosure for skills",
+        "improve skill description",
+        "organize skill content",
+        "understand skill anatomy",
+        "validate skill structure",
+        "write a new skill" ;
+    oc:yieldsState oc:DocumentCreated .
+
+oc:kn_0a0f029a a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When organizing skill content across files" ;
+    oc:directiveContent "Do not duplicate information across SKILL.md and references/ files. Each piece of information should live in exactly one location. Prefer references/ for detailed content unless it is truly core to the skill." ;
+    oc:hasRationale "Duplication causes context bloat and maintenance burden — when information is updated in one place but not the other, it creates inconsistencies that mislead the agent" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_0cb83fc3 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When writing YAML frontmatter description for any skill" ;
+    oc:directiveContent "Include specific trigger phrases in the frontmatter description using concrete user utterances (e.g., 'create a hook', 'add a PreToolUse hook'). Avoid vague descriptions like 'Provides guidance for working with hooks.'" ;
+    oc:hasRationale "Specific trigger phrases enable Claude's auto-discovery mechanism to accurately match user queries to the correct skill, reducing mis-triggers and improving response quality" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_58f03de2 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When creating any new skill from scratch" ;
+    oc:directiveContent "Follow the 6-step skill creation process in order: (1) Understand with concrete examples, (2) Plan reusable resources, (3) Create directory structure, (4) Edit skill starting with resources then SKILL.md, (5) Validate and test, (6) Iterate based on real usage." ;
+    oc:hasRationale "The sequential process ensures skills are grounded in real usage patterns, properly resourced, and validated before deployment — skipping steps leads to vague triggers, bloated content, or missing resources" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_7040a8ad a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When creating skills specifically for Claude Code plugins (as opposed to standalone skills)" ;
+    oc:directiveContent "Plugin skills must be created directly in the plugin's skills/ directory (e.g., plugin-name/skills/skill-name/SKILL.md). They are distributed as part of the plugin, not as separate packages. No init_skill.py or packaging scripts are needed for plugin skills." ;
+    oc:hasRationale "Plugin skills have a simpler lifecycle than standalone skills — they ride on the plugin's distribution mechanism and do not need independent packaging or initialization tooling" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_8fae0a52 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing or editing any SKILL.md file" ;
+    oc:directiveContent "Keep SKILL.md lean (1,500-2,000 words ideal, under 3,000 max). Move detailed patterns, advanced techniques, API docs, and migration guides to references/ files. Core concepts, essential procedures, and quick-reference tables belong in SKILL.md." ;
+    oc:hasRationale "Progressive disclosure minimizes context window consumption by loading only essential content when the skill triggers, deferring detailed material until Claude determines it is needed" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_90976bd5 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before publishing or packaging any skill" ;
+    oc:directiveContent "Before finalizing a skill, verify: SKILL.md has valid YAML frontmatter with name and description, description uses third-person with specific trigger phrases, body uses imperative form, body is under 3,000 words, all referenced files exist, examples are complete and working, scripts are executable." ;
+    oc:hasRationale "The validation checklist catches the most common skill quality issues that degrade agent performance, ensuring consistent quality across the skill ecosystem" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_ed451698 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When finalizing any skill with bundled resources" ;
+    oc:directiveContent "Do not leave bundled resources (references/, examples/, scripts/) unreferenced in SKILL.md. Claude must be explicitly told these resources exist and when to use them." ;
+    oc:hasRationale "Without explicit references, Claude's auto-discovery cannot find and load the supplementary resources, rendering them useless and wasting the effort of creating them" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_ee448d09 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When writing any skill content" ;
+    oc:directiveContent "Use imperative/infinitive form (verb-first) throughout the SKILL.md body. Use third-person in the frontmatter description ('This skill should be used when...'). Never use second person ('You should...', 'You need to...')." ;
+    oc:hasRationale "Consistent instructional language optimized for AI consumption ensures clarity and maintains uniform style across all skills" ;
+    oc:severityLevel "HIGH" .
+

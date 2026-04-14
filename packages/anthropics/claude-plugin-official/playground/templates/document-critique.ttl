@@ -1,0 +1,64 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_plugin_official_playground_document_critique a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "document-critique" ;
+    skos:broader "Interactive playground template" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/playground" ;
+    oc:contentHash "c5bd7a68a53f2075d127e482c93b5f3d0b51c24bf8d301c1124801cca7be2d41" ;
+    oc:differentia "that provides a structured document review interface with approve/reject/comment workflow for generating actionable feedback prompts" ;
+    oc:extends oc:skill_anthropics_claude_plugin_official_playground ;
+    oc:handlesFailure oc:InvalidInput,
+        oc:NoSuggestionsGenerated ;
+    oc:hasArgumentHint "document content to critique" ;
+    oc:hasCategory "document" ;
+    oc:impartsKnowledge oc:kn_25201b12,
+        oc:kn_3f94177b,
+        oc:kn_735fecd5,
+        oc:kn_cf1dc82f,
+        oc:kn_eb945c15 ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:DocumentContentAvailable ;
+    oc:resolvesIntent "approve or reject document suggestions",
+        "critique documents",
+        "generate improvement suggestions for documents",
+        "review documents with structured feedback" ;
+    oc:yieldsState oc:ActionablePromptGenerated,
+        oc:DocumentCritiqueGenerated .
+
+oc:kn_25201b12 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When building document critique UIs" ;
+    oc:directiveContent "Separate the document view from the suggestions panel to allow parallel review without losing context." ;
+    oc:hasRationale "Side-by-side layout lets users see the original text and suggestions simultaneously, reducing cognitive load and context switching." .
+
+oc:kn_3f94177b a oc:Idempotency,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When toggling suggestion statuses during review" ;
+    oc:directiveContent "The prompt output is regenerated from current suggestion state each time, so approving/rejecting can be freely reversed without corruption." ;
+    oc:hasRationale "State-driven regeneration ensures the prompt always reflects the current set of approvals and comments, making the review process non-destructive." .
+
+oc:kn_735fecd5 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When generating the prompt output from reviewed suggestions" ;
+    oc:directiveContent "Do not include rejected suggestions in the final prompt output — only show them for context." ;
+    oc:hasRationale "Including rejected suggestions as actionable items would result in unwanted changes being applied to the document, defeating the purpose of the review workflow." .
+
+oc:kn_cf1dc82f a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When generating suggestions for document critique" ;
+    oc:directiveContent "Each suggestion must include a specific line reference, actionable suggestion text, a category tag, and a status field." ;
+    oc:hasRationale "Structured suggestions enable precise matching to document lines and allow systematic filtering, approval, and prompt generation." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_eb945c15 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When matching suggestions to document line numbers" ;
+    oc:directiveContent "Use fuzzy matching (±2 lines) when mapping suggestions to document lines to handle minor line reference discrepancies." ;
+    oc:hasRationale "Line numbers can shift slightly between document versions or when content is reformatted; fuzzy matching prevents suggestions from appearing detached from their target text." .
+

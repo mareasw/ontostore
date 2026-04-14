@@ -1,0 +1,129 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_plugin_official_build_mcpb a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "build-mcpb" ;
+    skos:broader "MCP server packaging skill" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/build-mcpb" ;
+    oc:contentHash "83861aaf52440ebc702913c36e09448c7e1f6ef894cd6546764972353fa6fff2" ;
+    oc:differentia "bundles a local MCP server with its runtime into a single .mcpb file that runs without requiring Node/Python on the user's machine" ;
+    oc:extends oc:skill_build_mcp_server ;
+    oc:handlesFailure oc:FileNotFound,
+        oc:InvalidInput,
+        oc:PermissionDenied ;
+    oc:hasArgumentHint "MCP server project directory or description of server to package" ;
+    oc:hasCategory "development" ;
+    oc:hasDescription "This skill should be used when the user wants to \"package an MCP server\", \"bundle an MCP\", \"make an MCPB\", \"ship a local MCP server\", \"distribute a local MCP\", discusses \".mcpb files\", mentions bundling a Node or Python runtime with their MCP server, or needs an MCP server that interacts with the local filesystem, desktop apps, or OS and must be installable without the user having Node/Python set up." ;
+    oc:hasName "build-mcpb" ;
+    oc:hasRequirement oc:req_0d5277c6,
+        oc:req_2a24a66a,
+        oc:req_6a8d4711,
+        oc:req_cd3dedd1,
+        oc:req_db4fb765 ;
+    oc:impartsKnowledge oc:kn_0293b663,
+        oc:kn_128a52b4,
+        oc:kn_4aeffbe9,
+        oc:kn_57cd1da6,
+        oc:kn_8475e823,
+        oc:kn_a33fc686,
+        oc:kn_acfa9b2a,
+        oc:kn_d21efcb0,
+        oc:kn_fa5df396 ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:DirectoryWritable,
+        oc:EnvironmentReady ;
+    oc:resolvesIntent "build a local MCP server installable without toolchain setup",
+        "bundle an MCP server with its runtime for local distribution",
+        "create a manifest.json for an MCPB package",
+        "distribute a local MCP server as a single file",
+        "package an MCP server into a .mcpb bundle" ;
+    oc:yieldsState oc:DocumentCreated .
+
+oc:kn_0293b663 a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "After building and before distributing an MCPB package" ;
+    oc:directiveContent "Test the final .mcpb on a machine WITHOUT your dev toolchain before shipping. 'Works on my machine' failures in MCPB almost always trace to a dependency that wasn't actually bundled." ;
+    oc:hasRationale "Bundled dependencies may have transitive native extensions or platform-specific binaries that appear to work locally but fail on clean machines." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_128a52b4 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing the tool surface for an MCPB server" ;
+    oc:directiveContent "Split read and write tools into separate MCP tools. Mark read tools with readOnlyHint: true and destructive tools with destructiveHint: true. Consider not shipping delete tools at all." ;
+    oc:hasRationale "Read-only tools cannot be weaponized regardless of prompt injection. Tool annotations let hosts auto-approve reads and confirm destructive operations, reducing the blast radius of compromised calls." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_4aeffbe9 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When any tool accepts a file path parameter joined to a root directory" ;
+    oc:directiveContent "Always validate paths using resolve and relative checks (not String.includes) to prevent traversal attacks. Use the safeJoin pattern: resolve the full path, compute relative path from root, reject if it starts with '..' or is absolute." ;
+    oc:hasRationale "Simple string checks miss encoded traversals and symlink-based escapes. The resolve+relative pattern normalizes all edge cases." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_57cd1da6 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When configuring the server.mcp_config.env section of manifest.json" ;
+    oc:directiveContent "There is no auto-prefix for environment variables. The env var names your server reads are exactly what you declare in manifest server.mcp_config.env. Use ${user_config.KEY} for install-time substitution and ${__dirname} for bundle-relative paths." ;
+    oc:hasRationale "Developers often expect a convention like MCPB_CONFIG_* auto-prefixing. The manifest uses exact env var names, so misalignment between manifest env and server code silently yields undefined values." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_8475e823 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When any MCPB tool spawns a child process" ;
+    oc:directiveContent "Never use exec() or shell=True for spawning processes. Always use execFile with array-args to prevent command injection from user-controlled inputs." ;
+    oc:hasRationale "Shell interpolation of user input is the #1 command injection vector. Array-arg APIs bypass shell parsing entirely." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_a33fc686 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When deciding whether to build an MCPB vs a remote MCP server" ;
+    oc:directiveContent "Do NOT use MCPB for servers that only hit cloud APIs — those should be remote HTTP MCP servers. MCPB is exclusively for servers that must run on the user's machine (filesystem, desktop apps, localhost services, OS APIs)." ;
+    oc:hasRationale "Packaging a cloud-only server as MCPB adds local-security burden for zero user benefit — the user gains nothing from running it locally." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_acfa9b2a a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When any tool returns file contents, directory listings, or search results" ;
+    oc:directiveContent "Cap all unbounded outputs: file reads to ~1MB, directory listing counts, and search result matches. Return truncated content with a size notice rather than unbounded payloads." ;
+    oc:hasRationale "Claude will request arbitrarily large files. Uncapped reads cause memory spikes, slow responses, and chat transcript bloat." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_d21efcb0 a oc:KnowledgeNode,
+        oc:SecurityImplication ;
+    oc:appliesToContext "When writing any MCPB server tool handler that interacts with the filesystem, spawns processes, or handles user input" ;
+    oc:directiveContent "MCPB has NO sandbox or permissions block — the server process runs with full user privileges. Every path must be validated with resolve+containment checks, every spawned process must be allowlisted, and tool inputs must be treated as untrusted." ;
+    oc:hasRationale "Prompt injection can cause the AI to call tools with malicious arguments. Without platform-level sandboxing, tool handlers are the only defense against path traversal, command injection, and data exfiltration." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_fa5df396 a oc:Idempotency,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When determining which directories an MCPB server may access" ;
+    oc:directiveContent "Use roots/list from the MCP spec to get user-approved workspace boundaries instead of hardcoding a ROOT directory from config. Fall back to config only if the host doesn't support roots." ;
+    oc:hasRationale "roots/list is the spec-native mechanism for workspace boundaries — it respects the host's permission model and user choices rather than assuming a hardcoded path." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:req_0d5277c6 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "manifest.json schema v0.4" .
+
+oc:req_2a24a66a a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "npx @anthropic-ai/mcpb" .
+
+oc:req_6a8d4711 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "MCP protocol and stdio transport" .
+
+oc:req_cd3dedd1 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Local MCP security best practices" .
+
+oc:req_db4fb765 a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "node" .
+

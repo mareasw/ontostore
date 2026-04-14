@@ -1,0 +1,88 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_plugin_official_plugin_structure_component_patterns a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "component-patterns" ;
+    skos:broader "Reference guide for Claude Code plugin component organization" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/plugin-structure" ;
+    oc:contentHash "38681792a6aba4f06d3c391b20b04060263f1fbaacc5880cc0cafe0543d37f91" ;
+    oc:differentia "that provides advanced directory layout patterns, lifecycle documentation, and structural templates for commands, agents, skills, hooks, scripts, and cross-component coordination within plugins" ;
+    oc:extends oc:skill_anthropics_claude_plugin_official_plugin_structure ;
+    oc:handlesFailure oc:InvalidDirectoryStructure ;
+    oc:hasArgumentHint "plugin directory or component type to organize" ;
+    oc:hasCategory "development" ;
+    oc:hasRequirement oc:req_5793d36a ;
+    oc:impartsKnowledge oc:kn_1be06fc4,
+        oc:kn_5b1c7536,
+        oc:kn_7034720d,
+        oc:kn_952c9a44,
+        oc:kn_ad375f70,
+        oc:kn_bb50d2bf,
+        oc:kn_daabab5f ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:PluginManifestCreated ;
+    oc:resolvesIntent "choose directory structure for commands agents skills hooks scripts",
+        "implement cross-component patterns like shared resources and layered architecture",
+        "organize plugin components",
+        "plan scalable plugin architecture",
+        "understand component lifecycle discovery and activation phases" ;
+    oc:yieldsState oc:PluginComponentsOrganized .
+
+oc:kn_1be06fc4 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When using hierarchical command structures with nested directories" ;
+    oc:directiveContent "Claude Code does NOT automatically discover nested command directories. For hierarchical command structures, you MUST list each subdirectory explicitly in plugin.json custom paths (e.g., ['./commands/ci', './commands/deployment'])." ;
+    oc:hasRationale "Auto-discovery only scans the top-level commands/ directory for .md files. Nested subdirectories are invisible without explicit path configuration." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_5b1c7536 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When organizing hooks with event-based separate files" ;
+    oc:directiveContent "Do NOT use file references like ${file:./pre-tool-use.json} in hooks.json — Claude Code does not support them. Use a build script to combine separate hook files into the final hooks.json." ;
+    oc:hasRationale "Claude Code expects a single valid JSON hooks.json without file interpolation. Build scripts can combine modular source files at packaging time." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_7034720d a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When building plugins with multiple component types that need shared logic" ;
+    oc:directiveContent "Use shared lib/ directories for code reused across components (commands, agents, hooks), referencing via ${CLAUDE_PLUGIN_ROOT}/lib/. Separate concerns into layers: commands (UI), agents (orchestration), skills (knowledge), lib (core logic)." ;
+    oc:hasRationale "Cross-component code reuse ensures consistency and easier maintenance. Layered architecture separates concerns cleanly and scales to 100+ file plugins." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_952c9a44 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When structuring agent definitions in a plugin" ;
+    oc:directiveContent "Organize agents by the dimension most relevant to your use case: role-based for distinct responsibilities, capability-based for technology-specific expertise with automatic selection, or workflow-based for sequential pipeline stages." ;
+    oc:hasRationale "The organizational dimension determines how effectively Claude Code can select the right agent for a given task. Role-based aids manual invocation, capability-based aids automatic selection." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_ad375f70 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When organizing commands, agents, skills, hooks, or scripts in a plugin" ;
+    oc:directiveContent "Start with a flat directory structure and reorganize into categorized or hierarchical structures only when the number of components (15-20+) justifies it. Use custom paths in plugin.json for hierarchical structures since Claude Code doesn't auto-discover nested directories." ;
+    oc:hasRationale "Starting simple avoids premature over-engineering; reorganizing early prevents structural debt. Claude Code only auto-discovers top-level directories, so nested structures require explicit path configuration." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_bb50d2bf a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When organizing skill directories with rich resources" ;
+    oc:directiveContent "Keep SKILL.md lean (~1500 words) and move detailed information into references/, examples/, scripts/, and assets/ subdirectories. Claude loads these resources progressively only as needed based on the task." ;
+    oc:hasRationale "Progressive disclosure manages context window usage efficiently. Core concepts stay accessible while detailed references load on demand." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_daabab5f a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "When designing plugin directory structure for performance" ;
+    oc:directiveContent "Avoid deep directory nesting and minimize custom path entries. Component registration happens during Claude Code initialization, not continuously. Large plugin.json configurations slow loading time." ;
+    oc:hasRationale "Deep nesting impacts discovery time during initialization. Each custom path adds scanning overhead. Lean configurations enable faster plugin loading." ;
+    oc:severityLevel "LOW" .
+
+oc:req_5793d36a a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Understanding of Claude Code plugin structure (plugin.json, component types)" .
+

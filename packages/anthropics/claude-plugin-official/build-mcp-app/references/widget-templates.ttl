@@ -1,0 +1,107 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_plugin_official_build_mcp_app_widget_templates a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "widget-templates" ;
+    skos:broader "template library" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/build-mcp-app" ;
+    oc:contentHash "d165f546ed7f91ece474d7605abc91e54e410ecebd3b649829687282c4887386" ;
+    oc:differentia "provides minimal HTML scaffolds for common MCP widget shapes (picker, confirm, progress, display, carousel) that inline the ext-apps bundle and communicate via App.sendMessage" ;
+    oc:extends oc:skill_anthropics_claude_plugin_official_build_mcp_app ;
+    oc:hasArgumentHint "widget type (picker, confirm, progress, display, carousel)" ;
+    oc:hasCategory "development" ;
+    oc:hasRequirement oc:req_3370e128,
+        oc:req_3ea77834,
+        oc:req_539f87f2 ;
+    oc:impartsKnowledge oc:kn_0e4f05ad,
+        oc:kn_19b5e99f,
+        oc:kn_21de3ee1,
+        oc:kn_5239b6f2,
+        oc:kn_87f248f6,
+        oc:kn_b03e8f2d,
+        oc:kn_bece947e,
+        oc:kn_e4da63aa,
+        oc:kn_fc9f9bbc ;
+    oc:isUserInvocable true ;
+    oc:nature "concept" ;
+    oc:resolvesIntent "build interactive widget templates",
+        "create MCP widget UI",
+        "render picker confirm progress display or carousel widgets",
+        "scaffold widget HTML for MCP apps" .
+
+oc:kn_0e4f05ad a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When building any MCP widget HTML template" ;
+    oc:directiveContent "All widget templates must inline the App class from @modelcontextprotocol/ext-apps at build time via the /*__EXT_APPS_BUNDLE__*/ placeholder — the iframe's CSP blocks CDN script imports." ;
+    oc:hasRationale "CSP restrictions prevent external script loading inside the widget iframe, so the bundle must be inlined at build time." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_19b5e99f a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When serving multiple widget templates from an MCP server" ;
+    oc:directiveContent "Bundle once per server startup (or at build time) and reuse the bundle string across all widget templates. Avoid re-reading and re-processing the bundle for each widget." ;
+    oc:hasRationale "The bundle rewriting is expensive; reusing it avoids redundant file I/O and string processing per widget registration." .
+
+oc:kn_21de3ee1 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When rendering images in widgets (especially carousel)" ;
+    oc:directiveContent "The iframe CSP blocks remote img-src. Fetch thumbnails server-side in the tool handler, embed as data: URLs in the JSON payload, and add referrerpolicy='no-referrer' as a fallback." ;
+    oc:hasRationale "CSP prevents loading external images directly; server-side fetching and data URL embedding is the only reliable approach." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_5239b6f2 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When building carousel widgets" ;
+    oc:directiveContent "Do not use scroll-snap-type on carousels — it can cause a few-pixel-off-flush initial render. Use scrollLeft = 0 after rendering instead." ;
+    oc:hasRationale "CSS scroll snap can create subtle layout glitches on initial render that degrade the user experience." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_87f248f6 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When implementing a confirmation interaction" ;
+    oc:directiveContent "For simple confirmations, prefer MCP elicitation over a confirm widget. Only use the confirm widget when you need custom styling or context beyond what a native form offers." ;
+    oc:hasRationale "Elicitation is lighter-weight and more accessible for simple binary confirmations; widgets add complexity that should be justified." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_b03e8f2d a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing widget interaction patterns" ;
+    oc:directiveContent "Use silent state via updateModelContext for transient changes (cart/selection updates). Reserve sendMessage for terminal actions like 'checkout' or 'done' to avoid spamming the chat." ;
+    oc:hasRationale "Flooded chat with intermediate state changes degrades the conversation experience; only terminal actions warrant user-facing messages." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_bece947e a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When building display-only widgets (charts, previews)" ;
+    oc:directiveContent "Display-only widgets should not call sendMessage. The tool should return a text summary alongside the widget so Claude can keep reasoning while the user sees the visual." ;
+    oc:hasRationale "Claude needs text content to continue reasoning; without it, the model loses context about what was rendered." .
+
+oc:kn_e4da63aa a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When adding external links in widget HTML" ;
+    oc:directiveContent "window.open and <a target='_blank'> are blocked by the sandbox. Use app.openLink for outbound links instead." ;
+    oc:hasRationale "The iframe sandbox prevents traditional link-opening mechanisms; the ext-apps App class provides the approved alternative." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_fc9f9bbc a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When deciding whether to use a JS framework in a widget" ;
+    oc:directiveContent "Widgets should be framework-free (no React/Vue). They are small enough that framework hydration cost isn't worth it — use vanilla JS." ;
+    oc:hasRationale "MCP widgets are small, focused UI components where framework overhead outweighs benefits." .
+
+oc:req_3370e128 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "MCP server registerAppResource and registerAppTool patterns" .
+
+oc:req_3ea77834 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "@modelcontextprotocol/ext-apps package and App class API" .
+
+oc:req_539f87f2 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "iframe CSP constraints for MCP widgets" .
+

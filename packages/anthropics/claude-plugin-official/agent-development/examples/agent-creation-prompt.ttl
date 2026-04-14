@@ -1,0 +1,100 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_plugin_official_agent_development_agent_creation_prompt a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "agent-creation-prompt" ;
+    skos:broader "Agent generation template" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/agent-development" ;
+    oc:contentHash "fddc24d6f7c67722e5c007087d19606cf116a89f3360519c2ae8f52989f40a4d" ;
+    oc:dependsOnSkill oc:skill_agent_development ;
+    oc:differentia "guides AI-assisted creation of Claude Code plugin agents through a structured prompt-and-convert workflow producing JSON agent configurations that map to markdown agent files" ;
+    oc:extends oc:skill_anthropics_claude_plugin_official_agent_development ;
+    oc:handlesFailure oc:InvalidAgentFormat,
+        oc:ValidationFailed ;
+    oc:hasAllowedTool "Bash",
+        "Glob",
+        "Grep",
+        "Read",
+        "Write" ;
+    oc:hasArgumentHint "Agent description (e.g., \"I need an agent that reviews code for security issues\")" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_0b1cb50c,
+        oc:kn_318aa3c9,
+        oc:kn_49306d26,
+        oc:kn_4c58c17b,
+        oc:kn_87d33e64,
+        oc:kn_ba5b35f2,
+        oc:kn_e34265e6,
+        oc:kn_fffed1d1 ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:AgentDescriptionProvided,
+        oc:EnvironmentReady ;
+    oc:resolvesIntent "bootstrap new agent for plugin",
+        "convert agent JSON to markdown file",
+        "create agent from description",
+        "design agent system prompt",
+        "generate agent configuration" ;
+    oc:yieldsState oc:AgentFileCreated,
+        oc:AgentValidated .
+
+oc:kn_0b1cb50c a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When generating any agent configuration" ;
+    oc:directiveContent "Agent descriptions must include 2-4 concrete <example> blocks with Context, user message, assistant response, and <commentary> explaining why the agent triggers. Without these, the agent won't trigger reliably." ;
+    oc:hasRationale "Example blocks are the primary mechanism by which Claude Code determines when to invoke an agent. Vague or missing examples cause agents to never trigger or trigger incorrectly." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_318aa3c9 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When iterating on agent quality after initial generation" ;
+    oc:directiveContent "Start with AI-assisted generation, then refine manually. Focus manual edits on better triggering examples, more specific system prompts, clearer process steps, and better output format definitions." ;
+    oc:hasRationale "AI generation provides a comprehensive starting point quickly, but manual refinement is needed for project-specific patterns, custom tool combinations, unique personas, and precise triggering conditions." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_49306d26 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing any agent system prompt" ;
+    oc:directiveContent "Never write agent system prompts in first person ('I am...', 'I will...'). Always use second person ('You are...', 'You will...') to address the agent directly." ;
+    oc:hasRationale "First-person voice creates confusion about who is speaking—the orchestrating Claude instance or the agent itself. Second person is the established convention." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_4c58c17b a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When choosing an agent identifier" ;
+    oc:directiveContent "Agent identifiers must be 3-50 characters, lowercase letters/numbers/hyphens only, start and end with alphanumeric. Avoid generic names like 'helper', 'assistant', or 'agent'." ;
+    oc:hasRationale "Identifiers are used for namespacing and invocation. Invalid identifiers break agent discovery and routing." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_87d33e64 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When using AI-assisted agent generation" ;
+    oc:directiveContent "Follow the 4-step generation workflow: (1) Describe agent need, (2) Send generation prompt to Claude with system prompt loaded, (3) Receive JSON with identifier/whenToUse/systemPrompt, (4) Convert JSON to agents/[identifier].md file with proper frontmatter." ;
+    oc:hasRationale "This structured workflow ensures all required fields are populated and the resulting agent file follows the correct format without manual assembly errors." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_ba5b35f2 a oc:KnowledgeNode,
+        oc:PostFlightValidation ;
+    oc:appliesToContext "After generating any agent file" ;
+    oc:directiveContent "Always validate generated agents using scripts/validate-agent.sh before deploying. Check frontmatter structure, required fields, name format, example blocks, and system prompt length." ;
+    oc:hasRationale "The validator catches common mistakes like missing fields, invalid identifiers, absent example blocks, and improper system prompt structure that would cause runtime failures." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_e34265e6 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before sending the agent generation prompt" ;
+    oc:directiveContent "Before generating an agent, be specific about: what task it handles, when it should trigger, whether it should be proactive or reactive, key responsibilities, and output expectations. Vague descriptions produce vague agents." ;
+    oc:hasRationale "The quality of the generated agent is directly proportional to the specificity of the input description. Vague requests like 'I need an agent that helps with code' produce unusable results." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_fffed1d1 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When sizing agent frontmatter and system prompt content" ;
+    oc:directiveContent "System prompts should be 500-3,000 characters ideally, with 20-10,000 characters as hard bounds. Descriptions should be 200-1,000 characters with 10-5,000 as bounds." ;
+    oc:hasRationale "Oversized prompts waste token budget and reduce agent performance; undersized prompts lack sufficient guidance for autonomous operation." ;
+    oc:severityLevel "MEDIUM" .
+

@@ -1,0 +1,90 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_plugin_official_build_mcpb_manifest_schema a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "manifest-schema" ;
+    skos:broader "Schema specification" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/build-mcpb" ;
+    oc:contentHash "6a97f9481107ebdbe8a75f06a5e126ba28021e1e8652677109e53d63a5793c72" ;
+    oc:differentia "Defines the v0.4 MCPB manifest structure for packaging MCP servers, including server launch config, user install-time settings, and compatibility gates" ;
+    oc:extends oc:skill_anthropics_claude_plugin_official_build_mcpb ;
+    oc:handlesFailure oc:InvalidInput,
+        oc:SchemaValidationFailed ;
+    oc:hasCategory "development" ;
+    oc:hasRequirement oc:req_0835657a,
+        oc:req_3b8fa35b ;
+    oc:impartsKnowledge oc:kn_0e2c73e1,
+        oc:kn_2eed15e3,
+        oc:kn_428bb660,
+        oc:kn_491eea2a,
+        oc:kn_5768a2a7,
+        oc:kn_9de6b2ab,
+        oc:kn_b86e17b3 ;
+    oc:isUserInvocable false ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "configure server launch parameters in mcpb",
+        "create a valid mcpb manifest",
+        "define user config for mcpb packages",
+        "understand mcpb manifest schema fields",
+        "validate mcpb manifest files" ;
+    oc:yieldsState oc:ManifestValidated .
+
+oc:kn_0e2c73e1 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When defining user_config fields for API keys or credentials" ;
+    oc:directiveContent "Do NOT use a field called 'secret' on user_config entries — the correct field name is 'sensitive' (boolean). There is no 'secret' field in the schema." ;
+    oc:hasRationale "Using 'secret' will silently be rejected by additionalProperties:false, and sensitive values won't be stored encrypted or masked in the UI." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_2eed15e3 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When authoring manifest fields" ;
+    oc:directiveContent "Do NOT use 'entry' as a top-level field (that is not MCPB) or 'minHostVersion' for host version gating. Use 'server' with 'entry_point' inside, and 'compatibility.claude_desktop' for host version requirements." ;
+    oc:hasRationale "These are common mistakes from conflating MCPB with other package formats; using wrong field names causes silent failures under additionalProperties:false." .
+
+oc:kn_428bb660 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When configuring server launch parameters in mcp_config" ;
+    oc:directiveContent "Use substitution variables ${__dirname}, ${user_config.KEY}, and ${HOME} only in server.mcp_config.args and server.mcp_config.env. There are no auto-prefixed environment variables — env var names your server reads are exactly what you declare." ;
+    oc:hasRationale "Explicit wiring prevents surprising name collisions and makes the config-to-runtime mapping transparent and debuggable." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_491eea2a a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When planning security for an MCPB package" ;
+    oc:directiveContent "MCPB manifests have no permissions block — there is no manifest-level filesystem, network, or process scoping. Security boundaries must be enforced inside tool handlers." ;
+    oc:hasRationale "The server runs with full user privileges; relying on a non-existent permissions mechanism creates a false sense of security." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_5768a2a7 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When creating any new MCPB manifest from scratch" ;
+    oc:directiveContent "The minimal required fields are: manifest_version ('0.4'), name (lowercase hyphens), version (semver), description, author (object with name), and server (with type, entry_point, and mcp_config containing command and args)." ;
+    oc:hasRationale "Omitting any required field will cause schema validation to fail, blocking packaging and distribution." .
+
+oc:kn_9de6b2ab a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing or editing any MCPB manifest file" ;
+    oc:directiveContent "The manifest uses additionalProperties: false — any unknown or misspelled top-level keys will cause schema validation to reject the entire manifest." ;
+    oc:hasRationale "Strict schema enforcement prevents subtle bugs from typos and ensures forward compatibility as the schema evolves." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_b86e17b3 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When defining user_config fields that accept filesystem paths" ;
+    oc:directiveContent "Prefer type 'directory' or 'file' for path inputs over type 'string' — these render native OS file/directory pickers for better UX and validation." ;
+    oc:hasRationale "Native pickers prevent invalid paths, reduce user error, and provide a better installation experience." .
+
+oc:req_0835657a a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Familiarity with MCP (Model Context Protocol) server packaging" .
+
+oc:req_3b8fa35b a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Understanding of JSON schema and semver" .
+

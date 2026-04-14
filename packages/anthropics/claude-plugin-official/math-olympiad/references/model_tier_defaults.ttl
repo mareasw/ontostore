@@ -1,0 +1,68 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_plugin_official_math_olympiad_model_tier_defaults a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "model-tier-defaults" ;
+    skos:broader "Configuration framework" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/math-olympiad" ;
+    oc:contentHash "fa44e35b3c73c12c4098568df2d8fc6ff54dbed16b8d592e82272554c3eeaeb0" ;
+    oc:differentia "scales math olympiad solving parameters (solver count, vote budget, abstain threshold, pattern sweep, presentation pass) adaptively across Haiku, Sonnet, and Opus model tiers to compensate for per-tier capability differences" ;
+    oc:extends oc:skill_anthropics_claude_plugin_official_math_olympiad ;
+    oc:handlesFailure oc:UnknownModelTier ;
+    oc:hasArgumentHint "model-tier (haiku|sonnet|opus)" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_321ae134,
+        oc:kn_36dc7e96,
+        oc:kn_96d6e81f,
+        oc:kn_c333dc80,
+        oc:kn_df9caa0b,
+        oc:kn_fa4025a4 ;
+    oc:isUserInvocable false ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:ModelTierIdentified ;
+    oc:resolvesIntent "configure solving parameters for different model tiers",
+        "determine parallel solver count and vote budget by model capability",
+        "identify which model tier is in use and apply appropriate defaults",
+        "scale verification and presentation strategies by model strength" ;
+    oc:yieldsState oc:SolvingParametersConfigured .
+
+oc:kn_321ae134 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When determining when to give up on a problem after repeated revision failures" ;
+    oc:directiveContent "Abstain thresholds must be tier-appropriate: Haiku/Sonnet at 3 consecutive revise cycles, Opus at 5 consecutive revise cycles." ;
+    oc:hasRationale "Stronger models have higher likelihood of eventually fixing issues, so investing more revision cycles is justified for Opus." .
+
+oc:kn_36dc7e96 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When model tier is unknown at startup" ;
+    oc:directiveContent "If the orchestrating session cannot identify its model tier, default to Sonnet configuration. A reasonable heuristic is to ask the model to self-identify in its first response." ;
+    oc:hasRationale "Sonnet represents the balanced middle ground; misidentifying as Haiku wastes capacity, misidentifying as Opus under-verification risks false positives." .
+
+oc:kn_96d6e81f a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When managing verification vote budgets at any tier" ;
+    oc:directiveContent "Use the pigeonhole exit: stop launching verification votes once inflight >= confirm_needed + refute_needed - 1, because remaining votes carry zero information regardless of outcome." ;
+    oc:hasRationale "Once the outcome is mathematically determined, additional votes are pure latency with no information gain — this is a correctness optimization, not a cost optimization." .
+
+oc:kn_c333dc80 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When configuring the final presentation refinement stage" ;
+    oc:directiveContent "Presentation passes matter MORE for weaker models, not less. Haiku gets 3 drafts with comparator; Opus gets 3 drafts with deliberately different stylistic instructions (elegant, elementary, shortest)." ;
+    oc:hasRationale "Haiku's raw output is rougher so cleanup is critical. Opus can genuinely produce different proof styles, so stylistic diversity in drafts leverages its capability." .
+
+oc:kn_df9caa0b a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When setting verification voting thresholds" ;
+    oc:directiveContent "Haiku needs 5-confirm/3-refute (higher refute threshold), Sonnet needs 4-confirm/2-refute, Opus adds 12 dedicated pattern-specific verifiers on top of 5 general verifiers." ;
+    oc:hasRationale "Haiku verifiers are individually noisier, so a higher refute threshold prevents two confused verifiers from killing a correct proof. Opus's dedicated pattern verifiers transform generic skepticism into targeted attack." .
+
+oc:kn_fa4025a4 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When configuring solver parallelism for any model tier" ;
+    oc:directiveContent "Scale parallel solver count inversely with model capability: Haiku gets 12 (width), Sonnet gets 6 (balanced), Opus gets 4 (depth). Weaker models compensate by casting a wider net." ;
+    oc:hasRationale "Weaker individual samples require more parallel attempts to achieve comparable coverage; stronger models benefit more from investing compute in deeper verification per sample." .
+

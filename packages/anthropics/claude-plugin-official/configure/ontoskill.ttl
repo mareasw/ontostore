@@ -1,0 +1,73 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_plugin_official_configure a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "configure" ;
+    skos:broader "configuration utility" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/configure" ;
+    oc:contentHash "9ab3bd046001291cd4a9c2bdb9ab875091c69199b53bc87333f0810282a164fc" ;
+    oc:differentia "that saves a Discord bot token and manages channel access policy state" ;
+    oc:extends oc:skill_access ;
+    oc:handlesFailure oc:InvalidInput,
+        oc:PermissionDenied ;
+    oc:hasAllowedTool "Bash(ls *)",
+        "Bash(mkdir *)",
+        "Read",
+        "Write" ;
+    oc:hasArgumentHint "[no args | token | clear]" ;
+    oc:hasCategory "automation" ;
+    oc:hasDescription "Set up the Discord channel — save the bot token and review access policy. Use when the user pastes a Discord bot token, asks to configure Discord, asks \"how do I set this up\" or \"who can reach me,\" or wants to check channel status." ;
+    oc:hasName "configure" ;
+    oc:impartsKnowledge oc:kn_1bc33071,
+        oc:kn_391543dc,
+        oc:kn_9a56e1e9,
+        oc:kn_ab692a3f,
+        oc:kn_d31024eb ;
+    oc:isUserInvocable true ;
+    oc:nature "tool" ;
+    oc:requiresState oc:DirectoryWritable ;
+    oc:resolvesIntent "check Discord channel status",
+        "configure Discord channel",
+        "review Discord access policy",
+        "save Discord bot token" ;
+    oc:yieldsState oc:APIKeySet .
+
+oc:kn_1bc33071 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When reviewing or configuring Discord channel access" ;
+    oc:directiveContent "Always push toward allowlist policy as the long-term security posture. Pairing mode is temporary — once Discord snowflake IDs are captured, pairing should be turned off and the allowlist locked." ;
+    oc:hasRationale "Pairing mode allows anyone who can reach the bot to generate pairing codes, which is a security risk if left active after initial setup." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_391543dc a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When saving a new bot token" ;
+    oc:directiveContent "Discord bot tokens are long base64-ish strings typically starting with 'MT' or 'Nz'. Preserve existing .env keys when updating the token — do not overwrite unrelated configuration." ;
+    oc:hasRationale "Preserving other keys ensures the .env file remains valid for other consumers. Token format validation helps catch paste errors." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_9a56e1e9 a oc:KnowledgeNode,
+        oc:SecurityImplication ;
+    oc:appliesToContext "When writing the Discord bot token to ~/.claude/channels/discord/.env" ;
+    oc:directiveContent "The .env file containing the bot token must be chmod 600 to restrict file permissions since it is a credential." ;
+    oc:hasRationale "Bot tokens grant full control over the Discord bot; unrestricted file permissions could expose the token to other users on the system." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_ab692a3f a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before reading or writing Discord configuration files" ;
+    oc:directiveContent "The channels directory (~/.claude/channels/discord/) may not exist yet if the server hasn't run. Missing file equals not configured, not an error — mkdir -p as needed." ;
+    oc:hasRationale "First-time setup happens before the server has ever run, so the directory structure must be created on demand." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_d31024eb a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "After saving a new bot token or changing access policy" ;
+    oc:directiveContent "Token changes to .env require a session restart or /reload-plugins to take effect, but access.json policy changes via /discord:access take effect immediately on every inbound message." ;
+    oc:hasRationale "The server reads .env once at boot but re-reads access.json on every message, so the two config files have different propagation latencies." ;
+    oc:severityLevel "MEDIUM" .
+

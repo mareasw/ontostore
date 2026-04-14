@@ -1,0 +1,98 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_plugin_official_build_mcp_server a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "build-mcp-server" ;
+    skos:broader "Design and scaffold skill" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/build-mcp-server" ;
+    oc:contentHash "e5071f0b235ba74ed35fe3cdc36e7c083a8c12171fd791a4cc54487cfca09c65" ;
+    oc:dependsOnSkill oc:skill_build_mcp_app,
+        oc:skill_build_mcpb ;
+    oc:differentia "guides developers through a 5-phase discovery-to-scaffold workflow for MCP server development, selecting deployment model, tool pattern, framework, and auth strategy before handing off to specialized skills" ;
+    oc:handlesFailure oc:DependencyMissing,
+        oc:InvalidInput ;
+    oc:hasArgumentHint "description of what the MCP server should connect to and do" ;
+    oc:hasCategory "development" ;
+    oc:hasDescription "This skill should be used when the user asks to \"build an MCP server\", \"create an MCP\", \"make an MCP integration\", \"wrap an API for Claude\", \"expose tools to Claude\", \"make an MCP app\", or discusses building something with the Model Context Protocol. It is the entry point for MCP server development — it interrogates the user about their use case, determines the right deployment model (remote HTTP, MCPB, local stdio), picks a tool-design pattern, and hands off to specialized skills." ;
+    oc:hasName "build-mcp-server" ;
+    oc:impartsKnowledge oc:kn_0f5db216,
+        oc:kn_127c201c,
+        oc:kn_5f6544f2,
+        oc:kn_60264258,
+        oc:kn_6d11cd12,
+        oc:kn_ce475e55,
+        oc:kn_ec088d89,
+        oc:kn_fd55f8d5 ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "build an MCP server",
+        "choose MCP deployment model",
+        "create an MCP",
+        "design MCP server architecture",
+        "expose tools to Claude",
+        "make an MCP integration",
+        "wrap an API for Claude" ;
+    oc:yieldsState oc:MCPServerDesigned,
+        oc:MCPServerScaffolded .
+
+oc:kn_0f5db216 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When a server requires OAuth but the user wants local deployment" ;
+    oc:directiveContent "Local stdio servers doing OAuth are fragile — they break in headless/remote environments, every user re-does the OAuth dance, and there is no central token refresh or revocation." ;
+    oc:hasRationale "OAuth redirects require a hosted endpoint. If OAuth is required, strongly lean toward remote HTTP. If local + OAuth is unavoidable, MCPB is the right packaging." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_127c201c a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing the tool surface of an MCP server" ;
+    oc:directiveContent "Use one tool per action when the action surface is under ~15 operations. Switch to search + execute pattern for 30+ tools to avoid flooding Claude's context window with tool schemas." ;
+    oc:hasRationale "Every tool schema lands in Claude's context window every turn. Thirty tools with rich schemas can consume 3–5k tokens before conversation starts, degrading model performance." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_5f6544f2 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Before any code is written for an MCP server" ;
+    oc:directiveContent "Do not start scaffolding until the use case is fully interrogated — what it connects to, who will use it, how many actions it exposes, whether it needs mid-call user input, and what auth the upstream service requires. Wrong early choices cause painful rewrites." ;
+    oc:hasRationale "MCP servers come in many deployment forms (remote HTTP, MCPB, local stdio) and tool patterns; picking the wrong shape early leads to architectural mismatches that are expensive to correct later." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_60264258 a oc:KnowledgeNode,
+        oc:SecurityImplication ;
+    oc:appliesToContext "When implementing auth in any MCP server" ;
+    oc:directiveContent "Token passthrough is explicitly forbidden by the MCP spec — never accept a token and forward it upstream. Validate token audience (RFC 8707) to ensure it was minted for your server specifically." ;
+    oc:hasRationale "Accepting tokens minted for other services and forwarding them upstream is a security vulnerability. The spec requires audience validation as a MUST." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_6d11cd12 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When recommending a deployment model for MCP servers" ;
+    oc:directiveContent "Default to remote streamable-HTTP deployment unless the server must touch the user's local machine. Zero install friction, one deployment serves all users, and OAuth flows work properly." ;
+    oc:hasRationale "Remote HTTP is the simplest path for distribution and maintenance — users add a URL, it works across Claude desktop/Code/web, and the developer controls upgrades." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_ce475e55 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When implementing elicitation (mid-tool user input) in any MCP server" ;
+    oc:directiveContent "Always check clientCapabilities.elicitation before using elicitation and provide a text-based fallback. The SDK throws CapabilityNotSupported if the client doesn't advertise the capability." ;
+    oc:hasRationale "Elicitation support is rolling out across hosts (Claude Code ≥2.1.76 supports it, Desktop status unconfirmed). Without a capability check and fallback, the tool will crash on unsupported hosts." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_ec088d89 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing MCP tool descriptions and parameter schemas" ;
+    oc:directiveContent "Tool descriptions are prompt engineering — write them like one-line manpage entries that say what the tool does, what it returns, and critically what it does NOT do. Disambiguate sibling tools by referencing each other." ;
+    oc:hasRationale "Tool schemas land directly in Claude's context window and determine whether Claude picks the right tool with the right arguments. Most MCP integration bugs trace to vague descriptions or loose schemas." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_fd55f8d5 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When deciding how to distribute an MCP server to users" ;
+    oc:directiveContent "Do not use local stdio (npx/uvx) as a distribution mechanism for MCP servers — it requires users to have the right runtime, prevents push updates, and only works through Claude Code plugins." ;
+    oc:hasRationale "Local stdio is acceptable for personal prototypes but painful at scale. MCPB is the sanctioned packaging for local servers; remote HTTP is preferred for cloud API wrapping." ;
+    oc:severityLevel "MEDIUM" .
+

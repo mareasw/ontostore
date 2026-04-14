@@ -1,0 +1,89 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_plugin_official_build_mcp_server_auth a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "auth" ;
+    skos:broader "Authentication guide" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/build-mcp-server" ;
+    oc:contentHash "c1684118bec544bda013495fa9af79b7e43b47d361a1fec7b8dc87e55638da41" ;
+    oc:differentia "that defines the three-tier auth model (static key, CIMD OAuth, DCR OAuth) for MCP servers with token storage and validation requirements" ;
+    oc:extends oc:skill_anthropics_claude_plugin_official_build_mcp_server ;
+    oc:handlesFailure oc:InvalidInput,
+        oc:PermissionDenied ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_0f717004,
+        oc:kn_176d32eb,
+        oc:kn_1d0b64fe,
+        oc:kn_6371a081,
+        oc:kn_975b78c3,
+        oc:kn_a4945c96,
+        oc:kn_f1f3c394,
+        oc:kn_ff561b65 ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "choose authentication strategy for MCP server",
+        "configure token storage for MCP server",
+        "decide between local and remote MCP server based on auth needs",
+        "implement OAuth 2.0 for MCP server",
+        "understand MCP auth spec requirements" ;
+    oc:yieldsState oc:SystemAuthenticated .
+
+oc:kn_0f717004 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before processing any authenticated request to the MCP server" ;
+    oc:directiveContent "Validate bearer token audience (RFC 8707) — confirm the token was minted specifically for this server, not just that the signature is valid." ;
+    oc:hasRationale "A token with a valid signature but wrong audience indicates it was issued for a different service; accepting it violates the spec MUST requirement." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_176d32eb a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When implementing OAuth on any MCP server" ;
+    oc:directiveContent "Use SDK helpers from @modelcontextprotocol/sdk/server/auth (mcpAuthRouter, bearerAuth, proxyProvider) rather than hand-rolling OAuth logic." ;
+    oc:hasRationale "The SDK handles spec-compliant metadata, authorize, token, and validation flows correctly; hand-rolled implementations tend to miss edge cases and spec requirements." .
+
+oc:kn_1d0b64fe a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When handling bearer tokens on incoming MCP requests" ;
+    oc:directiveContent "Token passthrough is explicitly forbidden by the MCP spec. Never accept a bearer token and forward it upstream. If your server calls another service, exchange the token or use its own credentials." ;
+    oc:hasRationale "Token passthrough violates RFC 8707 audience validation and creates security vulnerabilities where tokens minted for one service are accepted by another." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_6371a081 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When deciding between local stdio and remote HTTP deployment for an OAuth-requiring MCP server" ;
+    oc:directiveContent "Local stdio servers doing OAuth via localhost browser redirect is fragile — it breaks in headless/remote environments, requires every user to repeat the auth dance, and lacks central token refresh or revocation. Lean toward remote HTTP if OAuth is required." ;
+    oc:hasRationale "OAuth redirect flows are designed for hosted endpoints; local localhost redirects introduce reliability and usability problems that remote hosting avoids." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_975b78c3 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When implementing OAuth 2.0 for a remote MCP server" ;
+    oc:directiveContent "Prefer OAuth via Client ID Metadata Document (CIMD) per spec 2025-11-25 which promoted it to SHOULD. Only fall back to Dynamic Client Registration (DCR) for backward compatibility with hosts that haven't adopted CIMD." ;
+    oc:hasRationale "CIMD eliminates the need for a registration endpoint and stored client records, simplifying the auth flow while remaining spec-compliant." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_a4945c96 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When a remote MCP server requires OAuth and the user has no hosting preference" ;
+    oc:directiveContent "If the user doesn't have strong hosting preferences, use an MCP-focused hosting provider that handles OAuth plumbing natively — this is usually the fastest path to a working OAuth-protected server." ;
+    oc:hasRationale "Specialized hosting providers eliminate the need to implement authorization server endpoints, token validation, and refresh logic from scratch." .
+
+oc:kn_f1f3c394 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When storing tokens for local or MCPB-packaged MCP servers" ;
+    oc:directiveContent "Never store tokens in plaintext on disk for local/MCPB deployments. Use the OS keychain (keytar on Node, keyring on Python) instead." ;
+    oc:hasRationale "Plaintext token storage exposes credentials to any process or user with file system access, compromising the entire auth chain." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_ff561b65 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When selecting an authentication strategy for an MCP server" ;
+    oc:directiveContent "If all you need is a static API key read from an environment variable, use Tier 1 and stop — no OAuth complexity needed." ;
+    oc:hasRationale "Over-engineering auth adds fragility and maintenance burden with no functional benefit for simple use cases." ;
+    oc:severityLevel "HIGH" .
+

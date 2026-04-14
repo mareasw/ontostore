@@ -1,0 +1,67 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_plugin_official_plugin_settings_create_settings_command a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "create-settings-command" ;
+    skos:broader "Configuration command" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/plugin-settings" ;
+    oc:contentHash "abf0a36bb3f6425041046f2da1ebfac5505c5b37656fdd4772cfc4d8bd2fa655" ;
+    oc:differentia "creates a local plugin settings file with user preferences via interactive prompts" ;
+    oc:extends oc:skill_anthropics_claude_plugin_official_plugin_settings ;
+    oc:handlesFailure oc:InvalidInput,
+        oc:PermissionDenied ;
+    oc:hasAllowedTool "AskUserQuestion",
+        "Write" ;
+    oc:hasArgumentHint "none (interactive prompts)" ;
+    oc:hasCategory "productivity" ;
+    oc:impartsKnowledge oc:kn_0d9a8dd7,
+        oc:kn_2fcfa197,
+        oc:kn_4fba6933,
+        oc:kn_a7d8e58b,
+        oc:kn_e2eab056 ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "configure plugin preferences",
+        "create plugin settings",
+        "initialize plugin configuration" ;
+    oc:yieldsState oc:ConfigurationCreated .
+
+oc:kn_0d9a8dd7 a oc:KnowledgeNode,
+        oc:SecurityImplication ;
+    oc:appliesToContext "When processing any path-related user input" ;
+    oc:directiveContent "Ensure file paths in settings don't contain directory traversal attempts (e.g., ../ sequences)." ;
+    oc:hasRationale "Path traversal attacks could allow writing files outside the intended .claude/ directory." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_2fcfa197 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before writing the settings file in Step 3" ;
+    oc:directiveContent "Always validate user input before writing the settings file — check mode is one of strict/standard/lenient, validate numeric fields, and sanitize free-text fields." ;
+    oc:hasRationale "Invalid or malicious input could corrupt the configuration or introduce security vulnerabilities like path traversal." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_4fba6933 a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "After creating the settings file" ;
+    oc:directiveContent "The settings file is written to .claude/my-plugin.local.md and is gitignored — it will not be committed to version control." ;
+    oc:hasRationale "Users need to know that settings are local-only and won't be shared with collaborators or pushed to remote repositories." .
+
+oc:kn_a7d8e58b a oc:KnowledgeNode,
+        oc:PostFlightValidation ;
+    oc:appliesToContext "After successfully creating the settings file" ;
+    oc:directiveContent "Inform the user that Claude Code must be restarted for settings changes to take effect." ;
+    oc:hasRationale "Settings are read at startup; without a restart, the new configuration won't be applied, causing user confusion." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_e2eab056 a oc:Idempotency,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When the command is invoked on a project that already has a settings file" ;
+    oc:directiveContent "Re-running this command overwrites any existing settings file at .claude/my-plugin.local.md." ;
+    oc:hasRationale "Users should be warned that existing customizations will be lost if they re-run configuration." ;
+    oc:severityLevel "MEDIUM" .
+

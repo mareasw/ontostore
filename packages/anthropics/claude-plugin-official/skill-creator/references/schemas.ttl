@@ -1,0 +1,72 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_plugin_official_skill_creator_schemas a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "schemas" ;
+    skos:broader "JSON schema reference document" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/skill-creator" ;
+    oc:contentHash "8e8876180a8989b406a4d3edddf875b04cdfd5805cc8616686d552b11ce4455f" ;
+    oc:differentia "defines the exact field names, types, and structures for all data files used in the skill-creator evaluation, grading, benchmarking, comparison, and analysis pipeline, ensuring viewer compatibility and data integrity" ;
+    oc:extends oc:skill_anthropics_claude_plugin_official_skill_creator ;
+    oc:handlesFailure oc:FileNotFound,
+        oc:InvalidInput ;
+    oc:hasArgumentHint "schema name (e.g., evals, grading, benchmark, comparison, analysis, metrics, timing, history)" ;
+    oc:hasCategory "development" ;
+    oc:hasRequirement oc:req_7188ee6e ;
+    oc:impartsKnowledge oc:kn_25eeea30,
+        oc:kn_a9d7d312,
+        oc:kn_af4ca64e,
+        oc:kn_d5b04002,
+        oc:kn_d7e8da04 ;
+    oc:isUserInvocable false ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "find the correct field names for benchmark viewer compatibility",
+        "look up schema for evals.json, grading.json, or benchmark.json",
+        "understand expected fields when generating grading or benchmark output",
+        "validate JSON structure for skill evaluation data files" ;
+    oc:yieldsState oc:SchemaReferenced .
+
+oc:kn_25eeea30 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When generating grading output" ;
+    oc:directiveContent "grading.json expectations array must use the fields 'text', 'passed', and 'evidence' — not 'name'/'met'/'details' or other variants — because the viewer depends on these exact field names." ;
+    oc:hasRationale "The eval viewer parses these specific field names to render pass/fail status and evidence in the UI" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_a9d7d312 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When drafting eval assertions" ;
+    oc:directiveContent "evals.json expectations should be objectively verifiable statements with descriptive names that read clearly in the benchmark viewer — someone glancing at results should immediately understand what each assertion checks." ;
+    oc:hasRationale "Clear, descriptive assertions make the benchmark viewer self-documenting and reduce the need to cross-reference eval definitions" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_af4ca64e a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "After each subagent run completes" ;
+    oc:directiveContent "When a subagent task completes, save timing data (total_tokens, duration_ms) from the task notification immediately to timing.json — this data is not persisted elsewhere and cannot be recovered after the fact." ;
+    oc:hasRationale "Timing and token data is ephemeral in task notifications; once dismissed it is permanently lost, breaking benchmark accuracy" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_d5b04002 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When generating benchmark.json manually" ;
+    oc:directiveContent "The benchmark.json viewer reads field names exactly — using 'config' instead of 'configuration', or putting 'pass_rate' at the top level of a run instead of nested under 'result', will cause the viewer to show empty/zero values." ;
+    oc:hasRationale "The viewer relies on exact field paths for grouping and color coding; any deviation silently breaks the display" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_d7e8da04 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When constructing benchmark run entries" ;
+    oc:directiveContent "benchmark.json runs must use 'with_skill' or 'without_skill' as the exact configuration strings for the viewer to correctly group and color-code results." ;
+    oc:hasRationale "The viewer uses these literal strings for grouping logic and visual differentiation between skill-enabled and baseline runs" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:req_7188ee6e a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "JSON schema definition for evals.json, history.json, grading.json, metrics.json, timing.json, benchmark.json, comparison.json, and analysis.json" .
+

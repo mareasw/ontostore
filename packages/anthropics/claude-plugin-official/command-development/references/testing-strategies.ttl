@@ -1,0 +1,71 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_plugin_official_command_development_testing_strategies a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "testing-strategies" ;
+    skos:broader "Testing methodology" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/command-development" ;
+    oc:contentHash "e6ccf78d85c23bc58582dbc8b91731c4e412568705ed2c87ac699a1ded9adc67" ;
+    oc:dependsOnSkill oc:skill_command_development ;
+    oc:differentia "that defines a 7-level validation framework for Claude Code slash commands covering syntax, frontmatter, invocation, arguments, file references, bash execution, and integration testing with automated CI/CD integration" ;
+    oc:extends oc:skill_anthropics_claude_plugin_official_command_development ;
+    oc:handlesFailure oc:ArgumentSubstitutionFailed,
+        oc:CommandNotFound,
+        oc:InvalidFrontmatter ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_1de6868d,
+        oc:kn_4d4759e3,
+        oc:kn_5f9eed81,
+        oc:kn_6d7af4c1,
+        oc:kn_a7693996 ;
+    oc:isUserInvocable false ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:CommandCreated,
+        oc:FileExists ;
+    oc:resolvesIntent "create pre-commit hooks for commands",
+        "debug failing commands",
+        "set up automated command testing",
+        "test slash commands",
+        "validate command structure" ;
+    oc:yieldsState oc:CommandTested,
+        oc:CommandValidated .
+
+oc:kn_1de6868d a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When testing any slash command before deployment" ;
+    oc:directiveContent "Follow a 7-level testing hierarchy: syntax validation → frontmatter field validation → manual invocation → argument testing → file reference testing → bash execution testing → integration testing" ;
+    oc:hasRationale "Progressive testing levels catch issues early at the cheapest level before moving to more expensive manual and integration tests" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_4d4759e3 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When setting up command testing infrastructure" ;
+    oc:directiveContent "Automate Levels 1-2 (syntax and frontmatter validation) with shell scripts, use them as pre-commit hooks and CI/CD gates, while Levels 3-7 require manual Claude Code session testing" ;
+    oc:hasRationale "Syntax and structure can be validated without Claude Code running, but execution behavior requires the full runtime environment" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_5f9eed81 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When testing commands that use inline bash execution" ;
+    oc:directiveContent "Commands using bash execution (!` syntax) must verify that allowed-tools restricts commands to only what is needed, and must test both successful and failing bash commands including disallowed commands" ;
+    oc:hasRationale "Unrestricted bash execution is a security risk; testing that the allowed-tools boundary is enforced prevents privilege escalation" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_6d7af4c1 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before deploying or distributing any slash command" ;
+    oc:directiveContent "Before releasing a command, verify all checklist items: correct file location, valid YAML frontmatter, appears in /help, arguments work, file references load, edge cases handled, integration with hooks/MCP works, and performance is acceptable" ;
+    oc:hasRationale "The comprehensive checklist prevents shipping broken commands that degrade user trust and require hotfixes" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_a7693996 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When validating argument handling in any command that uses $1, $2, or $ARGUMENTS" ;
+    oc:directiveContent "Test commands with a comprehensive argument test matrix including: no args, single arg, multiple args, extra args, special characters, and empty strings" ;
+    oc:hasRationale "Argument edge cases are the most common source of command failures since shell-style quoting and whitespace handling differ from expectations" ;
+    oc:severityLevel "HIGH" .
+

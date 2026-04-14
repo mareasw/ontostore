@@ -1,0 +1,86 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_plugin_official_plugin_settings_real_world_examples a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "real-world-examples" ;
+    skos:broader "Reference documentation" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/plugin-settings" ;
+    oc:contentHash "35c8805ac43fccd9efeef932bc49afc424f8fd150b553197652996abf2d1327e" ;
+    oc:differentia "that demonstrates production patterns for plugin settings files using the .claude/plugin-name.local.md convention through multi-agent-swarm and ralph-loop case studies" ;
+    oc:extends oc:skill_anthropics_claude_plugin_official_plugin_settings ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_04f8f72b,
+        oc:kn_596437d8,
+        oc:kn_6191a765,
+        oc:kn_9e44539e,
+        oc:kn_a8430af6,
+        oc:kn_ae9013a7,
+        oc:kn_c32e172c,
+        oc:kn_c826164f ;
+    oc:isUserInvocable false ;
+    oc:nature "Concept" ;
+    oc:resolvesIntent "avoid common anti-patterns in plugin settings",
+        "implement plugin settings with frontmatter and markdown body",
+        "learn how production plugins use local settings files",
+        "understand real-world plugin settings patterns" .
+
+oc:kn_04f8f72b a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When modifying or reading plugin settings files in shell scripts" ;
+    oc:directiveContent "Never use non-atomic in-place editing (like sed -i) on settings files, and always quote shell variables when working with parsed values." ;
+    oc:hasRationale "Non-atomic edits risk corruption; unquoted variables cause word-splitting and globbing errors with values containing spaces or special characters." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_596437d8 a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When validating parsed settings file content" ;
+    oc:directiveContent "If a critical settings field is missing or empty, log an error to stderr and remove the corrupt settings file rather than proceeding with invalid state." ;
+    oc:hasRationale "Failing gracefully with cleanup prevents cascading errors in subsequent hook invocations." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_6191a765 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When reading frontmatter fields that may be absent from the settings file" ;
+    oc:directiveContent "Provide default values for all optional settings fields using shell parameter expansion (e.g., MAX=${MAX:-10}) to handle missing or empty fields gracefully." ;
+    oc:hasRationale "Missing fields without defaults cause empty-variable errors in numeric comparisons and string operations." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_9e44539e a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing the frontmatter schema for a plugin settings file" ;
+    oc:directiveContent "Include an enabled: true boolean field in settings frontmatter so plugins can be temporarily deactivated without deleting the file." ;
+    oc:hasRationale "Allows quick toggle of plugin behavior for debugging or temporary suspension without losing configuration." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_a8430af6 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When parsing frontmatter values from plugin settings files in bash" ;
+    oc:directiveContent "Strip surrounding quotes from YAML-parsed values using sed 's/^\"\\(.*\\)\"$/\\1/' since YAML allows both quoted and unquoted values." ;
+    oc:hasRationale "YAML permits field: value and field: \"value\" — failing to normalize causes subtle comparison bugs." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_ae9013a7 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When referencing settings file paths in hooks or scripts" ;
+    oc:directiveContent "Never hardcode absolute paths to settings files; always use relative paths like .claude/plugin-name.local.md from the project root." ;
+    oc:hasRationale "Hardcoded paths break portability across different user machines and project directories." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_c32e172c a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing hooks or scripts that read plugin settings files" ;
+    oc:directiveContent "Always use the quick exit pattern: check if the settings file exists before attempting any parsing or logic, exiting immediately if not found." ;
+    oc:hasRationale "Avoids errors when the plugin isn't configured and keeps hook execution fast for non-users." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_c826164f a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When updating any .claude/plugin-name.local.md settings file" ;
+    oc:directiveContent "Use atomic updates via temp file + move when modifying settings files: write changes to a temporary file first, then atomically move it to the target path." ;
+    oc:hasRationale "Prevents file corruption if the writing process is interrupted midway." ;
+    oc:severityLevel "CRITICAL" .
+

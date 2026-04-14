@@ -1,0 +1,95 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_plugin_official_command_development_advanced_workflows a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "advanced-workflows" ;
+    skos:broader "Workflow pattern reference" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/command-development" ;
+    oc:contentHash "eb258095b5a411b68377c96730effe597884a14b619cb0c1a7ab1c801d80a7d9" ;
+    oc:dependsOnSkill oc:skill_command_development ;
+    oc:differentia "that documents multi-step command sequences, state management across invocations, command composition, and error handling patterns for complex Claude Code slash command workflows" ;
+    oc:extends oc:skill_anthropics_claude_plugin_official_command_development ;
+    oc:handlesFailure oc:ConcurrentExecutionConflict,
+        oc:InvalidInput,
+        oc:WorkflowInterrupted ;
+    oc:hasArgumentHint "[workflow-type] [pattern-name]" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_0db39988,
+        oc:kn_1bc608b6,
+        oc:kn_1f36a84c,
+        oc:kn_294a9bea,
+        oc:kn_40a4d905,
+        oc:kn_6c11cad9,
+        oc:kn_70242ab8,
+        oc:kn_c97c673e ;
+    oc:isUserInvocable false ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "build multi-step command workflows",
+        "compose commands into sequential pipelines",
+        "coordinate cross-command communication with flags and locks",
+        "create conditional branching command workflows",
+        "implement error handling and rollback in command workflows",
+        "manage workflow state across command invocations" ;
+    oc:yieldsState oc:MultiStepCommandCreated,
+        oc:WorkflowPatternApplied .
+
+oc:kn_0db39988 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When building command chains, pipelines, or composite workflows" ;
+    oc:directiveContent "Each command in a composed workflow should follow single responsibility — do one thing well — while meta-commands orchestrate the sequence." ;
+    oc:hasRationale "Single-responsibility commands are testable, reusable, and composable. Meta-commands provide orchestration without coupling command internals." .
+
+oc:kn_1bc608b6 a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When building multi-stage workflows with expensive or destructive steps" ;
+    oc:directiveContent "Implement checkpoint-based recovery by logging completed stages, so interrupted workflows can resume from the last successful checkpoint rather than restarting entirely." ;
+    oc:hasRationale "Checkpoint recovery avoids wasted time repeating completed work and reduces risk of partial side effects from re-running idempotent-but-costly operations." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_1f36a84c a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing deployment or environment-aware workflows" ;
+    oc:directiveContent "Use conditional branching based on environment type (production vs staging vs dev) to apply progressively stricter validation at higher tiers." ;
+    oc:hasRationale "Production deployments need extra safeguards (approval gates, full test suites) while dev environments can use minimal checks for speed, reducing friction at each tier." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_294a9bea a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before executing any workflow step that modifies state or deploys changes" ;
+    oc:directiveContent "Validate arguments (environment names, file existence, required parameters) at the start of workflow commands before any mutation occurs." ;
+    oc:hasRationale "Early validation prevents partial workflows caused by invalid inputs and provides clear error messages before any irreversible actions are taken." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_40a4d905 a oc:Idempotency,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "At workflow completion, failure, or manual abort" ;
+    oc:directiveContent "Clean up state files and lock files upon workflow completion or abort to leave the workspace in a clean state for future runs." ;
+    oc:hasRationale "Stale state files cause false recovery prompts, and leftover lock files block future executions. Cleanup ensures workflows are self-contained and repeatable." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_6c11cad9 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing multi-step workflows that span multiple command invocations" ;
+    oc:directiveContent "Store workflow state in .local.md files with YAML frontmatter to maintain persistence across command invocations and enable resume capability." ;
+    oc:hasRationale "Persistent state files allow workflows to survive interruptions, enable recovery from the last completed step, and provide clear visibility into workflow progress." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_70242ab8 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When creating deployment or mutation workflows that should not run simultaneously" ;
+    oc:directiveContent "Implement workflow locking via .lock files to prevent concurrent execution of workflows that mutate shared state." ;
+    oc:hasRationale "Concurrent workflow execution can corrupt state, deploy conflicting versions, or cause data loss. Lock files serialize access and provide clear error messages." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_c97c673e a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing state-carrying workflows that span multiple invocations" ;
+    oc:directiveContent "Never rely on implicit state between commands — always read state explicitly from state files before proceeding." ;
+    oc:hasRationale "Implicit state assumptions lead to race conditions, stale data, and unrecoverable workflows when commands execute out of order or are interrupted." ;
+    oc:severityLevel "CRITICAL" .
+

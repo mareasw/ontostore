@@ -1,0 +1,67 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_plugin_official_build_mcp_server_resources_and_prompts a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "resources-and-prompts" ;
+    skos:broader "MCP server primitive guide" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/build-mcp-server" ;
+    oc:contentHash "90537efcaf329ead6cabe42ab197412d39eb8401b6d1d734bf329f8a78cf8a60" ;
+    oc:differentia "explains Resources and Prompts as application-controlled and user-controlled primitives complementary to Tools, with implementation patterns in TypeScript and Python" ;
+    oc:extends oc:skill_anthropics_claude_plugin_official_build_mcp_server ;
+    oc:hasArgumentHint "N/A — conceptual guidance sub-skill, no direct arguments" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_244d0f81,
+        oc:kn_4f97bda6,
+        oc:kn_883c4736,
+        oc:kn_d0559401,
+        oc:kn_f81951cd ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "add prompts to MCP server",
+        "add resources to MCP server",
+        "decide between tools resources and prompts",
+        "expose browsable data via MCP resources",
+        "implement MCP prompt handlers",
+        "implement MCP resource templates" ;
+    oc:yieldsState oc:DocumentCreated .
+
+oc:kn_244d0f81 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When choosing between MCP Tools, Resources, and Prompts" ;
+    oc:directiveContent "Use Resources for large reference data, content that changes independently of conversation, or when 'Claude decides to fetch' is the wrong mental model. Use Tools for side effects, parameterized results, or when Claude should decide when to pull data in." ;
+    oc:hasRationale "MCP defines three primitives with different control models: Tools are model-controlled, Resources are application-controlled (host decides), and Prompts are user-controlled. Picking the right primitive ensures the integration follows MCP's intended interaction patterns." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_4f97bda6 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When exposing dynamic families of data as MCP Resources" ;
+    oc:directiveContent "Use URI templates (RFC 6570) to let one resource registration serve many dynamic URIs, e.g. file:///{path} or db://{table}." ;
+    oc:hasRationale "URI templates reduce boilerplate and provide a clean, RESTful pattern for parameterized resource access without registering each URI individually." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_883c4736 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When architecting an MCP server's surface area" ;
+    oc:directiveContent "Use Resources for browsable context (files, docs, schemas, log tails, live dashboards), Resource templates for dynamic URI families, Prompts for one-click user workflows, and Tools for on-demand parameterized fetching." ;
+    oc:hasRationale "The quick decision table maps intent to the correct primitive, preventing misuse like using Tools for static reference data or Prompts for side-effect operations." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_d0559401 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When planning an MCP server implementation" ;
+    oc:directiveContent "Most MCP servers only need tools. Only reach for Resources or Prompts when the shape of your integration doesn't fit 'Claude calls a function.'" ;
+    oc:hasRationale "Over-engineering with all three primitives adds complexity. Tools cover the majority of integration patterns; Resources and Prompts address specific UX gaps." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_f81951cd a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When implementing MCP Prompt handlers" ;
+    oc:directiveContent "Prompt arguments are string-only — no numbers, booleans, or objects. Convert types inside the handler. Prompts must return a messages[] array and must not have side effects." ;
+    oc:hasRationale "The MCP spec constrains prompt arguments to strings for simplicity and interoperability. Side-effect-free handlers ensure prompts are safe reusable templates." ;
+    oc:severityLevel "HIGH" .
+

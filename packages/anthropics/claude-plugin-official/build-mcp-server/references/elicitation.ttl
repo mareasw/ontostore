@@ -1,0 +1,94 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_plugin_official_build_mcp_server_elicitation a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "elicitation" ;
+    skos:broader "User input pattern" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/build-mcp-server" ;
+    oc:contentHash "d8f19b01b1bd3a8bad0fdb22e1898bb43110343db1d321e6c472f603d288f856" ;
+    oc:dependsOnSkill oc:skill_build_mcp_server ;
+    oc:differentia "that uses spec-native MCP elicitation to pause tool execution and collect structured form input from the user without rich UI" ;
+    oc:extends oc:skill_anthropics_claude_plugin_official_build_mcp_server ;
+    oc:handlesFailure oc:CapabilityNotSupported,
+        oc:UserCancelled,
+        oc:UserDeclined ;
+    oc:hasArgumentHint "elicitation schema definition (flat object with primitives)" ;
+    oc:hasCategory "development" ;
+    oc:hasRequirement oc:req_19d8893e,
+        oc:req_8854e4b5,
+        oc:req_e82419e6 ;
+    oc:impartsKnowledge oc:kn_161b5fbb,
+        oc:kn_271d1551,
+        oc:kn_2fa5bae2,
+        oc:kn_680d45ca,
+        oc:kn_d8bd589e,
+        oc:kn_e1cef01a ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:MCPServerRunning,
+        oc:ToolInstalled ;
+    oc:resolvesIntent "collect user confirmation during tool execution",
+        "decide between elicitation and widgets for user input",
+        "gather structured input from the user mid-tool-call",
+        "present simple form choices to the user" ;
+    oc:yieldsState oc:ElicitationResponseReceived,
+        oc:UserInputCollected .
+
+oc:kn_161b5fbb a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before every elicitation call in any MCP tool implementation" ;
+    oc:directiveContent "Always check client capabilities via server.getClientCapabilities() (TS) or catch CapabilityNotSupported (Python) before calling elicitation. The SDK throws CapabilityNotSupported with no graceful degradation if the client doesn't support it." ;
+    oc:hasRationale "Host support is very recent and not universal — Claude Desktop and claude.ai support is unconfirmed. Failing to check causes runtime crashes." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_271d1551 a oc:FallbackStrategy,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When elicitation capability is not available in the client" ;
+    oc:directiveContent "When a host does not support elicitation, return text content asking Claude to relay the question to the user and call the tool again with their answer." ;
+    oc:hasRationale "This provides a universal degradation path — the tool still functions via Claude's natural language interaction even without native form support." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_2fa5bae2 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When handling elicitation responses in tool implementations" ;
+    oc:directiveContent "Treat the three elicitation response actions differently: accept (user submitted valid data), decline (intentional rejection), cancel (possibly accidental dismissal). Distinguish decline from cancel in your logic when intent matters." ;
+    oc:hasRationale "Decline is an intentional user decision while cancel might be accidental (escape key, clicking away). Differentiating enables appropriate recovery behavior." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_680d45ca a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When defining elicitation schemas for any tool" ;
+    oc:directiveContent "Elicitation schemas must be flat objects with primitive types only (string, number, integer, boolean, enum). No nesting, no arrays of objects. String formats limited to email, uri, date, date-time." ;
+    oc:hasRationale "The MCP spec deliberately limits schemas to keep forms simple and renderable across all hosts. Complex data requires widgets instead." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_d8bd589e a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When deciding between elicitation and widgets for user input" ;
+    oc:directiveContent "Use elicitation for simple confirmations, enum pickers, and short flat forms. Escalate to build-mcp-app widgets when you need nested data, scrollable lists (100+ items), visual previews, live progress, or custom layouts." ;
+    oc:hasRationale "Elicitation is spec-native and works in any compliant host with minimal setup. Widgets require richer infrastructure but handle complexity that elicitation cannot." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_e1cef01a a oc:KnowledgeNode,
+        oc:SecurityImplication ;
+    oc:appliesToContext "When designing any elicitation form that might involve credentials" ;
+    oc:directiveContent "MUST NOT request passwords, API keys, or tokens via elicitation. These must go through OAuth or user_config with sensitive: true (MCPB)." ;
+    oc:hasRationale "This is a spec requirement — runtime forms are not secure channels for sensitive data and should not be used for credential collection." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:req_19d8893e a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "TypeScript MCP SDK or fastmcp Python SDK" .
+
+oc:req_8854e4b5 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "MCP specification elicitation protocol" .
+
+oc:req_e82419e6 a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "MCP-compatible host with elicitation capability (Claude Code v2.1.76+)" .
+

@@ -1,0 +1,60 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_plugin_official_command_development_plugin_features_reference a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "plugin-features-reference" ;
+    skos:broader "Reference documentation" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/command-development" ;
+    oc:contentHash "57e11ae6a4bbc1a4a295d1f036202970911d6029d64f4ab058b63a4c5a899072" ;
+    oc:dependsOnSkill oc:skill_command_development ;
+    oc:differentia "that catalogs plugin-specific command features including auto-discovery, CLAUDE_PLUGIN_ROOT variable usage, integration patterns with plugin agents/skills/hooks, and validation patterns for plugin commands" ;
+    oc:extends oc:skill_anthropics_claude_plugin_official_command_development ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_2ea641c6,
+        oc:kn_417a1b52,
+        oc:kn_7341b811,
+        oc:kn_a99f8b93,
+        oc:kn_eeacf2e1 ;
+    oc:isUserInvocable false ;
+    oc:nature "Concept" ;
+    oc:resolvesIntent "add input validation and error handling to plugin commands",
+        "implement plugin command patterns for configuration, templates, workflows, and data management",
+        "integrate commands with plugin components like agents, skills, and hooks",
+        "understand plugin command discovery and auto-registration",
+        "use CLAUDE_PLUGIN_ROOT for portable plugin paths" .
+
+oc:kn_2ea641c6 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When organizing and structuring plugin command files" ;
+    oc:directiveContent "Plugin commands are auto-discovered from the commands/ directory at plugin load time — no manual registration is needed. Subdirectories create namespaces shown as (plugin:name:namespace) in /help." ;
+    oc:hasRationale "Understanding auto-discovery prevents redundant registration attempts and enables proper command organization with namespaces for plugins with 5+ commands" .
+
+oc:kn_417a1b52 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When authoring any plugin command that references files within the plugin directory" ;
+    oc:directiveContent "Always use ${CLAUDE_PLUGIN_ROOT} for all plugin-internal paths (scripts, templates, config, resources) instead of relative paths like ./" ;
+    oc:hasRationale "Relative paths resolve against the current working directory, not the plugin root, causing file-not-found errors across different installations" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_7341b811 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When naming plugin commands" ;
+    oc:directiveContent "Avoid generic command names like /test, /run, or /do-stuff that conflict with common names. Use descriptive, action-oriented names with hyphens, and consider prefixing with the plugin name for uniqueness." ;
+    oc:hasRationale "Generic names cause namespace collisions across plugins and user-defined commands, making discovery and invocation unreliable" .
+
+oc:kn_a99f8b93 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before executing any plugin command that accepts user arguments" ;
+    oc:directiveContent "Validate inputs early in plugin commands: check required arguments with test -n, verify file existence with test -f, and validate argument formats with grep pattern matching before processing." ;
+    oc:hasRationale "Early validation prevents confusing downstream errors and provides clear, actionable error messages to users" .
+
+oc:kn_eeacf2e1 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When designing comprehensive plugin commands that go beyond simple single-step operations" ;
+    oc:directiveContent "For complex plugin commands, coordinate multiple plugin components: delegate complex logic to scripts in ${CLAUDE_PLUGIN_ROOT}/scripts/, use agents for multi-step analysis, reference skills for specialized domain knowledge, and coordinate with hooks for event-driven validation." ;
+    oc:hasRationale "Leveraging the full plugin component ecosystem produces more maintainable, modular, and powerful commands while keeping each command focused on a single purpose" .
+

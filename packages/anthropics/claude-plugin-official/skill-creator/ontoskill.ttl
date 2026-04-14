@@ -1,0 +1,115 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_plugin_official_skill_creator a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "skill-creator" ;
+    skos:broader "Skill authoring and evaluation framework" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/skill-creator" ;
+    oc:contentHash "a96538dda852fca4408c6f495f056849c2aba0738c42b1f770ab67817efc0973" ;
+    oc:differentia "Orchestrates the full lifecycle of creating, testing, iterating, and optimizing agent skills through test-driven evaluation loops with quantitative benchmarking and description optimization" ;
+    oc:handlesFailure oc:FileNotFound,
+        oc:InvalidInput,
+        oc:PermissionDenied ;
+    oc:hasAllowedTool "Bash",
+        "Edit",
+        "Glob",
+        "Grep",
+        "Read",
+        "Write" ;
+    oc:hasArgumentHint "skill-name or skill-directory path" ;
+    oc:hasCategory "development" ;
+    oc:hasDescription "Create new skills, modify and improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, update or optimize an existing skill, run evals to test a skill, benchmark skill performance with variance analysis, or optimize a skill's description for better triggering accuracy." ;
+    oc:hasName "skill-creator" ;
+    oc:impartsKnowledge oc:kn_270e8437,
+        oc:kn_2fb0a2e8,
+        oc:kn_58c5a2d0,
+        oc:kn_690566fa,
+        oc:kn_817715f1,
+        oc:kn_c76ee02c,
+        oc:kn_e74078b4,
+        oc:kn_eeee5dcc,
+        oc:kn_fbf488b2,
+        oc:kn_fe6a6e80 ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "benchmark skill performance",
+        "create a new skill from scratch",
+        "improve or modify an existing skill",
+        "optimize skill description for triggering accuracy",
+        "package a completed skill",
+        "run evaluation loops on skills",
+        "test a skill with eval prompts" ;
+    oc:yieldsState oc:SkillCreated,
+        oc:SkillEvaluated,
+        oc:SkillOptimized .
+
+oc:kn_270e8437 a oc:Idempotency,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When running the run_loop.py description optimization script" ;
+    oc:directiveContent "Description optimization uses a 60/40 train/test split and selects the best description by test score to avoid overfitting to training queries." ;
+    oc:hasRationale "Overfitting to training queries would produce a description that scores well on the eval set but fails in production. The held-out test set guards against this." .
+
+oc:kn_2fb0a2e8 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When reviewing test run transcripts during skill improvement" ;
+    oc:directiveContent "When all test runs independently create similar helper scripts or take the same multi-step approach, that's a strong signal the skill should bundle that script in scripts/." ;
+    oc:hasRationale "Repeated reinvention of the same helper code across test cases means every future invocation will also waste time recreating it. Bundling once saves all future runs." .
+
+oc:kn_58c5a2d0 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When drafting or editing any skill" ;
+    oc:directiveContent "Keep SKILL.md under 500 lines; if approaching this limit, add hierarchy with clear pointers to reference files so the model knows where to look next." ;
+    oc:hasRationale "Skills use a three-level progressive disclosure system — metadata is always in context (~100 words), the body when triggered (<500 lines ideal), and bundled resources loaded on demand. Exceeding 500 lines bloats context and degrades performance." .
+
+oc:kn_690566fa a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "After running test cases, in both Cowork and Claude Code environments" ;
+    oc:directiveContent "Generate the eval viewer using generate_review.py BEFORE evaluating inputs yourself — get test results in front of the human ASAP rather than revising the skill unilaterally." ;
+    oc:hasRationale "Human review is the most valuable feedback signal; generating the viewer promptly ensures the human can inspect outputs while the agent works on other tasks." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_817715f1 a oc:AssumptionBoundary,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When communicating with the user throughout the skill creation process" ;
+    oc:directiveContent "Adapt communication style to the user's technical level — 'evaluation' and 'benchmark' are borderline OK, but 'JSON' and 'assertion' need context cues before using without explanation." ;
+    oc:hasRationale "Users range from non-technical to expert; using jargon without calibration creates barriers for less technical users who are increasingly using AI tools." .
+
+oc:kn_c76ee02c a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing SKILL.md frontmatter description for any skill" ;
+    oc:directiveContent "Make skill descriptions slightly 'pushy' — include broad trigger phrases and contexts to combat Claude's tendency to undertrigger skills." ;
+    oc:hasRationale "Claude tends to not use skills when they'd be useful; a more aggressive description ensures the skill fires in relevant contexts." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_e74078b4 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When running skill evaluation in Cowork environment" ;
+    oc:directiveContent "Cowork environments tend to cause Claude to skip generating the eval viewer after running tests — explicitly add it to the TodoList to prevent omission." ;
+    oc:hasRationale "The Cowork setup seems to disincline Claude from generating the eval viewer, leading to missed human review steps." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_eeee5dcc a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "When subagent tasks complete during test execution" ;
+    oc:directiveContent "Before spawning test runs, capture timing data from task notifications immediately — total_tokens and duration_ms are only available in the notification and are not persisted elsewhere." ;
+    oc:hasRationale "Timing data is ephemeral and cannot be recovered later; saving it to timing.json immediately is critical for accurate benchmarking." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_fbf488b2 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing skill instructions and iterating on improvements" ;
+    oc:directiveContent "Explain the 'why' behind instructions rather than using heavy-handed MUSTs and NEVERs. Use theory of mind to make skills general and not overfit to specific examples." ;
+    oc:hasRationale "Today's LLMs are smart and respond better to reasoning-based instructions than rigid commands. Explaining why leads to more robust behavior across diverse prompts." .
+
+oc:kn_fe6a6e80 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When iterating on skill improvements based on user feedback from test runs" ;
+    oc:directiveContent "Do not overfit skill improvements to specific test cases. Instead of fiddly narrow fixes, look for broader patterns, metaphors, or working styles that generalize." ;
+    oc:hasRationale "Skills will be used millions of times across many prompts. Improvements that only fix specific test examples are useless; the skill must generalize beyond the small evaluation set." ;
+    oc:severityLevel "HIGH" .
+

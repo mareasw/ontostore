@@ -1,0 +1,114 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_plugin_official_skill_creator_analyzer a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "analyzer" ;
+    skos:broader "Analysis agent" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/skill-creator" ;
+    oc:contentHash "bf68f4cac5a56c673a928c2e6d619586c5b93ea364026ab37547772cb45a663a" ;
+    oc:dependsOnSkill oc:skill_skill_creator ;
+    oc:differentia "that performs post-hoc comparison analysis and benchmark pattern surfacing to extract actionable skill improvement insights" ;
+    oc:extends oc:skill_anthropics_claude_plugin_official_skill_creator ;
+    oc:handlesFailure oc:FileNotFound,
+        oc:InvalidInput ;
+    oc:hasAllowedTool "Read",
+        "Write" ;
+    oc:hasArgumentHint "winner, winner_skill_path, winner_transcript_path, loser_skill_path, loser_transcript_path, comparison_result_path, output_path -- or -- benchmark_data_path, skill_path, output_path" ;
+    oc:hasCategory "development" ;
+    oc:hasRequirement oc:req_02d12b97,
+        oc:req_5c3efadf,
+        oc:req_883dcb03,
+        oc:req_8ca7b09c ;
+    oc:impartsKnowledge oc:kn_382e742e,
+        oc:kn_4bfecd0c,
+        oc:kn_7492715c,
+        oc:kn_7d8afef1,
+        oc:kn_92e89188,
+        oc:kn_9e1b2758,
+        oc:kn_e7ae3cf7,
+        oc:kn_f348da53 ;
+    oc:isUserInvocable false ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:ComparisonCompleted ;
+    oc:resolvesIntent "analyze why one skill version beat another in blind comparison",
+        "evaluate instruction following quality in skill execution transcripts",
+        "generate improvement suggestions for losing skill versions",
+        "surface patterns and anomalies across benchmark runs" ;
+    oc:yieldsState oc:AnalysisGenerated .
+
+oc:kn_382e742e a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When generating improvement suggestions for the losing skill" ;
+    oc:directiveContent "Prioritize improvement suggestions by impact: focus first on changes that would most likely have changed the comparison outcome" ;
+    oc:hasRationale "Not all weaknesses are equal; causal weaknesses that directly led to the loss should be addressed before incidental ones" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_4bfecd0c a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing analysis results and improvement suggestions" ;
+    oc:directiveContent "Be specific and quote from skills/transcripts rather than making vague claims like 'instructions were unclear'" ;
+    oc:hasRationale "Specific, evidence-backed analysis is far more actionable than generic observations and helps the user understand exactly what to change" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_7492715c a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When analyzing benchmark results (not blind comparison results)" ;
+    oc:directiveContent "Do NOT suggest improvements to the skill during benchmark analysis mode — benchmark mode surfaces patterns only, improvement suggestions belong to the post-comparison analysis mode" ;
+    oc:hasRationale "Mixing observation with prescription during benchmarking introduces bias and conflates distinct analytical purposes" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_7d8afef1 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before starting the analysis process" ;
+    oc:directiveContent "Read the comparison result, both skills' SKILL.md files, and both transcripts before beginning any analysis" ;
+    oc:hasRationale "Complete context from all sources is needed to make accurate causal inferences about why the winner won" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_92e89188 a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When reviewing per-assertion pass/fail patterns across multiple runs" ;
+    oc:directiveContent "When analyzing benchmark assertions, distinguish between always-pass (non-discriminating), always-fail (possibly broken), skill-dependent, and highly-variable (possibly flaky) patterns" ;
+    oc:hasRationale "This categorization helps the user understand which assertions genuinely measure skill value vs. which are noise" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_9e1b2758 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When evaluating how closely agents followed their respective skill instructions" ;
+    oc:directiveContent "Score instruction following on a 1-10 scale for each transcript, noting specific issues rather than a single holistic judgment" ;
+    oc:hasRationale "A numeric score provides comparability while the issue list provides actionable detail for improvement" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_e7ae3cf7 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing the improvement_suggestions array in the output JSON" ;
+    oc:directiveContent "Categorize improvement suggestions into: instructions, tools, examples, error_handling, structure, or references for organized prioritization" ;
+    oc:hasRationale "Categorization enables the user to quickly identify the type of change needed and batch similar improvements together" ;
+    oc:severityLevel "LOW" .
+
+oc:kn_f348da53 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When formulating improvement suggestions" ;
+    oc:directiveContent "Consider generalization: evaluate whether an improvement would help on other evals too, not just the specific comparison being analyzed" ;
+    oc:hasRationale "Overfitted changes that only help one specific test case are less valuable than improvements that generalize across diverse prompts" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:req_02d12b97 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Benchmark JSON schema and aggregation structure" .
+
+oc:req_5c3efadf a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "Read" .
+
+oc:req_883dcb03 a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "Write" .
+
+oc:req_8ca7b09c a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Blind comparison workflow and comparator output format" .
+

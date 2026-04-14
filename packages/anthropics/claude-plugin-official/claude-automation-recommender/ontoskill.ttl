@@ -1,0 +1,90 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_plugin_official_claude_automation_recommender a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "claude-automation-recommender" ;
+    skos:broader "Codebase analysis and recommendation engine" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/claude-automation-recommender" ;
+    oc:contentHash "acde5c0b3e92c073a36ff9ebd000904520f60f0b4fcb4589017d815821ec8273" ;
+    oc:differentia "Detects project patterns from source code and config files to recommend tailored Claude Code automations across hooks, subagents, skills, plugins, and MCP servers" ;
+    oc:handlesFailure oc:FileNotFound,
+        oc:InvalidInput ;
+    oc:hasAllowedTool "Bash",
+        "Glob",
+        "Grep",
+        "Read" ;
+    oc:hasArgumentHint "optional automation-type filter (e.g., \"hooks\", \"MCP servers\", \"skills\")" ;
+    oc:hasCategory "development" ;
+    oc:hasDescription "Analyze a codebase and recommend Claude Code automations (hooks, subagents, skills, plugins, MCP servers). Use when user asks for automation recommendations, wants to optimize their Claude Code setup, mentions improving Claude Code workflows, asks how to first set up Claude Code for a project, or wants to know what Claude Code features they should use." ;
+    oc:hasName "claude-automation-recommender" ;
+    oc:impartsKnowledge oc:kn_0c8d6445,
+        oc:kn_0ff30596,
+        oc:kn_2992a2bc,
+        oc:kn_38aae0e6,
+        oc:kn_82b0e665,
+        oc:kn_cf2524b0,
+        oc:kn_f145b79f ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:DirectoryWritable,
+        oc:FileExists ;
+    oc:resolvesIntent "identify useful hooks, skills, plugins, subagents, and MCP servers",
+        "improve Claude Code workflows",
+        "optimize Claude Code setup for a project",
+        "recommend Claude Code automations",
+        "set up Claude Code for a new project" ;
+    oc:yieldsState oc:AutomationRecommendationsGenerated .
+
+oc:kn_0c8d6445 a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "Phase 1 codebase analysis" ;
+    oc:directiveContent "The skill uses Bash commands to inspect the filesystem (ls, cat, grep) which are read-only operations. No files are written or modified during execution." ;
+    oc:hasRationale "Users should be aware that the skill reads project files to detect patterns, but nothing is changed" ;
+    oc:severityLevel "LOW" .
+
+oc:kn_0ff30596 a oc:KnowledgeNode,
+        oc:SuccessIndicator ;
+    oc:appliesToContext "Phase 3 output validation" ;
+    oc:directiveContent "The skill succeeds when it produces a structured report with at least one actionable recommendation per relevant category, each justified by a specific codebase signal." ;
+    oc:hasRationale "Generic or unjustified recommendations indicate the analysis was insufficient" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_2992a2bc a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "All phases of execution" ;
+    oc:directiveContent "This skill is strictly read-only — it analyzes the codebase and outputs recommendations but must never create or modify any files." ;
+    oc:hasRationale "Preserves the skill as a safe analysis tool that cannot cause unintended side effects; users implement recommendations themselves" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_38aae0e6 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "Every execution of this skill" ;
+    oc:directiveContent "Follow a three-phase workflow: (1) Codebase Analysis via file inspection commands, (2) Generate Recommendations by matching detected signals to automation patterns, (3) Output a structured report. Always use web search to go beyond the bundled reference lists for codebase-specific recommendations." ;
+    oc:hasRationale "The three-phase approach ensures recommendations are grounded in actual codebase patterns rather than generic advice" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_82b0e665 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When generating recommendations for any project" ;
+    oc:directiveContent "Recommend only 1-2 automations per category by default to avoid overwhelming users. If the user asks for a specific type, expand to 3-5 recommendations for that category only." ;
+    oc:hasRationale "Overwhelming users with too many options reduces the likelihood they implement any of them" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_cf2524b0 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When generating the Phase 3 output report" ;
+    oc:directiveContent "Skip automation categories that are not relevant to the detected codebase. Only include recommendations where a clear codebase signal justifies the suggestion." ;
+    oc:hasRationale "Irrelevant recommendations reduce trust and signal that the analysis was superficial" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_f145b79f a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before generating recommendations in Phase 2" ;
+    oc:directiveContent "Check for existing Claude Code configuration (.claude/ directory, CLAUDE.md) before recommending automations to avoid duplicating what already exists." ;
+    oc:hasRationale "Recommending automations that are already configured wastes the user's time and undermines trust" ;
+    oc:severityLevel "HIGH" .
+

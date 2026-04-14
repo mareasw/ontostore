@@ -1,0 +1,78 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_plugin_official_build_mcp_server_server_capabilities a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "server-capabilities" ;
+    skos:broader "reference guide" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/build-mcp-server" ;
+    oc:contentHash "a4d76934e9fb386a5026c44a1888ea1338ca8f128314547a765827d60a1aaff0" ;
+    oc:differentia "that documents MCP server capabilities beyond core primitives — instructions, sampling, roots, logging, progress, cancellation, and completion — with implementation patterns for TypeScript and Python SDKs" ;
+    oc:extends oc:skill_anthropics_claude_plugin_official_build_mcp_server ;
+    oc:handlesFailure oc:ClientCapabilityNotSupported ;
+    oc:hasArgumentHint "capability-name (instructions, sampling, roots, logging, progress, cancellation, completion)" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_191a2755,
+        oc:kn_74c9543c,
+        oc:kn_ad6a4630,
+        oc:kn_c960c516,
+        oc:kn_d4cdf404,
+        oc:kn_f062d3be ;
+    oc:isUserInvocable true ;
+    oc:nature "concept" ;
+    oc:requiresState oc:MCPServerInitialized ;
+    oc:resolvesIntent "add autocomplete for prompt arguments",
+        "add server instructions to MCP server",
+        "handle cancellation in MCP tool handlers",
+        "implement MCP server capabilities",
+        "implement structured logging in MCP server",
+        "query workspace roots from MCP host",
+        "report progress from long-running tools",
+        "use sampling to delegate LLM calls to host" ;
+    oc:yieldsState oc:MCPServerCapabilitiesConfigured .
+
+oc:kn_191a2755 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When tool logic needs LLM inference" ;
+    oc:directiveContent "Do not ship your own LLM client inside MCP tools when sampling is available. Delegate LLM inference calls (summarize, classify, generate) to the host via sampling instead." ;
+    oc:hasRationale "Using the host's LLM avoids bundling model credentials, reduces latency, and leverages the user's existing model configuration" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_74c9543c a oc:FallbackStrategy,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When client does not declare support for a capability" ;
+    oc:directiveContent "When optional client capabilities are unavailable, use fallbacks: logging → stderr, progress → silently skip, sampling → bring your own LLM, elicitation → return text and ask Claude to relay, roots → config env var." ;
+    oc:hasRationale "Graceful degradation ensures the server remains functional across different MCP clients with varying feature support" ;
+    oc:severityLevel "LOW" .
+
+oc:kn_ad6a4630 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When Claude is not using tools correctly or tool-use hints don't fit in individual tool descriptions" ;
+    oc:directiveContent "Use server instructions for high-leverage system prompt injection — one line of config that lands directly in Claude's system prompt. If Claude keeps misusing your tools, put the fix here." ;
+    oc:hasRationale "Instructions are the highest-leverage one-liner in the MCP spec for correcting agent behavior without code changes" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_c960c516 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When building MCP servers that will run remotely or need observable logging" ;
+    oc:directiveContent "Use structured MCP logging (notifications/message with syslog levels) instead of stderr for remote servers. Client can filter by level." ;
+    oc:hasRationale "Structured logging is level-aware and filterable by the client, making it superior to stderr for production server deployments" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_d4cdf404 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When implementing tools that iterate over many items or take significant time" ;
+    oc:directiveContent "Long-running tools should report progress via progressToken and check AbortSignal for cancellation. In Python fastmcp, asyncio cancellation is handled automatically for properly async handlers." ;
+    oc:hasRationale "Progress reporting gives users visibility; cancellation support prevents wasting resources on abandoned requests" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_f062d3be a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "Before using any client-dependent capability (sampling, roots, elicitation)" ;
+    oc:directiveContent "Always check clientCapabilities before using optional features like sampling, elicitation, or roots. Use server.getClientCapabilities() (TS) or ctx.session.client_params.capabilities (Python) to verify support." ;
+    oc:hasRationale "Optional capabilities may not be supported by all clients; failing to check causes runtime errors or silent failures" ;
+    oc:severityLevel "CRITICAL" .
+

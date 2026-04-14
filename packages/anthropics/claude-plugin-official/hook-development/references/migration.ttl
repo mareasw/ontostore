@@ -1,0 +1,99 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_plugin_official_hook_development_migration a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "migration" ;
+    skos:broader "Migration guide" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/hook-development" ;
+    oc:contentHash "7f8e7a795829837f46a0c058c26c8f5c4aa8be5c9fb5316b828229d1802ded77" ;
+    oc:differentia "that converts basic command hooks to advanced prompt-based hooks for better maintainability and flexibility" ;
+    oc:extends oc:skill_anthropics_claude_plugin_official_hook_development ;
+    oc:handlesFailure oc:InvalidHookConfiguration,
+        oc:PromptTimeout ;
+    oc:hasArgumentHint "existing hook configuration or script to migrate" ;
+    oc:hasCategory "development" ;
+    oc:hasRequirement oc:req_0b8c59ce,
+        oc:req_62e8fa7f,
+        oc:req_f8467ae5 ;
+    oc:impartsKnowledge oc:kn_430d64e3,
+        oc:kn_53a29c7d,
+        oc:kn_927463e2,
+        oc:kn_d7be688f,
+        oc:kn_f25961f3,
+        oc:kn_f4d2ae4d,
+        oc:kn_f910bf4c ;
+    oc:isUserInvocable true ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:HooksConfigured,
+        oc:PluginInitialized ;
+    oc:resolvesIntent "convert bash hook scripts to prompt-based hooks",
+        "migrate command hooks to prompt hooks",
+        "refactor plugin hooks for maintainability",
+        "upgrade hook validation logic" ;
+    oc:yieldsState oc:HooksMigratedToPrompt .
+
+oc:kn_430d64e3 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When translating bash validation logic into prompt hook text" ;
+    oc:directiveContent "Convert hard-coded string/regex patterns to natural language criteria lists in prompt hooks: string contains → descriptive check, regex → intent description, multiple conditions → numbered criteria." ;
+    oc:hasRationale "Natural language criteria leverage the LLM's understanding to catch variations and edge cases that rigid pattern matching misses, such as 'rm -fr' vs 'rm -rf'." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_53a29c7d a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When configuring prompt-based hooks in hooks.json" ;
+    oc:directiveContent "Set appropriate timeouts for prompt hooks (usually 15-30 seconds) to prevent blocking the agent workflow." ;
+    oc:hasRationale "Without timeouts, a slow LLM response can block the entire tool execution pipeline." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_927463e2 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When deciding between command hooks and prompt hooks for any validation" ;
+    oc:directiveContent "Use prompt-based hooks for validation requiring context awareness, intent understanding, or flexible pattern matching; reserve command hooks for deterministic, fast, or external-tool-integrated checks." ;
+    oc:hasRationale "Prompt hooks leverage LLM reasoning for nuanced decisions while command hooks excel at fast, binary checks — choosing the wrong type leads to either missed edge cases or unnecessary latency." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_d7be688f a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When the validation logic is purely mathematical, under 50ms, or requires zero ambiguity" ;
+    oc:directiveContent "Do not replace deterministic performance-critical checks (file size, quick regex, simple math) with prompt hooks." ;
+    oc:hasRationale "Prompt hooks add 15-30s of LLM latency and introduce non-determinism — inappropriate for simple binary checks where speed and determinism matter." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_f25961f3 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When you need both speed and sophisticated validation on the same tool" ;
+    oc:directiveContent "Use a hybrid approach combining a fast command hook for deterministic checks followed by a prompt hook for deep reasoning." ;
+    oc:hasRationale "The command hook filters obvious violations instantly, while the prompt hook handles nuanced cases — this balances performance with coverage." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_f4d2ae4d a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When planning a hook migration from command to prompt type" ;
+    oc:directiveContent "Migrate one hook at a time, test thoroughly against cases the old hook caught, then look for improvements the migration enables." ;
+    oc:hasRationale "Batch migration risks breaking multiple validations simultaneously; incremental migration allows validation at each step and opportunity to enhance coverage." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_f910bf4c a oc:KnowledgeNode,
+        oc:RollbackProcedure ;
+    oc:appliesToContext "After successfully migrating a command hook to a prompt hook" ;
+    oc:directiveContent "Archive old script files rather than deleting them during migration so the original validation logic can be referenced or restored." ;
+    oc:hasRationale "Archived scripts serve as documentation of the original validation intent and provide a fallback if the prompt hook behaves unexpectedly." ;
+    oc:severityLevel "LOW" .
+
+oc:req_0b8c59ce a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Understanding of command vs prompt hook types" .
+
+oc:req_62e8fa7f a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Familiarity with hooks.json configuration format" .
+
+oc:req_f8467ae5 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Understanding of Claude plugin hook system (PreToolUse, PostToolUse, Stop)" .
+

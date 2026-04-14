@@ -1,0 +1,84 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix oc: <https://ontoskills.sh/ontology#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+oc:skill_anthropics_claude_plugin_official_plugin_settings_parsing_techniques a oc:DeclarativeSkill,
+        oc:Skill ;
+    dcterms:identifier "parsing-techniques" ;
+    skos:broader "Reference guide" ;
+    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/plugin-settings" ;
+    oc:contentHash "bc90aa020aa5fcbb3483d7316754450dcc91d086ee96f9304fa655e878f7712e" ;
+    oc:dependsOnSkill oc:skill_plugin_settings ;
+    oc:differentia "that documents bash techniques for parsing YAML frontmatter and markdown body content from Claude plugin settings files" ;
+    oc:extends oc:skill_anthropics_claude_plugin_official_plugin_settings ;
+    oc:handlesFailure oc:FileNotFound,
+        oc:InvalidInput ;
+    oc:hasArgumentHint "settings-file-path (e.g., .claude/plugin-name.local.md)" ;
+    oc:hasCategory "development" ;
+    oc:impartsKnowledge oc:kn_4e81b15b,
+        oc:kn_6261fa3d,
+        oc:kn_964ccad4,
+        oc:kn_9dda4fe1,
+        oc:kn_b1df850a,
+        oc:kn_ead12967,
+        oc:kn_ff8716e2 ;
+    oc:isUserInvocable false ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:FileExists ;
+    oc:resolvesIntent "extract frontmatter fields from markdown files",
+        "parse plugin settings files",
+        "read and update .claude plugin configuration",
+        "validate settings file structure and field values" ;
+    oc:yieldsState oc:SettingsParsed .
+
+oc:kn_4e81b15b a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before parsing any .claude plugin settings file" ;
+    oc:directiveContent "Always validate that the settings file has exactly 2 --- markers at the start before attempting to parse frontmatter." ;
+    oc:hasRationale "Missing or malformed frontmatter markers indicate an invalid or corrupted settings file. Early detection prevents confusing downstream parse errors." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_6261fa3d a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When reading multiple fields from the same settings file" ;
+    oc:directiveContent "Never re-parse the settings file for each field extraction. Parse frontmatter once and cache the result for all subsequent field extractions." ;
+    oc:hasRationale "Repeated file I/O and sed/grep pipelines for each field is wasteful; caching the frontmatter block and extracting from memory is significantly faster." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_964ccad4 a oc:KnowledgeNode,
+        oc:SecurityImplication ;
+    oc:appliesToContext "When feeding parsed settings body content into JSON structures" ;
+    oc:directiveContent "Always use jq -n --arg for constructing JSON with user-supplied content from settings files rather than string interpolation." ;
+    oc:hasRationale "String interpolation with user content ('\"$PROMPT\"') is vulnerable to injection attacks and will break if the content contains quotes, newlines, or special JSON characters." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_9dda4fe1 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When extracting markdown body content from settings files" ;
+    oc:directiveContent "The awk pattern '/^---$/{i++; next} i>=2' must be used for body extraction because it correctly handles --- markers that appear within the markdown body itself." ;
+    oc:hasRationale "A naive approach using sed ranges would break if --- appears in the body content. The awk counter approach only counts the first two markers as frontmatter delimiters." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_b1df850a a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When choosing a parsing strategy for settings fields" ;
+    oc:directiveContent "Use sed/grep for simple scalar field extraction; switch to yq for complex structures like nested objects or lists that require proper YAML parsing." ;
+    oc:hasRationale "sed/grep are universally available but cannot handle complex YAML structures correctly. yq provides proper parsing but adds a dependency that may not be available on all systems." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_ead12967 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When updating any .claude plugin settings file" ;
+    oc:directiveContent "Use temp file + atomic move (mv) when updating settings files to prevent corruption from partial writes." ;
+    oc:hasRationale "Atomic file replacement ensures the settings file is never in a partially-written state, which could crash the plugin or produce undefined behavior." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_ff8716e2 a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When a parsed field value is invalid or missing" ;
+    oc:directiveContent "Always provide sensible defaults when a settings field is missing, empty, null, or fails validation rather than failing outright." ;
+    oc:hasRationale "Plugin settings files may be edited by users who make mistakes. Graceful fallback to defaults keeps the plugin functional while warning about the issue." ;
+    oc:severityLevel "MEDIUM" .
+
