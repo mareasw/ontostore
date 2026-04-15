@@ -47,7 +47,7 @@ Source imports land in `~/.ontoskills/skills/author/<slug>` and are compiled to 
   "packages": [
     {
       "package_id": "mareasw/greeting",
-      "trust_tier": "verified",
+      "trust_tier": "official",
       "source_kind": "ontology",
       "manifest_path": "packages/mareasw/greeting/package.json"
     }
@@ -80,7 +80,7 @@ Source imports land in `~/.ontoskills/skills/author/<slug>` and are compiled to 
 
 - Canonical runtime identity: `author/package/skill`
 - Short IDs accepted as lookup convenience
-- Ambiguous short IDs resolve with precedence: `local > verified > trusted > community`
+- Ambiguous short IDs resolve with precedence: `official > local > verified > community`
 
 ## Activation Rules
 
