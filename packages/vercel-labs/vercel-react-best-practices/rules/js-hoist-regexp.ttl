@@ -7,70 +7,128 @@
 oc:skill_vercel_labs_vercel_react_best_practices_js_hoist_regexp a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "js-hoist-regexp" ;
-    skos:broader "optimization pattern" ;
+    skos:broader "Performance optimization pattern" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "f9e9aef2f7c2307dd7310f283df85dcada45fc43e9bb941b0c3aa414dec21ec4" ;
-    oc:differentia "hoists or memoizes RegExp creation outside of React component render paths to avoid unnecessary object recreation on every render cycle" ;
+    oc:differentia "hoists or memoizes RegExp creation outside React render paths to avoid per-render object allocation" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
-    oc:handlesFailure oc:InvalidInput ;
-    oc:hasArgumentHint "React component code using RegExp" ;
+    oc:handlesFailure oc:RegExpMutableStateConflict ;
     oc:hasCategory "development" ;
-    oc:hasRequirement oc:req_03a38ee7,
-        oc:req_eb5171d4 ;
-    oc:impartsKnowledge oc:kn_57f986a7,
-        oc:kn_65618da9,
-        oc:kn_9756277f,
-        oc:kn_9e8dcfd2,
-        oc:kn_f88818e0 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Hoist RegExp Creation
+impact: LOW-MEDIUM
+impactDescription: avoids recreation
+tags: javascript, regexp, optimization, memoization
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """const regex = /foo/g
+regex.test('foo')  // true, lastIndex = 3
+regex.test('foo')  // false, lastIndex = 0
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 8 ;
+                    oc:sourceLocation "lines 41-45" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """const EMAIL_REGEX = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/
+
+function Highlighter({ text, query }: Props) {
+  const regex = useMemo(
+    () => new RegExp(`(${escapeRegex(query)})`, 'gi'),
+    [query]
+  )
+  const parts = text.split(regex)
+  return <>{parts.map((part, i) => ...)}</>
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 5 ;
+                    oc:sourceLocation "lines 24-35" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Incorrect (new RegExp every render):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 6 ;
+                    oc:textContent "**Warning (global regex has mutable state):**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function Highlighter({ text, query }: Props) {
+  const regex = new RegExp(`(${query})`, 'gi')
+  const parts = text.split(regex)
+  return <>{parts.map((part, i) => ...)}</>
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-20" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "**Correct (memoize or hoist):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 7 ;
+                    oc:textContent "Global regex (`/g`) has mutable `lastIndex` state:" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Don't create RegExp inside render. Hoist to module scope or memoize with `useMemo()`." ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Hoist RegExp Creation" ] ;
+    oc:impartsKnowledge oc:kn_25492df3,
+        oc:kn_51fa4db4,
+        oc:kn_598f5b6a,
+        oc:kn_86d3fced,
+        oc:kn_a37d77a0 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:EnvironmentReady ;
-    oc:resolvesIntent "avoid regexp recreation on every render",
-        "hoist static regexp to module scope",
-        "memoize dynamic regexp in react components",
-        "optimize regexp usage in react components" ;
+    oc:requiresState oc:ReactComponentDefined ;
+    oc:resolvesIntent "avoid recreating RegExp on every render",
+        "fix mutable state bugs with global regex",
+        "optimize regex performance in React components" ;
     oc:yieldsState oc:RegExpOptimized .
 
-oc:kn_57f986a7 a oc:KnowledgeNode,
-        oc:SideEffect ;
-    oc:appliesToContext "When constructing RegExp from user-provided query strings" ;
-    oc:directiveContent "When user input is interpolated into dynamic RegExp, always escape special regex characters to prevent both injection and malformed patterns." ;
-    oc:hasRationale "Unescaped user input in RegExp can cause syntax errors or unintended regex behavior (ReDoS-like patterns)." ;
-    oc:severityLevel "HIGH" .
+oc:kn_25492df3 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When a component needs a RegExp derived from props or state" ;
+    oc:directiveContent "Hoist static regex patterns to module scope: `const MY_REGEX = /^pattern$/` — for dynamic patterns dependent on props/state, wrap in `useMemo(() => new RegExp(...), [deps])`." ;
+    oc:hasRationale "Module-scope hoisting is free; useMemo only re-creates when dependencies change, avoiding redundant allocation." .
 
-oc:kn_65618da9 a oc:KnowledgeNode,
+oc:kn_51fa4db4 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing React components that use regular expressions" ;
+    oc:directiveContent "Never create a new RegExp inside a React component's render body — it allocates a fresh object on every render cycle." ;
+    oc:hasRationale "Unnecessary per-render allocation wastes memory and GC pressure, especially in frequently re-rendering components." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_598f5b6a a oc:KnowledgeNode,
         oc:KnownIssue ;
-    oc:appliesToContext "When using global RegExp at module scope or sharing a single RegExp instance across multiple calls" ;
-    oc:directiveContent "Global RegExp (using /g flag) carries mutable lastIndex state that changes between .test() or .exec() calls, causing alternating true/false results on repeated calls with the same input." ;
-    oc:hasRationale "The lastIndex mutation is a well-known JavaScript footgun that can cause intermittent bugs in component logic, especially with hoisted or shared regex instances." ;
+    oc:appliesToContext "When using shared or hoisted regex with the /g flag" ;
+    oc:directiveContent "Global regex (with /g flag) carries mutable `lastIndex` state — calling `.test()` or `.exec()` advances it, causing alternating true/false results on repeated calls with the same input." ;
+    oc:hasRationale "This is a well-known JavaScript footgun: a hoisted /g regex used across renders or call sites will produce inconsistent results due to internal state mutation." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_9756277f a oc:AntiPattern,
+oc:kn_86d3fced a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When writing React components that use RegExp" ;
-    oc:directiveContent "Never create RegExp objects directly inside the render body of a React component, as they will be recreated on every render cycle." ;
-    oc:hasRationale "Recreating RegExp on every render is wasteful allocation and can degrade performance in frequently-rendered components." ;
-    oc:severityLevel "MEDIUM" .
+    oc:appliesToContext "When deciding between hoisting vs memoizing a RegExp" ;
+    oc:directiveContent "Use module-scope constants for fixed patterns (e.g., email validation); use `useMemo` only for patterns that depend on props or state; always escape dynamic input with an escape function before embedding in RegExp." ;
+    oc:hasRationale "Fixed patterns never change and should never be in render scope; dynamic patterns must be memoized to balance correctness and performance." .
 
-oc:kn_9e8dcfd2 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When the RegExp pattern includes variable input like query strings" ;
-    oc:directiveContent "For dynamic RegExp patterns that depend on props or state, wrap creation in useMemo() with the appropriate dependencies." ;
-    oc:hasRationale "useMemo ensures the RegExp is only recreated when its dependencies actually change, not on every render." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_f88818e0 a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When the RegExp pattern does not depend on props or state" ;
-    oc:directiveContent "Hoist static, constant RegExp patterns to module scope so they are created once and shared across all component instances." ;
-    oc:hasRationale "Module-scoped RegExp avoids repeated allocation and is the simplest optimization for fixed patterns." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:req_03a38ee7 a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "JavaScript RegExp API" .
-
-oc:req_eb5171d4 a oc:RequirementKnowledge ;
-    oc:isOptional true ;
-    oc:requirementValue "React hooks (useMemo)" .
+oc:kn_a37d77a0 a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "When hoisting regex to module scope with the global flag" ;
+    oc:directiveContent "Shared module-scope RegExp objects with the /g flag have side-effectful `.test()` and `.exec()` methods that mutate internal `lastIndex`." ;
+    oc:hasRationale "This side effect can cause non-deterministic behavior in concurrent or reused contexts." ;
+    oc:severityLevel "HIGH" .
 

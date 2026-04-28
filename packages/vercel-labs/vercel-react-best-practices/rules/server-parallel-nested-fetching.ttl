@@ -7,51 +7,113 @@
 oc:skill_vercel_labs_vercel_react_best_practices_server_parallel_nested_fetching a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "server-parallel-nested-fetching" ;
-    skos:broader "Performance optimization pattern" ;
+    skos:broader "Data fetching pattern" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "ad5d9656984d4a959997a2367bf59cc6632297b4634a1dd13a087939d83f30b3" ;
-    oc:differentia "chains dependent async fetches within individual Promise.all items so that a slow parent fetch does not block nested fetches for other items" ;
+    oc:differentia "chains dependent async fetches within individual promise chains to prevent server-side waterfalls" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
-    oc:handlesFailure oc:NetworkTimeout ;
-    oc:hasArgumentHint "nested async fetch code to optimize" ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_00372aac,
-        oc:kn_4bc3c504,
-        oc:kn_9503f656,
-        oc:kn_9ed693de ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Parallel Nested Data Fetching
+impact: CRITICAL
+impactDescription: eliminates server-side waterfalls
+tags: server, rsc, parallel-fetching, promise-chaining
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "If one `getChat(id)` out of 100 is extremely slow, the authors of the other 99 chats can't start loading even though their data is ready." ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """const chats = await Promise.all(
+  chatIds.map(id => getChat(id))
+)
+
+const chatAuthors = await Promise.all(
+  chats.map(chat => getUser(chat.author))
+)
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-22" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Incorrect (a single slow item blocks all nested fetches):**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """const chatAuthors = await Promise.all(
+  chatIds.map(id => getChat(id).then(chat => getUser(chat.author)))
+)
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 6 ;
+                    oc:sourceLocation "lines 28-32" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 7 ;
+                    oc:textContent "Each item independently chains `getChat` → `getUser`, so a slow chat doesn't block author fetches for the others." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "When fetching nested data in parallel, chain dependent fetches within each item's promise so a slow item doesn't block the rest." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 5 ;
+                    oc:textContent "**Correct (each item chains its own nested fetch):**" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Parallel Nested Data Fetching" ] ;
+    oc:impartsKnowledge oc:kn_0896bedc,
+        oc:kn_414bf507,
+        oc:kn_5bdf13e1,
+        oc:kn_5f722d5d,
+        oc:kn_9f53d161 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:EnvironmentReady ;
     oc:resolvesIntent "eliminate server-side waterfalls",
-        "optimize nested data fetching",
-        "parallelize dependent async operations" ;
-    oc:yieldsState oc:DataFetched .
+        "fetch nested data efficiently in RSC",
+        "optimize parallel data fetching" .
 
-oc:kn_00372aac a oc:AntiPattern,
+oc:kn_0896bedc a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When fetching nested/dependent data in server components or RSC" ;
-    oc:directiveContent "Never separate nested dependent fetches into sequential Promise.all calls, as a single slow item in the first batch blocks all items in the second batch." ;
-    oc:hasRationale "Sequential Promise.all phases create a waterfall where the second phase cannot begin until the slowest item in the first phase completes, wasting available parallelism." ;
+    oc:appliesToContext "Always when one fetch depends on the result of another per-item" ;
+    oc:directiveContent "Chain dependent fetches within each item's promise (.then()) rather than between separate Promise.all calls." ;
+    oc:hasRationale "Parallelizes at the item level instead of the stage level, eliminating cross-item blocking." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_414bf507 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When fetching nested/dependent data in server components" ;
+    oc:directiveContent "Never use sequential Promise.all stages for nested data fetching where the second stage depends on results from the first — a slow item in stage one blocks all items in stage two." ;
+    oc:hasRationale "This creates a server-side waterfall: the second Promise.all cannot begin until every item in the first Promise.all resolves, even if most items finished quickly." ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_4bc3c504 a oc:KnowledgeNode,
+oc:kn_5bdf13e1 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When fetching nested data where each item requires a follow-up fetch based on the first result" ;
+    oc:codeLanguage "tsx" ;
+    oc:directiveContent """const results = await Promise.all(
+  ids.map(id => getFirst(id).then(first => getSecond(first.relatedId)))
+);""" ;
+    oc:hasRationale "Each item chains its own dependent fetch independently, so a slow item does not block other items from proceeding." .
+
+oc:kn_5f722d5d a oc:KnowledgeNode,
         oc:PerformanceProfile ;
-    oc:appliesToContext "When evaluating fetch performance for N items with nested dependencies" ;
-    oc:directiveContent "Correct parallel nested fetching reduces total wait time from O(max_parent + max_child) to O(max(parent+child_per_item)), effectively eliminating cross-item blocking." ;
-    oc:hasRationale "With sequential Promise.all, total time is dominated by the slowest parent plus the slowest child; with chaining, total time is dominated only by the slowest combined parent+child pair." ;
-    oc:severityLevel "HIGH" .
+    oc:appliesToContext "When evaluating fetching strategy for large lists with variable-latency items" ;
+    oc:directiveContent "The anti-pattern's total time approaches sum of slowest-stage batches; the correct pattern's total time approaches max of individual item chains." ;
+    oc:hasRationale "With 100 items where one is slow, sequential stages block 99 completed items; per-item chaining only the slow item takes longer." .
 
-oc:kn_9503f656 a oc:Heuristic,
+oc:kn_9f53d161 a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When mapping over items that each require a secondary fetch based on the first fetch's result" ;
-    oc:directiveContent "Chain dependent fetches within each item's promise using .then() so each item independently resolves its full dependency chain." ;
-    oc:hasRationale "Independent chaining means only the item with the slow parent fetch is delayed; all other items proceed to their nested fetches immediately." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_9ed693de a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When designing any data-fetching architecture in React Server Components" ;
-    oc:directiveContent "Structure async data fetching to minimize the critical path: each logical unit of work should be self-contained and not gated by unrelated units." ;
-    oc:hasRationale "Self-contained promise chains prevent unrelated data dependencies from creating artificial serialization points." ;
-    oc:severityLevel "MEDIUM" .
+    oc:appliesToContext "When designing data fetching architectures in React Server Components" ;
+    oc:directiveContent "Prefer per-item promise chaining over stage-based batch processing for dependent async operations." ;
+    oc:hasRationale "Server-side waterfalls are a primary performance bottleneck in RSC; eliminating them is critical for page load times." .
 

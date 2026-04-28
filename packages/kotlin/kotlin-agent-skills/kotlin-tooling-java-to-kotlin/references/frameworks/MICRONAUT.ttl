@@ -10,76 +10,297 @@ oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_java_to_kotlin_micronaut a oc
     skos:broader "Conversion guide" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/kotlin/kotlin-agent-skills/kotlin-tooling-java-to-kotlin" ;
     oc:contentHash "4d5f9ba64acc694cdade9d374e43548f083bacb40d2995ce424c4ff8c7836edd" ;
-    oc:differentia "that handles Java-to-Kotlin migration for Micronaut framework source code, covering DI, annotations, AOP, and configuration patterns" ;
+    oc:dependsOnSkill oc:skill_ontoskills_kotlin_tooling_java_to_kotlin ;
+    oc:differentia "that maps Micronaut-specific Java patterns to idiomatic Kotlin during Java-to-Kotlin migration" ;
     oc:extends oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_java_to_kotlin ;
-    oc:handlesFailure oc:AOPProxyBreakingChange,
-        oc:AnnotationSiteTargetConflict,
-        oc:InvalidInput ;
-    oc:hasArgumentHint "Java source files containing io.micronaut.* imports" ;
+    oc:handlesFailure oc:InvalidInput ;
     oc:hasCategory "development" ;
-    oc:hasRequirement oc:req_6fe95f84,
-        oc:req_d3a69503,
-        oc:req_fb75b88e ;
-    oc:impartsKnowledge oc:kn_01cc7f60,
-        oc:kn_049c7dda,
-        oc:kn_18df920c,
-        oc:kn_9b39039f,
-        oc:kn_ce942cec ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent """This guide applies when the Java source contains imports matching `io.micronaut.*`.
+This covers Micronaut HTTP, Micronaut Data, and Micronaut Security.""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "When This Applies" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent """Replace `@Inject` on fields with constructor parameters in Kotlin's primary constructor.
+This eliminates `lateinit var` and makes dependencies immutable.""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "4. @Inject field injection → constructor injection" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Escape `$` in Kotlin to prevent string template interpretation:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """@Value("\\${config.key}") val configKey: String
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 25-27" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "3. @Value annotation" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent """Classes using AOP annotations (`@Around`, `@Introduction`, `@Cacheable`) must be `open`
+in Kotlin because Micronaut generates subclass proxies for them at compile time.""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 5 ;
+                            oc:sectionTitle "5. AOP interceptors require open classes" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent """Micronaut uses compile-time dependency injection via constructor injection by default.
+This maps naturally to Kotlin's primary constructor. Remove `@Inject` when there is
+only one constructor — Micronaut discovers it automatically.""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "1. Constructor injection is the default" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent """`@Singleton`, `@Controller`, `@Client`, `@Repository` — preserve these exactly.
+No annotation site target is needed.""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "2. Stereotype annotations" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent """`@Factory` classes and their `@Bean`-annotated methods should be `open` so Micronaut
+can manage their lifecycle through subclassing.""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 6 ;
+                            oc:sectionTitle "6. Bean factories" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent """Convert to a class with mutable properties. Use `lateinit var` for required `String`
+properties and `var` with defaults for primitives. The class must be `open`.""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 7 ;
+                            oc:sectionTitle "7. @ConfigurationProperties" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Key Rules" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """package com.acme.web
+
+import io.micronaut.http.annotation.Controller
+import io.micronaut.http.annotation.Get
+import io.micronaut.http.annotation.PathVariable
+
+@Controller("/api/orders")
+class OrderController(
+    private val orderService: OrderService,
+    private val inventoryClient: InventoryClient
+) {
+
+    @Get("/{id}")
+    fun getOrder(@PathVariable id: Long): OrderDto? {
+        return orderService.findById(id)
+    }
+
+    @Get
+    fun listOrders(): List<OrderDto> {
+        return orderService.findAll()
+    }
+}
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 4 ;
+                                    oc:sourceLocation "lines 91-114" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 6 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "The `jakarta.inject.Inject` import is removed because it is no longer referenced." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Constructor parameters become `private val` in the primary constructor." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "Return type `OrderDto` becomes `OrderDto?` where the service may return null." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "`@Inject` is removed — Micronaut auto-discovers the single constructor." ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Java:**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """package com.acme.web;
+
+import io.micronaut.http.annotation.Controller;
+import io.micronaut.http.annotation.Get;
+import io.micronaut.http.annotation.PathVariable;
+import jakarta.inject.Inject;
+
+@Controller("/api/orders")
+public class OrderController {
+
+    private final OrderService orderService;
+    private final InventoryClient inventoryClient;
+
+    @Inject
+    public OrderController(OrderService orderService, InventoryClient inventoryClient) {
+        this.orderService = orderService;
+        this.inventoryClient = inventoryClient;
+    }
+
+    @Get("/{id}")
+    public OrderDto getOrder(@PathVariable Long id) {
+        return orderService.findById(id);
+    }
+
+    @Get
+    public List<OrderDto> listOrders() {
+        return orderService.findAll();
+    }
+}
+""" ;
+                                    oc:codeLanguage "java" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 57-87" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent "Key changes:" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Kotlin:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Example 1: Micronaut Controller with Constructor Injection" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Examples" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Micronaut Conversion Guide" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "Convert a Micronaut Java class to idiomatic Kotlin, handling DI, annotations, and AOP constraints." ;
+            oc:hasStep [ a oc:WorkflowStep ;
+                    dcterms:description "Preserve stereotype annotations (@Singleton, @Controller, @Client, @Repository) as-is. Escape $ in @Value as \\${...}." ;
+                    oc:expectedOutcome "All annotations correctly preserved or escaped for Kotlin compilation." ;
+                    oc:stepId "annotations" ],
+                [ a oc:WorkflowStep ;
+                    dcterms:description "For @ConfigurationProperties: use lateinit var for required String properties, var with defaults for primitives." ;
+                    oc:expectedOutcome "Configuration properties class has appropriate mutability for Micronaut's reflective binding." ;
+                    oc:stepId "config-props" ],
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Make return types nullable where Java methods may return null (e.g., single-entity lookups)." ;
+                    oc:expectedOutcome "Kotlin null safety accurately reflects Java's potential null returns." ;
+                    oc:stepId "nullability" ],
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Detect Micronaut imports (io.micronaut.*) to confirm this guide applies." ;
+                    oc:expectedOutcome "Micronaut framework confirmed; proceed with Micronaut-specific conversion rules." ;
+                    oc:stepId "detect" ],
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Convert @Inject constructor/field injection to Kotlin primary constructor parameters (private val). Remove @Inject and its import when only one constructor exists." ;
+                    oc:expectedOutcome "Dependencies are immutable val properties in primary constructor; @Inject removed." ;
+                    oc:stepId "inject" ],
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Add 'open' modifier to classes using AOP annotations (@Around, @Introduction, @Cacheable), @Factory classes, and @ConfigurationProperties classes." ;
+                    oc:expectedOutcome "All proxy-targeted classes are open for Micronaut compile-time subclassing." ;
+                    oc:stepId "aop-open" ] ;
+            oc:workflowId "micronaut-conversion" ;
+            oc:workflowName "Micronaut Java-to-Kotlin Conversion" ] ;
+    oc:impartsKnowledge oc:kn_16c041f8,
+        oc:kn_4502fbad,
+        oc:kn_5473927a,
+        oc:kn_96ea03a0,
+        oc:kn_ac01e877,
+        oc:kn_c110b5a5,
+        oc:kn_d99aa065,
+        oc:kn_fd85a981 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:JavaSourceIdentified,
-        oc:MicronautImportsDetected ;
+    oc:requiresState oc:JavaSourceIdentified ;
     oc:resolvesIntent "convert micronaut java code to kotlin",
-        "migrate micronaut dependency injection to kotlin",
-        "refactor micronaut configuration properties to kotlin",
-        "translate micronaut annotations and AOP patterns to kotlin" ;
-    oc:yieldsState oc:KotlinConversionComplete,
-        oc:MicronautAnnotationsPreserved .
+        "migrate micronaut annotations and injection to kotlin",
+        "translate micronaut controller to kotlin" ;
+    oc:yieldsState oc:MicronautPatternsConverted .
 
-oc:kn_01cc7f60 a oc:KnowledgeNode,
+oc:kn_16c041f8 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting Micronaut controller methods that delegate to services returning single entities" ;
+    oc:directiveContent "Make return types nullable (e.g., OrderDto → OrderDto?) where the Java service method may return null." ;
+    oc:hasRationale "Kotlin enforces null safety; Java methods that can return null should be reflected as nullable Kotlin types." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_4502fbad a oc:KnowledgeNode,
         oc:Standard ;
-    oc:appliesToContext "When converting Micronaut classes that use field injection to Kotlin" ;
-    oc:directiveContent "Replace @Inject field injection with primary constructor parameters as private val to eliminate lateinit var and make dependencies immutable." ;
-    oc:hasRationale "Kotlin's primary constructor idiom is more concise and type-safe than field injection; constructor injection is already Micronaut's default mechanism." ;
+    oc:appliesToContext "When converting any Micronaut stereotype-annotated class" ;
+    oc:directiveContent "Preserve stereotype annotations (@Singleton, @Controller, @Client, @Repository) exactly as-is — no annotation site target needed." ;
+    oc:hasRationale "These annotations target the class directly and do not require Kotlin annotation site targets like @field: or @get:." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_5473927a a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting Micronaut @Inject field injection to Kotlin" ;
+    oc:directiveContent "Do NOT use lateinit var for @Inject field-injected dependencies — convert them to constructor parameters with private val instead." ;
+    oc:hasRationale "Constructor injection with val makes dependencies immutable and thread-safe, eliminating the need for lateinit var." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_049c7dda a oc:Constraint,
+oc:kn_96ea03a0 a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When converting any Micronaut class that uses AOP or bean factory annotations" ;
-    oc:directiveContent "Classes annotated with AOP interceptor annotations (@Around, @Introduction, @Cacheable) must be declared `open` in Kotlin because Micronaut generates subclass proxies at compile time." ;
-    oc:hasRationale "Kotlin classes are final by default; without `open`, Micronaut's compile-time proxy generation will fail with a subclassing error." ;
+    oc:appliesToContext "When converting classes with Micronaut AOP/interceptor annotations" ;
+    oc:directiveContent "Classes using Micronaut AOP annotations (@Around, @Introduction, @Cacheable) must be declared open in Kotlin." ;
+    oc:hasRationale "Micronaut generates subclass proxies at compile time; Kotlin classes are final by default, which prevents proxy generation." ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_18df920c a oc:AntiPattern,
+oc:kn_ac01e877 a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When converting Micronaut classes with a single constructor to Kotlin" ;
-    oc:directiveContent "Never use @Inject on a Kotlin primary constructor when it is the only constructor — Micronaut auto-discovers single constructors and @Inject is redundant noise." ;
-    oc:hasRationale "Removing @Inject simplifies the code and avoids unnecessary annotation imports while preserving Micronaut's compile-time DI behavior." ;
+    oc:appliesToContext "When converting Micronaut Java classes with a single @Inject-annotated constructor" ;
+    oc:directiveContent "Remove @Inject when converting a Java class that has only one constructor — Micronaut auto-discovers the sole constructor for dependency injection." ;
+    oc:hasRationale "Micronaut's compile-time DI resolves the single constructor automatically; keeping @Inject is redundant in Kotlin and adds unnecessary imports." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_9b39039f a oc:DesignPrinciple,
+oc:kn_c110b5a5 a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When converting Micronaut @ConfigurationProperties-annotated Java classes to Kotlin" ;
-    oc:directiveContent "Convert @ConfigurationProperties classes to open classes with lateinit var for required String properties and var with defaults for primitives." ;
-    oc:hasRationale "Micronaut requires configuration property classes to be open for subclass-based lifecycle management; mutable properties are needed because values are injected post-construction." ;
+    oc:appliesToContext "When converting Micronaut @ConfigurationProperties to Kotlin" ;
+    oc:directiveContent "For @ConfigurationProperties classes: use lateinit var for required String properties, var with defaults for primitives. The class must be open." ;
+    oc:hasRationale "Micronaut sets properties via reflection at runtime; lateinit var handles required strings while var with defaults handles optional primitives." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_d99aa065 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting Micronaut bean factory classes" ;
+    oc:directiveContent "@Factory classes and @Bean-annotated methods must be open so Micronaut can manage lifecycle through subclassing." ;
+    oc:hasRationale "Micronaut subclasses factory beans for lifecycle management; closed classes/methods prevent this." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_ce942cec a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "When converting any @Value-annotated field or parameter from Java to Kotlin" ;
-    oc:directiveContent "Escape the dollar sign in @Value annotations as \\${...} rather than ${...} to prevent Kotlin string template interpolation." ;
-    oc:hasRationale "Kotlin interprets ${...} inside strings as template expressions; the backslash escape ensures Micronaut receives the literal property placeholder." ;
+oc:kn_fd85a981 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting @Value annotation property placeholders" ;
+    oc:directiveContent "Escape $ in @Value annotations as \\${...} to prevent Kotlin string template interpretation." ;
+    oc:hasRationale "Kotlin treats $ as string template prefix; unescaped $ causes compilation errors." ;
     oc:severityLevel "CRITICAL" .
-
-oc:req_6fe95f84 a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "Micronaut framework annotations and DI model" .
-
-oc:req_d3a69503 a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "Kotlin primary constructors and class modifiers" .
-
-oc:req_fb75b88e a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "Java-to-Kotlin conversion fundamentals" .
 

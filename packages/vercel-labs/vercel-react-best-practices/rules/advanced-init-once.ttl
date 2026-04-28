@@ -10,48 +10,118 @@ oc:skill_vercel_labs_vercel_react_best_practices_advanced_init_once a oc:Declara
     skos:broader "React initialization pattern" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "3e4dc22173eb0e2b6dcf583e3babd862b8696328f8f59aee7c4d746c5bc05f6c" ;
-    oc:differentia "ensures app-wide initialization runs exactly once per app load rather than per component mount using module-level guards" ;
-    oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
-    oc:handlesFailure oc:DuplicateInitialization ;
-    oc:hasArgumentHint "React component with app-wide initialization logic" ;
+    oc:differentia "guards one-time app-wide setup against component remounting and StrictMode double-invocation" ;
+    oc:extends oc:skill_ontoskills_vercel_react_best_practices,
+        oc:skill_vercel_labs_vercel_react_best_practices ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_0bc4a24f,
-        oc:kn_18afea35,
-        oc:kn_36cb2018,
-        oc:kn_7c6a3796 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function Comp() {
+  useEffect(() => {
+    loadFromStorage()
+    checkAuthToken()
+  }, [])
+
+  // ...
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-23" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 6 ;
+                    oc:textContent "Reference: [Initializing the application](https://react.dev/learn/you-might-not-need-an-effect#initializing-the-application)" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Do not put app-wide initialization that must run once per app load inside `useEffect([])` of a component. Components can remount and effects will re-run. Use a module-level guard or top-level init in the entry module instead." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Incorrect (runs twice in dev, re-runs on remount):**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """let didInit = false
+
+function Comp() {
+  useEffect(() => {
+    if (didInit) return
+    didInit = true
+    loadFromStorage()
+    checkAuthToken()
+  }, [])
+
+  // ...
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 5 ;
+                    oc:sourceLocation "lines 27-40" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "**Correct (once per app load):**" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Initialize App Once, Not Per Mount" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Initialize App Once, Not Per Mount
+impact: LOW-MEDIUM
+impactDescription: avoids duplicate init in development
+tags: initialization, useEffect, app-startup, side-effects
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:impartsKnowledge oc:kn_02e2fc82,
+        oc:kn_41bc21c4,
+        oc:kn_599919cd,
+        oc:kn_c6fe81d2,
+        oc:kn_de6b4328 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:EnvironmentReady ;
-    oc:resolvesIntent "avoid duplicate initialization in React development mode",
-        "initialize app once per load",
-        "prevent re-running side effects on component remount" ;
-    oc:yieldsState oc:AppInitialized .
+    oc:resolvesIntent "handle app startup side effects safely",
+        "initialize app once",
+        "prevent duplicate initialization" .
 
-oc:kn_0bc4a24f a oc:KnowledgeNode,
-        oc:KnownIssue ;
-    oc:appliesToContext "When debugging duplicate initialization during React development" ;
-    oc:directiveContent "React StrictMode in development intentionally double-mounts components, causing useEffect cleanup and re-execution. This is by design and will not occur in production." ;
-    oc:hasRationale "Developers may observe unexpected double execution and incorrectly assume it's a bug; understanding StrictMode behavior prevents misdiagnosis." ;
+oc:kn_02e2fc82 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When app-wide init must live inside a component's useEffect" ;
+    oc:codeLanguage "tsx" ;
+    oc:directiveContent "Use a module-level boolean guard (let didInit = false) inside useEffect to ensure initialization runs exactly once per app load, even if the component remounts." ;
+    oc:hasRationale "Module-level variables persist across remounts within the same JS module lifecycle, providing a reliable single-execution guarantee." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_18afea35 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When writing React components that need one-time app initialization" ;
-    oc:directiveContent "Do not place app-wide initialization logic (e.g., loadFromStorage, checkAuthToken) inside a bare useEffect([]) in a component. Components can remount and effects will re-run, causing duplicate initialization." ;
-    oc:hasRationale "In development mode, React StrictMode double-invokes effects, and in production, component remounting (e.g., due to Suspense or routing) will also re-run effects, leading to duplicate side effects." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_36cb2018 a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When designing one-time initialization for a React application" ;
-    oc:directiveContent "Use a module-level guard variable (e.g., let didInit = false) inside useEffect to ensure initialization runs exactly once per app load, or move initialization to the entry module's top level." ;
-    oc:hasRationale "Module-level state persists across remounts because the module is evaluated once, providing a reliable single-execution guarantee regardless of component lifecycle." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_7c6a3796 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When evaluating where to place initialization code in a React app" ;
-    oc:directiveContent "If the initialization truly only needs to happen once per app load and has no dependency on component state or props, it should not live inside a component at all — prefer top-level module initialization." ;
-    oc:hasRationale "Moving init outside components eliminates the component lifecycle entirely from the equation, making the code simpler and the guarantee stronger." ;
+oc:kn_41bc21c4 a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "When using the didInit guard pattern" ;
+    oc:directiveContent "Module-level guard variables persist for the lifetime of the JS module, surviving component unmount/remount cycles but resetting on full page reload." ;
+    oc:hasRationale "Agents must understand the guard's lifecycle to correctly reason about when re-initialization occurs." ;
     oc:severityLevel "LOW" .
+
+oc:kn_599919cd a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing app startup architecture" ;
+    oc:directiveContent "App-wide initialization that must run once per app load should ideally be placed at the top level of the entry module, not inside any component." ;
+    oc:hasRationale "Top-level entry module code executes once when the bundle loads, avoiding remount pitfalls entirely." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_c6fe81d2 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When evaluating whether initialization logic needs protection" ;
+    oc:directiveContent "Distinguish between per-mount setup (subscribe to events, fetch component data) and per-app-load setup (auth check, storage hydration). Only per-app-load init needs the guard pattern." ;
+    oc:hasRationale "Over-applying the guard to per-mount logic would suppress legitimate re-initialization on remount." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_de6b4328 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing app initialization code inside React components" ;
+    oc:directiveContent "Never place app-wide initialization logic (e.g., loadFromStorage, checkAuthToken) inside a bare useEffect([]) — components remount in dev StrictMode and during navigation, causing duplicate execution." ;
+    oc:hasRationale "useEffect([]) does not guarantee single execution; React may remount components, re-running all effects." ;
+    oc:severityLevel "HIGH" .
 

@@ -10,68 +10,113 @@ oc:skill_vercel_labs_vercel_react_best_practices_async_api_routes a oc:Declarati
     skos:broader "Performance optimization pattern" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "523338540d73427dc14c0cbb19f2741ebccdf8b105a7b2c1b33d2905cf237a42" ;
-    oc:differentia "Prevents sequential waterfall chains in API routes and Server Actions by starting independent async operations immediately and awaiting them in parallel" ;
+    oc:differentia "Eliminates sequential await waterfall chains in API routes by starting independent operations immediately and using Promise.all for parallel execution" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
-    oc:handlesFailure oc:DependencyCycleDetected,
-        oc:PromiseRejected ;
-    oc:hasArgumentHint "api-route-or-server-action-code" ;
+    oc:handlesFailure oc:SequentialWaterfallDetected ;
     oc:hasCategory "development" ;
-    oc:hasRequirement oc:req_31b1cd92,
-        oc:req_38224c68 ;
-    oc:impartsKnowledge oc:kn_763d5d93,
-        oc:kn_8f7d43d2,
-        oc:kn_97fa501c,
-        oc:kn_b00fb621,
-        oc:kn_de9997a4 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Prevent Waterfall Chains in API Routes
+impact: CRITICAL
+impactDescription: 2-10× improvement
+tags: api-routes, server-actions, waterfalls, parallelization
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "**Correct (auth and config start immediately):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 6 ;
+                    oc:textContent "For operations with more complex dependency chains, use `better-all` to automatically maximize parallelism (see Dependency-Based Parallelization)." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Incorrect (config waits for auth, data waits for both):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "In API routes and Server Actions, start independent operations immediately, even if you don't await them yet." ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """export async function GET(request: Request) {
+  const session = await auth()
+  const config = await fetchConfig()
+  const data = await fetchData(session.user.id)
+  return Response.json({ data, config })
+}
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-21" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """export async function GET(request: Request) {
+  const sessionPromise = auth()
+  const configPromise = fetchConfig()
+  const session = await sessionPromise
+  const [config, data] = await Promise.all([
+    configPromise,
+    fetchData(session.user.id)
+  ])
+  return Response.json({ data, config })
+}
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 5 ;
+                    oc:sourceLocation "lines 25-36" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Prevent Waterfall Chains in API Routes" ] ;
+    oc:impartsKnowledge oc:kn_24651175,
+        oc:kn_5b29cefe,
+        oc:kn_65ea3c08,
+        oc:kn_7bcca0cf,
+        oc:kn_e5a2fd02 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:EnvironmentReady ;
-    oc:resolvesIntent "improve api response times",
+    oc:requiresState oc:AsyncOperationPending ;
+    oc:resolvesIntent "eliminate waterfall chains in server actions",
         "optimize api route performance",
-        "parallelize async operations in server actions",
-        "prevent waterfall chains in api routes" ;
+        "parallelize async operations in next.js api routes" ;
     oc:yieldsState oc:AsyncOperationsParallelized .
 
-oc:kn_763d5d93 a oc:Heuristic,
+oc:kn_24651175 a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When multiple async operations have been started and their results are needed together" ;
-    oc:directiveContent "Use Promise.all to await multiple independent results simultaneously once their promises are already in flight." ;
-    oc:hasRationale "Promise.all collects results in parallel rather than sequentially, reducing total wait time to the duration of the longest operation." ;
+    oc:appliesToContext "When multiple async operations exist in a handler where some have no dependency on each other" ;
+    oc:directiveContent "Start independent operations immediately by storing their promises, even if you don't await them yet. Only await when the result is actually needed." ;
+    oc:hasRationale "Fire-and-forget promise initiation lets the event loop schedule all independent I/O concurrently, maximizing throughput." .
+
+oc:kn_5b29cefe a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When operations have non-trivial interdependencies that are hard to manually parallelize" ;
+    oc:directiveContent "For complex dependency chains beyond simple Promise.all, use `better-all` to automatically maximize parallelism based on dependency analysis." ;
+    oc:hasRationale "Manual dependency management becomes error-prone with many operations; automated tools can optimally schedule based on the full dependency graph." .
+
+oc:kn_65ea3c08 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "API route handlers with mixed dependency chains" ;
+    oc:codeLanguage "typescript" ;
+    oc:directiveContent "Store promises as variables for independent ops → await sequentially when dependency exists → use Promise.all for collecting remaining results" ;
+    oc:hasRationale "This pattern minimizes waterfall depth while respecting data dependencies between operations." .
+
+oc:kn_7bcca0cf a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "API routes and Server Actions with multiple sequential async calls" ;
+    oc:directiveContent "Eliminating waterfall chains yields 2-10× improvement in API route response times." ;
+    oc:hasRationale "Parallel execution removes additive latency; the improvement scales with the number of previously-serialized independent operations." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_8f7d43d2 a oc:AntiPattern,
+oc:kn_e5a2fd02 a oc:AntiPattern,
         oc:KnowledgeNode ;
     oc:appliesToContext "When writing API route handlers or Server Actions with multiple async calls" ;
-    oc:directiveContent "Never sequentially await independent async operations in API routes or Server Actions — each unnecessary await creates a waterfall delay." ;
-    oc:hasRationale "Sequential awaits on independent operations waste time waiting for operations that could run concurrently, causing 2-10× slower response times." ;
+    oc:directiveContent "Never sequentially await independent async operations in API routes or Server Actions — this creates waterfall chains that multiply latency." ;
+    oc:hasRationale "Sequential awaits add individual latencies together; parallel execution collapses them to the longest single operation." ;
     oc:severityLevel "CRITICAL" .
-
-oc:kn_97fa501c a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When designing API routes and Server Actions with multiple async operations" ;
-    oc:directiveContent "Start all independent async operations immediately by invoking them without await, storing the promises, then awaiting results only when needed." ;
-    oc:hasRationale "Starting promises immediately maximizes parallelism — operations begin executing as soon as they are called, not when they are awaited." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_b00fb621 a oc:KnowledgeNode,
-        oc:WorkflowStrategy ;
-    oc:appliesToContext "When API routes have more than 3-4 interdependent async operations with non-trivial dependency graphs" ;
-    oc:directiveContent "For complex dependency chains, consider using 'better-all' to automatically maximize parallelism based on operation dependencies." ;
-    oc:hasRationale "Manual promise orchestration becomes error-prone with complex dependency graphs; automated tools ensure maximum parallelism without missed dependencies." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_de9997a4 a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When restructuring sequential awaits into parallel patterns" ;
-    oc:directiveContent "Operations that depend on the result of a prior operation must still await that prior result before starting — only truly independent operations can be parallelized." ;
-    oc:hasRationale "Data dependencies cannot be eliminated — if operation B needs output from operation A, A must complete before B starts. Incorrect parallelization causes runtime errors." ;
-    oc:severityLevel "CRITICAL" .
-
-oc:req_31b1cd92 a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "Next.js API Routes and Server Actions" .
-
-oc:req_38224c68 a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "JavaScript/TypeScript async/await and Promise.all" .
 

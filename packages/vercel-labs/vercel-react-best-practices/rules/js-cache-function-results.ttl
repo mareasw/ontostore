@@ -10,57 +10,193 @@ oc:skill_vercel_labs_vercel_react_best_practices_js_cache_function_results a oc:
     skos:broader "Performance optimization pattern" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "3daaa11d24f4295cb6be8bc6f407f2ce83cc7b5bd1f0e68891ea8ab835721dc7" ;
-    oc:differentia "uses module-level Map caching to memoize repeated pure function calls and avoid redundant computation during React renders" ;
+    oc:differentia "uses module-level Map to cache repeated function call results avoiding redundant computation during renders" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
-    oc:hasArgumentHint "function-name or component code to optimize" ;
+    oc:handlesFailure oc:InvalidInput ;
     oc:hasCategory "development" ;
-    oc:hasPackageName "vercel-react-best-practices" ;
-    oc:impartsKnowledge oc:kn_218b446d,
-        oc:kn_2fdc723f,
-        oc:kn_48dc8fbc,
-        oc:kn_55525675,
-        oc:kn_75f56f23 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 6 ;
+                    oc:textContent "**Simpler pattern for single-value functions:**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """// Module-level cache
+const slugifyCache = new Map<string, string>()
+
+function cachedSlugify(text: string): string {
+  if (slugifyCache.has(text)) {
+    return slugifyCache.get(text)!
+  }
+  const result = slugify(text)
+  slugifyCache.set(text, result)
+  return result
+}
+
+function ProjectList({ projects }: { projects: Project[] }) {
+  return (
+    <div>
+      {projects.map(project => {
+        // Computed only once per unique project name
+        const slug = cachedSlugify(project.name)
+        
+        return <ProjectCard key={project.id} slug={slug} />
+      })}
+    </div>
+  )
+}
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 5 ;
+                    oc:sourceLocation "lines 31-56" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """let isLoggedInCache: boolean | null = null
+
+function isLoggedIn(): boolean {
+  if (isLoggedInCache !== null) {
+    return isLoggedInCache
+  }
+  
+  isLoggedInCache = document.cookie.includes('auth=')
+  return isLoggedInCache
+}
+
+// Clear cache when auth changes
+function onAuthChange() {
+  isLoggedInCache = null
+}
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 7 ;
+                    oc:sourceLocation "lines 60-76" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Use a module-level Map to cache function results when the same function is called repeatedly with the same inputs during render." ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function ProjectList({ projects }: { projects: Project[] }) {
+  return (
+    <div>
+      {projects.map(project => {
+        // slugify() called 100+ times for same project names
+        const slug = slugify(project.name)
+        
+        return <ProjectCard key={project.id} slug={slug} />
+      })}
+    </div>
+  )
+}
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-27" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "**Correct (cached results):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 8 ;
+                    oc:textContent "Use a Map (not a hook) so it works everywhere: utilities, event handlers, not just React components." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 9 ;
+                    oc:textContent "Reference: [How we made the Vercel Dashboard twice as fast](https://vercel.com/blog/how-we-made-the-vercel-dashboard-twice-as-fast)" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Incorrect (redundant computation):**" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Cache Repeated Function Calls" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Cache Repeated Function Calls
+impact: MEDIUM
+impactDescription: avoid redundant computation
+tags: javascript, cache, memoization, performance
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "Apply module-level caching to expensive pure functions called repeatedly during render." ;
+            oc:hasStep _:ref_09b9bcbd2d12fae1,
+                _:ref_b8088a7f1fa6c7bd,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Add cache invalidation logic where the underlying data or state changes." ;
+                    oc:expectedOutcome "Cache is cleared when source data changes, preventing stale values." ;
+                    oc:stepDependsOn _:ref_b8088a7f1fa6c7bd ;
+                    oc:stepId "add-invalidation" ],
+                _:ref_fc1c2fda4e526393 ;
+            oc:workflowId "cache-function-results" ;
+            oc:workflowName "Cache Function Results Workflow" ] ;
+    oc:impartsKnowledge oc:kn_5c6a27be,
+        oc:kn_62c1b2b5,
+        oc:kn_79733cf9,
+        oc:kn_96625a04,
+        oc:kn_cd6681f9 ;
     oc:isUserInvocable true ;
-    oc:nature "Concept" ;
+    oc:nature "Technique" ;
     oc:requiresState oc:EnvironmentReady ;
-    oc:resolvesIntent "avoid redundant computation",
+    oc:resolvesIntent "avoid redundant computation during render",
         "cache function results",
-        "memoize pure function outputs",
-        "optimize repeated function calls" ;
+        "memoize function calls in React components",
+        "optimize repeated computations" ;
     oc:yieldsState oc:PerformanceOptimized .
 
-oc:kn_218b446d a oc:AntiPattern,
+oc:kn_5c6a27be a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When mapping over lists in React components that invoke computation-heavy functions" ;
-    oc:directiveContent "Do not call expensive pure functions (like slugify) inside render loops without caching, as they execute redundantly for duplicate inputs on every render." ;
-    oc:hasRationale "Redundant computation wastes CPU cycles and increases render time, especially with large lists where the same inputs recur." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_2fdc723f a oc:KnowledgeNode,
-        oc:PerformanceProfile ;
-    oc:appliesToContext "When rendering lists with 100+ items where many share the same computed values" ;
-    oc:directiveContent "Module-level caching reduces repeated computation from O(n) per render to O(1) per unique input, providing significant speedups when the same inputs recur across list items or re-renders." ;
-    oc:hasRationale "The Vercel Dashboard achieved a 2x speed improvement partly through this pattern." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_48dc8fbc a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When caching pure function results that are called repeatedly with the same inputs" ;
-    oc:directiveContent "Use a module-level Map for caching function results rather than React hooks like useMemo, so the cache works everywhere: utilities, event handlers, and non-component code." ;
-    oc:hasRationale "React hooks only work inside components; module-level Maps are universally accessible across the entire module scope." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_55525675 a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When using module-level caches for values that depend on mutable external state like cookies or auth tokens" ;
-    oc:directiveContent "Cache invalidation must be handled manually — set cached values to null or clear Map entries when the underlying data changes (e.g., auth state changes)." ;
-    oc:hasRationale "Without explicit invalidation, stale cached values will be returned indefinitely, causing incorrect behavior." ;
+    oc:appliesToContext "When deciding which functions to cache" ;
+    oc:directiveContent "Only cache pure functions — functions whose output depends solely on their inputs with no side effects." ;
+    oc:hasRationale "Impure functions or functions depending on mutable external state will return incorrect cached results." ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_75f56f23 a oc:Heuristic,
+oc:kn_62c1b2b5 a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When choosing a caching strategy based on function signature complexity" ;
-    oc:directiveContent "For single-value functions (e.g., boolean checks), a simple nullable variable is sufficient; for multi-key lookups, use a Map." ;
-    oc:hasRationale "Simpler caching mechanisms reduce overhead and are easier to reason about for trivial cases." ;
-    oc:severityLevel "LOW" .
+    oc:appliesToContext "When rendering lists that call utility functions on each item" ;
+    oc:directiveContent "Never call expensive pure functions (like slugify) repeatedly inside render loops with the same inputs — each invocation redundantly recomputes the same result." ;
+    oc:hasRationale "Redundant computation wastes CPU cycles and can significantly degrade performance with large datasets." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_79733cf9 a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "When caching values derived from mutable state like cookies or auth tokens" ;
+    oc:directiveContent "Module-level caches persist across renders and re-renders. You must invalidate them when the underlying data or auth state changes." ;
+    oc:hasRationale "Stale cached values can cause incorrect behavior when the source data changes without cache invalidation." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_96625a04 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When deciding where to place a function result cache" ;
+    oc:directiveContent "Use a module-level Map for caching, not a React hook, so the cache works everywhere: utility functions, event handlers, and components alike." ;
+    oc:hasRationale "Hooks are limited to React component scope; module-level caches are universally accessible across the module." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_cd6681f9 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When choosing between Map cache and simple variable cache" ;
+    oc:directiveContent "For single-value caching, a simple nullable variable (let x: T | null = null) is simpler than a Map. Use Map when caching multiple keys." ;
+    oc:hasRationale "Simpler patterns reduce code complexity and are easier to reason about for single-value scenarios." .
+
+_:ref_09b9bcbd2d12fae1 a oc:WorkflowStep ;
+    dcterms:description "Identify pure functions called repeatedly with the same inputs inside render paths or loops." ;
+    oc:expectedOutcome "A list of candidate functions that would benefit from caching." ;
+    oc:stepId "identify" .
+
+_:ref_b8088a7f1fa6c7bd a oc:WorkflowStep ;
+    dcterms:description "Implement the module-level cache and wrapper function using the chosen pattern." ;
+    oc:expectedOutcome "A cached version of the function that checks the cache before computing." ;
+    oc:stepDependsOn _:ref_fc1c2fda4e526393 ;
+    oc:stepId "implement-cache" .
+
+_:ref_fc1c2fda4e526393 a oc:WorkflowStep ;
+    dcterms:description "Choose cache pattern: Map for multi-key functions, nullable variable for single-value functions." ;
+    oc:expectedOutcome "The appropriate caching strategy is selected." ;
+    oc:stepDependsOn _:ref_09b9bcbd2d12fae1 ;
+    oc:stepId "choose-pattern" .
 

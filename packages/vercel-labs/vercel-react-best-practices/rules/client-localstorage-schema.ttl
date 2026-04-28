@@ -7,61 +7,187 @@
 oc:skill_vercel_labs_vercel_react_best_practices_client_localstorage_schema a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "client-localstorage-schema" ;
-    skos:broader "Best practice pattern" ;
+    skos:broader "Data persistence pattern" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "0fb7cdf9dc93fdf22f87e3669f953fb9d4ac9b0be42eec4a29fe9a2560610b88" ;
-    oc:differentia "that governs versioning, minimization, and safe access of localStorage data in client-side applications" ;
-    oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
+    oc:differentia "versions and minimizes localStorage data with schema migration and error handling" ;
+    oc:extends oc:skill_ontoskills_vercel_react_best_practices,
+        oc:skill_vercel_labs_vercel_react_best_practices ;
     oc:handlesFailure oc:QuotaExceeded,
         oc:StorageDisabled ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_083dd7e3,
-        oc:kn_34428fb5,
-        oc:kn_576aacc7,
-        oc:kn_69ce6257,
-        oc:kn_e2426995 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """const VERSION = 'v2'
+
+function saveConfig(config: { theme: string; language: string }) {
+  try {
+    localStorage.setItem(`userConfig:${VERSION}`, JSON.stringify(config))
+  } catch {
+    // Throws in incognito/private browsing, quota exceeded, or disabled
+  }
+}
+
+function loadConfig() {
+  try {
+    const data = localStorage.getItem(`userConfig:${VERSION}`)
+    return data ? JSON.parse(data) : null
+  } catch {
+    return null
+  }
+}
+
+// Migration from v1 to v2
+function migrate() {
+  try {
+    const v1 = localStorage.getItem('userConfig:v1')
+    if (v1) {
+      const old = JSON.parse(v1)
+      saveConfig({ theme: old.darkMode ? 'dark' : 'light', language: old.lang })
+      localStorage.removeItem('userConfig:v1')
+    }
+  } catch {}
+}
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 5 ;
+                    oc:sourceLocation "lines 22-53" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Add version prefix to keys and store only needed fields. Prevents schema conflicts and accidental storage of sensitive data." ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """// No version, stores everything, no error handling
+localStorage.setItem('userConfig', JSON.stringify(fullUserObject))
+const data = localStorage.getItem('userConfig')
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-18" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Incorrect:**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 8 ;
+                    oc:textContent "**Always wrap in try-catch:** `getItem()` and `setItem()` throw in incognito/private browsing (Safari, Firefox), when quota exceeded, or when disabled." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "**Correct:**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 6 ;
+                    oc:textContent "**Store minimal fields from server responses:**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """// User object has 20+ fields, only store what UI needs
+function cachePrefs(user: FullUser) {
+  try {
+    localStorage.setItem('prefs:v1', JSON.stringify({
+      theme: user.preferences.theme,
+      notifications: user.preferences.notifications
+    }))
+  } catch {}
+}
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 7 ;
+                    oc:sourceLocation "lines 57-67" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 9 ;
+                    oc:textContent "**Benefits:** Schema evolution via versioning, reduced storage size, prevents storing tokens/PII/internal flags." ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Version and Minimize localStorage Data" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Version and Minimize localStorage Data
+impact: MEDIUM
+impactDescription: prevents schema conflicts, reduces storage size
+tags: client, localStorage, storage, versioning, data-minimization
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "Implement versioned, minimal, error-safe localStorage usage" ;
+            oc:hasStep [ a oc:WorkflowStep ;
+                    dcterms:description "Create save and load functions that wrap getItem/setItem in try-catch blocks." ;
+                    oc:expectedOutcome "No unhandled exceptions from private browsing, quota, or disabled storage" ;
+                    oc:stepId "2" ],
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Extract only the minimal fields needed by the UI from server responses before storing." ;
+                    oc:expectedOutcome "localStorage contains only essential data, no PII or internal flags" ;
+                    oc:stepId "3" ],
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Call the migration function on app initialization before any reads." ;
+                    oc:expectedOutcome "Users on old schemas are automatically upgraded" ;
+                    oc:stepDependsOn _:ref_8f5e1afe920a1e5d ;
+                    oc:stepId "5" ],
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Define a VERSION constant and prefix all localStorage keys with it (e.g., 'userConfig:v2')." ;
+                    oc:expectedOutcome "All keys are namespaced by schema version" ;
+                    oc:stepId "1" ],
+                _:ref_8f5e1afe920a1e5d ;
+            oc:workflowId "localstorage-schema-setup" ;
+            oc:workflowName "Set up versioned localStorage" ] ;
+    oc:impartsKnowledge oc:kn_066ce849,
+        oc:kn_8eb696aa,
+        oc:kn_dc282fc4,
+        oc:kn_f0196673,
+        oc:kn_f1b7df03 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:EnvironmentReady ;
+    oc:requiresState oc:BrowserEnvironment ;
     oc:resolvesIntent "migrate localStorage schema between versions",
         "minimize localStorage storage size",
         "safely read and write localStorage",
         "version localStorage data" ;
-    oc:yieldsState oc:DataMinimized,
-        oc:LocalStorageVersioned .
+    oc:yieldsState oc:LocalStorageDataVersioned .
 
-oc:kn_083dd7e3 a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "When writing any data to localStorage" ;
-    oc:directiveContent "Always prefix localStorage keys with a version identifier (e.g., 'userConfig:v2') to enable schema evolution and safe migration between versions." ;
-    oc:hasRationale "Version prefixes allow backward-compatible migration paths and prevent schema conflicts when the data shape changes across application releases." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_34428fb5 a oc:KnowledgeNode,
-        oc:SecurityImplication ;
-    oc:appliesToContext "When deciding what data to persist client-side" ;
-    oc:directiveContent "Do not store authentication tokens, PII, or internal API flags in localStorage as it is accessible to any JavaScript on the same origin." ;
-    oc:hasRationale "localStorage is vulnerable to XSS attacks; sensitive data stored there can be exfiltrated by malicious scripts, leading to account compromise or data leaks." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_576aacc7 a oc:Constraint,
+oc:kn_066ce849 a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "Every localStorage read or write operation" ;
-    oc:directiveContent "Always wrap localStorage.getItem() and localStorage.setItem() calls in try-catch blocks." ;
-    oc:hasRationale "These calls throw in incognito/private browsing modes (Safari, Firefox), when storage quota is exceeded, or when storage is disabled by browser policy." ;
+    oc:appliesToContext "Always, for every localStorage read/write" ;
+    oc:directiveContent "Always wrap every localStorage.getItem() and localStorage.setItem() call in try-catch." ;
+    oc:hasRationale "These calls throw in Safari/Firefox private browsing, when storage quota is exceeded, or when storage is disabled by the user." ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_69ce6257 a oc:AntiPattern,
+oc:kn_8eb696aa a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When caching server response data client-side" ;
-    oc:directiveContent "Never store full API response objects in localStorage — extract and persist only the minimal fields the UI actually needs." ;
-    oc:hasRationale "Storing entire objects wastes quota, increases parse cost, and risks persisting sensitive data like tokens, PII, or internal flags." ;
+    oc:appliesToContext "When selecting fields to persist" ;
+    oc:directiveContent "Never store authentication tokens, PII, or internal server flags in localStorage." ;
+    oc:hasRationale "localStorage is accessible to any JS on the same origin including XSS attacks; sensitive data must use secure storage mechanisms." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_dc282fc4 a oc:Idempotency,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing migration logic" ;
+    oc:directiveContent "localStorage read operations are idempotent; writes overwrite previous values. Migration functions should remove old-version keys after successful migration." ;
+    oc:hasRationale "Leaving old keys wastes quota and can cause confusion about which version is canonical." .
+
+oc:kn_f0196673 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When caching server data to localStorage" ;
+    oc:directiveContent "Never store full API response objects in localStorage — only extract and persist the minimal fields the UI actually needs." ;
+    oc:hasRationale "Full objects bloat storage, risk exposing sensitive/internal fields (tokens, PII), and increase parsing cost." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_e2426995 a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When changing the shape of persisted localStorage data across application versions" ;
-    oc:directiveContent "Implement explicit migration functions that read old version data, transform it to the new schema, save it under the new key, and remove the old key." ;
-    oc:hasRationale "Explicit migration ensures users retain their preferences across deployments without manual reset, and cleaning up old keys prevents stale data conflicts." ;
-    oc:severityLevel "MEDIUM" .
+oc:kn_f1b7df03 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When defining any localStorage key" ;
+    oc:directiveContent "Always prefix localStorage keys with a version identifier (e.g., 'userConfig:v2') and provide a migration function to transform data between versions." ;
+    oc:hasRationale "Version prefixes prevent schema conflicts when the data shape changes across app releases, enabling safe migration." ;
+    oc:severityLevel "HIGH" .
+
+_:ref_8f5e1afe920a1e5d a oc:WorkflowStep ;
+    dcterms:description "Write a migration function that reads old-version data, transforms it, saves under new version, and removes the old key." ;
+    oc:expectedOutcome "Seamless upgrade path between schema versions" ;
+    oc:stepId "4" .
 

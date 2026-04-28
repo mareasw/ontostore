@@ -4,106 +4,567 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_coinbase_agentic_wallet_skills_query_onchain_data a oc:ExecutableSkill,
+oc:skill_coinbase_agentic_wallet_skills_query_onchain_data a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "query-onchain-data" ;
-    skos:broader "data querying interface" ;
-    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/coinbase/agentic-wallet-skills/query-onchain-data" ;
+    skos:broader "Data query interface" ;
+    prov:wasDerivedFrom "../.agents/skills/coinbase/agentic-wallet-skills/query-onchain-data" ;
     oc:contentHash "e3fe55e1956e510a6174d1578bf57dad55491bdbfd118d6d50cfcaca3899cc8b" ;
-    oc:dependsOnSkill oc:skill_authenticate_wallet,
-        oc:skill_fund ;
-    oc:differentia "queries onchain data on Base network using CDP SQL API via x402 paid requests" ;
-    oc:handlesFailure oc:InvalidInput,
-        oc:NetworkTimeout,
-        oc:PermissionDenied ;
+    oc:dependsOnSkill oc:skill_ontoskills_authenticate_wallet ;
+    oc:differentia "Queries onchain blockchain data on Base using the CDP SQL API via x402 paid requests" ;
+    oc:extends oc:skill_ontoskills_x402 ;
+    oc:handlesFailure oc:InsufficientBalance,
+        oc:PermissionDenied,
+        oc:QueryTimeout ;
     oc:hasAllowedTool "Bash(npx awal@2.0.3 balance*)",
         "Bash(npx awal@2.0.3 status*)",
         "Bash(npx awal@2.0.3 x402 pay *)" ;
-    oc:hasArgumentHint "SQL query in CoinbaseQL dialect against base.events, base.transactions, or base.blocks" ;
-    oc:hasCategory "blockchain" ;
+    oc:hasArgumentHint "SQL query in CoinbaseQL dialect targeting base.events, base.transactions, or base.blocks" ;
+    oc:hasCategory "development" ;
     oc:hasDescription "Query onchain data on Base using the CDP SQL API via x402. Use when you or your user want to view onchain information about decoded blocks, transactions, and event." ;
     oc:hasName "query-onchain-data" ;
-    oc:hasPayload oc:payload_e3fe55e1956e510a ;
-    oc:hasRequirement oc:req_546e93cd,
-        oc:req_6d8d44cc,
-        oc:req_a61e7e7b,
-        oc:req_c908d040 ;
-    oc:impartsKnowledge oc:kn_049f16bd,
-        oc:kn_711f8c63,
-        oc:kn_79196323,
-        oc:kn_a5b08d4b,
-        oc:kn_a84dad99,
-        oc:kn_ea20db24 ;
+    oc:hasRequirement oc:req_033c75f5,
+        oc:req_8489f4c9,
+        oc:req_8c6b7c33,
+        oc:req_efffe2be ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Use the CDP SQL API to query onchain data (events, transactions, blocks, transfers) on Base. Queries are executed via x402 and are charged per query." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """npx awal@2.0.3 x402 pay https://x402.cdp.coinbase.com/platform/v2/data/query/run -X POST -d '{"sql": "SELECT transaction_hash, to_address, value, gas, timestamp FROM base.transactions WHERE from_address = lower('\\''0xYOUR_ADDRESS'\\'') AND timestamp >= now() - INTERVAL 1 DAY LIMIT 10"}' --json
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 166-168" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Get transactions from a specific address" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """npx awal@2.0.3 x402 pay https://x402.cdp.coinbase.com/platform/v2/data/query/run -X POST -d '{"sql": "SELECT block_number, timestamp, transaction_count, gas_used FROM base.blocks ORDER BY block_number DESC LIMIT 1"}' --json
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 178-180" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "Get latest block info" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """npx awal@2.0.3 x402 pay https://x402.cdp.coinbase.com/platform/v2/data/query/run -X POST -d '{"sql": "SELECT event_signature, count(*) as cnt FROM base.events WHERE address = lower('\\''0xCONTRACT_ADDRESS'\\'') AND block_timestamp >= now() - INTERVAL 1 HOUR GROUP BY event_signature ORDER BY cnt DESC LIMIT 20"}' --json
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 172-174" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Count events by type for a contract in the last hour" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """SELECT
+  parameters['from'] AS sender,
+  parameters['to'] AS to,
+  parameters['value'] AS amount,
+  address AS token_address
+FROM base.events
+WHERE
+  event_signature = 'Transfer(address,address,uint256)'
+  AND address = '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913'
+  AND block_timestamp >= now() - INTERVAL 7 DAY
+LIMIT 10
+""" ;
+                                    oc:codeLanguage "sql" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 150-162" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Get recent USDC Transfer events with decoded parameters" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 7 ;
+                    oc:sectionTitle "Example Queries" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Before constructing the command, validate inputs to prevent shell injection:" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "**SQL query**: Always embed the query inside a single-quoted JSON string (`-d '{\"sql\": \"...\"}'`). Never use double quotes for the outer `-d` wrapper, as this enables shell expansion of `$` and backticks within the query." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "**Addresses**: Must be valid `0x` hex addresses (`^0x[0-9a-fA-F]{40}$`). Reject any value containing shell metacharacters." ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "Do not pass unvalidated user input into the command." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Input Validation" ],
+                [ a oc:Section ;
+                    oc:hasContent _:ref_ee2f5721cc1a3d6c ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 9 ;
+                    oc:sectionTitle "Best Practices" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Always include at least one indexed field in your WHERE clause.** Combining all three gives the best performance." ],
+                        [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 2 ;
+                            oc:rowCount 3 ;
+                            oc:tableCaption "Queries against `base.events` **MUST** filter on indexed fields to avoid full table scans. The indexed fields are" ;
+                            oc:tableMarkdown """| Indexed Field | Use For |
+| --- | --- |
+| `event_signature` | Filter by event type. Use this instead of `event_name` for performance. |
+| `address` | Filter by contract address. |
+| `block_timestamp` | Filter by time range. |
+""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Queries against `base.events` **MUST** filter on indexed fields to avoid full table scans. The indexed fields are:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "CRITICAL: Indexed Fields" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "\"Not authenticated\" - Run `awal auth login <email>` first, or see `authenticate-wallet` skill" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "\"Insufficient balance\" - Fund wallet with USDC; see `fund` skill" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Query timeout or error - Ensure you are filtering on indexed fields and using a LIMIT" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 11 ;
+                    oc:sectionTitle "Error Handling" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 1 ;
+                            oc:rowCount 2 ;
+                            oc:tableCaption "## Common Contract Addresses (Base)" ;
+                            oc:tableMarkdown """| Token | Address |
+| --- | --- |
+| USDC | `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913` |
+| WETH | `0x4200000000000000000000000000000000000006` |
+""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 8 ;
+                    oc:sectionTitle "Common Contract Addresses (Base)" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "If the wallet is not authenticated, refer to the `authenticate-wallet` skill." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """npx awal@2.0.3 status
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 15-17" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Confirm wallet is initialized and authed" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Must be authenticated (`npx awal@2.0.3 status` to check, see `authenticate-wallet` skill)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Wallet must have sufficient USDC balance (`npx awal@2.0.3 balance` to check)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Each query costs $0.10 (100000 USDC atomic units)" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 10 ;
+                    oc:sectionTitle "Prerequisites" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "CoinbaseQL is a SQL dialect based on ClickHouse. Supported features:" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "**Expressions**: CASE/WHEN/THEN/ELSE, CAST (both `CAST()` and `::` syntax), subqueries, array/map indexing with `[]`, dot notation" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "**Literals**: Array `[...]`, Map `{...}`, Tuple `(...)`" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "**Joins**: INNER, LEFT, RIGHT, FULL with ON" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "**Clauses**: SELECT (DISTINCT), FROM, WHERE, GROUP BY, ORDER BY (ASC/DESC), LIMIT, WITH (CTEs), UNION (ALL/DISTINCT)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 6 ;
+                                    oc:itemText "**Functions**: Standard SQL functions, lambda functions with `->` syntax" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "**Operators**: `=`, `!=`, `<>`, `<`, `>`, `<=`, `>=`, `+`, `-`, `*`, `/`, `%`, AND, OR, NOT, BETWEEN, IN, IS NULL, LIKE" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "CoinbaseQL Syntax" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """npx awal@2.0.3 x402 pay https://x402.cdp.coinbase.com/platform/v2/data/query/run -X POST -d '{"sql": "<YOUR_QUERY>"}' --json
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 23-25" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**IMPORTANT**: Always single-quote the `-d` JSON string to prevent bash variable expansion." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Executing a Query" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Complete transaction data." ],
+                                [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 2 ;
+                                    oc:rowCount 23 ;
+                                    oc:tableCaption "Complete transaction data." ;
+                                    oc:tableMarkdown """| Column | Type | Description |
+| --- | --- | --- |
+| block_number | UInt64 | Block number |
+| block_hash | String | Block hash |
+| transaction_hash | String | Transaction hash |
+| transaction_index | UInt64 | Index in block |
+| from_address | String | Sender address |
+| to_address | String | Recipient address |
+| value | String | Value transferred (wei) |
+| gas | UInt64 | Gas limit |
+| gas_price | UInt64 | Gas price |
+| input | String | Input data |
+| nonce | UInt64 | Sender nonce |
+| type | UInt64 | Transaction type |
+| max_fee_per_gas | UInt64 | EIP-1559 max fee |
+| max_priority_fee_per_gas | UInt64 | EIP-1559 priority fee |
+| chain_id | UInt64 | Chain ID |
+| v | String | Signature v |
+| r | String | Signature r |
+| s | String | Signature s |
+| is_system_tx | Bool | System transaction flag |
+| max_fee_per_blob_gas | String | Blob gas fee |
+| blob_versioned_hashes | Array(String) | Blob hashes |
+| timestamp | DateTime | Block timestamp |
+| action | Int8 | Added (1) or removed (-1) |
+""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "base.transactions" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 2 ;
+                                    oc:rowCount 24 ;
+                                    oc:tableCaption "Block-level metadata." ;
+                                    oc:tableMarkdown """| Column | Type | Description |
+| --- | --- | --- |
+| block_number | UInt64 | Block number |
+| block_hash | String | Block hash |
+| parent_hash | String | Parent block hash |
+| timestamp | DateTime | Block timestamp |
+| miner | String | Block producer |
+| nonce | UInt64 | Block nonce |
+| sha3_uncles | String | Uncles hash |
+| transactions_root | String | Transactions merkle root |
+| state_root | String | State merkle root |
+| receipts_root | String | Receipts merkle root |
+| logs_bloom | String | Bloom filter |
+| gas_limit | UInt64 | Block gas limit |
+| gas_used | UInt64 | Gas used in block |
+| base_fee_per_gas | UInt64 | Base fee per gas |
+| total_difficulty | String | Total chain difficulty |
+| size | UInt64 | Block size in bytes |
+| extra_data | String | Extra data field |
+| mix_hash | String | Mix hash |
+| withdrawals_root | String | Withdrawals root |
+| parent_beacon_block_root | String | Beacon chain parent root |
+| blob_gas_used | UInt64 | Blob gas used |
+| excess_blob_gas | UInt64 | Excess blob gas |
+| transaction_count | UInt64 | Number of transactions |
+| action | Int8 | Added (1) or removed (-1) |
+""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Block-level metadata." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "base.blocks" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 2 ;
+                                    oc:rowCount 15 ;
+                                    oc:tableCaption "Decoded event logs from smart contract interactions. **This is the primary table for most queries.**" ;
+                                    oc:tableMarkdown """| Column | Type | Description |
+| --- | --- | --- |
+| log_id | String | Unique log identifier |
+| block_number | UInt64 | Block number |
+| block_hash | FixedString(66) | Block hash |
+| block_timestamp | DateTime64(3, 'UTC') | Block timestamp (**INDEXED**) |
+| transaction_hash | FixedString(66) | Transaction hash |
+| transaction_to | FixedString(42) | Transaction recipient |
+| transaction_from | FixedString(42) | Transaction sender |
+| log_index | UInt32 | Log index within block |
+| address | FixedString(42) | Contract address (**INDEXED**) |
+| topics | Array(FixedString(66)) | Event topics |
+| event_name | LowCardinality(String) | Decoded event name |
+| event_signature | LowCardinality(String) | Event signature (**INDEXED** - prefer over event_name) |
+| parameters | Map(String, Variant(Bool, Int256, String, UInt256)) | Decoded event parameters |
+| parameter_types | Map(String, String) | ABI types for parameters |
+| action | Enum8('removed' = -1, 'added' = 1) | Added or removed (reorg) |
+""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Decoded event logs from smart contract interactions. **This is the primary table for most queries.**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "base.events" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Available Tables" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Query Onchain Data on Base" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """name: query-onchain-data
+description: Query onchain data on Base using the CDP SQL API via x402. Use when you or your user want to view onchain information about decoded blocks, transactions, and event.
+user-invocable: true
+disable-model-invocation: false
+allowed-tools: ["Bash(npx awal@2.0.3 status*)", "Bash(npx awal@2.0.3 balance*)", "Bash(npx awal@2.0.3 x402 pay *)"]
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "Complete workflow for querying onchain data using the CDP SQL API via x402" ;
+            oc:hasStep _:ref_1e5bcec8140055df,
+                _:ref_362e2d4d1f3dec98,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "If timeout or error occurs, verify indexed field usage and add time bounds to query" ;
+                    oc:expectedOutcome "Corrected query that completes successfully" ;
+                    oc:stepDependsOn _:ref_362e2d4d1f3dec98 ;
+                    oc:stepId "handle-errors" ],
+                _:ref_42fa99e4f84e8796,
+                _:ref_4cfb1c76078a64c1,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Parse and present the JSON query results to the user in a readable format" ;
+                    oc:expectedOutcome "User receives clear, formatted onchain data" ;
+                    oc:stepDependsOn _:ref_362e2d4d1f3dec98 ;
+                    oc:stepId "present-results" ],
+                _:ref_f840e33c4e3d0e0d ;
+            oc:workflowId "query-onchain-data-main" ;
+            oc:workflowName "Query Onchain Data on Base" ],
+        _:ref_ee2f5721cc1a3d6c ;
+    oc:impartsKnowledge oc:kn_018ba0bd,
+        oc:kn_55c429a1,
+        oc:kn_712f33f7,
+        oc:kn_813bf0e2,
+        oc:kn_a443d460,
+        oc:kn_da5b8ed3 ;
     oc:isUserInvocable true ;
     oc:nature "Tool" ;
-    oc:requiresState oc:SystemAuthenticated ;
-    oc:resolvesIntent "analyze onchain transactions and blocks",
-        "get blockchain data using SQL",
-        "query onchain data on Base",
-        "search smart contract event logs",
-        "view decoded blockchain events" ;
-    oc:yieldsState oc:DataRetrieved .
+    oc:requiresState oc:SystemAuthenticated,
+        oc:WalletFunded ;
+    oc:resolvesIntent "analyze onchain transactions",
+        "get block information on Base",
+        "query onchain data",
+        "search blockchain events",
+        "search token transfers on Base",
+        "view decoded contract events" ;
+    oc:yieldsState oc:OnchainDataRetrieved .
 
-oc:kn_049f16bd a oc:KnowledgeNode,
+oc:kn_018ba0bd a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "When budgeting and planning queries" ;
+    oc:directiveContent "Each query costs $0.10 (100000 USDC atomic units). Time-bounded queries with indexed fields are fast; unbounded queries will timeout." ;
+    oc:hasRationale "Query cost is fixed per execution regardless of complexity. Performance depends entirely on proper use of indexed fields." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_55c429a1 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When constructing x402 query commands" ;
+    oc:directiveContent "Never use double quotes for the outer -d JSON wrapper. Always use single quotes: -d '{\"sql\": \"...\"}'. Never use SELECT * — always specify needed columns. Always include a LIMIT clause." ;
+    oc:hasRationale "Double quotes enable shell expansion of $ and backticks, creating injection vulnerabilities. SELECT * and missing LIMIT cause excessive data retrieval and cost." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_712f33f7 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When query returns timeout error" ;
+    oc:directiveContent "Query timeouts indicate missing indexed field filters or excessively broad time ranges. Ensure WHERE clause includes event_signature, address, and/or block_timestamp with a reasonable time bound." ;
+    oc:hasRationale "Full table scans on blockchain data are computationally infeasible and will always timeout." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_813bf0e2 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When querying base.events table" ;
+    oc:directiveContent "Queries against base.events MUST filter on at least one indexed field (event_signature, address, or block_timestamp) in the WHERE clause. Combining all three gives best performance." ;
+    oc:hasRationale "Without indexed field filters, queries perform full table scans and will timeout or be prohibitively expensive." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_a443d460 a oc:KnowledgeNode,
         oc:SecurityImplication ;
-    oc:appliesToContext "When constructing the x402 pay command with user-provided query parameters" ;
-    oc:directiveContent "Always single-quote the -d JSON string to prevent bash variable expansion. Validate SQL inputs to prevent shell injection — addresses must match ^0x[0-9a-fA-F]{40}$ and reject any value containing shell metacharacters." ;
-    oc:hasRationale "Double quotes enable shell expansion of $ and backticks within the query, allowing injection attacks" ;
+    oc:appliesToContext "When accepting user-provided SQL queries or addresses" ;
+    oc:directiveContent "Validate all user inputs before embedding in commands. Addresses must match ^0x[0-9a-fA-F]{40}$. Reject any value containing shell metacharacters." ;
+    oc:hasRationale "Unvalidated input enables shell injection attacks through the bash command layer." ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_711f8c63 a oc:KnowledgeNode,
-        oc:RecoveryTactic ;
-    oc:appliesToContext "When a query execution fails with an error" ;
-    oc:directiveContent "On 'Not authenticated' error, run authenticate-wallet skill. On 'Insufficient balance' error, run fund skill. On query timeout, ensure indexed field filters and LIMIT are present." ;
-    oc:hasRationale "These are the most common failure modes and each has a clear remediation path" ;
+oc:kn_da5b8ed3 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When filtering by address or event type in queries" ;
+    oc:directiveContent "Always wrap address values in lower() function (e.g., address = lower('0xAbC...')). Use event_signature instead of event_name for filtering — it is indexed and faster." ;
+    oc:hasRationale "The database stores lowercase addresses but users may provide checksummed (mixed-case) addresses. event_signature is indexed while event_name is not." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_79196323 a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "Before executing any paid query" ;
-    oc:directiveContent "Each query costs $0.10 (100000 USDC atomic units). Ensure wallet has sufficient USDC balance before executing queries. Use time-bounded queries with block_timestamp to narrow scan range and reduce cost." ;
-    oc:hasRationale "Queries are charged per execution; unbounded queries waste funds and are more likely to timeout" ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_a5b08d4b a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When constructing any SQL query against base.events table" ;
-    oc:directiveContent "Queries against base.events MUST filter on at least one indexed field (event_signature, address, or block_timestamp) to avoid full table scans." ;
-    oc:hasRationale "Without indexed field filters, queries will perform full table scans causing timeouts and excessive charges" ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_a84dad99 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When writing any CoinbaseQL query" ;
-    oc:directiveContent "Never use SELECT * — always specify only the columns you need. Always include a LIMIT clause to bound result size." ;
-    oc:hasRationale "SELECT * wastes bandwidth and query time; missing LIMIT can return unbounded results causing timeouts and higher costs" ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_ea20db24 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When filtering events by type or contract address" ;
-    oc:directiveContent "Use event_signature instead of event_name for filtering — event_signature is indexed and much faster. Use lower() to wrap address values since the database stores lowercase but users may provide checksummed addresses." ;
-    oc:hasRationale "event_signature is an indexed field while event_name is not; address case mismatch causes zero-result queries" ;
-    oc:severityLevel "HIGH" .
-
-oc:payload_e3fe55e1956e510a a oc:ExecutionPayload ;
-    oc:code "npx awal@2.0.3 x402 pay https://x402.cdp.coinbase.com/platform/v2/data/query/run -X POST -d '{\"sql\": \"<YOUR_QUERY>\"}' --json" ;
-    oc:executor "shell" ;
-    oc:timeout 30000 .
-
-oc:req_546e93cd a oc:RequirementAPI ;
+oc:req_033c75f5 a oc:RequirementKnowledge ;
     oc:isOptional false ;
-    oc:requirementValue "CDP SQL API via x402 (https://x402.cdp.coinbase.com/platform/v2/data/query/run)" .
+    oc:requirementValue "CoinbaseQL SQL dialect (ClickHouse-based)" .
 
-oc:req_6d8d44cc a oc:RequirementKnowledge ;
+oc:req_8489f4c9 a oc:RequirementAPI ;
     oc:isOptional false ;
-    oc:requirementValue "CoinbaseQL SQL dialect (based on ClickHouse)" .
+    oc:requirementValue "Sufficient USDC balance for query payment ($0.10 per query)" .
 
-oc:req_a61e7e7b a oc:RequirementTool ;
+oc:req_8c6b7c33 a oc:RequirementTool ;
     oc:isOptional false ;
-    oc:requirementValue "npx awal@2.0.3" .
+    oc:requirementValue "npx (Node.js package runner)" .
 
-oc:req_c908d040 a oc:RequirementKnowledge ;
+oc:req_efffe2be a oc:RequirementAPI ;
     oc:isOptional false ;
-    oc:requirementValue "Base network table schemas (base.events, base.transactions, base.blocks)" .
+    oc:requirementValue "CDP SQL API endpoint (x402 paid)" .
+
+_:ref_4c76ef23dba6cb39 a oc:WorkflowStep ;
+    dcterms:description "**Always wrap address values in `lower()`** - the database stores lowercase addresses but users may provide checksummed (mixed-case) addresses. Use `address = lower('0xAbC...')` not `address = '0xAbC...'`." ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_6" ;
+    oc:stepOrder 6 .
+
+_:ref_5ec457d8a1d8d5b2 a oc:WorkflowStep ;
+    dcterms:description "**Always filter on indexed fields** (`event_signature`, `address`, `block_timestamp`) in `base.events` queries." ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_71c3b8bc8b56d6bf a oc:WorkflowStep ;
+    dcterms:description "**Use `event_signature` instead of `event_name`** for filtering - it is indexed and much faster." ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_8560c6fd97850aa2 a oc:WorkflowStep ;
+    dcterms:description "**Use time-bounded queries** with `block_timestamp` to narrow the scan range." ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_5" ;
+    oc:stepOrder 5 .
+
+_:ref_866636d7e2cd7f6e a oc:WorkflowStep ;
+    dcterms:description "**Common event signatures**: `Transfer(address,address,uint256)`, `Approval(address,address,uint256)`, `Swap(address,uint256,uint256,uint256,uint256,address)`." ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_7" ;
+    oc:stepOrder 7 .
+
+_:ref_980e52e992824fae a oc:WorkflowStep ;
+    dcterms:description "**Always include a `LIMIT`** clause to bound result size." ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_fdb0f2b691f34efc a oc:WorkflowStep ;
+    dcterms:description "**Never use `SELECT *`** - specify only the columns you need." ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_1e5bcec8140055df a oc:WorkflowStep ;
+    dcterms:description "Build SQL query ensuring indexed fields in WHERE clause, specific column selection, and LIMIT clause. Wrap addresses in lower()." ;
+    oc:expectedOutcome "Valid CoinbaseQL query with proper indexed field filters" ;
+    oc:stepDependsOn _:ref_f840e33c4e3d0e0d ;
+    oc:stepId "construct-query" .
+
+_:ref_42fa99e4f84e8796 a oc:WorkflowStep ;
+    dcterms:description "Run 'npx awal@2.0.3 balance' to verify sufficient USDC for query payment ($0.10)" ;
+    oc:expectedOutcome "Wallet has at least 100000 USDC atomic units; if not, redirect to fund skill" ;
+    oc:stepDependsOn _:ref_4cfb1c76078a64c1 ;
+    oc:stepId "check-balance" .
+
+_:ref_4cfb1c76078a64c1 a oc:WorkflowStep ;
+    dcterms:description "Run 'npx awal@2.0.3 status' to verify wallet is authenticated" ;
+    oc:expectedOutcome "Wallet shows authenticated status; if not, redirect to authenticate-wallet skill" ;
+    oc:stepId "check-auth" .
+
+_:ref_ee2f5721cc1a3d6c a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 1 ;
+    oc:hasStep _:ref_4c76ef23dba6cb39,
+        _:ref_5ec457d8a1d8d5b2,
+        _:ref_71c3b8bc8b56d6bf,
+        _:ref_8560c6fd97850aa2,
+        _:ref_866636d7e2cd7f6e,
+        _:ref_980e52e992824fae,
+        _:ref_fdb0f2b691f34efc ;
+    oc:workflowId "procedure_1" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_f840e33c4e3d0e0d a oc:WorkflowStep ;
+    dcterms:description "Validate user-provided SQL query and addresses — ensure addresses match 0x hex pattern, no shell metacharacters" ;
+    oc:expectedOutcome "All inputs pass validation; rejection of unsafe inputs" ;
+    oc:stepId "validate-input" .
+
+_:ref_362e2d4d1f3dec98 a oc:WorkflowStep ;
+    dcterms:description "Execute query via 'npx awal@2.0.3 x402 pay' with single-quoted -d JSON string" ;
+    oc:expectedOutcome "Query results returned as JSON" ;
+    oc:stepDependsOn _:ref_1e5bcec8140055df,
+        _:ref_42fa99e4f84e8796 ;
+    oc:stepId "execute-query" .
 

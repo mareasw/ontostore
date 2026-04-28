@@ -10,57 +10,179 @@ oc:skill_vercel_labs_vercel_react_best_practices_js_cache_storage a oc:Declarati
     skos:broader "Performance optimization pattern" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "11b826b0433898c1ece2d3547010d8e77db9fb240185748c45db91493de9b6cc" ;
-    oc:differentia "caches synchronous Web Storage API reads in memory using Map-based memoization to reduce expensive I/O operations" ;
-    oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
-    oc:handlesFailure oc:InvalidInput ;
-    oc:hasArgumentHint "storage key to cache" ;
+    oc:differentia "caches synchronous browser storage API reads in memory to reduce expensive I/O" ;
+    oc:extends oc:skill_ontoskills_vercel_react_best_practices,
+        oc:skill_vercel_labs_vercel_react_best_practices ;
+    oc:handlesFailure oc:CacheMiss,
+        oc:StorageUnavailable ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_00213bd5,
-        oc:kn_07336573,
-        oc:kn_4d5257b6,
-        oc:kn_709afe03,
-        oc:kn_7162e568 ;
+    oc:hasRequirement oc:req_89750c99,
+        oc:req_bc616461 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Cache Storage API Calls
+impact: LOW-MEDIUM
+impactDescription: reduces expensive I/O
+tags: javascript, localStorage, storage, caching, performance
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """window.addEventListener('storage', (e) => {
+  if (e.key) storageCache.delete(e.key)
+})
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    storageCache.clear()
+  }
+})
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 11 ;
+                    oc:sourceLocation "lines 60-70" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "**Correct (Map cache):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "`localStorage`, `sessionStorage`, and `document.cookie` are synchronous and expensive. Cache reads in memory." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 10 ;
+                    oc:textContent "If storage can change externally (another tab, server-set cookies), invalidate cache:" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Incorrect (reads storage on every call):**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """const storageCache = new Map<string, string | null>()
+
+function getLocalStorage(key: string) {
+  if (!storageCache.has(key)) {
+    storageCache.set(key, localStorage.getItem(key))
+  }
+  return storageCache.get(key)
+}
+
+function setLocalStorage(key: string, value: string) {
+  localStorage.setItem(key, value)
+  storageCache.set(key, value)  // keep cache in sync
+}
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 5 ;
+                    oc:sourceLocation "lines 23-37" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function getTheme() {
+  return localStorage.getItem('theme') ?? 'light'
+}
+// Called 10 times = 10 storage reads
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-19" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """let cookieCache: Record<string, string> | null = null
+
+function getCookie(name: string) {
+  if (!cookieCache) {
+    cookieCache = Object.fromEntries(
+      document.cookie.split('; ').map(c => c.split('='))
+    )
+  }
+  return cookieCache[name]
+}
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 8 ;
+                    oc:sourceLocation "lines 43-54" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 6 ;
+                    oc:textContent "Use a Map (not a hook) so it works everywhere: utilities, event handlers, not just React components." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 7 ;
+                    oc:textContent "**Cookie caching:**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 9 ;
+                    oc:textContent "**Important (invalidate on external changes):**" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Cache Storage API Calls" ] ;
+    oc:impartsKnowledge oc:kn_42edf1fb,
+        oc:kn_61fb76fa,
+        oc:kn_630ddf6b,
+        oc:kn_7d137f9a,
+        oc:kn_9cb8f8a1,
+        oc:kn_b2438c37 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:EnvironmentReady ;
-    oc:resolvesIntent "cache cookie reads",
-        "cache localStorage calls",
-        "optimize storage reads",
+    oc:requiresState oc:BrowserEnvironmentAvailable ;
+    oc:resolvesIntent "cache browser storage API calls",
+        "improve client-side storage performance",
+        "optimize localStorage reads",
         "reduce synchronous I/O overhead" ;
-    oc:yieldsState oc:CacheInitialized .
+    oc:yieldsState oc:StorageCacheInitialized .
 
-oc:kn_00213bd5 a oc:AntiPattern,
+oc:kn_42edf1fb a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When accessing browser storage APIs in JavaScript" ;
-    oc:directiveContent "Never read from localStorage, sessionStorage, or document.cookie on every function call without caching — these are synchronous blocking I/O operations." ;
-    oc:hasRationale "Synchronous storage reads block the main thread and are expensive; repeated reads in hot code paths compound the performance cost." ;
+    oc:appliesToContext "When implementing localStorage caching" ;
+    oc:directiveContent "Use a Map<string, string | null> as an in-memory cache for localStorage reads, checking the cache before hitting storage." ;
+    oc:hasRationale "Map provides O(1) lookups and works outside React components — in utilities, event handlers, and non-React code." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_07336573 a oc:KnowledgeNode,
-        oc:PerformanceProfile ;
-    oc:appliesToContext "When a storage key is read multiple times during a session" ;
-    oc:directiveContent "Caching storage reads reduces N synchronous I/O operations down to 1 initial read plus N-1 Map lookups (O(1) each)." ;
-    oc:hasRationale "Map lookups are orders of magnitude faster than localStorage reads; the performance benefit scales with access frequency." ;
-    oc:severityLevel "LOW" .
-
-oc:kn_4d5257b6 a oc:DesignPrinciple,
+oc:kn_61fb76fa a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When implementing in-memory storage caching" ;
-    oc:directiveContent "Use a plain Map for storage caching rather than a React hook, so the cache is usable across utilities, event handlers, and non-component code." ;
-    oc:hasRationale "Hook-based caching only works inside React components; a Map works everywhere and provides the same memoization benefit without framework coupling." ;
-    oc:severityLevel "MEDIUM" .
+    oc:appliesToContext "When accessing browser storage APIs" ;
+    oc:directiveContent "Never read from localStorage, sessionStorage, or document.cookie on every function call — these are synchronous blocking I/O operations." ;
+    oc:hasRationale "Synchronous storage reads block the main thread; repeated calls compound the cost unnecessarily." ;
+    oc:severityLevel "HIGH" .
 
-oc:kn_709afe03 a oc:Idempotency,
+oc:kn_630ddf6b a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When implementing setLocalStorage or similar write-through caching" ;
-    oc:directiveContent "The write-through cache pattern (updating both storage and cache on set) ensures idempotent reads after writes within the same session." ;
-    oc:hasRationale "Keeping the in-memory cache in sync with storage on writes guarantees subsequent reads return the correct value without hitting storage again." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_7162e568 a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When localStorage or cookies may be modified by another browser tab or server-set cookies" ;
-    oc:directiveContent "Cache invalidation listeners must be registered when storage can change externally — listen for the 'storage' event for cross-tab changes and 'visibilitychange' for tab reactivation." ;
-    oc:hasRationale "Without invalidation, stale cached values will be served indefinitely, leading to incorrect application state." ;
+    oc:appliesToContext "When storage can be modified by another tab, server-set cookies, or external code" ;
+    oc:directiveContent "Invalidate the in-memory cache when storage changes externally — listen for 'storage' events (cross-tab) and 'visibilitychange' events (tab return)." ;
+    oc:hasRationale "Stale cache causes inconsistent state across tabs or after external modifications; invalidation ensures correctness." ;
     oc:severityLevel "CRITICAL" .
+
+oc:kn_7d137f9a a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When choosing a caching mechanism for browser storage" ;
+    oc:directiveContent "Use a Map (not a React hook) for storage caching so it works everywhere: utilities, event handlers, not just React components." ;
+    oc:hasRationale "Hooks constrain usage to React component scope; a plain Map is universally accessible." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_9cb8f8a1 a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "When writing to cached storage" ;
+    oc:directiveContent "The setLocalStorage wrapper must update both localStorage and the in-memory cache to keep them in sync." ;
+    oc:hasRationale "If the cache is not updated on writes, subsequent reads return stale cached values." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_b2438c37 a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "When storage is accessed multiple times per render cycle or event loop" ;
+    oc:directiveContent "Caching reduces N storage reads to 1 read + N Map lookups, where Map lookups are ~100x faster than localStorage.getItem." ;
+    oc:hasRationale "The performance gain scales with call frequency; high-frequency readers benefit most." .
+
+oc:req_89750c99 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Browser Storage API (localStorage, sessionStorage, document.cookie)" .
+
+oc:req_bc616461 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "JavaScript Map data structure" .
 

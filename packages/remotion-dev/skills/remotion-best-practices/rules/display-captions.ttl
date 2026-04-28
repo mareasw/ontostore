@@ -7,82 +7,342 @@
 oc:skill_remotion_dev_skills_remotion_best_practices_display_captions a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "display-captions" ;
-    skos:broader "Video caption rendering guide" ;
+    skos:broader "Caption rendering technique" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/remotion-dev/skills/remotion-best-practices" ;
     oc:contentHash "20b8898a90536fa427a5a39571fc7deac7bde96c4c7bfdf413eee1ef4ef85530" ;
-    oc:differentia "Displays TikTok-style paginated captions with word-by-word highlighting in Remotion videos using the @remotion/captions package" ;
+    oc:differentia "uses TikTok-style page grouping and per-token word highlighting to display timed captions in Remotion video compositions" ;
     oc:extends oc:skill_remotion_dev_skills_remotion_best_practices ;
-    oc:handlesFailure oc:FileNotFound,
-        oc:InvalidInput ;
-    oc:hasAlias "captions",
-        "subtitles",
-        "tiktok-captions",
-        "word-highlight" ;
     oc:hasArgumentHint "captions JSON file path" ;
     oc:hasCategory "development" ;
-    oc:hasRequirement oc:req_6726c8e0,
-        oc:req_7eadcc20,
-        oc:req_9683b44d ;
-    oc:impartsKnowledge oc:kn_1c854e40,
-        oc:kn_2170af7b,
-        oc:kn_5b05bae6,
-        oc:kn_e2fee686,
-        oc:kn_ee7b6850 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "This guide explains how to display captions in Remotion, assuming you already have captions in the [`Caption`](https://www.remotion.dev/docs/captions/caption) format." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Use `createTikTokStyleCaptions()` to group captions into pages. The `combineTokensWithinMilliseconds` option controls how many words appear at once:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """import { useMemo } from "react";
+import { createTikTokStyleCaptions } from "@remotion/captions";
+import type { Caption } from "@remotion/captions";
+
+// How often captions should switch (in milliseconds)
+// Higher values = more words per page
+// Lower values = fewer words (more word-by-word)
+const SWITCH_CAPTIONS_EVERY_MS = 1200;
+
+const { pages } = useMemo(() => {
+  return createTikTokStyleCaptions({
+    captions,
+    combineTokensWithinMilliseconds: SWITCH_CAPTIONS_EVERY_MS,
+  });
+}, [captions]);
+""" ;
+                            oc:codeLanguage "tsx" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 65-81" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Creating pages" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """import { Sequence, useVideoConfig, AbsoluteFill } from "remotion";
+import type { TikTokPage } from "@remotion/captions";
+
+const CaptionedContent: React.FC = () => {
+  const { fps } = useVideoConfig();
+
+  return (
+    <AbsoluteFill>
+      {pages.map((page, index) => {
+        const nextPage = pages[index + 1] ?? null;
+        const startFrame = (page.startMs / 1000) * fps;
+        const endFrame = Math.min(
+          nextPage ? (nextPage.startMs / 1000) * fps : Infinity,
+          startFrame + (SWITCH_CAPTIONS_EVERY_MS / 1000) * fps,
+        );
+        const durationInFrames = endFrame - startFrame;
+
+        if (durationInFrames <= 0) {
+          return null;
+        }
+
+        return (
+          <Sequence
+            key={index}
+            from={startFrame}
+            durationInFrames={durationInFrames}
+          >
+            <CaptionPage page={page} />
+          </Sequence>
+        );
+      })}
+    </AbsoluteFill>
+  );
+};
+""" ;
+                            oc:codeLanguage "tsx" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 87-122" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Map over the pages and render each one in a `<Sequence>`. Calculate the start frame and duration from the page timing:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Rendering with Sequences" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """import { useState, useEffect, useCallback } from "react";
+import { AbsoluteFill, staticFile, useDelayRender } from "remotion";
+import type { Caption } from "@remotion/captions";
+
+export const MyComponent: React.FC = () => {
+  const [captions, setCaptions] = useState<Caption[] | null>(null);
+  const { delayRender, continueRender, cancelRender } = useDelayRender();
+  const [handle] = useState(() => delayRender());
+
+  const fetchCaptions = useCallback(async () => {
+    try {
+      // Assuming captions.json is in the public/ folder.
+      const response = await fetch(staticFile("captions123.json"));
+      const data = await response.json();
+      setCaptions(data);
+      continueRender(handle);
+    } catch (e) {
+      cancelRender(e);
+    }
+  }, [continueRender, cancelRender, handle]);
+
+  useEffect(() => {
+    fetchCaptions();
+  }, [fetchCaptions]);
+
+  if (!captions) {
+    return null;
+  }
+
+  return <AbsoluteFill>{/* Render captions here */}</AbsoluteFill>;
+};
+""" ;
+                            oc:codeLanguage "tsx" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 27-59" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "First, fetch your captions JSON file. Use [`useDelayRender()`](https://www.remotion.dev/docs/use-delay-render) to hold the render until the captions are loaded:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Fetching captions" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent """By default, put the captions alongside the video content, so the captions are in sync.  
+For each video, make a new captions JSON file.""" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """<AbsoluteFill>
+  <Video src={staticFile("video.mp4")} />
+  <CaptionPage page={page} />
+</AbsoluteFill>
+""" ;
+                            oc:codeLanguage "tsx" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 179-184" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 8 ;
+                    oc:sectionTitle "Display captions alongside video content" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent """Put captioning logic in a separate component.  
+Make a new file for it.""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Separate component for captions" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Read [Transcribing audio](transcribe-captions.md) for how to generate captions." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent """First, the [`@remotion/captions`](https://www.remotion.dev/docs/captions) package needs to be installed.
+If it is not installed, use the following command:""" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """npx remotion add @remotion/captions
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 3 ;
+                            oc:sourceLocation "lines 19-21" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Prerequisites" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "A caption page contains `tokens` which you can use to highlight the currently spoken word:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
+import type { TikTokPage } from "@remotion/captions";
+
+const HIGHLIGHT_COLOR = "#39E508";
+
+const CaptionPage: React.FC<{ page: TikTokPage }> = ({ page }) => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+
+  // Current time relative to the start of the sequence
+  const currentTimeMs = (frame / fps) * 1000;
+  // Convert to absolute time by adding the page start
+  const absoluteTimeMs = page.startMs + currentTimeMs;
+
+  return (
+    <AbsoluteFill style={{ justifyContent: "center", alignItems: "center" }}>
+      <div style={{ fontSize: 80, fontWeight: "bold", whiteSpace: "pre" }}>
+        {page.tokens.map((token) => {
+          const isActive =
+            token.fromMs <= absoluteTimeMs && token.toMs > absoluteTimeMs;
+
+          return (
+            <span
+              key={token.fromMs}
+              style={{ color: isActive ? HIGHLIGHT_COLOR : "white" }}
+            >
+              {token.text}
+            </span>
+          );
+        })}
+      </div>
+    </AbsoluteFill>
+  );
+};
+""" ;
+                            oc:codeLanguage "tsx" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 137-172" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 7 ;
+                    oc:sectionTitle "Word highlighting" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "The captions are whitespace sensitive. You should include spaces in the `text` field before each word. Use `whiteSpace: \"pre\"` to preserve the whitespace in the captions." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "White-space preservation" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Displaying captions in Remotion" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """name: display-captions
+description: Displaying captions in Remotion with TikTok-style pages and word highlighting
+metadata:
+  tags: captions, subtitles, display, tiktok, highlight
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "End-to-end workflow for displaying TikTok-style captions with word highlighting in a Remotion composition" ;
+            oc:hasStep _:ref_6459794a28e033d0,
+                _:ref_755fe7f9fe2508ff,
+                _:ref_8c141543af86cead,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Inside each page component, highlight active tokens by comparing absoluteTimeMs against token.fromMs/toMs" ;
+                    oc:expectedOutcome "Currently spoken word is visually highlighted in a different color" ;
+                    oc:stepDependsOn _:ref_755fe7f9fe2508ff ;
+                    oc:stepId "highlight-words" ],
+                _:ref_ae7c8e9d47ea7945 ;
+            oc:workflowId "display-captions-workflow" ;
+            oc:workflowName "Display Captions in Remotion" ] ;
+    oc:impartsKnowledge oc:kn_2850ad7b,
+        oc:kn_5f469ccf,
+        oc:kn_8c2c992c,
+        oc:kn_ae3b7176,
+        oc:kn_b9deb71e,
+        oc:kn_f2b1fe8f ;
     oc:isUserInvocable true ;
-    oc:nature "Work" ;
-    oc:requiresState oc:CaptionsGenerated,
-        oc:EnvironmentReady ;
-    oc:resolvesIntent "create tiktok-style subtitles",
-        "display captions in video",
-        "highlight spoken words in captions",
-        "render timed captions alongside video content" ;
-    oc:yieldsState oc:CaptionsRendered,
-        oc:VideoWithCaptions .
+    oc:nature "Concept" ;
+    oc:resolvesIntent "create tiktok-style caption pages",
+        "display captions in remotion video",
+        "highlight currently spoken word in captions",
+        "render timed subtitles over video content" .
 
-oc:kn_1c854e40 a oc:DesignPrinciple,
+oc:kn_2850ad7b a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When building caption display features in any Remotion project" ;
-    oc:directiveContent "Extract captioning logic into a separate component in its own file rather than embedding it inline with video content." ;
-    oc:hasRationale "Separation of concerns keeps caption logic reusable, testable, and prevents the main video component from becoming bloated." ;
-    oc:severityLevel "MEDIUM" .
+    oc:appliesToContext "When implementing captions in any Remotion project" ;
+    oc:directiveContent "Put captioning logic in a separate component in its own file, keeping it isolated from video composition logic." ;
+    oc:hasRationale "Separation of concerns makes caption components reusable and easier to maintain" .
 
-oc:kn_2170af7b a oc:KnowledgeNode,
-        oc:KnownIssue ;
-    oc:appliesToContext "When mapping over TikTok-style caption pages in Sequence components" ;
-    oc:directiveContent "Pages with `durationInFrames <= 0` can occur during page mapping and must be filtered out by returning null for those entries." ;
-    oc:hasRationale "Edge-case timing calculations can produce zero or negative duration pages, which would cause Remotion Sequence rendering errors if not handled." ;
+oc:kn_5f469ccf a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When implementing per-word highlighting in caption rendering" ;
+    oc:directiveContent "For word highlighting, compute absoluteTimeMs = page.startMs + (frame / fps) * 1000, then compare against each token's fromMs and toMs to determine if it's the active word." ;
+    oc:hasRationale "Frame-relative time must be converted to absolute time to correctly match tokens since frames are relative to the Sequence start, not the video start" .
+
+oc:kn_8c2c992c a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When organizing caption assets for a Remotion project" ;
+    oc:directiveContent "Each video must have its own separate captions JSON file. Do not reuse caption files across different videos." ;
+    oc:hasRationale "Captions are time-synced to specific audio; sharing caption files breaks synchronization" .
+
+oc:kn_ae3b7176 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When rendering any caption text in Remotion" ;
+    oc:directiveContent "Captions are whitespace sensitive. Include spaces in the text field before each word and use whiteSpace: 'pre' CSS property to preserve whitespace in the rendered captions." ;
+    oc:hasRationale "Without whitespace preservation, caption words will collapse together and become unreadable" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_5b05bae6 a oc:Heuristic,
+oc:kn_b9deb71e a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When configuring `createTikTokStyleCaptions()` for caption pagination" ;
-    oc:directiveContent "Use `combineTokensWithinMilliseconds` to control caption page density: higher values group more words per page, lower values produce word-by-word display. A value of ~1200ms is a good starting point." ;
-    oc:hasRationale "The timing threshold directly affects readability and visual pacing of captions, matching different content styles from subtitle blocks to karaoke-style word highlighting." ;
-    oc:severityLevel "MEDIUM" .
+    oc:appliesToContext "When calling createTikTokStyleCaptions() to group captions into pages" ;
+    oc:directiveContent "Use combineTokensWithinMilliseconds to control caption grouping: higher values mean more words per page (subtitle-style), lower values mean fewer words (word-by-word karaoke-style). A value of 1200ms is a good default." ;
+    oc:hasRationale "The timing threshold determines the viewing experience and readability of captions" .
 
-oc:kn_e2fee686 a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "When rendering any caption text to ensure correct word spacing" ;
-    oc:directiveContent "Always include spaces in the token `text` field before each word and use `whiteSpace: \"pre\"` CSS property to preserve whitespace in caption rendering." ;
-    oc:hasRationale "Captions are whitespace-sensitive; without `whiteSpace: 'pre'`, browsers collapse multiple spaces and caption words will run together incorrectly." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_ee7b6850 a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "When loading caption data from a remote or static file before rendering" ;
-    oc:directiveContent "Use `useDelayRender()` to hold the render until captions JSON is fully fetched, and call `cancelRender(e)` on fetch failure." ;
-    oc:hasRationale "Without delay rendering, the component would render before captions are available, producing blank or broken output." ;
+oc:kn_f2b1fe8f a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When fetching caption data from a file or API before rendering" ;
+    oc:directiveContent "Always use useDelayRender() when fetching captions JSON asynchronously. Call continueRender(handle) on success and cancelRender(e) on failure." ;
+    oc:hasRationale "Without delayRender, Remotion will render before captions are loaded, resulting in empty frames" ;
     oc:severityLevel "CRITICAL" .
 
-oc:req_6726c8e0 a oc:RequirementTool ;
-    oc:isOptional false ;
-    oc:requirementValue "@remotion/captions" .
+_:ref_6459794a28e033d0 a oc:WorkflowStep ;
+    dcterms:description "Fetch captions JSON file using useDelayRender() to hold render until data loads" ;
+    oc:stepDependsOn _:ref_8c141543af86cead ;
+    oc:stepId "fetch-captions" .
 
-oc:req_7eadcc20 a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "Caption JSON format from @remotion/captions" .
+_:ref_755fe7f9fe2508ff a oc:WorkflowStep ;
+    dcterms:description "Map pages into <Sequence> components with calculated startFrame and durationInFrames" ;
+    oc:expectedOutcome "Each caption page renders during its correct time window" ;
+    oc:stepDependsOn _:ref_ae7c8e9d47ea7945 ;
+    oc:stepId "render-sequences" .
 
-oc:req_9683b44d a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "React and Remotion fundamentals" .
+_:ref_8c141543af86cead a oc:WorkflowStep ;
+    dcterms:description "Install @remotion/captions package via 'npx remotion add @remotion/captions'" ;
+    oc:expectedOutcome "Package is available for import" ;
+    oc:stepId "install-package" .
+
+_:ref_ae7c8e9d47ea7945 a oc:WorkflowStep ;
+    dcterms:description "Call createTikTokStyleCaptions() to group captions into timed pages" ;
+    oc:expectedOutcome "Pages array with grouped tokens and timing information" ;
+    oc:stepDependsOn _:ref_6459794a28e033d0 ;
+    oc:stepId "create-pages" .
 

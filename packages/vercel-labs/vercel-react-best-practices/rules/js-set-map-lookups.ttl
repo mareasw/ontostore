@@ -10,46 +10,86 @@ oc:skill_vercel_labs_vercel_react_best_practices_js_set_map_lookups a oc:Declara
     skos:broader "Performance optimization pattern" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "a7fd781a6ba9ad49065961b6f9a90ef486bf6b648390e1a08704025f98e1642b" ;
-    oc:differentia "replaces O(n) array lookups with O(1) Set/Map lookups for repeated membership checks in JavaScript/TypeScript" ;
+    oc:differentia "converts array membership checks from O(n) to O(1) using Set/Map data structures" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
-    oc:hasArgumentHint "code with repeated array membership checks" ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_a9e68898,
-        oc:kn_b3ac0eff,
-        oc:kn_d8444411,
-        oc:kn_fcd56e83 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Use Set/Map for O(1) Lookups
+impact: LOW-MEDIUM
+impactDescription: O(n) to O(1)
+tags: javascript, set, map, data-structures, performance
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "**Correct (O(1) per check):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Convert arrays to Set/Map for repeated membership checks." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Incorrect (O(n) per check):**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """const allowedIds = ['a', 'b', 'c', ...]
+items.filter(item => allowedIds.includes(item.id))
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-17" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """const allowedIds = new Set(['a', 'b', 'c', ...])
+items.filter(item => allowedIds.has(item.id))
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 5 ;
+                    oc:sourceLocation "lines 21-24" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Use Set/Map for O(1) Lookups" ] ;
+    oc:impartsKnowledge oc:kn_0088887c,
+        oc:kn_05b0095d,
+        oc:kn_e7417e18,
+        oc:kn_ec570750 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:CodebaseAvailable ;
-    oc:resolvesIntent "improve array filtering performance",
-        "optimize membership checks",
-        "replace array.includes with Set.has" ;
-    oc:yieldsState oc:PerformanceOptimized .
+    oc:resolvesIntent "improve membership check performance",
+        "optimize array lookups",
+        "replace includes with Set.has" .
 
-oc:kn_a9e68898 a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "When filtering arrays or performing repeated membership checks against a static or semi-static list of values" ;
-    oc:directiveContent "Use Set instead of arrays for repeated membership checks (includes/contains operations) to achieve O(1) lookup time instead of O(n)." ;
-    oc:hasRationale "Array.includes() scans every element in the worst case, making it O(n) per check. Set.has() uses hash-based lookup for O(1) average time, which compounds significantly when used inside filter/map loops." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_b3ac0eff a oc:AntiPattern,
+oc:kn_0088887c a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When writing JavaScript/TypeScript code that filters or checks membership against a list" ;
-    oc:directiveContent "Avoid using Array.includes() or Array.indexOf() for membership checks inside loops like filter(), map(), or reduce() when the lookup collection has more than a few elements." ;
-    oc:hasRationale "This creates O(n×m) complexity (n items × m lookup collection size), which becomes a performance bottleneck at scale with large datasets." ;
-    oc:severityLevel "MEDIUM" .
+    oc:appliesToContext "When writing any filter/map/reduce that checks membership" ;
+    oc:directiveContent "If you call .includes(), .indexOf(), or .find() inside a loop or .filter() callback, convert the target array to a Set or Map first" ;
+    oc:hasRationale "The overhead of creating a Set is O(n) once, but saves O(n) on every subsequent lookup" .
 
-oc:kn_d8444411 a oc:DesignPrinciple,
+oc:kn_05b0095d a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When selecting data structures in JavaScript/TypeScript" ;
-    oc:directiveContent "Choose the data structure that matches the access pattern: use Set for membership checks, Map for key-value lookups, and Array for ordered iteration." ;
-    oc:hasRationale "Using the right data structure for the dominant operation avoids hidden performance costs and communicates intent more clearly to other developers." .
+    oc:appliesToContext "When performing repeated membership/existence checks against a known set of values" ;
+    oc:codeLanguage "typescript" ;
+    oc:directiveContent """const allowedIds = new Set(['a', 'b', 'c']);
+items.filter(item => allowedIds.has(item.id))""" .
 
-oc:kn_fcd56e83 a oc:KnowledgeNode,
+oc:kn_e7417e18 a oc:KnowledgeNode,
         oc:PerformanceProfile ;
-    oc:appliesToContext "When evaluating whether to convert arrays to Sets for lookup optimization" ;
-    oc:directiveContent "Set/Map lookups are O(1) average case; array includes/indexOf are O(n). The performance gain is LOW-MEDIUM impact depending on collection sizes and frequency of lookups." ;
-    oc:hasRationale "For small arrays (<10 items) the difference is negligible, but for large arrays or hot paths inside render cycles, the O(n)→O(1) improvement is meaningful." ;
-    oc:severityLevel "LOW" .
+    oc:appliesToContext "When the lookup collection has more than a trivial number of elements" ;
+    oc:directiveContent "Using Set.has() or Map.has() provides O(1) lookup vs O(n) for Array.includes(), yielding up to O(n)→O(1) improvement per check" ;
+    oc:hasRationale "Hash-based data structures provide constant-time lookups regardless of collection size" .
+
+oc:kn_ec570750 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When filtering or checking if items exist in a collection" ;
+    oc:directiveContent "Never use Array.includes() or Array.indexOf() for repeated membership checks on large arrays" ;
+    oc:hasRationale "Array.includes() is O(n) per check — for m items checked against n allowed values, total complexity is O(m×n)" ;
+    oc:severityLevel "MEDIUM" .
 

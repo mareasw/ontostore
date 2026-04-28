@@ -7,59 +7,158 @@
 oc:skill_vercel_labs_vercel_react_best_practices_client_event_listeners a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "client-event-listeners" ;
-    skos:broader "React hook pattern" ;
+    skos:broader "Pattern" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "242a873349febc1ce685e85617994784dbab92c2eaa68aed7fed5a83e7680e93" ;
-    oc:dependsOnSkill oc:skill_vercel_react_best_practices ;
-    oc:differentia "deduplicates global event listeners across component instances using useSWRSubscription to ensure N component instances share 1 listener instead of creating N separate listeners" ;
-    oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
-    oc:handlesFailure oc:InvalidInput ;
+    oc:differentia "deduplicates global event listeners using useSWRSubscription to share a single listener across N component instances" ;
+    oc:extends oc:skill_ontoskills_vercel_react_best_practices,
+        oc:skill_vercel_labs_vercel_react_best_practices ;
+    oc:handlesFailure oc:MemoryLeak ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_33ba2df7,
-        oc:kn_4e23f362,
-        oc:kn_67274508,
-        oc:kn_a0bb7507,
-        oc:kn_c2546881 ;
+    oc:hasRequirement oc:req_6504d8f3 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Deduplicate Global Event Listeners
+impact: LOW
+impactDescription: single listener for N components
+tags: client, swr, event-listeners, subscription
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """import useSWRSubscription from 'swr/subscription'
+
+// Module-level Map to track callbacks per key
+const keyCallbacks = new Map<string, Set<() => void>>()
+
+function useKeyboardShortcut(key: string, callback: () => void) {
+  // Register this callback in the Map
+  useEffect(() => {
+    if (!keyCallbacks.has(key)) {
+      keyCallbacks.set(key, new Set())
+    }
+    keyCallbacks.get(key)!.add(callback)
+
+    return () => {
+      const set = keyCallbacks.get(key)
+      if (set) {
+        set.delete(callback)
+        if (set.size === 0) {
+          keyCallbacks.delete(key)
+        }
+      }
+    }
+  }, [key, callback])
+
+  useSWRSubscription('global-keydown', () => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.metaKey && keyCallbacks.has(e.key)) {
+        keyCallbacks.get(e.key)!.forEach(cb => cb())
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  })
+}
+
+function Profile() {
+  // Multiple shortcuts will share the same listener
+  useKeyboardShortcut('p', () => { /* ... */ }) 
+  useKeyboardShortcut('k', () => { /* ... */ })
+  // ...
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 6 ;
+                    oc:sourceLocation "lines 32-74" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Incorrect (N instances = N listeners):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "When using the `useKeyboardShortcut` hook multiple times, each instance will register a new listener." ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function useKeyboardShortcut(key: string, callback: () => void) {
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.metaKey && e.key === key) {
+        callback()
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [key, callback])
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-26" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 5 ;
+                    oc:textContent "**Correct (N instances = 1 listener):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Use `useSWRSubscription()` to share global event listeners across component instances." ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Deduplicate Global Event Listeners" ] ;
+    oc:impartsKnowledge oc:kn_4fa9ee26,
+        oc:kn_a7ae275a,
+        oc:kn_be94904f,
+        oc:kn_d9def5db,
+        oc:kn_fb719b99 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:EnvironmentReady ;
-    oc:resolvesIntent "deduplicate global event listeners in React",
-        "optimize keyboard shortcut hooks for multiple component instances",
-        "share event listeners across components using SWR subscription" ;
-    oc:yieldsState oc:EventListenerDeduplicated .
+    oc:requiresState oc:SWRInstalled ;
+    oc:resolvesIntent "deduplicate event listeners",
+        "optimize keyboard shortcut hooks",
+        "reduce duplicate event listener registrations",
+        "share global event listeners across components" ;
+    oc:yieldsState oc:EventListenersDeduplicated .
 
-oc:kn_33ba2df7 a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "When implementing deduplicated global event listener hooks" ;
-    oc:directiveContent "Track per-instance callbacks in a module-level Map<string, Set<()=>void>> so the single shared listener can dispatch to all registered callbacks for a given key" ;
-    oc:hasRationale "The Map-of-Sets pattern ensures callbacks are registered/unregistered correctly, and the listener itself is cleaned up when no callbacks remain (set.size === 0)" ;
+oc:kn_4fa9ee26 a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "Global event listener hooks used by many component instances" ;
+    oc:directiveContent "Without deduplication, listener count scales O(N) with component instances. With useSWRSubscription, it stays O(1) — one listener regardless of N." ;
+    oc:hasRationale "This is especially impactful for frequently-fired events like keydown, scroll, or resize where each listener adds per-event overhead." .
+
+oc:kn_a7ae275a a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When multiple components need to react to the same global event source" ;
+    oc:directiveContent "Use useSWRSubscription from SWR to ensure only one global listener exists regardless of how many component instances subscribe to the same key." ;
+    oc:hasRationale "useSWRSubscription deduplicates the subscription under the hood — the subscribe function runs once per unique SWR key, not once per consumer." .
+
+oc:kn_be94904f a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When using hooks that attach to global event sources like window, document, or WebSocket" ;
+    oc:directiveContent "Never register separate global event listeners (e.g., window.addEventListener) inside each component instance via useEffect — N mounted instances create N duplicate listeners." ;
+    oc:hasRationale "Each duplicate listener wastes memory and CPU cycles processing the same event independently, degrading performance at scale." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_4e23f362 a oc:Constraint,
+oc:kn_d9def5db a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When configuring useSWRSubscription for global event listeners" ;
-    oc:directiveContent "The subscription key passed to useSWRSubscription must be identical across all instances that should share the same listener" ;
-    oc:hasRationale "SWR uses the key string for deduplication — mismatched keys will result in separate subscriptions, defeating the purpose of the pattern" ;
-    oc:severityLevel "MEDIUM" .
+    oc:appliesToContext "When implementing shared event listener hooks that accept per-instance callbacks" ;
+    oc:codeLanguage "tsx" ;
+    oc:directiveContent "Maintain a module-level Map<string, Set<() => void>> to track registered callbacks per event key, registering/unregistering in useEffect while the actual DOM listener is managed exclusively inside useSWRSubscription." ;
+    oc:hasRationale "Separating callback registration (per-instance) from the DOM listener (singleton) allows N consumers to share 1 listener while preserving individual callbacks." .
 
-oc:kn_67274508 a oc:DesignPrinciple,
+oc:kn_fb719b99 a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When building hooks that subscribe to global browser events (keydown, resize, visibilitychange, etc.)" ;
-    oc:directiveContent "Use useSWRSubscription() combined with a module-level Map to share a single global event listener across all component instances that need it" ;
-    oc:hasRationale "useSWRSubscription handles the subscription lifecycle and deduplication by key — only one subscription function runs per unique key regardless of how many components use the hook" ;
-    oc:severityLevel "MEDIUM" .
+    oc:appliesToContext "Code review and performance optimization of React components" ;
+    oc:directiveContent "Any useEffect that calls window.addEventListener or document.addEventListener with the same event type should be audited for deduplication via useSWRSubscription." ;
+    oc:hasRationale "Duplicate global listeners are a silent performance tax — they don't cause bugs but waste resources proportionally to component instance count." .
 
-oc:kn_a0bb7507 a oc:KnowledgeNode,
-        oc:SideEffect ;
-    oc:appliesToContext "When using useSWRSubscription for global event deduplication" ;
-    oc:directiveContent "The useSWRSubscription approach creates a single window event listener per unique subscription key, managed by SWR's internal lifecycle — the listener is added on first mount and removed on last unmount" ;
-    oc:hasRationale "Understanding the lifecycle prevents assumptions about when listeners are attached/detached — it follows SWR's subscription semantics, not React's effect timing" ;
-    oc:severityLevel "LOW" .
-
-oc:kn_c2546881 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When creating custom hooks that subscribe to global events (window.addEventListener, document.addEventListener)" ;
-    oc:directiveContent "Never register separate global event listeners per component instance — each useEffect that calls window.addEventListener creates an independent listener" ;
-    oc:hasRationale "N component instances each creating their own listener leads to O(N) listeners for the same event, causing performance degradation and potential double-fire bugs" ;
-    oc:severityLevel "HIGH" .
+oc:req_6504d8f3 a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "swr" .
 

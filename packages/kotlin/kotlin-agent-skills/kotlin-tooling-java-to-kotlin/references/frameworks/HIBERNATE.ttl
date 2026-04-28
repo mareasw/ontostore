@@ -7,72 +7,440 @@
 oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_java_to_kotlin_hibernate a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "hibernate" ;
-    skos:broader "conversion guide" ;
+    skos:broader "Conversion guide" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/kotlin/kotlin-agent-skills/kotlin-tooling-java-to-kotlin" ;
     oc:contentHash "02cf14d4d56cba141682bd8bfd5154d2018822a3aca6f477d8fb48bb91e08277" ;
-    oc:differentia "specializes Java-to-Kotlin translation for Hibernate/JPA entity classes, covering annotation targeting, identity semantics, proxy requirements, and relationship mapping" ;
+    oc:dependsOnSkill oc:skill_ontoskills_kotlin_tooling_java_to_kotlin ;
+    oc:differentia "that handles Java Hibernate/JPA annotations and entity semantics when translating to idiomatic Kotlin" ;
     oc:extends oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_java_to_kotlin ;
     oc:handlesFailure oc:AnnotationTargetMismatch,
-        oc:IdentitySemanticsViolation,
-        oc:ProxyCreationFailure ;
-    oc:hasArgumentHint "Java file with javax.persistence.*, jakarta.persistence.*, or org.hibernate.* imports" ;
+        oc:IdentitySemanticsBroken,
+        oc:ProxyCreationFailed ;
+    oc:hasArgumentHint "Java source file containing javax.persistence or org.hibernate imports" ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_2949a1cf,
-        oc:kn_4e2d2b0b,
-        oc:kn_9011e910,
-        oc:kn_9ddda411,
-        oc:kn_c8714518,
-        oc:kn_cec6ff6b ;
-    oc:isUserInvocable true ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent "Key points in this example:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """@Entity
+@Table(name = "departments")
+open class Department(
+
+    @field:Column(name = "name", nullable = false)
+    open val name: String = ""
+
+) {
+    @field:Id
+    @field:GeneratedValue(strategy = GenerationType.IDENTITY)
+    open var id: Long? = null
+        protected set
+
+    @field:OneToMany(mappedBy = "department", cascade = [CascadeType.ALL], orphanRemoval = true)
+    open val users: MutableList<User> = mutableListOf()
+
+    protected constructor() : this(name = "")
+
+    fun addUser(user: User) {
+        users.add(user)
+        user.department = this
+    }
+
+    fun removeUser(user: User) {
+        users.remove(user)
+        user.department = null
+    }
+}
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 4 ;
+                                    oc:sourceLocation "lines 192-221" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """@Entity
+@Table(name = "departments")
+public class Department {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "name", nullable = false)
+    private String name;
+
+    @OneToMany(mappedBy = "department", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<User> users = new ArrayList<>();
+
+    protected Department() {}
+
+    public Department(String name) {
+        this.name = name;
+    }
+
+    public Long getId() { return id; }
+    public String getName() { return name; }
+    public List<User> getUsers() { return users; }
+
+    public void addUser(User user) {
+        users.add(user);
+        user.setDepartment(this);
+    }
+
+    public void removeUser(User user) {
+        users.remove(user);
+        user.setDepartment(null);
+    }
+}
+""" ;
+                                    oc:codeLanguage "java" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 154-189" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Java:**" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 6 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "The class and its properties are `open` so Hibernate can create proxies." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "`cascade` array syntax uses Kotlin's `[CascadeType.ALL]` instead of Java's `{CascadeType.ALL}`." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "The collection is typed as `MutableList` to allow Hibernate to manage the relationship." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "The no-arg constructor delegates to the primary constructor with default values." ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Kotlin:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Example 3: Entity with @ManyToOne and @OneToMany" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """@Entity
+@Table(name = "users")
+open class User(
+
+    @field:Column(name = "username", nullable = false, unique = true)
+    open val username: String,
+
+    @field:Column(name = "email")
+    open var email: String? = null,
+
+    @field:ManyToOne(fetch = FetchType.LAZY)
+    @field:JoinColumn(name = "department_id")
+    open var department: Department? = null
+
+) {
+    @field:Id
+    @field:GeneratedValue(strategy = GenerationType.IDENTITY)
+    open var id: Long? = null
+        protected set
+
+    protected constructor() : this(username = "")
+}
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 4 ;
+                                    oc:sourceLocation "lines 77-100" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Java:**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """@Entity
+@Table(name = "users")
+public class User {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "username", nullable = false, unique = true)
+    private String username;
+
+    @Column(name = "email")
+    private String email;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id")
+    private Department department;
+
+    protected User() {}
+
+    public User(String username, String email, Department department) {
+        this.username = username;
+        this.email = email;
+        this.department = department;
+    }
+
+    public Long getId() { return id; }
+    public String getUsername() { return username; }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+    public Department getDepartment() { return department; }
+    public void setDepartment(Department department) { this.department = department; }
+}
+""" ;
+                                    oc:codeLanguage "java" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 40-74" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Kotlin:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Example 1: JPA Entity with @Id, @Column, and Relationships" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Java:**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """@Embeddable
+data class Address(
+
+    @field:Column(name = "street")
+    val street: String = "",
+
+    @field:Column(name = "city")
+    val city: String = "",
+
+    @field:Column(name = "zip_code")
+    val zipCode: String = ""
+)
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 4 ;
+                                    oc:sourceLocation "lines 133-146" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Kotlin:**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """@Embeddable
+public class Address {
+
+    @Column(name = "street")
+    private String street;
+
+    @Column(name = "city")
+    private String city;
+
+    @Column(name = "zip_code")
+    private String zipCode;
+
+    protected Address() {}
+
+    public Address(String street, String city, String zipCode) {
+        this.street = street;
+        this.city = city;
+        this.zipCode = zipCode;
+    }
+
+    public String getStreet() { return street; }
+    public String getCity() { return city; }
+    public String getZipCode() { return zipCode; }
+}
+""" ;
+                                    oc:codeLanguage "java" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 105-130" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent """`@Embeddable` classes can safely be data classes because Hibernate does not proxy them.
+Default values satisfy the no-arg constructor requirement.""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Example 2: @Embeddable Value Object" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Examples" ],
+                [ a oc:Section ;
+                    oc:hasContent _:ref_77a5af3ad68af54b ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Critical Rules" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "`jakarta.persistence.*`" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "`org.hibernate.*`" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "`javax.persistence.*`" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Detected when imports match any of:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "When This Applies" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Hibernate / JPA Conversion Guide" ] ;
+    oc:hasWorkflow _:ref_77a5af3ad68af54b ;
+    oc:impartsKnowledge oc:kn_3c79b6b0,
+        oc:kn_4879ba8d,
+        oc:kn_58d3e26c,
+        oc:kn_8f140287,
+        oc:kn_97dc466f,
+        oc:kn_ab260ad4,
+        oc:kn_d9e92c4a ;
+    oc:isUserInvocable false ;
     oc:nature "Concept" ;
-    oc:requiresState oc:FileExists,
-        oc:JpaImportsDetected ;
-    oc:resolvesIntent "convert hibernate jpa entity to kotlin",
-        "handle hibernate proxy requirements in kotlin",
-        "map jpa relationships in kotlin",
-        "migrate jpa annotations from java to kotlin",
-        "translate java entity class to kotlin" ;
-    oc:yieldsState oc:HibernateEntityConverted .
+    oc:requiresState oc:JPAImportsFound,
+        oc:JavaSourceDetected ;
+    oc:resolvesIntent "convert Hibernate entity relationships to Kotlin",
+        "convert JPA entity from Java to Kotlin",
+        "migrate javax.persistence classes to Kotlin",
+        "translate Hibernate annotations to Kotlin" ;
+    oc:yieldsState oc:EntityConverted,
+        oc:KotlinSourceReady .
 
-oc:kn_2949a1cf a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When converting entity relationships and cascade configurations" ;
-    oc:directiveContent "Convert Java cascade array syntax {CascadeType.ALL} to Kotlin bracket syntax [CascadeType.ALL]. Use MutableList for @OneToMany collections so Hibernate can manage the relationship." ;
-    oc:hasRationale "Kotlin uses brackets [] for array annotations instead of Java's curly braces {}. MutableList is required because Hibernate needs to replace the collection implementation with its own managed wrapper." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_4e2d2b0b a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When converting any JPA @Entity class from Java to Kotlin" ;
-    oc:directiveContent "Never use Kotlin data classes for @Entity classes. Data classes generate equals/hashCode based on all properties, which breaks Hibernate's identity semantics and proxy creation." ;
-    oc:hasRationale "Hibernate uses identity-based equality (database primary key) for entities, not property-based equality. Data class equals/hashCode would use all properties, causing broken lazy loading, detached entity issues, and proxy failures." ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_9011e910 a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When declaring any @Entity or @MappedSuperclass class in Kotlin" ;
-    oc:directiveContent "All JPA entity classes and their mutable properties must be declared `open` so Hibernate can create runtime proxies via subclassing." ;
-    oc:hasRationale "Kotlin classes are final by default. Hibernate creates CGLIB or ByteBuddy proxies by subclassing entities at runtime. Final classes prevent proxy creation, causing LazyInitializationException on lazy-loaded associations." ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_9ddda411 a oc:KnowledgeNode,
+oc:kn_3c79b6b0 a oc:KnowledgeNode,
         oc:Standard ;
-    oc:appliesToContext "When placing JPA annotations on Kotlin entity properties" ;
-    oc:directiveContent "Use @field: annotation site targets for all JPA annotations (@Id, @Column, @GeneratedValue, @ManyToOne, @OneToMany, @JoinColumn) to ensure they target the backing field rather than the getter or constructor parameter." ;
-    oc:hasRationale "Kotlin annotations default to targeting parameters or getters depending on context. Hibernate expects annotations on fields. Without @field: targeting, Hibernate will not find the mapping metadata and will throw MappingException." ;
+    oc:appliesToContext "When placing JPA annotations on entity properties" ;
+    oc:directiveContent "Use @field: annotation site targets for JPA annotations like @Id, @Column, @GeneratedValue, @ManyToOne, @OneToMany, @JoinColumn in Kotlin. For example: @field:Id, @field:Column(name = \"username\"), @field:ManyToOne(fetch = FetchType.LAZY)." ;
+    oc:hasRationale "Kotlin annotations default to targeting parameter sites, but Hibernate expects field-level annotations. Without @field: prefix, annotations are placed on constructor parameters instead of backing fields, causing Hibernate to ignore them." ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_c8714518 a oc:Heuristic,
+oc:kn_4879ba8d a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When converting @Embeddable value objects from Java to Kotlin" ;
-    oc:directiveContent "@Embeddable classes CAN be Kotlin data classes because Hibernate does not proxy them. Use default values for all constructor parameters to satisfy the no-arg constructor requirement." ;
-    oc:hasRationale "@Embeddable classes are value objects inlined into the owning entity's table. Since Hibernate never creates proxies for embeddables, data class semantics are safe and provide useful equals/hashCode/toString/copy." ;
-    oc:severityLevel "MEDIUM" .
+    oc:appliesToContext "When defining entity property types and annotation array parameters" ;
+    oc:directiveContent "Use `open var` for mutable entity properties and `open val` for immutable ones. Use MutableList for @OneToMany collections. Use Kotlin array syntax [CascadeType.ALL] instead of Java's {CascadeType.ALL}." ;
+    oc:hasRationale "Properties must be open for proxy overriding. MutableList allows Hibernate to manage collection relationships. Kotlin uses [] for annotation arrays." .
 
-oc:kn_cec6ff6b a oc:DesignPrinciple,
+oc:kn_58d3e26c a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When designing JPA entity identity in Kotlin" ;
-    oc:directiveContent "Place @Id and @GeneratedValue on a mutable property (open var) inside the class body with a protected setter, rather than in the primary constructor. Provide a protected no-arg constructor delegating to the primary constructor with default values." ;
-    oc:hasRationale "The ID is typically assigned by the database, so it should be nullable and mutable. A protected no-arg constructor satisfies Hibernate's proxy instantiation requirement while keeping the primary constructor expressive." ;
-    oc:severityLevel "HIGH" .
+    oc:appliesToContext "When converting any class annotated with @Entity" ;
+    oc:directiveContent "Never use Kotlin data classes for JPA @Entity classes. Data classes generate equals/hashCode based on all properties, breaking Hibernate's identity semantics and proxy creation." ;
+    oc:hasRationale "Hibernate uses identity-based equality for entities and creates runtime proxies via subclassing. Data class–generated equals/hashCode conflicts with both mechanisms." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_8f140287 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting entity classes that need proxy instantiation" ;
+    oc:directiveContent "Provide a protected no-arg constructor that delegates to the primary constructor with default values. Alternatively, use default values for all primary constructor parameters." ;
+    oc:hasRationale "Hibernate requires a no-argument constructor to instantiate proxy objects. Kotlin primary constructors with required parameters don't satisfy this requirement." .
+
+oc:kn_97dc466f a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting any @Entity class" ;
+    oc:directiveContent "All JPA entity classes and their mutable properties must be declared `open`. Kotlin classes are final by default, but Hibernate requires subclassing for proxy creation." ;
+    oc:hasRationale "Hibernate creates lazy-loading proxies by generating subclasses at runtime. Final classes prevent this, causing runtime errors." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_ab260ad4 a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When converting entity classes with generated IDs" ;
+    oc:directiveContent "Declare @Id as a separate property inside the class body with `open var ... protected set` rather than in the primary constructor. Initialize it as nullable with null default." ;
+    oc:hasRationale "This pattern keeps ID assignment controlled (protected setter) while allowing Hibernate to set it on persist, and avoids requiring ID in the primary constructor." .
+
+oc:kn_d9e92c4a a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When converting @Embeddable or @MappedSuperclass annotated classes" ;
+    oc:directiveContent "@Embeddable classes CAN be data classes with default values for all constructor parameters. @MappedSuperclass must be declared as `open abstract class`." ;
+    oc:hasRationale "@Embeddable classes are value objects not proxied by Hibernate, so data class semantics are safe. @MappedSuperclass is never instantiated directly." .
+
+_:ref_0d6f2d83852d6c6e a oc:WorkflowStep ;
+    dcterms:description "**Annotation site targets matter:**" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild [ a oc:BulletList ;
+            oc:blockType "bullet_list" ;
+            oc:contentOrder 1 ;
+            oc:hasItem [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 1 ;
+                    oc:itemText """`@Id`, `@Column`, `@GeneratedValue` on fields → use `@field:Id`, `@field:Column`, etc.
+in Kotlin, OR place annotations on constructor parameters with `@field:` site target.""" ],
+                [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 2 ;
+                    oc:itemText "`@ManyToOne`, `@OneToMany`, `@JoinColumn` → same `@field:` targeting." ] ] ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_15b1a55cef8931ee a oc:WorkflowStep ;
+    dcterms:description """**Lazy loading considerations:** `@ManyToOne(fetch = FetchType.LAZY)` requires the entity
+class to be open for proxy creation. `@OneToMany` with lazy collections work with Kotlin's
+`MutableList`.""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_5" ;
+    oc:stepOrder 5 .
+
+_:ref_3efcb171157fa32c a oc:WorkflowStep ;
+    dcterms:description """**Provide a no-argument constructor** if Hibernate requires one for proxy creation. Use a
+secondary constructor or default values for all primary constructor parameters.""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_5249b81a538d1cff a oc:WorkflowStep ;
+    dcterms:description """**Do NOT use data classes for JPA entities.** Data classes generate `equals`/`hashCode`
+based on all properties, which breaks Hibernate's identity semantics and proxy creation.""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_554ecca960f7528b a oc:WorkflowStep ;
+    dcterms:description "**`@Embeddable` classes**: Can be data classes (they don't need proxies)." ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_6" ;
+    oc:stepOrder 6 .
+
+_:ref_7450ee86d6b5adb6 a oc:WorkflowStep ;
+    dcterms:description "**`@MappedSuperclass`**: Must be `open abstract class` in Kotlin." ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_7" ;
+    oc:stepOrder 7 .
+
+_:ref_8e0932b2bd6af091 a oc:WorkflowStep ;
+    dcterms:description """**Keep entity classes `open`.** Hibernate creates proxies via subclassing. Kotlin classes
+are `final` by default, so you must use `open` explicitly (or use the `allopen` compiler
+plugin with JPA annotation support).""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_77a5af3ad68af54b a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 1 ;
+    oc:hasStep _:ref_0d6f2d83852d6c6e,
+        _:ref_15b1a55cef8931ee,
+        _:ref_3efcb171157fa32c,
+        _:ref_5249b81a538d1cff,
+        _:ref_554ecca960f7528b,
+        _:ref_7450ee86d6b5adb6,
+        _:ref_8e0932b2bd6af091 ;
+    oc:workflowId "procedure_1" ;
+    oc:workflowName "Ordered Procedure" .
 

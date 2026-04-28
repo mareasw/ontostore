@@ -7,49 +7,121 @@
 oc:skill_vercel_labs_vercel_react_best_practices_rerender_memo a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "rerender-memo" ;
-    skos:broader "React performance optimization pattern" ;
+    skos:broader "React optimization technique" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "1f258990c2f27ff6256b3cc5c43300631bb3f0d81f749aed08d07fcdcc131dd1" ;
-    oc:differentia "extracts expensive computation into memoized components to enable early returns that skip unnecessary work" ;
+    oc:differentia "extracts expensive computations into memoized components to enable early returns that skip unnecessary work" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
+    oc:handlesFailure oc:PerformanceDegraded ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_49c5cfa2,
-        oc:kn_d8e2edb6,
-        oc:kn_f7d1dc11,
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Incorrect (computes avatar even when loading):**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """const UserAvatar = memo(function UserAvatar({ user }: { user: User }) {
+  const id = useMemo(() => computeAvatarId(user), [user])
+  return <Avatar id={id} />
+})
+
+function Profile({ user, loading }: Props) {
+  if (loading) return <Skeleton />
+  return (
+    <div>
+      <UserAvatar user={user} />
+    </div>
+  )
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 5 ;
+                    oc:sourceLocation "lines 28-42" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function Profile({ user, loading }: Props) {
+  const avatar = useMemo(() => {
+    const id = computeAvatarId(user)
+    return <Avatar id={id} />
+  }, [user])
+
+  if (loading) return <Skeleton />
+  return <div>{avatar}</div>
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-24" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Extract expensive work into memoized components to enable early returns before computation." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "**Correct (skips computation when loading):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 6 ;
+                    oc:textContent "**Note:** If your project has [React Compiler](https://react.dev/learn/react-compiler) enabled, manual memoization with `memo()` and `useMemo()` is not necessary. The compiler automatically optimizes re-renders." ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Extract to Memoized Components" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Extract to Memoized Components
+impact: MEDIUM
+impactDescription: enables early returns
+tags: rerender, memo, useMemo, optimization
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:impartsKnowledge oc:kn_5556f067,
+        oc:kn_68df1f53,
+        oc:kn_c102b634,
+        oc:kn_e910b218,
         oc:kn_fb104b99 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:ReactComponentExists ;
-    oc:resolvesIntent "avoid unnecessary computation during loading states",
-        "extract memoized components",
-        "optimize React component re-renders" ;
+    oc:requiresState oc:ReactComponentIdentified ;
+    oc:resolvesIntent "avoid unnecessary computation with early returns",
+        "memoize expensive component computations",
+        "optimize React re-renders" ;
     oc:yieldsState oc:ComponentMemoized .
 
-oc:kn_49c5cfa2 a oc:KnowledgeNode,
-        oc:PerformanceProfile ;
-    oc:appliesToContext "When profiling or optimizing component render performance" ;
-    oc:directiveContent "Extracting to a memoized component enables early-return optimization that can completely skip expensive avatar ID computation during loading states." ;
-    oc:hasRationale "Skipping computation entirely (via early return) is always cheaper than computing and memoizing a result that is never used." ;
+oc:kn_5556f067 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When extracting expensive work from a component with conditional returns" ;
+    oc:codeLanguage "tsx" ;
+    oc:directiveContent "Wrap extracted expensive logic in `memo()` at the component level, and use `useMemo()` for individual expensive computations inside that component. The parent component then conditionally renders the memoized child only after passing early-return guards." .
+
+oc:kn_68df1f53 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before optimizing a React component for re-render performance" ;
+    oc:directiveContent "Check if the component has both expensive computations (useMemo, heavy calculations) and conditional early returns. If so, the expensive work should be extracted to a memoized child." .
+
+oc:kn_c102b634 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When a component has conditional early returns and also uses useMemo" ;
+    oc:directiveContent "Never compute expensive values with useMemo before early returns (e.g., loading guards). The memoized value is computed even when the early return prevents it from being rendered." ;
+    oc:hasRationale "useMemo runs before any return statement, so placing it before an early return like `if (loading) return <Skeleton />` wastes computation." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_d8e2edb6 a oc:AntiPattern,
+oc:kn_e910b218 a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When a React component has both expensive computations and early return paths (e.g., loading states)" ;
-    oc:directiveContent "Do not wrap expensive computation in useMemo inside a component that may return early — the useMemo hook runs before any conditional return, wasting computation." ;
-    oc:hasRationale "React hooks execute in order before conditional returns, so useMemo will compute even when the result is never rendered, defeating the purpose of memoization." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_f7d1dc11 a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When optimizing React components that have conditional rendering paths with expensive computations" ;
-    oc:directiveContent "Extract expensive work into a separate memoized child component so the parent can return early without triggering the child's computation." ;
-    oc:hasRationale "If the parent returns early, the memoized child component never renders, and its internal computation is entirely skipped — achieving the early-return optimization." ;
+    oc:appliesToContext "When refactoring components with expensive computations and conditional rendering" ;
+    oc:directiveContent "Extract expensive work into a separate memoized child component so the parent can early-return without triggering the child's computation." ;
+    oc:hasRationale "A child component only renders when the parent actually mounts it, so early returns in the parent skip the child's entire render cycle including any useMemo calls inside it." ;
     oc:severityLevel "HIGH" .
 
 oc:kn_fb104b99 a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When deciding whether to manually apply memoization in a React project" ;
+    oc:appliesToContext "When the project uses React Compiler" ;
     oc:directiveContent "If React Compiler is enabled in the project, skip manual memo() and useMemo() — the compiler handles re-render optimization automatically." ;
     oc:hasRationale "React Compiler automatically optimizes re-renders, making manual memoization redundant and potentially adding unnecessary complexity." ;
-    oc:severityLevel "MEDIUM" .
+    oc:severityLevel "LOW" .
 

@@ -7,17 +7,14 @@
 oc:skill_coinbase_agentic_wallet_skills_monetize_service a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "monetize-service" ;
-    skos:broader "Paid API server" ;
-    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/coinbase/agentic-wallet-skills/monetize-service" ;
+    skos:broader "Payment server generator" ;
+    prov:wasDerivedFrom "../.agents/skills/coinbase/agentic-wallet-skills/monetize-service" ;
     oc:contentHash "8aaf083c63cc3897e6c6b8666011274c24231999fa63c263be3f586b6642bf2a" ;
-    oc:dependsOnSkill oc:skill_authenticate_wallet ;
-    oc:differentia "charges USDC per-request via x402 payment protocol on Base network" ;
-    oc:handlesFailure oc:PaymentVerificationFailed,
-        oc:ServerStartupFailed ;
-    oc:hasAlias "create-paid-api",
-        "paid-endpoint",
-        "sell-api",
-        "x402-server" ;
+    oc:dependsOnSkill oc:skill_ontoskills_authenticate_wallet ;
+    oc:differentia "that creates an Express-based x402 payment-gated API enabling per-request USDC charging on Base network" ;
+    oc:handlesFailure oc:NetworkTimeout,
+        oc:PermissionDenied,
+        oc:WalletNotAuthenticated ;
     oc:hasAllowedTool "Bash(curl *)",
         "Bash(mkdir *)",
         "Bash(node *)",
@@ -26,134 +23,757 @@ oc:skill_coinbase_agentic_wallet_skills_monetize_service a oc:DeclarativeSkill,
         "Bash(npx awal@2.0.3 status*)",
         "Bash(npx awal@2.0.3 x402 details *)",
         "Bash(npx awal@2.0.3 x402 pay *)" ;
-    oc:hasArgumentHint "service description, endpoint path, price" ;
-    oc:hasCategory "development" ;
+    oc:hasArgumentHint "service description or API endpoint specification" ;
+    oc:hasCategory "automation" ;
     oc:hasDescription "Build and deploy a paid API that other agents can pay to use via x402. Use when you or the user want to monetize an API, make money, earn money, offer a service, sell a service to other agents, charge for endpoints, create a paid endpoint, or set up a paid service. Covers \"make money by offering an endpoint\", \"sell a service\", \"monetize your data\", \"create a paid API\"." ;
     oc:hasName "monetize-service" ;
-    oc:hasRequirement oc:req_006d053c,
-        oc:req_491abdeb,
-        oc:req_628f5238,
-        oc:req_6b4d17cd,
-        oc:req_9fbf8538,
-        oc:req_a61e7e7b,
-        oc:req_d8ac05cc,
-        oc:req_db4fb765,
-        oc:req_ea0a7a4b,
-        oc:req_f91c1344 ;
-    oc:impartsKnowledge oc:kn_35593b25,
-        oc:kn_39ddf91e,
-        oc:kn_6621531f,
-        oc:kn_7821420c,
-        oc:kn_7d68ae50,
-        oc:kn_92c8ea9e,
-        oc:kn_ac9241a6,
-        oc:kn_f6f46373 ;
+    oc:hasPackageName "awal" ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """name: monetize-service
+description: Build and deploy a paid API that other agents can pay to use via x402. Use when you or the user want to monetize an API, make money, earn money, offer a service, sell a service to other agents, charge for endpoints, create a paid endpoint, or set up a paid service. Covers "make money by offering an endpoint", "sell a service", "monetize your data", "create a paid API".
+user-invocable: true
+disable-model-invocation: false
+allowed-tools: ["Bash(npx awal@2.0.3 status*)", "Bash(npx awal@2.0.3 address*)", "Bash(npx awal@2.0.3 x402 details *)", "Bash(npx awal@2.0.3 x402 pay *)", "Bash(npm *)", "Bash(node *)", "Bash(curl *)", "Bash(mkdir *)"]
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Create an Express server that charges USDC for API access using the x402 payment protocol. Callers pay per-request in USDC on Base — no accounts, API keys, or subscriptions needed. Your service is automatically discoverable by other agents via the x402 Bazaar." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 1 ;
+                            oc:rowCount 4 ;
+                            oc:tableCaption "## Pricing Guidelines" ;
+                            oc:tableMarkdown """| Use Case               | Suggested Price |
+| ---------------------- | --------------- |
+| Simple data lookup     | $0.001 - $0.01 |
+| API proxy / enrichment | $0.01 - $0.10  |
+| Compute-heavy query    | $0.10 - $0.50  |
+| AI inference           | $0.05 - $1.00  |
+""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 23 ;
+                    oc:sectionTitle "Pricing Guidelines" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Each key in the routes object is `\"METHOD /path\"`. The value is a config object:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """{
+  "GET /api/data": {
+    accepts: {
+      scheme: "exact",
+      price: "$0.05",
+      network: "eip155:8453",
+      payTo: "0x...",
+    },
+    description: "Human-readable description of the endpoint",
+    mimeType: "application/json",
+    extensions: {
+      ...declareDiscoveryExtension({
+        output: {
+          example: { result: "example response" },
+          schema: {
+            properties: {
+              result: { type: "string" },
+            },
+          },
+        },
+      }),
+    },
+  },
+}
+""" ;
+                                    oc:codeLanguage "js" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 132-157" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 10 ;
+                            oc:sectionTitle "Route Config" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 1 ;
+                                    oc:rowCount 4 ;
+                                    oc:tableCaption "### Route-Level Fields" ;
+                                    oc:tableMarkdown """| Field              | Type    | Description                                        |
+| ------------------ | ------- | -------------------------------------------------- |
+| `accepts`          | object or array | Payment requirements (single or multiple)  |
+| `description`      | string? | What this endpoint does (shown to clients)         |
+| `mimeType`         | string? | MIME type of the response                          |
+| `extensions`       | object? | Extensions config (e.g. Bazaar discovery)          |
+""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 12 ;
+                            oc:sectionTitle "Route-Level Fields" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Creates Express middleware that enforces x402 payments." ],
+                                [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 2 ;
+                                    oc:rowCount 2 ;
+                                    oc:tableCaption "Creates Express middleware that enforces x402 payments." ;
+                                    oc:tableMarkdown """| Parameter | Type                 | Description                                          |
+| --------- | -------------------- | ---------------------------------------------------- |
+| `routes`  | object               | Route config mapping route patterns to payment config |
+| `server`  | x402ResourceServer   | Pre-configured x402 resource server instance         |
+""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 8 ;
+                            oc:sectionTitle "paymentMiddleware(routes, server)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "The `declareDiscoveryExtension` function registers your endpoint with the x402 Bazaar so other agents can discover it:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """const { declareDiscoveryExtension } = require("@x402/extensions/bazaar");
+
+extensions: {
+  ...declareDiscoveryExtension({
+    output: {
+      example: { /* example response body */ },
+      schema: {
+        properties: {
+          /* JSON schema of the response */
+        },
+      },
+    },
+  }),
+}
+""" ;
+                                    oc:codeLanguage "js" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 183-198" ],
+                                [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 3 ;
+                                    oc:rowCount 2 ;
+                                    oc:tableCaption "```" ;
+                                    oc:tableMarkdown """| Field            | Type   | Description                                    |
+| ---------------- | ------ | ---------------------------------------------- |
+| `output.example` | object | Example response body for the endpoint         |
+| `output.schema`  | object | JSON schema describing the response format     |
+""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 13 ;
+                            oc:sectionTitle "Discovery Extension" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Created with a facilitator client. Register payment schemes and extensions before passing to middleware." ],
+                                [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 3 ;
+                                    oc:rowCount 1 ;
+                                    oc:tableCaption "```" ;
+                                    oc:tableMarkdown """| Method                      | Description                                               |
+| --------------------------- | --------------------------------------------------------- |
+| `register(network, scheme)` | Register a payment scheme for a CAIP-2 network identifier |
+""" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """const { x402ResourceServer, HTTPFacilitatorClient } = require("@x402/core/server");
+const { ExactEvmScheme } = require("@x402/evm/exact/server");
+
+const facilitator = new HTTPFacilitatorClient({ url: "https://x402.org" });
+const server = new x402ResourceServer(facilitator);
+server.register("eip155:8453", new ExactEvmScheme());
+""" ;
+                                    oc:codeLanguage "js" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 115-122" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 9 ;
+                            oc:sectionTitle "x402ResourceServer" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 1 ;
+                                    oc:rowCount 2 ;
+                                    oc:tableCaption "### Supported Networks" ;
+                                    oc:tableMarkdown """| Network          | Description                      |
+| ---------------- | -------------------------------- |
+| `eip155:8453`    | Base mainnet (real USDC)         |
+| `eip155:84532`   | Base Sepolia testnet (test USDC) |
+""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 14 ;
+                            oc:sectionTitle "Supported Networks" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 2 ;
+                                    oc:rowCount 4 ;
+                                    oc:tableCaption "The `accepts` field can be a single object or an array (for multiple payment options)" ;
+                                    oc:tableMarkdown """| Field     | Type   | Description                                        |
+| --------- | ------ | -------------------------------------------------- |
+| `scheme`  | string | Payment scheme: `"exact"`                          |
+| `price`   | string | USDC price (e.g. `"$0.01"`, `"$1.00"`)            |
+| `network` | string | CAIP-2 network identifier (e.g. `"eip155:8453"`)  |
+| `payTo`   | string | Ethereum address (0x...) to receive USDC payments  |
+""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "The `accepts` field can be a single object or an array (for multiple payment options):" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 11 ;
+                            oc:sectionTitle "Accepts Config Fields" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 7 ;
+                    oc:sectionTitle "API Reference" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "Test with curl — you should get a 402 response with payment requirements:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """curl -i http://localhost:3000/api/example
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 3 ;
+                            oc:sourceLocation "lines 96-98" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """node index.js
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 90-92" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Step 3: Run It" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "Use this address as the `payTo` value." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Run this to get the wallet address that will receive payments:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """npx awal@2.0.3 address
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 29-31" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Step 1: Get the Payment Address" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "[ ] Install `express`, `@x402/express`, `@x402/core`, `@x402/evm`, and `@x402/extensions`" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 7 ;
+                                    oc:itemText "[ ] Test with `curl` (should get 402) and `npx awal@2.0.3 x402 pay` (should get 200)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 6 ;
+                                    oc:itemText "[ ] Keep health/status endpoints before payment middleware" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "[ ] Define routes with prices, descriptions, and discovery extensions (Bazaar auto-registers when routes declare it)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 8 ;
+                                    oc:itemText "[ ] Announce your service so other agents can find and use it" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "[ ] Register payment middleware before protected routes" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "[ ] Get wallet address with `npx awal@2.0.3 address`" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "[ ] Create `x402ResourceServer` with facilitator client and register `ExactEvmScheme` for `eip155:8453`" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 24 ;
+                    oc:sectionTitle "Checklist" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """mkdir x402-server && cd x402-server
+npm init -y
+npm install express @x402/express @x402/core @x402/evm @x402/extensions
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 37-41" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "Create `index.js`:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """const express = require("express");
+const { paymentMiddleware } = require("@x402/express");
+const { x402ResourceServer, HTTPFacilitatorClient } = require("@x402/core/server");
+const { ExactEvmScheme } = require("@x402/evm/exact/server");
+
+const app = express();
+app.use(express.json());
+
+const PAY_TO = "<address from step 1>";
+
+// Create facilitator client and x402 resource server
+const facilitator = new HTTPFacilitatorClient({ url: "https://x402.org/facilitator" });
+const server = new x402ResourceServer(facilitator);
+server.register("eip155:8453", new ExactEvmScheme());
+
+// x402 payment middleware — protects routes below
+app.use(
+  paymentMiddleware(
+    {
+      "GET /api/example": {
+        accepts: {
+          scheme: "exact",
+          price: "$0.01",
+          network: "eip155:8453",
+          payTo: PAY_TO,
+        },
+        description: "Description of what this endpoint returns",
+        mimeType: "application/json",
+      },
+    },
+    server,
+  ),
+);
+
+// Protected endpoint
+app.get("/api/example", (req, res) => {
+  res.json({ data: "This costs $0.01 per request" });
+});
+
+app.listen(3000, () => console.log("Server running on port 3000"));
+""" ;
+                            oc:codeLanguage "js" ;
+                            oc:contentOrder 3 ;
+                            oc:sourceLocation "lines 45-86" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Step 2: Set Up the Project" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Once the server is running, use the `pay-for-service` skill to test payments:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# Check the endpoint's payment requirements
+npx awal@2.0.3 x402 details http://localhost:3000/api/example
+
+# Make a paid request
+npx awal@2.0.3 x402 pay http://localhost:3000/api/example
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 381-387" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 22 ;
+                    oc:sectionTitle "Testing with the pay-for-service Skill" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "If the wallet is not authenticated, refer to the `authenticate-wallet` skill." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """npx awal@2.0.3 status
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 19-21" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Confirm wallet is initialized and authed" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "x402 is an HTTP-native payment protocol. When a client hits a protected endpoint without paying, the server returns HTTP 402 with payment requirements. The client signs a USDC payment and retries with a payment header. The facilitator verifies and settles the payment, and the server returns the response. Services register with the x402 Bazaar so other agents can discover and pay for them automatically." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "How It Works" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "For production use with the Coinbase facilitator (supports mainnet):" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """const { facilitator } = require("@coinbase/x402");
+const { HTTPFacilitatorClient } = require("@x402/core/server");
+
+const facilitatorClient = new HTTPFacilitatorClient(facilitator);
+const server = new x402ResourceServer(facilitatorClient);
+server.register("eip155:8453", new ExactEvmScheme());
+""" ;
+                                    oc:codeLanguage "js" ;
+                                    oc:contentOrder 3 ;
+                                    oc:sourceLocation "lines 366-373" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """npm install @coinbase/x402
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 362-364" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent "This requires `CDP_API_KEY_ID` and `CDP_API_KEY_SECRET` environment variables. Get these from https://portal.cdp.coinbase.com." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 21 ;
+                            oc:sectionTitle "Using the CDP facilitator (authenticated)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """"GET /api/data": {
+  accepts: [
+    {
+      scheme: "exact",
+      price: "$0.01",
+      network: "eip155:8453",
+      payTo: EVM_ADDRESS,
+    },
+    {
+      scheme: "exact",
+      price: "$0.01",
+      network: "eip155:84532",
+      payTo: EVM_ADDRESS,
+    },
+  ],
+  description: "Data endpoint accepting Base mainnet or testnet",
+}
+""" ;
+                                    oc:codeLanguage "js" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 338-356" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Accept payments on multiple networks for the same endpoint:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 20 ;
+                            oc:sectionTitle "Multiple payment options per endpoint" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """app.use(
+  paymentMiddleware(
+    {
+      "GET /api/*": {
+        accepts: {
+          scheme: "exact",
+          price: "$0.05",
+          network: "eip155:8453",
+          payTo: PAY_TO,
+        },
+        description: "API access",
+      },
+    },
+    server,
+  ),
+);
+
+app.get("/api/users", (req, res) => { /* ... */ });
+app.get("/api/posts", (req, res) => { /* ... */ });
+""" ;
+                                    oc:codeLanguage "js" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 259-279" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 17 ;
+                            oc:sectionTitle "Wildcard routes" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """app.use(
+  paymentMiddleware(
+    {
+      "POST /api/analyze": {
+        accepts: {
+          scheme: "exact",
+          price: "$0.10",
+          network: "eip155:8453",
+          payTo: PAY_TO,
+        },
+        description: "Analyze text sentiment",
+        mimeType: "application/json",
+        extensions: {
+          ...declareDiscoveryExtension({
+            output: {
+              example: { sentiment: "positive", score: 0.95 },
+              schema: {
+                properties: {
+                  sentiment: { type: "string" },
+                  score: { type: "number" },
+                },
+              },
+            },
+          }),
+        },
+      },
+    },
+    server,
+  ),
+);
+
+app.post("/api/analyze", (req, res) => {
+  const { text } = req.body;
+  // ... your logic
+  res.json({ sentiment: "positive", score: 0.95 });
+});
+""" ;
+                                    oc:codeLanguage "js" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 295-332" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 19 ;
+                            oc:sectionTitle "POST with body and discovery extension" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """app.use(
+  paymentMiddleware(
+    {
+      "GET /api/cheap": {
+        accepts: {
+          scheme: "exact",
+          price: "$0.001",
+          network: "eip155:8453",
+          payTo: PAY_TO,
+        },
+        description: "Inexpensive data lookup",
+      },
+      "GET /api/expensive": {
+        accepts: {
+          scheme: "exact",
+          price: "$1.00",
+          network: "eip155:8453",
+          payTo: PAY_TO,
+        },
+        description: "Premium data access",
+      },
+      "POST /api/query": {
+        accepts: {
+          scheme: "exact",
+          price: "$0.25",
+          network: "eip155:8453",
+          payTo: PAY_TO,
+        },
+        description: "Run a custom query",
+      },
+    },
+    server,
+  ),
+);
+
+app.get("/api/cheap", (req, res) => { /* ... */ });
+app.get("/api/expensive", (req, res) => { /* ... */ });
+app.post("/api/query", (req, res) => { /* ... */ });
+""" ;
+                                    oc:codeLanguage "js" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 216-255" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 16 ;
+                            oc:sectionTitle "Multiple endpoints with different prices" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """app.get("/health", (req, res) => res.json({ status: "ok" }));
+
+// Payment middleware only applies to routes registered after it
+app.use(paymentMiddleware({ /* ... */ }, server));
+app.get("/api/data", (req, res) => { /* ... */ });
+""" ;
+                                    oc:codeLanguage "js" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 285-291" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Register free endpoints before the payment middleware:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 18 ;
+                            oc:sectionTitle "Health check (no payment)" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 15 ;
+                    oc:sectionTitle "Patterns" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Build an x402 Payment Server" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "Complete workflow to create, configure, and test a payment-gated API service" ;
+            oc:hasStep _:ref_227c2a205ef166b2,
+                _:ref_2ffba74311a8cce8,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Test with curl (expect 402) and `npx awal@2.0.3 x402 pay` (expect 200)" ;
+                    oc:expectedOutcome "402 without payment, 200 with payment — end-to-end flow confirmed" ;
+                    oc:stepDependsOn _:ref_e698ffef7432ba38 ;
+                    oc:stepId "test-server" ],
+                _:ref_e698ffef7432ba38,
+                _:ref_f52671cd6db66bd1,
+                _:ref_fcc3a2c1d999f39e ;
+            oc:workflowId "monetize-api" ;
+            oc:workflowName "Build and Deploy Paid x402 API" ] ;
+    oc:impartsKnowledge oc:kn_0ffc03f3,
+        oc:kn_25efdf67,
+        oc:kn_43d244e1,
+        oc:kn_6715f73d,
+        oc:kn_6f9b93f7,
+        oc:kn_715b3978,
+        oc:kn_b0d03a43,
+        oc:kn_da738bd5,
+        oc:kn_e613db12 ;
     oc:isUserInvocable true ;
     oc:nature "Work" ;
-    oc:requiresState oc:SystemAuthenticated ;
-    oc:resolvesIntent "build a paid API server",
+    oc:requiresState oc:NodeInstalled,
+        oc:SystemAuthenticated ;
+    oc:resolvesIntent "build a paid API service",
         "charge for API access",
         "create a paid endpoint",
-        "earn money by offering an endpoint",
         "monetize an API",
-        "sell a service to other agents" ;
-    oc:yieldsState oc:EndpointProtected,
-        oc:ServerRunning,
-        oc:ServiceDiscoverable .
+        "sell a service to other agents",
+        "set up x402 payment server" ;
+    oc:yieldsState oc:PaymentEndpointActive,
+        oc:ServerRunning .
 
-oc:kn_35593b25 a oc:Idempotency,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When considering server deployment" ;
-    oc:directiveContent "Each HTTP request is independently charged — the x402 protocol is per-request, not subscription-based. Running the server multiple times on different ports creates independent paid endpoints." ;
-    oc:hasRationale "Understanding the per-request payment model helps set appropriate pricing and avoid unexpected costs for clients." ;
-    oc:severityLevel "LOW" .
+oc:kn_0ffc03f3 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When building an x402 paid API from scratch" ;
+    oc:directiveContent "1. Verify wallet auth with `npx awal@2.0.3 status` 2. Get payment address with `npx awal@2.0.3 address` 3. Create project dir, run `npm init -y`, install `express @x402/express @x402/core @x402/evm @x402/extensions` 4. Create `index.js` with x402ResourceServer, ExactEvmScheme, paymentMiddleware, and route handlers 5. Run `node index.js` 6. Test with `curl` (expect 402) and `npx awal@2.0.3 x402 pay` (expect 200)" ;
+    oc:hasRationale "Provides the complete sequential workflow for creating a monetized API endpoint" ;
+    oc:stepOrder 1 .
 
-oc:kn_39ddf91e a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When setting up the PAY_TO constant" ;
-    oc:directiveContent "Do not hardcode the payment address. Always retrieve it dynamically via `npx awal@2.0.3 address` and use it as the `payTo` value." ;
-    oc:hasRationale "Hardcoded or stale addresses cause payments to be sent to wrong recipient, resulting in lost revenue that cannot be recovered." ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_6621531f a oc:KnowledgeNode,
+oc:kn_25efdf67 a oc:KnowledgeNode,
         oc:KnownIssue ;
     oc:appliesToContext "When deploying to production" ;
-    oc:directiveContent "The default facilitator at https://x402.org/facilitator may have rate limits. For production, use the Coinbase CDP facilitator with `@coinbase/x402` and set CDP_API_KEY_ID/CDP_API_KEY_SECRET." ;
-    oc:hasRationale "Production traffic requires an authenticated facilitator to ensure reliable payment verification and settlement." ;
+    oc:directiveContent "The default facilitator at https://x402.org/facilitator is for development; for production use the Coinbase CDP facilitator which requires CDP_API_KEY_ID and CDP_API_KEY_SECRET environment variables" ;
+    oc:hasRationale "The development facilitator may not support mainnet settlement reliably" ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_7821420c a oc:DesignPrinciple,
+oc:kn_43d244e1 a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When configuring Express route order" ;
-    oc:directiveContent "Register free endpoints (health checks, status) BEFORE the payment middleware, and protected routes AFTER it. Express middleware applies to all routes defined after its registration." ;
-    oc:hasRationale "If payment middleware is registered first, even health/status endpoints will require payment, making the service unmonitorable." ;
-    oc:severityLevel "HIGH" .
+    oc:appliesToContext "When adding Bazaar discovery to a route" ;
+    oc:codeLanguage "javascript" ;
+    oc:directiveContent """extensions: {
+  ...declareDiscoveryExtension({
+    output: {
+      example: { result: "example response" },
+      schema: { properties: { result: { type: "string" } } }
+    }
+  })
+}""" ;
+    oc:hasRationale "Enables automatic service discovery by other agents in the x402 ecosystem" .
 
-oc:kn_7d68ae50 a oc:KnowledgeNode,
-        oc:PostFlightValidation ;
-    oc:appliesToContext "After server startup" ;
-    oc:directiveContent "After starting the server, test with `curl` (expect HTTP 402 with payment requirements) and then with `npx awal@2.0.3 x402 pay` (expect HTTP 200 with response data)." ;
-    oc:hasRationale "Verifying both the unpaid and paid flows confirms the payment middleware is correctly configured and the facilitator is operational." ;
-    oc:severityLevel "HIGH" .
+oc:kn_6715f73d a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Always — core boilerplate for setting up x402 payment middleware" ;
+    oc:codeLanguage "javascript" ;
+    oc:directiveContent """const { paymentMiddleware } = require("@x402/express");
+const { x402ResourceServer, HTTPFacilitatorClient } = require("@x402/core/server");
+const { ExactEvmScheme } = require("@x402/evm/exact/server");
 
-oc:kn_92c8ea9e a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "Before starting monetize-service setup" ;
-    oc:directiveContent "Always verify wallet is initialized and authenticated with `npx awal@2.0.3 status` before building the payment server." ;
-    oc:hasRationale "Without an authenticated wallet, the payment address cannot be obtained and payments cannot be received." ;
+const facilitator = new HTTPFacilitatorClient({ url: "https://x402.org/facilitator" });
+const server = new x402ResourceServer(facilitator);
+server.register("eip155:8453", new ExactEvmScheme());
+
+app.use(paymentMiddleware(
+  { "GET /api/example": { accepts: { scheme: "exact", price: "$0.01", network: "eip155:8453", payTo: PAY_TO }, description: "...", mimeType: "application/json" } },
+  server
+));""" ;
+    oc:hasRationale "This is the minimal working pattern that must be present in every x402 server" .
+
+oc:kn_6f9b93f7 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When defining route config for endpoints that should be discoverable" ;
+    oc:directiveContent "Use `declareDiscoveryExtension` with `output.example` and `output.schema` to register endpoints with the x402 Bazaar for automatic agent discoverability" ;
+    oc:hasRationale "Without discovery extensions, other agents cannot find the service via the Bazaar marketplace" .
+
+oc:kn_715b3978 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When deciding pricing for endpoints" ;
+    oc:directiveContent "Price simple lookups at $0.001-$0.01, API proxies at $0.01-$0.10, compute-heavy at $0.10-$0.50, AI inference at $0.05-$1.00" ;
+    oc:hasRationale "Reasonable pricing drives adoption; overpricing deters agent consumers" .
+
+oc:kn_b0d03a43 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Before starting any monetization workflow" ;
+    oc:directiveContent "Do not skip wallet authentication before creating the server — `npx awal@2.0.3 status` must succeed first" ;
+    oc:hasRationale "Without an authenticated wallet, payments cannot be received and the payTo address will be invalid" ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_ac9241a6 a oc:Heuristic,
+oc:kn_da738bd5 a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When defining route configurations" ;
-    oc:directiveContent "Use the x402 Bazaar discovery extension (`declareDiscoveryExtension`) with output examples and JSON schema so other agents can automatically find and understand your endpoint." ;
-    oc:hasRationale "Discovery registration makes the service visible in the x402 Bazaar marketplace, enabling autonomous agent discovery and increasing revenue potential." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_f6f46373 a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "When configuring payment network" ;
-    oc:directiveContent "Use `eip155:8453` (Base mainnet) for production and `eip155:84532` (Base Sepolia testnet) for testing. Always specify the CAIP-2 network identifier in the accepts config." ;
-    oc:hasRationale "Correct network identifiers ensure payments settle on the intended chain. Testnet usage prevents real USDC loss during development." ;
+    oc:appliesToContext "When mixing free and paid endpoints" ;
+    oc:directiveContent "Register free endpoints (e.g. /health) BEFORE the payment middleware; payment middleware only applies to routes registered after it" ;
+    oc:hasRationale "Express middleware is order-dependent — payment middleware will intercept all subsequent routes" ;
     oc:severityLevel "HIGH" .
 
-oc:req_006d053c a oc:RequirementTool ;
-    oc:isOptional false ;
-    oc:requirementValue "@x402/express" .
+oc:kn_e613db12 a oc:KnowledgeNode,
+        oc:Prerequisite ;
+    oc:appliesToContext "Before setting up the project" ;
+    oc:directiveContent "Node.js must be installed. Packages required: express, @x402/express, @x402/core, @x402/evm, @x402/extensions" .
 
-oc:req_491abdeb a oc:RequirementEnvVar ;
-    oc:isOptional true ;
-    oc:requirementValue "CDP_API_KEY_ID" .
+_:ref_227c2a205ef166b2 a oc:WorkflowStep ;
+    dcterms:description "Create project directory, init npm, install express @x402/express @x402/core @x402/evm @x402/extensions" ;
+    oc:expectedOutcome "Project directory with node_modules containing all dependencies" ;
+    oc:stepDependsOn _:ref_f52671cd6db66bd1 ;
+    oc:stepId "setup-project" .
 
-oc:req_628f5238 a oc:RequirementTool ;
-    oc:isOptional false ;
-    oc:requirementValue "@x402/evm" .
+_:ref_2ffba74311a8cce8 a oc:WorkflowStep ;
+    dcterms:description "Verify wallet is authenticated with `npx awal@2.0.3 status`" ;
+    oc:expectedOutcome "Wallet shows as authenticated and ready" ;
+    oc:stepId "check-wallet" .
 
-oc:req_6b4d17cd a oc:RequirementTool ;
-    oc:isOptional false ;
-    oc:requirementValue "@x402/core" .
+_:ref_e698ffef7432ba38 a oc:WorkflowStep ;
+    dcterms:description "Start server with `node index.js`" ;
+    oc:expectedOutcome "Server listening on port 3000" ;
+    oc:stepDependsOn _:ref_fcc3a2c1d999f39e ;
+    oc:stepId "run-server" .
 
-oc:req_9fbf8538 a oc:RequirementTool ;
-    oc:isOptional false ;
-    oc:requirementValue "npm" .
+_:ref_f52671cd6db66bd1 a oc:WorkflowStep ;
+    dcterms:description "Get wallet address with `npx awal@2.0.3 address` to use as payTo" ;
+    oc:expectedOutcome "Ethereum address displayed for payment receipt" ;
+    oc:stepDependsOn _:ref_2ffba74311a8cce8 ;
+    oc:stepId "get-address" .
 
-oc:req_a61e7e7b a oc:RequirementTool ;
-    oc:isOptional false ;
-    oc:requirementValue "npx awal@2.0.3" .
-
-oc:req_d8ac05cc a oc:RequirementTool ;
-    oc:isOptional false ;
-    oc:requirementValue "@x402/extensions" .
-
-oc:req_db4fb765 a oc:RequirementTool ;
-    oc:isOptional false ;
-    oc:requirementValue "node" .
-
-oc:req_ea0a7a4b a oc:RequirementTool ;
-    oc:isOptional false ;
-    oc:requirementValue "express" .
-
-oc:req_f91c1344 a oc:RequirementEnvVar ;
-    oc:isOptional true ;
-    oc:requirementValue "CDP_API_KEY_SECRET" .
+_:ref_fcc3a2c1d999f39e a oc:WorkflowStep ;
+    dcterms:description "Create index.js with x402ResourceServer, ExactEvmScheme, paymentMiddleware, and route handlers" ;
+    oc:expectedOutcome "Complete server file with payment-protected endpoints" ;
+    oc:stepDependsOn _:ref_227c2a205ef166b2 ;
+    oc:stepId "write-server" .
 

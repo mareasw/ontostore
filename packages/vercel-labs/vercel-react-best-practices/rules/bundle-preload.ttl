@@ -10,55 +10,124 @@ oc:skill_vercel_labs_vercel_react_best_practices_bundle_preload a oc:Declarative
     skos:broader "Performance optimization technique" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "d1f7cc28da7cd5ab249acd287edc5b761afcfb194e9cb62cd44c5f3543db2de2" ;
-    oc:differentia "preloads heavy JavaScript bundles based on user intent signals such as hover, focus, or feature flags to reduce perceived latency" ;
+    oc:differentia "preloads heavy JavaScript bundles based on user intent signals (hover, focus, feature flags) before they are needed" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
+    oc:handlesFailure oc:ImportFailed ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_0397a7c9,
-        oc:kn_4799294f,
-        oc:kn_64e22568,
-        oc:kn_c15acbb8,
-        oc:kn_c5e3707b ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Preload heavy bundles before they're needed to reduce perceived latency." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "**Example (preload when feature flag is enabled):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Example (preload on hover/focus):**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function EditorButton({ onClick }: { onClick: () => void }) {
+  const preload = () => {
+    if (typeof window !== 'undefined') {
+      void import('./monaco-editor')
+    }
+  }
+
+  return (
+    <button
+      onMouseEnter={preload}
+      onFocus={preload}
+      onClick={onClick}
+    >
+      Open Editor
+    </button>
+  )
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-32" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 6 ;
+                    oc:textContent "The `typeof window !== 'undefined'` check prevents bundling preloaded modules for SSR, optimizing server bundle size and build speed." ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function FlagsProvider({ children, flags }: Props) {
+  useEffect(() => {
+    if (flags.editorEnabled && typeof window !== 'undefined') {
+      void import('./monaco-editor').then(mod => mod.init())
+    }
+  }, [flags.editorEnabled])
+
+  return <FlagsContext.Provider value={flags}>
+    {children}
+  </FlagsContext.Provider>
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 5 ;
+                    oc:sourceLocation "lines 36-48" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Preload Based on User Intent" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Preload Based on User Intent
+impact: MEDIUM
+impactDescription: reduces perceived latency
+tags: bundle, preload, user-intent, hover
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:impartsKnowledge oc:kn_41fc216a,
+        oc:kn_6aa176e2,
+        oc:kn_87ce0396,
+        oc:kn_a93bfad7,
+        oc:kn_b2ef3aa7 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
     oc:requiresState oc:EnvironmentReady ;
-    oc:resolvesIntent "conditionally load heavy dependencies",
-        "optimize bundle loading performance",
-        "preload modules on user interaction",
-        "reduce perceived latency in React apps" ;
-    oc:yieldsState oc:BundlePreloaded .
+    oc:resolvesIntent "optimize bundle loading strategy",
+        "preload bundles on user interaction",
+        "reduce perceived latency" ;
+    oc:yieldsState oc:BundlesPreloaded .
 
-oc:kn_0397a7c9 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When adding preloading to a React application" ;
-    oc:directiveContent "Do not preload all heavy modules unconditionally on page load; instead, tie preloading to specific user intent signals." ;
-    oc:hasRationale "Unconditional preloading wastes bandwidth and CPU on modules the user may never need, defeating the purpose of code splitting." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_4799294f a oc:KnowledgeNode,
+oc:kn_41fc216a a oc:KnowledgeNode,
         oc:SideEffect ;
-    oc:appliesToContext "When using void import for preloading" ;
-    oc:directiveContent "Dynamic `import()` calls trigger network requests and module caching in the browser, even when the result is discarded with `void`." ;
-    oc:hasRationale "Agents should understand that preload is not free — it consumes network and parse resources, so it should only happen when there is high likelihood the user will need the module." ;
-    oc:severityLevel "LOW" .
+    oc:appliesToContext "When using void import() for preloading" ;
+    oc:directiveContent "void import() triggers a network fetch and module evaluation as a side effect; the discarded promise means no value is consumed." ;
+    oc:hasRationale "Agents must understand this is intentional — the import is purely for cache warming, not for using the module's exports." .
 
-oc:kn_64e22568 a oc:Constraint,
+oc:kn_6aa176e2 a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When writing preload logic that runs during server-side rendering" ;
-    oc:directiveContent "Always guard dynamic imports with `typeof window !== 'undefined'` to prevent bundling preloaded modules into the SSR bundle." ;
-    oc:hasRationale "Without this check, the preloaded module gets included in the server bundle, increasing server bundle size and slowing the build." ;
+    oc:appliesToContext "When writing preload logic in isomorphic/universal React components" ;
+    oc:directiveContent "Never preload modules without a typeof window !== 'undefined' guard — SSR builds will include preloaded modules in the server bundle, increasing bundle size and build time." ;
+    oc:hasRationale "Without the guard, the dynamic import executes during server rendering, bloating the server bundle with client-only dependencies like Monaco Editor." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_c15acbb8 a oc:DesignPrinciple,
+oc:kn_87ce0396 a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When a component uses a heavy dependency like a rich text editor or charting library" ;
-    oc:directiveContent "Preload heavy bundles proactively based on user intent signals (hover, focus, feature flags) rather than waiting for the user to trigger the full load." ;
-    oc:hasRationale "Preloading reduces the perceived latency the user experiences between clicking and the feature being ready." ;
+    oc:appliesToContext "When optimizing perceived latency for heavy client-side modules" ;
+    oc:directiveContent "Preload heavy bundles based on user intent signals such as hover, focus, or feature flags rather than loading everything eagerly or waiting until navigation." ;
+    oc:hasRationale "Intent-based preloading reduces perceived latency by starting fetches before the user explicitly requests the feature, without penalizing initial page load." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_c5e3707b a oc:Heuristic,
+oc:kn_a93bfad7 a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When deciding between fire-and-forget preload vs initialized preload" ;
-    oc:directiveContent "Use `void import(...)` for side-effect-free preloading where you only need the module cached; use `.then(mod => mod.init())` when initialization logic must run." ;
-    oc:hasRationale "Void import keeps the preload lightweight and avoids executing module side effects prematurely, while `.then()` is needed when the module requires explicit initialization." ;
-    oc:severityLevel "MEDIUM" .
+    oc:appliesToContext "When deciding which DOM events to use for preloading" ;
+    oc:directiveContent "Use onMouseEnter and onFocus as preload triggers — they fire 200-500ms before a click, giving the bundle time to load." ;
+    oc:hasRationale "Hover and focus events provide a reliable time window to preload before the user's click action actually needs the module." .
+
+oc:kn_b2ef3aa7 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before adding any dynamic import-based preloading in React components" ;
+    oc:directiveContent "Always guard preload logic with typeof window !== 'undefined' to prevent SSR bundle contamination." ;
+    oc:severityLevel "HIGH" .
 

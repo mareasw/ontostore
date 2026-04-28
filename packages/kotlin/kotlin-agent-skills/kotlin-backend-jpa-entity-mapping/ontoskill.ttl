@@ -7,88 +7,496 @@
 oc:skill_kotlin_kotlin_agent_skills_kotlin_backend_jpa_entity_mapping a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "kotlin-backend-jpa-entity-mapping" ;
-    skos:broader "Persistence design guide" ;
-    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/kotlin/kotlin-agent-skills/kotlin-backend-jpa-entity-mapping" ;
+    skos:broader "Knowledge framework" ;
+    prov:wasDerivedFrom "../.agents/skills/kotlin/kotlin-agent-skills/kotlin-backend-jpa-entity-mapping" ;
     oc:contentHash "f0757abea27dccd23d65d44276de86c29e3b70c81deb36c48966b0d3999ceaeb" ;
-    oc:differentia "enforces Kotlin-specific JPA entity correctness, covering identity semantics, equality contracts, uniqueness constraints, and ORM trap avoidance for Spring Data JPA and Hibernate projects" ;
+    oc:differentia "that prescribes correct JPA entity design, identity semantics, and ORM patterns for Kotlin + Spring Data JPA" ;
     oc:handlesFailure oc:InvalidInput ;
-    oc:hasArgumentHint "Kotlin JPA entity class or persistence-related error description" ;
+    oc:hasArgumentHint "Kotlin entity class or JPA mapping question" ;
     oc:hasCategory "development" ;
     oc:hasDescription """Model Kotlin persistence code correctly for Spring Data JPA and Hibernate. Covers entity design, identity and equality, uniqueness constraints, relationships, fetch plans, and common ORM (Object-Relational Mapping) traps  specific to Kotlin. Use when creating or reviewing JPA (Java Persistence API)  entities, diagnosing N+1 or LazyInitializationException, placing indexes and  uniqueness rules, or preventing Kotlin-specific bugs such as data class  entities and broken equals/hashCode.
 """ ;
     oc:hasName "kotlin-backend-jpa-entity-mapping" ;
-    oc:impartsKnowledge oc:kn_23d31e94,
-        oc:kn_31ccff63,
-        oc:kn_401072f0,
-        oc:kn_651445f3,
-        oc:kn_7150277a,
-        oc:kn_72170348,
-        oc:kn_a7a0e025,
-        oc:kn_e6e98c51 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """name: kotlin-backend-jpa-entity-mapping
+description: >
+  Model Kotlin persistence code correctly for Spring Data JPA and Hibernate.
+  Covers entity design, identity and equality, uniqueness constraints,
+  relationships, fetch plans, and common ORM (Object-Relational Mapping) traps 
+  specific to Kotlin. Use when creating or reviewing JPA (Java Persistence API) 
+  entities, diagnosing N+1 or LazyInitializationException, placing indexes and 
+  uniqueness rules, or preventing Kotlin-specific bugs such as data class 
+  entities and broken equals/hashCode.
+license: Apache-2.0
+metadata:
+  author: JetBrains
+  version: "1.0.0"
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent """This skill teaches correct entity design, identity strategies, and uniqueness constraints
+for Kotlin + Spring Data JPA projects.""" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent """Kotlin's `data class` is natural for DTOs but dangerous for JPA entities. Hibernate relies on
+identity semantics that `data class` breaks: `equals`/`hashCode` over all fields corrupts
+`Set`/`Map` membership after state changes, and auto-generated `copy()` creates detached
+duplicates of managed entities.""" ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 7 ;
+                                    oc:itemText "**`@Version`:** the clearest optimistic concurrency mechanism when concurrent updates matter." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 8 ;
+                                    oc:itemText "**`open-in-view` disabled:** DTO mapping touching lazy fields must happen inside a transaction boundary." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "**Bidirectional associations:** maintain both sides in domain methods. Half-updated graphs cause subtle bugs." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "**Lazy load triggers:** `toString`, debug logging, JSON serialization, and IDE inspection can all trigger lazy loads." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 6 ;
+                                    oc:itemText "**`Set` + mutable equality:** collection membership can break after entity state changes." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "**Bulk updates/deletes:** bypass persistence context and lifecycle callbacks. Subsequent reads may be stale." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "**Multiple bag fetches:** can cause Cartesian explosion. Verify the ORM can execute collection-heavy fetch plans safely." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "**`orphanRemoval` vs cascade remove:** not interchangeable. Explain lifecycle semantics before choosing." ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Common ORM Traps" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent """When an API must be idempotent (e.g., "reserve stock for order X"), enforce uniqueness
+at both layers: database constraint for correctness, application check for clean errors.""" ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """@Service
+class ReservationService(private val repo: ReservationRepository) {
+    @Transactional
+    fun createReservation(variantId: Long, orderId: String, qty: Int): Reservation {
+        // BUG: no check — duplicates silently accumulate
+        return repo.save(Reservation(variantId = variantId, orderId = orderId, quantity = qty))
+    }
+}
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 98-107" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Broken: No Duplicate Guard" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 3 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "Spring Data derives `findByXAndY` queries automatically" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Application check provides clean error messages — without it, users get raw `DataIntegrityViolationException`" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Both layers together: application catches the common case, database catches the race" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Database constraint is mandatory — application checks alone have race conditions" ] ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """@Entity
+@Table(
+    name = "reservations",
+    uniqueConstraints = [
+        UniqueConstraint(columnNames = ["variant_id", "order_id"])
+    ]
+)
+class Reservation(
+    @Column(name = "variant_id", nullable = false)
+    val variantId: Long,
+
+    @Column(name = "order_id", nullable = false)
+    val orderId: String,
+
+    @Column(nullable = false)
+    var quantity: Int
+) {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Long = 0
+}
+
+interface ReservationRepository : JpaRepository<Reservation, Long> {
+    fun findByVariantIdAndOrderId(variantId: Long, orderId: String): Reservation?
+}
+
+@Service
+class ReservationService(private val repo: ReservationRepository) {
+    @Transactional
+    fun createReservation(variantId: Long, orderId: String, qty: Int): Reservation {
+        repo.findByVariantIdAndOrderId(variantId, orderId)?.let {
+            throw IllegalStateException(
+                "Reservation already exists for variant=$variantId, order=$orderId"
+            )
+        }
+        return repo.save(Reservation(variantId = variantId, orderId = orderId, quantity = qty))
+    }
+}
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 111-149" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Key rules:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Correct: Database Constraint + Application Guard" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Uniqueness Constraints" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Follow project conventions when they already define an identity strategy." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "If no convention exists, use ID-based equality with a stable `hashCode`." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Be explicit about mutable fields and lazy associations when discussing equality." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Never accept all-field `equals`/`hashCode` generated by `data class` on an entity." ] ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """// WRONG: data class generates equals/hashCode from ALL fields
+data class Order(
+    @Id @GeneratedValue val id: Long = 0,
+    var status: String,
+    var total: BigDecimal
+)
+// BUG: order.status = "SHIPPED"; set.contains(order) → false (hash changed)
+// BUG: Hibernate proxy.equals(entity) → false (proxy has lazy fields uninitialized)
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 45-54" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Broken: `data class` Entity" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Key rules:**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """@Entity
+@Table(name = "orders")
+class Order(
+    @Column(nullable = false)
+    var status: String,
+
+    @Column(nullable = false)
+    var total: BigDecimal
+) {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Long = 0
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is Order) return false
+        return id != 0L && id == other.id
+    }
+
+    override fun hashCode(): Int = javaClass.hashCode()
+
+    // toString must NOT reference lazy collections
+    override fun toString(): String = "Order(id=$id, status=$status)"
+}
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 58-83" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 3 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "`toString` excludes lazy-loaded relations — prevents `LazyInitializationException`" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "`equals` compares by ID only — stable under dirty tracking and proxy unwrapping" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "`hashCode` returns class-based constant — avoids `Set`/`Map` corruption after persist" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "Constructor params are mutable entity fields; `id` is `val` with default" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Correct: Regular Class with ID-Based Identity" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Identity and Equality" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Model required columns as non-null only when object construction and persistence lifecycle make it safe." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 6 ;
+                                    oc:itemText "Verify classes and members are compatible with proxying where needed." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Use `lateinit` only when the project already accepts that tradeoff and the lifecycle is safe." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "Verify `kotlin(\"plugin.jpa\")` or equivalent no-arg support when JPA entities exist." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Keep transport DTOs and persistence entities separate unless the project clearly uses a shared model." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "**Never use `data class` for JPA entities.** Use a regular `class`. Keep `data class` for DTOs." ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Entity Design Rules" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Use indexes and uniqueness constraints to support real query patterns." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Be careful with collection fetch joins plus pagination — call out the tradeoff." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Diagnose N+1 by looking at actual query count or SQL logs, not by guessing from annotations." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Prefer targeted fetch solutions: `@EntityGraph`, `JOIN FETCH`, batch fetching, or DTO projection." ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Query and Fetch Rules" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Do not expose entities directly through API responses by default." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Do not claim an N+1 fix without explaining how the fetch plan changes query behavior." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Do not recommend `FetchType.EAGER` everywhere to silence lazy loading symptoms." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Do not use `data class` for JPA entities." ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Guardrails" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "JPA Entity Mapping for Kotlin" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "Workflow for correctly creating a JPA entity class in Kotlin with proper identity semantics" ;
+            oc:hasStep [ a oc:WorkflowStep ;
+                    dcterms:description "Implement ID-based equals (compare id != 0 && id == other.id), class-based hashCode (javaClass.hashCode()), and toString excluding lazy collections" ;
+                    oc:expectedOutcome "Entity identity is stable under dirty tracking and proxy unwrapping" ;
+                    oc:stepDependsOn _:ref_48c808354ad99b14 ;
+                    oc:stepId "implement-identity" ],
+                _:ref_48c808354ad99b14,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Review associations for fetch strategy: prefer lazy loading, use @EntityGraph or JOIN FETCH for specific queries, avoid EAGER as default" ;
+                    oc:expectedOutcome "No N+1 issues and no unnecessary data loading" ;
+                    oc:stepDependsOn _:ref_48c808354ad99b14 ;
+                    oc:stepId "review-fetch-plan" ],
+                _:ref_f53b972cad0da5a9,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Add @Table uniqueConstraints for business uniqueness, @Column(nullable=false) for required fields, and Spring Data query methods for application-level checks" ;
+                    oc:expectedOutcome "Duplicates are prevented at both database and application layers" ;
+                    oc:stepDependsOn _:ref_48c808354ad99b14 ;
+                    oc:stepId "add-constraints" ] ;
+            oc:workflowId "jpa-entity-creation" ;
+            oc:workflowName "Create JPA Entity in Kotlin" ],
+        [ a oc:Workflow ;
+            dcterms:description "Systematic approach to identifying and resolving N+1 query issues in JPA" ;
+            oc:hasStep _:ref_0509f56b5cb5e51e,
+                _:ref_53d1ddac5a915e2f,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Re-run with SQL logging and verify query count matches expectation; ensure no Cartesian explosion from multiple collection fetches" ;
+                    oc:expectedOutcome "N+1 resolved without introducing new performance issues" ;
+                    oc:stepDependsOn _:ref_53d1ddac5a915e2f ;
+                    oc:stepId "verify-fix" ],
+                _:ref_e64ec0f701cb90e9 ;
+            oc:workflowId "diagnose-n-plus-1" ;
+            oc:workflowName "Diagnose N+1 Query Problem" ] ;
+    oc:impartsKnowledge oc:kn_5b1ca3e1,
+        oc:kn_630e007d,
+        oc:kn_a1295334,
+        oc:kn_d224da19,
+        oc:kn_d2c94442,
+        oc:kn_e389d24c,
+        oc:kn_e8b2bd7f,
+        oc:kn_f7cce0f6 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
     oc:requiresState oc:EnvironmentReady ;
     oc:resolvesIntent "create JPA entities in Kotlin",
-        "design correct equals/hashCode for JPA entities",
-        "diagnose LazyInitializationException in Kotlin JPA",
-        "diagnose N+1 query problems in Spring Data JPA",
-        "place uniqueness constraints and indexes on JPA entities",
-        "review Kotlin persistence code for ORM anti-patterns" ;
-    oc:yieldsState oc:DocumentCreated .
+        "diagnose N+1 and LazyInitializationException",
+        "enforce uniqueness constraints",
+        "fix broken equals/hashCode in entities",
+        "prevent data class entity bugs",
+        "review JPA entity mapping" ;
+    oc:yieldsState oc:CodeCorrect .
 
-oc:kn_23d31e94 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When diagnosing or fixing N+1 query problems in Spring Data JPA" ;
-    oc:directiveContent "Diagnose N+1 by inspecting actual SQL query counts or enabling SQL logs, not by guessing from annotations. Then apply targeted fetch solutions: @EntityGraph, JOIN FETCH, batch fetching, or DTO projection." ;
-    oc:hasRationale "Annotation-based guessing can miss the real query pattern. Targeted solutions address the specific fetch plan rather than blanket FetchType.EAGER which masks the underlying issue." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_31ccff63 a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "Before creating or reviewing JPA entity classes in a Kotlin project" ;
-    oc:directiveContent "Verify kotlin(\"plugin.jpa\") or equivalent no-arg compiler plugin is configured when JPA entities exist in the project. Ensure entity classes and their members are compatible with Hibernate proxying." ;
-    oc:hasRationale "Hibernate requires no-arg constructors and open classes/methods for proxy generation. Without the JPA plugin, Kotlin classes are final by default and lack no-arg constructors, causing runtime proxy failures." ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_401072f0 a oc:KnowledgeNode,
+oc:kn_5b1ca3e1 a oc:KnowledgeNode,
         oc:KnownIssue ;
-    oc:appliesToContext "When designing entity relationships or performing batch operations" ;
-    oc:directiveContent "Bidirectional associations must be maintained on both sides in domain methods. Half-updated graphs cause subtle bugs. Also, bulk updates/deletes bypass the persistence context, making subsequent reads potentially stale." ;
-    oc:hasRationale "ORM in-memory state and database state can diverge when only one side of a bidirectional association is updated, or when bulk operations skip lifecycle callbacks and the first-level cache." ;
+    oc:appliesToContext "When working with entity relationships, lazy loading, or batch operations" ;
+    oc:directiveContent "Bidirectional associations must maintain both sides in domain methods. toString, debug logging, JSON serialization, and IDE inspection can all trigger lazy loads. Bulk updates/deletes bypass persistence context and lifecycle callbacks." ;
+    oc:hasRationale "Half-updated bidirectional graphs cause subtle bugs; unintended lazy load triggers cause LazyInitializationException; bulk operations leave stale reads" ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_651445f3 a oc:AntiPattern,
+oc:kn_630e007d a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When implementing toString on JPA entities or logging/debugging entity instances" ;
-    oc:directiveContent "Do not reference lazy-loaded collections or associations in toString(). Use only immediate, eagerly-available fields." ;
-    oc:hasRationale "toString, debug logging, JSON serialization, and IDE inspection can all trigger lazy loads outside an active Hibernate session, causing LazyInitializationException." ;
+    oc:appliesToContext "When investigating performance issues in JPA queries" ;
+    oc:directiveContent "Diagnose N+1 by inspecting actual query count or SQL logs, not by guessing from annotations. Prefer targeted fetch solutions: @EntityGraph, JOIN FETCH, batch fetching, or DTO projection." ;
+    oc:hasRationale "Guessing from annotations is unreliable; actual SQL observation is the only trustworthy diagnostic" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_a1295334 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When designing idempotent APIs or preventing duplicate records" ;
+    oc:directiveContent "Enforce uniqueness at both database constraint and application check layers. Database constraint catches race conditions; application check provides clean error messages." ;
+    oc:hasRationale "Application checks alone have race conditions; database constraints alone produce raw DataIntegrityViolationException. Both together cover the common case and the race." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_7150277a a oc:Constraint,
+oc:kn_d224da19 a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When implementing idempotent API operations (e.g., reserve stock for order X)" ;
-    oc:directiveContent "Enforce uniqueness at both the database constraint level AND the application check level. Database constraints guarantee correctness; application checks provide clean error messages." ;
-    oc:hasRationale "Application-only checks have race conditions under concurrent requests; database-only checks produce raw DataIntegrityViolationException. Both layers together cover the common case and the race." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_72170348 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When creating or reviewing any JPA entity class in Kotlin" ;
-    oc:directiveContent "Never use Kotlin data class for JPA entities. Data class generates equals/hashCode from all fields, corrupting Set/Map membership after state changes, and its copy() creates detached duplicates of managed entities." ;
-    oc:hasRationale "Hibernate relies on identity semantics that data class breaks: all-field equality changes after persist, lazy-loaded proxy fields cause false inequality, and copy() bypasses the persistence context." ;
+    oc:appliesToContext "When implementing equals/hashCode/toString on any JPA entity" ;
+    oc:directiveContent "Entity equals must compare by ID only, hashCode must return a class-based constant, and toString must exclude lazy-loaded relations to prevent LazyInitializationException." ;
+    oc:hasRationale "ID-based equality is stable under dirty tracking and proxy unwrapping; class-based hashCode avoids Set/Map corruption after persist" ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_a7a0e025 a oc:AntiPattern,
+oc:kn_d2c94442 a oc:KnowledgeNode,
+        oc:Prerequisite ;
+    oc:appliesToContext "Before applying any JPA entity patterns from this skill" ;
+    oc:directiveContent "Project must use Spring Data JPA with Hibernate and have kotlin(\"plugin.jpa\") compiler plugin configured for no-arg constructor support." ;
+    oc:hasRationale "JPA entities require no-arg constructors; Kotlin needs the JPA compiler plugin to generate them automatically" .
+
+oc:kn_e389d24c a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When troubleshooting LazyInitializationException or designing entity relationships" ;
-    oc:directiveContent "Do not use FetchType.EAGER everywhere to silence lazy loading symptoms. This masks the real fetch plan problem and causes Cartesian explosion with multiple bag fetches." ;
-    oc:hasRationale "Eager fetching is a blunt instrument that loads all associations regardless of use case, degrading performance and potentially causing Cartesian product issues with multiple collections." ;
+    oc:appliesToContext "When creating or reviewing any JPA entity in Kotlin" ;
+    oc:directiveContent "Never use Kotlin data class for JPA entities. Use regular class instead. Data class generates all-field equals/hashCode that corrupts Set/Map membership after state changes, and copy() creates detached duplicates of managed entities." ;
+    oc:hasRationale "Hibernate relies on identity semantics that data class breaks; equals/hashCode over all fields causes hash instability and proxy incompatibility" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_e8b2bd7f a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When diagnosing lazy loading issues or designing API layers" ;
+    oc:directiveContent "Do not recommend FetchType.EAGER everywhere to silence lazy loading symptoms. Do not expose entities directly through API responses by default." ;
+    oc:hasRationale "Eager fetching masks the real problem and causes unnecessary data loading; exposing entities directly leaks persistence concerns into the API contract" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_e6e98c51 a oc:DesignPrinciple,
+oc:kn_f7cce0f6 a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When defining equals/hashCode on any JPA entity" ;
-    oc:directiveContent "Implement ID-based equals with a class-constant hashCode. equals should compare by ID only (with a guard for unsaved id=0 entities), and hashCode should return javaClass.hashCode() to remain stable across dirty tracking." ;
-    oc:hasRationale "ID-based equality is stable under proxy unwrapping and state mutation. A class-constant hashCode prevents Set/Map corruption when Hibernate dirty-tracks field changes after persistence." ;
-    oc:severityLevel "CRITICAL" .
+    oc:appliesToContext "Before creating JPA entities in a Kotlin project" ;
+    oc:directiveContent "Verify kotlin(\"plugin.jpa\") or equivalent no-arg support when JPA entities exist. Verify classes and members are compatible with proxying where needed." ;
+    oc:hasRationale "JPA requires no-arg constructors and proxyable classes; Kotlin classes are final by default and need compiler plugins" ;
+    oc:severityLevel "HIGH" .
+
+_:ref_0509f56b5cb5e51e a oc:WorkflowStep ;
+    dcterms:description "Enable SQL logging and observe actual query count during the problematic operation" ;
+    oc:expectedOutcome "Exact number and content of SQL queries is visible" ;
+    oc:stepId "observe-queries" .
+
+_:ref_53d1ddac5a915e2f a oc:WorkflowStep ;
+    dcterms:description "Apply targeted fetch solution: @EntityGraph, JOIN FETCH, batch fetching, or DTO projection" ;
+    oc:expectedOutcome "Query count reduced to expected number; explain how fetch plan changed" ;
+    oc:stepDependsOn _:ref_e64ec0f701cb90e9 ;
+    oc:stepId "apply-fetch-fix" .
+
+_:ref_e64ec0f701cb90e9 a oc:WorkflowStep ;
+    dcterms:description "Confirm N+1 pattern: one query for parent entities plus N queries for lazy-loaded associations" ;
+    oc:expectedOutcome "Root cause association and access point identified" ;
+    oc:stepDependsOn _:ref_0509f56b5cb5e51e ;
+    oc:stepId "identify-n-plus-1" .
+
+_:ref_f53b972cad0da5a9 a oc:WorkflowStep ;
+    dcterms:description "Verify kotlin(\"plugin.jpa\") compiler plugin is configured in build.gradle.kts" ;
+    oc:expectedOutcome "No-arg constructor generation is enabled for JPA entities" ;
+    oc:stepId "verify-plugins" .
+
+_:ref_48c808354ad99b14 a oc:WorkflowStep ;
+    dcterms:description "Create regular (non-data) class with @Entity annotation, mutable constructor params for columns, and val id with @GeneratedValue default 0" ;
+    oc:expectedOutcome "Entity class compiles and Hibernate can instantiate it" ;
+    oc:stepDependsOn _:ref_f53b972cad0da5a9 ;
+    oc:stepId "create-entity-class" .
 

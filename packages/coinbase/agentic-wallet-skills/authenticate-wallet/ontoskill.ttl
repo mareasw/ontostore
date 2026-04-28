@@ -4,15 +4,15 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_coinbase_agentic_wallet_skills_authenticate_wallet a oc:ExecutableSkill,
+oc:skill_coinbase_agentic_wallet_skills_authenticate_wallet a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "authenticate-wallet" ;
     skos:broader "Authentication skill" ;
-    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/coinbase/agentic-wallet-skills/authenticate-wallet" ;
+    prov:wasDerivedFrom "../.agents/skills/coinbase/agentic-wallet-skills/authenticate-wallet" ;
     oc:contentHash "24d4cd9ca545d8f4828f277af0a5f14ccebab38a776c3df3bc29e083744a7f0d" ;
-    oc:differentia "that signs in to a crypto wallet using email OTP verification via the awal CLI" ;
+    oc:differentia "uses email OTP via the awal CLI to sign in to a crypto wallet, enabling all subsequent wallet operations" ;
     oc:handlesFailure oc:InvalidInput,
-        oc:PermissionDenied ;
+        oc:NetworkTimeout ;
     oc:hasAllowedTool "Bash(npx awal@2.0.3 address*)",
         "Bash(npx awal@2.0.3 auth *)",
         "Bash(npx awal@2.0.3 balance*)",
@@ -22,67 +22,275 @@ oc:skill_coinbase_agentic_wallet_skills_authenticate_wallet a oc:ExecutableSkill
     oc:hasCategory "automation" ;
     oc:hasDescription "Sign in to the wallet. Use when you or the user want to log in, sign in, connect, or set up the wallet, or when any wallet operation fails with authentication or \"not signed in\" errors. This skill is a prerequisite before sending, trading, or funding." ;
     oc:hasName "authenticate-wallet" ;
-    oc:hasPayload oc:payload_24d4cd9ca545d8f4 ;
-    oc:impartsKnowledge oc:kn_5dfe0c11,
-        oc:kn_6be29df7,
-        oc:kn_a0ea96a6,
-        oc:kn_a6ef4443,
-        oc:kn_ac190c57,
-        oc:kn_b96ac2a1 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "If you have access to email, you can authenticate the wallet yourself, otherwise you'll need to ask your human to give you an email address and to tell you the OTP code they receive." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "When the wallet is not signed in (detected via `npx awal status` or when wallet operations fail with authentication errors), use the `npx awal` CLI to authenticate." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 1 ;
+                            oc:rowCount 6 ;
+                            oc:tableCaption "## Available CLI Commands" ;
+                            oc:tableMarkdown """| Command                                      | Purpose                                |
+| -------------------------------------------- | -------------------------------------- |
+| `npx awal@2.0.3 status`                     | Check server health and auth status    |
+| `npx awal@2.0.3 auth login <email>`         | Send OTP code to email, returns flowId |
+| `npx awal@2.0.3 auth verify <flowId> <otp>` | Complete authentication with OTP code  |
+| `npx awal@2.0.3 balance`                    | Get USDC wallet balance                |
+| `npx awal@2.0.3 address`                    | Get wallet address                     |
+| `npx awal@2.0.3 show`                       | Open the wallet companion window       |
+""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Available CLI Commands" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# Check current status
+npx awal@2.0.3 status
+
+# Start login (sends OTP to email)
+npx awal@2.0.3 auth login user@example.com
+# Output: flowId: abc123...
+
+# After user receives code, verify
+npx awal@2.0.3 auth verify abc123 123456
+
+# Confirm authentication
+npx awal@2.0.3 status
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 55-68" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Example Session" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "All commands support `--json` for machine-readable output:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """npx awal@2.0.3 status --json
+npx awal@2.0.3 auth login user@example.com --json
+npx awal@2.0.3 auth verify <flowId> <otp> --json
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 85-89" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "JSON Output" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "**flowId**: Must be alphanumeric (`^[a-zA-Z0-9_-]+$`)." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "**otp**: Must be exactly 6 digits (`^\\d{6}$`)." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "**email**: Must match a standard email format (`^[^\\s;|&`]+@[^\\s;|&`]+$`). Reject if it contains spaces, semicolons, pipes, backticks, or other shell metacharacters." ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Before constructing the command, validate all user-provided values to prevent shell injection:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "Do not pass unvalidated user input into the command." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Input Validation" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Authentication uses a two-step email OTP process:" ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "This sends a 6-digit verification code to the email and outputs a `flowId`." ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """npx awal@2.0.3 auth login <email>
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 21-23" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Step 1: Initiate login" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "Use the `flowId` from step 1 and the 6-digit code from the user's email to complete authentication. If you have the ability to access the user's email, you can read the OTP code, or you can ask your human for the code." ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """npx awal@2.0.3 auth verify <flowId> <otp>
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 29-31" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Step 2: Verify OTP" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Authentication Flow" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """npx awal@2.0.3 status
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 47-49" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "Displays wallet server health and authentication status including wallet address." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Checking Authentication Status" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Authenticating with the Payments Wallet" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """name: authenticate-wallet
+description: Sign in to the wallet. Use when you or the user want to log in, sign in, connect, or set up the wallet, or when any wallet operation fails with authentication or "not signed in" errors. This skill is a prerequisite before sending, trading, or funding.
+user-invocable: true
+disable-model-invocation: false
+allowed-tools: ["Bash(npx awal@2.0.3 status*)", "Bash(npx awal@2.0.3 auth *)", "Bash(npx awal@2.0.3 balance*)", "Bash(npx awal@2.0.3 address*)", "Bash(npx awal@2.0.3 show*)"]
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "Two-step email OTP authentication flow for the payments wallet" ;
+            oc:hasStep _:ref_6a7642822a86ea60,
+                _:ref_7ff4ffd2c58e13d8,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Run npx awal@2.0.3 status to verify wallet is now authenticated" ;
+                    oc:expectedOutcome "Status shows authenticated with wallet address" ;
+                    oc:stepDependsOn _:ref_ba106ee293d81d1c ;
+                    oc:stepId "confirm-auth" ],
+                _:ref_94719bcacc2ddcd4,
+                _:ref_ba106ee293d81d1c ;
+            oc:workflowId "authenticate-wallet-flow" ;
+            oc:workflowName "Wallet Authentication" ] ;
+    oc:impartsKnowledge oc:kn_10921fa1,
+        oc:kn_16951716,
+        oc:kn_1d2135f5,
+        oc:kn_1e45a9b8,
+        oc:kn_5ac11989,
+        oc:kn_9f7cbfae,
+        oc:kn_b35f8fc7,
+        oc:kn_c8a75b5a ;
     oc:isUserInvocable true ;
     oc:nature "Tool" ;
-    oc:requiresState oc:NetworkAvailable ;
+    oc:requiresState oc:NetworkAvailable,
+        oc:ToolInstalled ;
     oc:resolvesIntent "authenticate wallet",
         "check wallet authentication status",
         "connect wallet",
-        "set up wallet",
+        "log in to wallet",
+        "resolve wallet auth errors",
         "sign in to wallet" ;
     oc:yieldsState oc:SystemAuthenticated .
 
-oc:kn_5dfe0c11 a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "Before starting any authentication flow" ;
-    oc:directiveContent "Always run `npx awal@2.0.3 status` first to check whether the wallet is already authenticated before initiating login." ;
-    oc:hasRationale "Avoids unnecessary re-authentication and confirms wallet server health." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_6be29df7 a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When validating inputs for auth login and auth verify commands" ;
-    oc:directiveContent "The OTP must be exactly 6 digits (matching ^\\d{6}$). The flowId must be alphanumeric (^[a-zA-Z0-9_-]+$). The email must match standard format without shell metacharacters." ;
-    oc:hasRationale "Input validation ensures only properly formatted values reach the CLI, preventing both errors and injection." ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_a0ea96a6 a oc:KnowledgeNode,
-        oc:SecurityImplication ;
-    oc:appliesToContext "When constructing any awal CLI command with user input" ;
-    oc:directiveContent "Validate all user-provided values (email, flowId, otp) against strict regex patterns before constructing shell commands. Never pass unvalidated input." ;
-    oc:hasRationale "Prevents shell injection attacks through maliciously crafted email addresses, flowIds, or OTP codes." ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_a6ef4443 a oc:Idempotency,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When retrying or re-checking authentication state" ;
-    oc:directiveContent "Running `npx awal@2.0.3 status` is safe to repeat. Running `auth login` again re-sends a new OTP and invalidates the previous flowId." ;
-    oc:hasRationale "Each login attempt generates a new flowId, so partial attempts should be completed or abandoned before starting fresh." ;
+oc:kn_10921fa1 a oc:KnowledgeNode,
+        oc:RequiresHumanClarification ;
+    oc:appliesToContext "When initiating or completing the OTP authentication flow without email access" ;
+    oc:directiveContent "If the agent cannot access the user's email, it must ask the human to provide their email address and the OTP code they receive." ;
+    oc:hasRationale "The OTP is sent to the user's email; without programmatic email access, human involvement is required to relay the code." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_ac190c57 a oc:KnowledgeNode,
-        oc:RequiresHumanClarification ;
-    oc:appliesToContext "When the agent does not have email access and needs to complete OTP verification" ;
-    oc:directiveContent "If the agent cannot access the user's email, it must ask the human to provide both the email address and the OTP code they receive." ;
-    oc:hasRationale "The OTP code is sent to the user's email; without access, the agent cannot complete authentication autonomously." ;
+oc:kn_16951716 a oc:KnowledgeNode,
+        oc:SecurityImplication ;
+    oc:appliesToContext "Before constructing any npx awal auth command with user input" ;
+    oc:directiveContent "Validate all user-provided values (email, flowId, otp) against strict regex patterns before constructing shell commands to prevent shell injection attacks." ;
+    oc:hasRationale "Unvalidated user input passed to shell commands enables injection attacks that can compromise the system." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_1d2135f5 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When wallet operations (send, trade, fund) fail with auth errors" ;
+    oc:directiveContent "If any wallet operation fails with authentication or 'not signed in' errors, trigger the authentication flow as a recovery step." ;
+    oc:hasRationale "Authentication errors from other wallet operations signal expired or missing sessions that need re-authentication." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_b96ac2a1 a oc:KnowledgeNode,
-        oc:WorkflowStrategy ;
-    oc:appliesToContext "When any downstream wallet operation returns an authentication or 'not signed in' error" ;
-    oc:directiveContent "Authentication is a prerequisite before any wallet operation (sending, trading, funding). If a wallet operation fails with an auth error, switch to this skill first." ;
-    oc:hasRationale "All wallet-dependent skills (send-usdc, trade, fund) require an authenticated wallet state to function." ;
-    oc:severityLevel "HIGH" .
+oc:kn_1e45a9b8 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Validating inputs before auth login and auth verify commands" ;
+    oc:directiveContent "Email must match ^[^\\s;|&`]+@[^\\s;|&`]+$, flowId must match ^[a-zA-Z0-9_-]+$, and OTP must be exactly 6 digits matching ^\\d{6}$." ;
+    oc:hasRationale "These strict patterns reject shell metacharacters and ensure only well-formed values reach the CLI." ;
+    oc:severityLevel "CRITICAL" .
 
-oc:payload_24d4cd9ca545d8f4 a oc:ExecutionPayload ;
-    oc:code "npx awal@2.0.3 auth login <email> && npx awal@2.0.3 auth verify <flowId> <otp>" ;
-    oc:executor "shell" ;
-    oc:timeout 30 .
+oc:kn_5ac11989 a oc:Command,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Checking authentication status with machine-readable output" ;
+    oc:directiveContent "npx awal@2.0.3 status --json" .
+
+oc:kn_9f7cbfae a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "Full authentication flow" ;
+    oc:directiveContent "1. Run npx awal@2.0.3 status to check current auth state. 2. If not authenticated, run npx awal@2.0.3 auth login <validated-email> to send OTP. 3. Obtain OTP from email access or ask human for the code. 4. Run npx awal@2.0.3 auth verify <flowId> <otp> to complete auth. 5. Run npx awal@2.0.3 status to confirm success." ;
+    oc:hasRationale "The two-step OTP process requires sequential execution — the flowId from step 1 is needed for step 2." ;
+    oc:stepOrder 1 .
+
+oc:kn_b35f8fc7 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Core two-step authentication sequence" ;
+    oc:codeLanguage "bash" ;
+    oc:directiveContent """npx awal@2.0.3 auth login <email>
+# Output: flowId: abc123...
+npx awal@2.0.3 auth verify <flowId> <6-digit-otp>""" .
+
+oc:kn_c8a75b5a a oc:KnowledgeNode,
+        oc:SuccessIndicator ;
+    oc:appliesToContext "Post-authentication verification" ;
+    oc:directiveContent "After running npx awal@2.0.3 status, a successful authentication shows the wallet address and authenticated status in the output." ;
+    oc:hasRationale "Confirming authentication succeeded prevents wasted failed attempts at downstream wallet operations." .
+
+_:ref_6a7642822a86ea60 a oc:WorkflowStep ;
+    dcterms:description "Run npx awal@2.0.3 auth login <validated-email> to send OTP to email" ;
+    oc:expectedOutcome "flowId returned for use in verification step" ;
+    oc:stepDependsOn _:ref_7ff4ffd2c58e13d8 ;
+    oc:stepId "initiate-login" .
+
+_:ref_7ff4ffd2c58e13d8 a oc:WorkflowStep ;
+    dcterms:description "Run npx awal@2.0.3 status to determine if wallet is already authenticated" ;
+    oc:expectedOutcome "Authentication status and wallet address displayed, or confirmation that auth is needed" ;
+    oc:stepId "check-status" .
+
+_:ref_94719bcacc2ddcd4 a oc:WorkflowStep ;
+    dcterms:description "Read OTP from email access or ask human for the 6-digit code" ;
+    oc:expectedOutcome "6-digit OTP code obtained" ;
+    oc:stepDependsOn _:ref_6a7642822a86ea60 ;
+    oc:stepId "obtain-otp" .
+
+_:ref_ba106ee293d81d1c a oc:WorkflowStep ;
+    dcterms:description "Run npx awal@2.0.3 auth verify <flowId> <otp> to complete authentication" ;
+    oc:expectedOutcome "Authentication successful confirmation" ;
+    oc:stepDependsOn _:ref_94719bcacc2ddcd4 ;
+    oc:stepId "verify-otp" .
 

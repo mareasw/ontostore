@@ -7,51 +7,148 @@
 oc:skill_vercel_labs_vercel_react_best_practices_rerender_use_ref_transient_values a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "rerender-use-ref-transient-values" ;
-    skos:broader "React performance optimization pattern" ;
+    skos:broader "Performance optimization pattern" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "f1a649af9d1d0b5c762f6c9c4c1c70c90d7df82aa10296ee87aadb78c1b76c54" ;
-    oc:differentia "stores frequently-changing transient values in useRef instead of useState to avoid unnecessary re-renders" ;
+    oc:differentia "uses useRef instead of useState for frequently-changing transient values to avoid unnecessary re-renders" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
-    oc:handlesFailure oc:InvalidInput ;
-    oc:hasArgumentHint "React component code that updates state on frequent events" ;
+    oc:hasArgumentHint "React component with high-frequency state updates" ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_51510244,
-        oc:kn_589dbcfc,
-        oc:kn_ba3f50a6,
-        oc:kn_df85b2b0 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function Tracker() {
+  const [lastX, setLastX] = useState(0)
+
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => setLastX(e.clientX)
+    window.addEventListener('mousemove', onMove)
+    return () => window.removeEventListener('mousemove', onMove)
+  }, [])
+
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: lastX,
+        width: 8,
+        height: 8,
+        background: 'black',
+      }}
+    />
+  )
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-37" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function Tracker() {
+  const lastXRef = useRef(0)
+  const dotRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      lastXRef.current = e.clientX
+      const node = dotRef.current
+      if (node) {
+        node.style.transform = `translateX(${e.clientX}px)`
+      }
+    }
+    window.addEventListener('mousemove', onMove)
+    return () => window.removeEventListener('mousemove', onMove)
+  }, [])
+
+  return (
+    <div
+      ref={dotRef}
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: 8,
+        height: 8,
+        background: 'black',
+        transform: 'translateX(0px)',
+      }}
+    />
+  )
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 5 ;
+                    oc:sourceLocation "lines 41-73" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "**Correct (no re-render for tracking):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Incorrect (renders every update):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "When a value changes frequently and you don't want a re-render on every update (e.g., mouse trackers, intervals, transient flags), store it in `useRef` instead of `useState`. Keep component state for UI; use refs for temporary DOM-adjacent values. Updating a ref does not trigger a re-render." ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Use useRef for Transient Values" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Use useRef for Transient Values
+impact: MEDIUM
+impactDescription: avoids unnecessary re-renders on frequent updates
+tags: rerender, useref, state, performance
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:impartsKnowledge oc:kn_02b5f19a,
+        oc:kn_07a43a07,
+        oc:kn_177ba6da,
+        oc:kn_a0d79949,
+        oc:kn_f706a972 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:ReactComponentExists ;
-    oc:resolvesIntent "avoid re-renders on frequent updates like mouse tracking or intervals",
-        "decide when to use useRef vs useState in React components",
-        "optimize React component re-rendering for transient values" ;
-    oc:yieldsState oc:ReactComponentOptimized .
+    oc:resolvesIntent "avoid unnecessary re-renders",
+        "optimize high-frequency value updates",
+        "store transient non-UI values without triggering renders" .
 
-oc:kn_51510244 a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "Always, when using useRef for values that also affect visual output" ;
-    oc:directiveContent "Ref value changes (ref.current = newValue) are synchronous and imperative — they will not cause a re-render, so any UI that depends on the ref value must be updated imperatively via DOM access." ;
-    oc:hasRationale "This is the fundamental trade-off: refs give you performance but require manual DOM synchronization instead of declarative React rendering." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_589dbcfc a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When optimizing components that track fast-changing values affecting visual output (e.g., positioning an element based on mouse coordinates)" ;
-    oc:directiveContent "When using useRef for transient values that affect the DOM, combine with a ref callback to imperatively mutate the DOM node's style or properties directly, bypassing React's rendering cycle." ;
-    oc:hasRationale "Direct DOM manipulation via refs avoids the overhead of React's reconciliation loop, which is unnecessary for simple style changes on a single element." ;
+oc:kn_02b5f19a a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "When evaluating render performance for high-frequency event handlers" ;
+    oc:directiveContent "useRef updates bypass React's reconciliation cycle entirely — no virtual DOM diff, no commit phase, no re-render." ;
+    oc:hasRationale "For events firing at 60fps (mousemove, scroll, requestAnimationFrame), skipping reconciliation is the difference between smooth and janky UI." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_ba3f50a6 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When implementing event handlers that fire rapidly (mousemove, scroll, requestAnimationFrame)" ;
-    oc:directiveContent "Do not store high-frequency transient values (mouse coordinates, interval counters, temporary flags) in useState if they don't directly control rendered output through JSX." ;
-    oc:hasRationale "Each setState call schedules a re-render, so high-frequency updates cause excessive rendering and jank, degrading performance." ;
+oc:kn_07a43a07 a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "When reading ref.current values in JSX or effects" ;
+    oc:directiveContent "Mutating ref.current does NOT trigger a re-render. Changes are only visible in the next render if the component re-renders for another reason." ;
+    oc:hasRationale "Agents must understand that ref mutations are invisible to React's render cycle — UI that depends on ref values must be updated imperatively via DOM refs." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_df85b2b0 a oc:Heuristic,
+oc:kn_177ba6da a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When choosing between useState and useRef for a value in a React component" ;
-    oc:directiveContent "Use useRef for values that change frequently and do not need to trigger a re-render (e.g., mouse positions, intervals, transient flags). Reserve useState for values that directly drive UI rendering." ;
-    oc:hasRationale "Updating a ref does not trigger a re-render, avoiding performance overhead from frequent state updates that don't need to be reflected in the virtual DOM." ;
-    oc:severityLevel "MEDIUM" .
+    oc:appliesToContext "When storing high-frequency transient values in React components" ;
+    oc:directiveContent "Never use useState for values that change very frequently and don't need to drive re-renders (e.g., mouse position, intervals, transient flags)." ;
+    oc:hasRationale "Each setState call triggers a full component re-render, causing significant performance degradation for events like mousemove that fire dozens of times per second." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_a0d79949 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When refactoring a component from useState to useRef for transient values" ;
+    oc:directiveContent "1. Identify values that change frequently but don't need to trigger renders 2. Replace useState with useRef 3. Access/modify via .current property 4. Use a ref for the DOM node that needs updating 5. Apply mutations directly to the DOM node via the ref inside the event handler" ;
+    oc:stepOrder 1 .
+
+oc:kn_f706a972 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When deciding between useState and useRef for a value" ;
+    oc:directiveContent "Use useState for values that drive UI rendering; use useRef for transient, DOM-adjacent values that don't need to trigger re-renders." ;
+    oc:hasRationale "Keeping the mental separation between UI state and transient values prevents unnecessary re-render cascades and maintains clear data-flow intent." ;
+    oc:severityLevel "HIGH" .
 

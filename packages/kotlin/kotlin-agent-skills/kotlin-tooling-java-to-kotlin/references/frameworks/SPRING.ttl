@@ -7,84 +7,463 @@
 oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_java_to_kotlin_spring a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "spring" ;
-    skos:broader "conversion guide" ;
+    skos:broader "Conversion guide" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/kotlin/kotlin-agent-skills/kotlin-tooling-java-to-kotlin" ;
     oc:contentHash "b07412f7dbcd9cb7d543370e69e6e9d0faf4f4bd74608a0586fa0be93c881ae8" ;
-    oc:differentia "handles Spring Framework idioms when translating Java source to idiomatic Kotlin" ;
+    oc:dependsOnSkill oc:skill_ontoskills_kotlin_tooling_java_to_kotlin ;
+    oc:differentia "that handles Java-to-Kotlin migration for Spring Framework code, covering annotation mapping, constructor injection, proxy requirements, and idiomatic Kotlin patterns" ;
     oc:extends oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_java_to_kotlin ;
-    oc:handlesFailure oc:AnnotationMigrationFailed,
-        oc:CompilationError ;
-    oc:hasArgumentHint "Java source file with org.springframework.* imports" ;
+    oc:handlesFailure oc:AutowiredRemovalIncomplete,
+        oc:ProxyMisconfiguration,
+        oc:SpELEscapingMissing ;
+    oc:hasArgumentHint "Java source file containing org.springframework.* imports" ;
     oc:hasCategory "development" ;
-    oc:hasRequirement oc:req_09e92987,
-        oc:req_1894ac46,
-        oc:req_743380d7 ;
-    oc:impartsKnowledge oc:kn_1f7e1ef5,
-        oc:kn_54c09465,
-        oc:kn_8ae5126e,
-        oc:kn_a6ea55d7,
-        oc:kn_d6d41673,
-        oc:kn_f710b25c ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent """Preserve exactly. The class must remain `open` because Spring creates proxies via
+subclassing. Do not make `@Transactional` classes `final`.""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 8 ;
+                            oc:sectionTitle "8. @Transactional" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent """Interface declarations convert directly. Replace `Optional<T>` return types with
+nullable `T?` in Kotlin for idiomatic usage.""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 6 ;
+                            oc:sectionTitle "6. Spring Data repositories" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent """Preserve exactly. Where Java uses array initializer syntax for annotation parameters,
+use `arrayOf()` in Kotlin.""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 7 ;
+                            oc:sectionTitle "7. @RequestMapping / @GetMapping / @PostMapping etc." ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent """`@Component`, `@Service`, `@RestController`, and `@Repository` target the class.
+Preserve these annotations exactly. No annotation site target is needed.""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "3. Stereotype annotations" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent """Kotlin's primary constructor makes constructor injection natural. When a class has a
+single constructor, Spring auto-discovers it — remove `@Autowired`.""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "2. Constructor injection over @Autowired" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """@Value("\\${app.name}") val appName: String
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 32-34" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent """Use `@Value` on constructor parameters. Escape `$` in SpEL expressions to prevent
+Kotlin string template interpretation:""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "4. @Value annotation" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "In Kotlin, `String[]` varargs must be spread with the `*` operator." ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 2 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Java: `SpringApplication.run(App.class, args);`" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Kotlin: `SpringApplication.run(App::class.java, *args)`" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "1. SpringApplication.run — spread CLI args" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent """`@Bean` methods must be `open` so that Spring can override them in CGLIB proxies.
+Alternatively, apply the `allopen` compiler plugin with a Spring preset, which makes
+annotated classes and their members open automatically.""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 9 ;
+                            oc:sectionTitle "9. @Bean methods in @Configuration classes" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent """Convert to a `data class` only if the properties are immutable. For mutable
+configuration, use a regular class with `lateinit var`.""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 5 ;
+                            oc:sectionTitle "5. @ConfigurationProperties" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Key Rules" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent """This guide applies when the Java source contains imports matching `org.springframework.*`.
+This covers Spring Boot, Spring MVC, Spring Data, and Spring Security.""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "When This Applies" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent "Key changes:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """package com.acme.config
+
+import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.stereotype.Component
+
+@Component
+@ConfigurationProperties(prefix = "app.mail")
+open class MailProperties {
+    lateinit var host: String
+    var port: Int = 587
+    lateinit var username: String
+    lateinit var password: String
+}
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 4 ;
+                                    oc:sourceLocation "lines 216-230" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """package com.acme.config;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
+
+@Component
+@ConfigurationProperties(prefix = "app.mail")
+public class MailProperties {
+
+    private String host;
+    private int port = 587;
+    private String username;
+    private String password;
+
+    public String getHost() { return host; }
+    public void setHost(String host) { this.host = host; }
+
+    public int getPort() { return port; }
+    public void setPort(int port) { this.port = port; }
+
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
+
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
+}
+""" ;
+                                    oc:codeLanguage "java" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 185-212" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Kotlin (mutable config with lateinit var):**" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Java:**" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 6 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Getters and setters are replaced by Kotlin properties." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText """`port` keeps its default value and uses a regular `var` (`lateinit` does not
+support primitive types).""" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "The class is `open` so that Spring can create a CGLIB proxy for it." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText """`lateinit var` is used for required `String` properties that Spring populates
+after construction.""" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Example 3: @ConfigurationProperties Class" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """package com.acme.web
+
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
+
+@RestController
+@RequestMapping("/api/users")
+class UserController(
+    private val userService: UserService
+) {
+
+    @GetMapping("/{id}")
+    fun getUser(@PathVariable id: Long): UserDto? {
+        return userService.findById(id)
+    }
+
+    @GetMapping
+    fun getAllUsers(): List<UserDto> {
+        return userService.findAll()
+    }
+}
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 4 ;
+                                    oc:sourceLocation "lines 147-171" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """package com.acme.web;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api/users")
+public class UserController {
+
+    private final UserService userService;
+
+    @Autowired
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
+
+    @GetMapping("/{id}")
+    public UserDto getUser(@PathVariable Long id) {
+        return userService.findById(id);
+    }
+
+    @GetMapping
+    public List<UserDto> getAllUsers() {
+        return userService.findAll();
+    }
+}
+""" ;
+                                    oc:codeLanguage "java" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 113-143" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Java:**" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 6 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "The `Autowired` import is removed because it is no longer referenced." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "Return type `UserDto` becomes `UserDto?` where the service may return null." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "`@Autowired` is removed — Spring auto-discovers the single constructor." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Constructor parameter becomes a `private val` in the primary constructor." ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent "Key changes:" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Kotlin:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Example 2: REST Controller with Constructor Injection" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent "Key changes:" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Kotlin:**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """package com.acme;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class Application {
+    public static void main(String[] args) {
+        SpringApplication.run(Application.class, args);
+    }
+}
+""" ;
+                                    oc:codeLanguage "java" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 70-82" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """package com.acme
+
+import org.springframework.boot.SpringApplication
+import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.runApplication
+
+@SpringBootApplication
+open class Application
+
+fun main(args: Array<String>) {
+    runApplication<Application>(*args)
+}
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 4 ;
+                                    oc:sourceLocation "lines 86-99" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 6 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "`main` becomes a top-level function (no companion object needed)." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText """`runApplication<T>` is a Spring Boot Kotlin extension that replaces
+`SpringApplication.run(T::class.java, *args)`.""" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "The `*args` spread operator is required for the varargs parameter." ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Java:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Example 1: Spring Boot Application Main Class" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Examples" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Spring Framework Conversion Guide" ] ;
+    oc:impartsKnowledge oc:kn_1b21d4d1,
+        oc:kn_5cacd608,
+        oc:kn_744609cc,
+        oc:kn_b57822b1,
+        oc:kn_bb0d9ae4,
+        oc:kn_bf6ad0a6,
+        oc:kn_e6e90767,
+        oc:kn_e89b4a5a ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:FileExists,
-        oc:JavaSourceIdentified ;
+    oc:requiresState oc:JavaSourceAvailable,
+        oc:SpringImportsDetected ;
     oc:resolvesIntent "convert Spring Boot application from Java to Kotlin",
-        "migrate Spring Data repositories and configuration properties to Kotlin",
-        "translate Spring annotations and dependency injection to Kotlin idioms" ;
-    oc:yieldsState oc:SpringConverted .
+        "convert Spring configuration properties classes to Kotlin",
+        "migrate Spring MVC REST controllers to Kotlin",
+        "refactor Spring @Autowired injection to Kotlin constructor injection",
+        "translate Spring Data repositories to Kotlin" ;
+    oc:yieldsState oc:KotlinSpringCodeGenerated .
 
-oc:kn_1f7e1ef5 a oc:DesignPrinciple,
+oc:kn_1b21d4d1 a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When converting Spring Boot application entry points and annotation array parameters" ;
-    oc:directiveContent "Replace Java array initializer syntax in annotation parameters with Kotlin arrayOf() and prefer top-level main function with runApplication<T>() over companion-object main." ;
-    oc:hasRationale "runApplication is a Spring Boot Kotlin extension that is more idiomatic than SpringApplication.run; arrayOf() is Kotlin's array literal syntax for annotations." ;
+    oc:appliesToContext "When the project has many Spring proxied classes" ;
+    oc:directiveContent "Consider applying the allopen compiler plugin with the Spring preset instead of manually adding open to every proxied class. This makes annotated classes and their members open automatically." ;
+    oc:hasRationale "Reduces boilerplate and risk of forgetting open on a proxied class, which would cause runtime failures." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_5cacd608 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When converting Spring Data repository interfaces" ;
+    oc:directiveContent "Replace Java Optional<T> return types with Kotlin nullable T? in Spring Data repository interfaces for idiomatic usage." ;
+    oc:hasRationale "Kotlin has built-in null safety; nullable types integrate with Kotlin's type system whereas Optional adds unnecessary wrapping." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_54c09465 a oc:Constraint,
+oc:kn_744609cc a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When converting Spring classes that use proxy-based features (AOP, CGLIB proxying)" ;
-    oc:directiveContent "Classes annotated with @Transactional or @ConfigurationProperties must remain open — do not make them final." ;
+    oc:appliesToContext "When converting any Spring component with dependency injection" ;
+    oc:directiveContent "Do not use @Autowired on constructors in Kotlin. Remove the annotation and the import — Spring auto-discovers the single primary constructor." ;
+    oc:hasRationale "Kotlin's primary constructor syntax makes @Autowired redundant and its presence is non-idiomatic." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_b57822b1 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting Spring Boot main application classes" ;
+    oc:directiveContent "SpringApplication.run() requires the spread operator *args for the varargs parameter, and class literals use App::class.java. Prefer runApplication<T>(*args) top-level extension." ;
+    oc:hasRationale "Kotlin does not auto-spread Java varargs; omitting * causes a compilation error." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_bb0d9ae4 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting Spring classes that use proxy-based features (transactions, configuration bindings, CGLIB proxies)" ;
+    oc:directiveContent "Classes annotated with @Transactional or @ConfigurationProperties must be declared open. @Bean methods in @Configuration classes must also be open." ;
     oc:hasRationale "Spring creates CGLIB proxies via subclassing; final classes prevent proxy creation and cause runtime errors." ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_8ae5126e a oc:Heuristic,
+oc:kn_bf6ad0a6 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When converting @Value annotations with property placeholders" ;
+    oc:directiveContent "Escape $ in @Value SpEL expressions as \\$ to prevent Kotlin string template interpolation. Example: @Value(\"\\${app.name}\") val appName: String" ;
+    oc:hasRationale "Kotlin interprets ${} as string templates; escaping prevents compile-time errors and incorrect string resolution." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_e6e90767 a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When converting Spring Data interfaces and configuration property classes" ;
-    oc:directiveContent "Convert Spring Data repository Optional<T> return types to Kotlin nullable T? and use data class for immutable @ConfigurationProperties; use lateinit var for mutable ones." ;
-    oc:hasRationale "Nullable types are Kotlin-idiomatic replacements for Optional, and data classes give equals/hashCode/copy for free when immutability is appropriate." ;
+    oc:appliesToContext "When converting @ConfigurationProperties classes" ;
+    oc:directiveContent "Convert @ConfigurationProperties to a data class only if properties are immutable. For mutable configuration that Spring populates post-construction, use a regular open class with lateinit var." ;
+    oc:hasRationale "Spring requires setter methods for binding; data classes are immutable by default and cannot be populated by Spring's property binding mechanism." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_e89b4a5a a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When converting Spring MVC controller annotations" ;
+    oc:directiveContent "Replace Java array initializer syntax in annotation parameters with Kotlin arrayOf(). Preserve @RequestMapping, @GetMapping, @PostMapping, and other Spring MVC annotations exactly." ;
+    oc:hasRationale "Kotlin does not support Java's curly-brace array initializer syntax; arrayOf() is the idiomatic replacement." ;
     oc:severityLevel "MEDIUM" .
-
-oc:kn_a6ea55d7 a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When converting Spring Boot main class with varargs parameter" ;
-    oc:directiveContent "The *args spread operator is mandatory when passing String[] CLI arguments to SpringApplication.run() or runApplication<T>() in Kotlin." ;
-    oc:hasRationale "Kotlin requires explicit spread for Java varargs arrays; omitting it causes a compilation error." ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_d6d41673 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When converting any Spring component with constructor injection" ;
-    oc:directiveContent "Never keep @Autowired on a single-constructor class when converting to Kotlin — Spring auto-discovers the primary constructor, making the annotation redundant." ;
-    oc:hasRationale "Redundant @Autowired clutters Kotlin code and contradicts the idiomatic pattern of using primary constructor parameters for dependency injection." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_f710b25c a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When converting @Value annotations that reference property placeholders" ;
-    oc:directiveContent "Escape $ in @Value SpEL expressions with \\${...} to prevent Kotlin string template interpolation." ;
-    oc:hasRationale "Kotlin interprets ${...} as string templates; without escaping, compilation fails or silently substitutes unintended values." ;
-    oc:severityLevel "HIGH" .
-
-oc:req_09e92987 a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "Spring Framework annotations and dependency injection patterns" .
-
-oc:req_1894ac46 a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "Spring Boot Kotlin extensions (runApplication, allopen plugin)" .
-
-oc:req_743380d7 a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "Kotlin primary constructors, spread operator, and string templates" .
 

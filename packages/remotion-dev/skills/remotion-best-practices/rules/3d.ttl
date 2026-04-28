@@ -7,81 +7,233 @@
 oc:skill_remotion_dev_skills_remotion_best_practices_3d a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "3d" ;
-    skos:broader "Guide" ;
+    skos:broader "Integration guide" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/remotion-dev/skills/remotion-best-practices" ;
     oc:contentHash "42cef6d68fb4a266ab495d35df0c60e03672b0d85c043f9b567f6aa7ff00dd0d" ;
-    oc:dependsOnSkill oc:skill_remotion_best_practices ;
-    oc:differentia "that governs 3D content integration in Remotion using Three.js and React Three Fiber with deterministic frame-driven animation" ;
+    oc:dependsOnSkill oc:skill_ontoskills_remotion_best_practices ;
+    oc:differentia "that enables 3D content rendering in Remotion videos using Three.js and React Three Fiber with frame-driven animation constraints" ;
     oc:extends oc:skill_remotion_dev_skills_remotion_best_practices ;
-    oc:handlesFailure oc:InvalidInput,
-        oc:PackageNotInstalled ;
-    oc:hasAlias "3d-remotion",
-        "react-three-fiber",
-        "three",
-        "threejs" ;
-    oc:hasArgumentHint "remotion-project-path" ;
+    oc:handlesFailure oc:DependencyMissing,
+        oc:InvalidInput ;
+    oc:hasAllowedTool "Bash" ;
+    oc:hasArgumentHint "Remotion project with 3D content requirements" ;
     oc:hasCategory "development" ;
-    oc:hasRequirement oc:req_06dea826,
-        oc:req_5d410652,
-        oc:req_69fb8c89 ;
-    oc:impartsKnowledge oc:kn_2747abbc,
-        oc:kn_58b6b2e6,
-        oc:kn_904f4b92,
-        oc:kn_ca7a9065,
-        oc:kn_f8d0a4cb ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """name: 3d
+description: 3D content in Remotion using Three.js and React Three Fiber.
+metadata:
+  tags: 3d, three, threejs
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent """Follow React Three Fiber and Three.js best practices.  
+Only the following Remotion-specific rules need to be followed:""" ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """import { ThreeCanvas } from "@remotion/three";
+import { useVideoConfig } from "remotion";
+
+const { width, height } = useVideoConfig();
+
+<ThreeCanvas width={width} height={height}>
+  <ambientLight intensity={0.4} />
+  <directionalLight position={[5, 5, 5]} intensity={0.8} />
+  <mesh>
+    <sphereGeometry args={[1, 32, 32]} />
+    <meshStandardMaterial color="red" />
+  </mesh>
+</ThreeCanvas>;
+""" ;
+                            oc:codeLanguage "tsx" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 30-44" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent """You MUST wrap 3D content in `<ThreeCanvas>` and include proper lighting.  
+`<ThreeCanvas>` MUST have a `width` and `height` prop.""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Using ThreeCanvas" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent """Shaders, models etc MUST NOT animate by themselves.  
+No animations are allowed unless they are driven by `useCurrentFrame()`.  
+Otherwise, it will cause flickering during rendering.""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "Using `useFrame()` from `@react-three/fiber` is forbidden." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "No animations not driven by `useCurrentFrame()`" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """npx remotion add @remotion/three # If project uses npm
+bunx remotion add @remotion/three # If project uses bun
+yarn remotion add @remotion/three # If project uses yarn
+pnpm exec remotion add @remotion/three # If project uses pnpm
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 18-23" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent """First, the `@remotion/three` package needs to be installed.  
+If it is not, use the following command:""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Prerequisites" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """import { Sequence } from "remotion";
+import { ThreeCanvas } from "@remotion/three";
+
+const { width, height } = useVideoConfig();
+
+<ThreeCanvas width={width} height={height}>
+  <Sequence layout="none">
+    <mesh>
+      <boxGeometry args={[2, 2, 2]} />
+      <meshStandardMaterial color="#4a9eff" />
+    </mesh>
+  </Sequence>
+</ThreeCanvas>;
+""" ;
+                            oc:codeLanguage "tsx" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 72-86" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "The `layout` prop of any `<Sequence>` inside a `<ThreeCanvas>` must be set to `none`." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Using `<Sequence>` inside `<ThreeCanvas>`" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Use `useCurrentFrame()` to perform animations." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """const frame = useCurrentFrame();
+const rotationY = frame * 0.02;
+
+<mesh rotation={[0, rotationY, 0]}>
+  <boxGeometry args={[2, 2, 2]} />
+  <meshStandardMaterial color="#4a9eff" />
+</mesh>;
+""" ;
+                            oc:codeLanguage "tsx" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 58-66" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Animate using `useCurrentFrame()`" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Using Three.js and React Three Fiber in Remotion" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "Install dependencies and create a properly configured 3D scene in a Remotion composition" ;
+            oc:hasStep [ a oc:WorkflowStep ;
+                    dcterms:description "If using <Sequence> inside <ThreeCanvas>, set layout='none' prop" ;
+                    oc:expectedOutcome "Sequences render correctly without CSS layout interference" ;
+                    oc:stepDependsOn _:ref_639fa1ad08b6f8a2 ;
+                    oc:stepId "sequence" ],
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Animate 3D objects using useCurrentFrame() to derive animation values" ;
+                    oc:expectedOutcome "Deterministic, flicker-free 3D animations" ;
+                    oc:stepDependsOn _:ref_639fa1ad08b6f8a2 ;
+                    oc:stepId "animate" ],
+                _:ref_639fa1ad08b6f8a2,
+                _:ref_8fda3b982439a5a7 ;
+            oc:workflowId "3d-setup" ;
+            oc:workflowName "3D Scene Setup in Remotion" ] ;
+    oc:impartsKnowledge oc:kn_1a8b174b,
+        oc:kn_1f0e061b,
+        oc:kn_4655a7c3,
+        oc:kn_588b2e92,
+        oc:kn_5d884636,
+        oc:kn_954bf38c,
+        oc:kn_f11b9fc1 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
     oc:requiresState oc:EnvironmentReady ;
-    oc:resolvesIntent "add 3d content to remotion video",
-        "animate 3d objects frame-by-frame in remotion",
-        "render 3d scenes in remotion",
-        "use three.js with remotion" ;
-    oc:yieldsState oc:Scene3DRendered .
+    oc:resolvesIntent "animate 3D objects in video",
+        "integrate Three.js with Remotion",
+        "render 3D content in Remotion",
+        "use React Three Fiber in Remotion compositions" ;
+    oc:yieldsState oc:ThreeCanvasConfigured .
 
-oc:kn_2747abbc a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "When rendering any 3D scene in Remotion" ;
-    oc:directiveContent "Always wrap 3D content in <ThreeCanvas> with explicit width and height props from useVideoConfig(), and include proper lighting (ambient + directional)." ;
-    oc:hasRationale "ThreeCanvas bridges Remotion's rendering pipeline with React Three Fiber; without explicit dimensions and lighting, the canvas will not render correctly or will appear unlit." ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_58b6b2e6 a oc:AntiPattern,
+oc:kn_1a8b174b a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When writing animation or per-frame logic in 3D Remotion components" ;
-    oc:directiveContent "Never use useFrame() from @react-three/fiber in a Remotion project." ;
-    oc:hasRationale "useFrame() runs on requestAnimationFrame which is decoupled from Remotion's frame-by-frame rendering model, causing desynchronized animations and flickering." ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_904f4b92 a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When animating any 3D object, shader, or model in a Remotion project" ;
-    oc:directiveContent "All animations MUST be driven by useCurrentFrame(). Never use useFrame() from @react-three/fiber or self-animating shaders/models." ;
-    oc:hasRationale "Remotion renders frames sequentially and deterministically. Self-animating elements or useFrame() produce non-deterministic timing, causing flickering and frame mismatch during rendering." ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_ca7a9065 a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When nesting Remotion's <Sequence> component within a <ThreeCanvas>" ;
-    oc:directiveContent "When using <Sequence> inside <ThreeCanvas>, the layout prop must be set to 'none'." ;
-    oc:hasRationale "The ThreeCanvas manages its own layout outside of the DOM. Without layout='none', Sequence tries to apply CSS layout rules that conflict with the 3D rendering context." ;
+    oc:appliesToContext "When using <Sequence> components within a <ThreeCanvas> tree" ;
+    oc:directiveContent "The layout prop of any <Sequence> inside <ThreeCanvas> must be set to 'none'." ;
+    oc:hasRationale "Sequences use CSS layout by default which interferes with the WebGL rendering context inside ThreeCanvas." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_f8d0a4cb a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "Before starting any 3D Remotion implementation" ;
-    oc:directiveContent "Verify that @remotion/three is installed before writing 3D code. Install it using the appropriate package manager command (npx/bunx/yarn/pnpm remotion add @remotion/three)." ;
-    oc:hasRationale "The @remotion/three package provides ThreeCanvas and related bindings; without it, 3D imports will fail at compile time." ;
-    oc:severityLevel "MEDIUM" .
+oc:kn_1f0e061b a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When building 3D scenes in Remotion" ;
+    oc:directiveContent "Follow standard React Three Fiber and Three.js best practices; only Remotion-specific rules (frame-driven animation, ThreeCanvas wrapper, Sequence layout) differ." ;
+    oc:hasRationale "Remotion's 3D integration is a thin layer over R3F/Three.js; general 3D knowledge transfers directly." .
 
-oc:req_06dea826 a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "React Three Fiber" .
+oc:kn_4655a7c3 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When rendering any 3D content in a Remotion composition" ;
+    oc:directiveContent "3D content MUST be wrapped in <ThreeCanvas> with explicit width and height props, and include proper lighting setup." ;
+    oc:hasRationale "Without width/height props the canvas cannot match the video dimensions. Without lighting, 3D objects will render as black/unlit." ;
+    oc:severityLevel "HIGH" .
 
-oc:req_5d410652 a oc:RequirementTool ;
-    oc:isOptional false ;
-    oc:requirementValue "@remotion/three" .
+oc:kn_588b2e92 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When creating any animation inside <ThreeCanvas>" ;
+    oc:directiveContent "All animations in 3D scenes MUST be driven by useCurrentFrame(). No self-animating shaders, models, or useFrame() from @react-three/fiber are allowed." ;
+    oc:hasRationale "Self-driven animations cause flickering during Remotion's frame-by-frame rendering because the animation state is not deterministic per frame." ;
+    oc:severityLevel "CRITICAL" .
 
-oc:req_69fb8c89 a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "Three.js" .
+oc:kn_5d884636 a oc:Idempotency,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When following the frame-driven animation pattern" ;
+    oc:directiveContent "3D rendering in Remotion is deterministic per frame when animations are driven by useCurrentFrame(), ensuring consistent output across renders." ;
+    oc:hasRationale "Frame-driven animation makes each frame independently reproducible, which is essential for video rendering." .
+
+oc:kn_954bf38c a oc:KnowledgeNode,
+        oc:Prerequisite ;
+    oc:appliesToContext "Before creating any 3D content in a Remotion project" ;
+    oc:directiveContent "The @remotion/three package must be installed before using 3D features. Install via: npx remotion add @remotion/three" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_f11b9fc1 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When building 3D scenes in Remotion" ;
+    oc:directiveContent "Never use useFrame() from @react-three/fiber inside Remotion compositions." ;
+    oc:hasRationale "useFrame() runs on every browser repaint, which conflicts with Remotion's frame-precise rendering model and causes visual flickering." ;
+    oc:severityLevel "CRITICAL" .
+
+_:ref_8fda3b982439a5a7 a oc:WorkflowStep ;
+    dcterms:description "Install @remotion/three package using the project's package manager" ;
+    oc:expectedOutcome "Package installed and available for import" ;
+    oc:stepId "install" .
+
+_:ref_639fa1ad08b6f8a2 a oc:WorkflowStep ;
+    dcterms:description "Wrap 3D content in <ThreeCanvas> with width/height from useVideoConfig() and add lighting" ;
+    oc:expectedOutcome "A properly sized and lit 3D canvas" ;
+    oc:stepDependsOn _:ref_8fda3b982439a5a7 ;
+    oc:stepId "create-canvas" .
 

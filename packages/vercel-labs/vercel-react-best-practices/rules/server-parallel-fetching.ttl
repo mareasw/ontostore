@@ -7,54 +7,172 @@
 oc:skill_vercel_labs_vercel_react_best_practices_server_parallel_fetching a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "server-parallel-fetching" ;
-    skos:broader "React Server Component optimization pattern" ;
+    skos:broader "Performance optimization pattern" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "569a2e9fc04f9606686cd75c5894ef8781b502786a7fffe241396846c7733472" ;
-    oc:differentia "parallelizes data fetching by restructuring component trees to avoid sequential awaits, eliminating server-side waterfalls" ;
+    oc:differentia "parallelizes server-side data fetching in React Server Components by restructuring component trees to use composition instead of sequential await calls" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
-    oc:hasArgumentHint "React Server Component tree to refactor" ;
+    oc:handlesFailure oc:InvalidInput ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_244d6e6e,
-        oc:kn_37a30c1d,
-        oc:kn_6b6aed29,
-        oc:kn_bead4d84,
-        oc:kn_fc074aa8 ;
+    oc:hasRequirement oc:req_267ff0a9,
+        oc:req_bb8549c5 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 6 ;
+                    oc:textContent "**Alternative with children prop:**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """async function Header() {
+  const data = await fetchHeader()
+  return <div>{data}</div>
+}
+
+async function Sidebar() {
+  const items = await fetchSidebarItems()
+  return <nav>{items.map(renderItem)}</nav>
+}
+
+export default function Page() {
+  return (
+    <div>
+      <Header />
+      <Sidebar />
+    </div>
+  )
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 5 ;
+                    oc:sourceLocation "lines 33-52" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Incorrect (Sidebar waits for Page's fetch to complete):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "React Server Components execute sequentially within a tree. Restructure with composition to parallelize data fetching." ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """export default async function Page() {
+  const header = await fetchHeader()
+  return (
+    <div>
+      <div>{header}</div>
+      <Sidebar />
+    </div>
+  )
+}
+
+async function Sidebar() {
+  const items = await fetchSidebarItems()
+  return <nav>{items.map(renderItem)}</nav>
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-29" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "**Correct (both fetch simultaneously):**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """async function Header() {
+  const data = await fetchHeader()
+  return <div>{data}</div>
+}
+
+async function Sidebar() {
+  const items = await fetchSidebarItems()
+  return <nav>{items.map(renderItem)}</nav>
+}
+
+function Layout({ children }: { children: ReactNode }) {
+  return (
+    <div>
+      <Header />
+      {children}
+    </div>
+  )
+}
+
+export default function Page() {
+  return (
+    <Layout>
+      <Sidebar />
+    </Layout>
+  )
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 7 ;
+                    oc:sourceLocation "lines 56-83" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Parallel Data Fetching with Component Composition" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Parallel Data Fetching with Component Composition
+impact: CRITICAL
+impactDescription: eliminates server-side waterfalls
+tags: server, rsc, parallel-fetching, composition
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:impartsKnowledge oc:kn_37aa8950,
+        oc:kn_6e4cbfaf,
+        oc:kn_a246a7b1,
+        oc:kn_f3850257,
+        oc:kn_f75ec192 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:resolvesIntent "eliminate server-side waterfalls in RSC",
-        "optimize server-side data fetching",
-        "parallelize data fetching in React Server Components",
-        "restructure component composition for concurrent fetching" .
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "eliminate server-side data fetching waterfalls",
+        "optimize React Server Component rendering performance",
+        "parallelize RSC data fetches" ;
+    oc:yieldsState oc:DocumentCreated .
 
-oc:kn_244d6e6e a oc:Heuristic,
+oc:kn_37aa8950 a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When refactoring page layouts for parallel fetching" ;
-    oc:directiveContent "When a component has no data dependencies of its own, make it synchronous and compose async children into it — this preserves parallelism of those children." ;
-    oc:hasRationale "Synchronous parent components act as transparent composition boundaries that don't introduce sequential await barriers." .
+    oc:appliesToContext "When deciding which components should be async in an RSC tree" ;
+    oc:directiveContent "If a parent component only composes children and doesn't consume their data, make it synchronous (non-async). Only make a component async if it itself needs to await data." ;
+    oc:hasRationale "A synchronous parent allows all async children to begin fetching immediately rather than being blocked by the parent's await." .
 
-oc:kn_37a30c1d a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When layout components don't need to await data themselves" ;
-    oc:directiveContent "Use the children prop pattern to decompose the tree — a parent that doesn't await can still wrap async children without blocking them." ;
-    oc:hasRationale "A non-async layout component passes through children without creating an await boundary, preserving parallelism of descendant async components." .
+oc:kn_6e4cbfaf a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When using layout components with React Server Components" ;
+    oc:directiveContent "When a layout or shared wrapper needs both async components and a children prop, keep the layout synchronous and pass async components as siblings or via children — the layout itself should not await." ;
+    oc:hasRationale "The children prop pattern allows async components to be composed without the layout itself creating a sequential bottleneck." .
 
-oc:kn_6b6aed29 a oc:Constraint,
+oc:kn_a246a7b1 a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "Always, when working with RSC architecture" ;
-    oc:directiveContent "React Server Components within a single tree execute sequentially; there is no automatic parallelism within a single component's function body." ;
-    oc:hasRationale "This is a fundamental property of RSC execution model — only sibling-level composition enables parallelism, not nested awaits." ;
-    oc:severityLevel "HIGH" .
+    oc:appliesToContext "When structuring RSC component trees with multiple independent data sources" ;
+    oc:directiveContent "Lift each data fetch into its own dedicated async server component so that sibling components fetch in parallel when rendered by a shared non-async parent." ;
+    oc:hasRationale "Sibling async components rendered by a non-async parent initiate their fetches concurrently, eliminating waterfall latency." .
 
-oc:kn_bead4d84 a oc:AntiPattern,
+oc:kn_f3850257 a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "When evaluating the performance impact of component restructuring" ;
+    oc:directiveContent "Sequential waterfall fetching has total latency = sum of all fetch times; parallel composition has total latency = max of individual fetch times." ;
+    oc:hasRationale "This is the fundamental performance win — from additive to max-based latency." .
+
+oc:kn_f75ec192 a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When designing React Server Component trees with multiple data sources" ;
-    oc:directiveContent "Never await data fetching in a parent component and then render child components that also fetch data — this creates sequential waterfalls where children wait for parents." ;
-    oc:hasRationale "RSCs execute sequentially within a tree; a parent's await blocks all child rendering, including their own fetches, compounding latency." ;
+    oc:appliesToContext "When writing async React Server Components that contain other async components" ;
+    oc:directiveContent "Never await data fetching in a parent component and then render child server components below — this creates a sequential waterfall where the child cannot begin fetching until the parent completes." ;
+    oc:hasRationale "React Server Components execute sequentially within a tree; a parent's await blocks all children from starting their own fetches." ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_fc074aa8 a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When multiple independent data sources are needed on a single page" ;
-    oc:directiveContent "Push data fetching into sibling async components so their fetches execute concurrently rather than sequentially." ;
-    oc:hasRationale "Sibling async components fire their fetches in parallel, reducing total wait time from sum(latencies) to max(latencies)." .
+oc:req_267ff0a9 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "React Server Components (RSC) execution model" .
+
+oc:req_bb8549c5 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Next.js App Router" .
 

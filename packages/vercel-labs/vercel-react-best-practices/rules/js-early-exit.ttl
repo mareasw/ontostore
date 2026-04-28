@@ -7,57 +7,122 @@
 oc:skill_vercel_labs_vercel_react_best_practices_js_early_exit a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "js-early-exit" ;
-    skos:broader "Code optimization pattern" ;
+    skos:broader "coding pattern" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "925ce5ce87f3347186ca62212f29cc6baa2b8c85a96d2720ad07c3d0abf781c0" ;
-    oc:dependsOnSkill oc:skill_vercel_react_best_practices ;
-    oc:differentia "that returns early from functions when the result is determined, avoiding unnecessary computation" ;
-    oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
-    oc:handlesFailure oc:InvalidInput ;
-    oc:hasArgumentHint "function code to refactor" ;
+    oc:differentia "returns immediately from functions when the result is determined, avoiding unnecessary computation" ;
+    oc:extends oc:skill_ontoskills_vercel_react_best_practices,
+        oc:skill_vercel_labs_vercel_react_best_practices ;
     oc:hasCategory "development" ;
-    oc:hasRequirement oc:req_3a2a55fb ;
-    oc:impartsKnowledge oc:kn_2a5cacfc,
-        oc:kn_3b12c5bb,
-        oc:kn_6c95532d,
-        oc:kn_9ff5d1f1 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Incorrect (processes all items even after finding answer):**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function validateUsers(users: User[]) {
+  let hasError = false
+  let errorMessage = ''
+  
+  for (const user of users) {
+    if (!user.email) {
+      hasError = true
+      errorMessage = 'Email required'
+    }
+    if (!user.name) {
+      hasError = true
+      errorMessage = 'Name required'
+    }
+    // Continues checking all users even after error found
+  }
+  
+  return hasError ? { valid: false, error: errorMessage } : { valid: true }
+}
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-33" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "**Correct (returns immediately on first error):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Return early when result is determined to skip unnecessary processing." ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function validateUsers(users: User[]) {
+  for (const user of users) {
+    if (!user.email) {
+      return { valid: false, error: 'Email required' }
+    }
+    if (!user.name) {
+      return { valid: false, error: 'Name required' }
+    }
+  }
+
+  return { valid: true }
+}
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 5 ;
+                    oc:sourceLocation "lines 37-50" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Early Return from Functions" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Early Return from Functions
+impact: LOW-MEDIUM
+impactDescription: avoids unnecessary computation
+tags: javascript, functions, optimization, early-return
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:impartsKnowledge oc:kn_16694110,
+        oc:kn_1ad5f49b,
+        oc:kn_cfda6895,
+        oc:kn_fe57ca06 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:EnvironmentReady ;
-    oc:resolvesIntent "avoid unnecessary computation in validation loops",
-        "optimize function execution with early returns",
-        "refactor functions to use early exit pattern" ;
-    oc:yieldsState oc:DocumentCreated .
+    oc:resolvesIntent "avoid unnecessary computation in loops",
+        "optimize functions with early returns",
+        "refactor validation functions to exit early" .
 
-oc:kn_2a5cacfc a oc:AntiPattern,
+oc:kn_16694110 a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When writing loop-based validation or search functions." ;
-    oc:directiveContent "Avoid accumulating error state with boolean flags and string messages across loop iterations when you can return immediately on the first error." ;
-    oc:hasRationale "Flag-based accumulation requires tracking mutable state across iterations, increasing complexity and the chance of bugs (e.g., overwriting error messages)." ;
+    oc:appliesToContext "When writing functions that iterate and can produce a definitive result before exhausting all items" ;
+    oc:directiveContent "Return immediately when the result is determined. Use early returns instead of accumulating state through flags." ;
+    oc:hasRationale "Early return short-circuits unnecessary work and reduces the cognitive complexity of tracking mutable accumulator state." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_3b12c5bb a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "When writing validation, search, or any function where a definitive answer can be determined before examining all inputs." ;
-    oc:directiveContent "Return early from functions when the result is already determined, rather than accumulating state and processing remaining items." ;
-    oc:hasRationale "Early return avoids unnecessary computation, reduces cognitive load by eliminating mutable accumulator variables, and makes the control flow easier to reason about." ;
-    oc:severityLevel "MEDIUM" .
+oc:kn_1ad5f49b a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When validating a collection of items where any single failure invalidates the whole set" ;
+    oc:codeLanguage "typescript" ;
+    oc:directiveContent """for (const item of items) {
+  if (failsCondition(item)) {
+    return { valid: false, error: 'reason' }
+  }
+}
+return { valid: true }""" ;
+    oc:hasRationale "This pattern eliminates mutable flags (hasError, errorMessage) and returns on first failure, making the control flow linear and easy to follow." .
 
-oc:kn_6c95532d a oc:KnowledgeNode,
+oc:kn_cfda6895 a oc:KnowledgeNode,
         oc:PerformanceProfile ;
-    oc:appliesToContext "When processing arrays or iterables where the answer can be determined at any point." ;
-    oc:directiveContent "Early exit can convert O(n) worst-case operations to O(k) where k is the position of the first matching element, providing significant speedup for large collections." ;
-    oc:hasRationale "Skipping unnecessary iterations directly reduces CPU cycles spent on work whose results would be discarded." ;
-    oc:severityLevel "LOW" .
+    oc:appliesToContext "When processing collections where failures or matches are likely before the last element" ;
+    oc:directiveContent "Early return reduces worst-case unnecessary iterations. In the worst case the pattern is the same; in the common case it exits far sooner." ;
+    oc:hasRationale "The impact is LOW-MEDIUM because the savings scale with collection size and how early the terminating condition is found." .
 
-oc:kn_9ff5d1f1 a oc:DesignPrinciple,
+oc:kn_fe57ca06 a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When structuring function control flow in JavaScript/TypeScript." ;
-    oc:directiveContent "Prefer guard clauses and early returns over deeply nested conditional logic." ;
-    oc:hasRationale "Flattening control flow with early returns makes code more readable and maintainable by reducing nesting depth and making the happy path clearly visible at the bottom." ;
-    oc:severityLevel "LOW" .
-
-oc:req_3a2a55fb a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "JavaScript/TypeScript function syntax" .
+    oc:appliesToContext "When writing validation, search, or any function where a definitive answer ends the computation" ;
+    oc:directiveContent "Never continue processing after the answer is already determined — accumulate-then-return patterns waste computation." ;
+    oc:hasRationale "Unnecessary iteration wastes CPU cycles and makes code harder to read by burying the important logic in accumulator variables." ;
+    oc:severityLevel "MEDIUM" .
 

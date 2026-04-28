@@ -10,56 +10,146 @@ oc:skill_vercel_labs_vercel_react_best_practices_client_swr_dedup a oc:Declarati
     skos:broader "Data-fetching pattern" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "644652c39c6cc00de8d1c77a7273612e868dc3f7edda30764164c12ec0f764a3" ;
-    oc:differentia "uses SWR library to automatically deduplicate, cache, and revalidate API requests across React component instances" ;
+    oc:differentia "uses SWR library for automatic request deduplication, caching, and revalidation across React component instances" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
-    oc:handlesFailure oc:FetchError,
-        oc:NetworkTimeout ;
-    oc:hasArgumentHint "React component or data-fetching pattern to optimize" ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_0a1fa670,
-        oc:kn_16be6b52,
-        oc:kn_9ad5aa27,
-        oc:kn_e34e3202,
-        oc:kn_f215fb17 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Use SWR for Automatic Deduplication
+impact: MEDIUM-HIGH
+impactDescription: automatic deduplication
+tags: client, swr, deduplication, data-fetching
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """import useSWR from 'swr'
+
+function UserList() {
+  const { data: users } = useSWR('/api/users', fetcher)
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 5 ;
+                    oc:sourceLocation "lines 27-33" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Incorrect (no deduplication, each instance fetches):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "SWR enables request deduplication, caching, and revalidation across component instances." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 6 ;
+                    oc:textContent "**For immutable data:**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function UserList() {
+  const [users, setUsers] = useState([])
+  useEffect(() => {
+    fetch('/api/users')
+      .then(r => r.json())
+      .then(setUsers)
+  }, [])
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-23" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """import { useSWRMutation } from 'swr/mutation'
+
+function UpdateButton() {
+  const { trigger } = useSWRMutation('/api/user', updateUser)
+  return <button onClick={() => trigger()}>Update</button>
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 9 ;
+                    oc:sourceLocation "lines 47-54" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "**Correct (multiple instances share one request):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 10 ;
+                    oc:textContent "Reference: [https://swr.vercel.app](https://swr.vercel.app)" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 8 ;
+                    oc:textContent "**For mutations:**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """import { useImmutableSWR } from '@/lib/swr'
+
+function StaticContent() {
+  const { data } = useImmutableSWR('/api/config', fetcher)
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 7 ;
+                    oc:sourceLocation "lines 37-43" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Use SWR for Automatic Deduplication" ] ;
+    oc:impartsKnowledge oc:kn_1760f991,
+        oc:kn_1aa3d6cc,
+        oc:kn_2d884e22,
+        oc:kn_74325692,
+        oc:kn_99efc066,
+        oc:kn_d9ea57e3 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:EnvironmentReady ;
     oc:resolvesIntent "deduplicate API requests",
-        "handle mutations with SWR",
-        "implement SWR caching strategy",
-        "optimize data fetching in React" ;
-    oc:yieldsState oc:DataCached,
-        oc:RequestDeduplicated .
+        "implement SWR for shared caching",
+        "optimize data fetching in React components" .
 
-oc:kn_0a1fa670 a oc:Constraint,
+oc:kn_1760f991 a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When configuring SWR across multiple components or pages" ;
-    oc:directiveContent "All SWR hooks sharing the same key must use the same fetcher function and data shape to maintain cache consistency." ;
-    oc:hasRationale "Mismatched fetchers for the same key can cause type errors, stale data, or unexpected revalidation behavior." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_16be6b52 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When fetching static or configuration data that does not change" ;
-    oc:directiveContent "Use useImmutableSWR for data that never changes (e.g., config, static content) to prevent unnecessary revalidation." ;
-    oc:hasRationale "Immutable SWR avoids background revalidation rounds, saving network resources and improving performance for truly static data." .
-
-oc:kn_9ad5aa27 a oc:KnowledgeNode,
-        oc:WorkflowStrategy ;
-    oc:appliesToContext "When implementing data mutations (create, update, delete) in React components" ;
-    oc:directiveContent "Use useSWRMutation for write operations (POST/PUT/DELETE) instead of useSWR, then trigger cache revalidation after mutation completes." ;
-    oc:hasRationale "useSWRMutation separates read and write concerns, providing explicit mutation triggers and enabling cache revalidation only when needed." .
-
-oc:kn_e34e3202 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When fetching data in React components that may be shared across multiple instances" ;
-    oc:directiveContent "Never use raw fetch inside useEffect for data that may be requested by multiple component instances — each instance will trigger a separate network request." ;
-    oc:hasRationale "Without deduplication, multiple components requesting the same endpoint create N identical network requests, wasting bandwidth and causing inconsistent state." ;
+    oc:appliesToContext "When fetching the same data in multiple React components" ;
+    oc:directiveContent "Never use useState + useEffect + fetch for data fetching in multiple component instances — each instance triggers a separate network request." ;
+    oc:hasRationale "Without deduplication, N component instances render N identical API calls, wasting bandwidth and server resources" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_f215fb17 a oc:DesignPrinciple,
+oc:kn_1aa3d6cc a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When multiple React components need the same data" ;
-    oc:directiveContent "Use SWR's key-based deduplication so that multiple component instances referencing the same key share a single request." ;
-    oc:hasRationale "SWR automatically deduplicates requests by key, ensuring only one fetch per key is in-flight at a time, reducing network load and keeping state synchronized." .
+    oc:appliesToContext "When you need to explicitly mutate/update data rather than just read it" ;
+    oc:codeLanguage "tsx" ;
+    oc:directiveContent "const { trigger } = useSWRMutation('/api/resource', updateFn)" ;
+    oc:hasRationale "useSWRMutation separates read and write concerns, preventing automatic revalidation on mount for mutation endpoints" .
+
+oc:kn_2d884e22 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Default data fetching with SWR — multiple components sharing the same key share one request" ;
+    oc:codeLanguage "tsx" ;
+    oc:directiveContent "const { data } = useSWR('/api/resource', fetcher)" ;
+    oc:hasRationale "SWR deduplicates by key, so identical keys across components resolve to a single in-flight request" .
+
+oc:kn_74325692 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When choosing which SWR hook to use" ;
+    oc:directiveContent "Use the appropriate SWR hook variant for the data's mutation characteristics: useSWR for mutable/fresh data, useImmutableSWR for static data, useSWRMutation for explicit writes." ;
+    oc:hasRationale "Matching the hook to the data lifecycle optimizes both network usage and cache freshness" .
+
+oc:kn_99efc066 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Fetching data that never changes (config, static content)" ;
+    oc:codeLanguage "tsx" ;
+    oc:directiveContent "const { data } = useImmutableSWR('/api/config', fetcher)" ;
+    oc:hasRationale "Prevents unnecessary revalidation for data that is known to be immutable, reducing network traffic" .
+
+oc:kn_d9ea57e3 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When evaluating whether to adopt SWR for a given fetch" ;
+    oc:directiveContent "Any data fetched in more than one component should use SWR (or similar) to deduplicate requests automatically." ;
+    oc:hasRationale "The deduplication benefit scales with the number of component instances sharing the same data" .
 

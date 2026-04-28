@@ -10,56 +10,138 @@ oc:skill_vercel_labs_vercel_react_best_practices_bundle_conditional a oc:Declara
     skos:broader "Bundle optimization technique" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "09c8259c3efb04fc0abb8e412ccbda217c222ae8118516283e571c995fe3a7d4" ;
-    oc:differentia "defers loading of large modules until feature activation using dynamic imports" ;
+    oc:differentia "defers loading of large modules until a feature is activated using dynamic imports" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
-    oc:handlesFailure oc:DynamicImportFailed ;
+    oc:handlesFailure oc:ImportFailed ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_289ae94f,
-        oc:kn_641be575,
-        oc:kn_ba9188c5,
-        oc:kn_ca3d84e9,
-        oc:kn_d87a6d77 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Conditional Module Loading
+impact: HIGH
+impactDescription: loads large data only when needed
+tags: bundle, conditional-loading, lazy-loading
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Load large data or modules only when a feature is activated." ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function AnimationPlayer({ enabled, setEnabled }: { enabled: boolean; setEnabled: React.Dispatch<React.SetStateAction<boolean>> }) {
+  const [frames, setFrames] = useState<Frame[] | null>(null)
+
+  useEffect(() => {
+    if (enabled && !frames && typeof window !== 'undefined') {
+      import('./animation-frames.js')
+        .then(mod => setFrames(mod.frames))
+        .catch(() => setEnabled(false))
+    }
+  }, [enabled, frames, setEnabled])
+
+  if (!frames) return <Skeleton />
+  return <Canvas frames={frames} />
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-29" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "The `typeof window !== 'undefined'` check prevents bundling this module for SSR, optimizing server bundle size and build speed." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Example (lazy-load animation frames):**" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Conditional Module Loading" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "Steps to implement lazy loading of a heavy module in a React component." ;
+            oc:hasStep [ a oc:WorkflowStep ;
+                    dcterms:description "Render a loading skeleton while data is null, then render the full component once loaded." ;
+                    oc:expectedOutcome "User sees skeleton during load, full content after" ;
+                    oc:stepDependsOn _:ref_908148001d968c07 ;
+                    oc:stepId "render-fallback" ],
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Add .catch() to the dynamic import to gracefully disable the feature on failure." ;
+                    oc:expectedOutcome "Feature is disabled instead of crashing on import failure" ;
+                    oc:stepDependsOn _:ref_908148001d968c07 ;
+                    oc:stepId "handle-error" ],
+                _:ref_8eb6fcb5b7fb032e,
+                _:ref_908148001d968c07,
+                _:ref_f8b217dd61358784 ;
+            oc:workflowId "conditional-loading" ;
+            oc:workflowName "Conditional Module Loading Workflow" ] ;
+    oc:impartsKnowledge oc:kn_05f5e4bc,
+        oc:kn_1082047e,
+        oc:kn_21945776,
+        oc:kn_4f9b5f28,
+        oc:kn_a53598c7 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:ReactComponentMounted ;
-    oc:resolvesIntent "lazy-load modules conditionally",
-        "optimize SSR bundle by deferring client-only imports",
+    oc:requiresState oc:ReactComponentReady ;
+    oc:resolvesIntent "conditionally load large data",
+        "lazy load modules",
+        "optimize dynamic imports in React",
         "reduce initial bundle size" ;
-    oc:yieldsState oc:BundleSizeOptimized,
-        oc:ModuleConditionallyLoaded .
+    oc:yieldsState oc:ModuleConditionallyLoaded .
 
-oc:kn_289ae94f a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When implementing conditional loading inside useEffect" ;
-    oc:directiveContent "Guard against repeated imports by checking if data has already been loaded (e.g., `if (enabled && !frames)`) before triggering a dynamic import." ;
-    oc:hasRationale "Without a loaded-state check, re-enabling a feature would re-fetch and re-parse the module, causing unnecessary network requests and state thrashing." ;
+oc:kn_05f5e4bc a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "When lazy-loading modules in Next.js or other SSR frameworks" ;
+    oc:directiveContent "Using typeof window !== 'undefined' before dynamic imports prevents bundling the module for SSR, reducing server bundle size and improving build speed." ;
+    oc:hasRationale "SSR bundles that include client-only modules waste server resources and slow builds." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_641be575 a oc:AntiPattern,
+oc:kn_1082047e a oc:Idempotency,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When writing components with optional or toggled features" ;
-    oc:directiveContent "Do not import large animation frames, datasets, or heavy libraries at the top level of a component that may never be used." ;
-    oc:hasRationale "Static imports are always included in the bundle regardless of whether the feature is activated, wasting bandwidth and parse time." ;
+    oc:appliesToContext "When using useEffect for conditional loading" ;
+    oc:directiveContent "Guard dynamic imports with a null-check on already-loaded state (e.g., !frames) to prevent redundant imports when the effect re-runs." ;
+    oc:hasRationale "Without the guard, re-renders could trigger multiple import calls for the same module." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_ba9188c5 a oc:KnowledgeNode,
+oc:kn_21945776 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When a component depends on heavy data (animations, large datasets, complex libraries)" ;
+    oc:directiveContent "Load large data or modules only when a feature is activated, not on initial page load." ;
+    oc:hasRationale "Deferring non-critical module loading reduces initial bundle size and improves time-to-interactive." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_4f9b5f28 a oc:KnowledgeNode,
         oc:RecoveryTactic ;
     oc:appliesToContext "When using dynamic import() for conditional loading" ;
-    oc:directiveContent "Handle dynamic import failures with a .catch() handler that gracefully disables the feature (e.g., setting enabled state to false)." ;
-    oc:hasRationale "Network failures or module loading errors should not crash the entire component; graceful degradation preserves the rest of the UI." ;
+    oc:directiveContent "Catch dynamic import failures with .catch() and disable the feature gracefully rather than crashing." ;
+    oc:hasRationale "Network failures or module errors during lazy loading should degrade gracefully instead of breaking the entire UI." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_ca3d84e9 a oc:Heuristic,
+oc:kn_a53598c7 a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When dynamically importing modules in components that run during server-side rendering" ;
-    oc:directiveContent "Use `typeof window !== 'undefined'` guard around dynamic imports to prevent bundling client-only modules into the SSR bundle." ;
-    oc:hasRationale "Without this guard, the module gets resolved and included in the server bundle, increasing server bundle size and potentially breaking SSR if the module relies on browser APIs." ;
+    oc:appliesToContext "When writing components with feature-gated or user-triggered functionality" ;
+    oc:directiveContent "Never statically import large optional modules at the top of a file if they are only needed conditionally." ;
+    oc:hasRationale "Static imports force the module into the main bundle, negating code-splitting benefits and slowing initial load." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_d87a6d77 a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When building components that depend on heavy data or large third-party modules" ;
-    oc:directiveContent "Load large data or modules only when the feature that requires them is activated, using dynamic import() triggered by state changes." ;
-    oc:hasRationale "Deferring module loading reduces initial JavaScript bundle size and improves Time to Interactive for the majority of users who may never activate the feature." ;
-    oc:severityLevel "HIGH" .
+_:ref_8eb6fcb5b7fb032e a oc:WorkflowStep ;
+    dcterms:description "Identify a large module or data dependency that is only needed when a feature is activated." ;
+    oc:expectedOutcome "Candidate module identified for deferred loading" ;
+    oc:stepId "identify" .
+
+_:ref_f8b217dd61358784 a oc:WorkflowStep ;
+    dcterms:description "Add state to hold the lazily-loaded data (null initially) and a feature activation flag." ;
+    oc:expectedOutcome "Component has null-state for deferred data and boolean activation flag" ;
+    oc:stepDependsOn _:ref_8eb6fcb5b7fb032e ;
+    oc:stepId "setup-state" .
+
+_:ref_908148001d968c07 a oc:WorkflowStep ;
+    dcterms:description "Use dynamic import() inside useEffect, guarded by activation flag, null-check, and typeof window check." ;
+    oc:expectedOutcome "Module is fetched only when feature is activated, client-side only" ;
+    oc:stepDependsOn _:ref_f8b217dd61358784 ;
+    oc:stepId "implement-import" .
 

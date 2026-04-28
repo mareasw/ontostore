@@ -7,78 +7,317 @@
 oc:skill_coinbase_agentic_wallet_skills_send_usdc a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "send-usdc" ;
-    skos:broader "Payment skill" ;
-    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/coinbase/agentic-wallet-skills/send-usdc" ;
+    skos:broader "Blockchain transaction skill" ;
+    prov:wasDerivedFrom "../.agents/skills/coinbase/agentic-wallet-skills/send-usdc" ;
     oc:contentHash "52208215b2ba2d0031fbf6b13c2cd5fe42378f3cb3d19dcad5a9bbe52e554386" ;
-    oc:dependsOnSkill oc:skill_authenticate_wallet ;
-    oc:differentia "that transfers USDC from an authenticated wallet to any Ethereum address or ENS name on Base network via the awal CLI" ;
-    oc:handlesFailure oc:InsufficientBalance,
-        oc:InvalidInput,
-        oc:NetworkTimeout ;
+    oc:dependsOnSkill oc:skill_ontoskills_authenticate_wallet ;
+    oc:differentia "Transfers USDC from an authenticated wallet to an Ethereum address or ENS name on Base network using the awal CLI" ;
+    oc:handlesFailure oc:ENSResolutionFailed,
+        oc:InsufficientBalance,
+        oc:InvalidRecipient ;
     oc:hasAllowedTool "Bash(npx awal@2.0.3 balance*)",
         "Bash(npx awal@2.0.3 send *)",
         "Bash(npx awal@2.0.3 status*)" ;
-    oc:hasArgumentHint "amount recipient [--chain <chain>] [--json]" ;
+    oc:hasArgumentHint "<amount> <recipient> [--chain <chain>] [--json]" ;
     oc:hasCategory "finance" ;
     oc:hasDescription "Send USDC to an Ethereum address or ENS name. Use when you or the user want to send money, pay someone, transfer USDC, tip, donate, or send funds to a wallet address or .eth name. Covers phrases like \"send $5 to\", \"pay 0x...\", or \"transfer to vitalik.eth\"." ;
     oc:hasName "send-usdc" ;
-    oc:hasRequirement oc:req_2597edc0,
-        oc:req_a61e7e7b ;
-    oc:impartsKnowledge oc:kn_1a39c42d,
-        oc:kn_1a54aa5e,
-        oc:kn_230e7a06,
-        oc:kn_80c677b3,
-        oc:kn_b1a2fb8c ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Use the `npx awal@2.0.3 send` command to transfer USDC from the wallet to any Ethereum address or ENS name on Base." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 1 ;
+                            oc:rowCount 2 ;
+                            oc:tableCaption "## Arguments" ;
+                            oc:tableMarkdown """| Argument    | Description                                                                                                                                                                                                                          |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `amount`    | Amount to send: '$1.00', '1.00', or atomic units (1000000 = $1). Always single-quote amounts that use `$` to prevent bash variable expansion. If the number looks like atomic units (no decimal or > 100), treat as atomic units. Assume that people won't be sending more than 100 USDC the majority of the time |
+| `recipient` | Ethereum address (0x...) or ENS name (vitalik.eth)                                                                                                                                                                                   |
+""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Arguments" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# Send $1.00 USDC to an address
+npx awal@2.0.3 send 1 0x1234...abcd
+
+# Send $0.50 USDC to an ENS name
+npx awal@2.0.3 send 0.50 vitalik.eth
+
+# Send with dollar sign prefix (note the single quotes)
+npx awal@2.0.3 send '$5.00' 0x1234...abcd
+
+# Get JSON output
+npx awal@2.0.3 send 1 vitalik.eth --json
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 52-64" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Examples" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Before constructing the command, validate all user-provided values to prevent shell injection:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "Do not pass unvalidated user input into the command." ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "**recipient**: Must be a valid `0x` hex address (`^0x[0-9a-fA-F]{40}$`) or an ENS name (`^[a-zA-Z0-9.-]+\\.eth$`). Reject any value containing spaces or shell metacharacters." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "**amount**: Must match `^\\$?[\\d.]+$` (digits, optional decimal point, optional `$` prefix). Reject if it contains spaces, semicolons, pipes, backticks, or other shell metacharacters." ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Input Validation" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """npx awal@2.0.3 send <amount> <recipient> [--chain <chain>] [--json]
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 23-25" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Command Syntax" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "If the wallet is not authenticated, refer to the `authenticate-wallet` skill." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """npx awal@2.0.3 status
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 15-17" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Confirm wallet is initialized and authed" ],
+                [ a oc:Section ;
+                    oc:hasContent _:ref_2b92bbff8d0a8ddf,
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "ENS names are automatically resolved to addresses via Ethereum mainnet. The command will:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 7 ;
+                    oc:sectionTitle "ENS Resolution" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "\"Could not resolve ENS name\" - Verify the ENS name exists" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "\"Not authenticated\" - Run `awal auth login <email>` first" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "\"Insufficient balance\" - Check balance with `awal balance`" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "\"Invalid recipient\" - Must be valid 0x address or ENS name" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Common errors:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 9 ;
+                    oc:sectionTitle "Error Handling" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 1 ;
+                            oc:rowCount 2 ;
+                            oc:tableCaption "## Options" ;
+                            oc:tableMarkdown """| Option           | Description                        |
+| ---------------- | ---------------------------------- |
+| `--chain <name>` | Blockchain network (default: base) |
+| `--json`         | Output result as JSON              |
+""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Options" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Wallet must have sufficient USDC balance (`npx awal balance` to check)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Must be authenticated (`npx awal@2.0.3 status` to check, `npx awal@2.0.3 auth login` to sign in, see skill `authenticate-wallet` for more information)" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 8 ;
+                    oc:sectionTitle "Prerequisites" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Sending USDC" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """name: send-usdc
+description: Send USDC to an Ethereum address or ENS name. Use when you or the user want to send money, pay someone, transfer USDC, tip, donate, or send funds to a wallet address or .eth name. Covers phrases like "send $5 to", "pay 0x...", or "transfer to vitalik.eth".
+user-invocable: true
+disable-model-invocation: false
+allowed-tools: ["Bash(npx awal@2.0.3 status*)", "Bash(npx awal@2.0.3 send *)", "Bash(npx awal@2.0.3 balance*)"]
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:hasWorkflow _:ref_2b92bbff8d0a8ddf,
+        [ a oc:Workflow ;
+            dcterms:description "Complete workflow for sending USDC from an authenticated wallet to a recipient" ;
+            oc:hasStep _:ref_6d8f36e85d1d2abc,
+                _:ref_7fbcd4504c159401,
+                _:ref_c19c730e595d3c7e,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Verify command output confirms successful transfer, noting resolved ENS address if applicable" ;
+                    oc:expectedOutcome "Output shows successful transfer with transaction details" ;
+                    oc:stepDependsOn _:ref_6d8f36e85d1d2abc ;
+                    oc:stepId "confirm-result" ],
+                _:ref_ebf944fd01390b8c ;
+            oc:workflowId "send-usdc-main" ;
+            oc:workflowName "Send USDC Workflow" ] ;
+    oc:impartsKnowledge oc:kn_2996b6d8,
+        oc:kn_7bb2789e,
+        oc:kn_97dbfc28,
+        oc:kn_be4a3923,
+        oc:kn_e5abd73f,
+        oc:kn_f5cca8f0,
+        oc:kn_fd8bda1d ;
     oc:isUserInvocable true ;
-    oc:nature "Tool" ;
+    oc:nature "Work" ;
     oc:requiresState oc:SystemAuthenticated ;
     oc:resolvesIntent "pay someone with USDC",
         "send USDC to an address",
-        "send funds to an ENS name",
+        "send money to an ENS name",
         "tip or donate USDC",
         "transfer USDC to a wallet" ;
-    oc:yieldsState oc:TransactionSent .
+    oc:yieldsState oc:TransactionCompleted .
 
-oc:kn_1a39c42d a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When constructing the amount argument" ;
-    oc:directiveContent "Single-quote amounts that use the $ prefix (e.g., '$5.00') to prevent bash variable expansion. If the number has no decimal point and is greater than 100, treat it as atomic units (1000000 = $1 USDC)." ;
-    oc:hasRationale "Bash interprets unquoted $ as variable expansion, corrupting the amount. Atomic unit interpretation prevents accidental large transfers." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_1a54aa5e a oc:KnowledgeNode,
-        oc:SideEffect ;
-    oc:appliesToContext "Always on successful execution" ;
-    oc:directiveContent "This skill transfers real USDC tokens from the wallet to an on-chain recipient. The transaction is irreversible once confirmed on Base." ;
-    oc:hasRationale "Blockchain transactions cannot be undone; incorrect amounts or recipients result in permanent loss of funds." ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_230e7a06 a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "Always, before constructing the send command" ;
-    oc:directiveContent "Validate amount against ^\\$?[\\d.]+$ and recipient against ^0x[0-9a-fA-F]{40}$ or ^[a-zA-Z0-9.-]+\\.eth$ before constructing the command. Reject any value containing spaces, semicolons, pipes, backticks, or other shell metacharacters." ;
-    oc:hasRationale "Unvalidated user input passed to a shell command enables injection attacks and can cause unintended execution or data loss." ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_80c677b3 a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "Before every send operation" ;
-    oc:directiveContent "Run 'npx awal@2.0.3 status' to confirm the wallet is authenticated before attempting a send. If not authenticated, invoke the authenticate-wallet skill first." ;
-    oc:hasRationale "Sending USDC requires an authenticated wallet; attempting to send without auth will fail and waste a round-trip." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_b1a2fb8c a oc:KnowledgeNode,
-        oc:RecoveryTactic ;
-    oc:appliesToContext "When the send command returns an error" ;
-    oc:directiveContent "On 'Not authenticated', invoke authenticate-wallet. On 'Insufficient balance', check with 'awal balance' and inform user. On 'Could not resolve ENS name', ask user to verify the ENS name. On 'Invalid recipient', re-validate the address format." ;
-    oc:hasRationale "Structured error recovery prevents retry loops and gives the user actionable next steps." ;
+oc:kn_2996b6d8 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When sending to .eth names" ;
+    oc:directiveContent "ENS resolution can fail if the name doesn't exist or the Ethereum mainnet RPC is unreachable. Verify ENS names exist before sending." ;
+    oc:hasRationale "ENS resolution depends on Ethereum mainnet availability; failed resolution blocks the transaction" ;
     oc:severityLevel "MEDIUM" .
 
-oc:req_2597edc0 a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "Ethereum address or ENS name format" .
+oc:kn_7bb2789e a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "On command execution failure" ;
+    oc:directiveContent "If 'Not authenticated' error occurs, run authenticate-wallet skill. If 'Insufficient balance', check with awal balance. If 'Could not resolve ENS name', verify the ENS name exists." ;
+    oc:hasRationale "These are the most common failure modes and each has a clear remediation path" ;
+    oc:severityLevel "HIGH" .
 
-oc:req_a61e7e7b a oc:RequirementTool ;
-    oc:isOptional false ;
-    oc:requirementValue "npx awal@2.0.3" .
+oc:kn_97dbfc28 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When formatting amount arguments" ;
+    oc:directiveContent "Always single-quote amounts with $ prefix (e.g., '$5.00') to prevent bash variable expansion. If the number has no decimal and is >100, treat as atomic units." ;
+    oc:hasRationale "Bash interprets $ in double quotes as variable expansion, corrupting the amount" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_be4a3923 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When constructing send commands from user input" ;
+    oc:directiveContent "Never pass unvalidated user input into the npx awal send command. Always validate amount and recipient against regex patterns first." ;
+    oc:hasRationale "Shell injection can lead to arbitrary command execution" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_e5abd73f a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Before constructing any send command" ;
+    oc:directiveContent "Amount must match ^\\$?[\\d.]+$, recipient must match ^0x[0-9a-fA-F]{40}$ or ^[a-zA-Z0-9.-]+\\.eth$. Reject any value containing spaces, semicolons, pipes, backticks, or shell metacharacters." ;
+    oc:hasRationale "Prevents shell injection attacks from unvalidated user input" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_f5cca8f0 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before every send operation" ;
+    oc:directiveContent "Run 'npx awal@2.0.3 status' to verify wallet is authenticated and 'npx awal balance' to verify sufficient USDC balance before attempting a send." ;
+    oc:hasRationale "Prevents failed transactions due to missing auth or insufficient funds" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_fd8bda1d a oc:AssumptionBoundary,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When interpreting amount values" ;
+    oc:directiveContent "Assume users won't be sending more than 100 USDC the majority of the time. Amounts without decimals or >100 should be treated as atomic units (1000000 = $1)." ;
+    oc:hasRationale "Disambiguates between human-readable amounts and atomic unit representations" .
+
+_:ref_b85b0bf3bfd41ad1 a oc:WorkflowStep ;
+    dcterms:description "Resolve the name to an address" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_d195cf174c715468 a oc:WorkflowStep ;
+    dcterms:description "Detect ENS names (any string containing a dot that isn't a hex address)" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_e3a29a3e2bc7d70a a oc:WorkflowStep ;
+    dcterms:description "Display both the ENS name and resolved address in the output" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_2b92bbff8d0a8ddf a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 2 ;
+    oc:hasStep _:ref_b85b0bf3bfd41ad1,
+        _:ref_d195cf174c715468,
+        _:ref_e3a29a3e2bc7d70a ;
+    oc:workflowId "procedure_2" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_6d8f36e85d1d2abc a oc:WorkflowStep ;
+    dcterms:description "Execute 'npx awal@2.0.3 send <amount> <recipient>' with validated inputs" ;
+    oc:expectedOutcome "Transaction completes and USDC is transferred to recipient" ;
+    oc:stepDependsOn _:ref_c19c730e595d3c7e ;
+    oc:stepId "send-usdc" .
+
+_:ref_7fbcd4504c159401 a oc:WorkflowStep ;
+    dcterms:description "Run 'npx awal balance' to verify sufficient USDC balance for the transfer" ;
+    oc:expectedOutcome "Balance is displayed and sufficient for the intended amount" ;
+    oc:stepId "check-balance" .
+
+_:ref_c19c730e595d3c7e a oc:WorkflowStep ;
+    dcterms:description "Validate amount matches ^\\$?[\\d.]+$ and recipient matches 0x hex or .eth ENS pattern. Reject shell metacharacters." ;
+    oc:expectedOutcome "All inputs pass validation regex checks" ;
+    oc:stepDependsOn _:ref_7fbcd4504c159401,
+        _:ref_ebf944fd01390b8c ;
+    oc:stepId "validate-input" .
+
+_:ref_ebf944fd01390b8c a oc:WorkflowStep ;
+    dcterms:description "Run 'npx awal@2.0.3 status' to confirm wallet is authenticated" ;
+    oc:expectedOutcome "Wallet shows authenticated status" ;
+    oc:stepId "check-auth" .
 

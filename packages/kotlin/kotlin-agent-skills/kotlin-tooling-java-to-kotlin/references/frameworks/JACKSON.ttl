@@ -10,66 +10,483 @@ oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_java_to_kotlin_jackson a oc:D
     skos:broader "conversion guide" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/kotlin/kotlin-agent-skills/kotlin-tooling-java-to-kotlin" ;
     oc:contentHash "c407201a3629f1af4117e3b6b99a0cbebb7f7b62ef14fb9c3bb7e55250ea86ef" ;
-    oc:differentia "handles Jackson annotation migration from Java to Kotlin with correct use-site targets" ;
+    oc:dependsOnSkill oc:skill_ontoskills_kotlin_tooling_java_to_kotlin ;
+    oc:differentia "that maps Jackson annotation patterns from Java to Kotlin, ensuring correct use-site targets for serialization fidelity" ;
     oc:extends oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_java_to_kotlin ;
-    oc:handlesFailure oc:AnnotationTargetMismatch,
-        oc:SerializationBehaviorChanged ;
-    oc:hasArgumentHint "Java source file with com.fasterxml.jackson.* imports" ;
+    oc:handlesFailure oc:AnnotationMismatch,
+        oc:InvalidAnnotationTarget ;
+    oc:hasAllowedTool "Edit",
+        "Glob",
+        "Grep",
+        "Read",
+        "Write" ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_0f047987,
-        oc:kn_4d3a09dd,
-        oc:kn_67dca8ab,
-        oc:kn_72f09794,
-        oc:kn_794d2c90,
-        oc:kn_92c79a9f ;
-    oc:isUserInvocable false ;
-    oc:nature "sub-skill" ;
-    oc:requiresState oc:JacksonImportsPresent,
-        oc:JavaSourceDetected ;
-    oc:resolvesIntent "apply correct Kotlin annotation site targets for Jackson",
+    oc:hasSection [ a oc:Section ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent _:ref_ab7a6076269dbc3a ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Key Rules" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Detected when imports match `com.fasterxml.jackson.*`." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "When This Applies" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText """String parameters remain nullable (`String?`) since Java strings are nullable by
+default and there is no `@NonNull` or `Objects.requireNonNull` evidence.""" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText """`@JsonCreator` is kept on the primary constructor for safety, ensuring Jackson can
+deserialize even without the Jackson Kotlin module.""" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "The class becomes a `data class` since it is immutable and value-oriented." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText """The Java `@JsonCreator` static factory is converted to a Kotlin primary constructor
+with `@JsonCreator`. The companion object factory is preserved for backward
+compatibility but the primary constructor handles deserialization.""" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**Key points:**" ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """package com.acme.model;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+/**
+ * Immutable configuration entry deserialized from JSON.
+ */
+public class ConfigEntry {
+
+    private final String key;
+    private final String value;
+    private final boolean enabled;
+
+    @JsonCreator
+    public static ConfigEntry create(
+            @JsonProperty("key") String key,
+            @JsonProperty("value") String value,
+            @JsonProperty("enabled") boolean enabled) {
+        return new ConfigEntry(key, value, enabled);
+    }
+
+    private ConfigEntry(String key, String value, boolean enabled) {
+        this.key = key;
+        this.value = value;
+        this.enabled = enabled;
+    }
+
+    @JsonProperty("key")
+    public String getKey() {
+        return key;
+    }
+
+    @JsonProperty("value")
+    public String getValue() {
+        return value;
+    }
+
+    @JsonProperty("enabled")
+    public boolean isEnabled() {
+        return enabled;
+    }
+}
+""" ;
+                                    oc:codeLanguage "java" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 150-194" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Java Input" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """package com.acme.model
+
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonProperty
+
+/**
+ * Immutable configuration entry deserialized from JSON.
+ *
+ * @property key the configuration key
+ * @property value the configuration value
+ * @property enabled whether this entry is active
+ */
+data class ConfigEntry @JsonCreator constructor(
+    @field:JsonProperty("key")
+    @get:JsonProperty("key")
+    val key: String?,
+
+    @field:JsonProperty("value")
+    @get:JsonProperty("value")
+    val value: String?,
+
+    @field:JsonProperty("enabled")
+    @get:JsonProperty("enabled")
+    val enabled: Boolean
+) {
+    companion object {
+        /**
+         * Factory method preserved for documentation; the primary constructor
+         * with [JsonCreator] handles deserialization directly.
+         */
+        @JsonCreator
+        @JvmStatic
+        fun create(
+            @JsonProperty("key") key: String?,
+            @JsonProperty("value") value: String?,
+            @JsonProperty("enabled") enabled: Boolean
+        ): ConfigEntry = ConfigEntry(key, value, enabled)
+    }
+}
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 198-238" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Kotlin Output" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Example 2: Class with @JsonCreator Factory Method" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "`@JsonInclude` stays at class level — no site target needed." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "`@JsonIgnore` gets both `@field:` and `@get:` to suppress serialization fully." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "`@JsonFormat` also gets both `@field:` and `@get:` since Java had it on both." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText """`@JsonProperty` gets both `@field:` and `@get:` to match the Java field + getter
+annotations.""" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**Key points:**" ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """package com.acme.dto
+
+import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.annotation.JsonFormat
+
+/**
+ * Data transfer object for an order summary.
+ *
+ * @property orderId unique identifier for the order, serialized as `"order_id"`
+ * @property totalAmount total monetary amount, serialized as `"total_amount"`
+ * @property createdDate date the order was created, formatted as `yyyy-MM-dd`
+ */
+@JsonInclude(JsonInclude.Include.NON_NULL)
+open class OrderSummaryDto(
+    @field:JsonProperty("order_id")
+    @get:JsonProperty("order_id")
+    val orderId: String?,
+
+    @field:JsonProperty("total_amount")
+    @get:JsonProperty("total_amount")
+    val totalAmount: Double,
+
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @get:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    val createdDate: String?
+) {
+    @field:JsonIgnore
+    @get:JsonIgnore
+    var internalNote: String? = null
+}
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 102-135" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Kotlin Output" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """package com.acme.dto;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+/**
+ * Data transfer object for an order summary.
+ */
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class OrderSummaryDto {
+
+    @JsonProperty("order_id")
+    private final String orderId;
+
+    @JsonProperty("total_amount")
+    private final double totalAmount;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private final String createdDate;
+
+    @JsonIgnore
+    private String internalNote;
+
+    public OrderSummaryDto(String orderId, double totalAmount, String createdDate) {
+        this.orderId = orderId;
+        this.totalAmount = totalAmount;
+        this.createdDate = createdDate;
+    }
+
+    @JsonProperty("order_id")
+    public String getOrderId() {
+        return orderId;
+    }
+
+    @JsonProperty("total_amount")
+    public double getTotalAmount() {
+        return totalAmount;
+    }
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    public String getCreatedDate() {
+        return createdDate;
+    }
+
+    @JsonIgnore
+    public String getInternalNote() {
+        return internalNote;
+    }
+
+    public void setInternalNote(String internalNote) {
+        this.internalNote = internalNote;
+    }
+}
+""" ;
+                                    oc:codeLanguage "java" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 42-98" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Java Input" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Example 1: DTO with Various Jackson Annotations" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Jackson Conversion Guide" ] ;
+    oc:hasWorkflow _:ref_ab7a6076269dbc3a ;
+    oc:impartsKnowledge oc:kn_58297cc6,
+        oc:kn_5b141f54,
+        oc:kn_5e9def42,
+        oc:kn_6a854395,
+        oc:kn_7973412b,
+        oc:kn_cf1249be,
+        oc:kn_d3ad8946,
+        oc:kn_dbfeacea,
+        oc:kn_e213f8f0 ;
+    oc:isUserInvocable true ;
+    oc:nature "concept" ;
+    oc:requiresState oc:JavaSourceDetected ;
+    oc:resolvesIntent "apply correct Kotlin use-site targets for Jackson annotations",
         "convert Jackson-annotated Java classes to Kotlin",
-        "preserve Jackson serialization behavior during Java-to-Kotlin conversion" ;
+        "preserve Jackson serialization behavior during Java-to-Kotlin migration" ;
     oc:yieldsState oc:JacksonAnnotationsConverted .
 
-oc:kn_0f047987 a oc:KnowledgeNode,
-        oc:KnownIssue ;
-    oc:appliesToContext "When the project uses Jackson with Kotlin but lacks the Kotlin module dependency" ;
-    oc:directiveContent "If jackson-module-kotlin is absent from the project, note it but do NOT add it during conversion. The converter should preserve explicit annotations that work without the module." ;
-    oc:hasRationale "Adding dependencies is outside the scope of source conversion; the note serves as a reminder for the developer to consider adding it separately." ;
-    oc:severityLevel "LOW" .
+oc:kn_58297cc6 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When converting Java classes with @JsonCreator factory methods or constructors" ;
+    oc:directiveContent "Convert Java @JsonCreator static factories to Kotlin primary constructors annotated with @JsonCreator. Preserve the annotation even if the Jackson Kotlin module makes it technically unnecessary." ;
+    oc:hasRationale "Preserving @JsonCreator ensures deserialization works without the Jackson Kotlin module present, maintaining backward compatibility." ;
+    oc:severityLevel "HIGH" .
 
-oc:kn_4d3a09dd a oc:KnowledgeNode,
-        oc:WorkflowStrategy ;
-    oc:appliesToContext "When converting Java classes using @JsonPOJOBuilder" ;
-    oc:directiveContent "Replace @JsonPOJOBuilder patterns with Kotlin primary constructor + @JsonCreator when converting to data classes. If not converting to a data class, preserve the builder pattern." ;
-    oc:hasRationale "Kotlin data classes with primary constructors make builder patterns unnecessary for Jackson deserialization, but non-data-class conversions should preserve the original pattern to avoid breaking changes." ;
+oc:kn_5b141f54 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting Java builder-pattern classes annotated with @JsonPOJOBuilder" ;
+    oc:directiveContent "If a Java class with @JsonPOJOBuilder is being converted to a Kotlin data class, replace the builder pattern with a primary constructor + @JsonCreator." ;
+    oc:hasRationale "Kotlin data classes with primary constructors eliminate the need for builder patterns while maintaining immutability and Jackson compatibility." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_67dca8ab a oc:DesignPrinciple,
+oc:kn_5e9def42 a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When converting any Jackson-annotated Java field+getter pair to a Kotlin property" ;
-    oc:directiveContent "When a Java field and its getter both carry the same Jackson annotation (e.g., @JsonProperty), the Kotlin property must receive BOTH @field: and @get: use-site targets to preserve identical serialization behavior." ;
-    oc:hasRationale "Kotlin properties unify fields and getters, so a single annotation target in Kotlin may not replicate Java's dual annotation coverage, causing Jackson to miss the annotation during either field or getter introspection." ;
+    oc:appliesToContext "When converting Java DTOs with multiple Jackson annotations on fields and getters" ;
+    oc:codeLanguage "kotlin" ;
+    oc:directiveContent """@JsonInclude(JsonInclude.Include.NON_NULL)
+open class OrderSummaryDto(
+    @field:JsonProperty("order_id")
+    @get:JsonProperty("order_id")
+    val orderId: String?,
+
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @get:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    val createdDate: String?
+)""" .
+
+oc:kn_6a854395 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When converting any Jackson annotation beyond @JsonProperty" ;
+    oc:directiveContent "Preserve @JsonIgnore, @JsonDeserialize, @JsonSerialize, @JsonInclude, and @JsonFormat with correct use-site targets matching the original Java annotation targets (field → @field:, getter → @get:)." ;
+    oc:hasRationale "Each annotation's behavior depends on where it is placed; incorrect site targets can silently break serialization or deserialization." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_7973412b a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When placing Jackson annotations on Kotlin properties" ;
+    oc:directiveContent "Never apply Jackson annotations without use-site targets when the original Java had them on both field and getter. A single @JsonProperty on a Kotlin property annotates the constructor parameter, not the field or getter." ;
+    oc:hasRationale "Without explicit site targets, Jackson annotations default to the constructor parameter in Kotlin, which may not match the original Java behavior and can break serialization." ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_72f09794 a oc:KnowledgeNode,
+oc:kn_cf1249be a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting Java classes with @JsonCreator factory methods to Kotlin data classes" ;
+    oc:codeLanguage "kotlin" ;
+    oc:directiveContent """data class ConfigEntry @JsonCreator constructor(
+    @field:JsonProperty("key")
+    @get:JsonProperty("key")
+    val key: String?,
+
+    @field:JsonProperty("value")
+    @get:JsonProperty("value")
+    val value: String?,
+
+    @field:JsonProperty("enabled")
+    @get:JsonProperty("enabled")
+    val enabled: Boolean
+)""" .
+
+oc:kn_d3ad8946 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting Jackson-annotated Java files to Kotlin" ;
+    oc:directiveContent "Do NOT add jackson-module-kotlin during conversion. Only note its absence as a recommendation, since conversion must not alter project dependencies." ;
+    oc:hasRationale "Conversion is a source-level transformation; adding dependencies is a separate project decision that may affect other modules." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_dbfeacea a oc:KnowledgeNode,
         oc:Standard ;
-    oc:appliesToContext "When converting Java classes with @JsonCreator static factories or annotated constructors" ;
-    oc:directiveContent "Preserve @JsonCreator on the Kotlin primary constructor for safe deserialization, even though the Jackson Kotlin module may make it redundant. Keep the companion object factory method for backward compatibility if the original Java had a static factory." ;
-    oc:hasRationale "Not all projects use the Jackson Kotlin module; retaining @JsonCreator ensures deserialization works regardless of module availability." ;
-    oc:severityLevel "HIGH" .
+    oc:appliesToContext "When converting Java classes with Jackson field + getter annotation pairs" ;
+    oc:directiveContent "When a Java field and its getter both carry @JsonProperty, apply BOTH @field:JsonProperty and @get:JsonProperty on the corresponding Kotlin property." ;
+    oc:hasRationale "Java annotates field and getter separately; Kotlin properties unify them, so both site targets are needed to preserve Jackson's dual-resolution behavior." ;
+    oc:severityLevel "CRITICAL" .
 
-oc:kn_794d2c90 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When simplifying Jackson annotations during conversion" ;
-    oc:directiveContent "Do NOT strip @field: or @get: targets from Jackson annotations assuming the Jackson Kotlin module handles them automatically. The module's presence is not guaranteed." ;
-    oc:hasRationale "Over-simplifying annotation targets can silently break serialization/deserialization in projects that don't include jackson-module-kotlin." ;
-    oc:severityLevel "HIGH" .
+oc:kn_e213f8f0 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When performing Java-to-Kotlin conversion on Jackson-annotated classes" ;
+    oc:directiveContent "1. Detect Jackson imports (com.fasterxml.jackson.*) to activate this guide. 2. Map each Java annotation to its Kotlin use-site target based on whether it was on field, getter, or both. 3. Apply @field: and/or @get: prefixes to all Jackson annotations on Kotlin properties. 4. Convert @JsonCreator static factories to primary constructor annotations. 5. Preserve class-level annotations (e.g., @JsonInclude) without site targets. 6. Note if jackson-module-kotlin is missing." ;
+    oc:stepOrder 1 .
 
-oc:kn_92c79a9f a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When determining nullability of String-typed Jackson properties during conversion" ;
-    oc:directiveContent "Java String parameters without @NonNull or Objects.requireNonNull evidence should become nullable String? in Kotlin, since Java strings are nullable by default." ;
-    oc:hasRationale "Incorrect nullability can cause Jackson deserialization failures or alter API contract behavior." ;
-    oc:severityLevel "MEDIUM" .
+_:ref_1748489446a77614 a oc:WorkflowStep ;
+    dcterms:description "**Annotation site targets**:" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild [ a oc:BulletList ;
+            oc:blockType "bullet_list" ;
+            oc:contentOrder 1 ;
+            oc:hasItem [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 3 ;
+                    oc:itemText """When converting to Kotlin properties, apply BOTH `@field:` and `@get:` targets to
+match Java's dual annotation on field + getter.""" ],
+                [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 1 ;
+                    oc:itemText "`@JsonProperty` on a Java field → `@field:JsonProperty` in Kotlin." ],
+                [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 2 ;
+                    oc:itemText "`@JsonProperty` on a Java getter → `@get:JsonProperty` in Kotlin." ] ] ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_786fb856dac039a1 a oc:WorkflowStep ;
+    dcterms:description """**Builder pattern with @JsonPOJOBuilder**: Replace with primary constructor +
+`@JsonCreator` if converting to data class. Otherwise preserve.""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_8" ;
+    oc:stepOrder 8 .
+
+_:ref_999dcca52a592d83 a oc:WorkflowStep ;
+    dcterms:description "**@JsonDeserialize / @JsonSerialize**: Preserve exactly with correct site targets." ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_adda86e070de4f29 a oc:WorkflowStep ;
+    dcterms:description """**@JsonIgnore**: Preserve exactly. Use `@get:JsonIgnore` or `@field:JsonIgnore`
+depending on original target.""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_b55db294e78fdbd0 a oc:WorkflowStep ;
+    dcterms:description """**@JsonCreator**: Java's `@JsonCreator` static factory or constructor → Kotlin primary
+constructor. The `@JsonCreator` annotation is often unnecessary on Kotlin's primary
+constructor if using the Jackson Kotlin module, but preserve it for safety.""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_cd835f1aafd77b4d a oc:WorkflowStep ;
+    dcterms:description "**@JsonInclude**: Preserve on class or property level." ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_5" ;
+    oc:stepOrder 5 .
+
+_:ref_e099bc0af821c9dc a oc:WorkflowStep ;
+    dcterms:description """**Jackson Kotlin Module**: Note that projects using Jackson with Kotlin should add
+`jackson-module-kotlin` for proper Kotlin support (data classes, default values,
+nullable types). This is NOT something to add during conversion — just note it if
+missing.""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_7" ;
+    oc:stepOrder 7 .
+
+_:ref_e70e10942c3542a0 a oc:WorkflowStep ;
+    dcterms:description "**@JsonFormat**: Preserve with `@field:JsonFormat` site target." ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_6" ;
+    oc:stepOrder 6 .
+
+_:ref_ab7a6076269dbc3a a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 1 ;
+    oc:hasStep _:ref_1748489446a77614,
+        _:ref_786fb856dac039a1,
+        _:ref_999dcca52a592d83,
+        _:ref_adda86e070de4f29,
+        _:ref_b55db294e78fdbd0,
+        _:ref_cd835f1aafd77b4d,
+        _:ref_e099bc0af821c9dc,
+        _:ref_e70e10942c3542a0 ;
+    oc:workflowId "procedure_1" ;
+    oc:workflowName "Ordered Procedure" .
 

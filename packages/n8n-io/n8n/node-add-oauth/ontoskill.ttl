@@ -7,97 +7,800 @@
 oc:skill_n8n_io_n8n_node_add_oauth a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "node-add-oauth" ;
-    skos:broader "OAuth2 integration scaffold" ;
-    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/n8n-io/n8n/node-add-oauth" ;
+    skos:broader "Code modification procedure" ;
+    prov:wasDerivedFrom "../.agents/skills/n8n-io/n8n/node-add-oauth" ;
     oc:contentHash "dd4088a970bcf0622ce840bb289ffa4e238087262dd549818362d76774ba88d1" ;
-    oc:differentia "generates the credential file, node wiring, tests, and CLI constant sync required to add OAuth2 Authorization Code support to an existing n8n node" ;
-    oc:extends oc:skill_n8n_conventions ;
-    oc:handlesFailure oc:InvalidInput,
+    oc:dependsOnSkill oc:skill_ontoskills_n8n_conventions ;
+    oc:differentia "Adds OAuth2 Authorization Code credential support to an existing n8n node by creating credential files, updating node files, registering in package.json, and writing tests" ;
+    oc:handlesFailure oc:InvalidOAuth2Endpoints,
         oc:TestFailure,
-        oc:TypeCheckFails ;
-    oc:hasAllowedTool "Bash",
-        "Edit",
-        "Glob",
-        "Grep",
-        "Read",
-        "Write" ;
+        oc:TypeCheckFailed ;
     oc:hasArgumentHint "[node-name] [optional: custom-scopes flag or scope list]" ;
     oc:hasCategory "development" ;
     oc:hasDescription "Add OAuth2 credential support to an existing n8n node — creates the credential file, updates the node, adds tests, and keeps the CLI constant in sync. Use when the user says /node-add-oauth." ;
     oc:hasName "node-add-oauth" ;
-    oc:impartsKnowledge oc:kn_2df33a26,
-        oc:kn_6c5ffc95,
-        oc:kn_741ea00e,
-        oc:kn_7d08fa82,
-        oc:kn_86a35ac8,
-        oc:kn_9548314e,
-        oc:kn_b31305c2,
-        oc:kn_ea9327b9 ;
+    oc:hasRequirement oc:req_6463a6fd,
+        oc:req_9b94af92,
+        oc:req_cc3b20d1,
+        oc:req_faadb7bc ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:BulletList ;
+                    oc:blockType "bullet_list" ;
+                    oc:contentOrder 2 ;
+                    oc:hasItem [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:hasChild [ a oc:BlockQuote ;
+                                    oc:blockType "blockquote" ;
+                                    oc:contentOrder 1 ;
+                                    oc:quoteContent """"Should users be able to customise the OAuth2 scopes for this credential, or should
+scopes be fixed?\"""" ] ;
+                            oc:itemOrder 2 ;
+                            oc:itemText """`CUSTOM_SCOPES`: whether the credential should support user-defined scopes. If the
+argument does not make this clear, **ask the user** before proceeding:""" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 1 ;
+                            oc:itemText """`NODE_NAME`: the service name (e.g. `GitHub`, `Notion`). Try to infer from the argument;
+if ambiguous, ask the user.""" ] ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Extract:" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 2 ;
+            oc:sectionTitle "Step 0 — Parse arguments" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """export const GENERIC_OAUTH2_CREDENTIALS_WITH_EDITABLE_SCOPE = [
+	'oAuth2Api',
+	'googleOAuth2Api',
+	'microsoftOAuth2Api',
+	'highLevelOAuth2Api',
+	'mcpOAuth2Api',
+	'{camelCase}OAuth2Api', // ← add this
+];
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 4 ;
+                    oc:sourceLocation "lines 157-166" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "File: `packages/cli/src/constants.ts`" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "**Only do this step when CUSTOM_SCOPES = yes.**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 3 ;
+                    oc:textContent """Add `'{camelCase}OAuth2Api'` to the `GENERIC_OAUTH2_CREDENTIALS_WITH_EDITABLE_SCOPE`
+array. Without this, n8n deletes the user's custom scope on OAuth2 reconnect.""" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 7 ;
+            oc:sectionTitle "Step 5 — Update `GENERIC_OAUTH2_CREDENTIALS_WITH_EDITABLE_SCOPE` (custom scopes only)" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """# From packages/nodes-base/
+pnpm test credentials/test/{NODE_NAME}OAuth2Api.credentials.test.ts
+pnpm test nodes/{NODE_NAME}/__test__/GenericFunctions.test.ts
+pnpm typecheck
+pnpm lint
+
+# Only when constants.ts was changed:
+pushd ../cli && pnpm typecheck && popd
+""" ;
+                    oc:codeLanguage "bash" ;
+                    oc:contentOrder 1 ;
+                    oc:sourceLocation "lines 311-320" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "Fix any type errors before finishing. Never skip `pnpm typecheck`." ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 16 ;
+            oc:sectionTitle "Step 10 — Verify" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "File: `packages/nodes-base/package.json`" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent """Find the `n8n.credentials` array and insert the new entry near other credentials for this
+service (alphabetical ordering within the service's block):""" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """"dist/credentials/{NODE_NAME}OAuth2Api.credentials.js",
+""" ;
+                    oc:codeLanguage "json" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 142-144" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 6 ;
+            oc:sectionTitle "Step 4 — Register the credential in `package.json`" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "In the credential-routing `describe` block:" ],
+                _:ref_b47095b29fec5274 ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 15 ;
+            oc:sectionTitle "Step 9 — Update `GenericFunctions.test.ts`" ],
+        [ a oc:Section ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent """Same two changes. Preserve any `displayName` label pattern already used by other credential
+entries in that trigger node's credentials array.""" ] ;
+                    oc:sectionLevel 3 ;
+                    oc:sectionOrder 13 ;
+                    oc:sectionTitle "Trigger node (`*Trigger.node.ts`, if present)" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """{ name: '{Display Name} (OAuth2)', value: '{camelCase}OAuth2' },
+""" ;
+                            oc:codeLanguage "typescript" ;
+                            oc:contentOrder 4 ;
+                            oc:sourceLocation "lines 253-255" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Version/auth options** — add to the `{versionParam}` (or equivalent) options list:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """{
+	name: '{camelCase}OAuth2Api',
+	required: true,
+	displayOptions: { show: { {versionParam}: ['{camelCase}OAuth2'] } },
+},
+""" ;
+                            oc:codeLanguage "typescript" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 243-249" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent "Keep `default` unchanged — existing workflows must not be affected." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**Credentials array** — add an entry for the new credential type:" ] ;
+                    oc:sectionLevel 3 ;
+                    oc:sectionOrder 12 ;
+                    oc:sectionTitle "Main node (`*.node.ts`)" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 11 ;
+            oc:sectionTitle "Step 7 — Update the node file(s)" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:BulletList ;
+                    oc:blockType "bullet_list" ;
+                    oc:contentOrder 2 ;
+                    oc:hasItem [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 2 ;
+                            oc:itemText "Access Token URL" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 5 ;
+                            oc:itemText """Whether the API requires a cloudId / workspace ID lookup after the token exchange
+(Atlassian-style gateway APIs do; most services don't)""" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 1 ;
+                            oc:itemText "Authorization URL" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 4 ;
+                            oc:itemText "Default scopes needed for the node's existing operations" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 3 ;
+                            oc:itemText "Required auth query parameters (e.g. `prompt=consent`, `access_type=offline`)" ] ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 3 ;
+                    oc:textContent "If you can't determine the endpoints confidently, ask the user to provide them." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Look up the service's OAuth2 documentation:" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 4 ;
+            oc:sectionTitle "Step 2 — Research OAuth2 endpoints" ],
+        [ a oc:Section ;
+            oc:hasContent _:ref_71eb21ae5b194d18,
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Read the following (adjust path conventions for the specific service):" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 3 ;
+            oc:sectionTitle "Step 1 — Explore the node" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent """Add OAuth2 (Authorization Code / 3LO) support to an existing n8n node. Works for any
+third-party service that supports standard OAuth2.""" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent """Before starting, read comparable existing OAuth2 credential files and tests under
+`packages/nodes-base/credentials/` to understand the conventions used in this codebase
+(e.g. `DiscordOAuth2Api.credentials.ts`, `MicrosoftTeamsOAuth2Api.credentials.ts`).""" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Overview" ],
+        [ a oc:Section ;
+            oc:hasContent _:ref_548dc412139eede7,
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """beforeAll(() => { nock.disableNetConnect(); });
+afterAll(() => { nock.restore(); });
+afterEach(() => { nock.cleanAll(); });
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 6 ;
+                    oc:sourceLocation "lines 286-290" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "File: `packages/nodes-base/credentials/test/{NODE_NAME}OAuth2Api.credentials.test.ts`" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent """Use `ClientOAuth2` from `@n8n/client-oauth2` and `nock` for HTTP mocking. Follow the
+structure in `MicrosoftTeamsOAuth2Api.credentials.test.ts`.""" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 5 ;
+                    oc:textContent "Lifecycle hooks required:" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 3 ;
+                    oc:textContent "Required test cases:" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 14 ;
+            oc:sectionTitle "Step 8 — Write credential tests" ],
+        [ a oc:Section ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Add an `else if` branch before the existing `else` fallback:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """} else if ({versionParam} === '{camelCase}OAuth2') {
+	domain = (await this.getCredentials('{camelCase}OAuth2Api')).{domainField} as string;
+	credentialType = '{camelCase}OAuth2Api';
+} else {
+""" ;
+                            oc:codeLanguage "typescript" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 176-181" ] ;
+                    oc:sectionLevel 3 ;
+                    oc:sectionOrder 9 ;
+                    oc:sectionTitle "6a — Standard services (token works directly against the instance URL)" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// Module-level cache: normalised domain → site/cloud ID
+export const _cloudIdCache = new Map<string, string>();
+
+async function getSiteId(
+	this: IHookFunctions | IExecuteFunctions | ILoadOptionsFunctions,
+	credentialType: string,
+	domain: string,
+): Promise<string> {
+	const normalizedDomain = domain.replace(/\\/$/, '');
+	if (_cloudIdCache.has(normalizedDomain)) return _cloudIdCache.get(normalizedDomain)!;
+
+	const resources = (await this.helpers.requestWithAuthentication.call(this, credentialType, {
+		uri: '{ACCESSIBLE_RESOURCES_ENDPOINT}',
+		json: true,
+	})) as Array<{ id: string; url: string }>;
+
+	const site = resources.find((r) => r.url === normalizedDomain);
+	if (!site) {
+		throw new NodeOperationError(
+			this.getNode(),
+			`No accessible site found for domain: ${domain}. Make sure the domain matches your site URL exactly.`,
+		);
+	}
+
+	_cloudIdCache.set(normalizedDomain, site.id);
+	return site.id;
+}
+""" ;
+                            oc:codeLanguage "typescript" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 189-217" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent """When the OAuth token is scoped for a gateway URL rather than the direct instance URL
+(Atlassian's `api.atlassian.com` is the canonical example), add a module-level cache and
+lookup helper **before** the main request function:""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 6 ;
+                            oc:textContent "Add `NodeOperationError` to the `n8n-workflow` import if not already present." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent """The existing `uri: \\`${domain}/rest${endpoint}\\`` construction then produces the correct
+gateway URL automatically.""" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """} else if ({versionParam} === '{camelCase}OAuth2') {
+	const rawDomain = (await this.getCredentials('{camelCase}OAuth2Api')).domain as string;
+	credentialType = '{camelCase}OAuth2Api';
+	const siteId = await getSiteId.call(this, credentialType, rawDomain);
+	domain = `{GATEWAY_BASE_URL}/${siteId}`;
+} else {
+""" ;
+                            oc:codeLanguage "typescript" ;
+                            oc:contentOrder 4 ;
+                            oc:sourceLocation "lines 221-228" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "Then in the main request function:" ] ;
+                    oc:sectionLevel 3 ;
+                    oc:sectionOrder 10 ;
+                    oc:sectionTitle "6b — Gateway services requiring a workspace/cloud ID lookup" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 8 ;
+            oc:sectionTitle "Step 6 — Update `GenericFunctions.ts`" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """import type { ICredentialType, INodeProperties } from 'n8n-workflow';
+
+const defaultScopes = [/* minimum scopes for existing node operations */];
+
+export class {NODE_NAME}OAuth2Api implements ICredentialType {
+	name = '{camelCase}OAuth2Api';
+	extends = ['oAuth2Api'];
+	displayName = '{Display Name} OAuth2 API';
+	documentationUrl = '{doc-slug}'; // matches docs.n8n.io/integrations/...
+
+	properties: INodeProperties[] = [
+		// Include service-specific fields the node needs to construct API calls
+		// (e.g. domain, workspace URL) — add BEFORE the hidden fields below.
+
+		{ displayName: 'Grant Type',        name: 'grantType',      type: 'hidden', default: 'authorizationCode' },
+		{ displayName: 'Authorization URL', name: 'authUrl',        type: 'hidden', default: '{AUTH_URL}', required: true },
+		{ displayName: 'Access Token URL',  name: 'accessTokenUrl', type: 'hidden', default: '{TOKEN_URL}', required: true },
+		// Only include authQueryParameters if the service requires extra query params:
+		{ displayName: 'Auth URI Query Parameters', name: 'authQueryParameters', type: 'hidden', default: '{QUERY_PARAMS}' },
+		{ displayName: 'Authentication',    name: 'authentication', type: 'hidden', default: 'header' },
+
+		// ── Custom scopes block (ONLY when CUSTOM_SCOPES = yes) ──────────────
+		{
+			displayName: 'Custom Scopes',
+			name: 'customScopes',
+			type: 'boolean',
+			default: false,
+			description: 'Define custom scopes',
+		},
+		{
+			displayName:
+				'The default scopes needed for the node to work are already set. If you change these the node may not function correctly.',
+			name: 'customScopesNotice',
+			type: 'notice',
+			default: '',
+			displayOptions: { show: { customScopes: [true] } },
+		},
+		{
+			displayName: 'Enabled Scopes',
+			name: 'enabledScopes',
+			type: 'string',
+			displayOptions: { show: { customScopes: [true] } },
+			default: defaultScopes.join(' '),
+			description: 'Scopes that should be enabled',
+		},
+		// ── End custom scopes block ───────────────────────────────────────────
+
+		{
+			displayName: 'Scope',
+			name: 'scope',
+			type: 'hidden',
+			// Custom scopes: expression toggles between user value and defaults.
+			// Fixed scopes: use the literal defaultScopes string instead.
+			default:
+				'={{$self["customScopes"] ? $self["enabledScopes"] : "' + defaultScopes.join(' ') + '"}}',
+		},
+	];
+}
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 2 ;
+                    oc:sourceLocation "lines 64-123" ],
+                [ a oc:BulletList ;
+                    oc:blockType "bullet_list" ;
+                    oc:contentOrder 4 ;
+                    oc:hasItem [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 1 ;
+                            oc:itemText "No `authenticate` block — `oAuth2Api` machinery handles Bearer token injection automatically." ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 4 ;
+                            oc:itemText """If the service needs a domain / workspace URL for API call construction, add it as a
+visible `string` field **before** the hidden fields.""" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 3 ;
+                            oc:itemText """`defaultScopes` at module level is the single source of truth: it populates both the
+`enabledScopes` default and the `scope` expression fallback. Update it in one place.""" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 2 ;
+                            oc:itemText "No `test` block — the OAuth dance validates the credential." ] ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "File: `packages/nodes-base/credentials/{NODE_NAME}OAuth2Api.credentials.ts`" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 3 ;
+                    oc:textContent "**Rules:**" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 5 ;
+            oc:sectionTitle "Step 3 — Create the credential file" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """name: node-add-oauth
+description: Add OAuth2 credential support to an existing n8n node — creates the credential file, updates the node, adds tests, and keeps the CLI constant in sync. Use when the user says /node-add-oauth.
+argument-hint: "[node-name] [optional: custom-scopes flag or scope list]"
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:hasWorkflow _:ref_548dc412139eede7,
+        [ a oc:Workflow ;
+            dcterms:description "Complete procedure to add OAuth2 Authorization Code support to an existing n8n node" ;
+            oc:hasStep _:ref_082cd46bbb0cf47f,
+                _:ref_13a1b5a9421863c4,
+                _:ref_3a9ae34c6932c6c0,
+                _:ref_43b8b5e45bdfe194,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Update the main node file and any trigger node files: add OAuth2 credential entry to credentials array and add OAuth2 option to version/auth parameter." ;
+                    oc:expectedOutcome "Node files updated with OAuth2 credential and auth option" ;
+                    oc:stepDependsOn _:ref_082cd46bbb0cf47f ;
+                    oc:stepId "update-node-files" ],
+                [ a oc:WorkflowStep ;
+                    dcterms:description "If CUSTOM_SCOPES is enabled, add the credential name to GENERIC_OAUTH2_CREDENTIALS_WITH_EDITABLE_SCOPE in packages/cli/src/constants.ts." ;
+                    oc:expectedOutcome "CLI constant updated (only when custom scopes enabled)" ;
+                    oc:stepDependsOn _:ref_43b8b5e45bdfe194 ;
+                    oc:stepId "update-cli-constants" ],
+                _:ref_c5262ef81759f107,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Run credential tests, GenericFunctions tests, typecheck, and lint. Run CLI typecheck if constants.ts was changed. Fix any errors." ;
+                    oc:expectedOutcome "All tests pass, no type errors, no lint errors" ;
+                    oc:stepDependsOn _:ref_c5262ef81759f107,
+                        _:ref_ed16680e1070faf7 ;
+                    oc:stepId "verify" ],
+                _:ref_ed16680e1070faf7,
+                _:ref_f87b265db95d34e4,
+                _:ref_fa8f7873ce942caa ;
+            oc:workflowId "add-oauth2-to-node" ;
+            oc:workflowName "Add OAuth2 Credential to n8n Node" ],
+        _:ref_71eb21ae5b194d18,
+        [ a oc:Workflow ;
+            dcterms:description "Add cloudId/workspace ID lookup pattern for gateway-style OAuth2 services (e.g., Atlassian)" ;
+            oc:hasStep _:ref_814ddbe1916c1362,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "In GenericFunctions.test.ts: import _cloudIdCache, add clear() in afterEach, add test mocking requestWithAuthentication for accessible-resources and gateway URL." ;
+                    oc:expectedOutcome "Gateway routing tested with proper cache cleanup" ;
+                    oc:stepDependsOn _:ref_f570c9f8455c1c05 ;
+                    oc:stepId "add-gateway-tests" ],
+                _:ref_f570c9f8455c1c05 ;
+            oc:workflowId "update-generic-functions-gateway" ;
+            oc:workflowName "Update GenericFunctions for Gateway Services" ],
+        _:ref_b47095b29fec5274 ;
+    oc:impartsKnowledge oc:kn_01d3bb4a,
+        oc:kn_0e8eaad4,
+        oc:kn_5bc19c5e,
+        oc:kn_9a105383,
+        oc:kn_a011ab17,
+        oc:kn_b8be6c7e,
+        oc:kn_d81747a1,
+        oc:kn_deb80d4f,
+        oc:kn_ef69ae2d ;
     oc:isUserInvocable true ;
     oc:nature "Work" ;
-    oc:requiresState oc:CodebaseAvailable,
-        oc:NodeExists ;
-    oc:resolvesIntent "add OAuth2 support to an n8n node",
-        "add authorization code flow to n8n node",
-        "create OAuth2 credential for n8n node",
-        "integrate third-party OAuth2 with n8n node" ;
-    oc:yieldsState oc:OAuth2CredentialCreated,
-        oc:TestsPassing,
-        oc:TypeCheckPasses .
+    oc:requiresState oc:NodeDirectoryReadable,
+        oc:NodeExists,
+        oc:OAuth2EndpointsKnown ;
+    oc:resolvesIntent "add OAuth2 support to n8n node",
+        "add authorization code flow to n8n integration",
+        "create OAuth2 credential for n8n",
+        "implement OAuth2 authentication in n8n node" ;
+    oc:yieldsState oc:NodeUpdatedWithOAuth2,
+        oc:OAuth2CredentialCreated,
+        oc:TestsWritten,
+        oc:TypeCheckPassed .
 
-oc:kn_2df33a26 a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When custom scopes are enabled for the credential" ;
-    oc:directiveContent "When CUSTOM_SCOPES is enabled, the credential name MUST be added to `GENERIC_OAUTH2_CREDENTIALS_WITH_EDITABLE_SCOPE` in `packages/cli/src/constants.ts`. Without this, n8n deletes the user's custom scope on OAuth2 reconnect." ;
-    oc:hasRationale "The CLI constant array is the authoritative registry of credentials that allow scope editing; omission causes silent data loss on reconnect." ;
+oc:kn_01d3bb4a a oc:KnowledgeNode,
+        oc:PostFlightValidation ;
+    oc:appliesToContext "After all changes are made (Step 10)" ;
+    oc:directiveContent "Run `pnpm typecheck` and `pnpm lint` from `packages/nodes-base/` — never skip typecheck. If constants.ts was modified, also run `pnpm typecheck` from `packages/cli/`." ;
+    oc:hasRationale "Type errors caught early prevent broken builds; cross-package changes require cross-package verification." ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_6c5ffc95 a oc:DesignPrinciple,
+oc:kn_0e8eaad4 a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When defining scopes in the credential file" ;
-    oc:directiveContent "Use `defaultScopes` at the module level as the single source of truth — it populates both `enabledScopes` default and the `scope` expression fallback." ;
-    oc:hasRationale "Duplicating scope lists in multiple locations leads to drift and bugs; a single constant ensures consistency." ;
+    oc:appliesToContext "Before beginning any implementation (Overview step)" ;
+    oc:directiveContent "Before starting, read at least two comparable existing OAuth2 credential files and their tests (e.g. DiscordOAuth2Api, MicrosoftTeamsOAuth2Api) under `packages/nodes-base/credentials/` to understand codebase conventions." ;
+    oc:hasRationale "Existing files encode implicit naming conventions and structural patterns not documented elsewhere." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_741ea00e a oc:Heuristic,
+oc:kn_5bc19c5e a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "At the start of any OAuth2 credential implementation" ;
-    oc:directiveContent "Before starting, read comparable existing OAuth2 credential files (e.g., DiscordOAuth2Api.credentials.ts, MicrosoftTeamsOAuth2Api.credentials.ts) to understand the codebase conventions." ;
-    oc:hasRationale "Following established patterns ensures consistency and reduces review friction in the n8n codebase." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_7d08fa82 a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "When creating any OAuth2 credential file for n8n" ;
-    oc:directiveContent "Never add an `authenticate` or `test` block to the OAuth2 credential file — the `oAuth2Api` base class handles Bearer token injection automatically and the OAuth dance validates the credential." ;
-    oc:hasRationale "Adding these blocks would conflict with the framework's built-in OAuth2 machinery and break token injection." ;
+    oc:appliesToContext "When creating OAuth2 credential files (Step 3)" ;
+    oc:directiveContent "Never add an `authenticate` block or `test` block to the OAuth2 credential file — the `oAuth2Api` base class handles Bearer token injection and the OAuth dance validates the credential automatically." ;
+    oc:hasRationale "The oAuth2Api base machinery already provides these capabilities; duplicating them causes conflicts." ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_86a35ac8 a oc:KnowledgeNode,
-        oc:WorkflowStrategy ;
-    oc:appliesToContext "When researching OAuth2 endpoints (Step 2)" ;
-    oc:directiveContent "Determine early whether the service is a standard service (token works directly against instance URL) or a gateway service (requires cloudId/workspace ID lookup after token exchange). This affects GenericFunctions.ts routing logic significantly." ;
-    oc:hasRationale "Gateway services like Atlassian require a site-ID cache and a helper function; standard services only need a simple else-if branch. Choosing the wrong pattern requires rework." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_9548314e a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When updating the node file's credentials array and version options" ;
-    oc:directiveContent "Keep the `default` field on the version/auth parameter unchanged — existing workflows must not be affected by adding OAuth2 support." ;
-    oc:hasRationale "Changing the default auth method would silently break all existing workflows using the node with the previous credential type." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_b31305c2 a oc:KnowledgeNode,
+oc:kn_9a105383 a oc:KnowledgeNode,
         oc:PreFlightCheck ;
-    oc:appliesToContext "After completing all file modifications (Step 10)" ;
-    oc:directiveContent "Run `pnpm typecheck`, `pnpm lint`, and `pnpm test` after all files are created/modified. Never skip typecheck. If constants.ts was changed, also run typecheck in packages/cli." ;
-    oc:hasRationale "Type errors and lint failures are common when wiring new credentials; catching them before commit prevents CI failures." ;
+    oc:appliesToContext "Before starting credential creation" ;
+    oc:directiveContent "Before implementation, verify: node directory exists at `packages/nodes-base/nodes/{NODE_NAME}/`, existing credentials are identified, and package.json registration pattern is understood." ;
+    oc:hasRationale "Missing any prerequisite leads to broken file paths or registration failures." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_a011ab17 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When creating credential files with scope configuration" ;
+    oc:directiveContent "`defaultScopes` at module level is the single source of truth — it must populate both the `enabledScopes` default and the `scope` expression fallback. Update it in one place only." ;
+    oc:hasRationale "Duplicating scope values in multiple places leads to drift and broken authorization." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_ea9327b9 a oc:KnowledgeNode,
+oc:kn_b8be6c7e a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When updating GenericFunctions.ts (Step 6)" ;
+    oc:directiveContent "Distinguish between standard services (token works directly against instance URL) and gateway services (token scoped for gateway URL, requires cloudId/workspace ID lookup after token exchange). Use the Atlassian pattern as reference for gateway services." ;
+    oc:hasRationale "The routing logic differs fundamentally between these two patterns — choosing wrong breaks API calls." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_d81747a1 a oc:KnowledgeNode,
         oc:RequiresHumanClarification ;
-    oc:appliesToContext "When parsing arguments (Step 0) and researching endpoints (Step 2)" ;
-    oc:directiveContent "Ask the user whether custom scopes should be supported if the argument doesn't make it clear. Also ask for OAuth2 endpoint URLs if they cannot be confidently determined from documentation." ;
-    oc:hasRationale "The custom-scopes decision affects 4 out of 10 steps (credential template, CLI constant, test cases, scope expression). Getting it wrong late requires significant rework." ;
-    oc:severityLevel "MEDIUM" .
+    oc:appliesToContext "During argument parsing and endpoint research (Steps 0 and 2)" ;
+    oc:directiveContent "Ask the user for clarification when: (1) NODE_NAME is ambiguous from the argument, (2) whether scopes should be customizable is unclear, (3) OAuth2 endpoints cannot be confidently determined from documentation." ;
+    oc:hasRationale "Guessing wrong on these decisions leads to incorrect credential configurations that are hard to fix later." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_deb80d4f a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When updating node files (Step 7)" ;
+    oc:directiveContent "Never change the `default` value of the version/auth parameter — existing workflows must not be affected by the new OAuth2 option." ;
+    oc:hasRationale "Changing defaults breaks backward compatibility for users with existing workflows." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_ef69ae2d a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When custom scopes are enabled (Step 5)" ;
+    oc:directiveContent "When CUSTOM_SCOPES is enabled, the credential name MUST be added to `GENERIC_OAUTH2_CREDENTIALS_WITH_EDITABLE_SCOPE` in `packages/cli/src/constants.ts` or n8n will delete the user's custom scope on OAuth2 reconnect." ;
+    oc:hasRationale "The CLI uses this allowlist to decide which credentials preserve user-modified scopes across reconnections." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:req_6463a6fd a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "n8n credential system architecture" .
+
+oc:req_9b94af92 a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "pnpm" .
+
+oc:req_cc3b20d1 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "OAuth2 Authorization Code flow" .
+
+oc:req_faadb7bc a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "nock" .
+
+_:ref_0bbacf64fd20e0c7 a oc:WorkflowStep ;
+    dcterms:description """**Token retrieval with default scopes** — mock the token endpoint with `nock`, call
+`oauthClient.code.getToken(...)`, assert `token.data.scope` contains each scope.""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_1b0e9439e5bdd1ce a oc:WorkflowStep ;
+    dcterms:description """**Metadata** — name, extends array, `enabledScopes` default, auth URL, token URL,
+`authQueryParameters` default (if applicable).""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_24503cd98686a385 a oc:WorkflowStep ;
+    dcterms:description """`package.json` at `packages/nodes-base/package.json` — find where existing credentials
+for this node are registered (grep for the node name).""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_2b29f2648478264a a oc:WorkflowStep ;
+    dcterms:description """**Default scopes in authorization URI** — call `oauthClient.code.getUri()`, assert each
+default scope is present.""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_2d4fda368ad43f0d a oc:BulletList ;
+    oc:blockType "bullet_list" ;
+    oc:contentOrder 1 ;
+    oc:hasItem [ a oc:BulletItem ;
+            oc:blockType "bullet_item" ;
+            oc:itemOrder 2 ;
+            oc:itemText "Find `GenericFunctions.ts` (may be named differently)" ],
+        [ a oc:BulletItem ;
+            oc:blockType "bullet_item" ;
+            oc:itemOrder 1 ;
+            oc:itemText "Find `*.node.ts` (main node) and any `*Trigger.node.ts`" ],
+        [ a oc:BulletItem ;
+            oc:blockType "bullet_item" ;
+            oc:itemOrder 3 ;
+            oc:itemText "Check if an `auth` / `version` subdirectory exists" ] .
+
+_:ref_485240e0716b6bb3 a oc:WorkflowStep ;
+    dcterms:description """If a site-ID cache (`_cloudIdCache`) was added, import it and call
+`_cloudIdCache.clear()` (or equivalent) in `afterEach`.""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_5ac61c98284753a5 a oc:WorkflowStep ;
+    dcterms:description """Existing credentials: `packages/nodes-base/credentials/` — look for existing
+`{NODE_NAME}*Api.credentials.ts` files to understand the naming convention and any
+auth method already in use.""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_5e42261099e8f022 a oc:BulletList ;
+    oc:blockType "bullet_list" ;
+    oc:contentOrder 1 ;
+    oc:hasItem [ a oc:BulletItem ;
+            oc:blockType "bullet_item" ;
+            oc:itemOrder 1 ;
+            oc:itemText """**Simple routing**: assert `getCredentials` was called with the correct credential
+name and `requestWithAuthentication` was called with the correct name and URI.""" ],
+        [ a oc:BulletItem ;
+            oc:blockType "bullet_item" ;
+            oc:itemOrder 2 ;
+            oc:itemText """**Gateway lookup**: mock `requestWithAuthentication` to return the accessible-resources
+payload on the first call and `{}` on the second. Assert the first call targets the
+resources endpoint and the second call uses the gateway base URL with the site ID.""" ] .
+
+_:ref_7fcf9763b1e6d2ac a oc:WorkflowStep ;
+    dcterms:description "**Token retrieval with custom scopes** _(skip when CUSTOM_SCOPES = no)_." ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_5" ;
+    oc:stepOrder 5 .
+
+_:ref_8b2193530217bc83 a oc:WorkflowStep ;
+    dcterms:description "**Custom scopes in authorization URI** _(skip when CUSTOM_SCOPES = no)_." ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_a3bea3d68c4240ea a oc:WorkflowStep ;
+    dcterms:description "Node directory: `packages/nodes-base/nodes/{NODE_NAME}/`" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild _:ref_2d4fda368ad43f0d ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_c83970763a06fe24 a oc:WorkflowStep ;
+    dcterms:description """**Minimal / different scope set** _(skip when CUSTOM_SCOPES = no)_ — assert scopes not
+in the set are absent from both the URI and token response.""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_6" ;
+    oc:stepOrder 6 .
+
+_:ref_e447c7fdc60bdb6b a oc:WorkflowStep ;
+    dcterms:description "Add/update the OAuth2 routing test case:" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild _:ref_5e42261099e8f022 ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_13a1b5a9421863c4 a oc:WorkflowStep ;
+    dcterms:description "Parse arguments: extract NODE_NAME (service name) and CUSTOM_SCOPES (whether users can customize scopes). Ask user if ambiguous." ;
+    oc:expectedOutcome "NODE_NAME and CUSTOM_SCOPES are determined" ;
+    oc:stepId "parse-args" .
+
+_:ref_43b8b5e45bdfe194 a oc:WorkflowStep ;
+    dcterms:description "Register the new credential in packages/nodes-base/package.json in the n8n.credentials array, alphabetically near other credentials for this service." ;
+    oc:expectedOutcome "Credential is registered in package.json" ;
+    oc:stepDependsOn _:ref_3a9ae34c6932c6c0 ;
+    oc:stepId "register-package-json" .
+
+_:ref_548dc412139eede7 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 4 ;
+    oc:hasStep _:ref_0bbacf64fd20e0c7,
+        _:ref_1b0e9439e5bdd1ce,
+        _:ref_2b29f2648478264a,
+        _:ref_7fcf9763b1e6d2ac,
+        _:ref_8b2193530217bc83,
+        _:ref_c83970763a06fe24 ;
+    oc:workflowId "procedure_4" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_71eb21ae5b194d18 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 2 ;
+    oc:hasStep _:ref_24503cd98686a385,
+        _:ref_5ac61c98284753a5,
+        _:ref_a3bea3d68c4240ea ;
+    oc:workflowId "procedure_2" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_814ddbe1916c1362 a oc:WorkflowStep ;
+    dcterms:description "Add module-level _cloudIdCache Map and getSiteId helper function before the main request function in GenericFunctions.ts." ;
+    oc:expectedOutcome "Cache and lookup helper added" ;
+    oc:stepId "add-cloudid-cache" .
+
+_:ref_b47095b29fec5274 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 2 ;
+    oc:hasStep _:ref_485240e0716b6bb3,
+        _:ref_e447c7fdc60bdb6b ;
+    oc:workflowId "procedure_2" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_c5262ef81759f107 a oc:WorkflowStep ;
+    dcterms:description "Write credential tests covering metadata, default scopes in auth URI, token retrieval, and custom scope scenarios using ClientOAuth2 and nock." ;
+    oc:expectedOutcome "Comprehensive credential tests written" ;
+    oc:stepDependsOn _:ref_3a9ae34c6932c6c0 ;
+    oc:stepId "write-credential-tests" .
+
+_:ref_ed16680e1070faf7 a oc:WorkflowStep ;
+    dcterms:description "Update GenericFunctions.test.ts with OAuth2 routing test cases (simple or gateway), including cloudId cache cleanup if applicable." ;
+    oc:expectedOutcome "GenericFunctions tests cover OAuth2 routing" ;
+    oc:stepDependsOn _:ref_082cd46bbb0cf47f ;
+    oc:stepId "update-generic-functions-tests" .
+
+_:ref_f570c9f8455c1c05 a oc:WorkflowStep ;
+    dcterms:description "Add OAuth2 else-if branch that retrieves raw domain, calls getSiteId, and constructs gateway URL with site ID." ;
+    oc:stepDependsOn _:ref_814ddbe1916c1362 ;
+    oc:stepId "add-gateway-routing" .
+
+_:ref_f87b265db95d34e4 a oc:WorkflowStep ;
+    dcterms:description "Research the service's OAuth2 endpoints: authorization URL, access token URL, required query parameters, default scopes, and whether gateway/cloud ID lookup is needed." ;
+    oc:expectedOutcome "OAuth2 endpoints and parameters are identified" ;
+    oc:stepDependsOn _:ref_fa8f7873ce942caa ;
+    oc:stepId "research-endpoints" .
+
+_:ref_fa8f7873ce942caa a oc:WorkflowStep ;
+    dcterms:description "Explore the node directory, existing credentials, and package.json to understand the current structure and naming conventions." ;
+    oc:expectedOutcome "Node structure, existing credentials, and registration pattern are understood" ;
+    oc:stepDependsOn _:ref_13a1b5a9421863c4 ;
+    oc:stepId "explore-node" .
+
+_:ref_082cd46bbb0cf47f a oc:WorkflowStep ;
+    dcterms:description "Update GenericFunctions.ts: add OAuth2 routing branch (standard or gateway/cloud-ID pattern) before the existing else fallback." ;
+    oc:expectedOutcome "GenericFunctions.ts handles OAuth2 credential routing" ;
+    oc:stepDependsOn _:ref_3a9ae34c6932c6c0 ;
+    oc:stepId "update-generic-functions" .
+
+_:ref_3a9ae34c6932c6c0 a oc:WorkflowStep ;
+    dcterms:description "Create the OAuth2 credential TypeScript file at packages/nodes-base/credentials/{NODE_NAME}OAuth2Api.credentials.ts with proper properties, scope handling, and no authenticate/test blocks." ;
+    oc:expectedOutcome "Credential file created following oAuth2Api extension pattern" ;
+    oc:stepDependsOn _:ref_f87b265db95d34e4 ;
+    oc:stepId "create-credential-file" .
 

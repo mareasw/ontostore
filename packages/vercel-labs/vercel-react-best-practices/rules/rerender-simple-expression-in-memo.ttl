@@ -7,50 +7,104 @@
 oc:skill_vercel_labs_vercel_react_best_practices_rerender_simple_expression_in_memo a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "rerender-simple-expression-in-memo" ;
-    skos:broader "React performance optimization guideline" ;
+    skos:broader "Performance optimization rule" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "5bdcf2d1558ba5204e643c887b7b4060f89630969425651eb68e96427d97f800" ;
-    oc:differentia "that identifies unnecessary useMemo wrapping of simple primitive expressions as an anti-pattern" ;
+    oc:differentia "advises against wrapping simple primitive-returning expressions in useMemo since the hook overhead exceeds the computation cost" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
-    oc:handlesFailure oc:InvalidInput ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_4e8fd3ed,
-        oc:kn_b8426e94,
-        oc:kn_c6544f82,
-        oc:kn_f570b162 ;
-    oc:isUserInvocable true ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent """When an expression is simple (few logical or arithmetical operators) and has a primitive result type (boolean, number, string), do not wrap it in `useMemo`.
+Calling `useMemo` and comparing hook dependencies may consume more resources than the expression itself.""" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function Header({ user, notifications }: Props) {
+  const isLoading = user.isLoading || notifications.isLoading
+
+  if (isLoading) return <Skeleton />
+  // return some markup
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 5 ;
+                    oc:sourceLocation "lines 28-35" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function Header({ user, notifications }: Props) {
+  const isLoading = useMemo(() => {
+    return user.isLoading || notifications.isLoading
+  }, [user.isLoading, notifications.isLoading])
+
+  if (isLoading) return <Skeleton />
+  // return some markup
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 15-24" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Incorrect:**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "**Correct:**" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Do not wrap a simple expression with a primitive result type in useMemo" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Do not wrap a simple expression with a primitive result type in useMemo
+impact: LOW-MEDIUM
+impactDescription: wasted computation on every render
+tags: rerender, useMemo, optimization
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:impartsKnowledge oc:kn_439ca1e7,
+        oc:kn_59f1c459,
+        oc:kn_bd537dfb,
+        oc:kn_e90374ed ;
+    oc:isUserInvocable false ;
     oc:nature "Concept" ;
     oc:requiresState oc:ReactComponentExists ;
-    oc:resolvesIntent "identify unnecessary useMemo usage",
-        "optimize React component re-renders",
-        "refactor simple expressions out of useMemo" ;
-    oc:yieldsState oc:ExpressionOptimized .
+    oc:resolvesIntent "avoid unnecessary useMemo wrapping",
+        "identify over-optimized simple expressions",
+        "optimize React component rendering" ;
+    oc:yieldsState oc:PerformanceOptimized .
 
-oc:kn_4e8fd3ed a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When deciding whether to memoize a value in a React component" ;
-    oc:directiveContent "Only use useMemo when the computation is expensive enough that the memoization overhead is justified, such as creating non-primitive values (objects, arrays) passed as props or dependencies, or performing costly calculations." ;
-    oc:hasRationale "Premature memoization adds complexity and can degrade performance rather than improve it." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_b8426e94 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When reviewing React component code for useMemo usage" ;
-    oc:directiveContent "An expression qualifies as 'simple' when it involves few logical or arithmetic operators and produces a primitive result type (boolean, number, string). Such expressions should not be memoized." ;
-    oc:hasRationale "Primitive comparisons are cheap; the memoization infrastructure costs more than the computation it attempts to save." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_c6544f82 a oc:KnowledgeNode,
+oc:kn_439ca1e7 a oc:KnowledgeNode,
         oc:PerformanceProfile ;
-    oc:appliesToContext "When a React component containing unnecessary useMemo calls renders" ;
-    oc:directiveContent "Wrapping simple primitive expressions in useMemo results in wasted computation on every render due to dependency comparison overhead, with LOW-MEDIUM impact severity." ;
-    oc:hasRationale "The dependency array comparison and memoization cache lookup are themselves operations that execute on every render, adding overhead without meaningful savings for simple expressions." ;
+    oc:appliesToContext "When profiling React component render performance" ;
+    oc:directiveContent "useMemo incurs overhead from hook call setup and dependency array comparison on every render, even when the memoized value is reused." ;
+    oc:hasRationale "Understanding the fixed cost of useMemo is essential to making informed optimization decisions." ;
     oc:severityLevel "LOW" .
 
-oc:kn_f570b162 a oc:AntiPattern,
+oc:kn_59f1c459 a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When evaluating whether to add useMemo to a simple expression in a React component" ;
-    oc:directiveContent "Do not wrap simple expressions with primitive result types (boolean, number, string) in useMemo. The overhead of calling useMemo and comparing dependencies may exceed the cost of the expression itself." ;
-    oc:hasRationale "useMemo has its own computational cost for dependency comparison and memoization overhead. For simple expressions (few logical or arithmetic operators), this overhead outweighs any benefit from caching the result." ;
+    oc:appliesToContext "When evaluating whether to add useMemo to a variable assignment in a React component" ;
+    oc:directiveContent "Do not wrap simple expressions (few logical/arithmetic operators) with primitive result types (boolean, number, string) in useMemo — the hook call and dependency comparison overhead costs more than the expression itself." ;
+    oc:hasRationale "Calling useMemo and comparing hook dependencies consumes more resources than computing a simple primitive expression directly on every render." ;
     oc:severityLevel "MEDIUM" .
+
+oc:kn_bd537dfb a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When deciding whether useMemo is appropriate for a given expression" ;
+    oc:directiveContent "useMemo is only worth the cost when the expression is computationally expensive or returns a non-primitive (object/array) reference that would cause unnecessary re-renders downstream." ;
+    oc:hasRationale "Primitive values are compared by value, so they never cause referential inequality issues that useMemo is designed to prevent." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_e90374ed a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When reviewing a React component for useMemo usage" ;
+    oc:directiveContent "An expression is 'simple' if it uses few logical or arithmetical operators. Such expressions with primitive return types should be computed inline without memoization." ;
+    oc:hasRationale "The cost model for useMemo only favors memoization when the expression computation exceeds the cost of the hook infrastructure." ;
+    oc:severityLevel "LOW" .
 

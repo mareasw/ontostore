@@ -7,60 +7,456 @@
 oc:skill_obra_superpowers_systematic_debugging_root_cause_tracing a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "root-cause-tracing" ;
-    skos:broader "debugging technique" ;
+    skos:broader "Debugging technique" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/obra/superpowers/systematic-debugging" ;
     oc:contentHash "a81bee9448794d261b4aca8487c595d11ff4bd4e10a5f96bca1117dd32527050" ;
-    oc:differentia "traces bugs backward through the call chain from symptom to original trigger, then fixes at the source" ;
+    oc:dependsOnSkill oc:skill_ontoskills_systematic_debugging ;
+    oc:differentia "Traces errors backward through the call chain to find and fix the original trigger rather than the symptom" ;
     oc:extends oc:skill_obra_superpowers_systematic_debugging ;
-    oc:handlesFailure oc:DeadEndTrace ;
-    oc:hasArgumentHint "error-symptom or stack-trace" ;
+    oc:handlesFailure oc:DeadEndInCallChain,
+        oc:StackTraceUnavailable ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_075fc258,
-        oc:kn_0a1185ac,
-        oc:kn_8763c053,
-        oc:kn_8d3e0e18,
-        oc:kn_fb49377f ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "Runs tests one-by-one, stops at first polluter. See script for usage." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "Use the bisection script `find-polluter.sh` in this directory:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "If something appears during tests but you don't know which test:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """./find-polluter.sh '.git' 'src/**/*.test.ts'
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 3 ;
+                            oc:sourceLocation "lines 103-105" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Finding Which Test Causes Pollution" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """await execFileAsync('git', ['init'], { cwd: projectDir });
+""" ;
+                                    oc:codeLanguage "typescript" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 41-43" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**What code directly causes this?**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "2. Find Immediate Cause" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """const context = setupCoreTest(); // Returns { tempDir: '' }
+Project.create('name', context.tempDir); // Accessed before beforeEach!
+""" ;
+                                    oc:codeLanguage "typescript" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 61-64" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Where did empty string come from?**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 5 ;
+                            oc:sectionTitle "5. Find Original Trigger" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """WorktreeManager.createSessionWorktree(projectDir, sessionId)
+  → called by Session.initializeWorkspace()
+  → called by Session.create()
+  → called by test at Project.create()
+""" ;
+                                    oc:codeLanguage "typescript" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 46-51" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "3. Ask: What Called This?" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 2 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "`projectDir = ''` (empty string!)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Empty string as `cwd` resolves to `process.cwd()`" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "That's the source code directory!" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**What value was passed?**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "4. Keep Tracing Up" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """Error: git init failed in /Users/jesse/project/packages/core
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 35-37" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "1. Observe the Symptom" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "The Tracing Process" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Use when:**" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 3 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Stack trace shows long call chain" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Error happens deep in execution (not at entry point)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Unclear where invalid data originated" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Need to find which test/code triggers the problem" ] ],
+                        [ a oc:Flowchart ;
+                            oc:blockType "flowchart" ;
+                            oc:contentOrder 1 ;
+                            oc:flowchartSource """digraph when_to_use {
+    "Bug appears deep in stack?" [shape=diamond];
+    "Can trace backwards?" [shape=diamond];
+    "Fix at symptom point" [shape=box];
+    "Trace to original trigger" [shape=box];
+    "BETTER: Also add defense-in-depth" [shape=box];
+
+    "Bug appears deep in stack?" -> "Can trace backwards?" [label="yes"];
+    "Can trace backwards?" -> "Trace to original trigger" [label="yes"];
+    "Can trace backwards?" -> "Fix at symptom point" [label="no - dead end"];
+    "Trace to original trigger" -> "BETTER: Also add defense-in-depth";
+}
+""" ;
+                            oc:flowchartType "graphviz" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "When to Use" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent """**In tests:** Use `console.error()` not logger - logger may be suppressed
+**Before operation:** Log before the dangerous operation, not after it fails
+**Include context:** Directory, cwd, environment variables, timestamps
+**Capture stack:** `new Error().stack` shows complete call chain""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 8 ;
+                    oc:sectionTitle "Stack Trace Tips" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 6 ;
+                            oc:textContent "**Analyze stack traces:**" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// Before the problematic operation
+async function gitInit(directory: string) {
+  const stack = new Error().stack;
+  console.error('DEBUG git init:', {
+    directory,
+    cwd: process.cwd(),
+    nodeEnv: process.env.NODE_ENV,
+    stack,
+  });
+
+  await execFileAsync('git', ['init'], { cwd: directory });
+}
+""" ;
+                            oc:codeLanguage "typescript" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 70-83" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 7 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Look for test file names" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Identify the pattern (same test? same parameter?)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Find the line number triggering the call" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Critical:** Use `console.error()` in tests (not logger - may not show)" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """npm test 2>&1 | grep 'DEBUG git init'
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 5 ;
+                            oc:sourceLocation "lines 88-90" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "**Run and capture:**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "When you can't trace manually, add instrumentation:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Adding Stack Traces" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "From debugging session (2025-10-03):" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Added 4 layers of defense" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Fixed at source (getter validation)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "1847 tests passed, zero pollution" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Found root cause through 5-level trace" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 9 ;
+                    oc:sectionTitle "Real-World Impact" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Flowchart ;
+                            oc:blockType "flowchart" ;
+                            oc:contentOrder 1 ;
+                            oc:flowchartSource """digraph principle {
+    "Found immediate cause" [shape=ellipse];
+    "Can trace one level up?" [shape=diamond];
+    "Trace backwards" [shape=box];
+    "Is this the source?" [shape=diamond];
+    "Fix at source" [shape=box];
+    "Add validation at each layer" [shape=box];
+    "Bug impossible" [shape=doublecircle];
+    "NEVER fix just the symptom" [shape=octagon, style=filled, fillcolor=red, fontcolor=white];
+
+    "Found immediate cause" -> "Can trace one level up?";
+    "Can trace one level up?" -> "Trace backwards" [label="yes"];
+    "Can trace one level up?" -> "NEVER fix just the symptom" [label="no"];
+    "Trace backwards" -> "Is this the source?";
+    "Is this the source?" -> "Trace backwards" [label="no - keeps going"];
+    "Is this the source?" -> "Fix at source" [label="yes"];
+    "Fix at source" -> "Add validation at each layer";
+    "Add validation at each layer" -> "Bug impossible";
+}
+""" ;
+                            oc:flowchartType "graphviz" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**NEVER fix just where the error appears.** Trace back to find the original trigger." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 7 ;
+                    oc:sectionTitle "Key Principle" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "**Root cause:** Top-level variable initialization accessing empty value" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 7 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Layer 1: Project.create() validates directory" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Layer 4: Stack trace logging before git init" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Layer 2: WorkspaceManager validates not empty" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Layer 3: NODE_ENV guard refuses git init outside tmpdir" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 6 ;
+                            oc:textContent "**Also added defense-in-depth:**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent "**Fix:** Made tempDir a getter that throws if accessed before beforeEach" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**Symptom:** `.git` created in `packages/core/` (source code)" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Trace chain:**" ],
+                        _:ref_e28776e3878d166b ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Real Example: Empty projectDir" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Bugs often manifest deep in the call stack (git init in wrong directory, file created in wrong location, database opened with wrong path). Your instinct is to fix where the error appears, but that's treating a symptom." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Core principle:** Trace backward through the call chain until you find the original trigger, then fix at the source." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Overview" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Root Cause Tracing" ] ;
+    oc:hasWorkflow _:ref_e28776e3878d166b ;
+    oc:impartsKnowledge oc:kn_26c1a406,
+        oc:kn_63871aee,
+        oc:kn_6502aac8,
+        oc:kn_6a6268ca,
+        oc:kn_cd42733c,
+        oc:kn_cf316f26,
+        oc:kn_ef69a895 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:ErrorObserved ;
-    oc:resolvesIntent "add stack trace instrumentation for debugging",
-        "find original trigger of an error",
+    oc:requiresState oc:BugObserved ;
+    oc:resolvesIntent "find original trigger of deep stack error",
+        "fix bugs at source rather than symptom",
         "identify which test causes pollution",
-        "trace root cause of deep-stack bugs" ;
-    oc:yieldsState oc:RootCauseIdentified .
+        "trace bug to root cause" ;
+    oc:yieldsState oc:DefenseInDepthAdded,
+        oc:RootCauseIdentified .
 
-oc:kn_075fc258 a oc:Heuristic,
+oc:kn_26c1a406 a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When adding instrumentation to capture stack traces during test debugging" ;
-    oc:directiveContent "Use console.error() for debug logging in tests, not the application logger which may be suppressed" ;
-    oc:hasRationale "Application loggers may be silenced or redirected in test environments, causing debug output to be lost" ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_0a1185ac a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When encountering any bug deep in the call stack" ;
-    oc:directiveContent "NEVER fix where the error appears. That is treating a symptom, not the root cause." ;
-    oc:hasRationale "Fixing at the symptom point leaves the original trigger intact, allowing the same class of bug to recur through other code paths" ;
+    oc:appliesToContext "When a bug manifests deep in the call stack" ;
+    oc:directiveContent "NEVER fix where the error appears. Fixing at the symptom point leaves the root cause intact and the bug will recur." ;
+    oc:hasRationale "Symptom-level fixes are bandaids; the original trigger remains and can cause the same or similar bugs through other paths" ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_8763c053 a oc:DesignPrinciple,
+oc:kn_63871aee a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When tracing any bug back to its root cause" ;
+    oc:directiveContent "1. Observe the symptom (error message/location) 2. Find the immediate cause (what code directly triggers it) 3. Ask: what called this? Trace the call chain upward 4. Keep tracing up — track parameter values at each level 5. Find the original trigger (where the invalid value originated)" ;
+    oc:hasRationale "Systematic backward tracing ensures you reach the true source rather than stopping at an intermediate layer" ;
+    oc:stepOrder 1 .
+
+oc:kn_6502aac8 a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "When a side effect appears during test runs but the triggering test is unknown" ;
+    oc:directiveContent "Use the bisection script (find-polluter.sh) to identify which test causes pollution by running tests one-by-one until the polluter is found." ;
+    oc:hasRationale "Binary/bisection search is O(log n) vs running all tests sequentially every time" .
+
+oc:kn_6a6268ca a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "After successfully identifying and fixing a root cause" ;
-    oc:directiveContent "After fixing at the source, add defense-in-depth validation at each layer in the call chain to make the bug class impossible" ;
-    oc:hasRationale "Multi-layer validation ensures that even if one defense fails, downstream guards catch the problem before damage occurs" ;
+    oc:appliesToContext "When adding instrumentation to trace bugs in test suites" ;
+    oc:directiveContent "Use console.error() for debug logging in tests, not logger — logger output may be suppressed in test environments." ;
+    oc:hasRationale "Test frameworks often suppress or redirect logger output, making debug traces invisible" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_8d3e0e18 a oc:Heuristic,
+oc:kn_cd42733c a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When instrumenting code to diagnose where a problematic operation originates" ;
-    oc:directiveContent "Log before the dangerous operation, not after it fails. Include directory, cwd, environment variables, and the full call stack via new Error().stack" ;
-    oc:hasRationale "Pre-failure logging captures the exact state leading to the error; post-failure logging may never execute if the process crashes" ;
-    oc:severityLevel "MEDIUM" .
+    oc:appliesToContext "After identifying and fixing the root cause" ;
+    oc:directiveContent "After fixing at the source, add defense-in-depth validation at every layer between the source and the symptom to make the bug impossible to recur." ;
+    oc:hasRationale "Layered validation catches similar issues at the earliest possible point and prevents entire classes of bugs" .
 
-oc:kn_fb49377f a oc:KnowledgeNode,
-        oc:WorkflowStrategy ;
-    oc:appliesToContext "When debugging errors that manifest deep in execution, not at entry point" ;
-    oc:directiveContent "Trace backward through the call chain step by step: observe symptom → find immediate cause → ask what called this → keep tracing up → find original trigger → fix at source" ;
-    oc:hasRationale "Bugs often originate far from where they surface; systematic backward tracing ensures you address the true cause" ;
-    oc:severityLevel "HIGH" .
+oc:kn_cf316f26 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before starting root cause tracing" ;
+    oc:directiveContent "Check if you can trace backwards through the call chain. If you hit a dead end, fall back to fixing at the symptom point and adding instrumentation." ;
+    oc:hasRationale "Some call chains cannot be traced (async boundaries, native code, external processes) and attempting to trace them wastes time" .
+
+oc:kn_ef69a895 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When adding debug instrumentation to trace a bug" ;
+    oc:directiveContent "Log context BEFORE the dangerous operation, not after it fails. Include directory, cwd, environment variables, and the full call stack." ;
+    oc:hasRationale "Post-failure logs miss the state that led to the failure; pre-operation captures capture the exact triggering conditions" .
+
+_:ref_04ca1feb5484274b a oc:WorkflowStep ;
+    dcterms:description "`git init` runs in `process.cwd()` ← empty cwd parameter" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_168230ee215dc5c0 a oc:WorkflowStep ;
+    dcterms:description "WorktreeManager called with empty projectDir" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_2d97fe1d7bc89b5d a oc:WorkflowStep ;
+    dcterms:description "Session.create() passed empty string" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_507ce300e176b11f a oc:WorkflowStep ;
+    dcterms:description "Test accessed `context.tempDir` before beforeEach" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_67fdfe6214ba85ef a oc:WorkflowStep ;
+    dcterms:description "setupCoreTest() returns `{ tempDir: '' }` initially" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_5" ;
+    oc:stepOrder 5 .
+
+_:ref_e28776e3878d166b a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 3 ;
+    oc:hasStep _:ref_04ca1feb5484274b,
+        _:ref_168230ee215dc5c0,
+        _:ref_2d97fe1d7bc89b5d,
+        _:ref_507ce300e176b11f,
+        _:ref_67fdfe6214ba85ef ;
+    oc:workflowId "procedure_3" ;
+    oc:workflowName "Ordered Procedure" .
 

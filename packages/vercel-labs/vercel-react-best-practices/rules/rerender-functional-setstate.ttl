@@ -7,72 +7,215 @@
 oc:skill_vercel_labs_vercel_react_best_practices_rerender_functional_setstate a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "rerender-functional-setstate" ;
-    skos:broader "React state management pattern" ;
+    skos:broader "React state update pattern" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "5e68df6b2ae8058e67f476ff1ac67bde159f5a9d18df439e46eabcdeb7b52e58" ;
-    oc:differentia "uses functional setState updates to prevent stale closures and stabilize callback references" ;
+    oc:differentia "uses functional setState form (curr => ...) to prevent stale closures and eliminate unnecessary useCallback dependencies" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
-    oc:handlesFailure oc:StaleClosureDetected,
-        oc:UnnecessaryRecreationIdentified ;
-    oc:hasArgumentHint "React component code using useState with callbacks" ;
+    oc:handlesFailure oc:StaleClosureDetected ;
     oc:hasCategory "development" ;
-    oc:hasRequirement oc:req_c0233aa4,
-        oc:req_cdad24b4 ;
-    oc:impartsKnowledge oc:kn_4600ad1f,
-        oc:kn_5fb26715,
-        oc:kn_74237f31,
-        oc:kn_af229d93,
-        oc:kn_c2bff44a ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Use Functional setState Updates
+impact: MEDIUM
+impactDescription: prevents stale closures and unnecessary callback recreations
+tags: react, hooks, useState, useCallback, callbacks, closures
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:BulletList ;
+                    oc:blockType "bullet_list" ;
+                    oc:contentOrder 12 ;
+                    oc:hasItem [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 1 ;
+                            oc:itemText "Setting state to a static value: `setCount(0)`" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 2 ;
+                            oc:itemText "Setting state from props/arguments only: `setName(newName)`" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 3 ;
+                            oc:itemText "State doesn't depend on previous value" ] ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 9 ;
+                    oc:textContent "**When to use functional updates:**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 13 ;
+                    oc:textContent "**Note:** If your project has [React Compiler](https://react.dev/learn/react-compiler) enabled, the compiler can automatically optimize some cases, but functional updates are still recommended for correctness and to prevent stale closure bugs." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 5 ;
+                    oc:textContent "**Correct (stable callbacks, no stale closures):**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function TodoList() {
+  const [items, setItems] = useState(initialItems)
+  
+  // Callback must depend on items, recreated on every items change
+  const addItems = useCallback((newItems: Item[]) => {
+    setItems([...items, ...newItems])
+  }, [items])  // ❌ items dependency causes recreations
+  
+  // Risk of stale closure if dependency is forgotten
+  const removeItem = useCallback((id: string) => {
+    setItems(items.filter(item => item.id !== id))
+  }, [])  // ❌ Missing items dependency - will use stale items!
+  
+  return <ItemsEditor items={items} onAdd={addItems} onRemove={removeItem} />
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-30" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "The first callback is recreated every time `items` changes, which can cause child components to re-render unnecessarily. The second callback has a stale closure bug—it will always reference the initial `items` value." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Incorrect (requires state as dependency):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 7 ;
+                    oc:textContent "**Benefits:**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 11 ;
+                    oc:textContent "**When direct updates are fine:**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "When updating state based on the current state value, use the functional update form of setState instead of directly referencing the state variable. This prevents stale closures, eliminates unnecessary dependencies, and creates stable callback references." ],
+                [ a oc:BulletList ;
+                    oc:blockType "bullet_list" ;
+                    oc:contentOrder 10 ;
+                    oc:hasItem [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 2 ;
+                            oc:itemText "Inside useCallback/useMemo when state is needed" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 3 ;
+                            oc:itemText "Event handlers that reference state" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 1 ;
+                            oc:itemText "Any setState that depends on the current state value" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 4 ;
+                            oc:itemText "Async operations that update state" ] ],
+                _:ref_fdfa8986399faf9f,
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function TodoList() {
+  const [items, setItems] = useState(initialItems)
+  
+  // Stable callback, never recreated
+  const addItems = useCallback((newItems: Item[]) => {
+    setItems(curr => [...curr, ...newItems])
+  }, [])  // ✅ No dependencies needed
+  
+  // Always uses latest state, no stale closure risk
+  const removeItem = useCallback((id: string) => {
+    setItems(curr => curr.filter(item => item.id !== id))
+  }, [])  // ✅ Safe and stable
+  
+  return <ItemsEditor items={items} onAdd={addItems} onRemove={removeItem} />
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 6 ;
+                    oc:sourceLocation "lines 36-52" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Use Functional setState Updates" ] ;
+    oc:hasWorkflow _:ref_fdfa8986399faf9f ;
+    oc:impartsKnowledge oc:kn_5dd48ced,
+        oc:kn_956fd1fb,
+        oc:kn_a32fda78,
+        oc:kn_b65a0483,
+        oc:kn_d4733918 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:ReactComponentWithState ;
-    oc:resolvesIntent "fix React state update bugs",
-        "optimize React useCallback dependencies",
-        "prevent stale closures in React useState callbacks",
-        "stabilize callback references in React components" ;
-    oc:yieldsState oc:StableCallbacksEstablished,
-        oc:StaleClosureRiskMitigated .
+    oc:requiresState oc:ReactComponentMounted ;
+    oc:resolvesIntent "fix stale closure bugs in React callbacks",
+        "optimize useCallback to prevent unnecessary recreations",
+        "write stable React state updates" ;
+    oc:yieldsState oc:StableCallbacksCreated .
 
-oc:kn_4600ad1f a oc:AntiPattern,
+oc:kn_5dd48ced a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When writing useCallback, useMemo, or any closure that calls setState based on current state" ;
-    oc:directiveContent "Never reference a state variable directly inside a useCallback or useMemo that updates that same state — always use the functional update form (e.g., setItems(curr => ...) instead of setItems([...items, ...]))." ;
-    oc:hasRationale "Direct state references in closures capture stale values if the dependency is omitted, or cause unnecessary callback recreations if the dependency is included — both are bugs." ;
+    oc:appliesToContext "When updating state based on its current value inside useCallback or event handlers" ;
+    oc:directiveContent "Never reference a state variable directly inside a useCallback/setState call that depends on the current state value — use the functional update form setItems(curr => ...) instead." ;
+    oc:hasRationale "Direct references cause stale closures (capturing outdated state) or force dependency-driven recreations that trigger unnecessary child re-renders." ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_5fb26715 a oc:DesignPrinciple,
+oc:kn_956fd1fb a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When updating React state based on its current value, especially inside useCallback, event handlers, or async operations" ;
-    oc:directiveContent "Use functional setState updates (setItems(curr => ...)) whenever the new state depends on the previous state value." ;
-    oc:hasRationale "Functional updates guarantee access to the latest state without needing to add state to dependency arrays, yielding stable callback references and eliminating stale closure bugs." ;
-    oc:severityLevel "HIGH" .
+    oc:appliesToContext "When deciding between functional vs direct setState" ;
+    oc:directiveContent "Use functional setState whenever the new state depends on the previous state value — use direct setState only for static values or prop/argument-derived values." ;
+    oc:hasRationale "Functional updates guarantee correctness and stability; direct updates are simpler and safe only when no previous-state dependency exists." .
 
-oc:kn_74237f31 a oc:KnowledgeNode,
-        oc:SideEffect ;
-    oc:appliesToContext "Always, when functional setState is adopted" ;
-    oc:directiveContent "Using functional setState with empty dependency arrays produces stable callback references that never change across renders, which can simplify memoization of child components." ;
-    oc:hasRationale "Stable references are a side benefit beyond correctness — they improve performance by avoiding unnecessary re-renders downstream." ;
-    oc:severityLevel "LOW" .
-
-oc:kn_af229d93 a oc:KnowledgeNode,
-        oc:PerformanceProfile ;
-    oc:appliesToContext "When optimizing React component render performance" ;
-    oc:directiveContent "Functional setState updates eliminate the need to include state in useCallback dependency arrays, preventing callback recreation on every state change and reducing unnecessary child re-renders." ;
-    oc:hasRationale "Stable callback references mean memoized child components receiving these callbacks via props will not re-render when unrelated state changes occur." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_c2bff44a a oc:Heuristic,
+oc:kn_a32fda78 a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When deciding between direct vs functional setState" ;
-    oc:directiveContent "If setState's new value references the current state variable, switch to the functional form; if setting to a static value or a value derived only from props/arguments, direct form is fine." ;
-    oc:hasRationale "Functional updates add no value when state is being set to a completely independent value, but are essential for correctness when previous state is involved." ;
-    oc:severityLevel "MEDIUM" .
+    oc:appliesToContext "When appending items to an array state inside useCallback with an empty dependency array" ;
+    oc:codeLanguage "tsx" ;
+    oc:directiveContent "setItems(curr => [...curr, ...newItems])" ;
+    oc:hasRationale "Functional update receives the latest state snapshot, eliminating the need to include the state variable in the dependency array." .
 
-oc:req_c0233aa4 a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "React hooks (useState, useCallback)" .
+oc:kn_b65a0483 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When React Compiler is enabled in the project" ;
+    oc:directiveContent "React Compiler can auto-optimize some cases, but functional updates are still recommended for correctness and stale closure prevention." ;
+    oc:hasRationale "The compiler handles memoization optimization but does not guarantee protection against stale closure semantics." .
 
-oc:req_cdad24b4 a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "JavaScript closures and dependency arrays" .
+oc:kn_d4733918 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When state is accessed within closures that may execute asynchronously or be memoized" ;
+    oc:directiveContent "Prefer functional updates inside useCallback, useMemo, async operations, and event handlers that reference state." ;
+    oc:hasRationale "These contexts carry the highest risk of stale closures; functional updates eliminate that risk entirely." .
+
+_:ref_54b308fc761834fe a oc:WorkflowStep ;
+    dcterms:description "**Stable callback references** - Callbacks don't need to be recreated when state changes" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_c195a1048dfad912 a oc:WorkflowStep ;
+    dcterms:description "**Prevents bugs** - Eliminates the most common source of React closure bugs" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_d172648b5ea6c7b6 a oc:WorkflowStep ;
+    dcterms:description "**Fewer dependencies** - Simplifies dependency arrays and reduces memory leaks" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_e4ab3ec85571289b a oc:WorkflowStep ;
+    dcterms:description "**No stale closures** - Always operates on the latest state value" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_fdfa8986399faf9f a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 8 ;
+    oc:hasStep _:ref_54b308fc761834fe,
+        _:ref_c195a1048dfad912,
+        _:ref_d172648b5ea6c7b6,
+        _:ref_e4ab3ec85571289b ;
+    oc:workflowId "procedure_8" ;
+    oc:workflowName "Ordered Procedure" .
 

@@ -7,62 +7,242 @@
 oc:skill_remotion_dev_skills_remotion_best_practices_sequencing a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "sequencing" ;
-    skos:broader "timing and layout pattern" ;
+    skos:broader "Timing control pattern" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/remotion-dev/skills/remotion-best-practices" ;
     oc:contentHash "7c18f2ac36974fd7b85c01efa1135ea06a14e8492dd9fe82ced3bec0b4bb605d" ;
-    oc:differentia "uses Remotion's Sequence and Series components to control when elements appear, for how long, and in what order within a video timeline" ;
-    oc:extends oc:skill_remotion_best_practices,
-        oc:skill_remotion_dev_skills_remotion_best_practices ;
-    oc:handlesFailure oc:InvalidInput ;
-    oc:hasArgumentHint "component tree with timing requirements" ;
+    oc:differentia "delays, trims, and sequences element appearance in Remotion video timelines using Sequence and Series components" ;
+    oc:extends oc:skill_remotion_dev_skills_remotion_best_practices ;
+    oc:handlesFailure oc:InvalidFrameReference,
+        oc:TimingOverlapError ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_81166d75,
-        oc:kn_b6eae859,
-        oc:kn_c891d7e2,
-        oc:kn_df93f69f,
-        oc:kn_eef8622e ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Inside a Sequence, `useCurrentFrame()` returns the local frame (starting from 0):" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """<Sequence from={60} durationInFrames={30}>
+  <MyComponent />
+  {/* Inside MyComponent, useCurrentFrame() returns 0-29, not 60-89 */}
+</Sequence>
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 2 ;
+                    oc:sourceLocation "lines 85-90" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 3 ;
+            oc:sectionTitle "Frame References Inside Sequences" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """<Sequence premountFor={1 * fps}>
+  <Title />
+</Sequence>
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 2 ;
+                    oc:sourceLocation "lines 37-41" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent """This loads the component in the timeline before it is actually played.  
+Always premount any `<Sequence>`!""" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Premounting" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 3 ;
+                    oc:textContent "Same as with `<Sequence>`, the items will be wrapped in an absolute fill element by default when using `<Series.Sequence>`, unless the `layout` prop is set to `none`." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Use `<Series>` when elements should play one after another without overlap." ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """import { Series } from "remotion";
+
+<Series>
+  <Series.Sequence durationInFrames={45}>
+    <Intro />
+  </Series.Sequence>
+  <Series.Sequence durationInFrames={60}>
+    <MainContent />
+  </Series.Sequence>
+  <Series.Sequence durationInFrames={30}>
+    <Outro />
+  </Series.Sequence>
+</Series>;
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 2 ;
+                    oc:sourceLocation "lines 47-61" ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """<Series>
+  <Series.Sequence durationInFrames={60}>
+    <SceneA />
+  </Series.Sequence>
+  <Series.Sequence offset={-15} durationInFrames={60}>
+    {/* Starts 15 frames before SceneA ends */}
+    <SceneB />
+  </Series.Sequence>
+</Series>
+""" ;
+                            oc:codeLanguage "tsx" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 69-79" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Use negative offset for overlapping sequences:" ] ;
+                    oc:sectionLevel 3 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Series with overlaps" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 2 ;
+            oc:sectionTitle "Series" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """name: sequencing
+description: Sequencing patterns for Remotion - delay, trim, limit duration of items
+metadata:
+  tags: sequence, series, timing, delay, trim
+""" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """import { Sequence } from "remotion";
+
+const {fps} = useVideoConfig();
+
+<Sequence from={1 * fps} durationInFrames={2 * fps} premountFor={1 * fps}>
+  <Title />
+</Sequence>
+<Sequence from={2 * fps} durationInFrames={2 * fps} premountFor={1 * fps}>
+  <Subtitle />
+</Sequence>
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 10-21" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent """This will by default wrap the component in an absolute fill element.  
+If the items should not be wrapped, use the `layout` prop:""" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "Use `<Sequence>` to delay when an element appears in the timeline." ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """<Sequence layout="none">
+  <Title />
+</Sequence>
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 5 ;
+                    oc:sourceLocation "lines 26-30" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """<AbsoluteFill>
+  <Sequence width={COMPOSITION_WIDTH} height={COMPOSITION_HEIGHT}>
+    <CompositionComponent />
+  </Sequence>
+</AbsoluteFill>
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 2 ;
+                    oc:sourceLocation "lines 112-118" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "To add a composition within another composition, you can use the `<Sequence>` component with a `width` and `height` prop to specify the size of the composition." ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 5 ;
+            oc:sectionTitle "Nesting compositions within another" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """<Sequence from={0} durationInFrames={120}>
+  <Background />
+  <Sequence from={15} durationInFrames={90} layout="none">
+    <Title />
+  </Sequence>
+  <Sequence from={45} durationInFrames={60} layout="none">
+    <Subtitle />
+  </Sequence>
+</Sequence>
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 2 ;
+                    oc:sourceLocation "lines 96-106" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Sequences can be nested for complex timing:" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 4 ;
+            oc:sectionTitle "Nested Sequences" ] ;
+    oc:impartsKnowledge oc:kn_aa2549f0,
+        oc:kn_b4fff958,
+        oc:kn_d01ef32f,
+        oc:kn_d9226dbf,
+        oc:kn_e0010fbd,
+        oc:kn_e92f55ce ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:EnvironmentReady ;
+    oc:requiresState oc:RemotionProjectInitialized ;
     oc:resolvesIntent "create overlapping video segments",
         "delay element appearance in video timeline",
-        "nest compositions within each other",
-        "sequence elements one after another",
-        "trim and limit duration of video elements" ;
-    oc:yieldsState oc:SequenceConfigured .
+        "nest sequences for complex timing",
+        "sequence elements to play one after another" ;
+    oc:yieldsState oc:SequencesConfigured .
 
-oc:kn_81166d75 a oc:AntiPattern,
+oc:kn_aa2549f0 a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When <Sequence> or <Series.Sequence> introduces unwanted layout shifts due to default absolute-fill wrapping" ;
-    oc:directiveContent "Do not forget the layout prop when Sequence wrapping causes unwanted absolute-fill positioning of child elements." ;
-    oc:hasRationale "The default absolute-fill wrapper can break custom positioning; setting layout='none' preserves the child's original layout behavior." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_b6eae859 a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When reading frame data inside a <Sequence> wrapper" ;
-    oc:directiveContent "useCurrentFrame() returns local frames (starting from 0) inside a Sequence, not the absolute composition frame." ;
-    oc:hasRationale "This local frame behavior makes sequences self-contained and reusable at any timeline position, but can cause bugs if developers assume absolute frame values." ;
+    oc:appliesToContext "When reading frame values inside a <Sequence>" ;
+    oc:directiveContent "Do not assume useCurrentFrame() returns global frames inside a Sequence — it returns local frames starting from 0." ;
+    oc:hasRationale "The frame counter resets to 0 at the start of each Sequence, so global frame assumptions will produce incorrect timing calculations." ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_c891d7e2 a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "When using <Sequence> in any Remotion composition" ;
-    oc:directiveContent "Always premount any <Sequence> component by setting premountFor to preload the component before it plays." ;
-    oc:hasRationale "Premounting prevents visual glitches and loading flicker by ensuring the component is fully rendered before it becomes visible on the timeline." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_df93f69f a oc:Constraint,
+oc:kn_b4fff958 a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When embedding a Composition component within another composition" ;
-    oc:directiveContent "To nest one composition inside another, use <Sequence> with explicit width and height props to define the inner composition's dimensions." ;
-    oc:hasRationale "Without explicit dimensions, the nested composition has no reference frame for its coordinate system and may not render correctly." ;
-    oc:severityLevel "HIGH" .
+    oc:appliesToContext "When choosing between Sequence and Series for timeline ordering" ;
+    oc:directiveContent "Use <Sequence> for delaying/trimming individual elements; use <Series> for playing elements one after another without manual offset calculation." ;
+    oc:hasRationale "Series automatically chains elements sequentially, eliminating manual frame offset math and reducing timing errors." .
 
-oc:kn_eef8622e a oc:Heuristic,
+oc:kn_d01ef32f a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When deciding between Sequence and Series for timeline orchestration" ;
-    oc:directiveContent "Use <Sequence> for delaying or trimming individual elements; use <Series> for playing elements one after another without manual frame calculation." ;
-    oc:hasRationale "Series eliminates the need to manually calculate cumulative start frames, reducing off-by-one errors in sequential playback." ;
-    oc:severityLevel "MEDIUM" .
+    oc:appliesToContext "When absolute positioning interferes with custom layout" ;
+    oc:directiveContent "<Sequence> wraps children in an absolute fill element by default. Use layout=\"none\" to prevent this wrapping." ;
+    oc:hasRationale "The default absolute fill can break custom positioning strategies if not accounted for." .
+
+oc:kn_d9226dbf a oc:Idempotency,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When building complex multi-layered timing structures" ;
+    oc:directiveContent "Sequences can be nested arbitrarily deep for complex timing hierarchies, with each level having its own local frame context." ;
+    oc:hasRationale "Nested sequences compose naturally — each child sequence's frame counter is relative to its parent sequence's start." .
+
+oc:kn_e0010fbd a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When building crossfade or overlap effects between consecutive scenes" ;
+    oc:directiveContent "Use negative offset on Series.Sequence to create overlapping transitions between scenes." ;
+    oc:hasRationale "Negative offset shifts the start time backward relative to the previous sequence's end, enabling seamless transitions." .
+
+oc:kn_e92f55ce a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Whenever using <Sequence> components" ;
+    oc:directiveContent "Always premount any <Sequence> by setting premountFor to load the component before it plays." ;
+    oc:hasRationale "Premounting ensures components are loaded and rendered before their scheduled appearance, preventing visual glitches." ;
+    oc:severityLevel "HIGH" .
 

@@ -7,72 +7,601 @@
 oc:skill_obra_superpowers_using_git_worktrees a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "using-git-worktrees" ;
-    skos:broader "Git workspace management skill" ;
-    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/obra/superpowers/using-git-worktrees" ;
+    skos:broader "Workspace isolation tool" ;
+    prov:wasDerivedFrom "../.agents/skills/obra/superpowers/using-git-worktrees" ;
     oc:contentHash "d8ae72ab8b3185d35d078f9fe77b3410de1868d93a8c7fcb42f6f59a325b1ddf" ;
-    oc:dependsOnSkill oc:skill_brainstorming ;
-    oc:differentia "creates isolated git worktrees with systematic directory selection, safety verification, and automated project setup for parallel development" ;
-    oc:handlesFailure oc:DependencyInstallFailure,
-        oc:GitWorktreeConflict,
-        oc:TestFailure ;
-    oc:hasAllowedTool "Bash",
-        "Glob",
-        "Grep",
-        "Read",
-        "Write" ;
-    oc:hasArgumentHint "branch-name (for the new worktree branch)" ;
+    oc:differentia "Creates and manages git worktrees with systematic directory selection, safety verification, and baseline testing for isolated feature development" ;
+    oc:handlesFailure oc:BaselineTestFailure,
+        oc:DirectoryNotIgnored ;
+    oc:hasAllowedTool "Bash" ;
+    oc:hasArgumentHint "branch-name for the new worktree" ;
     oc:hasCategory "development" ;
     oc:hasDescription "Use when starting feature work that needs isolation from current workspace or before executing implementation plans - creates isolated git worktrees with smart directory selection and safety verification" ;
     oc:hasName "using-git-worktrees" ;
-    oc:impartsKnowledge oc:kn_102c2e85,
-        oc:kn_8f253479,
-        oc:kn_9d3c39e4,
-        oc:kn_d2deadc5,
-        oc:kn_fff296d8 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """name: using-git-worktrees
+description: Use when starting feature work that needs isolation from current workspace or before executing implementation plans - creates isolated git worktrees with smart directory selection and safety verification
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 1 ;
+                            oc:rowCount 7 ;
+                            oc:tableCaption "## Quick Reference" ;
+                            oc:tableMarkdown """| Situation | Action |
+|-----------|--------|
+| `.worktrees/` exists | Use it (verify ignored) |
+| `worktrees/` exists | Use it (verify ignored) |
+| Both exist | Use `.worktrees/` |
+| Neither exists | Check CLAUDE.md → Ask user |
+| Directory not ignored | Add to .gitignore + commit |
+| Tests fail during baseline | Report failures + ask |
+| No package.json/Cargo.toml | Skip dependency install |
+""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 16 ;
+                    oc:sectionTitle "Quick Reference" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Follow this priority order:" ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**If preference specified:** Use it without asking." ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """grep -i "worktree.*director" CLAUDE.md 2>/dev/null
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 32-34" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 5 ;
+                            oc:sectionTitle "2. Check CLAUDE.md" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """No worktree directory found. Where should I create worktrees?
+
+1. .worktrees/ (project-local, hidden)
+2. ~/.config/superpowers/worktrees/<project-name>/ (global location)
+
+Which would you prefer?
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 42-49" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "If no directory exists and no CLAUDE.md preference:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 6 ;
+                            oc:sectionTitle "3. Ask User" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# Check in priority order
+ls -d .worktrees 2>/dev/null     # Preferred (hidden)
+ls -d worktrees 2>/dev/null      # Alternative
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 22-26" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**If found:** Use that directory. If both exist, `.worktrees` wins." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "1. Check Existing Directories" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Directory Selection Process" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Always:**" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 4 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Verify clean test baseline" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Verify directory is ignored for project-local" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Follow directory priority: existing > CLAUDE.md > ask" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Auto-detect and run project setup" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**Never:**" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "Skip CLAUDE.md check" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Create worktree without verifying it's ignored (project-local)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Skip baseline test verification" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Proceed with failing tests without asking" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Assume directory location when ambiguous" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 23 ;
+                    oc:sectionTitle "Red Flags" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**If tests fail:** Report failures, ask whether to proceed or investigate." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Run tests to ensure worktree starts clean:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# Examples - use project-appropriate command
+npm test
+cargo test
+pytest
+go test ./...
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 124-130" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent "**If tests pass:** Report ready." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 14 ;
+                            oc:sectionTitle "4. Verify Clean Baseline" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """project=$(basename "$(git rev-parse --show-toplevel)")
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 79-81" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 11 ;
+                            oc:sectionTitle "1. Detect Project Name" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """Worktree ready at <full-path>
+Tests passing (<N> tests, 0 failures)
+Ready to implement <feature-name>
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 138-142" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 15 ;
+                            oc:sectionTitle "5. Report Location" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Auto-detect and run appropriate setup:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# Node.js
+if [ -f package.json ]; then npm install; fi
+
+# Rust
+if [ -f Cargo.toml ]; then cargo build; fi
+
+# Python
+if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+if [ -f pyproject.toml ]; then poetry install; fi
+
+# Go
+if [ -f go.mod ]; then go mod download; fi
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 105-118" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 13 ;
+                            oc:sectionTitle "3. Run Project Setup" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# Determine full path
+case $LOCATION in
+  .worktrees|worktrees)
+    path="$LOCATION/$BRANCH_NAME"
+    ;;
+  ~/.config/superpowers/worktrees/*)
+    path="~/.config/superpowers/worktrees/$project/$BRANCH_NAME"
+    ;;
+esac
+
+# Create worktree with new branch
+git worktree add "$path" -b "$BRANCH_NAME"
+cd "$path"
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 85-99" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 12 ;
+                            oc:sectionTitle "2. Create Worktree" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 10 ;
+                    oc:sectionTitle "Creation Steps" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**MUST verify directory is ignored before creating worktree:**" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**If NOT ignored:**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# Check if directory is ignored (respects local, global, and system gitignore)
+git check-ignore -q .worktrees 2>/dev/null || git check-ignore -q worktrees 2>/dev/null
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 57-60" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent "Per Jesse's rule \"Fix broken things immediately\":" ],
+                                _:ref_81becfebabdbfacc,
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 6 ;
+                                    oc:textContent "**Why critical:** Prevents accidentally committing worktree contents to repository." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 8 ;
+                            oc:sectionTitle "For Project-Local Directories (.worktrees or worktrees)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "No .gitignore verification needed - outside project entirely." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 9 ;
+                            oc:sectionTitle "For Global Directory (~/.config/superpowers/worktrees)" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 7 ;
+                    oc:sectionTitle "Safety Verification" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Git worktrees create isolated workspaces sharing the same repository, allowing work on multiple branches simultaneously without switching." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Core principle:** Systematic directory selection + safety verification = reliable isolation." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Announce at start:** \"I'm using the using-git-worktrees skill to set up an isolated workspace.\"" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Overview" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "**subagent-driven-development** - REQUIRED before executing any tasks" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "**brainstorming** (Phase 4) - REQUIRED when design is approved and implementation follows" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "**executing-plans** - REQUIRED before executing any tasks" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Any skill needing isolated workspace" ] ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 4 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "**finishing-a-development-branch** - REQUIRED for cleanup after work complete" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Pairs with:**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**Called by:**" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 24 ;
+                    oc:sectionTitle "Integration" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 1 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "**Fix:** Report failures, get explicit permission to proceed" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "**Problem:** Can't distinguish new bugs from pre-existing issues" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 20 ;
+                            oc:sectionTitle "Proceeding with failing tests" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 1 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "**Fix:** Auto-detect from project files (package.json, etc.)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "**Problem:** Breaks on projects using different tools" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 21 ;
+                            oc:sectionTitle "Hardcoding setup commands" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 1 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "**Problem:** Creates inconsistency, violates project conventions" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "**Fix:** Follow priority: existing > CLAUDE.md > ask" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 19 ;
+                            oc:sectionTitle "Assuming directory location" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 1 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "**Fix:** Always use `git check-ignore` before creating project-local worktree" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "**Problem:** Worktree contents get tracked, pollute git status" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 18 ;
+                            oc:sectionTitle "Skipping ignore verification" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 17 ;
+                    oc:sectionTitle "Common Mistakes" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """You: I'm using the using-git-worktrees skill to set up an isolated workspace.
+
+[Check .worktrees/ - exists]
+[Verify ignored - git check-ignore confirms .worktrees/ is ignored]
+[Create worktree: git worktree add .worktrees/auth -b feature/auth]
+[Run npm install]
+[Run npm test - 47 passing]
+
+Worktree ready at /Users/jesse/myproject/.worktrees/auth
+Tests passing (47 tests, 0 failures)
+Ready to implement auth feature
+""" ;
+                            oc:codeLanguage "" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 180-192" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 22 ;
+                    oc:sectionTitle "Example Workflow" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Using Git Worktrees" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "Systematic process to create an isolated git worktree with directory selection, safety verification, dependency setup, and baseline testing" ;
+            oc:hasStep _:ref_6e6755260e0fc4de,
+                _:ref_b76eb59e085ab8c3,
+                _:ref_c3b2e49d92d5c74c,
+                _:ref_c751f2681466d535,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Report worktree location, test results summary, and readiness for feature implementation" ;
+                    oc:expectedOutcome "User informed of worktree location and ready state" ;
+                    oc:stepDependsOn _:ref_6e6755260e0fc4de ;
+                    oc:stepId "report-ready" ],
+                _:ref_d0bc682fe63c1b38 ;
+            oc:workflowId "worktree-creation" ;
+            oc:workflowName "Create Isolated Git Worktree" ],
+        _:ref_81becfebabdbfacc ;
+    oc:impartsKnowledge oc:kn_04bd56d4,
+        oc:kn_4e47876a,
+        oc:kn_5c64d79d,
+        oc:kn_60aaa1c9,
+        oc:kn_798b9607,
+        oc:kn_9014f274,
+        oc:kn_a4f3757e,
+        oc:kn_af3fe8e4,
+        oc:kn_d0ca5f37,
+        oc:kn_db44c145 ;
     oc:isUserInvocable true ;
     oc:nature "Tool" ;
     oc:requiresState oc:DirectoryWritable,
-        oc:SystemAuthenticated ;
-    oc:resolvesIntent "create isolated git workspace",
-        "create parallel development branch workspace",
-        "prepare isolated environment for implementation",
-        "set up worktree for feature development" ;
-    oc:yieldsState oc:EnvironmentReady,
-        oc:TestsPassing,
+        oc:ToolInstalled ;
+    oc:resolvesIntent "create isolated git worktree",
+        "manage git worktrees safely",
+        "set up parallel workspace for feature development",
+        "start feature work with workspace isolation" ;
+    oc:yieldsState oc:CleanTestBaseline,
         oc:WorktreeCreated .
 
-oc:kn_102c2e85 a oc:DesignPrinciple,
+oc:kn_04bd56d4 a oc:Idempotency,
         oc:KnowledgeNode ;
-    oc:appliesToContext "After dependency installation in the newly created worktree" ;
-    oc:directiveContent "Always run baseline tests in the new worktree to establish a clean verification state before any implementation begins." ;
-    oc:hasRationale "A clean test baseline is essential for distinguishing whether later test failures are caused by new changes or were pre-existing." ;
-    oc:severityLevel "HIGH" .
+    oc:appliesToContext "When running directory selection process" ;
+    oc:directiveContent "Directory selection is idempotent: if .worktrees/ already exists and is ignored, re-running the check simply reuses it" ;
+    oc:hasRationale "Safe to re-run checks without side effects" .
 
-oc:kn_8f253479 a oc:Heuristic,
+oc:kn_4e47876a a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "After creating the worktree and before running baseline tests" ;
-    oc:directiveContent "Auto-detect project type from marker files (package.json, Cargo.toml, requirements.txt, pyproject.toml, go.mod) and run appropriate dependency installation." ;
-    oc:hasRationale "Hardcoding setup commands breaks on projects using different tools; auto-detection ensures the worktree is properly initialized regardless of stack." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_9d3c39e4 a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When creating worktrees in .worktrees/ or worktrees/ directories inside the project" ;
-    oc:directiveContent "Always verify project-local worktree directories are git-ignored using `git check-ignore` before creating any worktree." ;
-    oc:hasRationale "Prevents accidentally committing worktree contents to the repository, which pollutes git status and can corrupt the repo." ;
+    oc:appliesToContext "Before creating any worktree in .worktrees/ or worktrees/" ;
+    oc:directiveContent "Never create a project-local worktree without verifying the directory is gitignored first" ;
+    oc:hasRationale "Worktree contents that aren't ignored will pollute git status and risk accidental commits to the repository" ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_d2deadc5 a oc:Heuristic,
+oc:kn_5c64d79d a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When selecting where to create worktrees" ;
-    oc:directiveContent "Follow directory priority order: existing directory > CLAUDE.md preference > ask user. Prefer .worktrees/ (hidden) over worktrees/ (visible)." ;
-    oc:hasRationale "Ensures consistency with project conventions and avoids creating redundant or conflicting directory structures." ;
+    oc:appliesToContext "When selecting worktree directory location" ;
+    oc:directiveContent "Never assume a directory location when it is ambiguous — follow the priority: existing > CLAUDE.md > ask user" ;
+    oc:hasRationale "Hardcoded assumptions violate project conventions and create inconsistency across team members" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_60aaa1c9 a oc:KnowledgeNode,
+        oc:PostFlightValidation ;
+    oc:appliesToContext "After dependency installation in new worktree" ;
+    oc:directiveContent "Run project-appropriate test suite after setup to verify clean baseline — report failures and ask before proceeding if any fail" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_fff296d8 a oc:AntiPattern,
+oc:kn_798b9607 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Always, before git worktree add for project-local directories" ;
+    oc:directiveContent "Run git check-ignore -q to verify worktree directory is ignored before creating any project-local worktree" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_9014f274 a oc:FallbackStrategy,
         oc:KnowledgeNode ;
-    oc:appliesToContext "After running project setup and baseline test verification in the new worktree" ;
-    oc:directiveContent "Never proceed with failing baseline tests without explicitly asking the user for permission to continue." ;
-    oc:hasRationale "Failing baseline tests mean you cannot distinguish new bugs from pre-existing issues, making all subsequent work unverifiable." ;
+    oc:appliesToContext "When user chooses global worktree directory" ;
+    oc:directiveContent "For global directory (~/.config/superpowers/worktrees/), no .gitignore verification is needed since it is outside the project entirely" ;
+    oc:hasRationale "Global directories are inherently excluded from project git tracking" .
+
+oc:kn_a4f3757e a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "Always during worktree creation" ;
+    oc:directiveContent "Creates a new git worktree (branch + directory), may add lines to .gitignore and create a commit, and runs dependency installation" ;
+    oc:hasRationale "Agent must be aware that git state, filesystem, and installed dependencies will change" .
+
+oc:kn_af3fe8e4 a oc:KnowledgeNode,
+        oc:SecurityImplication ;
+    oc:appliesToContext "When git check-ignore fails for .worktrees/ or worktrees/" ;
+    oc:directiveContent "If a project-local worktree directory is not gitignored, immediately add it to .gitignore and commit before proceeding" ;
+    oc:hasRationale "Per 'fix broken things immediately' principle — leaving it unfixed risks tracking worktree contents" ;
     oc:severityLevel "HIGH" .
+
+oc:kn_d0ca5f37 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When running project setup in a new worktree" ;
+    oc:directiveContent "Auto-detect project type from marker files (package.json, Cargo.toml, requirements.txt, pyproject.toml, go.mod) rather than hardcoding setup commands" ;
+    oc:hasRationale "Hardcoded setup commands break on projects using different tools or language ecosystems" .
+
+oc:kn_db44c145 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "After worktree creation and setup" ;
+    oc:directiveContent "Never skip baseline test verification after creating a worktree" ;
+    oc:hasRationale "Without a clean test baseline, new bugs cannot be distinguished from pre-existing issues" ;
+    oc:severityLevel "HIGH" .
+
+_:ref_8675f1e75115a4ad a oc:WorkflowStep ;
+    dcterms:description "Add appropriate line to .gitignore" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_d899897fd90cbc43 a oc:WorkflowStep ;
+    dcterms:description "Proceed with worktree creation" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_fed91aae97b7171b a oc:WorkflowStep ;
+    dcterms:description "Commit the change" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_6e6755260e0fc4de a oc:WorkflowStep ;
+    dcterms:description "Run project test suite to verify clean baseline; if tests fail, report and ask user whether to proceed" ;
+    oc:expectedOutcome "All tests pass, confirming clean worktree baseline" ;
+    oc:stepDependsOn _:ref_d0bc682fe63c1b38 ;
+    oc:stepId "verify-baseline" .
+
+_:ref_81becfebabdbfacc a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 5 ;
+    oc:hasStep _:ref_8675f1e75115a4ad,
+        _:ref_d899897fd90cbc43,
+        _:ref_fed91aae97b7171b ;
+    oc:workflowId "procedure_5" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_b76eb59e085ab8c3 a oc:WorkflowStep ;
+    dcterms:description "Detect project name, construct full path, run git worktree add with new branch, cd into worktree" ;
+    oc:expectedOutcome "Worktree directory created and branch checked out" ;
+    oc:stepDependsOn _:ref_c3b2e49d92d5c74c ;
+    oc:stepId "create-worktree" .
+
+_:ref_c3b2e49d92d5c74c a oc:WorkflowStep ;
+    dcterms:description "For project-local directories, run git check-ignore to verify directory is gitignored; if not, add to .gitignore and commit" ;
+    oc:expectedOutcome "Worktree directory confirmed ignored by git (or global location chosen)" ;
+    oc:stepDependsOn _:ref_c751f2681466d535 ;
+    oc:stepId "verify-ignored" .
+
+_:ref_c751f2681466d535 a oc:WorkflowStep ;
+    dcterms:description "Check for existing worktree directories (.worktrees > worktrees), then check CLAUDE.md for preference, then ask user" ;
+    oc:expectedOutcome "Worktree directory location determined" ;
+    oc:stepId "select-directory" .
+
+_:ref_d0bc682fe63c1b38 a oc:WorkflowStep ;
+    dcterms:description "Auto-detect project type from marker files and run appropriate dependency installation (npm install, cargo build, pip install, poetry install, go mod download)" ;
+    oc:expectedOutcome "Dependencies installed in worktree" ;
+    oc:stepDependsOn _:ref_b76eb59e085ab8c3 ;
+    oc:stepId "run-setup" .
 

@@ -10,57 +10,214 @@ oc:skill_vercel_labs_vercel_react_best_practices_js_batch_dom_css a oc:Declarati
     skos:broader "Performance optimization pattern" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "480b891b9eaf96e929dc1e964274a4828e3a78009b7d00ccd965a0d425215959" ;
-    oc:differentia "prevents layout thrashing by batching DOM style writes separately from layout reads to avoid forced synchronous reflows" ;
+    oc:differentia "batches DOM style writes before layout reads to prevent forced synchronous reflows" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
-    oc:handlesFailure oc:ReflowDetected ;
-    oc:hasArgumentHint "element or component with DOM style operations" ;
+    oc:handlesFailure oc:LayoutThrashingDetected ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_1799c055,
-        oc:kn_37cb34c0,
-        oc:kn_3a84bd95,
-        oc:kn_86b8b70f,
-        oc:kn_ee89c42e ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**This is OK (browser batches style changes):**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """.highlighted-box {
+  width: 100px;
+  height: 200px;
+  background-color: blue;
+  border: 1px solid black;
+}
+""" ;
+                    oc:codeLanguage "css" ;
+                    oc:contentOrder 11 ;
+                    oc:sourceLocation "lines 62-69" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function updateElementStyles(element: HTMLElement) {
+  // Batch all writes together
+  element.style.width = '100px'
+  element.style.height = '200px'
+  element.style.backgroundColor = 'blue'
+  element.style.border = '1px solid black'
+  
+  // Read after all writes are done (single reflow)
+  const { width, height } = element.getBoundingClientRect()
+}
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 7 ;
+                    oc:sourceLocation "lines 34-45" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "**Incorrect (interleaved reads and writes force reflows):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 16 ;
+                    oc:textContent "See [this gist](https://gist.github.com/paulirish/5d52fb081b3570c81e3a) and [CSS Triggers](https://csstriggers.com/) for more information on layout-forcing operations." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 15 ;
+                    oc:textContent "Prefer CSS classes over inline styles when possible. CSS files are cached by the browser, and classes provide better separation of concerns and are easier to maintain." ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function avoidThrashing(element: HTMLElement) {
+  // Read phase - all layout queries first
+  const rect1 = element.getBoundingClientRect()
+  const offsetWidth = element.offsetWidth
+  const offsetHeight = element.offsetHeight
+  
+  // Write phase - all style changes after
+  element.style.width = '100px'
+  element.style.height = '200px'
+}
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 9 ;
+                    oc:sourceLocation "lines 48-59" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 10 ;
+                    oc:textContent "**Better: use CSS classes**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Avoid interleaving style writes with layout reads. When you read a layout property (like `offsetWidth`, `getBoundingClientRect()`, or `getComputedStyle()`) between style changes, the browser is forced to trigger a synchronous reflow." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 13 ;
+                    oc:textContent "**React example:**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function updateElementStyles(element: HTMLElement) {
+  element.classList.add('highlighted-box')
+  
+  const { width, height } = element.getBoundingClientRect()
+}
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 12 ;
+                    oc:sourceLocation "lines 70-76" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function updateElementStyles(element: HTMLElement) {
+  // Each line invalidates style, but browser batches the recalculation
+  element.style.width = '100px'
+  element.style.height = '200px'
+  element.style.backgroundColor = 'blue'
+  element.style.border = '1px solid black'
+}
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 13-21" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function layoutThrashing(element: HTMLElement) {
+  element.style.width = '100px'
+  const width = element.offsetWidth  // Forces reflow
+  element.style.height = '200px'
+  const height = element.offsetHeight  // Forces another reflow
+}
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 5 ;
+                    oc:sourceLocation "lines 24-31" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 8 ;
+                    oc:textContent "**Correct (batch reads, then writes):**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """// Incorrect: interleaving style changes with layout queries
+function Box({ isHighlighted }: { isHighlighted: boolean }) {
+  const ref = useRef<HTMLDivElement>(null)
+  
+  useEffect(() => {
+    if (ref.current && isHighlighted) {
+      ref.current.style.width = '100px'
+      const width = ref.current.offsetWidth // Forces layout
+      ref.current.style.height = '200px'
+    }
+  }, [isHighlighted])
+  
+  return <div ref={ref}>Content</div>
+}
+
+// Correct: toggle class
+function Box({ isHighlighted }: { isHighlighted: boolean }) {
+  return (
+    <div className={isHighlighted ? 'highlighted-box' : ''}>
+      Content
+    </div>
+  )
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 14 ;
+                    oc:sourceLocation "lines 79-103" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 6 ;
+                    oc:textContent "**Correct (batch writes, then read once):**" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Avoid Layout Thrashing" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Avoid Layout Thrashing
+impact: MEDIUM
+impactDescription: prevents forced synchronous layouts and reduces performance bottlenecks
+tags: javascript, dom, css, performance, reflow, layout-thrashing
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:impartsKnowledge oc:kn_0c78ae52,
+        oc:kn_65dc85f4,
+        oc:kn_b51a98d3,
+        oc:kn_ce205eee,
+        oc:kn_d526a276 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
     oc:requiresState oc:DOMReady ;
-    oc:resolvesIntent "avoid layout thrashing in JavaScript",
-        "batch CSS reads and writes to prevent reflow",
-        "improve rendering performance in React components",
-        "optimize DOM style mutations" ;
-    oc:yieldsState oc:LayoutThrashingPrevented .
+    oc:resolvesIntent "avoid forced synchronous layouts",
+        "batch DOM reads and writes correctly",
+        "optimize DOM rendering performance",
+        "prevent layout thrashing in JavaScript" ;
+    oc:yieldsState oc:ReflowMinimized .
 
-oc:kn_1799c055 a oc:KnowledgeNode,
-        oc:KnownIssue ;
-    oc:appliesToContext "When using refs to imperatively manipulate DOM styles in React effects" ;
-    oc:directiveContent "In React, accessing offsetWidth or getBoundingClientRect inside a useEffect that also sets inline styles causes layout thrashing per render cycle." ;
-    oc:hasRationale "React's useEffect runs after paint in some cases, but synchronous layout reads between style mutations still force the browser to recalculate layout immediately, negating React's batching optimizations." ;
+oc:kn_0c78ae52 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When implementing conditional styling in React components" ;
+    oc:directiveContent "In React, use className toggling instead of refs with inline style manipulation to avoid layout thrashing entirely." ;
+    oc:hasRationale "Declarative class toggling lets React handle DOM updates optimally, eliminating the need for imperative ref-based style changes that risk interleaved reads/writes" .
+
+oc:kn_65dc85f4 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When applying multiple style changes to an element" ;
+    oc:directiveContent "Prefer CSS classes over inline styles. Use element.classList.add() or toggle classes instead of direct style property assignments." ;
+    oc:hasRationale "CSS files are cached by the browser, classes provide better separation of concerns, and a single class toggle avoids multiple inline style mutations" .
+
+oc:kn_b51a98d3 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When querying layout properties after style modifications" ;
+    oc:directiveContent "Reading offsetWidth, offsetHeight, getBoundingClientRect(), or getComputedStyle() forces layout recalculation if any preceding style change has invalidated the layout." ;
+    oc:hasRationale "These are 'forced synchronous layout' triggers — the browser must compute up-to-date layout before returning the value" ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_37cb34c0 a oc:AntiPattern,
+oc:kn_ce205eee a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When performing any DOM style mutations in JavaScript or React useEffect hooks" ;
-    oc:directiveContent "Never interleave DOM style writes with layout property reads (offsetWidth, getBoundingClientRect, getComputedStyle) as each read between writes forces a synchronous reflow." ;
-    oc:hasRationale "Interleaved reads and writes cause the browser to flush its style calculation queue repeatedly, creating a cascade of forced synchronous layouts that degrade rendering performance." ;
+    oc:appliesToContext "When both reading layout properties and writing styles in the same code block" ;
+    oc:directiveContent "Batch all style writes together first, then perform all layout reads in a separate phase. This ensures a single reflow instead of many." ;
+    oc:hasRationale "The browser batches style invalidations and recalculates layout once when reads and writes are grouped into separate phases" .
+
+oc:kn_d526a276 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When modifying element styles and querying layout properties in the same function" ;
+    oc:directiveContent "Never interleave DOM style writes with layout property reads (offsetWidth, getBoundingClientRect, getComputedStyle). Each interleaved read forces a synchronous reflow." ;
+    oc:hasRationale "Interleaving forces the browser to recalculate layout synchronously for each read, creating a cascade of forced reflows (layout thrashing) that devastates performance" ;
     oc:severityLevel "HIGH" .
-
-oc:kn_3a84bd95 a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When reading any geometric or computed style property from the DOM" ;
-    oc:directiveContent "Properties that force synchronous layout include offsetWidth, offsetHeight, offsetTop, offsetLeft, scrollTop, scrollLeft, scrollWidth, scrollHeight, clientTop, clientLeft, clientWidth, clientHeight, getBoundingClientRect(), and getComputedStyle()." ;
-    oc:hasRationale "These properties require the browser to have an up-to-date layout to return correct values, so accessing them invalidates any pending style change batch and forces immediate recalculation." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_86b8b70f a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When both reading layout properties and writing styles in the same function or effect" ;
-    oc:directiveContent "Batch all style writes together in one phase, then perform all layout reads in a separate phase afterward — or read all layout values first, then write all styles." ;
-    oc:hasRationale "Batching allows the browser to coalesce multiple style invalidations into a single reflow cycle, dramatically reducing layout computation cost." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_ee89c42e a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When setting multiple visual properties on an element, especially in React components" ;
-    oc:directiveContent "Prefer CSS classes over inline styles for applying multiple property changes simultaneously." ;
-    oc:hasRationale "CSS classes are cached by the browser, provide better separation of concerns, are easier to maintain, and inherently batch all property changes into a single operation." ;
-    oc:severityLevel "MEDIUM" .
 

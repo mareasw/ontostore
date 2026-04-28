@@ -7,54 +7,126 @@
 oc:skill_vercel_labs_vercel_react_best_practices_rerender_move_effect_to_event a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "rerender-move-effect-to-event" ;
-    skos:broader "React performance optimization pattern" ;
+    skos:broader "React pattern guideline" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "abc2cbf167bee056743023351e96806a411d3398da8802093620aecf0721f029" ;
-    oc:dependsOnSkill oc:skill_vercel_react_best_practices ;
-    oc:differentia "moves side effects triggered by user actions from useEffect into event handlers to prevent unnecessary re-runs and duplicate side effects" ;
+    oc:differentia "that prescribes moving interaction-triggered side effects from useEffect into event handlers to avoid duplicate executions and unnecessary dependency tracking" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
-    oc:hasArgumentHint "React component code with useEffect that handles user interactions" ;
+    oc:handlesFailure oc:InvalidEffectDependency ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_53505c82,
-        oc:kn_7673a79a,
-        oc:kn_d22b1bc0,
-        oc:kn_ef978345,
-        oc:kn_f5bfc6c1 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function Form() {
+  const theme = useContext(ThemeContext)
+
+  function handleSubmit() {
+    post('/api/register')
+    showToast('Registered', theme)
+  }
+
+  return <button onClick={handleSubmit}>Submit</button>
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 5 ;
+                    oc:sourceLocation "lines 32-43" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 6 ;
+                    oc:textContent "Reference: [Should this code move to an event handler?](https://react.dev/learn/removing-effect-dependencies#should-this-code-move-to-an-event-handler)" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function Form() {
+  const [submitted, setSubmitted] = useState(false)
+  const theme = useContext(ThemeContext)
+
+  useEffect(() => {
+    if (submitted) {
+      post('/api/register')
+      showToast('Registered', theme)
+    }
+  }, [submitted, theme])
+
+  return <button onClick={() => setSubmitted(true)}>Submit</button>
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-28" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "If a side effect is triggered by a specific user action (submit, click, drag), run it in that event handler. Do not model the action as state + effect; it makes effects re-run on unrelated changes and can duplicate the action." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Incorrect (event modeled as state + effect):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "**Correct (do it in the handler):**" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Put Interaction Logic in Event Handlers" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Put Interaction Logic in Event Handlers
+impact: MEDIUM
+impactDescription: avoids effect re-runs and duplicate side effects
+tags: rerender, useEffect, events, side-effects, dependencies
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:impartsKnowledge oc:kn_35fe00d8,
+        oc:kn_45f57ce9,
+        oc:kn_470d3b7c,
+        oc:kn_ec0f3e25,
+        oc:kn_fc1fb562 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:resolvesIntent "eliminate duplicate side effects from useEffect",
-        "fix unnecessary effect re-runs",
-        "optimize React component re-rendering behavior",
-        "refactor interaction logic from effects to event handlers" .
+    oc:requiresState oc:ReactComponentExists ;
+    oc:resolvesIntent "fix duplicate side effects in React",
+        "optimize React useEffect dependencies",
+        "prevent unnecessary effect re-runs",
+        "refactor React effect to event handler" ;
+    oc:yieldsState oc:EffectMovedToEventHandler .
 
-oc:kn_53505c82 a oc:Constraint,
+oc:kn_35fe00d8 a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "When an effect depends on both interaction state and non-interaction state (like theme, context values)" ;
+    oc:directiveContent "Placing interaction logic in useEffect can cause duplicate API calls, duplicate toast notifications, or other duplicated side effects when unrelated dependencies change." ;
+    oc:hasRationale "Any dependency change triggers a re-run of the entire effect, re-executing the interaction logic even though the user only acted once." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_45f57ce9 a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When designing state management for user interactions in React components" ;
-    oc:directiveContent "Do not introduce intermediate state variables solely to trigger effects from user actions. The event handler itself is the correct trigger mechanism." ;
-    oc:hasRationale "Each unnecessary state variable added to trigger an effect creates additional re-render cycles and widens the dependency surface for unrelated changes" .
+    oc:appliesToContext "When reviewing useEffect dependencies that include interaction-triggered state booleans" ;
+    oc:directiveContent "useEffect should not be used as a callback mechanism for user-initiated actions." ;
+    oc:hasRationale "Effects run after render and may fire multiple times if dependencies change, unlike event handlers which execute synchronously once." ;
+    oc:severityLevel "MEDIUM" .
 
-oc:kn_7673a79a a oc:KnowledgeNode,
-        oc:SuccessIndicator ;
-    oc:appliesToContext "When validating that a refactor from useEffect to event handler was successful" ;
-    oc:directiveContent "After refactoring, the interaction logic should execute exactly once per user action regardless of other state changes (theme, context, props) in the component." ;
-    oc:hasRationale "The primary signal that the pattern was applied correctly is that the side effect is no longer sensitive to unrelated dependency changes" .
-
-oc:kn_d22b1bc0 a oc:DesignPrinciple,
+oc:kn_470d3b7c a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When architecting React component logic and deciding between useEffect vs event handlers" ;
-    oc:directiveContent "Separate interaction-driven logic (belongs in event handlers) from synchronization-driven logic (belongs in effects). User actions are discrete events, not continuous state to synchronize with." ;
-    oc:hasRationale "This separation of concerns keeps the code predictable — event handlers fire exactly when the user acts, while effects handle syncing with external systems over time" .
+    oc:appliesToContext "When deciding where to place interaction logic in a React component" ;
+    oc:directiveContent "Side effects triggered by user actions belong in event handlers, not in useEffect." ;
+    oc:hasRationale "Event handlers are not reactive and run exactly once per interaction, avoiding the dependency tracking pitfalls of effects." ;
+    oc:severityLevel "CRITICAL" .
 
-oc:kn_ef978345 a oc:Heuristic,
+oc:kn_ec0f3e25 a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When deciding where to place interaction logic in React components" ;
-    oc:directiveContent "If a side effect is triggered by a specific user action, place the logic directly in the corresponding event handler (onClick, onSubmit, onDrag, etc.) instead of useEffect." ;
-    oc:hasRationale "Event handlers execute exactly once per user action, making them the correct locus for interaction-driven side effects, whereas effects run on every render where dependencies change" .
+    oc:appliesToContext "When a side effect is triggered by a specific user action (submit, click, drag)" ;
+    oc:directiveContent "Never model a user interaction as a state variable + useEffect when the side effect can run directly in the event handler." ;
+    oc:hasRationale "Modeling interactions as state + effect causes the effect to re-run on unrelated state changes and can duplicate the action." ;
+    oc:severityLevel "HIGH" .
 
-oc:kn_f5bfc6c1 a oc:AntiPattern,
+oc:kn_fc1fb562 a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When writing React components that respond to user interactions" ;
-    oc:directiveContent "Never model user-initiated actions (submit, click, drag) as state + useEffect. This causes the effect to re-run on unrelated state changes and can duplicate the action." ;
-    oc:hasRationale "State + effect pattern creates hidden coupling between the action and unrelated dependency changes (e.g., theme changes), leading to duplicate API calls or side effects" ;
+    oc:appliesToContext "When choosing between useEffect and event handlers" ;
+    oc:directiveContent "If a side effect is caused by a specific user action (click, submit, drag), put it in the event handler. If it is caused by rendering or synchronization with an external system, use useEffect." ;
+    oc:hasRationale "Effects re-run whenever their dependencies change, which is necessary for synchronization but harmful for one-time interactions." ;
     oc:severityLevel "HIGH" .
 

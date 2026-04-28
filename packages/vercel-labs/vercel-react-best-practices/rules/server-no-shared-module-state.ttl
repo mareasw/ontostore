@@ -7,60 +7,141 @@
 oc:skill_vercel_labs_vercel_react_best_practices_server_no_shared_module_state a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "server-no-shared-module-state" ;
-    skos:broader "Server-side rendering guideline" ;
+    skos:broader "Server-side React pattern" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "4d869bf1cd2f1632e5ca4c0e64b1cf0e71c5f5a0f940bc8a22174d205e735ed7" ;
-    oc:differentia "prevents concurrency bugs by prohibiting mutable module-level state for request-scoped data in RSC and SSR" ;
+    oc:differentia "prevents concurrency bugs by avoiding mutable module-level state for request-scoped data" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
-    oc:handlesFailure oc:DataLeak,
+    oc:handlesFailure oc:CrossRequestDataLeak,
         oc:RaceCondition ;
+    oc:hasArgumentHint "server component or SSR code to audit for shared mutable state" ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_06a33a3f,
-        oc:kn_3b0a2d68,
-        oc:kn_94dd8c12,
-        oc:kn_9815cd3b,
-        oc:kn_d1806bae ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Avoid Shared Module State for Request Data
+impact: HIGH
+impactDescription: prevents concurrency bugs and request data leaks
+tags: server, rsc, ssr, concurrency, security, state
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 10 ;
+                    oc:textContent "For static assets and config, see [Hoist Static I/O to Module Level](./server-hoist-static-io.md)." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 6 ;
+                    oc:textContent "**Correct (keep request data local to the render tree):**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """export default async function Page() {
+  const user = await auth()
+  return <Dashboard user={user} />
+}
+
+function Dashboard({ user }: { user: User | null }) {
+  return <div>{user?.name}</div>
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 7 ;
+                    oc:sourceLocation "lines 33-42" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "Treat module scope on the server as process-wide shared memory, not request-local state." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "For React Server Components and client components rendered during SSR, avoid using mutable module-level variables to share request-scoped data. Server renders can run concurrently in the same process. If one render writes to shared module state and another render reads it, you can get race conditions, cross-request contamination, and security bugs where one user's data appears in another user's response." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 8 ;
+                    oc:textContent "Safe exceptions:" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 3 ;
+                    oc:textContent "**Incorrect (request data leaks across concurrent renders):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 5 ;
+                    oc:textContent "If two requests overlap, request A can set `currentUser`, then request B overwrites it before request A finishes rendering `Dashboard`." ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """let currentUser: User | null = null
+
+export default async function Page() {
+  currentUser = await auth()
+  return <Dashboard />
+}
+
+async function Dashboard() {
+  return <div>{currentUser?.name}</div>
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 4 ;
+                    oc:sourceLocation "lines 16-27" ],
+                [ a oc:BulletList ;
+                    oc:blockType "bullet_list" ;
+                    oc:contentOrder 9 ;
+                    oc:hasItem [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 1 ;
+                            oc:itemText "Immutable static assets or config loaded once at module scope" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 2 ;
+                            oc:itemText "Shared caches intentionally designed for cross-request reuse and keyed correctly" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 3 ;
+                            oc:itemText "Process-wide singletons that do not store request- or user-specific mutable data" ] ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Avoid Shared Module State for Request Data" ] ;
+    oc:impartsKnowledge oc:kn_2f154d5a,
+        oc:kn_3e0011b7,
+        oc:kn_be1155e1,
+        oc:kn_db16ac67 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
     oc:requiresState oc:EnvironmentReady ;
-    oc:resolvesIntent "avoid shared module state in server components",
-        "fix race conditions in SSR",
-        "prevent request data leaks in concurrent renders",
-        "write thread-safe React Server Components" ;
-    oc:yieldsState oc:ServerComponentSafe .
+    oc:resolvesIntent "avoid race conditions in concurrent server renders",
+        "prevent request data leaks in server components",
+        "write safe server-side React components" ;
+    oc:yieldsState oc:ServerComponentsSafe .
 
-oc:kn_06a33a3f a oc:AntiPattern,
+oc:kn_2f154d5a a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When writing server components or SSR client components that handle per-request data" ;
-    oc:directiveContent "Never use mutable module-level variables to store request-scoped data (e.g., currentUser, request ID) in React Server Components or SSR-rendered client components." ;
-    oc:hasRationale "Server renders run concurrently in the same process; mutable module state is shared across all requests, causing race conditions, cross-request contamination, and security bugs where one user's data appears in another user's response." ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_3b0a2d68 a oc:KnowledgeNode,
-        oc:SecurityImplication ;
-    oc:appliesToContext "When server renders execute concurrently for different users" ;
-    oc:directiveContent "Cross-request contamination from shared module state can cause one user's private data to appear in another user's response." ;
-    oc:hasRationale "This is a data leak vulnerability that violates user privacy and can expose sensitive information across authenticated sessions." ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_94dd8c12 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When evaluating whether a module-level variable is safe on the server" ;
-    oc:directiveContent "Treat module scope on the server as process-wide shared memory, not request-local state." ;
-    oc:hasRationale "This mental model prevents accidental sharing of request data and makes the concurrency implications of module-level state explicit." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_9815cd3b a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When architecting data flow in server components" ;
-    oc:directiveContent "Pass request-scoped data through the component render tree via props rather than relying on shared module state." ;
-    oc:hasRationale "Props are inherently request-local and thread-safe because each concurrent render gets its own component instance with its own prop values." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_d1806bae a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When considering whether module-level state is acceptable" ;
-    oc:directiveContent "Safe exceptions for module-level state are limited to: immutable static assets/config loaded once, intentionally shared caches keyed correctly, and process-wide singletons that never store request- or user-specific mutable data." ;
-    oc:hasRationale "These exceptions are safe because they either never change after initialization or are explicitly designed for cross-request reuse without per-request mutation." ;
+    oc:appliesToContext "When deciding whether module-level state is acceptable" ;
+    oc:directiveContent "Mutable module-level state is safe only for: immutable static assets/config loaded once, shared caches intentionally designed for cross-request reuse with correct keying, and process-wide singletons that store no request/user-specific mutable data." ;
+    oc:hasRationale "These exceptions are safe because they either never change after initialization or are explicitly designed for shared concurrent access." ;
     oc:severityLevel "MEDIUM" .
+
+oc:kn_3e0011b7 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing server-side React components" ;
+    oc:directiveContent "Never use mutable module-level variables to store request-scoped data in React Server Components or SSR-rendered client components." ;
+    oc:hasRationale "Server renders run concurrently in the same process — mutable module state is process-wide shared memory, not request-local. Concurrent writes cause race conditions and cross-request data leaks." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_be1155e1 a oc:KnowledgeNode,
+        oc:SecurityImplication ;
+    oc:appliesToContext "When storing any user or request data in server components" ;
+    oc:directiveContent "Shared mutable module state on the server can cause one user's data to appear in another user's response, creating a security vulnerability." ;
+    oc:hasRationale "Cross-request contamination from shared state violates user data isolation and can expose sensitive information to unauthorized parties." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_db16ac67 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When architecting server component data flow" ;
+    oc:directiveContent "Treat module scope on the server as process-wide shared memory, not request-local state. Pass request data explicitly through component props." ;
+    oc:hasRationale "Explicit prop passing ensures each concurrent render has its own isolated data, eliminating cross-request contamination." ;
+    oc:severityLevel "HIGH" .
 

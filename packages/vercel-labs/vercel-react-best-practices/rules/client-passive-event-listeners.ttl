@@ -10,67 +10,125 @@ oc:skill_vercel_labs_vercel_react_best_practices_client_passive_event_listeners 
     skos:broader "Performance optimization technique" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "1f35016f9053de69e884ee9be00654e37979c2ca85f5e57764dc2626ff7acb4b" ;
-    oc:differentia "adds passive flag to touch and wheel event listeners to eliminate scroll delay by informing the browser that preventDefault() will not be called" ;
+    oc:differentia "adds passive flag to touch and wheel event listeners to eliminate scroll blocking" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
-    oc:handlesFailure oc:InvalidInput ;
-    oc:hasArgumentHint "React component with touch/wheel event listeners" ;
+    oc:hasArgumentHint "component or event listener code to optimize" ;
     oc:hasCategory "development" ;
-    oc:hasRequirement oc:req_30e8fa79,
-        oc:req_38a5f0a5 ;
-    oc:impartsKnowledge oc:kn_92dc87f8,
-        oc:kn_955653b3,
-        oc:kn_abc28f92,
-        oc:kn_b2fd02d1,
-        oc:kn_be9a6a35 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 6 ;
+                    oc:textContent "**Use passive when:** tracking/analytics, logging, any listener that doesn't call `preventDefault()`." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Incorrect:**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """useEffect(() => {
+  const handleTouch = (e: TouchEvent) => console.log(e.touches[0].clientX)
+  const handleWheel = (e: WheelEvent) => console.log(e.deltaY)
+  
+  document.addEventListener('touchstart', handleTouch, { passive: true })
+  document.addEventListener('wheel', handleWheel, { passive: true })
+  
+  return () => {
+    document.removeEventListener('touchstart', handleTouch)
+    document.removeEventListener('wheel', handleWheel)
+  }
+}, [])
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 5 ;
+                    oc:sourceLocation "lines 31-44" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Add `{ passive: true }` to touch and wheel event listeners to enable immediate scrolling. Browsers normally wait for listeners to finish to check if `preventDefault()` is called, causing scroll delay." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 7 ;
+                    oc:textContent "**Don't use passive when:** implementing custom swipe gestures, custom zoom controls, or any listener that needs `preventDefault()`." ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """useEffect(() => {
+  const handleTouch = (e: TouchEvent) => console.log(e.touches[0].clientX)
+  const handleWheel = (e: WheelEvent) => console.log(e.deltaY)
+  
+  document.addEventListener('touchstart', handleTouch)
+  document.addEventListener('wheel', handleWheel)
+  
+  return () => {
+    document.removeEventListener('touchstart', handleTouch)
+    document.removeEventListener('wheel', handleWheel)
+  }
+}, [])
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-27" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "**Correct:**" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Use Passive Event Listeners for Scrolling Performance" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Use Passive Event Listeners for Scrolling Performance
+impact: MEDIUM
+impactDescription: eliminates scroll delay caused by event listeners
+tags: client, event-listeners, scrolling, performance, touch, wheel
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:impartsKnowledge oc:kn_6b24c55d,
+        oc:kn_791bbcc0,
+        oc:kn_7c998627,
+        oc:kn_7e212107,
+        oc:kn_8fda8f10 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:EnvironmentReady ;
     oc:resolvesIntent "add passive event listeners",
-        "eliminate scroll delay in React components",
-        "improve touch and wheel event handling",
-        "optimize scrolling performance" ;
-    oc:yieldsState oc:ScrollingPerformanceOptimized .
+        "optimize scrolling performance",
+        "prevent scroll delay from event listeners" .
 
-oc:kn_92dc87f8 a oc:Idempotency,
+oc:kn_6b24c55d a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When managing event listener lifecycle in React components" ;
-    oc:directiveContent "Properly cleaning up passive event listeners in useEffect return functions is essential; removeEventListener does not need the passive option but must reference the same handler function." ;
-    oc:hasRationale "Failing to remove listeners on component unmount causes memory leaks and potential stale closure bugs." ;
+    oc:appliesToContext "When adding touchstart, touchmove, wheel, or similar scroll-related event listeners" ;
+    oc:directiveContent "Never add touch or wheel event listeners without the { passive: true } option if the listener does not call preventDefault()." ;
+    oc:hasRationale "Browsers block scrolling while waiting for non-passive listeners to finish executing, to check if preventDefault() will be called. This causes visible scroll delay." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_791bbcc0 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When adding scroll-related event listeners for observational purposes" ;
+    oc:directiveContent "Use passive listeners for tracking, analytics, logging, or any listener that only reads event data without calling preventDefault()." ;
+    oc:hasRationale "These listeners never need to block the browser's default scroll behavior, so marking them passive eliminates unnecessary waiting." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_955653b3 a oc:AntiPattern,
+oc:kn_7c998627 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "When converting existing event listeners to passive" ;
+    oc:directiveContent "Before adding passive: true, verify that the event handler never calls preventDefault() under any code path." ;
+    oc:hasRationale "A passive listener that calls preventDefault() will be ignored by the browser and generate a console warning, breaking intended behavior silently." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_7e212107 a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "Always, when touch/wheel listeners are present on a page" ;
+    oc:directiveContent "Passive event listeners eliminate the browser's wait time for scroll-related event handlers, enabling immediate scrolling response." ;
+    oc:hasRationale "Without passive, the browser must synchronously execute each listener before it can begin scrolling, introducing frame delays." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_8fda8f10 a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When implementing custom gesture handling or any listener that must intercept and cancel default browser behavior" ;
-    oc:directiveContent "Never use passive: true on listeners that need to call preventDefault(), such as custom swipe gestures or custom zoom controls." ;
-    oc:hasRationale "Marking a listener as passive while calling preventDefault() will cause the browser to ignore the preventDefault() call, silently breaking intended behavior." ;
+    oc:appliesToContext "When implementing custom gesture handling that requires preventing default browser behavior" ;
+    oc:directiveContent "Do NOT use passive: true when the listener needs to call preventDefault(), such as for custom swipe gestures or custom zoom controls." ;
+    oc:hasRationale "Passive listeners signal that preventDefault() will not be called, so the browser skips waiting. If you need to prevent default behavior, passive mode breaks that contract." ;
     oc:severityLevel "CRITICAL" .
-
-oc:kn_abc28f92 a oc:KnowledgeNode,
-        oc:SideEffect ;
-    oc:appliesToContext "When passive: true is set on touch or wheel event listeners" ;
-    oc:directiveContent "Passive event listeners enable the browser to perform scroll processing on the compositor thread without waiting for the main thread, improving scroll responsiveness." ;
-    oc:hasRationale "This is the core performance benefit — the browser can immediately begin scrolling instead of blocking until the listener callback completes." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_b2fd02d1 a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "When adding touch or wheel event listeners in React useEffect hooks or anywhere in the browser" ;
-    oc:directiveContent "Always add { passive: true } to touchstart, touchmove, and wheel event listeners that do not call preventDefault()." ;
-    oc:hasRationale "Without passive: true, the browser must wait for the listener to finish executing to check if preventDefault() is called, which blocks scrolling and introduces visible delay." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_be9a6a35 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When deciding whether a listener should be passive" ;
-    oc:directiveContent "Use passive listeners for tracking, analytics, and logging handlers that only read event data without modifying behavior." ;
-    oc:hasRationale "These read-only handlers never need to call preventDefault(), so they are safe and beneficial to mark as passive." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:req_30e8fa79 a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "React useEffect hook and event listener lifecycle management" .
-
-oc:req_38a5f0a5 a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "Browser event listener options and passive behavior" .
 

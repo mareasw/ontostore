@@ -7,61 +7,417 @@
 oc:skill_obra_superpowers_systematic_debugging_defense_in_depth a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "defense-in-depth" ;
-    skos:broader "debugging validation strategy" ;
+    skos:broader "Validation methodology" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/obra/superpowers/systematic-debugging" ;
     oc:contentHash "1e175fb86fc357e58c6aebf5441e481e1b7868b4380c0456b63a17eefbd18ba7" ;
-    oc:differentia "applies validation at every layer data passes through to make bugs structurally impossible rather than merely fixed" ;
+    oc:differentia "applies checks at every layer data passes through — entry point, business logic, environment guards, and debug instrumentation — to make bugs structurally impossible rather than merely fixed" ;
     oc:extends oc:skill_obra_superpowers_systematic_debugging ;
-    oc:handlesFailure oc:SingleLayerInsufficient,
+    oc:handlesFailure oc:InvalidInput,
         oc:ValidationBypassed ;
-    oc:hasArgumentHint "bug description or data flow to validate" ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_11940185,
-        oc:kn_1d803bf4,
-        oc:kn_735a523e,
-        oc:kn_7f50d8e6,
-        oc:kn_e51ff8f8 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "All four layers were necessary. During testing, each layer caught bugs the others missed:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Don't stop at one validation point.** Add checks at every layer." ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Mocks bypassed business logic checks" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Different code paths bypassed entry validation" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Debug logging identified structural misuse" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Edge cases on different platforms needed environment guards" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Key Insight" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Core principle:** Validate at EVERY layer data passes through. Make the bug structurally impossible." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "When you fix a bug caused by invalid data, adding validation at one place feels sufficient. But that single check can be bypassed by different code paths, refactoring, or mocks." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Overview" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "When you find a bug:" ],
+                        _:ref_e57d2ffa171d1a7b ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Applying the Pattern" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Purpose:** Capture context for forensics" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """async function gitInit(directory: string) {
+  const stack = new Error().stack;
+  logger.debug('About to git init', {
+    directory,
+    cwd: process.cwd(),
+    stack,
+  });
+  // ... proceed
+}
+""" ;
+                                    oc:codeLanguage "typescript" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 75-85" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "Layer 4: Debug Instrumentation" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Purpose:** Reject obviously invalid input at API boundary" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """function createProject(name: string, workingDirectory: string) {
+  if (!workingDirectory || workingDirectory.trim() === '') {
+    throw new Error('workingDirectory cannot be empty');
+  }
+  if (!existsSync(workingDirectory)) {
+    throw new Error(`workingDirectory does not exist: ${workingDirectory}`);
+  }
+  if (!statSync(workingDirectory).isDirectory()) {
+    throw new Error(`workingDirectory is not a directory: ${workingDirectory}`);
+  }
+  // ... proceed
+}
+""" ;
+                                    oc:codeLanguage "typescript" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 25-38" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Layer 1: Entry Point Validation" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """async function gitInit(directory: string) {
+  // In tests, refuse git init outside temp directories
+  if (process.env.NODE_ENV === 'test') {
+    const normalized = normalize(resolve(directory));
+    const tmpDir = normalize(resolve(tmpdir()));
+
+    if (!normalized.startsWith(tmpDir)) {
+      throw new Error(
+        `Refusing git init outside temp dir during tests: ${directory}`
+      );
+    }
+  }
+  // ... proceed
+}
+""" ;
+                                    oc:codeLanguage "typescript" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 55-70" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Purpose:** Prevent dangerous operations in specific contexts" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Layer 3: Environment Guards" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """function initializeWorkspace(projectDir: string, sessionId: string) {
+  if (!projectDir) {
+    throw new Error('projectDir required for workspace initialization');
+  }
+  // ... proceed
+}
+""" ;
+                                    oc:codeLanguage "typescript" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 43-50" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Purpose:** Ensure data makes sense for this operation" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Layer 2: Business Logic Validation" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "The Four Layers" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Data flow:**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "**Four layers added:**" ],
+                        _:ref_83c3fd7d26c96128,
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 6 ;
+                            oc:textContent "**Result:** All 1847 tests passed, bug impossible to reproduce" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 5 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Layer 4: Stack trace logging before git init" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Layer 3: `WorktreeManager` refuses git init outside tmpdir in tests" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Layer 2: `WorkspaceManager` validates projectDir not empty" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Layer 1: `Project.create()` validates not empty/exists/writable" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Bug: Empty `projectDir` caused `git init` in source code" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Example from Session" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 3 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Entry validation catches most bugs" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Debug logging helps when other layers fail" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Business logic catches edge cases" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Environment guards prevent context-specific dangers" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "Different layers catch different cases:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent """Single validation: "We fixed the bug"
+Multiple layers: "We made the bug impossible\"""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Why Multiple Layers" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Defense-in-Depth Validation" ] ;
+    oc:hasWorkflow _:ref_83c3fd7d26c96128,
+        _:ref_e57d2ffa171d1a7b ;
+    oc:impartsKnowledge oc:kn_076bcf12,
+        oc:kn_443fba1f,
+        oc:kn_4de512c6,
+        oc:kn_6583c7ac,
+        oc:kn_6f5afc53,
+        oc:kn_864df479,
+        oc:kn_9d074438,
+        oc:kn_a572ee1e,
+        oc:kn_cd96e9bb,
+        oc:kn_e10c58e5,
+        oc:kn_f65ce81f ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:BugRootCauseIdentified ;
-    oc:resolvesIntent "add defense-in-depth validation to data flows",
-        "apply multi-layer validation after fixing a bug",
-        "make a bug structurally impossible",
-        "prevent bug recurrence through layered defenses" ;
-    oc:yieldsState oc:MultiLayerValidationApplied .
+    oc:requiresState oc:BugIdentified ;
+    oc:resolvesIntent "add multi-layer validation after fixing a bug",
+        "make a bug structurally impossible to reproduce",
+        "prevent invalid data from bypassing single-point validation" ;
+    oc:yieldsState oc:DefenseInDepthApplied .
 
-oc:kn_11940185 a oc:DesignPrinciple,
+oc:kn_076bcf12 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "After fixing any data validation bug" ;
+    oc:directiveContent "Never add validation at only one point and consider the bug fixed. Different code paths, mocks, and platform edge cases will bypass single-point checks." ;
+    oc:hasRationale "During testing, each layer catches bugs the others missed — different code paths bypass entry validation, mocks bypass business logic, and platform edge cases need environment guards" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_443fba1f a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Layer 3: Environment guards for test safety" ;
+    oc:codeLanguage "typescript" ;
+    oc:directiveContent """if (process.env.NODE_ENV === 'test') {
+  const normalized = normalize(resolve(directory));
+  const tmpDir = normalize(resolve(tmpdir()));
+  if (!normalized.startsWith(tmpDir)) {
+    throw new Error(`Refusing git init outside temp dir during tests: ${directory}`);
+  }
+}""" .
+
+oc:kn_4de512c6 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When tempted to stop after adding one or two validation layers" ;
+    oc:directiveContent "All four layers are necessary. During testing, each layer catches bugs the others missed: different code paths bypass entry validation, mocks bypass business logic checks, edge cases on different platforms need environment guards, and debug logging identifies structural misuse." ;
+    oc:hasRationale "Real-world evidence shows each layer independently catches distinct failure modes" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_6583c7ac a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "When operations have context-specific safety requirements" ;
+    oc:directiveContent "Environment guards (Layer 3) prevent dangerous operations in specific contexts, such as refusing git init outside temp directories during tests." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_6f5afc53 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Layer 1: Entry point validation at API boundary" ;
+    oc:codeLanguage "typescript" ;
+    oc:directiveContent """if (!workingDirectory || workingDirectory.trim() === '') {
+  throw new Error('workingDirectory cannot be empty');
+}
+if (!existsSync(workingDirectory)) {
+  throw new Error(`workingDirectory does not exist: ${workingDirectory}`);
+}
+if (!statSync(workingDirectory).isDirectory()) {
+  throw new Error(`workingDirectory is not a directory: ${workingDirectory}`);
+}""" .
+
+oc:kn_864df479 a oc:DesignPrinciple,
         oc:KnowledgeNode ;
     oc:appliesToContext "When fixing any bug caused by invalid data" ;
-    oc:directiveContent "Validate at EVERY layer data passes through — entry point, business logic, environment guards, and debug instrumentation — not just at one point." ;
-    oc:hasRationale "Single validation can be bypassed by different code paths, refactoring, or mocks. Multiple layers make the bug structurally impossible rather than merely fixed." ;
+    oc:directiveContent "Validate at EVERY layer data passes through, not just one. Single validation can be bypassed by different code paths, refactoring, or mocks." ;
+    oc:hasRationale "Single validation is a point fix; multi-layer validation makes the bug structurally impossible" ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_1d803bf4 a oc:KnowledgeNode,
+oc:kn_9d074438 a oc:KnowledgeNode,
         oc:PostFlightValidation ;
-    oc:appliesToContext "After applying defense-in-depth validation" ;
-    oc:directiveContent "After adding multi-layer validation, test that each layer catches the bug independently by bypassing earlier layers and verifying later layers still catch it." ;
-    oc:hasRationale "All four layers are necessary — during testing, each layer caught bugs the others missed. Without independent testing, you cannot confirm redundancy is effective." ;
-    oc:severityLevel "HIGH" .
+    oc:appliesToContext "After adding all four validation layers" ;
+    oc:directiveContent "Test each layer independently by attempting to bypass earlier layers and verifying later layers still catch the bad data." ;
+    oc:hasRationale "Confirms that the defense-in-depth actually works end-to-end" .
 
-oc:kn_735a523e a oc:AntiPattern,
+oc:kn_a572ee1e a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When adding validation after a bug fix" ;
-    oc:directiveContent "Do not stop at a single validation point after fixing a bug. One check is never sufficient." ;
-    oc:hasRationale "During testing, each layer catches bugs the others missed: different code paths bypass entry validation, mocks bypass business logic, edge cases need environment guards." ;
-    oc:severityLevel "HIGH" .
+    oc:appliesToContext "Layer 4: Debug instrumentation for forensics" ;
+    oc:codeLanguage "typescript" ;
+    oc:directiveContent """const stack = new Error().stack;
+logger.debug('About to git init', {
+  directory,
+  cwd: process.cwd(),
+  stack,
+});""" .
 
-oc:kn_7f50d8e6 a oc:KnowledgeNode,
-        oc:WorkflowStrategy ;
-    oc:appliesToContext "When applying defense-in-depth after root cause analysis" ;
-    oc:directiveContent "When you find a bug: (1) Trace the data flow to find origin and usage, (2) Map all checkpoints where data passes through, (3) Add validation at each layer, (4) Test each layer independently by trying to bypass earlier layers." ;
-    oc:hasRationale "Systematic data flow tracing ensures no validation gap remains. Testing each layer independently confirms redundancy works." ;
+oc:kn_cd96e9bb a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When evaluating whether a bug fix is sufficient" ;
+    oc:directiveContent "Single validation means 'we fixed the bug'. Multiple layers mean 'we made the bug impossible'. Aim for the latter." ;
+    oc:hasRationale "The goal is structural impossibility, not point-fixing" .
+
+oc:kn_e10c58e5 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When applying defense-in-depth after finding a bug" ;
+    oc:directiveContent "1. Trace the data flow — where does bad value originate and where is it used 2. Map all checkpoints — list every point data passes through 3. Add validation at each layer — entry, business, environment, debug 4. Test each layer — try to bypass layer 1, verify layer 2 catches it" ;
+    oc:stepOrder 1 .
+
+oc:kn_f65ce81f a oc:KnowledgeNode,
+        oc:SecurityImplication ;
+    oc:appliesToContext "When defining API or function boundaries" ;
+    oc:directiveContent "Entry point validation (Layer 1) rejects obviously invalid input at API boundaries — empty strings, non-existent paths, wrong types — preventing bad data from propagating deeper into the system." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_e51ff8f8 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When designing validation for any data flow" ;
-    oc:directiveContent "Use four distinct validation layers: Layer 1 (Entry Point) rejects obviously invalid input at API boundaries, Layer 2 (Business Logic) ensures data makes sense for the operation, Layer 3 (Environment Guards) prevents dangerous operations in specific contexts like tests, Layer 4 (Debug Instrumentation) captures context for forensics." ;
-    oc:hasRationale "Each layer serves a distinct purpose and catches different failure modes — entry validation catches most bugs, business logic catches edge cases, environment guards prevent context-specific dangers, debug logging helps when other layers fail." ;
-    oc:severityLevel "MEDIUM" .
+_:ref_056ed271545a46d5 a oc:WorkflowStep ;
+    dcterms:description "**Add validation at each layer** - Entry, business, environment, debug" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_1617f28f9a8dfa59 a oc:WorkflowStep ;
+    dcterms:description "**Test each layer** - Try to bypass layer 1, verify layer 2 catches it" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_49d6cb0979a292c2 a oc:WorkflowStep ;
+    dcterms:description "`git init` runs in `process.cwd()`" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_54b9f189bc257541 a oc:WorkflowStep ;
+    dcterms:description "**Trace the data flow** - Where does bad value originate? Where used?" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_89b189f811d05e7d a oc:WorkflowStep ;
+    dcterms:description "Test setup → empty string" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_8cfcdd6a5d508e09 a oc:WorkflowStep ;
+    dcterms:description "`WorkspaceManager.createWorkspace('')`" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_8d122e32fa4a2222 a oc:WorkflowStep ;
+    dcterms:description "`Project.create(name, '')`" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_95cba0abbd1dd008 a oc:WorkflowStep ;
+    dcterms:description "**Map all checkpoints** - List every point data passes through" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_83c3fd7d26c96128 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 3 ;
+    oc:hasStep _:ref_49d6cb0979a292c2,
+        _:ref_89b189f811d05e7d,
+        _:ref_8cfcdd6a5d508e09,
+        _:ref_8d122e32fa4a2222 ;
+    oc:workflowId "procedure_3" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_e57d2ffa171d1a7b a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 2 ;
+    oc:hasStep _:ref_056ed271545a46d5,
+        _:ref_1617f28f9a8dfa59,
+        _:ref_54b9f189bc257541,
+        _:ref_95cba0abbd1dd008 ;
+    oc:workflowId "procedure_2" ;
+    oc:workflowName "Ordered Procedure" .
 

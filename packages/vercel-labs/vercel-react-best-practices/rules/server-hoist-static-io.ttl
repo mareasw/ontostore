@@ -10,57 +10,323 @@ oc:skill_vercel_labs_vercel_react_best_practices_server_hoist_static_io a oc:Dec
     skos:broader "Performance optimization pattern" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "5abea4dd882b13661bd5f7dfb93f9e547d5f08176c61c448ade91b210ed5d49f" ;
-    oc:differentia "hoists static file/network I/O operations to module level so they execute once at import time rather than on every request invocation in Next.js server-side code" ;
+    oc:differentia "hoists static file and network I/O to module level in Next.js server functions to avoid redundant per-request reads" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
-    oc:handlesFailure oc:InvalidInput ;
-    oc:hasArgumentHint "Next.js route handler or server function file path" ;
+    oc:handlesFailure oc:FileNotFound,
+        oc:MemoryExceeded ;
+    oc:hasArgumentHint "file path or route handler to optimize" ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_05f49cf3,
-        oc:kn_08c28656,
-        oc:kn_13068e78,
-        oc:kn_38b48410,
-        oc:kn_fd8e0d98 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """// app/api/og/route.tsx
+import { ImageResponse } from 'next/og'
+
+// Module-level: runs ONCE when module is first imported
+const fontData = fetch(
+  new URL('./fonts/Inter.ttf', import.meta.url)
+).then(res => res.arrayBuffer())
+
+const logoData = fetch(
+  new URL('./images/logo.png', import.meta.url)
+).then(res => res.arrayBuffer())
+
+export async function GET(request: Request) {
+  // Await the already-started promises
+  const [font, logo] = await Promise.all([fontData, logoData])
+
+  return new ImageResponse(
+    <div style={{ fontFamily: 'Inter' }}>
+      <img src={logo} />
+      Hello World
+    </div>,
+    { fonts: [{ name: 'Inter', data: font }] }
+  )
+}
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 6 ;
+                    oc:sourceLocation "lines 42-67" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 17 ;
+                    oc:textContent "With Vercel's [Fluid Compute](https://vercel.com/docs/fluid-compute), module-level caching is especially effective because multiple concurrent requests share the same function instance. The static assets stay loaded in memory across requests without cold start penalties." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "When loading static assets (fonts, logos, images, config files) in route handlers or server functions, hoist the I/O operation to module level. Module-level code runs once when the module is first imported, not on every request. This eliminates redundant file system reads or network fetches that would otherwise run on every invocation." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 18 ;
+                    oc:textContent "In traditional serverless, each cold start re-executes module-level code, but subsequent warm invocations reuse the loaded assets until the instance is recycled." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 15 ;
+                    oc:textContent "When not to use this pattern:" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 3 ;
+                    oc:textContent "**Incorrect (reads font file on every request):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 9 ;
+                    oc:textContent "**Incorrect (reads config on every call):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 5 ;
+                    oc:textContent "**Correct (loads once at module initialization):**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """import fs from 'node:fs/promises'
+
+const configPromise = fs
+  .readFile('./config.json', 'utf-8')
+  .then(JSON.parse)
+const templatePromise = fs.readFile('./template.html', 'utf-8')
+
+export async function processRequest(data: Data) {
+  const [config, template] = await Promise.all([
+    configPromise,
+    templatePromise,
+  ])
+
+  return render(template, data, config)
+}
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 12 ;
+                    oc:sourceLocation "lines 114-130" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """// app/api/og/route.tsx
+import { ImageResponse } from 'next/og'
+import { readFileSync } from 'fs'
+import { join } from 'path'
+
+// Synchronous read at module level - blocks only during module init
+const fontData = readFileSync(
+  join(process.cwd(), 'public/fonts/Inter.ttf')
+)
+
+const logoData = readFileSync(
+  join(process.cwd(), 'public/images/logo.png')
+)
+
+export async function GET(request: Request) {
+  return new ImageResponse(
+    <div style={{ fontFamily: 'Inter' }}>
+      <img src={logoData} />
+      Hello World
+    </div>,
+    { fonts: [{ name: 'Inter', data: fontData }] }
+  )
+}
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 8 ;
+                    oc:sourceLocation "lines 71-95" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """import fs from 'node:fs/promises'
+
+export async function processRequest(data: Data) {
+  const config = JSON.parse(
+    await fs.readFile('./config.json', 'utf-8')
+  )
+  const template = await fs.readFile('./template.html', 'utf-8')
+
+  return render(template, data, config)
+}
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 10 ;
+                    oc:sourceLocation "lines 99-110" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "**Impact: HIGH (avoids repeated file/network I/O per request)**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 11 ;
+                    oc:textContent "**Correct (hoists config and template to module level):**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """// app/api/og/route.tsx
+import { ImageResponse } from 'next/og'
+
+export async function GET(request: Request) {
+  // Runs on EVERY request - expensive!
+  const fontData = await fetch(
+    new URL('./fonts/Inter.ttf', import.meta.url)
+  ).then(res => res.arrayBuffer())
+
+  const logoData = await fetch(
+    new URL('./images/logo.png', import.meta.url)
+  ).then(res => res.arrayBuffer())
+
+  return new ImageResponse(
+    <div style={{ fontFamily: 'Inter' }}>
+      <img src={logoData} />
+      Hello World
+    </div>,
+    { fonts: [{ name: 'Inter', data: fontData }] }
+  )
+}
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 4 ;
+                    oc:sourceLocation "lines 16-38" ],
+                [ a oc:BulletList ;
+                    oc:blockType "bullet_list" ;
+                    oc:contentOrder 16 ;
+                    oc:hasItem [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 4 ;
+                            oc:itemText "Sensitive data that shouldn't persist in memory" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 3 ;
+                            oc:itemText "Large files that would consume too much memory if kept loaded" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 1 ;
+                            oc:itemText "Assets that vary per request or user" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 2 ;
+                            oc:itemText "Files that may change during runtime (use caching with TTL instead)" ] ],
+                [ a oc:BulletList ;
+                    oc:blockType "bullet_list" ;
+                    oc:contentOrder 14 ;
+                    oc:hasItem [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 5 ;
+                            oc:itemText "Any static asset that's the same across all requests" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 3 ;
+                            oc:itemText "Reading configuration files that don't change at runtime" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 2 ;
+                            oc:itemText "Loading static logos, icons, or watermarks" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 4 ;
+                            oc:itemText "Loading email templates or other static templates" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 1 ;
+                            oc:itemText "Loading fonts for OG image generation" ] ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 13 ;
+                    oc:textContent "When to use this pattern:" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 7 ;
+                    oc:textContent "**Correct (synchronous fs at module level):**" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Hoist Static I/O to Module Level" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Hoist Static I/O to Module Level
+impact: HIGH
+impactDescription: avoids repeated file/network I/O per request
+tags: server, io, performance, next.js, route-handlers, og-image
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:impartsKnowledge oc:kn_0bbdc0d1,
+        oc:kn_1a03b540,
+        oc:kn_298e4864,
+        oc:kn_3d705457,
+        oc:kn_5f70d3ba,
+        oc:kn_7f2e9084,
+        oc:kn_c8164bcd,
+        oc:kn_cb3ebe37,
+        oc:kn_e00b7ecc ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:EnvironmentReady ;
-    oc:resolvesIntent "eliminate redundant file reads in serverless functions",
-        "improve OG image generation performance",
+    oc:requiresState oc:ModuleImported ;
+    oc:resolvesIntent "avoid repeated file reads in serverless functions",
+        "improve OG image generation speed",
         "optimize server route handler performance",
-        "reduce repeated static I/O in Next.js route handlers" ;
-    oc:yieldsState oc:OptimizedIO .
+        "reduce cold-start and warm-invocation I/O overhead" ;
+    oc:yieldsState oc:IOOptimized,
+        oc:StaticAssetsLoaded .
 
-oc:kn_05f49cf3 a oc:Heuristic,
+oc:kn_0bbdc0d1 a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When hoisting async I/O to module level in route handlers" ;
-    oc:directiveContent "Use async fetch/readFile at module level with Promise.all() inside the handler to await already-started promises, rather than blocking synchronous reads." ;
-    oc:hasRationale "Starting promises at module level and awaiting them in the handler gives the best of both worlds: early initiation and non-blocking concurrency without cold-start serialization." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_08c28656 a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When loading static assets (fonts, logos, config files, templates) in Next.js route handlers or server functions" ;
-    oc:directiveContent "Hoist static I/O operations (fetch, readFileSync, fs.readFile) to module level so they execute once when the module is first imported, not on every request invocation." ;
-    oc:hasRationale "Module-level code runs once per function instance lifecycle; request-level code runs on every invocation, causing redundant I/O that degrades performance." ;
+    oc:appliesToContext "When deciding whether to apply the hoisting pattern" ;
+    oc:directiveContent "Do NOT hoist I/O to module level if the asset varies per request/user, may change at runtime, is very large (memory pressure), or contains sensitive data that shouldn't persist in memory." ;
+    oc:hasRationale "Hoisting inappropriate assets causes stale data, excessive memory consumption, or security exposure." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_13068e78 a oc:Constraint,
+oc:kn_1a03b540 a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "Before applying the hoisting pattern to any I/O operation" ;
-    oc:directiveContent "Do NOT hoist I/O to module level for assets that vary per request, change at runtime, are very large (memory pressure), or contain sensitive data that should not persist in memory." ;
-    oc:hasRationale "Hoisting these cases would cause stale data, excessive memory consumption, or security risks from persistent in-memory sensitive values." ;
-    oc:severityLevel "HIGH" .
+    oc:appliesToContext "When assets are semi-static (updated occasionally but not per-request)" ;
+    oc:directiveContent "Use caching with TTL instead of module-level hoisting when files may change during runtime." ;
+    oc:hasRationale "Module-level variables live for the lifetime of the function instance; TTL-based caching allows periodic refresh without per-request overhead." .
 
-oc:kn_38b48410 a oc:KnowledgeNode,
+oc:kn_298e4864 a oc:KnowledgeNode,
         oc:PerformanceProfile ;
-    oc:appliesToContext "When deploying to Vercel or any serverless platform" ;
-    oc:directiveContent "With Vercel Fluid Compute, module-level caching is especially effective because multiple concurrent requests share the same function instance, keeping static assets warm in memory. In traditional serverless, cold starts re-execute module-level code but warm invocations reuse loaded assets." ;
-    oc:hasRationale "Understanding the serverless lifecycle (cold start vs warm invocation) determines the actual performance benefit of module-level hoisting." ;
-    oc:severityLevel "MEDIUM" .
+    oc:appliesToContext "Serverless and edge function deployments" ;
+    oc:directiveContent "Module-level hoisting trades a one-time blocking cost during module initialization for O(1) per-request access. In traditional serverless, cold starts re-run module-level code but warm invocations reuse loaded assets." .
 
-oc:kn_fd8e0d98 a oc:AntiPattern,
+oc:kn_3d705457 a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When writing GET handlers in app/api routes, OG image generation, or any server function processing repeated requests" ;
-    oc:directiveContent "Never perform static file reads or network fetches inside request handler bodies when the asset does not vary per request." ;
-    oc:hasRationale "Performing I/O inside the handler body causes the same asset to be loaded on every single request, multiplying latency and resource consumption unnecessarily." ;
+    oc:appliesToContext "When refactoring route handlers that load static assets" ;
+    oc:codeLanguage "typescript" ;
+    oc:directiveContent "Move static fetch() or fs.readFile() calls outside the handler function to module scope. Inside the handler, await the already-started promise to get the result." ;
+    oc:hasRationale "Module-level code executes once on first import, not per request, so assets are loaded a single time and reused." ;
     oc:severityLevel "CRITICAL" .
+
+oc:kn_5f70d3ba a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When loading fonts, images, config files, or templates in Next.js route handlers or server functions" ;
+    oc:directiveContent "Never perform static file/network I/O inside a request handler function body — it re-executes on every single request invocation, wasting CPU and increasing latency." ;
+    oc:hasRationale "Per-request I/O for unchanging assets is pure overhead that compounds under load, especially in serverless environments." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_7f2e9084 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When deploying to Vercel with Fluid Compute enabled" ;
+    oc:directiveContent "With Vercel Fluid Compute, module-level caching is especially effective because concurrent requests share the same function instance, keeping static assets warm in memory." ;
+    oc:hasRationale "Fluid Compute extends function lifetime and enables true in-memory reuse across many requests, amplifying the benefit of hoisting." .
+
+oc:kn_c8164bcd a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When synchronous file loading is acceptable at module init time" ;
+    oc:codeLanguage "typescript" ;
+    oc:directiveContent """import { readFileSync } from 'fs'
+import { join } from 'path'
+
+const fontData = readFileSync(join(process.cwd(), 'public/fonts/Inter.ttf'))
+
+export async function GET(request: Request) {
+  return new ImageResponse(..., { fonts: [{ name: 'Inter', data: fontData }] })
+}""" .
+
+oc:kn_cb3ebe37 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When optimizing any Next.js server route handler" ;
+    oc:directiveContent "1. Identify static I/O (fetch, fs.readFile) inside handler body 2. Move the I/O call to module scope (outside the function) 3. Store the resulting promise (async) or value (sync fs) in a module-level variable 4. Inside the handler, await or reference the module-level promise/value 5. Verify the asset does not vary per request or change at runtime" ;
+    oc:stepOrder 1 .
+
+oc:kn_e00b7ecc a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When loading fonts and images for OG image generation" ;
+    oc:codeLanguage "typescript" ;
+    oc:directiveContent """const fontData = fetch(new URL('./fonts/Inter.ttf', import.meta.url)).then(res => res.arrayBuffer())
+const logoData = fetch(new URL('./images/logo.png', import.meta.url)).then(res => res.arrayBuffer())
+
+export async function GET(request: Request) {
+  const [font, logo] = await Promise.all([fontData, logoData])
+  return new ImageResponse(...)
+}""" .
 

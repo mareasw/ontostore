@@ -7,89 +7,985 @@
 oc:skill_coreyhaines31_marketingskills_churn_prevention_dunning_playbook a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "dunning-playbook" ;
-    skos:broader "playbook" ;
+    skos:broader "Playbook" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/coreyhaines31/marketingskills/churn-prevention" ;
     oc:contentHash "95afe21035cb81769ef0024de08806fec31073eb507a806f05b6b18b70e259a1" ;
-    oc:differentia "provides a structured timeline, email templates, retry strategies, and provider-specific configurations for recovering failed subscription payments and reducing involuntary churn" ;
+    oc:dependsOnSkill oc:skill_ontoskills_churn_prevention ;
+    oc:differentia "recovers failed subscription payments through timed retries, email sequences, and grace period management to reduce involuntary churn" ;
     oc:extends oc:skill_coreyhaines31_marketingskills_churn_prevention ;
-    oc:handlesFailure oc:HardDeclineUnrecoverable,
-        oc:PaymentRecoveryFailed ;
-    oc:hasArgumentHint "payment provider (e.g., Stripe, Chargebee, Recurly, Paddle)" ;
-    oc:hasCategory "finance" ;
-    oc:impartsKnowledge oc:kn_18bab9a8,
-        oc:kn_23bb8356,
-        oc:kn_27184fea,
-        oc:kn_4a009136,
-        oc:kn_696058b0,
-        oc:kn_8d65c579,
-        oc:kn_bca940c9,
-        oc:kn_dd94b806 ;
+    oc:handlesFailure oc:CardUpdateFailed,
+        oc:GracePeriodExpired,
+        oc:PaymentDeclinedHard ;
+    oc:hasArgumentHint "subscription-provider (e.g., stripe, chargebee, paddle, recurly)" ;
+    oc:hasCategory "automation" ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Complete guide to recovering failed payments and reducing involuntary churn." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Manual retry schedule (if no smart retries):**" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Stripe (Smart Retries — recommended):**" ],
+                                [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 4 ;
+                                    oc:rowCount 5 ;
+                                    oc:tableCaption "**Manual retry schedule (if no smart retries):**" ;
+                                    oc:tableMarkdown """| Retry | Timing | Best Day/Time |
+|-------|--------|--------------|
+| 1 | Day 1 (24h after failure) | Morning, same day of week as original |
+| 2 | Day 3 | Try a different time of day |
+| 3 | Day 5 | After typical payday (1st, 15th) |
+| 4 | Day 7 | Morning of the next business day |
+| 5 (final) | Day 10 | Last attempt before grace period ends |
+""" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 6 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Retry on the same day of month the original payment succeeded" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Retry after common paydays (1st and 15th of the month)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Avoid retrying on weekends (lower approval rates)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "Morning retries (8-10am local time) perform slightly better" ] ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 2 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Typically 4-8 retry attempts over 3-4 weeks" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Stripe's ML model picks optimal retry timing based on billions of transactions" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Enable \"Smart Retries\" in Stripe Dashboard → Billing → Settings" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "Recovers ~15% more than fixed-schedule retries" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent "**Retry timing insights:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 11 ;
+                            oc:sectionTitle "Retry Schedule by Provider" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 1 ;
+                                    oc:rowCount 7 ;
+                                    oc:tableCaption "### Decline Type Classification" ;
+                                    oc:tableMarkdown """| Code | Type | Meaning | Retry? |
+|------|------|---------|--------|
+| `insufficient_funds` | Soft | Temporarily low balance | Yes — retry in 2-3 days |
+| `card_declined` (generic) | Soft | Various temporary reasons | Yes — retry 3-4 times |
+| `processing_error` | Soft | Gateway/network issue | Yes — retry within 24h |
+| `expired_card` | Hard | Card is expired | No — request new card |
+| `stolen_card` | Hard | Card reported stolen | No — request new card |
+| `do_not_honor` | Soft/Hard | Bank refused (ambiguous) | Try once more, then ask for new card |
+| `authentication_required` | Auth | SCA/3DS needed | Send customer to authenticate |
+""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 10 ;
+                            oc:sectionTitle "Decline Type Classification" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 9 ;
+                    oc:sectionTitle "Smart Retry Strategy" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Major card networks offer automatic card update programs:" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 5 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "**Chargebee**: Enabled through gateway settings" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "**Stripe**: Automatic — enabled by default" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "**Braintree**: Contact processor to enable" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "**Recurly**: Built-in, enabled by default" ] ],
+                                [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 2 ;
+                                    oc:rowCount 3 ;
+                                    oc:tableCaption "Major card networks offer automatic card update programs" ;
+                                    oc:tableMarkdown """| Service | Network | What It Does |
+|---------|---------|--------------|
+| Visa Account Updater (VAU) | Visa | Auto-updates stored card numbers and expiry dates |
+| Mastercard Automatic Billing Updater (ABU) | Mastercard | Same for Mastercard |
+| Amex Cardrefresher | American Express | Same for Amex |
+""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent "**How to enable:**" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Impact:** Reduces hard declines from expired/replaced cards by 30-50%." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 6 ;
+                            oc:sectionTitle "Card Updater Services" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """Subject: Your card ending in 4242 expires soon
+
+Hi [Name],
+
+The card on file for your [Product] subscription expires on [date].
+
+Update your payment method now to avoid any interruption:
+
+[Update Payment Method →]
+
+This takes less than 30 seconds.
+
+— [Product] Team
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 3 ;
+                                    oc:sourceLocation "lines 43-57" ],
+                                [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 1 ;
+                                    oc:rowCount 4 ;
+                                    oc:tableCaption "### Card Expiry Management" ;
+                                    oc:tableMarkdown """| Timing | Action |
+|--------|--------|
+| 30 days before expiry | Email: "Your card ending in 4242 expires next month" |
+| 15 days before expiry | Email: "Update your payment method to avoid interruption" |
+| 7 days before expiry | Email: "Your card expires in 7 days — update now" |
+| 3 days before expiry | In-app banner: "Payment method expiring soon" |
+""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Email template — Card expiring:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 5 ;
+                            oc:sectionTitle "Card Expiry Management" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Prompt for a second payment method:" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 2 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "After first successful payment: \"Protect your account with a backup card\" (better timing)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "During signup: \"Add a backup payment method\" (low conversion)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "After a failed payment is recovered: \"Add a backup to prevent future interruptions\" (best timing — they felt the pain)" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 7 ;
+                            oc:sectionTitle "Backup Payment Methods" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "For annual plans or high-value subscriptions:" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 2 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Show what's included in the renewal" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Include link to update payment method" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Email 7 days before renewal with amount and date" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "Required by some regulations for auto-renewals" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 8 ;
+                            oc:sectionTitle "Pre-Billing Notifications" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Pre-Dunning: Prevent Failures Before They Happen" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Don't rely on email alone. Show payment failures in the app:" ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Rules:**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """┌──────────────────────────────────────────────────────┐
+│ ⚠ Your payment of $29 failed. Update your card to    │
+│ avoid losing access. [Update Payment →]  [Dismiss]   │
+└──────────────────────────────────────────────────────┘
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 341-346" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 3 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "Don't block the product — let them continue using it" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Show on every page load during dunning period" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Allow dismiss (but show again next session)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Direct link to payment update (fewest clicks possible)" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 27 ;
+                            oc:sectionTitle "Banner Pattern" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """┌─────────────────────────────────────┐
+│                                     │
+│  Your account will be paused        │
+│  on [date]                          │
+│                                     │
+│  Update your payment method to      │
+│  keep access to your [X] projects   │
+│  and [Y] team members.              │
+│                                     │
+│  [Update Payment Method]            │
+│  [Remind Me Later]                  │
+│                                     │
+└─────────────────────────────────────┘
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 355-369" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 28 ;
+                            oc:sectionTitle "Modal Pattern (for final warning)" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 26 ;
+                    oc:sectionTitle "In-App Dunning" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 2 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Paddle handles retries and dunning automatically" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "Best for hands-off approach" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Webhook: `subscription.payment_failed`, `subscription.cancelled`" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Limited customization (Paddle manages the relationship)" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Managed dunning:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 24 ;
+                            oc:sectionTitle "Paddle" ],
+                        [ a oc:Section ;
+                            oc:hasContent _:ref_0b28059ae00bd16f,
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent "**Webhook events to handle:**" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Enable Smart Retries:**" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Custom retry rules (if not using Smart Retries):**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """Retry 1: 3 days after failure
+Retry 2: 5 days after failure
+Retry 3: 7 days after failure
+Final:   Mark subscription as unpaid after last retry
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 4 ;
+                                    oc:sourceLocation "lines 289-294" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 6 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "`invoice.paid` — cancel dunning, restore access" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "`customer.subscription.updated` — status changes" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "`invoice.payment_failed` — trigger dunning" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "`customer.subscription.deleted` — final cancellation" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 22 ;
+                            oc:sectionTitle "Stripe" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Advanced features:**" ],
+                                _:ref_7865312800a0cad6,
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Revenue Recovery:**" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 4 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Built-in Account Updater" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Machine-learning retry optimization" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Per-plan dunning schedules" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 25 ;
+                            oc:sectionTitle "Recurly" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Built-in dunning:**" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Dunning options:**" ],
+                                _:ref_7775adf9fef54bd4,
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 4 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Grace period configuration per plan" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Automatic retries with configurable schedule" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Built-in dunning emails (customizable templates)" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 23 ;
+                            oc:sectionTitle "Chargebee" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 21 ;
+                    oc:sectionTitle "Provider-Specific Setup" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Failed payments cause 30-50% of all subscription churn" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Subscription businesses lose an estimated $129 billion annually to involuntary churn" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Most failed payments are recoverable with the right strategy" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Effective dunning recovers 50-60% of failed payments" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Why Dunning Matters" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """Day -30 to -7: Pre-dunning (prevent failures)
+Day 0:         Payment fails → Smart retry #1 + Email #1
+Day 1-3:       Smart retry #2 + Email #2
+Day 3-5:       Smart retry #3
+Day 5-7:       Smart retry #4 + Email #3
+Day 7-10:      Final retry + Email #4 (final warning)
+Day 10-14:     Grace period ends → Account paused/cancelled
+Day 14+:       Win-back sequence begins
+""" ;
+                            oc:codeLanguage "" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 18-27" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "The Dunning Timeline" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 2 ;
+                                    oc:rowCount 3 ;
+                                    oc:tableCaption "**By company stage:**" ;
+                                    oc:tableMarkdown """| Stage | Typical Involuntary Churn | Target After Optimization |
+|-------|--------------------------|--------------------------|
+| Early (< $1M ARR) | 3-5% of MRR/month | 1-2% |
+| Growth ($1-10M ARR) | 2-4% of MRR/month | 0.5-1.5% |
+| Scale ($10M+ ARR) | 1-3% of MRR/month | 0.3-0.8% |
+""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**By company stage:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 31 ;
+                            oc:sectionTitle "Benchmarking" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """Monthly failed payment MRR:        $10,000
+Current recovery rate:              30% ($3,000 recovered)
+Target recovery rate:               60% ($6,000 recovered)
+Monthly improvement:                $3,000/month
+Annual improvement:                 $36,000/year
+Cost of dunning optimization:       ~$200-500/month (tooling)
+ROI:                                6-15x
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 400-408" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 32 ;
+                            oc:sectionTitle "ROI Calculation" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 1 ;
+                                    oc:rowCount 8 ;
+                                    oc:tableCaption "### Key Metrics" ;
+                                    oc:tableMarkdown """| Metric | How to Calculate | Target |
+|--------|-----------------|--------|
+| Recovery rate | Recovered payments / Total failed | 50-60% |
+| Recovery rate by decline type | Recovered / Failed per type | Soft: 70%+, Hard: 40%+ |
+| Time to recovery | Days from failure to successful payment | <5 days |
+| Pre-dunning prevention rate | Prevented failures / Expected failures | 20-30% |
+| Dunning email open rate | Opens / Sent per email | 60%+ |
+| Dunning email click rate | Clicks / Opens per email | 30%+ |
+| Revenue recovered (monthly) | Sum of recovered payment amounts | Track trend |
+| Revenue lost to involuntary churn | Sum of failed + unrecovered amounts | Track trend |
+""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 30 ;
+                            oc:sectionTitle "Key Metrics" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 29 ;
+                    oc:sectionTitle "Measuring Dunning Performance" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Tone:** Friendly, matter-of-fact. No alarm." ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """Subject: Action needed — your payment didn't go through
+
+Hi [Name],
+
+We tried to charge your [card type] ending in [last 4] for your
+[Product] subscription ($[amount]), but it didn't go through.
+
+This happens sometimes — usually a quick card update fixes it.
+
+[Update Payment Method →]
+
+Your access isn't affected yet. We'll retry automatically, but
+updating your card is the fastest fix.
+
+Need help? Just reply to this email.
+
+— [Product] Team
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 140-158" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 13 ;
+                            oc:sectionTitle "Email 1: Payment Failed (Day 0)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """Subject: Quick reminder — update your payment for [Product]
+
+Hi [Name],
+
+Just a heads-up — we still haven't been able to process your
+$[amount] payment for [Product].
+
+[Update Payment Method →]
+
+Takes less than 30 seconds. Your [data/projects/team access]
+is safe, but we'll need a valid payment method to keep your
+account active.
+
+Questions? Reply here and we'll help.
+
+— [Product] Team
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 164-181" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Tone:** Helpful, slightly more urgent." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 14 ;
+                            oc:sectionTitle "Email 2: Reminder (Day 3)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Tone:** Direct, clear consequences." ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """Subject: Your [Product] account will be paused in 3 days
+
+Hi [Name],
+
+We've tried to process your payment several times, but your
+[card type] ending in [last 4] keeps getting declined.
+
+If we don't receive payment by [date], your account will be
+paused and you'll lose access to:
+
+• [Key feature/data they use]
+• [Their projects/workspace]
+• [Team access for X members]
+
+[Update Payment Method Now →]
+
+Your data won't be deleted — you can reactivate anytime by
+updating your payment method.
+
+— [Product] Team
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 187-208" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 15 ;
+                            oc:sectionTitle "Email 3: Urgency (Day 7)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """Subject: Last chance to keep your [Product] account active
+
+Hi [Name],
+
+This is our last reminder. Your payment of $[amount] is past
+due, and your account will be paused tomorrow ([date]).
+
+[Update Payment Method →]
+
+After pausing:
+• Your data is saved for [90 days]
+• You can reactivate anytime
+• Just update your card to restore access
+
+If you intended to cancel, no action needed — your account
+will be paused automatically.
+
+— [Product] Team
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 214-233" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Tone:** Final, clear, no guilt." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 16 ;
+                            oc:sectionTitle "Email 4: Final Warning (Day 10)" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 12 ;
+                    oc:sectionTitle "Dunning Email Sequence" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 1 ;
+                                    oc:rowCount 5 ;
+                                    oc:tableCaption "### What Happens During Grace Period" ;
+                                    oc:tableMarkdown """| Setting | Recommendation |
+|---------|---------------|
+| Duration | 7-14 days after final retry |
+| Access | Degraded (read-only) or full access |
+| Visibility | In-app banner: "Payment past due — update to continue" |
+| Retry | Continue background retries during grace |
+| Communication | Dunning emails continue |
+""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 18 ;
+                            oc:sectionTitle "What Happens During Grace Period" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 2 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Higher recovery rate (they still see value)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Risk: some customers exploit the grace period" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Lower friction, customer feels respected" ] ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 4 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Clear message: \"Update payment to resume full access\"" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Creates urgency without data loss fear" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Can view but not create/edit" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Option A: Full access during grace (recommended for B2B)**" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 6 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Only appropriate for very low-cost plans" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Lower recovery rate" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Aggressive, damages relationship" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Option B: Read-only access (recommended for B2C)**" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent "**Option C: Immediate lockout (not recommended)**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 19 ;
+                            oc:sectionTitle "Access Degradation Options" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 1 ;
+                                    oc:rowCount 6 ;
+                                    oc:tableCaption "### Post-Grace Period" ;
+                                    oc:tableMarkdown """| Timing | Action |
+|--------|--------|
+| Grace period ends | Pause account (not delete) |
+| Day 1 post-pause | "Your account has been paused" email |
+| Day 7 post-pause | "Your data is still here" reminder |
+| Day 30 post-pause | Win-back attempt with new offer |
+| Day 60 post-pause | Final win-back |
+| Day 90 post-pause | Data deletion warning (if applicable) |
+""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 20 ;
+                            oc:sectionTitle "Post-Grace Period" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 17 ;
+                    oc:sectionTitle "Grace Period Management" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Dunning Playbook" ] ;
+    oc:hasWorkflow _:ref_0b28059ae00bd16f,
+        _:ref_7775adf9fef54bd4,
+        _:ref_7865312800a0cad6,
+        [ a oc:Workflow ;
+            dcterms:description "Complete setup of a dunning system from pre-dunning prevention through post-grace win-back" ;
+            oc:hasStep [ a oc:WorkflowStep ;
+                    dcterms:description "Add in-app banner on every page during dunning and modal for final warning with direct payment update link" ;
+                    oc:expectedOutcome "Non-email notification coverage ensures visibility during product usage" ;
+                    oc:stepDependsOn _:ref_73f2b5ae70ab0573 ;
+                    oc:stepId "setup-in-app-dunning" ],
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Set up card expiry reminders at 30, 15, 7, and 3 days before expiry; prompt for backup payment method after first successful recovery" ;
+                    oc:expectedOutcome "20-30% of potential failures prevented before they occur" ;
+                    oc:stepDependsOn _:ref_f06a253c0d79d130 ;
+                    oc:stepId "configure-pre-dunning" ],
+                _:ref_73f2b5ae70ab0573,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Handle webhook events (invoice.payment_failed, invoice.paid, subscription.updated/deleted) and track recovery rate, time to recovery, email engagement, and involuntary churn %" ;
+                    oc:expectedOutcome "Real-time dunning triggers and performance dashboard tracking toward 50-60% recovery target" ;
+                    oc:stepDependsOn _:ref_73f2b5ae70ab0573,
+                        _:ref_be7ed016aa21fec4 ;
+                    oc:stepId "setup-webhooks-and-metrics" ],
+                _:ref_be7ed016aa21fec4,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Set 7-14 day grace period with appropriate access level (full for B2B, read-only for B2C) and post-grace win-back sequence" ;
+                    oc:expectedOutcome "Grace period and win-back flow configured with clear transition points" ;
+                    oc:stepDependsOn _:ref_be7ed016aa21fec4 ;
+                    oc:stepId "configure-grace-period" ],
+                _:ref_f06a253c0d79d130 ;
+            oc:workflowId "dunning-setup" ;
+            oc:workflowName "Dunning System Setup" ] ;
+    oc:impartsKnowledge oc:kn_244b4e48,
+        oc:kn_395e6071,
+        oc:kn_4ca1f93b,
+        oc:kn_566d8a0f,
+        oc:kn_699e2468,
+        oc:kn_801dc8b6,
+        oc:kn_b8bf6798,
+        oc:kn_c81ee72a ;
     oc:isUserInvocable true ;
-    oc:nature "concept" ;
-    oc:requiresState oc:SubscriptionActive ;
+    oc:nature "Work" ;
+    oc:requiresState oc:PaymentProviderIntegrated,
+        oc:SubscriptionBillingConfigured ;
     oc:resolvesIntent "configure smart retry strategies",
-        "implement pre-dunning prevention",
-        "manage grace periods after payment failure",
-        "measure dunning performance",
+        "manage payment grace periods",
+        "prevent subscription payment failures",
         "recover failed payments",
         "reduce involuntary churn",
         "set up dunning email sequences" ;
     oc:yieldsState oc:DunningConfigured,
-        oc:FailedPaymentRecoveryPlanReady .
+        oc:FailedPaymentRecoveryActive .
 
-oc:kn_18bab9a8 a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "During pre-dunning prevention setup" ;
-    oc:directiveContent "Enable card updater services (Visa Account Updater, Mastercard ABU, Amex Cardrefresher) to automatically update stored card numbers and expiry dates. Pair with pre-dunning emails at 30, 15, 7, and 3 days before card expiry." ;
-    oc:hasRationale "Card updater services reduce hard declines from expired/replaced cards by 30-50%, preventing failures before they occur." ;
-    oc:severityLevel "HIGH" .
+oc:kn_244b4e48 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing the dunning communication strategy" ;
+    oc:directiveContent "Never rely on email alone for dunning notifications. In-app banners and modals are critical — show payment failures on every page load with direct update links." ;
+    oc:hasRationale "Email open rates are never 100%; in-app notifications ensure the customer sees the issue during normal product usage" .
 
-oc:kn_23bb8356 a oc:KnowledgeNode,
+oc:kn_395e6071 a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "When choosing between smart and manual retry schedules" ;
+    oc:directiveContent "Stripe Smart Retries (ML-based) recovers ~15% more than fixed-schedule retries by picking optimal timing from billions of transactions. Prefer provider smart retries over manual schedules when available." ;
+    oc:hasRationale "ML-optimized timing accounts for patterns humans can't predict, improving recovery without additional effort" .
+
+oc:kn_4ca1f93b a oc:KnowledgeNode,
         oc:SuccessIndicator ;
-    oc:appliesToContext "When measuring dunning campaign performance" ;
-    oc:directiveContent "Track recovery rate (target 50-60%), time to recovery (target <5 days), dunning email open rate (target 60%+), and involuntary churn as % of MRR (target 0.3-2% depending on company stage)." ;
-    oc:hasRationale "Without these metrics, you cannot diagnose whether dunning is underperforming due to timing, messaging, or access policy issues." ;
-    oc:severityLevel "MEDIUM" .
+    oc:appliesToContext "When evaluating whether the dunning system is working correctly" ;
+    oc:directiveContent "Dunning email open rate should be 60%+ and click rate 30%+. Involuntary churn should target 1-2% of MRR/month for early-stage, 0.5-1.5% for growth-stage, and 0.3-0.8% for scale-stage companies." ;
+    oc:hasRationale "Low email engagement or high involuntary churn indicates broken dunning flows or poor messaging" .
 
-oc:kn_27184fea a oc:DesignPrinciple,
+oc:kn_566d8a0f a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When designing the complete dunning communication strategy" ;
-    oc:directiveContent "Supplement email dunning with in-app banners (every page load during dunning) and modals (final warning), always with a direct 'Update Payment Method' link requiring the fewest possible clicks." ;
-    oc:hasRationale "Email open rates alone cannot drive maximum recovery; in-app notifications capture users who are actively engaged with the product." ;
-    oc:severityLevel "MEDIUM" .
+    oc:appliesToContext "When measuring and benchmarking dunning performance" ;
+    oc:directiveContent "Target 50-60% recovery rate for failed payments. Soft decline recovery should be 70%+, hard decline 40%+. Time to recovery should be under 5 days." ;
+    oc:hasRationale "These benchmarks distinguish effective dunning from ineffective; below 50% suggests broken retry or communication flows" .
 
-oc:kn_4a009136 a oc:DesignPrinciple,
+oc:kn_699e2468 a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When designing any dunning system" ;
-    oc:directiveContent "Use a graduated 14-day dunning timeline: pre-dunning prevention (Day -30 to -7), smart retries with escalating emails (Day 0-10), grace period (Day 10-14), then win-back (Day 14+)." ;
-    oc:hasRationale "Failed payments cause 30-50% of all subscription churn, and a structured timeline recovers 50-60% of failed payments vs. ad-hoc approaches." ;
+    oc:appliesToContext "When determining retry strategy for a failed payment" ;
+    oc:directiveContent "Classify decline codes as soft (retry: insufficient_funds, generic card_declined, processing_error), hard (don't retry: expired_card, stolen_card), or auth-required. Only retry soft declines 3-5 times over 10-14 days." ;
+    oc:hasRationale "Retrying hard declines wastes attempts and can trigger fraud flags; soft declines are temporarily recoverable" ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_696058b0 a oc:Heuristic,
+oc:kn_801dc8b6 a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When processing payment failure response codes from payment providers" ;
-    oc:directiveContent "Classify decline codes into soft (retry: insufficient_funds, generic card_declined, processing_error) vs. hard (stop retrying: expired_card, stolen_card) and handle authentication_required separately via SCA/3DS." ;
-    oc:hasRationale "Retrying hard declines wastes attempts and damages the relationship; soft declines are recoverable with optimal timing." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_8d65c579 a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "Before implementing a dunning system" ;
-    oc:directiveContent "Before launching dunning, ensure webhook handlers are configured for invoice.payment_failed, invoice.paid, and customer.subscription.deleted events on your payment provider." ;
-    oc:hasRationale "Webhooks are the trigger mechanism for dunning workflows; missing events means missed recovery opportunities or stale account states." ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_bca940c9 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When configuring retry schedules" ;
-    oc:directiveContent "Use provider smart retry features (e.g., Stripe Smart Retries) over fixed schedules. If manual, retry on same day of month as original success, after paydays (1st/15th), on weekdays, and in the morning (8-10am local time)." ;
-    oc:hasRationale "ML-based smart retries recover ~15% more than fixed-schedule retries by leveraging billions of transaction patterns." ;
+    oc:appliesToContext "When configuring post-failure grace period access policies" ;
+    oc:directiveContent "Grace period should be 7-14 days after final retry attempt. Full access during grace is recommended for B2B; read-only access for B2C. Immediate lockout is not recommended." ;
+    oc:hasRationale "Too short a grace period loses recoverable customers; too long invites exploitation" ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_dd94b806 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When deciding access degradation strategy during grace period" ;
-    oc:directiveContent "Never immediately lock out users on payment failure. Instead, provide full access during grace period (B2B) or read-only access (B2C), with in-app banners and direct update links." ;
-    oc:hasRationale "Immediate lockout is aggressive, damages the customer relationship, and yields lower recovery rates. Degraded access maintains trust while creating urgency." ;
+oc:kn_b8bf6798 a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "When configuring payment gateway — always enable card updater services" ;
+    oc:directiveContent "Card updater services (Visa VAU, Mastercard ABU, Amex Cardrefresher) automatically update stored card numbers and expiry dates, reducing hard declines from expired/replaced cards by 30-50%." ;
+    oc:hasRationale "This is a zero-effort recovery mechanism that silently prevents a large portion of failures" ;
     oc:severityLevel "HIGH" .
+
+oc:kn_c81ee72a a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Always — start with prevention before building recovery flows" ;
+    oc:directiveContent "Pre-dunning (preventing failures before they happen via card updater services, expiry reminders, and backup payment methods) is more effective than recovering failed payments after the fact." ;
+    oc:hasRationale "Preventing a failure costs less effort and preserves customer trust better than recovering from one" ;
+    oc:severityLevel "HIGH" .
+
+_:ref_01bd5ac08a3e66e7 a oc:WorkflowStep ;
+    dcterms:description "Enable \"Smart Retries\" under retry rules" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_1d287da2cdf1ef78 a oc:WorkflowStep ;
+    dcterms:description "Configuration → Dunning Management" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_3ded39a52878b687 a oc:WorkflowStep ;
+    dcterms:description "Configure retry attempts and intervals" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_5fb7a7ef1857a6ef a oc:WorkflowStep ;
+    dcterms:description "Settings → Configure Chargebee → Email Notifications → Dunning" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_69f44328fc9a41bf a oc:WorkflowStep ;
+    dcterms:description "Set retry schedule per plan" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_8ab59d59d5418d49 a oc:WorkflowStep ;
+    dcterms:description "Set failed payment emails in Dashboard → Settings → Emails" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_ad2d9f7f91872ea7 a oc:WorkflowStep ;
+    dcterms:description "Settings → Configure Chargebee → Retry Settings" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_ecda037c9f81ac64 a oc:WorkflowStep ;
+    dcterms:description "Configure grace period and final action (pause vs cancel)" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_ee0a281b285b05c9 a oc:WorkflowStep ;
+    dcterms:description "Dashboard → Settings → Billing → Subscriptions and emails" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_0b28059ae00bd16f a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 2 ;
+    oc:hasStep _:ref_01bd5ac08a3e66e7,
+        _:ref_8ab59d59d5418d49,
+        _:ref_ee0a281b285b05c9 ;
+    oc:workflowId "procedure_2" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_7775adf9fef54bd4 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 2 ;
+    oc:hasStep _:ref_3ded39a52878b687,
+        _:ref_5fb7a7ef1857a6ef,
+        _:ref_ad2d9f7f91872ea7 ;
+    oc:workflowId "procedure_2" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_7865312800a0cad6 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 2 ;
+    oc:hasStep _:ref_1d287da2cdf1ef78,
+        _:ref_69f44328fc9a41bf,
+        _:ref_ecda037c9f81ac64 ;
+    oc:workflowId "procedure_2" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_f06a253c0d79d130 a oc:WorkflowStep ;
+    dcterms:description "Enable card updater services (VAU/ABU/Cardrefresher) in payment gateway" ;
+    oc:expectedOutcome "Automatic card updates reduce hard declines by 30-50%" ;
+    oc:stepId "enable-card-updater" .
+
+_:ref_be7ed016aa21fec4 a oc:WorkflowStep ;
+    dcterms:description "Create 4-email sequence: Day 0 (friendly failure notice), Day 3 (reminder), Day 7 (urgency with consequences), Day 10 (final warning)" ;
+    oc:expectedOutcome "Timed email sequence with escalating urgency and payment update CTAs" ;
+    oc:stepDependsOn _:ref_73f2b5ae70ab0573 ;
+    oc:stepId "create-dunning-emails" .
+
+_:ref_73f2b5ae70ab0573 a oc:WorkflowStep ;
+    dcterms:description "Enable smart retries (preferred) or configure manual retry schedule with 5 attempts over 10 days, classifying decline types properly" ;
+    oc:expectedOutcome "Automated retry system active with soft/hard decline classification" ;
+    oc:stepId "configure-retry-schedule" .
 

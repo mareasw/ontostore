@@ -7,56 +7,99 @@
 oc:skill_remotion_dev_skills_remotion_best_practices_text_animations a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "text-animations" ;
-    skos:broader "Typography animation pattern library" ;
+    skos:broader "Animation technique collection" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/remotion-dev/skills/remotion-best-practices" ;
     oc:contentHash "40ac6b1bccf1c57d9edd46c74e847ec6e86fe775d3ef4fd14e1338f4a2606171" ;
-    oc:dependsOnSkill oc:skill_remotion_best_practices ;
-    oc:differentia "provides text animation techniques (typewriter, word highlight) for Remotion using useCurrentFrame-based character-by-character rendering" ;
+    oc:dependsOnSkill oc:skill_ontoskills_remotion_best_practices ;
+    oc:differentia "provides typography and text animation patterns (typewriter, word highlight) for React-based video rendering in Remotion" ;
     oc:extends oc:skill_remotion_dev_skills_remotion_best_practices ;
     oc:handlesFailure oc:InvalidInput ;
-    oc:hasAllowedTool "Read" ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_3a704042,
-        oc:kn_58472001,
-        oc:kn_648e56fd,
-        oc:kn_b75576c7,
-        oc:kn_d58a6ae1 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """name: text-animations
+description: Typography and text animation patterns for Remotion.
+metadata:
+  tags: typography, text, typewriter, highlighter ken
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Based on `useCurrentFrame()`, reduce the string character by character to create a typewriter effect." ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Text animations" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "See [Word Highlight](assets/text-animations-word-highlight.tsx) for an example for how a word highlight is animated, like with a highlighter pen." ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 3 ;
+            oc:sectionTitle "Word Highlighting" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "See [Typewriter](assets/text-animations-typewriter.tsx) for an advanced example with a blinking cursor and a pause after the first sentence." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "Always use string slicing for typewriter effects. Never use per-character opacity." ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 2 ;
+            oc:sectionTitle "Typewriter Effect" ] ;
+    oc:impartsKnowledge oc:kn_07f7dce9,
+        oc:kn_504d08f9,
+        oc:kn_7ec9898b,
+        oc:kn_b03c2f7b,
+        oc:kn_f57a90e3 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
     oc:requiresState oc:EnvironmentReady ;
-    oc:resolvesIntent "animate word highlighting in Remotion",
-        "create text reveal animations in video",
-        "create typewriter text effect in Remotion" ;
-    oc:yieldsState oc:DocumentCreated .
+    oc:resolvesIntent "animate text appearance in video",
+        "animate text character by character",
+        "create typewriter text effect",
+        "create word highlight animation" ;
+    oc:yieldsState oc:TextAnimationImplemented .
 
-oc:kn_3a704042 a oc:AntiPattern,
+oc:kn_07f7dce9 a oc:AntiPattern,
         oc:KnowledgeNode ;
     oc:appliesToContext "When implementing typewriter text animations" ;
-    oc:directiveContent "Never use per-character opacity for typewriter effects. Always use string slicing to progressively reveal text." ;
-    oc:hasRationale "Per-character opacity creates invisible DOM elements for every character, degrading rendering performance and producing visual artifacts. String slicing is cleaner and more efficient." ;
-    oc:severityLevel "CRITICAL" .
+    oc:directiveContent "Never use per-character opacity for typewriter effects. Always use string slicing." ;
+    oc:hasRationale "Per-character opacity requires rendering all characters with individual opacity values, which is more complex, less performant, and less faithful to a true typewriter effect than simply slicing the visible portion of the string." ;
+    oc:severityLevel "HIGH" .
 
-oc:kn_58472001 a oc:DesignPrinciple,
+oc:kn_504d08f9 a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When implementing word highlight animations" ;
-    oc:directiveContent "Use spring() with high damping for highlight wipe animations, scaling from left center with transformOrigin to create a natural pen-stroke effect." ;
-    oc:hasRationale "Spring physics with high damping (200) produces a smooth, decelerating wipe that mimics a real highlighter pen motion better than linear interpolation." .
+    oc:appliesToContext "When building any typewriter-style text reveal" ;
+    oc:codeLanguage "tsx" ;
+    oc:directiveContent "Use useCurrentFrame() to drive the string slice index: `fullText.slice(0, Math.floor(frame / charFrames))` where charFrames controls typing speed." ;
+    oc:hasRationale "String slicing based on frame count is the canonical Remotion approach for character-by-character text reveal." .
 
-oc:kn_648e56fd a oc:DesignPrinciple,
+oc:kn_7ec9898b a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When building any text animation in Remotion" ;
-    oc:directiveContent "Use useCurrentFrame() to drive text animation progress, computing how many characters or words to display based on the current frame number." ;
-    oc:hasRationale "Remotion is frame-based; animations must be deterministic functions of the current frame to ensure consistent rendering across preview and final output." .
+    oc:appliesToContext "When configuring typewriter animation timing" ;
+    oc:directiveContent "Use 2 frames per character as a baseline typing speed and 16 frames for cursor blink cycle at standard FPS." ;
+    oc:hasRationale "These values produce a natural-feeling typing speed and cursor blink at common video frame rates (24-30fps)." ;
+    oc:severityLevel "MEDIUM" .
 
-oc:kn_b75576c7 a oc:Heuristic,
+oc:kn_b03c2f7b a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When creating advanced typewriter effects with dramatic pauses between sentences" ;
-    oc:directiveContent "Add a pause mid-typing by tracking a pause index in the full text and halting character progression for a calculated number of frames (fps × pause_seconds)." ;
-    oc:hasRationale "Pauses create visual rhythm and give viewers time to absorb information, improving readability and engagement." .
+    oc:appliesToContext "When implementing typewriter effects with natural pacing" ;
+    oc:directiveContent "Add a mid-typing pause by detecting when a pause phrase has been fully typed, then freezing the slice index for a calculated number of pause frames before resuming." ;
+    oc:hasRationale "A pause after a sentence makes the animation feel more natural and readable, mimicking real human typing cadence." .
 
-oc:kn_d58a6ae1 a oc:Idempotency,
+oc:kn_f57a90e3 a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "Always, by design of Remotion's frame-based architecture" ;
-    oc:directiveContent "Text animations are frame-deterministic: given the same frame number, the animation output is always identical. Re-rendering does not change results." ;
-    oc:hasRationale "Frame determinism ensures consistent video output across previews, renders, and re-renders without accumulated state drift." .
+    oc:appliesToContext "When creating a highlighter-pen word highlight animation" ;
+    oc:codeLanguage "tsx" ;
+    oc:directiveContent "Use spring() with high damping (e.g., damping: 200) to drive a scaleX transform from 0 to 1 on an absolutely-positioned highlight span behind the target word, with transformOrigin: 'left center'." ;
+    oc:hasRationale "The spring animation with scaleX gives a smooth wipe-on effect that looks like a highlighter being drawn across a word." .
 

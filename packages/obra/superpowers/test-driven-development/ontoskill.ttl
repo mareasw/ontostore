@@ -7,115 +7,961 @@
 oc:skill_obra_superpowers_test_driven_development a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "test-driven-development" ;
-    skos:broader "development methodology" ;
-    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/obra/superpowers/test-driven-development" ;
+    skos:broader "Development methodology" ;
+    prov:wasDerivedFrom "../.agents/skills/obra/superpowers/test-driven-development" ;
     oc:contentHash "62d4b1b3b8e65d345da6daa1dedb5a3d5689fc95f6e4f12d6051d1547e66baea" ;
-    oc:differentia "enforces strict red-green-refactor cycle requiring tests to fail before any production code is written" ;
-    oc:extends oc:skill_brainstorming ;
-    oc:handlesFailure oc:OtherTestsBroken,
-        oc:RationalizationDetected,
-        oc:TestErrorsNotFails,
-        oc:TestPassesUnexpectedly ;
-    oc:hasAllowedTool "Bash",
-        "Edit",
-        "Glob",
-        "Grep",
-        "Read",
-        "Write" ;
-    oc:hasArgumentHint "feature-or-bugfix-description" ;
+    oc:differentia "that mandates writing a failing test before any production code, then writing minimal code to pass, then refactoring" ;
+    oc:handlesFailure oc:TestErrors,
+        oc:TestFailsUnexpectedly,
+        oc:TestPassesImmediately ;
+    oc:hasArgumentHint "feature or bugfix description" ;
     oc:hasCategory "development" ;
     oc:hasDescription "Use when implementing any feature or bugfix, before writing implementation code" ;
     oc:hasName "test-driven-development" ;
-    oc:impartsKnowledge oc:kn_16fd0738,
-        oc:kn_1f3557ef,
-        oc:kn_2369733f,
-        oc:kn_286ce68e,
-        oc:kn_4f89feed,
-        oc:kn_6a83a56f,
-        oc:kn_82df3d7a,
-        oc:kn_91a36e45,
-        oc:kn_b7adb6d6,
-        oc:kn_d1ce53a5 ;
+    oc:hasRequirement oc:req_28b7e85d,
+        oc:req_fdb8ab49 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """name: test-driven-development
+description: Use when implementing any feature or bugfix, before writing implementation code
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Flowchart ;
+                            oc:blockType "flowchart" ;
+                            oc:contentOrder 1 ;
+                            oc:flowchartSource """digraph tdd_cycle {
+    rankdir=LR;
+    red [label="RED\\nWrite failing test", shape=box, style=filled, fillcolor="#ffcccc"];
+    verify_red [label="Verify fails\\ncorrectly", shape=diamond];
+    green [label="GREEN\\nMinimal code", shape=box, style=filled, fillcolor="#ccffcc"];
+    verify_green [label="Verify passes\\nAll green", shape=diamond];
+    refactor [label="REFACTOR\\nClean up", shape=box, style=filled, fillcolor="#ccccff"];
+    next [label="Next", shape=ellipse];
+
+    red -> verify_red;
+    verify_red -> green [label="yes"];
+    verify_red -> red [label="wrong\\nfailure"];
+    green -> verify_green;
+    verify_green -> refactor [label="yes"];
+    verify_green -> green [label="no"];
+    refactor -> verify_green [label="stay\\ngreen"];
+    verify_green -> next;
+    next -> red;
+}
+""" ;
+                            oc:flowchartType "graphviz" ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "const result = await retryOperation(operation);" ],
+                                [ a oc:HTMLBlock ;
+                                    oc:blockType "html_block" ;
+                                    oc:contentOrder 2 ;
+                                    oc:htmlContent """<Good>
+```typescript
+test('retries failed operations 3 times', async () => {
+  let attempts = 0;
+  const operation = () => {
+    attempts++;
+    if (attempts < 3) throw new Error('fail');
+    return 'success';
+  };""" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """Clear name, tests real behavior, one thing
+</Good>
+
+<Bad>
+```typescript
+test('retry works', async () => {
+  const mock = jest.fn()
+    .mockRejectedValueOnce(new Error())
+    .mockRejectedValueOnce(new Error())
+    .mockResolvedValueOnce('success');
+  await retryOperation(mock);
+  expect(mock).toHaveBeenCalledTimes(3);
+});
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 5 ;
+                                    oc:sourceLocation "lines 90-104" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 6 ;
+                                    oc:textContent """Vague name, tests mock not code
+</Bad>""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent """expect(result).toBe('success');
+  expect(attempts).toBe(3);
+});""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Write one minimal test showing what should happen." ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 8 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "One behavior" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Clear name" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Real code (no mocks unless unavoidable)" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 7 ;
+                                    oc:textContent "**Requirements:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 6 ;
+                            oc:sectionTitle "RED - Write Failing Test" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "Confirm:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """npm test path/to/test.test.ts
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 117-119" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**MANDATORY. Never skip.**" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 6 ;
+                                    oc:textContent "**Test errors?** Fix error, re-run until it fails correctly." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent "**Test passes?** You're testing existing behavior. Fix test." ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 4 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Failure message is expected" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Fails because feature missing (not typos)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Test fails (not errors)" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 7 ;
+                            oc:sectionTitle "Verify RED - Watch It Fail" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 2 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Improve names" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Extract helpers" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Remove duplication" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "Keep tests green. Don't add behavior." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "After green only:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 10 ;
+                            oc:sectionTitle "REFACTOR - Clean Up" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Next failing test for next feature." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 11 ;
+                            oc:sectionTitle "Repeat" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """npm test path/to/test.test.ts
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 172-174" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 6 ;
+                                    oc:textContent "**Other tests fail?** Fix now." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent "**Test fails?** Fix code, not test." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**MANDATORY.**" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "Confirm:" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 4 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Test passes" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Output pristine (no errors, warnings)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Other tests still pass" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 9 ;
+                            oc:sectionTitle "Verify GREEN - Watch It Pass" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Write simplest code to pass the test." ],
+                                [ a oc:HTMLBlock ;
+                                    oc:blockType "html_block" ;
+                                    oc:contentOrder 2 ;
+                                    oc:htmlContent """<Good>
+```typescript
+async function retryOperation<T>(fn: () => Promise<T>): Promise<T> {
+  for (let i = 0; i < 3; i++) {
+    try {
+      return await fn();
+    } catch (e) {
+      if (i === 2) throw e;
+    }
+  }
+  throw new Error('unreachable');
+}
+```
+Just enough to pass
+</Good>""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent "Don't add features, refactor other code, or \"improve\" beyond the test." ],
+                                [ a oc:HTMLBlock ;
+                                    oc:blockType "html_block" ;
+                                    oc:contentOrder 3 ;
+                                    oc:htmlContent """<Bad>
+```typescript
+async function retryOperation<T>(
+  fn: () => Promise<T>,
+  options?: {
+    maxRetries?: number;
+    backoff?: 'linear' | 'exponential';
+    onRetry?: (attempt: number) => void;
+  }
+): Promise<T> {
+  // YAGNI
+}
+```
+Over-engineered
+</Bad>""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 8 ;
+                            oc:sectionTitle "GREEN - Minimal Code" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Red-Green-Refactor" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Core principle:** If you didn't watch the test fail, you don't know if it tests the right thing." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Violating the letter of the rules is violating the spirit of the rules.**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Write the test first. Watch it fail. Write minimal code to pass." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Overview" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """Production code → test exists and failed first
+Otherwise → not TDD
+""" ;
+                            oc:codeLanguage "" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 366-369" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "No exceptions without your human partner's permission." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 21 ;
+                    oc:sectionTitle "Final Rule" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Can't explain why test failed" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "Tests added \"later\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Test passes immediately" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 13 ;
+                                    oc:itemText "\"This is different because...\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 7 ;
+                                    oc:itemText "\"I already manually tested it\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 11 ;
+                                    oc:itemText "\"Already spent X hours, deleting is wasteful\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 9 ;
+                                    oc:itemText "\"It's about spirit not ritual\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Test after implementation" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Code before test" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 12 ;
+                                    oc:itemText "\"TDD is dogmatic, I'm being pragmatic\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 10 ;
+                                    oc:itemText "\"Keep as reference\" or \"adapt existing code\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 8 ;
+                                    oc:itemText "\"Tests after achieve the same purpose\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 6 ;
+                                    oc:itemText "Rationalizing \"just this once\"" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**All of these mean: Delete code. Start over with TDD.**" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 15 ;
+                    oc:sectionTitle "Red Flags - STOP and Start Over" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 1 ;
+                            oc:rowCount 11 ;
+                            oc:tableCaption "## Common Rationalizations" ;
+                            oc:tableMarkdown """| Excuse | Reality |
+|--------|---------|
+| "Too simple to test" | Simple code breaks. Test takes 30 seconds. |
+| "I'll test after" | Tests passing immediately prove nothing. |
+| "Tests after achieve same goals" | Tests-after = "what does this do?" Tests-first = "what should this do?" |
+| "Already manually tested" | Ad-hoc ≠ systematic. No record, can't re-run. |
+| "Deleting X hours is wasteful" | Sunk cost fallacy. Keeping unverified code is technical debt. |
+| "Keep as reference, write tests first" | You'll adapt it. That's testing after. Delete means delete. |
+| "Need to explore first" | Fine. Throw away exploration, start with TDD. |
+| "Test hard = design unclear" | Listen to test. Hard to test = hard to use. |
+| "TDD will slow me down" | TDD faster than debugging. Pragmatic = test-first. |
+| "Manual test faster" | Manual doesn't prove edge cases. You'll re-test every change. |
+| "Existing code has no tests" | You're improving it. Add tests for existing code. |
+""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 14 ;
+                    oc:sectionTitle "Common Rationalizations" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "When adding mocks or test utilities, read @testing-anti-patterns.md to avoid common pitfalls:" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Adding test-only methods to production classes" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Mocking without understanding dependencies" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Testing mock behavior instead of real behavior" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 20 ;
+                    oc:sectionTitle "Testing Anti-Patterns" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 1 ;
+                            oc:rowCount 3 ;
+                            oc:tableCaption "## Good Tests" ;
+                            oc:tableMarkdown """| Quality | Good | Bad |
+|---------|------|-----|
+| **Minimal** | One thing. "and" in name? Split it. | `test('validates email and domain and whitespace')` |
+| **Clear** | Name describes behavior | `test('test1')` |
+| **Shows intent** | Demonstrates desired API | Obscures what code should do |
+""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 12 ;
+                    oc:sectionTitle "Good Tests" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 11 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Keep it and add tests after (30 min, low confidence, likely bugs)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Delete and rewrite with TDD (X more hours, high confidence)" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 16 ;
+                            oc:textContent "\"Pragmatic\" shortcuts = debugging in production = slower." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "Tests written after code pass immediately. Passing immediately proves nothing:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent "**\"I already manually tested all the edge cases\"**" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 3 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Might miss edge cases you forgot" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Might test wrong thing" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "You never saw it catch the bug" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Might test implementation, not behavior" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 13 ;
+                            oc:textContent "**\"TDD is dogmatic, being pragmatic means adapting\"**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 12 ;
+                            oc:textContent "The \"waste\" is keeping code you can't trust. Working code without real tests is technical debt." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "Test-first forces you to see the test fail, proving it actually tests something." ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 15 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Documents behavior (tests show how to use code)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Prevents regressions (tests catch breaks immediately)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Enables refactoring (change freely, tests catch breaks)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Finds bugs before commit (faster than debugging after)" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 18 ;
+                            oc:textContent "No. Tests-after answer \"What does this do?\" Tests-first answer \"What should this do?\"" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 20 ;
+                            oc:textContent "Tests-first force edge case discovery before implementing. Tests-after verify you remembered everything (you didn't)." ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 7 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Can't re-run when code changes" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Easy to forget cases under pressure" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "No record of what you tested" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "\"It worked when I tried it\" ≠ comprehensive" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 8 ;
+                            oc:textContent "Automated tests are systematic. They run the same way every time." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 6 ;
+                            oc:textContent "Manual testing is ad-hoc. You think you tested everything but:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 19 ;
+                            oc:textContent "Tests-after are biased by your implementation. You test what you built, not what's required. You verify remembered edge cases, not discovered ones." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 9 ;
+                            oc:textContent "**\"Deleting X hours of work is wasteful\"**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 10 ;
+                            oc:textContent "Sunk cost fallacy. The time is already gone. Your choice now:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 17 ;
+                            oc:textContent "**\"Tests after achieve the same goals - it's spirit not ritual\"**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 21 ;
+                            oc:textContent "30 minutes of tests after ≠ TDD. You get coverage, lose proof tests work." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**\"I'll write tests after to verify it works\"**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 14 ;
+                            oc:textContent "TDD IS pragmatic:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 13 ;
+                    oc:sectionTitle "Why Order Matters" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Bug found? Write failing test reproducing it. Follow TDD cycle. Test proves fix and prevents regression." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "Never fix bugs without a test." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 19 ;
+                    oc:sectionTitle "Debugging Integration" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Before marking work complete:" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 6 ;
+                                    oc:itemText "[ ] Output pristine (no errors, warnings)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "[ ] All tests pass" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "[ ] Each test failed for expected reason (feature missing, not typo)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "[ ] Wrote minimal code to pass each test" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 7 ;
+                                    oc:itemText "[ ] Tests use real code (mocks only if unavoidable)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "[ ] Every new function/method has a test" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "[ ] Watched each test fail before implementing" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 8 ;
+                                    oc:itemText "[ ] Edge cases and errors covered" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "Can't check all boxes? You skipped TDD. Start over." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 17 ;
+                    oc:sectionTitle "Verification Checklist" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Behavior changes" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Refactoring" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Bug fixes" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "New features" ] ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 4 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Generated code" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Configuration files" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Throwaway prototypes" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Exceptions (ask your human partner):**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**Always:**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent "Thinking \"skip TDD just this once\"? Stop. That's rationalization." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "When to Use" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 1 ;
+                            oc:rowCount 4 ;
+                            oc:tableCaption "## When Stuck" ;
+                            oc:tableMarkdown """| Problem | Solution |
+|---------|----------|
+| Don't know how to test | Write wished-for API. Write assertion first. Ask your human partner. |
+| Test too complicated | Design too complicated. Simplify interface. |
+| Must mock everything | Code too coupled. Use dependency injection. |
+| Test setup huge | Extract helpers. Still complex? Simplify design. |
+""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 18 ;
+                    oc:sectionTitle "When Stuck" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**RED**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 10 ;
+                            oc:textContent """**REFACTOR**
+Extract validation for multiple fields if needed.""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 6 ;
+                            oc:textContent "**GREEN**" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """$ npm test
+PASS
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 9 ;
+                            oc:sourceLocation "lines 319-322" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """function submitForm(data: FormData) {
+  if (!data.email?.trim()) {
+    return { error: 'Email required' };
+  }
+  // ...
+}
+""" ;
+                            oc:codeLanguage "typescript" ;
+                            oc:contentOrder 7 ;
+                            oc:sourceLocation "lines 309-316" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "**Verify RED**" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """test('rejects empty email', async () => {
+  const result = await submitForm({ email: '' });
+  expect(result.error).toBe('Email required');
+});
+""" ;
+                            oc:codeLanguage "typescript" ;
+                            oc:contentOrder 3 ;
+                            oc:sourceLocation "lines 295-300" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 8 ;
+                            oc:textContent "**Verify GREEN**" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """$ npm test
+FAIL: expected 'Email required', got undefined
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 5 ;
+                            oc:sourceLocation "lines 303-306" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**Bug:** Empty email accepted" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 16 ;
+                    oc:sectionTitle "Example: Bug Fix" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**No exceptions:**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "Write code before the test? Delete it. Start over." ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 4 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Don't look at it" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Delete means delete" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Don't \"adapt\" it while writing tests" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Don't keep it as \"reference\"" ] ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """NO PRODUCTION CODE WITHOUT A FAILING TEST FIRST
+""" ;
+                            oc:codeLanguage "" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 33-35" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent "Implement fresh from tests. Period." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "The Iron Law" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Test-Driven Development (TDD)" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "The core TDD loop: write a failing test, verify it fails, write minimal code, verify it passes, refactor, repeat." ;
+            oc:hasStep _:ref_1d5347ee516b7b7c,
+                _:ref_4ef89f4cb6180e56,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Write next failing test for next behavior and repeat the cycle" ;
+                    oc:expectedOutcome "Next RED phase begins" ;
+                    oc:stepDependsOn _:ref_fe39f62b86b391b2 ;
+                    oc:stepId "repeat" ],
+                _:ref_c16fe4b9a62ace27,
+                _:ref_e52a54e0159ea9dd,
+                _:ref_fe39f62b86b391b2 ;
+            oc:workflowId "tdd-cycle" ;
+            oc:workflowName "Red-Green-Refactor Cycle" ] ;
+    oc:impartsKnowledge oc:kn_0884a293,
+        oc:kn_15abeb65,
+        oc:kn_23047a60,
+        oc:kn_25b9a287,
+        oc:kn_2a424855,
+        oc:kn_2d4c9286,
+        oc:kn_4261fa80,
+        oc:kn_96dea482,
+        oc:kn_da2b63a6 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:DevelopmentEnvironmentReady,
-        oc:FeatureSpecified ;
-    oc:resolvesIntent "fix bugs using test-first approach",
-        "implement features using TDD",
-        "refactor code safely with test coverage",
-        "verify behavior through test-driven cycles",
-        "write failing tests before production code" ;
-    oc:yieldsState oc:CodeRefactored,
-        oc:FeatureImplemented,
+    oc:requiresState oc:EnvironmentReady,
+        oc:TestFrameworkConfigured ;
+    oc:resolvesIntent "fix bugs with test-first approach",
+        "implement features with TDD",
+        "refactor code safely",
+        "write verified production code" ;
+    oc:yieldsState oc:CodeVerified,
         oc:TestPassing .
 
-oc:kn_16fd0738 a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "At the end of every implementation session" ;
-    oc:directiveContent "Before marking work complete, verify: every new function has a test, each test was watched to fail first, each test failed for the expected reason, minimal code was written to pass, all tests pass with pristine output, mocks are used only when unavoidable, and edge cases are covered." ;
-    oc:hasRationale "This checklist is the quality gate that ensures TDD discipline was actually followed, not just claimed." ;
+oc:kn_0884a293 a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "During Verify RED phase" ;
+    oc:directiveContent "If test passes immediately in RED, you're testing existing behavior—fix the test. If test errors (not fails), fix the error and re-run until it fails correctly for the right reason." ;
+    oc:hasRationale "A test that doesn't fail for the expected reason provides no proof that the test is valid" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_15abeb65 a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When discovering code was written before tests" ;
+    oc:directiveContent "If you wrote code before tests, delete all of it. Don't keep as reference, don't adapt it. Start fresh with TDD from tests. Sunk cost is a fallacy." ;
+    oc:hasRationale "Keeping pre-written code biases the tests toward the implementation rather than the requirement" ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_1f3557ef a oc:Constraint,
+oc:kn_23047a60 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Every TDD cycle iteration" ;
+    oc:directiveContent "Both Verify RED and Verify GREEN steps are MANDATORY. Never skip watching the test fail before implementing, and never skip watching it pass after implementing." ;
+    oc:hasRationale "Verify RED proves the test catches the missing feature; Verify GREEN proves the implementation satisfies the requirement" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_25b9a287 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When adding mocks or test utilities" ;
+    oc:directiveContent "Never test mock behavior instead of real behavior. Never add test-only methods to production classes. Never mock without understanding dependencies. Mocks are isolation tools, not the thing being tested." ;
+    oc:hasRationale "Testing mocks gives false confidence—the test passes but proves nothing about real behavior" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_2a424855 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing tests in the RED phase" ;
+    oc:directiveContent "Write one minimal test showing one behavior. Clear name, real code (no mocks unless unavoidable). If 'and' appears in the test name, split it." ;
+    oc:hasRationale "Tests that cover multiple behaviors are harder to debug and violate the single-responsibility focus of TDD" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_2d4c9286 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "Every feature or bugfix implementation" ;
+    oc:directiveContent "1. Write one minimal failing test (RED) 2. Run test, verify it fails for the right reason (Verify RED) 3. Write minimal code to pass (GREEN) 4. Run test, verify it passes and all other tests pass (Verify GREEN) 5. Refactor while keeping tests green (REFACTOR) 6. Repeat for next behavior" ;
+    oc:stepOrder 1 .
+
+oc:kn_4261fa80 a oc:Constraint,
         oc:KnowledgeNode ;
     oc:appliesToContext "Always, when writing any production code" ;
-    oc:directiveContent "No production code shall be written without a failing test first. Code written before its test must be deleted entirely — not kept as reference, not adapted." ;
-    oc:hasRationale "Writing code before tests means you can never verify the test actually catches the absence of the feature — it passes immediately, proving nothing." ;
+    oc:directiveContent "NO PRODUCTION CODE WITHOUT A FAILING TEST FIRST. Write code before the test? Delete it entirely and start over. Don't keep as reference, don't adapt it, don't look at it." ;
+    oc:hasRationale "Without seeing the test fail first, you cannot prove the test actually tests anything meaningful" ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_2369733f a oc:KnowledgeNode,
-        oc:RecoveryTactic ;
-    oc:appliesToContext "When encountering any bug or unexpected behavior" ;
-    oc:directiveContent "When a bug is found, write a failing test that reproduces it first, then follow the standard TDD cycle to fix it. Never fix a bug without a reproducing test." ;
-    oc:hasRationale "A test that reproduces the bug proves the fix works and prevents regression. Fixing without a test leaves no safety net for future changes." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_286ce68e a oc:Heuristic,
+oc:kn_96dea482 a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "During the GREEN phase of every TDD cycle" ;
-    oc:directiveContent "Write minimal code to pass the test. Do not add features, refactor other code, or over-engineer beyond what the test requires. Each GREEN step should be the simplest possible passing implementation." ;
-    oc:hasRationale "Over-engineering during GREEN violates YAGNI and defeats the incremental discipline of TDD. Each cycle adds exactly one behavior." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_4f89feed a oc:KnowledgeNode,
-        oc:KnownIssue ;
-    oc:appliesToContext "Whenever considering writing tests after code" ;
-    oc:directiveContent "Tests written after implementation pass immediately and prove nothing — they test what was built, not what should be built. They are biased by the implementation and miss edge cases the implementer forgot." ;
-    oc:hasRationale "Tests-after answer 'what does this do?' while tests-first answer 'what should this do?'. Tests-first force edge case discovery before implementing." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_6a83a56f a oc:KnowledgeNode,
-        oc:PostFlightValidation ;
-    oc:appliesToContext "After writing implementation code to pass a test" ;
-    oc:directiveContent "After each GREEN step, run the full test suite — not just the new test. Confirm: the new test passes, all existing tests still pass, and output is pristine with no errors or warnings." ;
-    oc:hasRationale "Running only the new test misses regressions. Pristine output catches subtle issues like warnings that indicate problems." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_82df3d7a a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "Whenever tempted to write code before tests or skip the TDD cycle" ;
-    oc:directiveContent "Treat all rationalizations for skipping TDD as red flags requiring an immediate stop and restart. Common rationalizations include: 'too simple to test', 'I'll test after', 'already manually tested', 'deleting is wasteful', 'TDD is dogmatic', 'keep as reference', and 'this is different because...'" ;
-    oc:hasRationale "Every rationalization for skipping TDD has been documented as leading to lower confidence, missed edge cases, and technical debt. The discipline is the value." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_91a36e45 a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When struggling to write a test during the RED phase" ;
-    oc:directiveContent "If a test is hard to write, the design is too complicated. Listen to the test — difficult testing signals poor interface design, excessive coupling, or unclear responsibilities. Simplify the design, not the test." ;
-    oc:hasRationale "TDD is a design tool. Test difficulty is diagnostic feedback about your architecture, not a testing problem to work around." ;
+    oc:appliesToContext "When stuck writing tests" ;
+    oc:directiveContent "If a test is too complicated, the design is too complicated—simplify the interface. If you must mock everything, the code is too coupled—use dependency injection. If test setup is huge, extract helpers or simplify the design." ;
+    oc:hasRationale "Test difficulty is a signal about design quality; listen to the test" ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_b7adb6d6 a oc:AntiPattern,
+oc:kn_da2b63a6 a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When writing any test that involves mocking" ;
-    oc:directiveContent "Never assert on mock behavior or test-only artifacts. Tests must verify real behavior of the system. Use mocks only to isolate external dependencies, never as the thing being tested." ;
-    oc:hasRationale "Testing mock behavior tells you the mock works, not that your code works. This creates false confidence and hides real bugs. Consult testing-anti-patterns.md for detailed guidance." ;
+    oc:appliesToContext "During the GREEN phase" ;
+    oc:directiveContent "Write the simplest code to pass the test. Don't add features, don't refactor other code, don't improve beyond what the test requires. YAGNI." ;
+    oc:hasRationale "Over-engineering during GREEN leads to untested code paths and violates the incremental nature of TDD" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_d1ce53a5 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "After writing each failing test, before writing implementation code" ;
-    oc:directiveContent "Never skip the verify-RED step. You must watch each test fail and confirm it fails for the expected reason (feature missing, not a typo or error) before writing implementation." ;
-    oc:hasRationale "Without watching the test fail correctly, you don't know if the test tests the right thing. A test that passes immediately or errors is not a valid RED." ;
-    oc:severityLevel "CRITICAL" .
+oc:req_28b7e85d a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "test runner (e.g., npm test, pytest, jest)" .
+
+oc:req_fdb8ab49 a oc:RequirementKnowledge ;
+    oc:isOptional true ;
+    oc:requirementValue "testing-anti-patterns" .
+
+_:ref_1d5347ee516b7b7c a oc:WorkflowStep ;
+    dcterms:description "Write the simplest possible code to make the test pass" ;
+    oc:expectedOutcome "Minimal implementation that satisfies the test" ;
+    oc:stepDependsOn _:ref_e52a54e0159ea9dd ;
+    oc:stepId "green" .
+
+_:ref_4ef89f4cb6180e56 a oc:WorkflowStep ;
+    dcterms:description "Run the test and confirm it passes, all other tests still pass, and output is pristine" ;
+    oc:expectedOutcome "All tests pass with no errors or warnings" ;
+    oc:stepDependsOn _:ref_1d5347ee516b7b7c ;
+    oc:stepId "verify-green" .
+
+_:ref_c16fe4b9a62ace27 a oc:WorkflowStep ;
+    dcterms:description "Write one minimal test showing the desired behavior with a clear name" ;
+    oc:expectedOutcome "A single test case that describes one behavior" ;
+    oc:stepId "red" .
+
+_:ref_e52a54e0159ea9dd a oc:WorkflowStep ;
+    dcterms:description "Run the test and confirm it fails for the expected reason (feature missing, not typo or error)" ;
+    oc:expectedOutcome "Test fails with expected failure message" ;
+    oc:stepDependsOn _:ref_c16fe4b9a62ace27 ;
+    oc:stepId "verify-red" .
+
+_:ref_fe39f62b86b391b2 a oc:WorkflowStep ;
+    dcterms:description "Clean up: remove duplication, improve names, extract helpers. Keep tests green, don't add behavior." ;
+    oc:expectedOutcome "Cleaner code with all tests still passing" ;
+    oc:stepDependsOn _:ref_4ef89f4cb6180e56 ;
+    oc:stepId "refactor" .
 

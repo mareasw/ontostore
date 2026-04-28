@@ -7,58 +7,122 @@
 oc:skill_vercel_labs_vercel_react_best_practices_rendering_hoist_jsx a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "rendering-hoist-jsx" ;
-    skos:broader "rendering optimization technique" ;
+    skos:broader "React rendering optimization technique" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "93b229560fae92005ed9a2a829064607b39b2e984e92d221d05b2d41df2b7c0e" ;
-    oc:differentia "hoists static JSX elements outside components to avoid re-creation on every render" ;
+    oc:differentia "hoists static JSX elements outside components to avoid unnecessary re-creation on every render" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
-    oc:hasArgumentHint "JSX component or element to optimize" ;
+    oc:handlesFailure oc:InvalidInput ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_073ce541,
-        oc:kn_2bfedb6d,
-        oc:kn_5d001e1b,
-        oc:kn_b811851b,
-        oc:kn_d1116a7c ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Hoist Static JSX Elements
+impact: LOW
+impactDescription: avoids re-creation
+tags: rendering, jsx, static, optimization
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Extract static JSX outside components to avoid re-creation." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 7 ;
+                    oc:textContent "**Note:** If your project has [React Compiler](https://react.dev/learn/react-compiler) enabled, the compiler automatically hoists static JSX elements and optimizes component re-renders, making manual hoisting unnecessary." ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function LoadingSkeleton() {
+  return <div className="animate-pulse h-20 bg-gray-200" />
+}
+
+function Container() {
+  return (
+    <div>
+      {loading && <LoadingSkeleton />}
+    </div>
+  )
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-26" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Incorrect (recreates element every render):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 6 ;
+                    oc:textContent "This is especially helpful for large and static SVG nodes, which can be expensive to recreate on every render." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "**Correct (reuses same element):**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """const loadingSkeleton = (
+  <div className="animate-pulse h-20 bg-gray-200" />
+)
+
+function Container() {
+  return (
+    <div>
+      {loading && loadingSkeleton}
+    </div>
+  )
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 5 ;
+                    oc:sourceLocation "lines 30-42" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Hoist Static JSX Elements" ] ;
+    oc:impartsKnowledge oc:kn_3388c367,
+        oc:kn_786ff1ce,
+        oc:kn_8b60257e,
+        oc:kn_8d67e7d8 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:ReactComponentWritten ;
-    oc:resolvesIntent "avoid unnecessary JSX element re-creation",
-        "optimize JSX rendering performance",
-        "reduce render cost for static elements" ;
-    oc:yieldsState oc:StaticJSXHoisted .
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "hoist static JSX elements",
+        "improve component render performance",
+        "optimize React rendering",
+        "reduce unnecessary JSX re-creation" ;
+    oc:yieldsState oc:CodeOptimized .
 
-oc:kn_073ce541 a oc:Idempotency,
+oc:kn_3388c367 a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "Always, by definition of the hoisting technique" ;
-    oc:directiveContent "Hoisting a static JSX element is idempotent — moving it outside the component once produces the same result regardless of how many times the component re-renders." ;
-    oc:hasRationale "The hoisted element is created once at module load time and reused, guaranteeing consistent references across all renders." ;
+    oc:appliesToContext "When rendering inline SVGs or complex static markup" ;
+    oc:directiveContent "This optimization is especially impactful for large, static SVG nodes, which are expensive to recreate." ;
+    oc:hasRationale "SVGs can contain dozens or hundreds of nodes; recreating them each render is disproportionately costly compared to simple elements." ;
     oc:severityLevel "LOW" .
 
-oc:kn_2bfedb6d a oc:KnowledgeNode,
-        oc:KnownIssue ;
-    oc:appliesToContext "When working in a project that has React Compiler enabled" ;
-    oc:directiveContent "If React Compiler is enabled in the project, manual hoisting of static JSX elements is unnecessary because the compiler automatically performs this optimization." ;
-    oc:hasRationale "Manual hoisting adds code complexity; if the compiler already handles it, the manual version becomes redundant noise and may even conflict with compiler optimizations." ;
-    oc:severityLevel "LOW" .
-
-oc:kn_5d001e1b a oc:AntiPattern,
+oc:kn_786ff1ce a oc:AssumptionBoundary,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When writing React components with static sub-elements that never change" ;
-    oc:directiveContent "Do not define static JSX elements inside component functions when the element does not depend on any props or state." ;
-    oc:hasRationale "Defining static elements inside the component body causes them to be recreated on every render cycle, wasting CPU cycles and memory allocations." ;
+    oc:appliesToContext "When React Compiler is configured in the project" ;
+    oc:directiveContent "If the project has React Compiler enabled, manual hoisting of static JSX is unnecessary — the compiler performs this optimization automatically." ;
+    oc:hasRationale "React Compiler automatically identifies and hoists static JSX elements, making manual optimization redundant and potentially cluttering the code." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_b811851b a oc:DesignPrinciple,
+oc:kn_8b60257e a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When writing React components that contain static, unchanging JSX elements" ;
-    oc:directiveContent "Extract static JSX elements outside of component functions so the same element reference is reused across renders instead of being recreated each time." ;
-    oc:hasRationale "Recreating JSX elements on every render allocates new objects unnecessarily, increasing garbage collection pressure and render cost, especially for complex static subtrees like SVGs." ;
-    oc:severityLevel "LOW" .
+    oc:appliesToContext "When writing JSX for static content like loading skeletons, icons, or static SVGs" ;
+    oc:directiveContent "Never wrap static JSX in a component if it has no props or dynamic behavior — this causes React to recreate the element tree on every render." ;
+    oc:hasRationale "Each component render creates a new React element object, triggering unnecessary reconciliation work for content that never changes." ;
+    oc:severityLevel "MEDIUM" .
 
-oc:kn_d1116a7c a oc:Heuristic,
+oc:kn_8d67e7d8 a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When a component renders SVG or other large static subtrees" ;
-    oc:directiveContent "Large static SVG nodes are prime candidates for hoisting, as they are expensive to recreate on every render." ;
-    oc:hasRationale "SVG nodes tend to be deeply nested and structurally complex, making their re-creation cost disproportionately high compared to simple HTML elements." ;
+    oc:appliesToContext "When a JSX element has no dynamic props or children" ;
+    oc:codeLanguage "tsx" ;
+    oc:directiveContent "Extract static JSX as a module-level constant: `const staticElement = <div className=\"...\" />;` then reference it directly in JSX: `{condition && staticElement}`." ;
+    oc:hasRationale "Module-level constants are created once and reused across all renders, eliminating repeated element creation." ;
     oc:severityLevel "MEDIUM" .
 

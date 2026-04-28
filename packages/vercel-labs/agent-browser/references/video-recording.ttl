@@ -7,75 +7,391 @@
 oc:skill_vercel_labs_agent_browser_video_recording a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "video-recording" ;
-    skos:broader "Browser automation recording sub-skill" ;
+    skos:broader "Browser automation sub-skill" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/agent-browser" ;
     oc:contentHash "c2c12bd8c44e5d36fbb94cfc376180d47507d3c26a7ee8876b892fc700dcf332" ;
-    oc:dependsOnSkill oc:skill_agent_browser ;
-    oc:differentia "Captures browser interactions as WebM video for debugging, documentation, and CI/CD evidence" ;
+    oc:dependsOnSkill oc:skill_ontoskills_agent_browser ;
+    oc:differentia "Captures browser sessions as WebM video recordings for debugging, documentation, and CI/CD evidence" ;
     oc:extends oc:skill_vercel_labs_agent_browser ;
-    oc:handlesFailure oc:CodecUnavailable,
-        oc:DiskSpaceExhausted,
-        oc:RecordingNotStarted ;
-    oc:hasAllowedTool "Bash" ;
     oc:hasArgumentHint "output-file-path (e.g., ./demo.webm)" ;
     oc:hasCategory "automation" ;
-    oc:hasRequirement oc:req_2ca9ae52,
-        oc:req_33dc207f ;
-    oc:impartsKnowledge oc:kn_5c9256eb,
-        oc:kn_639868e0,
-        oc:kn_6792c232,
-        oc:kn_e5507b59,
-        oc:kn_fdd7b48d ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Capture browser automation as video for debugging, documentation, or verification." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Related**: [commands.md](commands.md) for full command reference, [SKILL.md](../SKILL.md) for quick start." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# Include context in filename
+agent-browser record start ./recordings/login-flow-2024-01-15.webm
+agent-browser record start ./recordings/checkout-test-run-42.webm
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 126-130" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "2. Use Descriptive Filenames" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# Record video AND capture key frames
+agent-browser record start ./flow.webm
+
+agent-browser open https://example.com
+agent-browser screenshot ./screenshots/step1-homepage.png
+
+agent-browser click @e1
+agent-browser screenshot ./screenshots/step2-after-click.png
+
+agent-browser record stop
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 150-161" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "4. Combine with Screenshots" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# Slow down for human viewing
+agent-browser click @e1
+agent-browser wait 500  # Let viewer see result
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 118-122" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "1. Add Pauses for Clarity" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """#!/bin/bash
+set -e
+
+cleanup() {
+    agent-browser record stop 2>/dev/null || true
+    agent-browser close 2>/dev/null || true
+}
+trap cleanup EXIT
+
+agent-browser record start ./automation.webm
+# ... automation steps ...
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 134-146" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "3. Handle Recording in Error Cases" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Best Practices" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# Start recording to file
+agent-browser record start ./output.webm
+
+# Stop current recording
+agent-browser record stop
+
+# Restart with new file (stops current + starts new)
+agent-browser record restart ./take2.webm
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 34-43" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Recording Commands" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """#!/bin/bash
+# Record automation for debugging
+
+agent-browser record start ./debug-$(date +%Y%m%d-%H%M%S).webm
+
+# Run your automation
+agent-browser open https://app.example.com
+agent-browser snapshot -i
+agent-browser click @e1 || {
+    echo "Click failed - check recording"
+    agent-browser record stop
+    exit 1
+}
+
+agent-browser record stop
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 49-65" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Debugging Failed Automation" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """#!/bin/bash
+# Record E2E test runs for CI artifacts
+
+TEST_NAME="${1:-e2e-test}"
+RECORDING_DIR="./test-recordings"
+mkdir -p "$RECORDING_DIR"
+
+agent-browser record start "$RECORDING_DIR/$TEST_NAME-$(date +%s).webm"
+
+# Run test
+if run_e2e_test; then
+    echo "Test passed"
+else
+    echo "Test failed - recording saved"
+fi
+
+agent-browser record stop
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 94-112" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "CI/CD Test Evidence" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """#!/bin/bash
+# Record workflow for documentation
+
+agent-browser record start ./docs/how-to-login.webm
+
+agent-browser open https://app.example.com/login
+agent-browser wait 1000  # Pause for visibility
+
+agent-browser snapshot -i
+agent-browser fill @e1 "demo@example.com"
+agent-browser wait 500
+
+agent-browser fill @e2 "password"
+agent-browser wait 500
+
+agent-browser click @e3
+agent-browser wait --load networkidle
+agent-browser wait 1000  # Show result
+
+agent-browser record stop
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 69-90" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Documentation Generation" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Use Cases" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# Start recording
+agent-browser record start ./demo.webm
+
+# Perform actions
+agent-browser open https://example.com
+agent-browser snapshot -i
+agent-browser click @e1
+agent-browser fill @e2 "test input"
+
+# Stop and save
+agent-browser record stop
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 18-30" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Basic Recording" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Default format: WebM (VP8/VP9 codec)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Compatible with all modern browsers and video players" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Compressed but high quality" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Output Format" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Large recordings can consume significant disk space" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Recording adds slight overhead to automation" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Some headless environments may have codec limitations" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 7 ;
+                    oc:sectionTitle "Limitations" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "[Use Cases](#use-cases)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "[Output Format](#output-format)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 6 ;
+                                    oc:itemText "[Limitations](#limitations)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "[Best Practices](#best-practices)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "[Recording Commands](#recording-commands)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "[Basic Recording](#basic-recording)" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Contents" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Video Recording" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "Full workflow for recording a browser automation session with proper error handling and cleanup" ;
+            oc:hasStep [ a oc:WorkflowStep ;
+                    dcterms:description "On any failure, ensure recording is stopped via trap/cleanup handler" ;
+                    oc:expectedOutcome "Partial recording is saved even on failure" ;
+                    oc:stepDependsOn _:ref_8a787b5c7bb53c76 ;
+                    oc:stepId "cleanup-on-error" ],
+                _:ref_8a787b5c7bb53c76,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Execute browser automation steps with wait pauses between actions for clarity" ;
+                    oc:expectedOutcome "Browser actions are executed and captured on video" ;
+                    oc:stepDependsOn _:ref_8a787b5c7bb53c76 ;
+                    oc:stepId "perform-actions" ],
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Stop recording: agent-browser record stop" ;
+                    oc:expectedOutcome "WebM video file is finalized and saved to disk" ;
+                    oc:stepDependsOn _:ref_8a787b5c7bb53c76 ;
+                    oc:stepId "stop-recording" ] ;
+            oc:workflowId "record-browser-session" ;
+            oc:workflowName "Record Browser Automation Session" ] ;
+    oc:impartsKnowledge oc:kn_14dddbbc,
+        oc:kn_6805f877,
+        oc:kn_8c35ac08,
+        oc:kn_92a43d4e,
+        oc:kn_b3668239,
+        oc:kn_bd72f337,
+        oc:kn_deea2e0f,
+        oc:kn_e2c27b04 ;
     oc:isUserInvocable true ;
-    oc:nature "Capability" ;
-    oc:requiresState oc:BrowserSessionActive ;
-    oc:resolvesIntent "capture debugging recordings of failed automation",
-        "create CI/CD test evidence recordings",
-        "generate documentation videos of browser workflows",
-        "record browser automation as video",
-        "restart or manage video recordings during browser sessions" ;
+    oc:nature "Tool" ;
+    oc:requiresState oc:BrowserSessionActive,
+        oc:DirectoryWritable ;
+    oc:resolvesIntent "capture debugging evidence of browser interactions",
+        "generate video documentation of workflows",
+        "record E2E test runs for CI artifacts",
+        "record browser automation as video" ;
     oc:yieldsState oc:VideoRecordingCreated .
 
-oc:kn_5c9256eb a oc:DesignPrinciple,
+oc:kn_14dddbbc a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When starting a recording with 'record start'" ;
-    oc:directiveContent "Use descriptive filenames that include context such as test name, flow name, and date/timestamp." ;
-    oc:hasRationale "Descriptive filenames make recordings searchable and identifiable among many artifacts, especially in CI/CD pipelines." ;
-    oc:severityLevel "MEDIUM" .
+    oc:appliesToContext "Ensuring recordings are saved even on script failure or unexpected exit" ;
+    oc:codeLanguage "bash" ;
+    oc:directiveContent """cleanup() {
+    agent-browser record stop 2>/dev/null || true
+    agent-browser close 2>/dev/null || true
+}
+trap cleanup EXIT
 
-oc:kn_639868e0 a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "Always — inherent limitation of the recording feature" ;
-    oc:directiveContent "Recording adds slight overhead to automation and large recordings can consume significant disk space. Some headless environments may have codec limitations." ;
-    oc:hasRationale "Awareness of these constraints prevents unexpected performance degradation or failed recordings in constrained environments." ;
-    oc:severityLevel "MEDIUM" .
+agent-browser record start ./automation.webm""" .
 
-oc:kn_6792c232 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When recording for documentation or demonstration purposes" ;
-    oc:directiveContent "Add deliberate wait pauses (500-1000ms) between actions to make recordings viewable by humans." ;
-    oc:hasRationale "Automated actions execute too quickly for humans to follow; pauses give viewers time to perceive each step." ;
-    oc:severityLevel "MEDIUM" .
+oc:kn_6805f877 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "Recording any browser automation session" ;
+    oc:directiveContent "1. `agent-browser record start ./output.webm` 2. Perform browser actions (open, click, fill, etc.) 3. Add wait pauses between actions for clarity 4. `agent-browser record stop` to save" ;
+    oc:hasRationale "Ensures recording covers the full automation lifecycle and is saved properly" ;
+    oc:stepOrder 1 .
 
-oc:kn_e5507b59 a oc:KnowledgeNode,
-        oc:SideEffect ;
-    oc:appliesToContext "During any active recording session" ;
-    oc:directiveContent "Video recordings produce .webm files on disk and consume CPU/disk I/O during capture. Multiple recordings (without stopping) can accumulate." ;
-    oc:hasRationale "Unmonitored recording can fill disk space and degrade system performance, especially in long-running CI pipelines." ;
+oc:kn_8c35ac08 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When recording extended automation sessions" ;
+    oc:directiveContent "Large recordings can consume significant disk space. Long automation sessions should monitor available storage." ;
+    oc:hasRationale "WebM compression is efficient but not unlimited; long recordings can fill disks especially in CI environments" ;
     oc:severityLevel "LOW" .
 
-oc:kn_fdd7b48d a oc:KnowledgeNode,
+oc:kn_92a43d4e a oc:KnowledgeNode,
         oc:Standard ;
-    oc:appliesToContext "When recording any browser automation session" ;
-    oc:directiveContent "Always use trap-based cleanup to stop recordings on exit or error, ensuring no orphaned recording processes." ;
-    oc:hasRationale "Without cleanup traps, failed automation leaves recording processes running and incomplete video files." ;
-    oc:severityLevel "HIGH" .
+    oc:appliesToContext "When naming recording output files" ;
+    oc:directiveContent "Use descriptive filenames that include context: workflow name, date, and test identifier (e.g., `login-flow-2024-01-15.webm`, `checkout-test-run-42.webm`)" ;
+    oc:hasRationale "Descriptive filenames make recordings searchable and identifiable without playing them" .
 
-oc:req_2ca9ae52 a oc:RequirementHardware ;
-    oc:isOptional false ;
-    oc:requirementValue "Sufficient disk space for video output" .
+oc:kn_b3668239 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Always — recording format and performance constraints" ;
+    oc:directiveContent "Default output format is WebM (VP8/VP9 codec). Some headless environments may have codec limitations. Recording adds slight overhead to automation." ;
+    oc:hasRationale "Codec incompatibility can cause silent failures in CI; overhead may affect timing-sensitive tests" ;
+    oc:severityLevel "MEDIUM" .
 
-oc:req_33dc207f a oc:RequirementTool ;
-    oc:isOptional false ;
-    oc:requirementValue "agent-browser CLI" .
+oc:kn_bd72f337 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Basic recording control commands" ;
+    oc:codeLanguage "bash" ;
+    oc:directiveContent """agent-browser record start ./output.webm
+# ... actions ...
+agent-browser record stop
+agent-browser record restart ./take2.webm  # stops current + starts new""" .
+
+oc:kn_deea2e0f a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "On script error or unexpected termination during recording" ;
+    oc:directiveContent "Use a shell trap on EXIT to ensure `agent-browser record stop` runs even when the script fails or is interrupted, preventing lost recordings" ;
+    oc:hasRationale "Without a cleanup trap, recording data may be lost on crash, negating the debugging value" .
+
+oc:kn_e2c27b04 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When recording for documentation or human review" ;
+    oc:directiveContent "Insert `agent-browser wait 500` between actions to slow down for human viewing, making recordings useful as documentation" ;
+    oc:hasRationale "Full-speed automation is too fast for human viewers to follow; pauses let viewers see each step's result" .
+
+_:ref_8a787b5c7bb53c76 a oc:WorkflowStep ;
+    dcterms:description "Start recording with descriptive filename: agent-browser record start ./output.webm" ;
+    oc:expectedOutcome "Recording begins, file path is set" ;
+    oc:stepId "start-recording" .
 

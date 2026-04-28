@@ -7,104 +7,1022 @@
 oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_agp9_migration_known_issues a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "known-issues" ;
-    skos:broader "Reference guide" ;
+    skos:broader "Known issue catalog" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/kotlin/kotlin-agent-skills/kotlin-tooling-agp9-migration" ;
     oc:contentHash "5b15e61f34e3821f40fb26d1a5a9cdce4c9cea1915b6be147df2d43ed883027f" ;
-    oc:differentia "catalogs known issues, breaking changes, and workarounds for KMP AGP 9.0 library migration" ;
+    oc:differentia "Documents gotchas, limitations, and workarounds for KMP AGP 9.0 library migration including BuildConfig removal, variant loss, DSL changes, and plugin compatibility" ;
     oc:extends oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_agp9_migration ;
-    oc:handlesFailure oc:BuildFailure,
-        oc:ClassCastException,
-        oc:ProGuardRuleDropped,
-        oc:ResourceResolutionFailure ;
-    oc:hasArgumentHint "issue-number or keyword (e.g., \"buildconfig\", \"proguard\", \"kapt\", \"ndk\")" ;
+    oc:handlesFailure oc:BuildConfigMissing,
+        oc:BuildVariantNotSupported,
+        oc:DSLBreakingChange,
+        oc:PluginIncompatible ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_336590d2,
-        oc:kn_41261645,
-        oc:kn_4f43845c,
-        oc:kn_54177be8,
-        oc:kn_5c197c9d,
-        oc:kn_5f5e86d4,
-        oc:kn_6f858883,
-        oc:kn_919edb99,
-        oc:kn_c0662e3b,
-        oc:kn_ee4bcf8f ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Comprehensive list of gotchas, limitations, and workarounds when migrating to `com.android.kotlin.multiplatform.library`. Based on official Android documentation and community experience." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "Keep the JNI module as a classic `com.android.library` module and have the KMP module depend on it:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 7 ;
+                            oc:textContent "Define an interface in `commonMain` and implement it in `androidMain` by delegating to the JNI bridge." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**Problem:** The KMP library plugin does not support `externalNativeBuild`, `ndkVersion`, or JNI source compilation. Modules that use C/C++ native code via NDK cannot be migrated directly." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """jni-bridge/                 # com.android.library (AGP 8.x compatible in AGP 9.0)
+  build.gradle.kts
+  src/main/jni/             # C/C++ sources
+  src/main/kotlin/          # JNI bindings
+
+shared/                     # com.android.kotlin.multiplatform.library
+  build.gradle.kts
+""" ;
+                            oc:codeLanguage "" ;
+                            oc:contentOrder 5 ;
+                            oc:sourceLocation "lines 135-143" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// shared/build.gradle.kts
+kotlin {
+    sourceSets {
+        androidMain.dependencies {
+            implementation(project(":jni-bridge"))
+        }
+    }
+}
+""" ;
+                            oc:codeLanguage "kotlin" ;
+                            oc:contentOrder 6 ;
+                            oc:sourceLocation "lines 145-154" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Workaround -- Proxy Interface Pattern:**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Impact:** Medium. Affects modules with native image processing, crypto, or media libraries." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "2. NDK / JNI Unsupported" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**Problem:** Several features are removed in AGP 9.0 with no replacement:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Impact:** Low-Medium. Only affects projects using these specific features." ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "**`dexOptions` DSL** — removed (d8 handles this automatically)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "**Embedded Wear OS app support** — `wearApp` configurations removed" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 6 ;
+                                    oc:itemText "**AIDL** — disabled by default, enable per-module if needed: `buildFeatures { aidl = true }`" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "**RenderScript** — disabled by default, enable per-module if needed: `buildFeatures { renderScript = true }`" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "**Density split APK** — use app bundles instead" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "**`androidDependencies` and `sourceSets` report tasks** — removed" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 17 ;
+                    oc:sectionTitle "17. Removed Features" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// Old (fails with AGP 9.0)
+switch (view.getId()) {
+    case R.id.button1: // ...
+    case R.id.button2: // ...
+}
+
+// New
+int id = view.getId();
+if (id == R.id.button1) { /* ... */ }
+else if (id == R.id.button2) { /* ... */ }
+""" ;
+                            oc:codeLanguage "java" ;
+                            oc:contentOrder 4 ;
+                            oc:sourceLocation "lines 504-515" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Impact:** Medium. Common in older Java codebases using `switch(view.getId())`." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**Problem:** AGP 9.0 makes R class fields compile-time non-final in application modules (`android.enableAppCompileTimeRClass=true` is now default). Code using `switch` statements on R class fields (like `R.id.some_view`) will fail to compile because `switch` requires compile-time constants." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Fix:** Refactor `switch` statements to `if/else`:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 18 ;
+                    oc:sectionTitle "18. R Class Non-Final in Application Modules" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 1 ;
+                            oc:rowCount 4 ;
+                            oc:tableCaption "## 12. IDE Support Matrix" ;
+                            oc:tableMarkdown """| IDE | KMP Library Plugin Support | Notes                                                     |
+|---|---|-----------------------------------------------------------|
+| Android Studio Otter 3 (2025.2.3) | Full | First version with full AGP 9.0 support                   |
+| Android Studio Narwhal (2025.1) | Partial | Can build but limited code insight for new DSL            |
+| Android Studio Meerkat (2024.3) | None | Does not recognize the KMP library plugin                 |
+| IntelliJ IDEA | Not supported | Does not support AGP 9.0 as of 2025.3, use Android Studio |
+""" ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 1 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "**Use Android Studio Otter 3 or later.** This is currently the only IDE with full AGP 9.0 + KMP library plugin support." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Ensure the Kotlin plugin in your IDE matches the KGP version in your project." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "**IntelliJ IDEA does not support AGP 9.0** — even with the Android plugin installed, project sync and build integration will not work correctly. If the project uses IntelliJ IDEA, recommend switching to Android Studio for Android/KMP development." ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Recommended IDE Setup" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 12 ;
+                    oc:sectionTitle "12. IDE Support Matrix" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent "**When you need this:**" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# gradle.properties
+android.builtInKotlin=false
+""" ;
+                            oc:codeLanguage "properties" ;
+                            oc:contentOrder 3 ;
+                            oc:sourceLocation "lines 348-351" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**Problem:** AGP 9.0 bundles Kotlin compilation for `com.android.application` modules, meaning you should NOT apply the `kotlin-android` plugin separately. If you have tooling or plugins that conflict with the built-in Kotlin support, you can temporarily disable it." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Temporary Workaround:**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "**Warning:** This flag is temporary and will be removed in a future AGP version. Use it only to unblock migration while you fix plugin conflicts." ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 6 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "A third-party Gradle plugin explicitly applies `kotlin-android` and conflicts" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "You have custom Kotlin compiler plugin configurations that conflict with AGP's built-in setup" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 11 ;
+                    oc:sectionTitle "11. android.builtInKotlin=false (Temporary Opt-Out)" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Impact:** Medium. May trigger new runtime behavior changes associated with higher API levels." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**Problem:** AGP 9.0 changes `targetSdk` to default to `compileSdk` when not explicitly set (previously defaulted to `minSdk`). This can silently change app behavior if `targetSdk` was intentionally unset." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """android {
+    defaultConfig {
+        targetSdk = 35  // Set explicitly
+    }
+}
+""" ;
+                            oc:codeLanguage "kotlin" ;
+                            oc:contentOrder 4 ;
+                            oc:sourceLocation "lines 527-533" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Fix:** Explicitly set `targetSdk` in all application modules:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 19 ;
+                    oc:sectionTitle "19. targetSdk Defaults to compileSdk" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Fix:** Remove the line:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Impact:** Low. Build warning only." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**Problem:** The `lint { useK2Uast = true }` option is deprecated. With KGP 2.0+ and AGP 9.0, K2 UAST is the default and only implementation." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// Remove this
+lint {
+    useK2Uast = true  // DELETE
+}
+""" ;
+                            oc:codeLanguage "kotlin" ;
+                            oc:contentOrder 4 ;
+                            oc:sourceLocation "lines 285-290" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 8 ;
+                    oc:sectionTitle "8. Lint useK2Uast Deprecated" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """java.lang.ClassCastException: class com.android.build.gradle.internal.dsl.ApplicationExtensionImpl$AgpDecorated_Decorated
+    cannot be cast to class com.android.build.gradle.BaseExtension
+""" ;
+                            oc:codeLanguage "" ;
+                            oc:contentOrder 4 ;
+                            oc:sourceLocation "lines 413-416" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent "**Fix:**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 7 ;
+                            oc:textContent "**Temporary opt-out:** `android.newDsl=false` in `gradle.properties` (removed in AGP 10.0)." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// Old
+import com.android.build.gradle.BaseExtension
+val ext = extensions.getByType(BaseExtension::class)
+
+// New
+import com.android.build.api.dsl.CommonExtension
+val ext = extensions.getByType(CommonExtension::class)
+""" ;
+                            oc:codeLanguage "kotlin" ;
+                            oc:contentOrder 6 ;
+                            oc:sourceLocation "lines 420-428" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Impact:** High for projects with custom build logic or convention plugins." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**Problem:** AGP 9.0 exclusively uses new public DSL interfaces. The old `BaseExtension`, `AppExtension`, `LibraryExtension` types from `com.android.build.gradle` are removed. Build logic or convention plugins casting to these types will fail with `ClassCastException`." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Error message:**" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 14 ;
+                    oc:sectionTitle "14. New DSL Interfaces (BaseExtension Removed)" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**Problem:** Many third-party Gradle plugins are incompatible with AGP 9.0 due to removed variant APIs, new DSL interfaces, or built-in Kotlin conflicts. See the main SKILL.md \"Plugin Compatibility\" section for the full compatibility table." ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 4 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "detekt < 2.0.0, ktlint, SQLDelight, Paparazzi, protobuf — see SKILL.md for specific flags" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Impact:** High. Can completely block migration." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Key plugins requiring opt-out flags:**" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 20 ;
+                    oc:sectionTitle "20. Third-Party Plugin Compatibility" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Impact:** Medium. Can cause runtime crashes in release builds of consuming applications." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**Problem:** If you had `consumerProguardFiles` in the old `android { defaultConfig {} }` block and did not migrate it to the new DSL location, the rules are silently ignored. No warning is emitted." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Fix:**" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// Old (silently ignored)
+android {
+    defaultConfig {
+        consumerProguardFiles("consumer-rules.pro")
+    }
+}
+
+// New
+kotlin {
+    android {
+        consumerProguardFiles.add(file("consumer-rules.pro"))
+    }
+}
+""" ;
+                            oc:codeLanguage "kotlin" ;
+                            oc:contentOrder 4 ;
+                            oc:sourceLocation "lines 204-218" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "5. Consumer ProGuard Rules Silently Dropped" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 6 ;
+                            oc:textContent "Or use compile-time constants from the application module passed via DI." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# In the app module's proguard-rules.pro
+-assumenosideeffects class com.example.shared.AppConfiguration {
+    boolean isDebug() return false;
+}
+""" ;
+                            oc:codeLanguage "proguard" ;
+                            oc:contentOrder 5 ;
+                            oc:sourceLocation "lines 331-336" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**Problem:** In classic Android libraries, `BuildConfig.DEBUG` was a `static final boolean` that the compiler could use for dead-code elimination (tree-shaking). Without BuildConfig in KMP libraries, this optimization path is lost." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "Use R8 rules in the application module to remove debug code:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Workaround:**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Impact:** Low to Medium. Debug-only code paths may be included in release builds." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 10 ;
+                    oc:sectionTitle "10. Static BuildConfig.DEBUG for Tree-Shaking No Longer Available" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Impact:** High. Many projects still use kapt for annotation processing" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// Module build.gradle.kts
+plugins {
+    // REMOVE: alias(libs.plugins.kotlin.kapt)
+    alias(libs.plugins.legacy.kapt)
+}
+""" ;
+                            oc:codeLanguage "kotlin" ;
+                            oc:contentOrder 7 ;
+                            oc:sourceLocation "lines 396-402" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "**Preferred:** Migrate to KSP (Kotlin Symbol Processing). Most annotation processors now support KSP." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent "**Fallback:** Replace with `com.android.legacy-kapt` (versioned with AGP):" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# gradle/libs.versions.toml
+[plugins]
+legacy-kapt = { id = "com.android.legacy-kapt", version.ref = "agp" }
+""" ;
+                            oc:codeLanguage "toml" ;
+                            oc:contentOrder 6 ;
+                            oc:sourceLocation "lines 390-394" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**Problem:** The `org.jetbrains.kotlin.kapt` plugin is incompatible with AGP 9.0's built-in Kotlin support. Applying both causes a build failure." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Workaround:**" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 13 ;
+                    oc:sectionTitle "13. kapt Incompatible with Built-in Kotlin" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Fix:**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent "Replace `variantFilter` with `androidComponents.beforeVariants()`." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Impact:** Medium-High. Affects custom build logic and many third-party plugins." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// Old
+android {
+    applicationVariants.all { variant ->
+        variant.signingConfig.enableV1Signing = false
+    }
+}
+
+// New
+androidComponents {
+    onVariants { variant ->
+        variant.signingConfig.enableV1Signing.set(false)
+    }
+}
+""" ;
+                            oc:codeLanguage "kotlin" ;
+                            oc:contentOrder 4 ;
+                            oc:sourceLocation "lines 442-456" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**Problem:** The following APIs are removed in AGP 9.0: `applicationVariants`, `libraryVariants`, `testVariants`, `unitTestVariants`, `variantFilter`. Build scripts or plugins using these will fail." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 15 ;
+                    oc:sectionTitle "15. Deprecated Variant APIs Removed" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**Problem:** The packaging exclusions DSL has a subtle syntax difference. The old brace-expansion syntax may not work correctly." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Fix:**" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// Old (may not work correctly in AGP 9.0)
+packaging {
+    resources {
+        excludes += "/META-INF/{AL2.0,LGPL2.1}"
+    }
+}
+
+// New (explicit entries)
+packaging {
+    resources {
+        excludes.add("/META-INF/AL2.0")
+        excludes.add("/META-INF/LGPL2.1")
+    }
+}
+""" ;
+                            oc:codeLanguage "kotlin" ;
+                            oc:contentOrder 4 ;
+                            oc:sourceLocation "lines 302-317" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Impact:** Low. Build may fail or produce unexpected results." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 9 ;
+                    oc:sectionTitle "9. Packaging Exclusions Syntax Change" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Impact:** Low. Aliases provide backward compatibility, but you should rename for clarity." ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 4 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Rename `src/androidUnitTest/` to `src/androidHostTest/`" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Update CI scripts that reference the old directory names" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Rename `src/androidInstrumentedTest/` to `src/androidDeviceTest/`" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Update `sourceSets` references in `build.gradle.kts`" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Action Items:**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**Problem:** The source set `androidUnitTest` is renamed to `androidHostTest`. The source set `androidInstrumentedTest` is renamed to `androidDeviceTest`. The old names still work as aliases but are deprecated." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 7 ;
+                    oc:sectionTitle "7. Renamed test source sets" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Impact:** Medium. Release builds may crash or behave differently without rule updates." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**Problem:** AGP 9.0 changes several R8 defaults:" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 5 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "New option: `-processkotlinnullchecks keep|remove_message|remove` to control Kotlin null checks" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Switch to `proguard-android-optimize.txt` in `getDefaultProguardFile()`" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Review all ProGuard/R8 keep rules; add explicit rules for default constructors if needed" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Remove global options (`-dontobfuscate`, `-dontoptimize`) from library consumer rules" ] ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "`android.r8.proguardAndroidTxt.disallowed=true` — only `proguard-android-optimize.txt` is supported" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "`android.r8.strictFullModeForKeepRules=true` — keep rules no longer implicitly keep default constructors" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Keep rules no longer propagate to synthesized companion methods" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "`android.r8.globalOptionsInConsumerRules.disallowed=true` — library consumer rules cannot contain global options (like `-dontobfuscate`)" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "**Fix:**" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 16 ;
+                    oc:sectionTitle "16. R8 and ProGuard Rule Changes" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// Old
+import com.android.build.gradle.LibraryExtension
+
+class MyConventionPlugin : Plugin<Project> {
+    override fun apply(target: Project) {
+        target.pluginManager.apply("com.android.library")
+        target.extensions.configure<LibraryExtension> {
+            compileSdk = 34
+            defaultConfig.minSdk = 24
+        }
+    }
+}
+
+// New
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+
+class MyConventionPlugin : Plugin<Project> {
+    override fun apply(target: Project) {
+        target.pluginManager.apply("org.jetbrains.kotlin.multiplatform")
+        target.pluginManager.apply("com.android.kotlin.multiplatform.library")
+        target.extensions.configure<KotlinMultiplatformExtension> {
+            android {
+                compileSdk = 35
+                minSdk = 24
+            }
+        }
+    }
+}
+""" ;
+                            oc:codeLanguage "kotlin" ;
+                            oc:contentOrder 4 ;
+                            oc:sourceLocation "lines 230-259" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Key Changes:**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**Problem:** Build-logic convention plugins that apply `com.android.library` and configure the `LibraryExtension` must be rewritten to use the KMP library plugin and `KotlinMultiplatformExtension`." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Impact:** Medium to High for projects with extensive build-logic modules." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "6. Convention Plugin Refactoring Needed" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Workaround -- Single Variant Architecture:**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Impact:** High. Affects projects using flavor-specific dependencies, resources, or source sets." ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 4 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "For compile-time constants that vary by build flavor, use **BuildKonfig** or **gradle-buildconfig-plugin** (see issue 1 alternatives). These provide a flavor-like system for KMP but do NOT replace variant-specific dependencies, resources, signing, or minification." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "For library-specific debug/release behavior, use the `AppConfiguration` pattern from issue 1." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Use `expect`/`actual` with different actual implementations selected by DI based on runtime config." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Use runtime configuration instead of compile-time variants." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Move all variant-dependent logic to the application module (which still supports variants)." ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**Problem:** The KMP library plugin produces a single build variant. There are no `debug`/`release` build types and no product flavors. Code that depends on variant-specific behavior, resources, or dependencies must be restructured." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "3. No Build Variants" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Fix:**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent "**Note:** This is separate from Compose Multiplatform resources (`composeResources/`), which are handled by the compose resources plugin and do not need this flag." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """kotlin {
+    android {
+        androidResources { enable = true }
+    }
+}
+""" ;
+                            oc:codeLanguage "kotlin" ;
+                            oc:contentOrder 4 ;
+                            oc:sourceLocation "lines 184-190" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**Problem:** Android resources (`res/` directory) are not processed by default with the KMP library plugin. If you forget to enable them, resource references (`R.string.*`, `R.drawable.*`) will fail to resolve. This is tracked as CMP-9547." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Impact:** High. Silent failure -- resources are simply ignored without an error until you try to reference them." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "4. Compose Resources Require Explicit Enable" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent "Inject `AppConfiguration` via your DI framework (Koin, kotlin-inject, manual DI)." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**Problem:** The `BuildConfig` class is not generated for KMP library modules. Code referencing `BuildConfig.DEBUG`, `BuildConfig.VERSION_NAME`, or custom `buildConfigField` entries will fail to compile." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """defaultConfigs("dev") {
+    buildConfigField(STRING, "API_BASE_URL", "https://dev.api.example.com")
+    buildConfigField(BOOLEAN, "IS_DEBUG", "true")
+}
+defaultConfigs("release") {
+    buildConfigField(STRING, "API_BASE_URL", "https://api.example.com")
+    buildConfigField(BOOLEAN, "IS_DEBUG", "false")
+}
+""" ;
+                            oc:codeLanguage "kotlin" ;
+                            oc:contentOrder 10 ;
+                            oc:sourceLocation "lines 76-85" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 14 ;
+                            oc:textContent """**Important limitation:** Neither plugin replaces Android build variants fully. They provide
+compile-time constants only. Build type-specific dependencies, resources, source sets, signing
+configs, and minification settings must be handled in the application module (which still supports
+variants) or via runtime configuration.""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Workaround -- AppConfiguration DI Pattern:**" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// build.gradle.kts
+plugins {
+    id("com.codingfeline.buildkonfig")
+}
+
+buildkonfig {
+    packageName = "com.example.shared"
+
+    defaultConfigs {
+        buildConfigField(STRING, "API_BASE_URL", "https://api.example.com")
+        buildConfigField(BOOLEAN, "IS_DEBUG", "false")
+        buildConfigField(STRING, "VERSION_NAME", "1.0.0")
+    }
+
+    // Optional: target-specific overrides
+    targetConfigs {
+        create("android") {
+            buildConfigField(STRING, "PLATFORM", "android")
+        }
+        create("ios") {
+            buildConfigField(STRING, "PLATFORM", "ios")
+        }
+    }
+}
+""" ;
+                            oc:codeLanguage "kotlin" ;
+                            oc:contentOrder 8 ;
+                            oc:sourceLocation "lines 46-71" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 11 ;
+                            oc:textContent "**Alternative B — gradle-buildconfig-plugin** ([github.com/gmazzo/gradle-buildconfig-plugin](https://github.com/gmazzo/gradle-buildconfig-plugin)):" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 12 ;
+                            oc:textContent """More general-purpose; supports Java, Kotlin, Groovy, and KMP. Richer type support (arrays, maps,
+Files, URIs). Uses `expect`/`actual` for KMP via explicit `expect()` calls.""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 6 ;
+                            oc:textContent "**Alternative A — BuildKonfig plugin** ([github.com/yshrsmz/BuildKonfig](https://github.com/yshrsmz/BuildKonfig)):" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 9 ;
+                            oc:textContent """Use flavors for debug/release by setting `buildkonfig.flavor=dev` in `gradle.properties`
+or passing `-Pbuildkonfig.flavor=release` on CLI:""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Impact:** High. Many libraries use `BuildConfig.DEBUG` for logging gates and `buildConfigField` for compile-time constants." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 7 ;
+                            oc:textContent """Generates `expect`/`actual` BuildConfig objects across all KMP targets. Supports typed fields
+(String, Int, Long, Float, Boolean), target-specific overrides, and a flavor system via Gradle properties.""" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// In commonMain
+expect class AppConfiguration {
+    val isDebug: Boolean
+    val versionName: String
+    val apiBaseUrl: String
+}
+
+// In androidMain
+actual class AppConfiguration(private val context: Context) {
+    actual val isDebug: Boolean = (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
+    actual val versionName: String = context.packageManager
+        .getPackageInfo(context.packageName, 0).versionName ?: "unknown"
+    actual val apiBaseUrl: String = if (isDebug) "https://dev.api.example.com" else "https://api.example.com"
+}
+
+// In iosMain
+actual class AppConfiguration {
+    actual val isDebug: Boolean = Platform.isDebugBinary
+    actual val versionName: String = NSBundle.mainBundle.objectForInfoDictionaryKey("CFBundleShortVersionString") as? String ?: "unknown"
+    actual val apiBaseUrl: String = if (isDebug) "https://dev.api.example.com" else "https://api.example.com"
+}
+""" ;
+                            oc:codeLanguage "kotlin" ;
+                            oc:contentOrder 4 ;
+                            oc:sourceLocation "lines 15-37" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// build.gradle.kts
+plugins {
+    id("com.github.gmazzo.buildconfig")
+}
+
+buildConfig {
+    packageName("com.example.shared")
+
+    buildConfigField("APP_NAME", project.name)
+    buildConfigField("VERSION", "1.0.0")
+    buildConfigField("IS_DEBUG", false)
+
+    // Platform-specific fields using expect/actual
+    buildConfigField("PLATFORM", expect<String>())
+}
+
+// In source set configurations:
+sourceSets.named("androidMain") {
+    buildConfigField("PLATFORM", "android")
+}
+sourceSets.named("iosMain") {
+    buildConfigField("PLATFORM", "ios")
+}
+""" ;
+                            oc:codeLanguage "kotlin" ;
+                            oc:contentOrder 13 ;
+                            oc:sourceLocation "lines 92-116" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "1. BuildConfig Removed in Libraries" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Known Issues: KMP AGP 9.0 Library Migration" ] ;
+    oc:impartsKnowledge oc:kn_1e483bae,
+        oc:kn_28f6bc41,
+        oc:kn_2fffd47b,
+        oc:kn_3bef06d4,
+        oc:kn_648036a9,
+        oc:kn_64ed5651,
+        oc:kn_98a3e636,
+        oc:kn_af9d9da0,
+        oc:kn_b1cf3850,
+        oc:kn_bbb805e8,
+        oc:kn_bc5ae5ca,
+        oc:kn_bd7b40c2,
+        oc:kn_c371d608,
+        oc:kn_d58f4a26,
+        oc:kn_edc1ea1c,
+        oc:kn_ffa34573 ;
     oc:isUserInvocable true ;
-    oc:nature "Concept" ;
-    oc:requiresState oc:AGP9MigrationStarted ;
-    oc:resolvesIntent "check breaking changes before migrating to AGP 9.0",
-        "diagnose AGP 9.0 migration build failures",
-        "find workarounds for KMP library plugin limitations",
-        "fix convention plugin incompatibilities with AGP 9.0",
-        "resolve BuildConfig removal in KMP library modules" ;
-    oc:yieldsState oc:KnownIssuesReviewed,
-        oc:WorkaroundApplied .
+    oc:nature "Reference" ;
+    oc:requiresState oc:ProjectUsesKotlinMultiplatform ;
+    oc:resolvesIntent "find workarounds for KMP library plugin limitations",
+        "resolve build errors after migrating to com.android.kotlin.multiplatform.library",
+        "troubleshoot AGP 9.0 migration failures",
+        "understand breaking changes in AGP 9.0 for KMP projects" ;
+    oc:yieldsState oc:MigrationIssuesIdentified,
+        oc:WorkaroundsApplied .
 
-oc:kn_336590d2 a oc:KnowledgeNode,
+oc:kn_1e483bae a oc:KnowledgeNode,
         oc:KnownIssue ;
-    oc:appliesToContext "When configuring packaging exclusions in build scripts" ;
-    oc:directiveContent "Packaging exclusions brace-expansion syntax (e.g., excludes += \"/META-INF/{AL2.0,LGPL2.1}\") may not work correctly in AGP 9.0. Use explicit individual entries with excludes.add() instead." ;
-    oc:hasRationale "Subtle syntax change that can cause builds to fail or produce unexpected packaging results without a clear error message" ;
-    oc:severityLevel "LOW" .
+    oc:appliesToContext "When refactoring build-logic convention plugins for AGP 9.0 compatibility" ;
+    oc:directiveContent "Convention plugins must switch from applying com.android.library + LibraryExtension to org.jetbrains.kotlin.multiplatform + com.android.kotlin.multiplatform.library + KotlinMultiplatformExtension." ;
+    oc:hasRationale "The old plugin and extension types are removed; convention plugins that cast to LibraryExtension will throw ClassCastException" ;
+    oc:severityLevel "HIGH" .
 
-oc:kn_41261645 a oc:Constraint,
+oc:kn_28f6bc41 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When migrating modules that use flavor-specific dependencies, resources, or source sets" ;
+    oc:directiveContent "The KMP library plugin produces a single build variant — no debug/release build types, no product flavors. Move all variant-dependent logic to the application module or use runtime configuration via expect/actual + DI." ;
+    oc:hasRationale "Variant removal is a fundamental architectural change that forces restructuring of build configuration" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_2fffd47b a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When migrating application modules with Java switch statements on R class fields" ;
+    oc:directiveContent "R class fields are compile-time non-final in application modules by default. switch statements on R.id.* fields will fail to compile. Refactor to if/else." ;
+    oc:hasRationale "AGP 9.0 defaults android.enableAppCompileTimeRClass=true, making R fields non-final" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_3bef06d4 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When migrating modules that use org.jetbrains.kotlin.kapt" ;
+    oc:directiveContent "kapt is incompatible with AGP 9.0's built-in Kotlin support. Migrate to KSP preferred, or use com.android.legacy-kapt as fallback." ;
+    oc:hasRationale "Applying kapt alongside built-in Kotlin causes build failure; many projects still depend on kapt" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_648036a9 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When build logic or convention plugins cast to old AGP extension types" ;
+    oc:directiveContent "BaseExtension, AppExtension, LibraryExtension types are removed. Use CommonExtension from com.android.build.api.dsl instead. Temporary opt-out: android.newDsl=false." ;
+    oc:hasRationale "Casting to removed types causes ClassCastException at build time" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_64ed5651 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When migrating library modules that reference BuildConfig.DEBUG, BuildConfig.VERSION_NAME, or custom buildConfigField entries" ;
+    oc:directiveContent "BuildConfig is not generated for KMP library modules. Use AppConfiguration expect/actual DI pattern, BuildKonfig plugin, or gradle-buildconfig-plugin as replacements." ;
+    oc:hasRationale "Code referencing BuildConfig will fail to compile after migration; this is one of the highest-impact breaking changes" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_98a3e636 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When migrating modules with C/C++ native code via NDK" ;
+    oc:directiveContent "The KMP library plugin does not support externalNativeBuild, ndkVersion, or JNI source compilation. Keep JNI modules as classic com.android.library and depend on them from the KMP module via a proxy interface." ;
+    oc:hasRationale "NDK/JNI modules cannot be directly migrated; they must remain as separate Android library modules" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_af9d9da0 a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When updating build-logic convention plugins for AGP 9.0 compatibility" ;
-    oc:directiveContent "AGP 9.0 removes BaseExtension, AppExtension, LibraryExtension types. All build logic must use the new public DSL interfaces (CommonExtension, etc.). Convention plugins applying com.android.library must be rewritten to use org.jetbrains.kotlin.multiplatform + com.android.kotlin.multiplatform.library with KotlinMultiplatformExtension." ;
-    oc:hasRationale "Casting to old extension types produces ClassCastException at runtime, and the old plugin IDs are no longer valid for KMP library modules" ;
+    oc:appliesToContext "When evaluating alternatives for BuildConfig removal" ;
+    oc:directiveContent "Do not assume BuildKonfig or gradle-buildconfig-plugin fully replace Android build variants. They provide compile-time constants only — not variant-specific dependencies, resources, source sets, signing configs, or minification." ;
+    oc:hasRationale "Overestimating plugin capabilities leads to missing variant-dependent configuration in production builds" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_4f43845c a oc:AntiPattern,
+oc:kn_b1cf3850 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When migrating application modules where targetSdk was intentionally unset" ;
+    oc:directiveContent "targetSdk now defaults to compileSdk when not explicitly set (previously defaulted to minSdk). Explicitly set targetSdk in all application modules." ;
+    oc:hasRationale "Silent behavioral change may trigger unexpected runtime behavior at higher API levels" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_bbb805e8 a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When configuring ProGuard consumer rules for KMP library modules" ;
-    oc:directiveContent "Do not use consumerProguardFiles in the old android { defaultConfig {} } block — it is silently ignored in the new KMP library DSL. Move rules to kotlin { android { consumerProguardFiles.add(...) } }." ;
-    oc:hasRationale "Silent dropping of consumer ProGuard rules can cause runtime crashes in release builds of consuming applications with no build-time warning" ;
-    oc:severityLevel "CRITICAL" .
+    oc:appliesToContext "When replacing BuildConfig.DEBUG or other build-time constants across KMP targets" ;
+    oc:codeLanguage "kotlin" ;
+    oc:directiveContent "Use the AppConfiguration expect/actual DI pattern to replace BuildConfig: define expect class in commonMain with actual implementations in androidMain (using Context/ApplicationInfo) and iosMain (using Platform.isDebugBinary/NSBundle). Inject via DI framework." ;
+    oc:hasRationale "This is the idiomatic KMP approach for cross-platform configuration without relying on Android-specific BuildConfig" .
 
-oc:kn_54177be8 a oc:KnowledgeNode,
+oc:kn_bc5ae5ca a oc:KnowledgeNode,
         oc:KnownIssue ;
-    oc:appliesToContext "When migrating modules that rely on flavor-specific dependencies, resources, or source sets" ;
-    oc:directiveContent "The KMP library plugin produces a single build variant with no debug/release build types or product flavors. Move all variant-dependent logic to the application module and use runtime configuration via DI or expect/actual." ;
-    oc:hasRationale "Single variant architecture is a fundamental design constraint of the KMP library plugin that cannot be worked around within the library module itself" ;
+    oc:appliesToContext "When the KMP library module has Android resources that fail to resolve silently" ;
+    oc:directiveContent "Android resources (res/) are not processed by default. Enable them with `kotlin { android { androidResources { enable = true } } }`. This is tracked as CMP-9547." ;
+    oc:hasRationale "Silent failure — resources are simply ignored without an error until referenced, making this easy to miss" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_5c197c9d a oc:KnowledgeNode,
+oc:kn_bd7b40c2 a oc:KnowledgeNode,
         oc:KnownIssue ;
-    oc:appliesToContext "When migrating a library module that references BuildConfig fields" ;
-    oc:directiveContent "BuildConfig is not generated for KMP library modules. Code referencing BuildConfig.DEBUG, BuildConfig.VERSION_NAME, or custom buildConfigField entries will fail to compile. Use the AppConfiguration DI pattern with expect/actual, or the BuildKonfig / gradle-buildconfig-plugin alternatives." ;
-    oc:hasRationale "BuildConfig removal is one of the highest-impact breaking changes because many libraries use BuildConfig.DEBUG for logging gates and buildConfigField for compile-time constants" ;
+    oc:appliesToContext "When build scripts or third-party plugins use removed variant APIs" ;
+    oc:directiveContent "applicationVariants, libraryVariants, testVariants, unitTestVariants, variantFilter APIs are removed. Replace with androidComponents.onVariants() and androidComponents.beforeVariants()." ;
+    oc:hasRationale "These APIs were deprecated and are now removed; custom build logic must migrate to the new Variant API" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_c371d608 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When migrating modules that ship consumer ProGuard rules" ;
+    oc:directiveContent "consumerProguardFiles must be migrated from android.defaultConfig to kotlin.android.consumerProguardFiles.add(). Old location is silently ignored with no warning." ;
+    oc:hasRationale "Silently dropped rules can cause runtime crashes in release builds of consuming applications" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_d58f4a26 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When setting up the development environment for AGP 9.0 migration" ;
+    oc:directiveContent "IntelliJ IDEA does not support AGP 9.0 as of 2025.3. Use Android Studio Otter 3 (2025.2.3) or later for full AGP 9.0 + KMP library plugin support." ;
+    oc:hasRationale "Using an unsupported IDE leads to project sync failures and incorrect code insight" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_5f5e86d4 a oc:KnowledgeNode,
+oc:kn_edc1ea1c a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When performing a systematic migration audit of a module" ;
+    oc:directiveContent "For each migrated module, check these in order: 1) BuildConfig usage 2) NDK/JNI 3) Build variants 4) Android resources 5) Consumer ProGuard rules 6) Convention plugins 7) kapt usage 8) R class switch statements 9) targetSdk default" ;
+    oc:hasRationale "Prioritizing by impact (High→Medium→Low) ensures the most blocking issues are resolved first" .
+
+oc:kn_ffa34573 a oc:KnowledgeNode,
         oc:RecoveryTactic ;
-    oc:appliesToContext "When annotation processing or third-party plugins conflict with AGP 9.0 built-in Kotlin compilation" ;
-    oc:directiveContent "If kapt conflicts with AGP 9.0's built-in Kotlin support, either migrate to KSP (preferred) or use com.android.legacy-kapt as a fallback. For other plugin conflicts, use android.builtInKotlin=false as a temporary opt-out." ;
-    oc:hasRationale "kapt is incompatible with built-in Kotlin and causes hard build failures; KSP migration is the long-term solution but legacy-kapt provides a migration bridge" ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_6f858883 a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When organizing test source directories after migration" ;
-    oc:directiveContent "Source set androidUnitTest is renamed to androidHostTest and androidInstrumentedTest to androidDeviceTest. Old names work as deprecated aliases. Rename directories and update CI scripts accordingly." ;
-    oc:hasRationale "Deprecated aliases provide temporary compatibility but should be proactively renamed to avoid future breakage" ;
-    oc:severityLevel "LOW" .
-
-oc:kn_919edb99 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When planning and executing an AGP 9.0 migration" ;
-    oc:directiveContent "For each AGP 9.0 migration, systematically check: (1) BuildConfig references, (2) consumer ProGuard rules, (3) convention plugins, (4) kapt usage, (5) NDK/JNI modules, (6) variant-dependent code, (7) resource enable flag, (8) third-party plugin versions. Address in this priority order." ;
-    oc:hasRationale "Following a structured checklist prevents missing silent failures like dropped ProGuard rules or ignored resources that only manifest at runtime" .
-
-oc:kn_c0662e3b a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "When setting up a KMP library module with the new plugin" ;
-    oc:directiveContent "Before migrating, explicitly enable Android resources with kotlin { android { androidResources { enable = true } } }. Without this flag, resources are silently ignored (tracked as CMP-9547). Also verify IDE is Android Studio Otter 3+ — IntelliJ IDEA and older Android Studio versions do not support AGP 9.0." ;
-    oc:hasRationale "Silent failure mode means resources are simply ignored without an error until referenced, making this easy to miss until runtime" ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_ee4bcf8f a oc:KnowledgeNode,
-        oc:KnownIssue ;
-    oc:appliesToContext "When migrating modules that contain C/C++ native code via NDK" ;
-    oc:directiveContent "The KMP library plugin does not support externalNativeBuild, ndkVersion, or JNI source compilation. Keep JNI modules as classic com.android.library and depend on them from the KMP module via a proxy interface pattern." ;
-    oc:hasRationale "NDK/JNI is fundamentally incompatible with the KMP library plugin and requires architectural separation to maintain native code support" ;
+    oc:appliesToContext "When plugin conflicts block migration and need an immediate workaround" ;
+    oc:directiveContent "Use android.builtInKotlin=false in gradle.properties as a temporary opt-out when custom Kotlin compiler plugins or third-party plugins conflict with AGP 9.0's built-in Kotlin support. This flag will be removed in a future AGP version." ;
+    oc:hasRationale "Provides a migration escape hatch while long-term fixes are developed" ;
     oc:severityLevel "MEDIUM" .
 

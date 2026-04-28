@@ -7,77 +7,487 @@
 oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_java_to_kotlin_mockito a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "mockito" ;
-    skos:broader "mocking framework conversion guide" ;
+    skos:broader "Conversion guide" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/kotlin/kotlin-agent-skills/kotlin-tooling-java-to-kotlin" ;
     oc:contentHash "221bdf1fae8def5ca083e84cf829b252baceea065eca10a42fa7279d6f8be23e" ;
-    oc:differentia "translates Java Mockito test code to either Kotlin MockK (idiomatic) or mockito-kotlin wrappers, covering stubbing, verification, argument capture, and coroutine support" ;
+    oc:dependsOnSkill oc:skill_ontoskills_kotlin_tooling_java_to_kotlin ;
+    oc:differentia "that translates Mockito mocking patterns to either MockK (idiomatic Kotlin) or mockito-kotlin syntax during Java-to-Kotlin migration" ;
     oc:extends oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_java_to_kotlin ;
     oc:handlesFailure oc:InvalidInput ;
-    oc:hasArgumentHint "Java test file or Mockito code snippet to convert" ;
+    oc:hasArgumentHint "Java test file with org.mockito.* imports" ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_315f4c0d,
-        oc:kn_5752c14f,
-        oc:kn_7489ab58,
-        oc:kn_7ebae135,
-        oc:kn_93750ff8,
-        oc:kn_b9f28886,
-        oc:kn_fd96c313 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "For suspending functions, use `coEvery` and `coVerify` instead of `every` and `verify`:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """coEvery { foo.suspendBar() } returns x
+coVerify { foo.suspendBar() }
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 37-40" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "2. Coroutine support in MockK" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 1 ;
+                                    oc:rowCount 15 ;
+                                    oc:tableCaption "### 1. MockK conversion table" ;
+                                    oc:tableMarkdown """| Mockito | MockK |
+|---|---|
+| `Mockito.mock(Foo.class)` | `mockk<Foo>()` |
+| `@Mock Foo foo` | `@MockK lateinit var foo: Foo` (with `@ExtendWith(MockKExtension::class)`) |
+| `when(foo.bar()).thenReturn(x)` | `every { foo.bar() } returns x` |
+| `when(foo.bar()).thenThrow(e)` | `every { foo.bar() } throws e` |
+| `when(foo.bar()).thenAnswer { }` | `every { foo.bar() } answers { }` |
+| `doNothing().when(foo).bar()` | `justRun { foo.bar() }` |
+| `verify(foo).bar()` | `verify { foo.bar() }` |
+| `verify(foo, times(2)).bar()` | `verify(exactly = 2) { foo.bar() }` |
+| `verify(foo, never()).bar()` | `verify(exactly = 0) { foo.bar() }` |
+| `ArgumentCaptor<T>` | `slot<T>()` and `capture(slot)` |
+| `any()` | `any()` |
+| `eq(x)` | `eq(x)` (often not needed — MockK matches exact values by default) |
+| `Mockito.spy(obj)` | `spyk(obj)` |
+| `@InjectMocks` | No direct equivalent — use constructor injection |
+| `verifyNoMoreInteractions(foo)` | `confirmVerified(foo)` |
+""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "1. MockK conversion table" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 2 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText """`whenever(foo.bar())` instead of `` Mockito.`when`(foo.bar()) `` — avoids backtick-
+escaping `when` (it is a Kotlin keyword).""" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "`any()` — properly handles Kotlin's non-null types." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "`argumentCaptor<T>()` — type-safe captor via reified generics." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "`mock<Foo>()` instead of `Mockito.mock(Foo::class.java)` — uses reified generics." ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent """If keeping Mockito, use the `mockito-kotlin` library (`org.mockito.kotlin`) for
+Kotlin-friendly wrappers:""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "3. Keeping Mockito (syntax-only conversion)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent """MockK supports relaxed mocks that return default values without explicit stubbing:
+`mockk<Foo>(relaxed = true)`. This has no direct Mockito equivalent (Mockito's
+`RETURNS_DEFAULTS` is the closest).""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "4. Relaxed mocks" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Key Rules" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """package com.acme.service;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.anyLong;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+
+/**
+ * Tests for OrderService using Mockito mocks.
+ */
+public class OrderServiceTest {
+
+    private UserRepository userRepository;
+    private OrderRepository orderRepository;
+    private OrderService orderService;
+
+    @Before
+    public void setUp() {
+        userRepository = mock(UserRepository.class);
+        orderRepository = mock(OrderRepository.class);
+        orderService = new OrderService(userRepository, orderRepository);
+    }
+
+    @Test
+    public void testCreateOrderForUser() {
+        User user = new User(1L, "Alice");
+        when(userRepository.findById(1L)).thenReturn(user);
+
+        orderService.createOrder(1L, "ITEM-100");
+
+        ArgumentCaptor<Order> captor = ArgumentCaptor.forClass(Order.class);
+        verify(orderRepository).save(captor.capture());
+        assertEquals("ITEM-100", captor.getValue().getItemCode());
+        assertEquals(1L, captor.getValue().getUserId());
+    }
+
+    @Test
+    public void testGetOrderCount() {
+        when(orderRepository.countByUserId(anyLong())).thenReturn(5);
+
+        int count = orderService.getOrderCount(1L);
+
+        assertEquals(5, count);
+        verify(orderRepository).countByUserId(1L);
+    }
+}
+""" ;
+                                    oc:codeLanguage "java" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 64-116" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Java Input" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 3 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "`when(...).thenReturn(...)` → `every { ... } returns ...`." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "`mock(Foo.class)` → `mockk<Foo>()` using reified generics." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText """`@Before` setUp is eliminated — mocks are initialized inline with property
+declarations. This works because MockK mocks do not require a runner.""" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "`ArgumentCaptor` → `slot<T>()` with `capture(slot)`, accessed via `slot.captured`." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 5 ;
+                                            oc:itemText "`anyLong()` → `any()` (MockK's `any()` handles all types)." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 6 ;
+                                            oc:itemText "`verify(foo).bar()` → `verify { foo.bar() }`." ] ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """package com.acme.service
+
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import kotlin.test.assertEquals
+
+/**
+ * Tests for OrderService using MockK mocks.
+ */
+class OrderServiceTest {
+
+    private val userRepository = mockk<UserRepository>()
+    private val orderRepository = mockk<OrderRepository>()
+    private val orderService = OrderService(userRepository, orderRepository)
+
+    @Test
+    fun `should create order for user`() {
+        val user = User(1L, "Alice")
+        every { userRepository.findById(1L) } returns user
+        every { orderRepository.save(any()) } returns Unit
+
+        orderService.createOrder(1L, "ITEM-100")
+
+        val orderSlot = slot<Order>()
+        verify { orderRepository.save(capture(orderSlot)) }
+        assertEquals("ITEM-100", orderSlot.captured.itemCode)
+        assertEquals(1L, orderSlot.captured.userId)
+    }
+
+    @Test
+    fun `should return order count`() {
+        every { orderRepository.countByUserId(any()) } returns 5
+
+        val count = orderService.getOrderCount(1L)
+
+        assertEquals(5, count)
+        verify { orderRepository.countByUserId(1L) }
+    }
+}
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 120-164" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Key points:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Kotlin Output (MockK)" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Example 1: Converting to MockK" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent """While Mockito works in Kotlin, MockK is the idiomatic Kotlin mocking library. Convert
+to MockK when the project already uses MockK or is doing a full Kotlin migration. If
+the project wants to keep Mockito, convert only the Java syntax to Kotlin syntax using
+the `mockito-kotlin` helper library.""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Detected when imports match `org.mockito.*`." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "When This Applies" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """package com.acme.service;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import org.junit.Before;
+import org.junit.Test;
+
+/**
+ * Tests for PricingService using Mockito.
+ */
+public class PricingServiceTest {
+
+    private PriceRepository priceRepository;
+    private PricingService pricingService;
+
+    @Before
+    public void setUp() {
+        priceRepository = mock(PriceRepository.class);
+        pricingService = new PricingService(priceRepository);
+    }
+
+    @Test
+    public void testGetPrice() {
+        when(priceRepository.findPriceByItemCode("ITEM-1")).thenReturn(9.99);
+        double price = pricingService.getPrice("ITEM-1");
+        assertEquals(9.99, price, 0.001);
+        verify(priceRepository).findPriceByItemCode("ITEM-1");
+    }
+}
+""" ;
+                                    oc:codeLanguage "java" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 181-214" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Java Input" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 3 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "`when(...)` → `whenever(...)` to avoid backtick-escaping the `when` keyword." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "`mock(Foo.class)` → `mock<Foo>()` from `org.mockito.kotlin` (reified generics)." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 5 ;
+                                            oc:itemText "`assertEquals` with a delta parameter works the same way from kotlin.test." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "`verify` stays the same — `org.mockito.kotlin.verify` wraps Mockito's verify." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "The `setUp` method is eliminated — mocks are initialized inline." ] ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """package com.acme.service
+
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
+import kotlin.test.assertEquals
+
+/**
+ * Tests for PricingService using Mockito.
+ */
+class PricingServiceTest {
+
+    private val priceRepository = mock<PriceRepository>()
+    private val pricingService = PricingService(priceRepository)
+
+    @Test
+    fun `should return price for item`() {
+        whenever(priceRepository.findPriceByItemCode("ITEM-1")).thenReturn(9.99)
+
+        val price = pricingService.getPrice("ITEM-1")
+
+        assertEquals(9.99, price, 0.001)
+        verify(priceRepository).findPriceByItemCode("ITEM-1")
+    }
+}
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 218-246" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Key points:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Kotlin Output (mockito-kotlin)" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Example 2: Keeping Mockito (mockito-kotlin syntax)" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Mockito to MockK Conversion Guide" ] ;
+    oc:impartsKnowledge oc:kn_345c0efc,
+        oc:kn_5139f4ae,
+        oc:kn_54f00af9,
+        oc:kn_6e4c49e8,
+        oc:kn_767b6dcb,
+        oc:kn_83ad312e,
+        oc:kn_83b1f992,
+        oc:kn_9287970c,
+        oc:kn_cbf4d20f,
+        oc:kn_dbca39d2,
+        oc:kn_dcabecad ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
     oc:requiresState oc:FileExists ;
-    oc:resolvesIntent "convert mockito tests to kotlin syntax",
+    oc:resolvesIntent "convert mockito tests to mockito-kotlin syntax",
         "convert mockito tests to mockk",
-        "keep mockito with kotlin-friendly wrappers",
-        "migrate java mocking code to kotlin",
-        "translate mockito stubs and verifies to mockk equivalents" ;
+        "migrate mockito stubbing to mockk dsl",
+        "translate java mocking to kotlin mocking" ;
     oc:yieldsState oc:DocumentCreated .
 
-oc:kn_315f4c0d a oc:KnowledgeNode,
+oc:kn_345c0efc a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When the Kotlin code under test contains suspend functions" ;
+    oc:directiveContent "For suspending functions (coroutines), use `coEvery` / `coVerify` instead of `every` / `verify` in MockK. There is no direct coroutine support in Mockito." ;
+    oc:hasRationale "Coroutine functions have a different signature and calling convention; MockK's co-prefixed variants handle the coroutine context correctly." .
+
+oc:kn_5139f4ae a oc:KnowledgeNode,
         oc:Standard ;
-    oc:appliesToContext "When the class under test or its collaborators contain suspend functions" ;
-    oc:directiveContent "For suspending functions, use coEvery/coVerify instead of every/verify. Standard every/verify blocks will fail on coroutine functions." ;
-    oc:hasRationale "MockK provides dedicated coroutine-aware stubbing and verification to handle Kotlin's suspend functions correctly within test contexts" ;
+    oc:appliesToContext "When converting tests that use @InjectMocks" ;
+    oc:directiveContent "MockK has no direct equivalent to @InjectMocks — use constructor injection instead. This is actually better design practice." ;
+    oc:hasRationale "Constructor injection makes dependencies explicit and testable, aligning with Kotlin's preference for val constructor parameters." .
+
+oc:kn_54f00af9 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting argument matchers" ;
+    oc:directiveContent "MockK matches exact values by default, so `eq(x)` is often unnecessary. MockK's `any()` handles all Kotlin types including non-null types without extra configuration." ;
+    oc:hasRationale "MockK's type inference and default matching behavior reduce verbosity compared to Mockito's explicit matchers." .
+
+oc:kn_6e4c49e8 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When converting a Mockito test file to Kotlin" ;
+    oc:directiveContent "1. Detect Mockito imports in source file. 2. Decide conversion target: MockK (full migration) or mockito-kotlin (syntax-only). 3. Replace mock creation: Mockito.mock → mockk<Foo>() or mock<Foo>(). 4. Replace stubbing: when().thenReturn → every {} returns or whenever().thenReturn. 5. Replace verification: verify(foo).bar() → verify { foo.bar() }. 6. Replace ArgumentCaptor with slot<T>() + capture(). 7. Inline mock initialization into property declarations, removing setUp methods. 8. Add coEvery/coVerify for suspend functions if converting to MockK." ;
+    oc:stepOrder 1 .
+
+oc:kn_767b6dcb a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When testing suspend functions with MockK" ;
+    oc:codeLanguage "kotlin" ;
+    oc:directiveContent """// Coroutine support in MockK
+ coEvery { foo.suspendBar() } returns x
+ coVerify { foo.suspendBar() }""" .
+
+oc:kn_83ad312e a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting Mockito stubbing to Kotlin" ;
+    oc:directiveContent "Never use Mockito.`when`(...)` in Kotlin — use `whenever(...)` from mockito-kotlin or `every { ... } returns ...` from MockK to avoid backtick-escaping the `when` keyword." ;
+    oc:hasRationale "`when` is a keyword in Kotlin and must be escaped with backticks, making code ugly and error-prone; the Kotlin-friendly wrappers eliminate this." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_83b1f992 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing MockK test code" ;
+    oc:codeLanguage "kotlin" ;
+    oc:directiveContent """// MockK stubbing
+ every { foo.bar() } returns x
+ every { foo.bar() } throws e
+ every { foo.bar() } answers { /* answer block */ }
+ justRun { foo.bar() }
+
+ // Verification
+ verify { foo.bar() }
+ verify(exactly = 2) { foo.bar() }
+ verify(exactly = 0) { foo.bar() }
+
+ // Slot capture
+ val slot = slot<Order>()
+ verify { repo.save(capture(slot)) }
+ slot.captured // accessed value""" .
+
+oc:kn_9287970c a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When keeping Mockito but converting to Kotlin syntax" ;
+    oc:codeLanguage "kotlin" ;
+    oc:directiveContent """// mockito-kotlin stubbing
+ import org.mockito.kotlin.mock
+ import org.mockito.kotlin.whenever
+ import org.mockito.kotlin.verify
+
+ val repo = mock<PriceRepository>()
+ whenever(repo.findPrice("ITEM-1")).thenReturn(9.99)
+ verify(repo).findPrice("ITEM-1")""" .
+
+oc:kn_cbf4d20f a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When Mockito imports are detected in a Java test file" ;
+    oc:directiveContent "Only convert to MockK if the project already uses MockK or is doing a full Kotlin migration. If the project wants to keep Mockito, convert only the syntax using mockito-kotlin library (org.mockito.kotlin)." ;
+    oc:hasRationale "Forcing a MockK migration on a project that wants to stay with Mockito creates unnecessary churn and risk; mockito-kotlin provides idiomatic Kotlin wrappers without changing the mocking framework." ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_5752c14f a oc:AntiPattern,
+oc:kn_dbca39d2 a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When keeping Mockito in a Kotlin test file rather than converting to MockK" ;
-    oc:directiveContent "Do not use Mockito's when() in Kotlin without backtick-escaping, as 'when' is a Kotlin keyword. If keeping Mockito, always use the mockito-kotlin whenever() wrapper instead." ;
-    oc:hasRationale "Kotlin reserves 'when' as a keyword, requiring backtick-escaping (Mockito.`when`) which is ugly and error-prone; mockito-kotlin's whenever() avoids this entirely" ;
-    oc:severityLevel "HIGH" .
+    oc:appliesToContext "When converting any Mockito test class" ;
+    oc:directiveContent "Eliminate @Before setUp methods — initialize mocks inline with property declarations using reified generics (mockk<Foo>() or mock<Foo>()). This works because MockK and mockito-kotlin mocks do not require a runner." ;
+    oc:hasRationale "Inline initialization is more idiomatic Kotlin, reduces boilerplate, and avoids lifecycle coupling with test runners." .
 
-oc:kn_7489ab58 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When converting Java Mockito test classes that use @Before setUp to create mocks" ;
-    oc:directiveContent "Eliminate @Before setUp methods by initializing mocks inline with property declarations (e.g., val repo = mockk<Repo>()). MockK mocks do not require a runner or lifecycle method for initialization." ;
-    oc:hasRationale "Inline initialization is more idiomatic Kotlin, reduces boilerplate, and works because MockK mocks are ready to use upon construction without requiring a test runner" ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_7ebae135 a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When converting Mockito ArgumentCaptor usage to MockK" ;
-    oc:directiveContent "Use MockK's slot<T>() with capture(slot) instead of ArgumentCaptor. Access the captured value via slot.captured rather than captor.getValue()." ;
-    oc:hasRationale "MockK slots provide a more type-safe and Kotlin-idiomatic API for capturing arguments compared to Mockito's reflection-based ArgumentCaptor" ;
-    oc:severityLevel "LOW" .
-
-oc:kn_93750ff8 a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "When Mockito imports (org.mockito.*) are detected in Java test code" ;
-    oc:directiveContent "Convert Mockito to MockK when the project already uses MockK or is doing a full Kotlin migration. Only keep Mockito with mockito-kotlin wrappers if the project explicitly wants to retain Mockito." ;
-    oc:hasRationale "MockK is the idiomatic Kotlin mocking library with first-class coroutine support, relaxed mocks, and reified generics; using it maintains consistency in a Kotlin codebase" ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_b9f28886 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When converting Mockito matchers to MockK equivalents" ;
-    oc:directiveContent "MockK's eq(x) is often unnecessary — MockK matches exact values by default. Only use matchers like any() when you explicitly need loose matching." ;
-    oc:hasRationale "Unlike Mockito which requires explicit eq() for literal values when any matchers are present in the same stub, MockK infers exact matching for plain values, reducing verbosity" ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_fd96c313 a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When converting @InjectMocks annotations from Mockito to MockK" ;
-    oc:directiveContent "MockK has no direct equivalent to @InjectMocks — use constructor injection instead. Refactor the class under test to receive its dependencies via constructor parameters." ;
-    oc:hasRationale "Constructor injection is already the recommended pattern in Kotlin and Spring; MockK's design encourages this by not providing a field-injection analog" ;
-    oc:severityLevel "MEDIUM" .
+oc:kn_dcabecad a oc:KnowledgeNode,
+        oc:Prerequisite ;
+    oc:appliesToContext "Before starting conversion" ;
+    oc:directiveContent "If converting to MockK: add dependency io.mockk:mockk. If keeping Mockito with Kotlin syntax: add dependency org.mockito.kotlin:mockito-kotlin." .
 

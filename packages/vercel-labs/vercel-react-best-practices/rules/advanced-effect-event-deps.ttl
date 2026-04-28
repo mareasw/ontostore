@@ -7,53 +7,128 @@
 oc:skill_vercel_labs_vercel_react_best_practices_advanced_effect_event_deps a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "advanced-effect-event-deps" ;
-    skos:broader "React hook pattern guideline" ;
+    skos:broader "React hooks pattern" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "55ed8f9f27a1bff803d6fa55828176207714b02123cbb97ddb8a90d88024a723" ;
-    oc:differentia "prescribes excluding useEffectEvent functions from useEffect dependency arrays because they lack stable identity" ;
+    oc:differentia "that prevents Effect Event functions from being incorrectly included in useEffect dependency arrays" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
-    oc:handlesFailure oc:EffectReRunOnEveryRender,
-        oc:LintValueTriggered ;
-    oc:hasArgumentHint "React component code using useEffectEvent" ;
+    oc:handlesFailure oc:InvalidInput ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_5232e844,
-        oc:kn_5ee94bfe,
-        oc:kn_a621fc75,
-        oc:kn_e857aca1 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """import { useEffect, useEffectEvent } from 'react'
+
+function ChatRoom({ roomId, onConnected }: {
+  roomId: string
+  onConnected: () => void
+}) {
+  const handleConnected = useEffectEvent(onConnected)
+
+  useEffect(() => {
+    const connection = createConnection(roomId)
+    connection.on('connected', handleConnected)
+    connection.connect()
+
+    return () => connection.disconnect()
+  }, [roomId, handleConnected])
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-31" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """import { useEffect, useEffectEvent } from 'react'
+
+function ChatRoom({ roomId, onConnected }: {
+  roomId: string
+  onConnected: () => void
+}) {
+  const handleConnected = useEffectEvent(onConnected)
+
+  useEffect(() => {
+    const connection = createConnection(roomId)
+    connection.on('connected', handleConnected)
+    connection.connect()
+
+    return () => connection.disconnect()
+  }, [roomId])
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 6 ;
+                    oc:sourceLocation "lines 37-54" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Effect Event functions do not have a stable identity. Their identity intentionally changes on every render. Do not include the function returned by `useEffectEvent` in a `useEffect` dependency array. Keep the actual reactive values as dependencies and call the Effect Event from inside the effect body or subscriptions created by that effect." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 7 ;
+                    oc:textContent "Reference: [React useEffectEvent: Effect Event in deps](https://react.dev/reference/react/useEffectEvent#effect-event-in-deps)" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Incorrect (Effect Event added as a dependency):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "Including the Effect Event in dependencies makes the effect re-run every render and triggers the React Hooks lint rule." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 5 ;
+                    oc:textContent "**Correct (depend on reactive values, not the Effect Event):**" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Do Not Put Effect Events in Dependency Arrays" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Do Not Put Effect Events in Dependency Arrays
+impact: LOW
+impactDescription: avoids unnecessary effect re-runs and lint errors
+tags: advanced, hooks, useEffectEvent, dependencies, effects
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:impartsKnowledge oc:kn_51b741d1,
+        oc:kn_e2808e7e,
+        oc:kn_e2aee3f4,
+        oc:kn_fe70ebf1 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:ReactComponentDefined,
-        oc:UseEffectEventImported ;
-    oc:resolvesIntent "avoid effect re-runs caused by unstable Effect Event identity",
-        "fix React Hooks lint errors related to Effect Event dependencies",
-        "write correct useEffect dependencies when using useEffectEvent" ;
-    oc:yieldsState oc:EffectDependenciesCorrectlyConfigured .
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "avoid unnecessary effect re-runs with useEffectEvent",
+        "fix useEffectEvent dependency lint errors",
+        "write correct effect dependencies when using useEffectEvent" ;
+    oc:yieldsState oc:CodeCorrect .
 
-oc:kn_5232e844 a oc:Idempotency,
+oc:kn_51b741d1 a oc:Idempotency,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When reasoning about the identity semantics of useEffectEvent return values" ;
-    oc:directiveContent "An Effect Event function is intentionally non-stable — its identity changes every render by design so it always reads the latest props/state values." ;
-    oc:hasRationale "This unstable identity is a feature, not a bug — it allows Effect Events to always read the latest values without triggering re-subscriptions in effects." ;
-    oc:severityLevel "LOW" .
+    oc:appliesToContext "When reasoning about Effect Event identity and referential stability" ;
+    oc:directiveContent "Effect Events intentionally change identity on every render to always capture the latest closure values, which is the opposite of stable references like useCallback." ;
+    oc:hasRationale "Understanding that Effect Events are inherently unstable is key to understanding why they must not be dependencies." .
 
-oc:kn_5ee94bfe a oc:KnowledgeNode,
-        oc:SideEffect ;
-    oc:appliesToContext "When incorrectly adding useEffectEvent results to dependency arrays" ;
-    oc:directiveContent "Including an Effect Event in a dependency array causes the effect to re-run on every single render, creating unnecessary re-executions and potential infinite re-render loops." ;
-    oc:hasRationale "Since useEffectEvent returns a function with unstable identity (new reference each render), React's dependency comparison always detects a change, triggering the effect unnecessarily." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_a621fc75 a oc:AntiPattern,
+oc:kn_e2808e7e a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When writing useEffect hooks that call functions created by useEffectEvent" ;
-    oc:directiveContent "Never include the function returned by useEffectEvent in a useEffect dependency array. Effect Events intentionally lack stable identity and change on every render." ;
-    oc:hasRationale "Including Effect Events in dependency arrays causes the effect to re-run on every render and triggers React Hooks lint rule violations, defeating the purpose of useEffectEvent." ;
+    oc:appliesToContext "When deciding whether to use useEffectEvent vs a regular callback in an effect" ;
+    oc:directiveContent "useEffectEvent provides a way to wrap non-reactive callbacks that always read the latest props/state without being added as effect dependencies." ;
+    oc:hasRationale "This is the core purpose of useEffectEvent — decoupling effect synchronization from callback identity changes." .
+
+oc:kn_e2aee3f4 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When using useEffectEvent with useEffect" ;
+    oc:directiveContent "Keep the actual reactive values as dependencies and call the Effect Event from inside the effect body or subscriptions created by that effect." ;
+    oc:hasRationale "useEffectEvent is designed to read the latest props/state without subscribing to them reactively, so only truly reactive values (like roomId) should trigger the effect." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_e857aca1 a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "When an effect needs to read non-reactive values without subscribing to their changes" ;
-    oc:directiveContent "Keep only actual reactive values (e.g., roomId, props, state) in the useEffect dependency array and call the Effect Event from inside the effect body or its subscriptions." ;
-    oc:hasRationale "This preserves the effect's subscription stability while allowing access to the latest non-reactive values through the Effect Event wrapper." ;
-    oc:severityLevel "CRITICAL" .
+oc:kn_fe70ebf1 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing useEffect hooks that consume useEffectEvent values" ;
+    oc:directiveContent "Never include the function returned by useEffectEvent in a useEffect dependency array. Effect Event functions do not have a stable identity — their identity intentionally changes on every render." ;
+    oc:hasRationale "Including the Effect Event in dependencies makes the effect re-run every render and triggers the React Hooks lint rule, defeating the purpose of useEffectEvent." ;
+    oc:severityLevel "HIGH" .
 

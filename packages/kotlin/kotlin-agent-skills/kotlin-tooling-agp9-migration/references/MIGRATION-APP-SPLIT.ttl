@@ -7,99 +7,1021 @@
 oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_agp9_migration_migration_app_split a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "migration-app-split" ;
-    skos:broader "module restructure guide" ;
+    skos:broader "Migration procedure" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/kotlin/kotlin-agent-skills/kotlin-tooling-agp9-migration" ;
     oc:contentHash "77b614b62dd495d4954414cfbafdbd1ee4c888ead08ee8c4df20db64ad23f2bb" ;
-    oc:differentia "that splits a monolithic KMP + Android application module into separate shared KMP library and pure Android application modules for AGP 9.0 compatibility" ;
+    oc:differentia "Splits a monolithic KMP + Android application module into separate androidApp and shared KMP library modules for AGP 9.0 compatibility" ;
     oc:extends oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_agp9_migration ;
-    oc:handlesFailure oc:BuildFailed,
-        oc:ManifestActivityNotFound,
+    oc:handlesFailure oc:ManifestActivityNotFound,
         oc:NamespaceCollision,
         oc:PluginConflict ;
     oc:hasArgumentHint "module-name (e.g. composeApp)" ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_20ad185e,
-        oc:kn_2dc6213e,
-        oc:kn_3687e603,
-        oc:kn_44e4b7c0,
-        oc:kn_54107a3f,
-        oc:kn_740005e1,
-        oc:kn_a8e51255,
-        oc:kn_c16d41be,
-        oc:kn_d8ec77b8 ;
+    oc:hasPackageName "kotlin-tooling-agp9-migration" ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "AGP 9.0 does not support `com.android.application` combined with `org.jetbrains.kotlin.multiplatform` in the same module. You must split the monolithic `composeApp` module into a pure Android application module and a KMP shared library module." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "After the split, the run configuration for the Android app must point to `:androidApp` instead of `:composeApp`:" ],
+                                _:ref_c12ecf20192d0ca6 ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Android Studio" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "If the shared module was renamed from `composeApp` to `shared`:" ],
+                                _:ref_ca932b19a45ae57f ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Xcode (iOS)" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 10 ;
+                    oc:sectionTitle "Run Configuration Updates" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "These items are Android application concerns and must move out of the shared KMP module:" ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """composeApp/src/androidMain/kotlin/.../MyApplication.kt
+  --> androidApp/src/main/kotlin/.../MyApplication.kt
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 369-372" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "3. Application Class (if any)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """composeApp/proguard-rules.pro
+  --> androidApp/proguard-rules.pro
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 389-392" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 5 ;
+                            oc:sectionTitle "5. ProGuard Rules" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """// androidApp/src/main/kotlin/com/example/app/MainActivity.kt
+package com.example.app
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import com.example.shared.App  // Import from shared module
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            App()  // Shared composable
+        }
+    }
+}
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 3 ;
+                                    oc:sourceLocation "lines 324-341" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "Update `MainActivity` to call into shared code:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """composeApp/src/androidMain/kotlin/com/example/app/MainActivity.kt
+  --> androidApp/src/main/kotlin/com/example/app/MainActivity.kt
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 317-320" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "1. MainActivity (and any other Activities)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """composeApp/src/androidMain/res/mipmap-*/
+composeApp/src/androidMain/res/values/themes.xml  (app-level theme)
+  --> androidApp/src/main/res/
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 381-385" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 1 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "Navigation graphs (if not shared)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "App theme definitions that reference `applicationId`" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Splash screen resources" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Launcher icons (`mipmap-*`)" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "4. App-Level Resources" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "The full application manifest with `<application>`, `<activity>`, `<intent-filter>` moves to androidApp:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """<activity
+    android:name="com.example.app.MainActivity"
+    android:exported="true">
+    <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+        <category android:name="android.intent.category.LAUNCHER" />
+    </intent-filter>
+</activity>
+""" ;
+                                    oc:codeLanguage "xml" ;
+                                    oc:contentOrder 4 ;
+                                    oc:sourceLocation "lines 354-363" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """composeApp/src/androidMain/AndroidManifest.xml
+  --> androidApp/src/main/AndroidManifest.xml
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 347-350" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Important:** After moving the manifest, verify the `android:name` attribute on `<activity>` points to the correct Activity class in its new location. If the old manifest relied on a default or short class name, you may need to use the fully qualified name:" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent "The shared module may still have a minimal manifest (auto-generated or containing just `<manifest>` with no `<application>`)." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "2. AndroidManifest.xml" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 7 ;
+                    oc:sectionTitle "What to Move to androidApp" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """shared/
+  build.gradle.kts           # kotlin.multiplatform + com.android.kotlin.multiplatform.library
+  src/
+    commonMain/kotlin/        # All shared KMP code
+    androidMain/kotlin/       # Android-specific implementations (expect/actual)
+    androidMain/res/          # Shared Android resources (if any)
+    iosMain/kotlin/           # iOS-specific code
+
+androidApp/
+  build.gradle.kts           # com.android.application ONLY (no kotlin.multiplatform)
+  src/
+    main/kotlin/              # MainActivity, Application class
+    main/res/                 # App-level resources (launcher icons, themes, etc.)
+    main/AndroidManifest.xml  # Full manifest with <application> and <activity>
+
+iosApp/                       # Unchanged
+""" ;
+                            oc:codeLanguage "" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 89-106" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "New Structure (AGP 9.x)" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """rootProject.name = "MyProject"
+include(":shared")
+include(":androidApp")
+include(":iosApp")
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 248-253" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "After" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """rootProject.name = "MyProject"
+include(":composeApp")
+include(":iosApp") // if present as a Gradle module
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 240-244" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Before" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "settings.gradle.kts Changes" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """plugins {
+    alias(libs.plugins.kotlinMultiplatform)
+    alias(libs.plugins.androidKmpLibrary)
+    alias(libs.plugins.composeMultiplatform)
+    alias(libs.plugins.composeCompiler)
+}
+
+kotlin {
+    android {
+        namespace = "com.example.shared"
+        compileSdk = 35
+        minSdk = 24
+
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+        }
+
+        androidResources { enable = true }
+    }
+
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
+
+    listOf(iosX64(), iosArm64(), iosSimulatorArm64()).forEach {
+        it.binaries.framework {
+            baseName = "Shared"
+            isStatic = true
+        }
+    }
+
+    sourceSets {
+        commonMain.dependencies {
+            implementation(compose.runtime)
+            implementation(compose.foundation)
+            implementation(compose.material3)
+            implementation(compose.ui)
+            implementation(libs.kotlinx.coroutines.core)
+        }
+        androidMain.dependencies {
+            // Android-specific shared dependencies only
+        }
+    }
+}
+""" ;
+                            oc:codeLanguage "kotlin" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 178-223" ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 1 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "**Namespace must differ from androidApp.** Use `com.example.shared` vs `com.example.app`." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 6 ;
+                                            oc:itemText "**`androidTarget {}`** is replaced with **`android {}`**." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "**Plugin is `com.android.kotlin.multiplatform.library`**, not `com.android.library`." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 5 ;
+                                            oc:itemText "**Framework exports** (`binaries.framework`) stay here since iOS depends on the shared module." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "**No `buildTypes` or `productFlavors`.** The KMP library plugin produces a single variant." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "**No `applicationId`, `versionCode`, `versionName`, `targetSdk`.** These are application-only concepts." ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Key Points for shared" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "shared/build.gradle.kts" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "[ ] Create `androidApp/` directory with `build.gradle.kts`" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "[ ] Move app-level resources (launcher icons, app theme) to `androidApp`" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 7 ;
+                                    oc:itemText "[ ] Remove application-only config (`applicationId`, `versionCode`, `buildTypes`) from shared" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 13 ;
+                                    oc:itemText "[ ] Update Xcode project if iOS target exists" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 12 ;
+                                    oc:itemText "[ ] Update Android Studio run configuration" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 10 ;
+                                    oc:itemText "[ ] Update root `build.gradle.kts` plugin declarations" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "[ ] Move ProGuard rules to `androidApp`" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 14 ;
+                                    oc:itemText "[ ] Run `./gradlew :androidApp:assembleDebug` and `./gradlew :shared:assemble` to verify" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 11 ;
+                                    oc:itemText "[ ] Ensure namespaces are different between modules" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 6 ;
+                                    oc:itemText "[ ] Convert `composeApp` to `shared` with KMP library plugin" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "[ ] Move `AndroidManifest.xml` (full manifest) to `androidApp`" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 9 ;
+                                    oc:itemText "[ ] Update `settings.gradle.kts` includes" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "[ ] Move `MainActivity` and `Application` class to `androidApp`" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 8 ;
+                                    oc:itemText "[ ] Add `implementation(project(\":shared\"))` to androidApp dependencies" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 11 ;
+                    oc:sectionTitle "Quick Checklist" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """plugins {
+    alias(libs.plugins.androidApplication)
+    alias(libs.plugins.composeCompiler)
+}
+
+android {
+    namespace = "com.example.app"
+    compileSdk = 35
+
+    defaultConfig {
+        applicationId = "com.example.app"
+        minSdk = 24
+        targetSdk = 35
+        versionCode = 1
+        versionName = "1.0"
+    }
+
+    buildFeatures {
+        compose = true
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+        }
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+    }
+}
+
+dependencies {
+    implementation(project(":shared"))
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.compose.ui.tooling.preview)
+    debugImplementation(libs.compose.ui.tooling)
+}
+""" ;
+                            oc:codeLanguage "kotlin" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 114-164" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**Important:** In AGP 9.0, the `com.android.application` plugin has Kotlin support built in. Do NOT apply `org.jetbrains.kotlin.android` separately -- it will conflict." ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 1 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "**No `kotlin.multiplatform` plugin.** This is a pure Android application module." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "**`buildTypes` and `productFlavors` work here.** The application plugin still supports full variant configuration." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "**No `kotlin-android` plugin.** AGP 9.0's `com.android.application` plugin bundles Kotlin compilation. Applying `org.jetbrains.kotlin.android` will cause a conflict error." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 5 ;
+                                            oc:itemText "**Depends on `:shared`** to access all shared KMP code." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "**Compose compiler plugin** is applied separately (`composeCompiler`), or it can come from KGP 2.0+ if you use the compose compiler Gradle plugin." ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Key Points for androidApp" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "androidApp/build.gradle.kts" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**After:**" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Before:**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """plugins {
+    alias(libs.plugins.androidApplication) apply false
+    alias(libs.plugins.androidLibrary) apply false
+    alias(libs.plugins.kotlinMultiplatform) apply false
+    alias(libs.plugins.composeMultiplatform) apply false
+    alias(libs.plugins.composeCompiler) apply false
+}
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 262-270" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """plugins {
+    alias(libs.plugins.androidApplication) apply false
+    alias(libs.plugins.androidKmpLibrary) apply false
+    alias(libs.plugins.kotlinMultiplatform) apply false
+    alias(libs.plugins.composeMultiplatform) apply false
+    alias(libs.plugins.composeCompiler) apply false
+}
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 4 ;
+                                    oc:sourceLocation "lines 273-281" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "With Version Catalog" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Before:**" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent "Note: `com.android.library` is replaced with `com.android.kotlin.multiplatform.library`. If you still have pure Android library modules (non-KMP), you can keep `com.android.library` as well." ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """plugins {
+    id("com.android.application") version "8.7.3" apply false
+    id("com.android.library") version "8.7.3" apply false
+    id("org.jetbrains.kotlin.multiplatform") version "2.1.0" apply false
+    id("org.jetbrains.compose") version "1.7.0" apply false
+    id("org.jetbrains.kotlin.plugin.compose") version "2.1.0" apply false
+}
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 286-294" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**After:**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """plugins {
+    id("com.android.application") version "9.0.1" apply false
+    id("com.android.kotlin.multiplatform.library") version "9.0.1" apply false
+    id("org.jetbrains.kotlin.multiplatform") version "2.3.20" apply false
+    id("org.jetbrains.compose") version "1.10.3" apply false
+    id("org.jetbrains.kotlin.plugin.compose") version "2.3.20" apply false
+}
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 4 ;
+                                    oc:sourceLocation "lines 297-305" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Without Version Catalog" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Root build.gradle.kts Changes" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "All `commonMain` code (ViewModels, repositories, models, shared composables)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "Shared Android resources (strings, drawables used by shared composables)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 6 ;
+                                    oc:itemText "Shared Android-specific implementations (`actual` functions)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Framework export configuration (`binaries.framework`)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "All `expect`/`actual` declarations" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "All `iosMain`, `desktopMain`, `wasmJsMain` code" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 8 ;
+                    oc:sectionTitle "What Stays in shared" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "If they collide, you will get duplicate R class errors at compile time. The `applicationId` (in androidApp only) can be different from both namespaces." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "The `namespace` for each module must be unique:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// shared/build.gradle.kts
+kotlin {
+    android {
+        namespace = "com.example.shared"
+    }
+}
+
+// androidApp/build.gradle.kts
+android {
+    namespace = "com.example.app"
+}
+""" ;
+                            oc:codeLanguage "kotlin" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 411-423" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 9 ;
+                    oc:sectionTitle "Namespace Requirements" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """composeApp/
+  build.gradle.kts          # com.android.application + kotlin.multiplatform
+  src/
+    commonMain/kotlin/       # Shared KMP code
+    androidMain/kotlin/      # Android-specific code + MainActivity
+    androidMain/res/         # Android resources
+    androidMain/AndroidManifest.xml
+    iosMain/kotlin/          # iOS-specific code
+    desktopMain/kotlin/      # Desktop entry point (optional)
+""" ;
+                            oc:codeLanguage "" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 9-19" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "Single `composeApp/build.gradle.kts`:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """plugins {
+    alias(libs.plugins.kotlinMultiplatform)
+    alias(libs.plugins.androidApplication)
+    alias(libs.plugins.composeMultiplatform)
+    alias(libs.plugins.composeCompiler)
+}
+
+kotlin {
+    androidTarget {
+        compilations.all {
+            kotlinOptions { jvmTarget = "11" }
+        }
+    }
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
+
+    listOf(iosX64(), iosArm64(), iosSimulatorArm64()).forEach {
+        it.binaries.framework {
+            baseName = "ComposeApp"
+            isStatic = true
+        }
+    }
+
+    sourceSets {
+        commonMain.dependencies {
+            implementation(compose.runtime)
+            implementation(compose.foundation)
+            implementation(compose.material3)
+            implementation(compose.ui)
+            implementation(libs.kotlinx.coroutines.core)
+        }
+        androidMain.dependencies {
+            implementation(libs.androidx.activity.compose)
+            implementation(libs.compose.ui.tooling.preview)
+        }
+    }
+}
+
+android {
+    namespace = "com.example.app"
+    compileSdk = 34
+    defaultConfig {
+        applicationId = "com.example.app"
+        minSdk = 24
+        targetSdk = 34
+        versionCode = 1
+        versionName = "1.0"
+    }
+    buildFeatures { compose = true }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+}
+
+dependencies {
+    debugImplementation(libs.compose.ui.tooling)
+}
+""" ;
+                            oc:codeLanguage "kotlin" ;
+                            oc:contentOrder 3 ;
+                            oc:sourceLocation "lines 23-83" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Old Structure (AGP 8.x)" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Splitting a KMP + Android Application Module for AGP 9.0" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "Mandatory migration path for modules combining kotlin.multiplatform + com.android.application into separate androidApp and shared modules" ;
+            oc:hasStep _:ref_20badd92e3e8a658,
+                _:ref_2e44e1a351120aec,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Run ./gradlew :androidApp:assembleDebug and ./gradlew :shared:assemble to verify both modules build successfully" ;
+                    oc:expectedOutcome "Clean build with no errors for both modules" ;
+                    oc:stepDependsOn _:ref_e240e4ebc046006a ;
+                    oc:stepId "verify-build" ],
+                _:ref_43c7531f6b3aeee9,
+                _:ref_ac177aa0672b90f5,
+                _:ref_e240e4ebc046006a ;
+            oc:workflowId "app-split-migration" ;
+            oc:workflowName "AGP 9.0 Application Module Split" ],
+        _:ref_c12ecf20192d0ca6,
+        _:ref_ca932b19a45ae57f ;
+    oc:impartsKnowledge oc:kn_1c9f2340,
+        oc:kn_24360034,
+        oc:kn_47491b61,
+        oc:kn_4f0f2605,
+        oc:kn_52f305fa,
+        oc:kn_75f60ab0,
+        oc:kn_8d318ab9,
+        oc:kn_91666856,
+        oc:kn_97596d85,
+        oc:kn_d07090bc,
+        oc:kn_d243fd35,
+        oc:kn_d4da3b27,
+        oc:kn_e2e4dd8b,
+        oc:kn_f1686238 ;
     oc:isUserInvocable true ;
-    oc:nature "Work" ;
-    oc:requiresState oc:ModuleClassifiedAsAppSplit,
+    oc:nature "Tool" ;
+    oc:requiresState oc:ModuleClassifiedAsPathB,
         oc:ProjectAnalyzed ;
-    oc:resolvesIntent "create androidApp module from monolithic composeApp",
-        "migrate com.android.application + kotlin.multiplatform to AGP 9",
+    oc:resolvesIntent "migrate combined KMP + com.android.application to split module structure",
+        "refactor monolithic KMP module into shared library and Android app",
         "separate composeApp into shared and androidApp modules",
-        "split KMP Android app module for AGP 9" ;
+        "split KMP android app module for AGP 9" ;
     oc:yieldsState oc:AndroidAppModuleCreated,
-        oc:AppModuleSplit,
-        oc:SettingsGradleUpdated,
-        oc:SharedModuleCreated .
+        oc:ModuleSplitComplete,
+        oc:SharedModuleConverted .
 
-oc:kn_20ad185e a oc:AntiPattern,
+oc:kn_1c9f2340 a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When configuring the new androidApp module's build.gradle.kts" ;
-    oc:directiveContent "Do NOT apply org.jetbrains.kotlin.android to the androidApp module. AGP 9.0's com.android.application plugin has built-in Kotlin support and applying kotlin-android separately will cause a conflict error." ;
-    oc:hasRationale "AGP 9.0 bundles Kotlin compilation. The separate kotlin-android plugin registers competing Kotlin compilation tasks that conflict with the built-in ones" ;
-    oc:severityLevel "CRITICAL" .
+    oc:appliesToContext "When setting namespace in both build.gradle.kts files" ;
+    oc:directiveContent "The androidApp and shared modules must have different namespace values (e.g. com.example.app vs com.example.shared). Colliding namespaces produce duplicate R class errors at compile time." ;
+    oc:hasRationale "Android resource generation requires unique namespace per module to generate distinct R classes" ;
+    oc:severityLevel "HIGH" .
 
-oc:kn_2dc6213e a oc:KnowledgeNode,
-        oc:WorkflowStrategy ;
-    oc:appliesToContext "When the split involves renaming the KMP module and the project has iOS targets" ;
-    oc:directiveContent "If the project has iOS targets and the module is renamed from composeApp to shared, update: (1) baseName in binaries.framework to 'Shared', (2) Xcode Run Script build phase to use :shared:embedAndSignAppleFrameworkForXcode, (3) all Swift import statements from 'ComposeApp' to 'Shared', (4) framework search paths in Xcode Build Settings." ;
-    oc:hasRationale "The framework name is derived from baseName in the Gradle config. If baseName changes, iOS consumers must update their imports, build scripts, and search paths or the app will fail to link" ;
+oc:kn_24360034 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing the shared module's build.gradle.kts" ;
+    oc:directiveContent "Use androidTarget {} → android {} as the DSL migration for the shared module's Kotlin block. The old androidTarget DSL is replaced with android inside kotlin {}." ;
+    oc:hasRationale "AGP 9.0 KMP library plugin uses a new DSL shape for Android target configuration" ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_3687e603 a oc:KnowledgeNode,
+oc:kn_47491b61 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When evaluating AGP 9.0 migration paths for any module applying both plugins" ;
+    oc:directiveContent "AGP 9.0 does NOT support com.android.application combined with org.jetbrains.kotlin.multiplatform in the same module. The split is mandatory, not optional." ;
+    oc:hasRationale "This is a hard incompatibility — the build will fail if both plugins remain in the same module" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_4f0f2605 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When creating the shared/build.gradle.kts — uses com.android.kotlin.multiplatform.library, no applicationId/buildTypes" ;
+    oc:codeLanguage "kotlin" ;
+    oc:directiveContent """plugins {
+    alias(libs.plugins.kotlinMultiplatform)
+    alias(libs.plugins.androidKmpLibrary)
+    alias(libs.plugins.composeMultiplatform)
+    alias(libs.plugins.composeCompiler)
+}
+kotlin {
+    android { namespace = "com.example.shared"; compileSdk = 35; minSdk = 24
+        androidResources { enable = true } }
+    sourceSets { commonMain.dependencies { /* shared deps */ } }
+}""" .
+
+oc:kn_52f305fa a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When creating the androidApp/build.gradle.kts — no kotlin-android plugin, no kotlin.multiplatform plugin" ;
+    oc:codeLanguage "kotlin" ;
+    oc:directiveContent """plugins {
+    alias(libs.plugins.androidApplication)
+    alias(libs.plugins.composeCompiler)
+}
+android {
+    namespace = "com.example.app"
+    compileSdk = 35
+    defaultConfig { applicationId = "com.example.app"; minSdk = 24; targetSdk = 35 }
+    buildFeatures { compose = true }
+    kotlin { compilerOptions { jvmTarget.set(JvmTarget.JVM_11) } }
+}
+dependencies {
+    implementation(project(":shared"))
+}""" .
+
+oc:kn_75f60ab0 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing the relocated MainActivity in androidApp that delegates to shared Compose UI" ;
+    oc:codeLanguage "kotlin" ;
+    oc:directiveContent """class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent { App() }  // Shared composable from :shared
+    }
+}""" .
+
+oc:kn_8d318ab9 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When configuring the new androidApp/build.gradle.kts" ;
+    oc:directiveContent "Never apply org.jetbrains.kotlin.android to the androidApp module. AGP 9.0's com.android.application plugin has built-in Kotlin support; applying kotlin-android separately will cause a conflict error." ;
+    oc:hasRationale "Double Kotlin compilation registration causes build failure" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_91666856 a oc:KnowledgeNode,
         oc:KnownIssue ;
-    oc:appliesToContext "When moving the manifest from androidMain to androidApp/src/main" ;
-    oc:directiveContent "After moving AndroidManifest.xml, the android:name attribute on <activity> must use the fully qualified class name in its new location. The shared module may still need a minimal manifest (just <manifest> with no <application>)." ;
-    oc:hasRationale "The old manifest may have relied on directory-relative class resolution. After moving, the class is in a different module/package path and the fully qualified name is required" ;
+    oc:appliesToContext "When moving the manifest from composeApp/src/androidMain/ to androidApp/src/main/" ;
+    oc:directiveContent "After moving AndroidManifest.xml to androidApp, the android:name attribute on <activity> must use the fully qualified class name. The old manifest may have relied on a default or short class name that no longer resolves." ;
+    oc:hasRationale "The manifest merger needs the explicit class path because the activity class is now in a different module" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_44e4b7c0 a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "When configuring the shared module's build.gradle.kts after splitting" ;
-    oc:directiveContent "Use com.android.kotlin.multiplatform.library (not com.android.library) for the shared KMP module, and place Android config inside kotlin { android { } } instead of a top-level android { } block." ;
-    oc:hasRationale "The new KMP library plugin is the AGP 9.0 replacement for com.android.library in KMP contexts. It uses the kotlin { android { } } DSL block rather than a separate top-level android block" ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_54107a3f a oc:Heuristic,
+oc:kn_97596d85 a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When deciding which files to move during the split" ;
-    oc:directiveContent "Move only Android application concerns to androidApp: Activities, Application class, AndroidManifest.xml, app-level resources (launcher icons, app theme), and ProGuard rules. Keep all commonMain code, expect/actual declarations, iOS/desktop targets, and shared resources in the shared module." ;
-    oc:hasRationale "Over-moving shared code into androidApp defeats the purpose of KMP sharing. Under-moving app concerns leaves application-only config in a library module where it is invalid" ;
-    oc:severityLevel "MEDIUM" .
+    oc:appliesToContext "When converting the original module to the shared KMP library" ;
+    oc:directiveContent "The shared module must use com.android.kotlin.multiplatform.library, NOT com.android.library. Application-only concepts (applicationId, versionCode, versionName, targetSdk, buildTypes, productFlavors) must NOT appear in the shared module." ;
+    oc:hasRationale "The KMP library plugin has a single-variant architecture and does not support application-specific configurations" ;
+    oc:severityLevel "HIGH" .
 
-oc:kn_740005e1 a oc:KnowledgeNode,
+oc:kn_d07090bc a oc:KnowledgeNode,
+        oc:PostFlightValidation ;
+    oc:appliesToContext "After completing all migration steps" ;
+    oc:directiveContent "Run ./gradlew :androidApp:assembleDebug and ./gradlew :shared:assemble to verify both modules build independently. Check that namespaces are unique and no duplicate R class errors occur." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_d243fd35 a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When the project has an iOS target and the module is renamed" ;
+    oc:directiveContent "If iOS target exists and the module was renamed from composeApp to shared: update baseName in binaries.framework, update Xcode Run Script build phase from :composeApp: to :shared:, update all Swift import statements, and update framework search paths." ;
+    oc:hasRationale "The iOS framework name and Gradle task paths are tied to the module name — mismatched references break the Xcode build" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_d4da3b27 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When executing the mandatory module split for AGP 9.0" ;
+    oc:directiveContent "1. Create androidApp/ directory with build.gradle.kts (com.android.application only). 2. Move MainActivity, Application class, AndroidManifest.xml, app-level resources, ProGuard rules to androidApp/src/main/. 3. Convert original module to shared/ with kotlin.multiplatform + com.android.kotlin.multiplatform.library. 4. Remove application-only config from shared. 5. Add implementation(project(\":shared\")) to androidApp. 6. Update settings.gradle.kts includes. 7. Update root build.gradle.kts plugin declarations. 8. Ensure unique namespaces. 9. Update IDE run configs and Xcode project if applicable. 10. Verify with ./gradlew :androidApp:assembleDebug and ./gradlew :shared:assemble." ;
+    oc:stepOrder 1 .
+
+oc:kn_e2e4dd8b a oc:KnowledgeNode,
+        oc:Prerequisite ;
+    oc:directiveContent "The project must use AGP 9.0+ and Gradle 9.1.0+. The project must have been analyzed and the target module classified as requiring Path B (kotlin.multiplatform + com.android.application combined)." .
+
+oc:kn_f1686238 a oc:KnowledgeNode,
         oc:PreFlightCheck ;
-    oc:appliesToContext "Before and after performing the module split" ;
-    oc:directiveContent "Before splitting, verify the module applies both com.android.application and org.jetbrains.kotlin.multiplatform plugins. After splitting, verify: (1) namespaces differ, (2) settings.gradle.kts includes both :shared and :androidApp, (3) androidApp has implementation(project(\":shared\")), (4) AndroidManifest.xml moved to androidApp with correct android:name on <activity>." ;
-    oc:hasRationale "Missing any of these checks leads to build failures that are hard to diagnose because they involve cross-module dependencies and manifest merging" ;
-    oc:severityLevel "HIGH" .
+    oc:appliesToContext "Always, before making any file changes" ;
+    oc:directiveContent "Before starting: read settings.gradle.kts, the target module's build.gradle.kts, and verify the module applies both kotlin.multiplatform and com.android.application. Confirm no org.jetbrains.kotlin.android plugin is applied." .
 
-oc:kn_a8e51255 a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When setting namespace in both build.gradle.kts files after the split" ;
-    oc:directiveContent "The namespace for shared and androidApp modules must be unique (e.g. com.example.shared vs com.example.app). Colliding namespaces produce duplicate R class errors at compile time." ;
-    oc:hasRationale "Android resource generation uses the namespace to create R class packages. Duplicate namespaces cause the compiler to generate conflicting R classes" ;
-    oc:severityLevel "HIGH" .
+_:ref_1f9c59bb1888ed06 a oc:WorkflowStep ;
+    dcterms:description "Ensure the launch activity is `com.example.app.MainActivity`" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
 
-oc:kn_c16d41be a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When migrating any KMP module that applies both com.android.application and kotlin.multiplatform plugins" ;
-    oc:directiveContent "AGP 9.0 does not support com.android.application combined with org.jetbrains.kotlin.multiplatform in the same module. You must split the monolithic module." ;
-    oc:hasRationale "This is a hard incompatibility in AGP 9.0 — the build will fail if both plugins are applied to the same module" ;
-    oc:severityLevel "CRITICAL" .
+_:ref_2280791a7598a276 a oc:CodeExample ;
+    oc:blockType "code_block" ;
+    oc:codeContent """// Old
+import ComposeApp
 
-oc:kn_d8ec77b8 a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When converting the old composeApp module to the shared library module" ;
-    oc:directiveContent "Application-only properties (applicationId, versionCode, versionName, targetSdk, buildTypes, productFlavors) must NOT appear in the shared KMP library module. These belong exclusively in the androidApp module." ;
-    oc:hasRationale "The KMP library plugin produces a single variant and does not support application-level configuration. Including these properties will cause Gradle configuration errors" ;
-    oc:severityLevel "HIGH" .
+// New
+import Shared
+""" ;
+    oc:codeLanguage "swift" ;
+    oc:contentOrder 1 ;
+    oc:sourceLocation "lines 465-471" .
+
+_:ref_2a0699c94c1a8e04 a oc:WorkflowStep ;
+    dcterms:description "**Update `baseName` in `shared/build.gradle.kts`** to match the new module name:" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild [ a oc:CodeExample ;
+            oc:blockType "code_block" ;
+            oc:codeContent """listOf(iosX64(), iosArm64(), iosSimulatorArm64()).forEach {
+    it.binaries.framework {
+        baseName = "Shared"  // was "ComposeApp"
+        isStatic = true
+    }
+}
+""" ;
+            oc:codeLanguage "kotlin" ;
+            oc:contentOrder 1 ;
+            oc:sourceLocation "lines 444-451" ] ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_4c553d8ca598e20f a oc:WorkflowStep ;
+    dcterms:description "**Update Swift imports** — in all `.swift` files, change the framework import to match `baseName`:" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild _:ref_2280791a7598a276 ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_a5b70a75716e061b a oc:WorkflowStep ;
+    dcterms:description "**Update the Run Script build phase** in `project.pbxproj` (or via Xcode > Build Phases > Run Script) to reference the new module:" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild [ a oc:CodeExample ;
+            oc:blockType "code_block" ;
+            oc:codeContent """# Old
+cd "$SRCROOT/.."
+./gradlew :composeApp:embedAndSignAppleFrameworkForXcode
+
+# New
+cd "$SRCROOT/.."
+./gradlew :shared:embedAndSignAppleFrameworkForXcode
+""" ;
+            oc:codeLanguage "bash" ;
+            oc:contentOrder 1 ;
+            oc:sourceLocation "lines 454-462" ] ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_adf68d112afe0898 a oc:WorkflowStep ;
+    dcterms:description "Edit Run Configurations" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_ae15fa2d6eaa9fb3 a oc:CodeExample ;
+    oc:blockType "code_block" ;
+    oc:codeContent """// Example: rename if it was called ComposeAppApp or similar
+@main
+struct MyApp: App {
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+        }
+    }
+}
+""" ;
+    oc:codeLanguage "swift" ;
+    oc:contentOrder 1 ;
+    oc:sourceLocation "lines 474-484" .
+
+_:ref_ceb4f98e822a1d50 a oc:WorkflowStep ;
+    dcterms:description "**Update framework search paths** in Xcode Build Settings if they reference the old module directory path." ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_5" ;
+    oc:stepOrder 5 .
+
+_:ref_d5f5451c45f457b6 a oc:WorkflowStep ;
+    dcterms:description "Change Module to `androidApp`" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_f9f931ed8544456e a oc:WorkflowStep ;
+    dcterms:description "**Update the app struct name** if it was tied to the old module name. The `@main` struct name in your SwiftUI app entry point is independent of the framework name, but if it referenced the old name, rename it:" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild _:ref_ae15fa2d6eaa9fb3 ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_20badd92e3e8a658 a oc:WorkflowStep ;
+    dcterms:description "Create androidApp/ directory with build.gradle.kts using com.android.application plugin only (no kotlin-android, no kotlin.multiplatform)" ;
+    oc:expectedOutcome "androidApp module exists with correct build file" ;
+    oc:stepId "create-androidapp" .
+
+_:ref_2e44e1a351120aec a oc:WorkflowStep ;
+    dcterms:description "Move MainActivity, Application class, AndroidManifest.xml (with fully qualified activity names), app-level resources, and ProGuard rules from composeApp/src/androidMain/ to androidApp/src/main/" ;
+    oc:expectedOutcome "All Android application concerns are in androidApp; shared module has no app-specific code" ;
+    oc:stepDependsOn _:ref_20badd92e3e8a658 ;
+    oc:stepId "move-android-entry-points" .
+
+_:ref_43c7531f6b3aeee9 a oc:WorkflowStep ;
+    dcterms:description "Rename composeApp to shared; replace com.android.library with com.android.kotlin.multiplatform.library; migrate androidTarget {} to android {}; remove applicationId, versionCode, versionName, targetSdk, buildTypes; ensure namespace differs from androidApp" ;
+    oc:expectedOutcome "shared module builds as a KMP library with single variant" ;
+    oc:stepDependsOn _:ref_2e44e1a351120aec ;
+    oc:stepId "convert-shared-module" .
+
+_:ref_ac177aa0672b90f5 a oc:WorkflowStep ;
+    dcterms:description "Update settings.gradle.kts to include :shared and :androidApp; update root build.gradle.kts to declare androidKmpLibrary plugin; update version catalog if used" ;
+    oc:expectedOutcome "Gradle sync succeeds with both modules recognized" ;
+    oc:stepDependsOn _:ref_43c7531f6b3aeee9 ;
+    oc:stepId "update-gradle-config" .
+
+_:ref_c12ecf20192d0ca6 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 2 ;
+    oc:hasStep _:ref_1f9c59bb1888ed06,
+        _:ref_adf68d112afe0898,
+        _:ref_d5f5451c45f457b6 ;
+    oc:workflowId "procedure_2" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_ca932b19a45ae57f a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 2 ;
+    oc:hasStep _:ref_2a0699c94c1a8e04,
+        _:ref_4c553d8ca598e20f,
+        _:ref_a5b70a75716e061b,
+        _:ref_ceb4f98e822a1d50,
+        _:ref_f9f931ed8544456e ;
+    oc:workflowId "procedure_2" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_e240e4ebc046006a a oc:WorkflowStep ;
+    dcterms:description "Update Android Studio run configuration to point to :androidApp; if iOS target exists, update Xcode Run Script build phase, Swift import statements, and framework baseName" ;
+    oc:expectedOutcome "IDE run configs and Xcode project reference correct modules" ;
+    oc:stepDependsOn _:ref_ac177aa0672b90f5 ;
+    oc:stepId "update-ide-config" .
 

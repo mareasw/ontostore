@@ -7,60 +7,112 @@
 oc:skill_obra_superpowers_using_superpowers_gemini_tools a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "gemini-tools" ;
-    skos:broader "Platform tool mapping reference" ;
+    skos:broader "Tool mapping reference" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/obra/superpowers/using-superpowers" ;
     oc:contentHash "477239fd7b4868f016662831e0fe840557ce91217f057f742a41af57a53554de" ;
-    oc:differentia "translates Claude Code tool names to their Gemini CLI equivalents for cross-platform skill execution" ;
+    oc:dependsOnSkill oc:skill_ontoskills_using_superpowers ;
+    oc:differentia "Translates Claude Code tool names to Gemini CLI equivalents for cross-platform skill execution" ;
     oc:extends oc:skill_obra_superpowers_using_superpowers ;
+    oc:handlesFailure oc:ToolNotFound ;
+    oc:hasArgumentHint "platform-context" ;
     oc:hasCategory "development" ;
-    oc:hasRequirement oc:req_b3d0b0bd ;
-    oc:impartsKnowledge oc:kn_0690a42a,
-        oc:kn_68be5413,
-        oc:kn_721cfbe6,
-        oc:kn_aa65a3e2,
-        oc:kn_f7272eaa ;
-    oc:isUserInvocable false ;
-    oc:nature "Concept" ;
-    oc:resolvesIntent "adapt skill instructions for Gemini CLI platform",
-        "determine Gemini CLI capabilities and limitations for skill execution",
-        "translate Claude Code tool names to Gemini CLI equivalents" .
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Table ;
+                    oc:blockType "table" ;
+                    oc:contentOrder 2 ;
+                    oc:rowCount 11 ;
+                    oc:tableCaption "Skills use Claude Code tool names. When you encounter these in a skill, use your platform equivalent" ;
+                    oc:tableMarkdown """| Skill references | Gemini CLI equivalent |
+|-----------------|----------------------|
+| `Read` (file reading) | `read_file` |
+| `Write` (file creation) | `write_file` |
+| `Edit` (file editing) | `replace` |
+| `Bash` (run commands) | `run_shell_command` |
+| `Grep` (search file content) | `grep_search` |
+| `Glob` (search files by name) | `glob` |
+| `TodoWrite` (task tracking) | `write_todos` |
+| `Skill` tool (invoke a skill) | `activate_skill` |
+| `WebSearch` | `google_web_search` |
+| `WebFetch` | `web_fetch` |
+| `Task` tool (dispatch subagent) | No equivalent — Gemini CLI does not support subagents |
+""" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Skills use Claude Code tool names. When you encounter these in a skill, use your platform equivalent:" ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "These tools are available in Gemini CLI but have no Claude Code equivalent:" ],
+                        [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 2 ;
+                            oc:rowCount 5 ;
+                            oc:tableCaption "These tools are available in Gemini CLI but have no Claude Code equivalent" ;
+                            oc:tableMarkdown """| Tool | Purpose |
+|------|---------|
+| `list_directory` | List files and subdirectories |
+| `save_memory` | Persist facts to GEMINI.md across sessions |
+| `ask_user` | Request structured input from the user |
+| `tracker_create_task` | Rich task management (create, update, list, visualize) |
+| `enter_plan_mode` / `exit_plan_mode` | Switch to read-only research mode before making changes |
+""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Additional Gemini CLI tools" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Gemini CLI has no equivalent to Claude Code's `Task` tool. Skills that rely on subagent dispatch (`subagent-driven-development`, `dispatching-parallel-agents`) will fall back to single-session execution via `executing-plans`." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "No subagent support" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Gemini CLI Tool Mapping" ] ;
+    oc:impartsKnowledge oc:kn_27cbfe2f,
+        oc:kn_5bc5e3ea,
+        oc:kn_875c4435,
+        oc:kn_88d1380b,
+        oc:kn_aeefaad5 ;
+    oc:isUserInvocable true ;
+    oc:nature "Tool" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "map claude code tools to gemini cli equivalents",
+        "translate tool references for gemini platform",
+        "understand gemini cli tool capabilities and limitations" ;
+    oc:yieldsState oc:ToolMappingResolved .
 
-oc:kn_0690a42a a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When skills require web access on Gemini CLI" ;
-    oc:directiveContent "When WebSearch is needed, use google_web_search as the direct Gemini CLI equivalent. When WebFetch is needed, use web_fetch identically." ;
-    oc:hasRationale "Gemini CLI provides native web search and fetch tools that map directly to the Claude Code equivalents." ;
-    oc:severityLevel "LOW" .
+oc:kn_27cbfe2f a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When skills require parallel agent dispatch that Gemini CLI cannot support" ;
+    oc:directiveContent "When encountering Task tool usage in skills, replace with sequential execution of the plan using executing-plans skill pattern — run steps one at a time in the current session." ;
+    oc:hasRationale "Sequential execution preserves correctness while adapting to platform limitations" .
 
-oc:kn_68be5413 a oc:DesignPrinciple,
+oc:kn_5bc5e3ea a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When executing skills on Gemini CLI and looking for enhanced capabilities" ;
-    oc:directiveContent "Gemini CLI provides additional tools with no Claude Code equivalent: list_directory, save_memory, ask_user, tracker_create_task, and enter_plan_mode/exit_plan_mode. These can be used to enhance skill execution on Gemini CLI." ;
-    oc:hasRationale "Leveraging platform-native tools can improve skill outcomes beyond the baseline Claude Code experience." ;
-    oc:severityLevel "MEDIUM" .
+    oc:appliesToContext "When loading or preparing to execute any skill on Gemini CLI" ;
+    oc:directiveContent "Before executing any skill on Gemini CLI, translate all tool invocations using the mapping table. If a tool has no equivalent, check if the skill can proceed without it or needs a fallback strategy." ;
+    oc:hasRationale "Proactive translation prevents runtime tool-not-found errors" .
 
-oc:kn_721cfbe6 a oc:Constraint,
+oc:kn_875c4435 a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When executing skills that reference the Task tool or subagent dispatch on Gemini CLI" ;
-    oc:directiveContent "Gemini CLI has no equivalent to the Task tool for dispatching subagents. Skills requiring subagent dispatch (subagent-driven-development, dispatching-parallel-agents) must fall back to single-session execution via executing-plans." ;
-    oc:hasRationale "Attempting to use subagent patterns on Gemini CLI will fail silently or produce errors; falling back to sequential plan execution is the only viable path." ;
-    oc:severityLevel "CRITICAL" .
+    oc:appliesToContext "When optimizing skills for Gemini CLI specifically or using platform-exclusive capabilities" ;
+    oc:directiveContent "Gemini CLI has additional tools with no Claude Code equivalent: list_directory (file listing), save_memory (persist facts to GEMINI.md), ask_user (structured input), tracker_create_task (rich task management), enter_plan_mode/exit_plan_mode (read-only research mode)." ;
+    oc:hasRationale "Leveraging Gemini-specific tools enables functionality beyond what Claude Code skills assume" .
 
-oc:kn_aa65a3e2 a oc:DesignPrinciple,
+oc:kn_88d1380b a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When translating any skill's tool invocations for Gemini CLI execution" ;
-    oc:directiveContent "Map all Claude Code tool references to their Gemini CLI equivalents: Read→read_file, Write→write_file, Edit→replace, Bash→run_shell_command, Grep→grep_search, Glob→glob, TodoWrite→write_todos, Skill→activate_skill, WebSearch→google_web_search, WebFetch→web_fetch." ;
-    oc:hasRationale "Skills are authored against Claude Code's tool names; correct platform-specific translation is essential for proper skill execution." ;
+    oc:appliesToContext "When encountering skills that use the Task tool or subagent patterns" ;
+    oc:directiveContent "Gemini CLI has no equivalent to Claude Code's Task tool. Skills that rely on subagent dispatch (subagent-driven-development, dispatching-parallel-agents) must fall back to single-session execution via executing-plans." ;
+    oc:hasRationale "Subagent dispatch is architecturally impossible in Gemini CLI; falling back to executing-plans preserves the plan structure in a single session" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_f7272eaa a oc:FallbackStrategy,
+oc:kn_aeefaad5 a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When encountering subagent-dependent skills on Gemini CLI" ;
-    oc:directiveContent "When a skill requires parallel subagent execution, degrade gracefully to sequential single-session execution using the executing-plans skill as the fallback pattern." ;
-    oc:hasRationale "Ensuring a viable execution path exists even without subagent support prevents total skill failure." ;
-    oc:severityLevel "HIGH" .
-
-oc:req_b3d0b0bd a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "Gemini CLI tool names and capabilities" .
+    oc:appliesToContext "When translating any skill's tool references to Gemini CLI platform" ;
+    oc:directiveContent "Read→read_file | Write→write_file | Edit→replace | Bash→run_shell_command | Grep→grep_search | Glob→glob | TodoWrite→write_todos | Skill→activate_skill | WebSearch→google_web_search | WebFetch→web_fetch | Task→NO_EQUIVALENT" ;
+    oc:hasRationale "Skills are written with Claude Code tool names; Gemini CLI requires its own tool names for execution" .
 

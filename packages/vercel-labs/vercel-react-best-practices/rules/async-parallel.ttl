@@ -7,55 +7,97 @@
 oc:skill_vercel_labs_vercel_react_best_practices_async_parallel a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "async-parallel" ;
-    skos:broader "async optimization pattern" ;
+    skos:broader "Performance optimization pattern" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "6d2f841896279e976dfcdc1ac89e70771ac188baadfd43c096b5706cb838b961" ;
-    oc:differentia "replaces sequential await chains with Promise.all() for independent concurrent operations" ;
+    oc:differentia "that parallelizes independent async operations using Promise.all() to eliminate sequential waterfalls" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_146a5b41,
-        oc:kn_1ae2975f,
-        oc:kn_6bac050c,
-        oc:kn_76d7b930,
-        oc:kn_b22a01cd ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Promise.all() for Independent Operations
+impact: CRITICAL
+impactDescription: 2-10× improvement
+tags: async, parallelization, promises, waterfalls
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "When async operations have no interdependencies, execute them concurrently using `Promise.all()`." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Incorrect (sequential execution, 3 round trips):**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """const [user, posts, comments] = await Promise.all([
+  fetchUser(),
+  fetchPosts(),
+  fetchComments()
+])
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 5 ;
+                    oc:sourceLocation "lines 22-28" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "**Correct (parallel execution, 1 round trip):**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """const user = await fetchUser()
+const posts = await fetchPosts()
+const comments = await fetchComments()
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-18" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Promise.all() for Independent Operations" ] ;
+    oc:impartsKnowledge oc:kn_1e6d0b14,
+        oc:kn_3e0d28e7,
+        oc:kn_87f07bf7,
+        oc:kn_d2e431ba ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:resolvesIntent "eliminate sequential await waterfalls",
-        "optimize async operations for parallel execution",
-        "reduce network round trips in concurrent fetches" .
+    oc:resolvesIntent "eliminate sequential async waterfalls",
+        "optimize data fetching in React components",
+        "parallelize independent async operations" .
 
-oc:kn_146a5b41 a oc:KnowledgeNode,
-        oc:SideEffect ;
-    oc:appliesToContext "When using Promise.all() for batched operations" ;
-    oc:directiveContent "With Promise.all(), if any single promise rejects, the entire batch fails — all concurrently-executing operations are lost." ;
-    oc:hasRationale "The all-or-nothing failure mode means one failing request kills the entire set; consider Promise.allSettled() when partial results are acceptable." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_1ae2975f a oc:KnowledgeNode,
+oc:kn_1e6d0b14 a oc:KnowledgeNode,
         oc:PerformanceProfile ;
-    oc:appliesToContext "When measuring async function performance with multiple independent calls" ;
-    oc:directiveContent "Parallel execution reduces total latency from sum(N operations) to max(N operations), typically yielding 2-10× improvement." ;
-    oc:hasRationale "Network-bound operations benefit most since latency is additive in sequential mode but overlaps in parallel mode." ;
-    oc:severityLevel "LOW" .
+    oc:appliesToContext "When evaluating async code performance" ;
+    oc:directiveContent "Sequential awaits cause N round trips for N independent operations; Promise.all() reduces this to 1 round trip batch." ;
+    oc:hasRationale "Network latency compounds with each sequential await, whereas Promise.all() overlaps all network wait times." .
 
-oc:kn_6bac050c a oc:AntiPattern,
+oc:kn_3e0d28e7 a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When writing async functions with multiple independent data fetches or computations" ;
-    oc:directiveContent "Never use sequential await calls for operations that have no interdependencies — each await blocks the event loop unnecessarily." ;
-    oc:hasRationale "Sequential awaits serialize independent operations, multiplying latency by the number of operations instead of running them in a single batch." ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_76d7b930 a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When multiple async operations do not depend on each other's results" ;
-    oc:directiveContent "Use Promise.all() to execute independent async operations concurrently, collecting all results in a single destructured assignment." ;
-    oc:hasRationale "Promise.all() collapses N round trips into 1, yielding 2-10× performance improvement for independent operations." ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_b22a01cd a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When evaluating whether operations can be parallelized" ;
-    oc:directiveContent "Only apply Promise.all() when operations are truly independent — if operation B requires the result of operation A, they must remain sequential." ;
-    oc:hasRationale "Incorrect parallelization of dependent operations causes race conditions and undefined behavior." ;
+    oc:appliesToContext "When reviewing or writing any code with multiple async calls" ;
+    oc:directiveContent "If async operation B does not depend on the result of async operation A, run them in parallel with Promise.all()." ;
+    oc:hasRationale "Independent operations have no reason to wait on each other; parallelization yields 2-10× improvement." ;
     oc:severityLevel "HIGH" .
+
+oc:kn_87f07bf7 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When multiple async operations are independent and can run concurrently" ;
+    oc:codeLanguage "typescript" ;
+    oc:directiveContent """const [user, posts, comments] = await Promise.all([
+  fetchUser(),
+  fetchPosts(),
+  fetchComments()
+])""" .
+
+oc:kn_d2e431ba a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When multiple async calls have no data dependency on each other" ;
+    oc:directiveContent "Never await independent async operations sequentially — this creates artificial waterfalls where each operation waits for the previous one to complete." ;
+    oc:hasRationale "Sequential awaits on independent operations waste network time and can turn 1 round trip into N round trips, causing 2-10× slower performance." ;
+    oc:severityLevel "CRITICAL" .
 

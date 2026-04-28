@@ -7,51 +7,115 @@
 oc:skill_vercel_labs_vercel_react_best_practices_rerender_transitions a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "rerender-transitions" ;
-    skos:broader "React performance optimization technique" ;
+    skos:broader "React performance optimization pattern" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "60f4033909a62df5e5b8c601494f9e50a562e2f8c1c2d81eac24f38142265f1c" ;
-    oc:differentia "uses startTransition to wrap non-urgent state updates so they don't block the main thread during high-frequency events like scrolling" ;
+    oc:differentia "uses startTransition to mark non-urgent state updates so they don't block urgent UI rendering" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
-    oc:handlesFailure oc:InvalidInput ;
-    oc:hasArgumentHint "React component or hook code that handles frequent events" ;
+    oc:handlesFailure oc:TransitionYieldedToUrgentUpdate ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_95b09047,
-        oc:kn_a3086645,
-        oc:kn_d9fb459a,
-        oc:kn_fd64cfa5 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Use Transitions for Non-Urgent Updates
+impact: MEDIUM
+impactDescription: maintains UI responsiveness
+tags: rerender, transitions, startTransition, performance
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Incorrect (blocks UI on every scroll):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Mark frequent, non-urgent state updates as transitions to maintain UI responsiveness." ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """import { startTransition } from 'react'
+
+function ScrollTracker() {
+  const [scrollY, setScrollY] = useState(0)
+  useEffect(() => {
+    const handler = () => {
+      startTransition(() => setScrollY(window.scrollY))
+    }
+    window.addEventListener('scroll', handler, { passive: true })
+    return () => window.removeEventListener('scroll', handler)
+  }, [])
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 5 ;
+                    oc:sourceLocation "lines 27-40" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function ScrollTracker() {
+  const [scrollY, setScrollY] = useState(0)
+  useEffect(() => {
+    const handler = () => setScrollY(window.scrollY)
+    window.addEventListener('scroll', handler, { passive: true })
+    return () => window.removeEventListener('scroll', handler)
+  }, [])
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-23" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "**Correct (non-blocking updates):**" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Use Transitions for Non-Urgent Updates" ] ;
+    oc:impartsKnowledge oc:kn_27cc1e60,
+        oc:kn_2ae17709,
+        oc:kn_5f46afea,
+        oc:kn_7708c044,
+        oc:kn_b3073160 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:EnvironmentReady ;
-    oc:resolvesIntent "apply startTransition to scroll handlers and similar high-frequency updates",
-        "optimize React re-renders for non-urgent updates",
-        "prevent UI jank during frequent events" ;
-    oc:yieldsState oc:TransitionApplied .
+    oc:requiresState oc:ReactComponentMounted ;
+    oc:resolvesIntent "handle scroll or input events without blocking rendering",
+        "improve UI responsiveness during frequent state updates",
+        "optimize React component re-renders for non-urgent updates" ;
+    oc:yieldsState oc:UIResponsiveDuringFrequentUpdates .
 
-oc:kn_95b09047 a oc:Heuristic,
+oc:kn_27cc1e60 a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When auditing React components for performance optimization opportunities" ;
-    oc:directiveContent "If a state update originates from scroll, resize, pointermove, or similar rapidly-repeating events, it is a strong candidate for startTransition." ;
-    oc:hasRationale "These events fire at 60+ times per second; even lightweight renders at this frequency compete with user input for the main thread." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_a3086645 a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When deciding which setState calls to wrap in startTransition" ;
-    oc:directiveContent "Only wrap non-urgent updates in startTransition — never wrap urgent updates like controlled input values, focus management, or immediate visual feedback." ;
-    oc:hasRationale "Urgent updates wrapped in startTransition will be deferred, causing perceptible lag in user-facing interactions that should feel instantaneous." ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_d9fb459a a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When a state update is triggered by a frequent event and does not need to be visually immediate" ;
-    oc:directiveContent "Use startTransition to wrap non-urgent state updates so React can interrupt them if more urgent updates (like user input) arrive." ;
-    oc:hasRationale "startTransition marks the update as low-priority, allowing React to batch and defer rendering while keeping the UI responsive to user interaction." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_fd64cfa5 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When writing React event handlers for scroll, resize, or other rapidly-firing DOM events" ;
-    oc:directiveContent "Never call setState directly inside high-frequency event handlers (scroll, resize, mousemove) without wrapping in startTransition." ;
-    oc:hasRationale "Direct setState in high-frequency handlers blocks the main thread on every event, causing visible UI jank and degraded responsiveness." ;
+    oc:appliesToContext "When handling scroll, input, or other frequent DOM events in React components" ;
+    oc:directiveContent "Do not set state directly inside high-frequency event handlers (scroll, input, resize) without wrapping in startTransition — it blocks the main thread and degrades UI responsiveness." ;
+    oc:hasRationale "Direct setState in high-frequency callbacks forces React to render synchronously on every event, starving the main thread of time for user interactions." ;
     oc:severityLevel "HIGH" .
+
+oc:kn_2ae17709 a oc:KnowledgeNode,
+        oc:Prerequisite ;
+    oc:appliesToContext "Before using this pattern" ;
+    oc:directiveContent "React 18+ is required for startTransition API" .
+
+oc:kn_5f46afea a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When deciding which state updates to wrap in transitions" ;
+    oc:directiveContent "Distinguish between urgent updates (typing, clicking) and non-urgent updates (filtering, scrolling indicators, analytics) — wrap only the non-urgent ones in startTransition." ;
+    oc:hasRationale "React's concurrent rendering schedules transitions at lower priority so urgent interactions remain responsive." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_7708c044 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Wrapping any non-urgent state update inside an event handler" ;
+    oc:codeLanguage "tsx" ;
+    oc:directiveContent "startTransition(() => setState(newValue))" ;
+    oc:hasRationale "This is the minimal API surface for marking a state update as a transition in React 18+." .
+
+oc:kn_b3073160 a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "When using startTransition for scroll trackers, filter updates, or similar UI" ;
+    oc:directiveContent "startTransition reduces main-thread blocking by deferring non-urgent renders, but the deferred update may render with slightly stale data until the transition completes." ;
+    oc:hasRationale "Transitions are interruptible — React may abort them if a higher-priority update arrives, which is the desired behavior for non-urgent work." .
 

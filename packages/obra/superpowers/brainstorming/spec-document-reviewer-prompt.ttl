@@ -7,61 +7,140 @@
 oc:skill_obra_superpowers_brainstorming_spec_document_reviewer_prompt a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "spec-document-reviewer-prompt" ;
-    skos:broader "review template" ;
+    skos:broader "Prompt template" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/obra/superpowers/brainstorming" ;
     oc:contentHash "12cb5ed58aef41b8da6fbb505547c71ca3f5658c83b66ca6e556c936308b3189" ;
-    oc:dependsOnSkill oc:skill_brainstorming ;
-    oc:differentia "dispatches a subagent to verify spec documents are complete, consistent, and ready for implementation planning" ;
+    oc:dependsOnSkill oc:skill_ontoskills_brainstorming ;
+    oc:differentia "dispatches a spec document reviewer subagent that verifies completeness, consistency, and readiness for implementation planning" ;
     oc:extends oc:skill_obra_superpowers_brainstorming ;
-    oc:handlesFailure oc:FileNotFound,
-        oc:InvalidInput ;
-    oc:hasArgumentHint "SPEC_FILE_PATH" ;
+    oc:handlesFailure oc:DocumentIncomplete,
+        oc:DocumentInconsistent ;
+    oc:hasAllowedTool "Task" ;
+    oc:hasArgumentHint "SPEC_FILE_PATH — path to the spec document to review" ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_033d227e,
-        oc:kn_8b246715,
-        oc:kn_92b5bd5a,
-        oc:kn_d1669a9d,
-        oc:kn_fb84e655 ;
-    oc:isUserInvocable false ;
-    oc:nature "Concept" ;
-    oc:requiresState oc:DocumentCreated ;
-    oc:resolvesIntent "check spec readiness for planning",
-        "dispatch spec reviewer subagent",
-        "review spec document",
-        "verify spec completeness" ;
-    oc:yieldsState oc:SpecReviewed .
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 5 ;
+                    oc:textContent "**Reviewer returns:** Status, Issues (if any), Recommendations" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 3 ;
+                    oc:textContent "**Dispatch after:** Spec document is written to docs/superpowers/specs/" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Purpose:** Verify the spec is complete, consistent, and ready for implementation planning." ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """Task tool (general-purpose):
+  description: "Review spec document"
+  prompt: |
+    You are a spec document reviewer. Verify this spec is complete and ready for planning.
 
-oc:kn_033d227e a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "Before dispatching the spec reviewer" ;
-    oc:directiveContent "Verify the spec file exists at the specified path before dispatching the reviewer subagent" ;
-    oc:hasRationale "Dispatching a reviewer against a non-existent file wastes agent cycles and produces confusing results" ;
+    **Spec to review:** [SPEC_FILE_PATH]
+
+    ## What to Check
+
+    | Category | What to Look For |
+    |----------|------------------|
+    | Completeness | TODOs, placeholders, "TBD", incomplete sections |
+    | Consistency | Internal contradictions, conflicting requirements |
+    | Clarity | Requirements ambiguous enough to cause someone to build the wrong thing |
+    | Scope | Focused enough for a single plan — not covering multiple independent subsystems |
+    | YAGNI | Unrequested features, over-engineering |
+
+    ## Calibration
+
+    **Only flag issues that would cause real problems during implementation planning.**
+    A missing section, a contradiction, or a requirement so ambiguous it could be
+    interpreted two different ways — those are issues. Minor wording improvements,
+    stylistic preferences, and "sections less detailed than others" are not.
+
+    Approve unless there are serious gaps that would lead to a flawed plan.
+
+    ## Output Format
+
+    ## Spec Review
+
+    **Status:** Approved | Issues Found
+
+    **Issues (if any):**
+    - [Section X]: [specific issue] - [why it matters for planning]
+
+    **Recommendations (advisory, do not block approval):**
+    - [suggestions for improvement]
+""" ;
+                    oc:codeLanguage "" ;
+                    oc:contentOrder 4 ;
+                    oc:sourceLocation "lines 9-47" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Use this template when dispatching a spec document reviewer subagent." ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Spec Document Reviewer Prompt Template" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "Dispatch a subagent to review a spec document for completeness, consistency, clarity, scope, and YAGNI compliance." ;
+            oc:hasStep _:ref_70e4fffe3278da3c,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Evaluate the review result — if Approved, proceed to user review gate; if Issues Found, fix issues and optionally re-dispatch" ;
+                    oc:expectedOutcome "Spec is approved or issues are identified for remediation" ;
+                    oc:stepDependsOn _:ref_70e4fffe3278da3c ;
+                    oc:stepId "evaluate-result" ] ;
+            oc:workflowId "spec-review-dispatch" ;
+            oc:workflowName "Dispatch Spec Document Reviewer" ] ;
+    oc:impartsKnowledge oc:kn_5727d86a,
+        oc:kn_7bc405ba,
+        oc:kn_8cdfd126,
+        oc:kn_a2b056f7,
+        oc:kn_d7cc9437 ;
+    oc:isUserInvocable false ;
+    oc:nature "Work" ;
+    oc:requiresState oc:DocumentCreated ;
+    oc:resolvesIntent "review spec document",
+        "validate spec readiness for implementation planning",
+        "verify spec completeness and consistency" ;
+    oc:yieldsState oc:DocumentReviewed .
+
+oc:kn_5727d86a a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When performing the spec review" ;
+    oc:directiveContent "Check five categories in order: Completeness (TODOs/placeholders/TBD), Consistency (internal contradictions), Clarity (ambiguous requirements), Scope (focused for single plan), YAGNI (over-engineering)." ;
+    oc:hasRationale "These five categories cover the most common failure modes that would derail implementation planning." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_8b246715 a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "When performing any spec document review" ;
-    oc:directiveContent "Check spec documents across five dimensions: Completeness (TODOs, placeholders, TBDs), Consistency (internal contradictions), Clarity (ambiguous requirements), Scope (focused for single plan), and YAGNI (unrequested features, over-engineering)." ;
-    oc:hasRationale "These five categories cover the most common failure modes that would derail implementation planning" ;
+oc:kn_7bc405ba a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When reviewing a spec document" ;
+    oc:directiveContent "Only flag issues that would cause real problems during implementation planning — missing sections, contradictions, or requirements ambiguous enough to be interpreted two different ways." ;
+    oc:hasRationale "Over-flagging minor issues wastes time and dilutes attention from genuine blockers; the reviewer's job is to catch flaws that would lead to a faulty plan, not to copy-edit." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_92b5bd5a a oc:Constraint,
+oc:kn_8cdfd126 a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "Before dispatching the spec reviewer" ;
-    oc:directiveContent "Spec must be written to docs/superpowers/specs/ before dispatching the reviewer subagent" ;
-    oc:hasRationale "The reviewer needs a persisted document to analyze; dispatching before the spec exists would be premature" ;
+    oc:appliesToContext "When determining what counts as a review issue" ;
+    oc:directiveContent "Do not flag minor wording improvements, stylistic preferences, or sections being less detailed than others as issues." ;
+    oc:hasRationale "These are not blockers for planning and should only appear as advisory recommendations, never as blocking issues." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_a2b056f7 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When making the approve/reject determination" ;
+    oc:directiveContent "Approve the spec unless there are serious gaps that would lead to a flawed implementation plan." ;
+    oc:hasRationale "The spec review gate is a quality filter for planning readiness, not a perfection gate — the goal is to prevent bad plans, not perfect specs." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_d7cc9437 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before dispatching the reviewer" ;
+    oc:directiveContent "The spec document must already be written to docs/superpowers/specs/ before dispatching the reviewer subagent." ;
+    oc:hasRationale "Reviewing a non-existent or incomplete file is a waste of an agent cycle — the spec must exist as a committed artifact first." ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_d1669a9d a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When reviewing any spec document for completeness and readiness" ;
-    oc:directiveContent "Only flag issues that would cause real problems during implementation planning — missing sections, contradictions, or requirements ambiguous enough to be interpreted multiple ways. Minor wording, style, and depth differences are not actionable issues." ;
-    oc:hasRationale "Over-flagging trivial issues wastes cycles and erodes trust in the review process; the reviewer's value is in catching problems that would lead to a flawed implementation plan" ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_fb84e655 a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When making the final approval decision on a spec" ;
-    oc:directiveContent "Approve the spec unless there are serious gaps that would lead to a flawed plan. Recommendations are advisory and do not block approval." ;
-    oc:hasRationale "The default posture should be to approve and move forward; only genuine planning blockers should prevent approval, keeping the process lean" .
+_:ref_70e4fffe3278da3c a oc:WorkflowStep ;
+    dcterms:description "Dispatch Task tool with the spec-reviewer prompt template, filling in [SPEC_FILE_PATH] with the actual spec path" ;
+    oc:expectedOutcome "Subagent returns status (Approved | Issues Found), list of issues, and advisory recommendations" ;
+    oc:stepId "dispatch-reviewer" .
 

@@ -7,94 +7,699 @@
 oc:skill_vercel_labs_agent_browser_authentication a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "authentication" ;
-    skos:broader "authentication pattern guide" ;
+    skos:broader "Browser authentication pattern library" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/agent-browser" ;
     oc:contentHash "8ccc30f2613523630cf3771a07d71339676d93c63623631a4206521c6d78d2e5" ;
-    oc:differentia "that documents login flows, session persistence, OAuth, 2FA, and credential management for automated browser sessions using agent-browser" ;
+    oc:dependsOnSkill oc:skill_ontoskills_agent_browser ;
+    oc:differentia "Provides login flows, session persistence, and credential management for agent-browser automation" ;
     oc:extends oc:skill_vercel_labs_agent_browser ;
     oc:handlesFailure oc:AuthenticationFailed,
         oc:SessionExpired,
-        oc:TokenRefreshRequired ;
-    oc:hasAllowedTool "agent-browser",
-        "bash" ;
-    oc:hasArgumentHint "auth-state-file path or profile name" ;
+        oc:TokenRefreshFailed ;
+    oc:hasAllowedTool "Bash" ;
+    oc:hasArgumentHint "auth-method (e.g., import, profile, session, basic, oauth, 2fa)" ;
     oc:hasCategory "automation" ;
-    oc:impartsKnowledge oc:kn_06908ba4,
-        oc:kn_0b093785,
-        oc:kn_266db1bd,
-        oc:kn_3172c6bb,
-        oc:kn_63fa5cb4,
-        oc:kn_b5c068bb,
-        oc:kn_b65de72d,
-        oc:kn_f78a72d6 ;
+    oc:hasRequirement oc:req_33dc207f,
+        oc:req_882f0c31,
+        oc:req_d68da712,
+        oc:req_e4ace3cb ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Login flows, session persistence, OAuth, 2FA, and authenticated browsing." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Related**: [session-management.md](session-management.md) for state persistence details, [SKILL.md](../SKILL.md) for quick start." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 10 ;
+                                    oc:itemText "[Cookie-Based Auth](#cookie-based-auth)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 9 ;
+                                    oc:itemText "[HTTP Basic Auth](#http-basic-auth)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "[Basic Login Flow](#basic-login-flow)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "[Saving Authentication State](#saving-authentication-state)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 6 ;
+                                    oc:itemText "[Restoring Authentication](#restoring-authentication)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 8 ;
+                                    oc:itemText "[Two-Factor Authentication](#two-factor-authentication)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 11 ;
+                                    oc:itemText "[Token Refresh Handling](#token-refresh-handling)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 7 ;
+                                    oc:itemText "[OAuth / SSO Flows](#oauth--sso-flows)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "[Import Auth from Your Browser](#import-auth-from-your-browser)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 12 ;
+                                    oc:itemText "[Security Best Practices](#security-best-practices)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "[Session Persistence](#session-persistence)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "[Persistent Profiles](#persistent-profiles)" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Contents" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """#!/bin/bash
+# Wrapper that handles token refresh
+
+STATE_FILE="./auth-state.json"
+
+# Try loading existing state
+if [[ -f "$STATE_FILE" ]]; then
+    agent-browser state load "$STATE_FILE"
+    agent-browser open https://app.example.com/dashboard
+
+    # Check if session is still valid
+    URL=$(agent-browser get url)
+    if [[ "$URL" == *"/login"* ]]; then
+        echo "Session expired, re-authenticating..."
+        # Perform fresh login
+        agent-browser snapshot -i
+        agent-browser fill @e1 "$USERNAME"
+        agent-browser fill @e2 "$PASSWORD"
+        agent-browser click @e3
+        agent-browser wait --url "**/dashboard"
+        agent-browser state save "$STATE_FILE"
+    fi
+else
+    # First-time login
+    agent-browser open https://app.example.com/login
+    # ... login flow ...
+fi
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 248-276" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "For sessions with expiring tokens:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 12 ;
+                    oc:sectionTitle "Token Refresh Handling" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 10 ;
+                            oc:textContent "This works for any site, including those with complex OAuth flows, SSO, or 2FA -- as long as Chrome already has valid session cookies." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 6 ;
+                            oc:textContent "**Step 2: Grab the auth state**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 8 ;
+                            oc:textContent "**Step 3: Reuse in automation**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "Log in to your target site(s) in this Chrome window as you normally would." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# Load auth at launch
+agent-browser --state ./my-auth.json open https://app.example.com/dashboard
+
+# Or load into an existing session
+agent-browser state load ./my-auth.json
+agent-browser open https://app.example.com/dashboard
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 9 ;
+                            oc:sourceLocation "lines 52-59" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 12 ;
+                            oc:textContent "**Tip:** Combine with `--session-name` so the imported auth auto-persists across restarts:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# macOS
+"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --remote-debugging-port=9222
+
+# Linux
+google-chrome --remote-debugging-port=9222
+
+# Windows
+"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe" --remote-debugging-port=9222
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 3 ;
+                            oc:sourceLocation "lines 28-37" ],
+                        [ a oc:BlockQuote ;
+                            oc:blockType "blockquote" ;
+                            oc:contentOrder 11 ;
+                            oc:quoteContent "**Security note:** State files contain session tokens in plaintext. Add them to `.gitignore`, delete when no longer needed, and set `AGENT_BROWSER_ENCRYPTION_KEY` for encryption at rest. See [Security Best Practices](#security-best-practices)." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "The fastest way to authenticate is to reuse cookies from a Chrome session you are already logged into." ],
+                        [ a oc:BlockQuote ;
+                            oc:blockType "blockquote" ;
+                            oc:contentOrder 5 ;
+                            oc:quoteContent "**Security note:** `--remote-debugging-port` exposes full browser control on localhost. Any local process can connect and read cookies, execute JS, etc. Only use on trusted machines and close Chrome when done." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# Auto-discover the running Chrome and save its cookies + localStorage
+agent-browser --auto-connect state save ./my-auth.json
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 7 ;
+                            oc:sourceLocation "lines 45-48" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Step 1: Start Chrome with remote debugging**" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """agent-browser --session-name myapp state load ./my-auth.json
+# From now on, state is auto-saved/restored for "myapp"
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 13 ;
+                            oc:sourceLocation "lines 67-70" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Import Auth from Your Browser" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Skip login by loading saved state:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# Load saved auth state
+agent-browser state load ./auth-state.json
+
+# Navigate directly to protected page
+agent-browser open https://app.example.com/dashboard
+
+# Verify authenticated
+agent-browser snapshot -i
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 164-173" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 7 ;
+                    oc:sectionTitle "Restoring Authentication" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# Login first (see above)
+agent-browser open https://app.example.com/login
+agent-browser snapshot -i
+agent-browser fill @e1 "user@example.com"
+agent-browser fill @e2 "password123"
+agent-browser click @e3
+agent-browser wait --url "**/dashboard"
+
+# Save authenticated state
+agent-browser state save ./auth-state.json
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 147-158" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "After logging in, save state for reuse:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Saving Authentication State" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "Encrypt state at rest:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """export AGENT_BROWSER_ENCRYPTION_KEY=$(openssl rand -hex 32)
+agent-browser --session-name secure open https://app.example.com
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 4 ;
+                            oc:sourceLocation "lines 115-118" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Use `--session-name` to auto-save and restore cookies + localStorage by name, without managing files:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# Auto-saves state on close, auto-restores on next launch
+agent-browser --session-name twitter open https://twitter.com
+# ... login flow ...
+agent-browser close  # state saved to ~/.agent-browser/sessions/
+
+# Next time: state is automatically restored
+agent-browser --session-name twitter open https://twitter.com
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 103-111" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Session Persistence" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# Set auth cookie
+agent-browser cookies set session_token "abc123xyz"
+
+# Navigate to protected page
+agent-browser open https://app.example.com/dashboard
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 236-242" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Manually set authentication cookies:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 11 ;
+                    oc:sectionTitle "Cookie-Based Auth" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Handle 2FA with manual intervention:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# Login with credentials
+agent-browser open https://app.example.com/login --headed  # Show browser
+agent-browser snapshot -i
+agent-browser fill @e1 "user@example.com"
+agent-browser fill @e2 "password123"
+agent-browser click @e3
+
+# Wait for user to complete 2FA manually
+echo "Complete 2FA in the browser window..."
+agent-browser wait --url "**/dashboard" --timeout 120000
+
+# Save state after 2FA
+agent-browser state save ./2fa-state.json
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 204-218" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 9 ;
+                    oc:sectionTitle "Two-Factor Authentication" ],
+                [ a oc:Section ;
+                    oc:hasContent _:ref_3464121446717f98 ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 13 ;
+                    oc:sectionTitle "Security Best Practices" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# Set credentials before navigation
+agent-browser set credentials username password
+
+# Navigate to protected resource
+agent-browser open https://protected.example.com/api
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 224-230" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "For sites using HTTP Basic Authentication:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 10 ;
+                    oc:sectionTitle "HTTP Basic Auth" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """agent-browser --profile ~/.profiles/admin open https://app.example.com
+agent-browser --profile ~/.profiles/viewer open https://app.example.com
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 4 ;
+                            oc:sourceLocation "lines 87-90" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Use `--profile` to point agent-browser at a Chrome user data directory. This persists everything (cookies, IndexedDB, service workers, cache) across browser restarts without explicit save/load:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# First run: login once
+agent-browser --profile ~/.myapp-profile open https://app.example.com/login
+# ... complete login flow ...
+
+# All subsequent runs: already authenticated
+agent-browser --profile ~/.myapp-profile open https://app.example.com/dashboard
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 76-83" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent "Or set via environment variable:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "Use different paths for different projects or test users:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """export AGENT_BROWSER_PROFILE=~/.myapp-profile
+agent-browser open https://app.example.com/dashboard
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 6 ;
+                            oc:sourceLocation "lines 94-97" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Persistent Profiles" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "For OAuth redirects:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# Start OAuth flow
+agent-browser open https://app.example.com/auth/google
+
+# Handle redirects automatically
+agent-browser wait --url "**/accounts.google.com**"
+agent-browser snapshot -i
+
+# Fill Google credentials
+agent-browser fill @e1 "user@gmail.com"
+agent-browser click @e2  # Next button
+agent-browser wait 2000
+agent-browser snapshot -i
+agent-browser fill @e3 "password"
+agent-browser click @e4  # Sign in
+
+# Wait for redirect back
+agent-browser wait --url "**/app.example.com**"
+agent-browser state save ./oauth-state.json
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 179-198" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 8 ;
+                    oc:sectionTitle "OAuth / SSO Flows" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# Navigate to login page
+agent-browser open https://app.example.com/login
+agent-browser wait --load networkidle
+
+# Get form elements
+agent-browser snapshot -i
+# Output: @e1 [input type="email"], @e2 [input type="password"], @e3 [button] "Sign In"
+
+# Fill credentials
+agent-browser fill @e1 "user@example.com"
+agent-browser fill @e2 "password123"
+
+# Submit
+agent-browser click @e3
+agent-browser wait --load networkidle
+
+# Verify login succeeded
+agent-browser get url  # Should be dashboard, not login
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 122-141" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Basic Login Flow" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Authentication Patterns" ] ;
+    oc:hasWorkflow _:ref_3464121446717f98,
+        [ a oc:Workflow ;
+            dcterms:description "Automate standard username/password login form submission" ;
+            oc:hasStep [ a oc:WorkflowStep ;
+                    dcterms:description "Open login page and wait for network idle" ;
+                    oc:expectedOutcome "Login page fully loaded" ;
+                    oc:stepId "navigate-login" ],
+                _:ref_a15a4f338d7726f9,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Run snapshot -i to identify form element selectors" ;
+                    oc:expectedOutcome "Element IDs for email, password, and submit button obtained" ;
+                    oc:stepId "snapshot-form" ],
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Check URL is dashboard/protected page, then save state for reuse" ;
+                    oc:expectedOutcome "Login confirmed, auth state persisted" ;
+                    oc:stepDependsOn _:ref_a15a4f338d7726f9 ;
+                    oc:stepId "verify-login" ] ;
+            oc:workflowId "basic-login" ;
+            oc:workflowName "Basic Login Flow" ],
+        [ a oc:Workflow ;
+            dcterms:description "Defensive wrapper that handles expired sessions by detecting and re-authenticating" ;
+            oc:hasStep [ a oc:WorkflowStep ;
+                    dcterms:description "If session expired, perform fresh login and save new state" ;
+                    oc:expectedOutcome "Fresh auth state saved, protected content accessible" ;
+                    oc:stepDependsOn _:ref_8355a4d324b84a25 ;
+                    oc:stepId "reauth-if-needed" ],
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Attempt to load existing auth state file and navigate to protected page" ;
+                    oc:expectedOutcome "Either protected page loads or redirect to login detected" ;
+                    oc:stepId "load-state" ],
+                _:ref_8355a4d324b84a25 ;
+            oc:workflowId "token-refresh" ;
+            oc:workflowName "Token Refresh Handling" ],
+        [ a oc:Workflow ;
+            dcterms:description "Import authentication state from an already-logged-in Chrome session for reuse in automation" ;
+            oc:hasStep _:ref_1c0ff8912a6cd7ae,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Load auth state with --state flag or agent-browser state load, then navigate to protected pages" ;
+                    oc:expectedOutcome "Browser navigates to protected content without login" ;
+                    oc:stepDependsOn _:ref_1c0ff8912a6cd7ae ;
+                    oc:stepId "reuse-auth" ],
+                _:ref_964664e6e51f9a5f ;
+            oc:workflowId "import-browser-auth" ;
+            oc:workflowName "Import Auth from Existing Browser" ] ;
+    oc:impartsKnowledge oc:kn_3f4b8472,
+        oc:kn_661c00d8,
+        oc:kn_6d26ba97,
+        oc:kn_79428051,
+        oc:kn_83660d90,
+        oc:kn_c5f771b2,
+        oc:kn_c88c60c4,
+        oc:kn_d6f33642,
+        oc:kn_e6bcd403 ;
     oc:isUserInvocable true ;
-    oc:nature "Concept" ;
-    oc:requiresState oc:BrowserRunning,
-        oc:NetworkAvailable ;
-    oc:resolvesIntent "authenticate browser sessions",
-        "handle OAuth/SSO login flows",
-        "handle token refresh in automated sessions",
+    oc:nature "Tool" ;
+    oc:requiresState oc:BrowserAvailable ;
+    oc:resolvesIntent "authenticate browser session",
+        "handle OAuth/SSO flows",
         "handle two-factor authentication",
-        "import auth from existing Chrome browser",
-        "manage persistent browser profiles",
-        "save and restore authentication state",
-        "set HTTP basic auth and cookies for browser automation" ;
-    oc:yieldsState oc:BrowserAuthenticated,
-        oc:SessionStateSaved .
+        "import auth from existing browser",
+        "manage browser cookies and credentials",
+        "persist sessions across browser restarts",
+        "refresh expired auth tokens",
+        "save and restore authentication state" ;
+    oc:yieldsState oc:AuthStatePersisted,
+        oc:AuthenticatedSession .
 
-oc:kn_06908ba4 a oc:KnowledgeNode,
+oc:kn_3f4b8472 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "After any login form submission" ;
+    oc:directiveContent "Verify login succeeded by checking the URL is the dashboard/protected page and not still on the login page after form submission." ;
+    oc:hasRationale "Silent login failures propagate as confusing downstream errors" .
+
+oc:kn_661c00d8 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When target site requires two-factor authentication" ;
+    oc:directiveContent "2FA flows require --headed mode and manual user intervention. Use wait --url with a long timeout (e.g., 120000ms) to accommodate the manual step." ;
+    oc:hasRationale "2FA by design cannot be fully automated; the agent must wait for human completion" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_6d26ba97 a oc:KnowledgeNode,
         oc:SecurityImplication ;
-    oc:appliesToContext "When saving or storing any authentication state file" ;
-    oc:directiveContent "State files contain session tokens in plaintext. Always add them to .gitignore, delete when no longer needed, and set AGENT_BROWSER_ENCRYPTION_KEY for encryption at rest." ;
-    oc:hasRationale "Plaintext state files can leak session tokens if committed to version control or accessed by unauthorized processes" ;
+    oc:appliesToContext "Whenever saving or storing auth state files" ;
+    oc:directiveContent "State files contain session tokens in plaintext. Add them to .gitignore, delete when no longer needed, and set AGENT_BROWSER_ENCRYPTION_KEY for encryption at rest." ;
+    oc:hasRationale "Leaked state files grant full session access to anyone who obtains them" ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_0b093785 a oc:KnowledgeNode,
-        oc:WorkflowStrategy ;
-    oc:appliesToContext "When encountering two-factor authentication during automated login" ;
-    oc:directiveContent "For 2FA flows, use --headed mode and wait with a long timeout for manual completion, then save state immediately after for reuse." ;
-    oc:hasRationale "2FA is designed to require human interaction; manual completion in headed mode with state persistence is the most reliable approach" ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_266db1bd a oc:KnowledgeNode,
+oc:kn_79428051 a oc:KnowledgeNode,
         oc:PostFlightValidation ;
-    oc:appliesToContext "After completing any login flow" ;
-    oc:directiveContent "After login, verify authentication succeeded by checking the current URL is the dashboard/protected page, not the login page, and take a snapshot to confirm page content." ;
-    oc:hasRationale "Login forms can fail silently or redirect to error pages; explicit verification prevents downstream automation from operating in an unauthenticated state" ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_3172c6bb a oc:KnowledgeNode,
-        oc:SecurityImplication ;
-    oc:appliesToContext "When importing auth from an existing Chrome browser session via remote debugging" ;
-    oc:directiveContent "Using --remote-debugging-port on Chrome exposes full browser control on localhost. Any local process can connect and read cookies or execute JS. Only use on trusted machines and close Chrome when done." ;
-    oc:hasRationale "Remote debugging port opens unrestricted access to the browser, creating a local privilege escalation vector" ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_63fa5cb4 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When authenticating against sites with complex multi-step login flows" ;
-    oc:directiveContent "For sites with complex OAuth, SSO, or 2FA, the fastest approach is to import auth from an already-authenticated Chrome session using --auto-connect state save rather than automating the entire flow." ;
-    oc:hasRationale "Automating complex auth flows is fragile; reusing an existing browser session avoids redirect handling, popup management, and MFA timing issues" ;
+    oc:appliesToContext "After automation completes, especially in CI/CD environments" ;
+    oc:directiveContent "Clean up auth artifacts after automation: clear cookies, delete state files, close browser sessions." ;
+    oc:hasRationale "Residual auth state is an attack surface; cleanup limits exposure window" ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_b5c068bb a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When filling login forms in automated browser sessions" ;
-    oc:directiveContent "Never hardcode credentials in automation scripts. Always use environment variables like $APP_USERNAME and $APP_PASSWORD." ;
-    oc:hasRationale "Hardcoded credentials in scripts are a security risk and make credential rotation difficult" ;
-    oc:severityLevel "HIGH" .
+oc:kn_83660d90 a oc:KnowledgeNode,
+        oc:SecurityImplication ;
+    oc:appliesToContext "When using Chrome remote debugging to import auth" ;
+    oc:directiveContent "--remote-debugging-port exposes full browser control on localhost. Any local process can connect and read cookies, execute JS. Only use on trusted machines and close Chrome when done." ;
+    oc:hasRationale "Remote debugging port is an unauthenticated gateway to the browser" ;
+    oc:severityLevel "CRITICAL" .
 
-oc:kn_b65de72d a oc:DesignPrinciple,
+oc:kn_c5f771b2 a oc:DesignPrinciple,
         oc:KnowledgeNode ;
     oc:appliesToContext "When choosing a session persistence strategy" ;
-    oc:directiveContent "Use --profile for long-lived identity persistence across restarts, --session-name for lightweight cookie+localStorage persistence, and explicit state save/load for portable state files." ;
-    oc:hasRationale "Each persistence mechanism trades off convenience, scope, and portability differently; matching the right one to the use case reduces complexity" ;
+    oc:directiveContent "Use --profile for full browser state persistence (cookies, IndexedDB, service workers) or --session-name for lightweight cookie/localStorage persistence. Choose based on whether the site relies on advanced browser storage." ;
+    oc:hasRationale "Matching persistence depth to site requirements avoids stale state and reduces storage overhead" .
+
+oc:kn_c88c60c4 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When automating long-running sessions with expiring tokens" ;
+    oc:directiveContent "For token refresh, load existing state, check if session is still valid by inspecting the URL, and fall back to fresh login if redirected to login page. Always re-save state after re-authentication." ;
+    oc:hasRationale "Sessions expire unpredictably; defensive re-authentication prevents silent failures" .
+
+oc:kn_d6f33642 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When target site has complex auth and manual browser login is feasible" ;
+    oc:directiveContent "The fastest way to authenticate is to import cookies from an already-logged-in Chrome session using --auto-connect state save, bypassing complex OAuth/SSO/2FA flows entirely." ;
+    oc:hasRationale "Reusing existing sessions avoids re-implementing multi-step auth flows" ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_f78a72d6 a oc:KnowledgeNode,
-        oc:RecoveryTactic ;
-    oc:appliesToContext "When restoring authentication state that may have expired" ;
-    oc:directiveContent "When loading saved state, verify the session is still valid by checking if the URL redirects to a login page. If expired, perform a fresh login and overwrite the state file." ;
-    oc:hasRationale "Session tokens have finite lifetimes; detecting expiration and re-authenticating prevents silent failures in automated workflows" ;
+oc:kn_e6bcd403 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When filling login forms in any automation flow" ;
+    oc:directiveContent "Never hardcode credentials in automation scripts. Use environment variables for all usernames and passwords." ;
+    oc:hasRationale "Hardcoded credentials leak via version control, logs, and process listings" ;
     oc:severityLevel "HIGH" .
+
+oc:req_33dc207f a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "agent-browser CLI" .
+
+oc:req_882f0c31 a oc:RequirementEnvVar ;
+    oc:isOptional true ;
+    oc:requirementValue "AGENT_BROWSER_PROFILE" .
+
+oc:req_d68da712 a oc:RequirementTool ;
+    oc:isOptional true ;
+    oc:requirementValue "Google Chrome (for import auth flow)" .
+
+oc:req_e4ace3cb a oc:RequirementEnvVar ;
+    oc:isOptional true ;
+    oc:requirementValue "AGENT_BROWSER_ENCRYPTION_KEY" .
+
+_:ref_1a70b54184f37c04 a oc:CodeExample ;
+    oc:blockType "code_block" ;
+    oc:codeContent """agent-browser fill @e1 "$APP_USERNAME"
+agent-browser fill @e2 "$APP_PASSWORD"
+""" ;
+    oc:codeLanguage "bash" ;
+    oc:contentOrder 1 ;
+    oc:sourceLocation "lines 286-289" .
+
+_:ref_252fccaacbfa0b71 a oc:WorkflowStep ;
+    dcterms:description "**Use environment variables for credentials**" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild _:ref_1a70b54184f37c04 ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_362a2ae00a60dae0 a oc:WorkflowStep ;
+    dcterms:description "**Use short-lived sessions for CI/CD**" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild [ a oc:CodeExample ;
+            oc:blockType "code_block" ;
+            oc:codeContent """# Don't persist state in CI
+agent-browser open https://app.example.com/login
+# ... login and perform actions ...
+agent-browser close  # Session ends, nothing persisted
+""" ;
+            oc:codeLanguage "bash" ;
+            oc:contentOrder 1 ;
+            oc:sourceLocation "lines 298-303" ] ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_76447b1fea3a9c50 a oc:CodeExample ;
+    oc:blockType "code_block" ;
+    oc:codeContent """agent-browser cookies clear
+rm -f ./auth-state.json
+""" ;
+    oc:codeLanguage "bash" ;
+    oc:contentOrder 1 ;
+    oc:sourceLocation "lines 292-295" .
+
+_:ref_917756c3f7afbe7c a oc:CodeExample ;
+    oc:blockType "code_block" ;
+    oc:codeContent """echo "*.auth-state.json" >> .gitignore
+""" ;
+    oc:codeLanguage "bash" ;
+    oc:contentOrder 1 ;
+    oc:sourceLocation "lines 281-283" .
+
+_:ref_c843355c3cfa3be3 a oc:WorkflowStep ;
+    dcterms:description "**Never commit state files** - They contain session tokens" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild _:ref_917756c3f7afbe7c ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_cb96eef2f1d1eede a oc:WorkflowStep ;
+    dcterms:description "**Clean up after automation**" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild _:ref_76447b1fea3a9c50 ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_1c0ff8912a6cd7ae a oc:WorkflowStep ;
+    dcterms:description "Run agent-browser --auto-connect state save ./my-auth.json to extract cookies and localStorage" ;
+    oc:expectedOutcome "Auth state file saved to disk" ;
+    oc:stepDependsOn _:ref_964664e6e51f9a5f ;
+    oc:stepId "save-auth-state" .
+
+_:ref_3464121446717f98 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 1 ;
+    oc:hasStep _:ref_252fccaacbfa0b71,
+        _:ref_362a2ae00a60dae0,
+        _:ref_c843355c3cfa3be3,
+        _:ref_cb96eef2f1d1eede ;
+    oc:workflowId "procedure_1" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_8355a4d324b84a25 a oc:WorkflowStep ;
+    dcterms:description "Check if current URL contains /login indicating expired session" ;
+    oc:expectedOutcome "Session validity determined" ;
+    oc:stepId "check-validity" .
+
+_:ref_964664e6e51f9a5f a oc:WorkflowStep ;
+    dcterms:description "Launch Chrome with --remote-debugging-port=9222 and manually log in to target site(s)" ;
+    oc:expectedOutcome "Chrome running with active authenticated sessions" ;
+    oc:stepId "start-chrome-debug" .
+
+_:ref_a15a4f338d7726f9 a oc:WorkflowStep ;
+    dcterms:description "Fill credentials from env vars and click submit, wait for navigation" ;
+    oc:expectedOutcome "Form submitted, page navigates away from login" ;
+    oc:stepId "fill-submit" .
 

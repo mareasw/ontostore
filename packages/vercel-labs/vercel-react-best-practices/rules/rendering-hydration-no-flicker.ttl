@@ -7,57 +7,174 @@
 oc:skill_vercel_labs_vercel_react_best_practices_rendering_hydration_no_flicker a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "rendering-hydration-no-flicker" ;
-    skos:broader "React rendering pattern" ;
+    skos:broader "Rendering pattern" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "dc7ab358c67c177bca6e6f360fbc935ebe4efa928c0ba3ebd3f9f3d9e2000ca3" ;
-    oc:differentia "prevents hydration mismatch and visual flickering when using client-side storage in SSR contexts via synchronous inline scripts" ;
+    oc:differentia "Prevents hydration mismatch and visual flickering by using a synchronous inline script to read client-side storage before React hydration" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
-    oc:hasArgumentHint "client-side storage key and wrapper component" ;
+    oc:handlesFailure oc:InvalidInput ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_384fb543,
-        oc:kn_6f374942,
-        oc:kn_6f86a9e6,
-        oc:kn_da4132b8,
-        oc:kn_ea54d790 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Prevent Hydration Mismatch Without Flickering
+impact: MEDIUM
+impactDescription: avoids visual flicker and hydration errors
+tags: rendering, ssr, hydration, localStorage, flicker
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function ThemeWrapper({ children }: { children: ReactNode }) {
+  // localStorage is not available on server - throws error
+  const theme = localStorage.getItem('theme') || 'light'
+  
+  return (
+    <div className={theme}>
+      {children}
+    </div>
+  )
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-25" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 7 ;
+                    oc:textContent "Component first renders with default value (`light`), then updates after hydration, causing a visible flash of incorrect content." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "When rendering content that depends on client-side storage (localStorage, cookies), avoid both SSR breakage and post-hydration flickering by injecting a synchronous script that updates the DOM before React hydrates." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 5 ;
+                    oc:textContent "**Incorrect (visual flickering):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 11 ;
+                    oc:textContent "This pattern is especially useful for theme toggles, user preferences, authentication states, and any client-only data that should render immediately without flashing default values." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "Server-side rendering will fail because `localStorage` is undefined." ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function ThemeWrapper({ children }: { children: ReactNode }) {
+  return (
+    <>
+      <div id="theme-wrapper">
+        {children}
+      </div>
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
+            (function() {
+              try {
+                var theme = localStorage.getItem('theme') || 'light';
+                var el = document.getElementById('theme-wrapper');
+                if (el) el.className = theme;
+              } catch (e) {}
+            })();
+          `,
+        }}
+      />
+    </>
+  )
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 9 ;
+                    oc:sourceLocation "lines 55-78" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 8 ;
+                    oc:textContent "**Correct (no flicker, no hydration mismatch):**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function ThemeWrapper({ children }: { children: ReactNode }) {
+  const [theme, setTheme] = useState('light')
+  
+  useEffect(() => {
+    // Runs after hydration - causes visible flash
+    const stored = localStorage.getItem('theme')
+    if (stored) {
+      setTheme(stored)
+    }
+  }, [])
+  
+  return (
+    <div className={theme}>
+      {children}
+    </div>
+  )
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 6 ;
+                    oc:sourceLocation "lines 31-49" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 10 ;
+                    oc:textContent "The inline script executes synchronously before showing the element, ensuring the DOM already has the correct value. No flickering, no hydration mismatch." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Incorrect (breaks SSR):**" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Prevent Hydration Mismatch Without Flickering" ] ;
+    oc:impartsKnowledge oc:kn_33c60d56,
+        oc:kn_74a05b7d,
+        oc:kn_756b65c0,
+        oc:kn_b4846226,
+        oc:kn_b62a2772 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:resolvesIntent "avoid visual flicker on theme toggle",
-        "implement flicker-free theme switching in Next.js",
-        "prevent hydration mismatch with localStorage",
-        "render client-only data without SSR errors" .
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "avoid visual flickering on SSR pages",
+        "implement theme toggle without flicker",
+        "prevent hydration mismatch",
+        "render client-only data without flash of default content" ;
+    oc:yieldsState oc:DocumentCreated .
 
-oc:kn_384fb543 a oc:Heuristic,
+oc:kn_33c60d56 a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When writing inline scripts that access browser storage APIs" ;
-    oc:directiveContent "Wrap localStorage reads in try/catch within inline scripts to gracefully handle environments where storage may be disabled or restricted." ;
-    oc:hasRationale "Private browsing modes, storage quotas, and browser security policies can cause localStorage access to throw, which would break the page if unhandled." ;
+    oc:appliesToContext "When rendering content that depends on localStorage, cookies, or other client-only APIs" ;
+    oc:directiveContent "Use a synchronous inline <script> via dangerouslySetInnerHTML to read client-only data and mutate the DOM before React hydrates, avoiding both SSR breakage and post-hydration flicker." ;
+    oc:hasRationale "The inline script executes synchronously before the browser paints, ensuring the DOM has the correct value at hydration time with no visual flash." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_74a05b7d a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When implementing the synchronous inline script pattern" ;
+    oc:directiveContent "The synchronous script approach requires a stable DOM element ID or selector that exists in the SSR output so the script can find and update it." ;
+    oc:hasRationale "Without a reliable selector, the script cannot locate the target element to apply the client-only value." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_6f374942 a oc:AntiPattern,
+oc:kn_756b65c0 a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When rendering components that depend on client-side storage (localStorage, sessionStorage, cookies) in an SSR/SSG environment" ;
-    oc:directiveContent "Never access localStorage or other browser-only APIs directly during component render in SSR contexts — they are undefined on the server and will throw errors." ;
-    oc:hasRationale "Server-side rendering executes in Node.js where browser APIs like localStorage do not exist, causing runtime errors and broken renders." ;
+    oc:appliesToContext "When implementing theme toggles, user preferences, or auth-dependent rendering" ;
+    oc:directiveContent "Avoid reading localStorage in useEffect to set initial state — this causes a visible flash of the default value before the stored value is applied." ;
+    oc:hasRationale "useEffect runs after hydration and paint, so the user sees the default value (e.g., light theme) flash before the stored value (e.g., dark theme) takes effect." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_b4846226 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When deciding whether to use this pattern vs. alternatives like blocking loading states" ;
+    oc:directiveContent "This pattern is especially useful for theme toggles, user preferences, authentication states, and any client-only data that should render immediately without flashing default values." ;
+    oc:hasRationale "These use cases share the common trait of needing immediate visual correctness without a loading state." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_b62a2772 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When rendering components that depend on client-side storage" ;
+    oc:directiveContent "Never access localStorage directly during SSR rendering — it is undefined on the server and will throw a runtime error." ;
+    oc:hasRationale "Server-side rendering runs in Node.js where the window/localStorage API does not exist, causing the entire render to fail." ;
     oc:severityLevel "CRITICAL" .
-
-oc:kn_6f86a9e6 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When implementing theme toggles, user preferences, or any client-only data that should render immediately" ;
-    oc:directiveContent "Avoid using useEffect to read localStorage and then setState, as this causes a visible flash of incorrect/default content before the update applies." ;
-    oc:hasRationale "useEffect runs after hydration, meaning the component first renders with the default value and then re-renders with the stored value, producing a visible flicker." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_da4132b8 a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When you need client-only data to be present in the DOM immediately on first paint without breaking SSR" ;
-    oc:directiveContent "Use a synchronous inline script (via dangerouslySetInnerHTML) to read client-side storage and update the DOM before React hydrates, eliminating both SSR errors and post-hydration flicker." ;
-    oc:hasRationale "Synchronous inline scripts execute before the browser paints and before React hydration begins, so the DOM already has the correct value when React takes over — no mismatch, no flash." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_ea54d790 a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When implementing the inline script hydration-safe pattern" ;
-    oc:directiveContent "The synchronous script pattern requires a identifiable DOM element (by id) that exists in the SSR output, so the script can target it before hydration." ;
-    oc:hasRationale "Without a stable DOM selector, the script cannot find the element to apply the class or attribute before React hydrates." ;
-    oc:severityLevel "MEDIUM" .
 

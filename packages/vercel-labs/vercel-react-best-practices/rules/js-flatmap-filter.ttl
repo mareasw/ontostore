@@ -7,58 +7,149 @@
 oc:skill_vercel_labs_vercel_react_best_practices_js_flatmap_filter a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "js-flatmap-filter" ;
-    skos:broader "Performance optimization pattern" ;
+    skos:broader "Code optimization pattern" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "9e5b166a41914d975bef7635467f8fb32cd98b5c3126c0bc6f163490812fb5f0" ;
-    oc:differentia "replaces chained .map().filter() with .flatMap() to eliminate intermediate arrays and reduce iterations from two to one" ;
+    oc:differentia "replaces chained .map().filter() with a single .flatMap() call to eliminate intermediate arrays and reduce iterations" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
-    oc:hasArgumentHint "code with .map().filter() chains" ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_9643d672,
-        oc:kn_9d147fa7,
-        oc:kn_9d9b7e8f,
-        oc:kn_e2e91ae7,
-        oc:kn_eb08ef87 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """const userNames = users.flatMap(user =>
+  user.isActive ? [user.name] : []
+)
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 6 ;
+                    oc:sourceLocation "lines 24-28" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """const userNames = users
+  .map(user => user.isActive ? user.name : null)
+  .filter(Boolean)
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 4 ;
+                    oc:sourceLocation "lines 16-20" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 3 ;
+                    oc:textContent "**Incorrect (2 iterations, intermediate array):**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """// Extract valid emails from responses
+// Before
+const emails = responses
+  .map(r => r.success ? r.data.email : null)
+  .filter(Boolean)
+
+// After
+const emails = responses.flatMap(r =>
+  r.success ? [r.data.email] : []
+)
+
+// Parse and filter valid numbers
+// Before
+const numbers = strings
+  .map(s => parseInt(s, 10))
+  .filter(n => !isNaN(n))
+
+// After
+const numbers = strings.flatMap(s => {
+  const n = parseInt(s, 10)
+  return isNaN(n) ? [] : [n]
+})
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 8 ;
+                    oc:sourceLocation "lines 32-55" ],
+                [ a oc:BulletList ;
+                    oc:blockType "bullet_list" ;
+                    oc:contentOrder 10 ;
+                    oc:hasItem [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 3 ;
+                            oc:itemText "Parsing/validating where invalid inputs should be skipped" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 2 ;
+                            oc:itemText "Conditional mapping where some inputs produce no output" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 1 ;
+                            oc:itemText "Transforming items while filtering some out" ] ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "Chaining `.map().filter(Boolean)` creates an intermediate array and iterates twice. Use `.flatMap()` to transform and filter in a single pass." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "**Impact: LOW-MEDIUM (eliminates intermediate array)**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 7 ;
+                    oc:textContent "**More examples:**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 9 ;
+                    oc:textContent "**When to use:**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 5 ;
+                    oc:textContent "**Correct (1 iteration, no intermediate array):**" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Use flatMap to Map and Filter in One Pass" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Use flatMap to Map and Filter in One Pass
+impact: LOW-MEDIUM
+impactDescription: eliminates intermediate array
+tags: javascript, arrays, flatMap, filter, performance
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:impartsKnowledge oc:kn_03b2a0b2,
+        oc:kn_862b6fdb,
+        oc:kn_a33a4bff,
+        oc:kn_fcd7ffec ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:CodeReady ;
-    oc:resolvesIntent "optimize array transformations",
-        "reduce memory allocations in array processing",
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "eliminate intermediate arrays",
+        "map and filter in one pass",
+        "optimize array transformations",
         "replace map-filter chains with flatMap" ;
     oc:yieldsState oc:CodeOptimized .
 
-oc:kn_9643d672 a oc:AntiPattern,
+oc:kn_03b2a0b2 a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "When evaluating performance of array transformation chains" ;
+    oc:directiveContent "flatMap replaces O(2n) with O(n) iteration and eliminates one intermediate array allocation." ;
+    oc:hasRationale "The performance gain is LOW-MEDIUM impact — measurable on large arrays but not transformative on small ones." .
+
+oc:kn_862b6fdb a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When writing array transformations that include conditional filtering" ;
-    oc:directiveContent "Avoid chaining .map().filter(Boolean) when the map step produces null/undefined for items that should be excluded." ;
-    oc:hasRationale "This pattern creates an unnecessary intermediate array and iterates twice over the data, wasting memory and compute." ;
+    oc:appliesToContext "When designing data transformation pipelines in JavaScript" ;
+    oc:directiveContent "Combine transformation and filtering into a single pass using flatMap instead of separate map and filter operations." ;
+    oc:hasRationale "Single-pass operations are more efficient than multi-pass chains for large datasets." .
+
+oc:kn_a33a4bff a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When transforming and filtering arrays in JavaScript/TypeScript" ;
+    oc:directiveContent "Avoid chaining .map().filter(Boolean) — it creates an intermediate array and iterates twice over the data." ;
+    oc:hasRationale "Two iterations and an intermediate array waste memory and CPU cycles, especially on large collections." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_9d147fa7 a oc:KnowledgeNode,
-        oc:SideEffect ;
-    oc:appliesToContext "When optimizing hot paths or processing large arrays" ;
-    oc:directiveContent "Replacing .map().filter() with .flatMap() removes one intermediate array allocation per transformation chain, reducing peak memory usage proportional to the input array size." ;
-    oc:hasRationale "Intermediate arrays from .map() consume memory equal to the input size even if most items are filtered out; flatMap avoids this allocation entirely." ;
-    oc:severityLevel "LOW" .
-
-oc:kn_9d9b7e8f a oc:Heuristic,
+oc:kn_fcd7ffec a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When evaluating whether flatMap is the right tool for an array transformation" ;
-    oc:directiveContent "Use flatMap when you need to transform items while filtering some out, perform conditional mapping where some inputs produce no output, or parse/validate where invalid inputs should be skipped." ;
-    oc:hasRationale "These are the canonical use cases where flatMap provides clear benefits over separate map and filter operations." ;
-    oc:severityLevel "LOW" .
-
-oc:kn_e2e91ae7 a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When implementing flatMap for map-filter replacement" ;
-    oc:directiveContent "The flatMap callback must return an array — use [value] to include and [] to exclude. Returning a non-array value will produce unexpected results." ;
-    oc:hasRationale "flatMap flattens the returned array one level; returning a non-array value will not behave as expected for filtering." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_eb08ef87 a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "When transforming arrays where some items should be conditionally excluded from the result" ;
-    oc:directiveContent "Use .flatMap() to map and filter in a single pass by returning a single-element array for items to keep and an empty array for items to exclude." ;
-    oc:hasRationale "Eliminates the intermediate array created by chaining .map().filter() and reduces iterations from two to one, improving both memory usage and CPU cycles." ;
-    oc:severityLevel "MEDIUM" .
+    oc:appliesToContext "When you need to transform items while conditionally filtering some out" ;
+    oc:codeLanguage "typescript" ;
+    oc:directiveContent "Use .flatMap() returning [] for items to exclude and [value] for items to include: `arr.flatMap(x => condition ? [transform(x)] : [])`" ;
+    oc:hasRationale "flatMap maps each element to an array, then flattens one level — returning an empty array effectively filters that element out in a single pass." .
 

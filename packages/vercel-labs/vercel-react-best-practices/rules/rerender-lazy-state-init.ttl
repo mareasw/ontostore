@@ -10,55 +10,141 @@ oc:skill_vercel_labs_vercel_react_best_practices_rerender_lazy_state_init a oc:D
     skos:broader "React performance optimization pattern" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "4ae844740f266fc8cbf050701230286624a2440ec5be67b9a63d9edc3c580573" ;
-    oc:differentia "that avoids re-running expensive initializers on every render by passing a function to useState" ;
+    oc:differentia "uses lazy initialization function in useState to avoid re-computing expensive initial state values on every render" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
-    oc:hasArgumentHint "React component with useState hooks" ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_2a53c03f,
-        oc:kn_2b0d7a74,
-        oc:kn_3f418fad,
-        oc:kn_5caef01b,
-        oc:kn_ff8179c1 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Use Lazy State Initialization
+impact: MEDIUM
+impactDescription: wasted computation on every render
+tags: react, hooks, useState, performance, initialization
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Pass a function to `useState` for expensive initial values. Without the function form, the initializer runs on every render even though the value is only used once." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 6 ;
+                    oc:textContent "Use lazy initialization when computing initial values from localStorage/sessionStorage, building data structures (indexes, maps), reading from the DOM, or performing heavy transformations." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 7 ;
+                    oc:textContent "For simple primitives (`useState(0)`), direct references (`useState(props.value)`), or cheap literals (`useState({})`), the function form is unnecessary." ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function FilteredList({ items }: { items: Item[] }) {
+  // buildSearchIndex() runs ONLY on initial render
+  const [searchIndex, setSearchIndex] = useState(() => buildSearchIndex(items))
+  const [query, setQuery] = useState('')
+  
+  return <SearchResults index={searchIndex} query={query} />
+}
+
+function UserProfile() {
+  // JSON.parse runs only on initial render
+  const [settings, setSettings] = useState(() => {
+    const stored = localStorage.getItem('settings')
+    return stored ? JSON.parse(stored) : {}
+  })
+  
+  return <SettingsForm settings={settings} onChange={setSettings} />
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 5 ;
+                    oc:sourceLocation "lines 36-54" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function FilteredList({ items }: { items: Item[] }) {
+  // buildSearchIndex() runs on EVERY render, even after initialization
+  const [searchIndex, setSearchIndex] = useState(buildSearchIndex(items))
+  const [query, setQuery] = useState('')
+  
+  // When query changes, buildSearchIndex runs again unnecessarily
+  return <SearchResults index={searchIndex} query={query} />
+}
+
+function UserProfile() {
+  // JSON.parse runs on every render
+  const [settings, setSettings] = useState(
+    JSON.parse(localStorage.getItem('settings') || '{}')
+  )
+  
+  return <SettingsForm settings={settings} onChange={setSettings} />
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-32" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "**Correct (runs only once):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Incorrect (runs on every render):**" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Use Lazy State Initialization" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "Identify and fix useState calls that recompute expensive initial values on every render." ;
+            oc:hasStep [ a oc:WorkflowStep ;
+                    dcterms:description "Scan component for useState calls where the initial value involves expensive computation (JSON.parse, localStorage, DOM reads, index building, heavy transforms)." ;
+                    oc:expectedOutcome "List of useState calls that pass raw expressions instead of initializer functions." ;
+                    oc:stepId "identify" ],
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Replace the raw expression with an arrow function: useState(() => expensiveExpression)." ;
+                    oc:expectedOutcome "Expensive initializer now runs only on mount, not on every render." ;
+                    oc:stepId "wrap-in-function" ],
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Confirm the computation is non-trivial (not simple primitives, direct prop refs, or cheap literals)." ;
+                    oc:expectedOutcome "Filtered list of useState calls that genuinely need lazy initialization." ;
+                    oc:stepId "verify-necessity" ] ;
+            oc:workflowId "lazy-state-init-fix" ;
+            oc:workflowName "Fix non-lazy useState initialization" ] ;
+    oc:impartsKnowledge oc:kn_5328f8ff,
+        oc:kn_783da0ee,
+        oc:kn_b80047b3,
+        oc:kn_e5e8f87f ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:ReactComponentReady ;
-    oc:resolvesIntent "fix lazy state initialization anti-pattern",
-        "optimize useState initialization",
-        "prevent wasted computation on re-renders" ;
-    oc:yieldsState oc:StateOptimized .
+    oc:resolvesIntent "fix unnecessary state recomputation",
+        "lazy-initialize useState with expensive computations",
+        "optimize react component performance" .
 
-oc:kn_2a53c03f a oc:Heuristic,
+oc:kn_5328f8ff a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When writing useState hooks with non-trivial initial value computation" ;
-    oc:directiveContent "Use lazy state initialization (pass a function to useState) when the initial value involves localStorage/sessionStorage access, building data structures (indexes, maps), DOM reads, or heavy transformations." ;
-    oc:hasRationale "The function form (() => expensiveValue) is only invoked by React on the initial mount, skipping the computation on all subsequent re-renders." ;
-    oc:severityLevel "MEDIUM" .
+    oc:appliesToContext "When evaluating whether a useState initializer needs the function form" ;
+    oc:directiveContent "Use lazy initialization when computing initial values from localStorage/sessionStorage, building data structures (indexes, maps), reading from the DOM, or performing heavy transformations." ;
+    oc:hasRationale "These operations involve I/O, parsing, or significant CPU work that should not repeat needlessly." .
 
-oc:kn_2b0d7a74 a oc:AntiPattern,
+oc:kn_783da0ee a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When initializing useState with computed values like JSON.parse, buildSearchIndex, or localStorage reads" ;
-    oc:directiveContent "Never pass a raw expensive expression directly to useState — it will execute on every render even though the result is discarded after initialization." ;
-    oc:hasRationale "Without the function form, React evaluates the initial value expression on every render call, wasting CPU cycles and potentially causing performance degradation in frequently re-rendering components." ;
+    oc:appliesToContext "When initializing useState with any non-trivial computation" ;
+    oc:codeLanguage "tsx" ;
+    oc:directiveContent "useState(() => expensiveInitValue) — wrap the initializer in an arrow function so it runs only on mount." ;
+    oc:hasRationale "The function form is called only once during the initial render, avoiding repeated computation." .
+
+oc:kn_b80047b3 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When calling useState with computed values (JSON.parse, buildSearchIndex, localStorage reads, DOM reads, heavy transforms)" ;
+    oc:directiveContent "Never pass a raw expensive expression to useState — it executes on every render even though the result is discarded after initialization." ;
+    oc:hasRationale "React evaluates the initial value argument on every render call; only the first result is used, making subsequent evaluations pure waste." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_3f418fad a oc:Constraint,
+oc:kn_e5e8f87f a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When the initial value computation is trivially cheap" ;
-    oc:directiveContent "Do NOT use lazy initialization for simple primitives (useState(0)), direct prop references (useState(props.value)), or cheap literals (useState({})) — the function wrapper adds unnecessary overhead and noise." ;
-    oc:hasRationale "Over-optimizing trivial initializers adds code complexity without measurable performance benefit. Reserve the pattern for genuinely expensive computations." ;
+    oc:appliesToContext "When deciding whether to use the function form of useState" ;
+    oc:directiveContent "Do NOT use lazy initialization for simple primitives (useState(0)), direct prop references (useState(props.value)), or cheap literals (useState({}))." ;
+    oc:hasRationale "Wrapping trivial values adds unnecessary overhead and reduces readability with no performance benefit." ;
     oc:severityLevel "LOW" .
-
-oc:kn_5caef01b a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When evaluating whether to apply lazy state initialization" ;
-    oc:directiveContent "Distinguish between initialization cost and re-render cost: only lazy-initialize when the initialization cost multiplied by re-render frequency creates a measurable performance impact." ;
-    oc:hasRationale "The impact is proportional to how often the component re-renders and how expensive the initializer is. High-frequency re-renderers with expensive initializers benefit most." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_ff8179c1 a oc:KnowledgeNode,
-        oc:SideEffect ;
-    oc:appliesToContext "When writing the initializer function passed to useState" ;
-    oc:directiveContent "Lazy initialization functions should be pure — they must not cause side effects or rely on mutable external state that changes between renders." ;
-    oc:hasRationale "React only calls the initializer once, but if it has side effects, debugging becomes harder and behavior becomes unpredictable if the component is ever remounted." ;
-    oc:severityLevel "MEDIUM" .
 

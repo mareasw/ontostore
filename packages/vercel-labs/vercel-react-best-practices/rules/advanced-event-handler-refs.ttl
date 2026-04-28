@@ -7,60 +7,138 @@
 oc:skill_vercel_labs_vercel_react_best_practices_advanced_event_handler_refs a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "advanced-event-handler-refs" ;
-    skos:broader "React optimization pattern" ;
+    skos:broader "React hook pattern" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "a3097edeecfb2ff6851cd66ed8cdf0617c3c88180504bee824aa6e75a215bbbc" ;
-    oc:differentia "stores callbacks in refs to maintain stable event subscriptions without re-subscribing on handler changes" ;
-    oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
+    oc:differentia "stores event handler callbacks in refs to maintain stable subscriptions without re-subscribing on callback changes" ;
+    oc:extends oc:skill_ontoskills_vercel_react_best_practices,
+        oc:skill_vercel_labs_vercel_react_best_practices ;
     oc:handlesFailure oc:InvalidInput ;
-    oc:hasArgumentHint "React hook or component with event handler effects" ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_07bbfe2a,
-        oc:kn_0c4f2ff8,
-        oc:kn_105e5b21,
-        oc:kn_7436cbea,
-        oc:kn_f417a0db ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Store Event Handlers in Refs
+impact: LOW
+impactDescription: stable subscriptions
+tags: advanced, hooks, refs, event-handlers, optimization
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function useWindowEvent(event: string, handler: (e) => void) {
+  useEffect(() => {
+    window.addEventListener(event, handler)
+    return () => window.removeEventListener(event, handler)
+  }, [event, handler])
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-21" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "**Correct (stable subscription):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Incorrect (re-subscribes on every render):**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function useWindowEvent(event: string, handler: (e) => void) {
+  const handlerRef = useRef(handler)
+  useEffect(() => {
+    handlerRef.current = handler
+  }, [handler])
+
+  useEffect(() => {
+    const listener = (e) => handlerRef.current(e)
+    window.addEventListener(event, listener)
+    return () => window.removeEventListener(event, listener)
+  }, [event])
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 5 ;
+                    oc:sourceLocation "lines 25-38" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Store callbacks in refs when used in effects that shouldn't re-subscribe on callback changes." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 6 ;
+                    oc:textContent "**Alternative: use `useEffectEvent` if you're on latest React:**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """import { useEffectEvent } from 'react'
+
+function useWindowEvent(event: string, handler: (e) => void) {
+  const onEvent = useEffectEvent(handler)
+
+  useEffect(() => {
+    window.addEventListener(event, onEvent)
+    return () => window.removeEventListener(event, onEvent)
+  }, [event])
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 7 ;
+                    oc:sourceLocation "lines 42-53" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 8 ;
+                    oc:textContent "`useEffectEvent` provides a cleaner API for the same pattern: it creates a stable function reference that always calls the latest version of the handler." ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Store Event Handlers in Refs" ] ;
+    oc:impartsKnowledge oc:kn_4ffcb850,
+        oc:kn_62744038,
+        oc:kn_b009ad33,
+        oc:kn_f1113784,
+        oc:kn_fa93578b ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
     oc:requiresState oc:EnvironmentReady ;
     oc:resolvesIntent "create stable event listener hooks",
         "optimize event handler subscriptions",
-        "prevent unnecessary re-subscription in effects",
-        "use refs for callback stability" ;
-    oc:yieldsState oc:DocumentCreated .
+        "prevent unnecessary re-subscriptions in effects" ;
+    oc:yieldsState oc:StableSubscriptions .
 
-oc:kn_07bbfe2a a oc:Heuristic,
+oc:kn_4ffcb850 a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When React 18.3+ or later with useEffectEvent is available" ;
-    oc:directiveContent "Prefer useEffectEvent over manual ref-based handler stabilization when using latest React versions" ;
-    oc:hasRationale "useEffectEvent provides a cleaner, built-in API for the same ref-stabilization pattern, reducing boilerplate and potential for mistakes" ;
-    oc:severityLevel "LOW" .
+    oc:appliesToContext "When designing hooks that bridge imperative subscriptions with declarative React components" ;
+    oc:directiveContent "Separate the subscription lifecycle from the handler update lifecycle — the subscription effect should only depend on the event type, not the callback." ;
+    oc:hasRationale "This separation ensures subscriptions remain stable while callback logic stays fresh" .
 
-oc:kn_0c4f2ff8 a oc:DesignPrinciple,
+oc:kn_62744038 a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When creating custom hooks for event listeners or subscriptions" ;
-    oc:directiveContent "Store event handler callbacks in refs and read from the ref inside the effect listener to decouple subscription lifetime from handler identity" ;
-    oc:hasRationale "This pattern ensures the subscription remains stable while always calling the latest version of the handler, avoiding stale closure bugs without re-subscription overhead" ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_105e5b21 a oc:KnowledgeNode,
-        oc:SideEffect ;
-    oc:appliesToContext "When implementing the handlerRef pattern in custom hooks" ;
-    oc:directiveContent "The ref-stabilization pattern mutates ref.current on every handler change, which is a safe side effect that does not trigger re-renders" ;
-    oc:hasRationale "Understanding that ref mutations are safe side effects is crucial — they don't trigger re-renders and are the intended mechanism for this pattern" ;
-    oc:severityLevel "LOW" .
-
-oc:kn_7436cbea a oc:KnowledgeNode,
-        oc:PerformanceProfile ;
-    oc:appliesToContext "When evaluating subscription-heavy components like those with window or document event listeners" ;
-    oc:directiveContent "Without ref-stabilization, event listeners are removed and re-added on every render cycle, causing unnecessary DOM churn" ;
-    oc:hasRationale "Each addEventListener/removeEventListener cycle has a cost, and in rapid re-render scenarios this can degrade performance and cause missed events during the transition" ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_f417a0db a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When writing useEffect hooks that add event listeners or subscriptions" ;
-    oc:directiveContent "Never include callback handlers directly in useEffect dependency arrays if the effect sets up subscriptions, as this causes re-subscription on every render" ;
-    oc:hasRationale "Including the handler in the dependency array causes the effect to tear down and re-setup the subscription every time the handler reference changes, which is typically every render" ;
+    oc:appliesToContext "When using useEffect with event listeners or subscriptions" ;
+    oc:directiveContent "Never include handler functions in useEffect dependency arrays if the handler changes frequently — this causes re-subscription on every render." ;
+    oc:hasRationale "Including unstable handler references in dependency arrays defeats the purpose of memoization and causes performance issues from constant subscribe/unsubscribe cycles" ;
     oc:severityLevel "HIGH" .
+
+oc:kn_b009ad33 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When React version supports useEffectEvent (experimental/latest)" ;
+    oc:directiveContent "Prefer useEffectEvent over manual ref-based handler storage when using latest React versions — it provides the same stability guarantee with cleaner syntax." ;
+    oc:hasRationale "useEffectEvent is the canonical React API for this pattern and is less error-prone than manual ref management" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_f1113784 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When creating custom hooks that subscribe to events with frequently-changing handlers" ;
+    oc:codeLanguage "tsx" ;
+    oc:directiveContent "const handlerRef = useRef(handler); useEffect(() => { handlerRef.current = handler }, [handler]); useEffect(() => { const listener = (e) => handlerRef.current(e); /* subscribe */ return () => { /* unsubscribe */ } }, [event]);" .
+
+oc:kn_fa93578b a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "When evaluating whether to apply this optimization" ;
+    oc:directiveContent "This pattern eliminates unnecessary DOM addEventListener/removeEventListener calls, reducing GC pressure and preventing brief subscription gaps during re-renders." ;
+    oc:hasRationale "Re-subscribing on every render is wasteful for events like resize or scroll that rarely change handlers" .
 

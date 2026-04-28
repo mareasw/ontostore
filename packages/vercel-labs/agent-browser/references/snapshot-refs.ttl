@@ -7,67 +7,412 @@
 oc:skill_vercel_labs_agent_browser_snapshot_refs a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "snapshot-refs" ;
-    skos:broader "interaction model" ;
+    skos:broader "Reference system" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/agent-browser" ;
     oc:contentHash "c2aa75f5a3c1b34a72d53c06b68cc97d8a3c295134257d48f315cdff1c06455d" ;
-    oc:differentia "uses compact element references from page snapshots to reduce context usage for browser automation agents" ;
+    oc:differentia "assigns compact @eN identifiers to page elements via snapshots so AI agents can interact with the DOM using minimal tokens" ;
     oc:extends oc:skill_vercel_labs_agent_browser ;
-    oc:handlesFailure oc:ElementNotVisible,
-        oc:RefNotFound ;
-    oc:hasArgumentHint "snapshot command and @ref notation" ;
+    oc:handlesFailure oc:PageNotLoaded,
+        oc:RefNotFound,
+        oc:SnapshotStale ;
+    oc:hasArgumentHint "none (sub-skill reference documentation)" ;
     oc:hasCategory "automation" ;
-    oc:impartsKnowledge oc:kn_2002e6e4,
-        oc:kn_849aa27e,
-        oc:kn_97af9107,
-        oc:kn_a9a0cde1,
-        oc:kn_d1a5a636,
-        oc:kn_ef0dbf4d ;
-    oc:isUserInvocable false ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Compact element references that reduce context usage dramatically for AI agents." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Related**: [commands.md](commands.md) for full command reference, [SKILL.md](../SKILL.md) for quick start." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "[Best Practices](#best-practices)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 7 ;
+                                    oc:itemText "[Troubleshooting](#troubleshooting)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "[How Refs Work](#how-refs-work)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "[Ref Lifecycle](#ref-lifecycle)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 6 ;
+                                    oc:itemText "[Ref Notation Details](#ref-notation-details)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "[Using Refs](#using-refs)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "[Snapshot Command](#the-snapshot-command)" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Contents" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# Scroll down to reveal element
+agent-browser scroll down 1000
+agent-browser snapshot -i
+
+# Or wait for dynamic content
+agent-browser wait 1000
+agent-browser snapshot -i
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 201-209" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Element Not Visible in Snapshot" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# Snapshot specific container
+agent-browser snapshot @e5
+
+# Or use get text for content-only extraction
+agent-browser get text @e5
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 213-219" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Too Many Elements" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# Ref may have changed - re-snapshot
+agent-browser snapshot -i
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 194-197" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "\"Ref not found\" Error" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 9 ;
+                    oc:sectionTitle "Troubleshooting" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """agent-browser click @e1            # Opens dropdown
+agent-browser snapshot -i          # See dropdown items
+agent-browser click @e7            # Select item
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 123-127" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "3. Re-Snapshot After Dynamic Changes" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# CORRECT
+agent-browser open https://example.com
+agent-browser snapshot -i          # Get refs first
+agent-browser click @e1            # Use ref
+
+# WRONG
+agent-browser open https://example.com
+agent-browser click @e1            # Ref doesn't exist yet!
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 102-111" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "1. Always Snapshot Before Interacting" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """agent-browser click @e5            # Navigates to new page
+agent-browser snapshot -i          # Get new refs
+agent-browser click @e1            # Use new refs
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 115-119" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "2. Re-Snapshot After Navigation" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# Snapshot just the form
+agent-browser snapshot @e9
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 133-136" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "For complex pages, snapshot specific areas:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "4. Snapshot Specific Regions" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Best Practices" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 4 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Cross-origin iframes that block accessibility tree access are silently skipped" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "To scope a snapshot to a single iframe, use `frame @ref` then `snapshot -i`" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Empty iframes or iframes with no interactive content are omitted from the output" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Only one level of iframe nesting is expanded (iframes within iframes are not recursed)" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Snapshots automatically detect and inline iframe content. When the main-frame snapshot runs, each `Iframe` node is resolved and its child accessibility tree is included directly beneath it in the output. Refs assigned to elements inside iframes carry frame context, so interactions like `click`, `fill`, and `type` work without manually switching frames." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """agent-browser snapshot -i
+# @e1 [heading] "Checkout"
+# @e2 [Iframe] "payment-frame"
+#   @e3 [input] "Card number"
+#   @e4 [input] "Expiry"
+#   @e5 [button] "Pay"
+# @e6 [button] "Cancel"
+
+# Interact with iframe elements directly using their refs
+agent-browser fill @e3 "4111111111111111"
+agent-browser fill @e4 "12/28"
+agent-browser click @e5
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 169-182" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Key details:**" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 8 ;
+                    oc:sectionTitle "Iframes" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**IMPORTANT**: Refs are invalidated when the page changes!" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# Get initial snapshot
+agent-browser snapshot -i
+# @e1 [button] "Next"
+
+# Click triggers page change
+agent-browser click @e1
+
+# MUST re-snapshot to get new refs!
+agent-browser snapshot -i
+# @e1 [h1] "Page 2"  ← Different element now!
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 85-96" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Ref Lifecycle" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Once you have refs, interact directly:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# Click the "Sign In" button
+agent-browser click @e6
+
+# Fill email input
+agent-browser fill @e10 "user@example.com"
+
+# Fill password
+agent-browser fill @e11 "password123"
+
+# Submit the form
+agent-browser click @e12
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 67-79" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Using Refs" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """Compact snapshot → @refs assigned → Direct interaction (~200-400 tokens)
+""" ;
+                            oc:codeLanguage "" ;
+                            oc:contentOrder 4 ;
+                            oc:sourceLocation "lines 25-27" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Traditional approach:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "agent-browser approach:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """Full DOM/HTML → AI parses → CSS selector → Action (~3000-5000 tokens)
+""" ;
+                            oc:codeLanguage "" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 20-22" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "How Refs Work" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """@e1 [tag type="value"] "text content" placeholder="hint"
+│    │   │             │               │
+│    │   │             │               └─ Additional attributes
+│    │   │             └─ Visible text
+│    │   └─ Key attributes shown
+│    └─ HTML tag name
+└─ Unique ref ID
+""" ;
+                            oc:codeLanguage "" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 140-148" ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """@e1 [button] "Submit"                    # Button with text
+@e2 [input type="email"]                 # Email input
+@e3 [input type="password"]              # Password input
+@e4 [a href="/page"] "Link Text"         # Anchor link
+@e5 [select]                             # Dropdown
+@e6 [textarea] placeholder="Message"     # Text area
+@e7 [div class="modal"]                  # Container (when relevant)
+@e8 [img alt="Logo"]                     # Image
+@e9 [checkbox] checked                   # Checked checkbox
+@e10 [radio] selected                    # Selected radio
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 152-163" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Common Patterns" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 7 ;
+                    oc:sectionTitle "Ref Notation Details" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# Basic snapshot (shows page structure)
+agent-browser snapshot
+
+# Interactive snapshot (-i flag) - RECOMMENDED
+agent-browser snapshot -i
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 31-37" ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """Page: Example Site - Home
+URL: https://example.com
+
+@e1 [header]
+  @e2 [nav]
+    @e3 [a] "Home"
+    @e4 [a] "Products"
+    @e5 [a] "About"
+  @e6 [button] "Sign In"
+
+@e7 [main]
+  @e8 [h1] "Welcome"
+  @e9 [form]
+    @e10 [input type="email"] placeholder="Email"
+    @e11 [input type="password"] placeholder="Password"
+    @e12 [button type="submit"] "Log In"
+
+@e13 [footer]
+  @e14 [a] "Privacy Policy"
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 41-61" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Snapshot Output Format" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "The Snapshot Command" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Snapshot and Refs" ] ;
+    oc:impartsKnowledge oc:kn_1ece8f33,
+        oc:kn_9e16ce40,
+        oc:kn_cf0416f9 ;
+    oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:PageLoaded ;
-    oc:resolvesIntent "capture page structure as snapshot",
-        "interact with web page elements using compact refs",
-        "reduce token usage during browser automation" ;
+    oc:requiresState oc:BrowserRunning,
+        oc:PageLoaded ;
+    oc:resolvesIntent "get element references",
+        "interact with page elements by ref",
+        "navigate dynamic pages using refs",
+        "reduce token usage for browser automation",
+        "take page snapshot" ;
     oc:yieldsState oc:RefsAssigned,
         oc:SnapshotCaptured .
 
-oc:kn_2002e6e4 a oc:Constraint,
+oc:kn_1ece8f33 a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When working with pages that contain iframes" ;
-    oc:directiveContent "Iframe content is only expanded one level deep; cross-origin iframes blocking accessibility tree access are silently skipped; empty iframes are omitted." ;
-    oc:hasRationale "Deeply nested or cross-origin iframes cannot be reliably accessed; agents must be aware of this limitation to avoid assuming iframe content is always available." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_849aa27e a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When a snapshot output is too large or when only a region (e.g., a form, a modal) is relevant" ;
-    oc:directiveContent "For complex pages with many elements, snapshot a specific container element (e.g., `agent-browser snapshot @e9`) instead of the full page to reduce noise." ;
-    oc:hasRationale "Targeted snapshots reduce context usage further and make element identification less ambiguous." .
-
-oc:kn_97af9107 a oc:KnowledgeNode,
-        oc:PerformanceProfile ;
-    oc:appliesToContext "Always — this is the core performance advantage of the ref model" ;
-    oc:directiveContent "Using refs reduces browser interaction context from ~3000-5000 tokens (full DOM/HTML parsing) to ~200-400 tokens (compact snapshot + @ref interaction)." ;
-    oc:hasRationale "Dramatic token savings allow more complex multi-step workflows within context windows." .
-
-oc:kn_a9a0cde1 a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "Before any click, fill, or type action on a freshly opened or navigated page" ;
-    oc:directiveContent "Always run `agent-browser snapshot -i` before interacting with any page elements to obtain valid refs." ;
-    oc:hasRationale "Refs do not exist until a snapshot is taken; interacting without refs causes 'ref not found' errors." ;
+    oc:appliesToContext "Before any ref-based interaction" ;
+    oc:directiveContent "Never attempt to interact with refs (e.g., click @e1) without first running `agent-browser snapshot -i` on the current page." ;
+    oc:hasRationale "Refs only exist after a snapshot is taken; they are not persistent across pages or sessions." ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_d1a5a636 a oc:KnowledgeNode,
-        oc:RecoveryTactic ;
-    oc:appliesToContext "On any ref resolution failure" ;
-    oc:directiveContent "When encountering 'ref not found' errors or elements not visible in snapshot, re-snapshot the page. For off-screen elements, scroll first then re-snapshot. For dynamic content, wait then re-snapshot." ;
-    oc:hasRationale "Page state may have changed or elements may not yet be rendered; re-snapshoting captures the current DOM state." ;
-    oc:severityLevel "HIGH" .
+oc:kn_9e16ce40 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "Every browser automation workflow" ;
+    oc:directiveContent "1. Open/navigate to page → 2. Run `agent-browser snapshot -i` → 3. Identify target element ref → 4. Interact using ref (click/fill/type) → 5. Re-snapshot after any DOM change → Repeat from step 3" ;
+    oc:stepOrder 1 .
 
-oc:kn_ef0dbf4d a oc:KnowledgeNode,
-        oc:KnownIssue ;
-    oc:appliesToContext "After any action that mutates the DOM or triggers navigation" ;
-    oc:directiveContent "Refs are invalidated whenever the page changes — navigation, dynamic content loading, dropdowns opening, modals appearing all invalidate existing refs." ;
-    oc:hasRationale "Reusing stale refs silently targets wrong elements or fails, because @e IDs are reassigned on each snapshot." ;
+oc:kn_cf0416f9 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "After any action that changes the DOM (click, navigate, submit)" ;
+    oc:directiveContent "Refs are invalidated when the page changes — after any click, navigation, or dynamic content change, you MUST re-snapshot before using refs." ;
+    oc:hasRationale "Using stale refs causes 'ref not found' errors because element IDs are reassigned on each snapshot." ;
     oc:severityLevel "CRITICAL" .
 

@@ -12,46 +12,138 @@ oc:skill_vercel_labs_vercel_react_best_practices_rendering_animate_svg_wrapper a
     oc:contentHash "9c6ae0ca7a51434e803887c64cded760956579a1452ccb80a461a03f9c937c77" ;
     oc:differentia "wraps SVG elements in div containers to enable GPU-accelerated CSS animations instead of animating SVG elements directly" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
-    oc:handlesFailure oc:InvalidInput ;
-    oc:hasArgumentHint "SVG component or animation code to optimize" ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_22830bb3,
-        oc:kn_57e55ba1,
-        oc:kn_6da171cd,
-        oc:kn_f74caa58 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "**Correct (animating wrapper div - hardware accelerated):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 6 ;
+                    oc:textContent "This applies to all CSS transforms and transitions (`transform`, `opacity`, `translate`, `scale`, `rotate`). The wrapper div allows browsers to use GPU acceleration for smoother animations." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Many browsers don't have hardware acceleration for CSS3 animations on SVG elements. Wrap SVG in a `<div>` and animate the wrapper instead." ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function LoadingSpinner() {
+  return (
+    <div className="animate-spin">
+      <svg 
+        width="24" 
+        height="24" 
+        viewBox="0 0 24 24"
+      >
+        <circle cx="12" cy="12" r="10" stroke="currentColor" />
+      </svg>
+    </div>
+  )
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 5 ;
+                    oc:sourceLocation "lines 31-45" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Incorrect (animating SVG directly - no hardware acceleration):**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function LoadingSpinner() {
+  return (
+    <svg 
+      className="animate-spin"
+      width="24" 
+      height="24" 
+      viewBox="0 0 24 24"
+    >
+      <circle cx="12" cy="12" r="10" stroke="currentColor" />
+    </svg>
+  )
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-27" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Animate SVG Wrapper Instead of SVG Element" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Animate SVG Wrapper Instead of SVG Element
+impact: LOW
+impactDescription: enables hardware acceleration
+tags: rendering, svg, css, animation, performance
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "Wrap SVG in a div and apply animations to the wrapper to enable GPU acceleration." ;
+            oc:hasStep _:ref_38d040ca95e5e834,
+                _:ref_7df49cdf4e3bf49b,
+                _:ref_d222f3dc0f3e3232,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Verify animation still works correctly and runs smoothly with hardware acceleration." ;
+                    oc:expectedOutcome "Animation is visually identical but smoother with GPU compositing enabled." ;
+                    oc:stepDependsOn _:ref_7df49cdf4e3bf49b ;
+                    oc:stepId "verify" ] ;
+            oc:workflowId "svg-animation-optimization" ;
+            oc:workflowName "Optimize SVG Animation with Wrapper" ] ;
+    oc:impartsKnowledge oc:kn_5657d6ef,
+        oc:kn_83e8f2e3,
+        oc:kn_b3b15ab7,
+        oc:kn_c8d559a5 ;
     oc:isUserInvocable true ;
-    oc:nature "Concept" ;
-    oc:requiresState oc:EnvironmentReady ;
-    oc:resolvesIntent "animate SVG elements smoothly",
+    oc:nature "Technique" ;
+    oc:resolvesIntent "animate SVG smoothly",
         "enable hardware acceleration for SVG animations",
-        "optimize SVG animation performance" ;
-    oc:yieldsState oc:SVGAnimationOptimized .
+        "optimize SVG animation performance" .
 
-oc:kn_22830bb3 a oc:Idempotency,
+oc:kn_5657d6ef a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When refactoring existing SVG animations to use the wrapper pattern" ;
-    oc:directiveContent "This wrapping technique is purely structural and can be applied or removed without side effects on SVG content or layout, provided the wrapper div does not alter sizing." ;
-    oc:hasRationale "The div wrapper is a transparent container that delegates animation to the GPU without changing the visual output of the SVG itself." ;
-    oc:severityLevel "LOW" .
-
-oc:kn_57e55ba1 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When implementing CSS-based animations on SVG elements in React/Next.js components" ;
-    oc:directiveContent "Never apply CSS animation classes (like animate-spin, transform, opacity transitions) directly to SVG elements; always wrap the SVG in a div and animate the wrapper." ;
-    oc:hasRationale "Most browsers lack hardware acceleration for CSS3 animations on SVG elements, resulting in janky or suboptimal animation performance." ;
+    oc:appliesToContext "When any CSS transform, transition, or animation is needed on an SVG element" ;
+    oc:directiveContent "Wrap SVG elements in a <div> container and apply CSS animation classes to the wrapper div instead of the SVG element itself." ;
+    oc:hasRationale "Browser GPU compositing works natively with HTML elements like div, enabling hardware-accelerated smooth animations." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_6da171cd a oc:KnowledgeNode,
+oc:kn_83e8f2e3 a oc:KnowledgeNode,
         oc:PerformanceProfile ;
-    oc:appliesToContext "Always when evaluating SVG animation rendering performance" ;
-    oc:directiveContent "Animating the SVG wrapper div enables hardware (GPU) acceleration, significantly reducing CPU load during animation frames." ;
-    oc:hasRationale "GPU-accelerated compositing avoids main-thread jank and provides consistent frame rates during animations." ;
-    oc:severityLevel "LOW" .
+    oc:appliesToContext "When rendering animated SVGs in production" ;
+    oc:directiveContent "Animating SVG via a wrapper div enables GPU compositing, producing smoother 60fps animations compared to direct SVG animation which is CPU-bound." ;
+    oc:hasRationale "GPU-accelerated animations offload compositing work from the main thread, reducing jank and improving perceived performance." .
 
-oc:kn_f74caa58 a oc:DesignPrinciple,
+oc:kn_b3b15ab7 a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When animating SVG with any CSS transform or transition property" ;
-    oc:directiveContent "Apply CSS transforms and transitions (transform, opacity, translate, scale, rotate) to a wrapper div element rather than the SVG element itself to leverage GPU compositing." ;
-    oc:hasRationale "Browsers delegate div animations to the GPU compositor layer, producing smoother 60fps animations compared to CPU-rendered SVG animations." ;
+    oc:appliesToContext "When animating any SVG element with CSS transforms or transitions" ;
+    oc:directiveContent "Never apply CSS animation classes (like animate-spin, transform, opacity transitions) directly to SVG elements — browsers lack hardware acceleration for CSS3 animations on SVG." ;
+    oc:hasRationale "Direct SVG animation relies on CPU rendering, causing jank and poor performance especially on lower-end devices." ;
     oc:severityLevel "MEDIUM" .
+
+oc:kn_c8d559a5 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When deciding which CSS properties trigger hardware acceleration on SVGs" ;
+    oc:directiveContent "This pattern applies to all CSS transforms and transitions: transform, opacity, translate, scale, and rotate." ;
+    oc:hasRationale "All GPU-compositable CSS properties benefit from the wrapper pattern when applied to SVG content." ;
+    oc:severityLevel "MEDIUM" .
+
+_:ref_38d040ca95e5e834 a oc:WorkflowStep ;
+    dcterms:description "Identify any SVG element that has CSS animation/transform classes applied directly to it." ;
+    oc:expectedOutcome "All SVG elements with direct animation classes are found." ;
+    oc:stepId "identify" .
+
+_:ref_7df49cdf4e3bf49b a oc:WorkflowStep ;
+    dcterms:description "Move all CSS animation classes and transform styles from the SVG element to the wrapper div." ;
+    oc:stepDependsOn _:ref_d222f3dc0f3e3232 ;
+    oc:stepId "move-classes" .
+
+_:ref_d222f3dc0f3e3232 a oc:WorkflowStep ;
+    dcterms:description "Wrap the SVG element in a <div> container element." ;
+    oc:expectedOutcome "SVG is nested inside a parent div." ;
+    oc:stepDependsOn _:ref_38d040ca95e5e834 ;
+    oc:stepId "wrap" .
 
