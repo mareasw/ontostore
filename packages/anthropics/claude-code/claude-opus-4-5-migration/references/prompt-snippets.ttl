@@ -4,67 +4,309 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_code_claude_opus_4_5_migration_prompt_snippets a oc:DeclarativeSkill,
+oc:skill_claude_code_claude_opus_4_5_migration_prompt_snippets a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "prompt-snippets" ;
-    skos:broader "Migration aid" ;
+    skos:broader "Migration reference" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-code/claude-opus-4-5-migration" ;
     oc:contentHash "a6995d7c3588bb55da02eac0aaf438d6f75a0f8203c16c0f621fea384e2ffa51" ;
-    oc:dependsOnSkill oc:skill_claude_opus_4_5_migration ;
-    oc:differentia "that provides targeted prompt adjustments to address Opus 4.5-specific behavioral issues like overtriggering, over-engineering, and design quality" ;
-    oc:extends oc:skill_anthropics_claude_code_claude_opus_4_5_migration ;
-    oc:handlesFailure oc:InvalidSnippetRequest,
-        oc:UnrelatedIssueReported ;
-    oc:hasArgumentHint "specific issue reported (e.g., \"overtriggering\", \"over-engineering\", \"code exploration\", \"frontend design\", \"thinking sensitivity\")" ;
+    oc:dependsOnSkill oc:skill_ontoskills_claude_opus_4_5_migration ;
+    oc:differentia "that provides conditional prompt snippets to fix Opus 4.5 behavioral issues" ;
+    oc:extends oc:skill_claude_code_claude_opus_4_5_migration ;
+    oc:handlesFailure oc:InvalidSnippetContext ;
+    oc:hasArgumentHint "issue-type (tool-overtriggering, over-engineering, code-exploration, frontend-design, thinking-sensitivity)" ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_36ce03fc,
-        oc:kn_44720ad1,
-        oc:kn_855ae2c8,
-        oc:kn_ed51c43f,
-        oc:kn_f6a498fa ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Only apply these snippets if the user explicitly requests them or reports a specific issue. By default, the migration should only update model strings." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**Problem**: Opus 4.5 may create extra files, add unnecessary abstractions, or build unrequested flexibility." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Snippet to add to system prompt**:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """- Avoid over-engineering. Only make changes that are directly requested or clearly necessary. Keep solutions simple and focused.
+- Don't add features, refactor code, or make "improvements" beyond what was asked. A bug fix doesn't need surrounding code cleaned up. A simple feature doesn't need extra configurability.
+- Don't add error handling, fallbacks, or validation for scenarios that can't happen. Trust internal code and framework guarantees. Only validate at system boundaries (user input, external APIs). Don't use backwards-compatibility shims when you can just change the code.
+- Don't create helpers, utilities, or abstractions for one-time operations. Don't design for hypothetical future requirements. The right amount of complexity is the minimum needed for the current task. Reuse existing abstractions where possible and follow the DRY principle.
+""" ;
+                            oc:codeLanguage "" ;
+                            oc:contentOrder 4 ;
+                            oc:sourceLocation "lines 28-33" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**When to add**: User reports unwanted files, excessive abstraction, or unrequested features." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "2. Over-Engineering Prevention" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Solution**: Replace aggressive language with normal phrasing." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**When to add**: User reports tools being called too frequently or unnecessarily." ],
+                        [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 4 ;
+                            oc:rowCount 4 ;
+                            oc:tableCaption "**Solution**: Replace aggressive language with normal phrasing." ;
+                            oc:tableMarkdown """| Before | After |
+|--------|-------|
+| `CRITICAL: You MUST use this tool when...` | `Use this tool when...` |
+| `ALWAYS call the search function before...` | `Call the search function before...` |
+| `You are REQUIRED to...` | `You should...` |
+| `NEVER skip this step` | `Don't skip this step` |
+""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**Problem**: Prompts designed to reduce undertriggering on previous models may cause Opus 4.5 to overtrigger." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "1. Tool Overtriggering" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """<frontend_aesthetics>
+You tend to converge toward generic, "on distribution" outputs. In frontend design, this creates what users call the "AI slop" aesthetic. Avoid this: make creative, distinctive frontends that surprise and delight.
+
+Focus on:
+- Typography: Choose fonts that are beautiful, unique, and interesting. Avoid generic fonts like Arial and Inter; opt instead for distinctive choices that elevate the frontend's aesthetics.
+- Color & Theme: Commit to a cohesive aesthetic. Use CSS variables for consistency. Dominant colors with sharp accents outperform timid, evenly-distributed palettes. Draw from IDE themes and cultural aesthetics for inspiration.
+- Motion: Use animations for effects and micro-interactions. Prioritize CSS-only solutions for HTML. Use Motion library for React when available. Focus on high-impact moments: one well-orchestrated page load with staggered reveals (animation-delay) creates more delight than scattered micro-interactions.
+- Backgrounds: Create atmosphere and depth rather than defaulting to solid colors. Layer CSS gradients, use geometric patterns, or add contextual effects that match the overall aesthetic.
+
+Avoid generic AI-generated aesthetics:
+- Overused font families (Inter, Roboto, Arial, system fonts)
+- Clichéd color schemes (particularly purple gradients on white backgrounds)
+- Predictable layouts and component patterns
+- Cookie-cutter design that lacks context-specific character
+
+Interpret creatively and make unexpected choices that feel genuinely designed for the context. Vary between light and dark themes, different fonts, different aesthetics. You still tend to converge on common choices (Space Grotesk, for example) across generations. Avoid this: it is critical that you think outside the box!
+</frontend_aesthetics>
+""" ;
+                            oc:codeLanguage "xml" ;
+                            oc:contentOrder 4 ;
+                            oc:sourceLocation "lines 55-73" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**Problem**: Default frontend outputs may look generic (\"AI slop\" aesthetic)." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**When to add**: User requests improved frontend design quality or reports generic-looking outputs." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Snippet to add to system prompt**:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "4. Frontend Design Quality" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Snippet to add to system prompt**:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**Problem**: Opus 4.5 may propose solutions without reading code or make assumptions about unread files." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """ALWAYS read and understand relevant files before proposing code edits. Do not speculate about code you have not inspected. If the user references a specific file/path, you MUST open and inspect it before explaining or proposing fixes. Be rigorous and persistent in searching code for key facts. Thoroughly review the style, conventions, and abstractions of the codebase before implementing new features or abstractions.
+""" ;
+                            oc:codeLanguage "" ;
+                            oc:contentOrder 4 ;
+                            oc:sourceLocation "lines 43-45" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**When to add**: User reports the model proposing fixes without inspecting relevant code." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "3. Code Exploration" ],
+                [ a oc:Section ;
+                    oc:hasContent _:ref_f9bd7973b4a9ca52 ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Usage Guidelines" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 6 ;
+                            oc:rowCount 5 ;
+                            oc:tableCaption "**Solution**: Replace \"think\" with alternative words." ;
+                            oc:tableMarkdown """| Before | After |
+|--------|-------|
+| `think about` | `consider` |
+| `think through` | `evaluate` |
+| `I think` | `I believe` |
+| `think carefully` | `consider carefully` |
+| `thinking` | `reasoning` / `considering` |
+""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "Extended thinking is not enabled by default. It is only enabled if the API request contains a `thinking` parameter:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """"thinking": {
+    "type": "enabled",
+    "budget_tokens": 10000
+}
+""" ;
+                            oc:codeLanguage "json" ;
+                            oc:contentOrder 3 ;
+                            oc:sourceLocation "lines 80-85" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent "**Solution**: Replace \"think\" with alternative words." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**Problem**: When extended thinking is not enabled (the default), Opus 4.5 is particularly sensitive to the word \"think\" and its variants." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "**When to apply**: User reports issues related to \"thinking\" while extended thinking is not enabled (no `thinking` parameter in their request)." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "5. Thinking Sensitivity" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Prompt Snippets for Opus 4.5" ] ;
+    oc:hasWorkflow _:ref_f9bd7973b4a9ca52 ;
+    oc:impartsKnowledge oc:kn_046b6acd,
+        oc:kn_077a9584,
+        oc:kn_5bc7cf06,
+        oc:kn_5e991a93,
+        oc:kn_8eb4b33f,
+        oc:kn_920e2e0e,
+        oc:kn_94916071,
+        oc:kn_bd33e0a6 ;
     oc:isUserInvocable true ;
-    oc:nature "Concept" ;
-    oc:requiresState oc:OpusMigrationInProgress ;
-    oc:resolvesIntent "apply targeted prompt snippets for opus 4.5 migration",
-        "enhance opus 4.5 frontend design quality",
-        "fix opus 4.5 thinking sensitivity when extended thinking is disabled",
+    oc:nature "Tool" ;
+    oc:requiresState oc:ModelStringUpdated ;
+    oc:resolvesIntent "apply targeted prompt patches for opus 4.5 migration",
+        "fix opus 4.5 thinking sensitivity issues",
         "fix opus 4.5 tool overtriggering",
-        "improve opus 4.5 code exploration rigor",
+        "improve opus 4.5 code exploration behavior",
+        "improve opus 4.5 frontend design quality",
         "prevent opus 4.5 over-engineering" ;
     oc:yieldsState oc:PromptSnippetsApplied .
 
-oc:kn_36ce03fc a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When user reports issues related to 'thinking' while extended thinking is not enabled" ;
-    oc:directiveContent "When extended thinking is not enabled (no thinking parameter in API request), replace 'think' and variants with alternatives like 'consider', 'evaluate', 'believe', or 'reasoning' to avoid unintended model behavior." ;
-    oc:hasRationale "Opus 4.5 is particularly sensitive to the word 'think' and its variants when extended thinking is disabled, potentially causing degraded output quality." ;
+oc:kn_046b6acd a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When extended thinking is not enabled in the API request" ;
+    oc:directiveContent "When extended thinking is not enabled (no 'thinking' parameter in the API request), Opus 4.5 is particularly sensitive to the word 'think' and its variants, causing unexpected behavior." ;
+    oc:hasRationale "The word 'think' triggers internal reasoning pathways that behave differently without extended thinking budget, leading to degraded output quality" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_44720ad1 a oc:KnowledgeNode,
-        oc:PostFlightValidation ;
-    oc:appliesToContext "After completing prompt snippet integration during Opus 4.5 migration" ;
-    oc:directiveContent "After migration, list all model string updates and prompt modifications made so the user can review the full scope of changes." ;
-    oc:hasRationale "Providing a summary of all changes ensures transparency and allows the user to verify no unintended modifications were introduced." ;
+oc:kn_077a9584 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When user reports unwanted files, excessive abstraction, or unrequested features" ;
+    oc:directiveContent "Opus 4.5 may create extra files, add unnecessary abstractions, build unrequested flexibility, or add error handling for impossible scenarios." ;
+    oc:hasRationale "Opus 4.5 has a tendency toward over-engineering when not constrained" ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_855ae2c8 a oc:Heuristic,
+oc:kn_5bc7cf06 a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When user reports tools being called too frequently or unnecessarily during Opus 4.5 migration" ;
-    oc:directiveContent "Replace aggressive trigger language (CRITICAL, MUST, ALWAYS, NEVER, REQUIRED) with normal phrasing (use when, should, don't) to prevent Opus 4.5 tool overtriggering." ;
-    oc:hasRationale "Opus 4.5 is more responsive to instruction strength than prior models; aggressive language designed to overcome undertriggering on older models now causes overtriggering." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_ed51c43f a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When integrating any prompt snippet into the migrated prompt" ;
-    oc:directiveContent "Do not append snippets blindly to prompts. Weave them into the existing prompt structure using XML tags that match or complement the existing structure, and place them logically near related content." ;
-    oc:hasRationale "Blindly appended snippets can conflict with existing instructions or be ignored due to poor structural placement." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_f6a498fa a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "Always, before applying any prompt snippet during Opus 4.5 migration" ;
-    oc:directiveContent "Only apply these prompt snippets if the user explicitly requests them or reports a specific issue. By default, the migration should only update model strings." ;
-    oc:hasRationale "Applying snippets unconditionally introduces unnecessary prompt changes and may alter behavior that was working correctly." ;
+    oc:appliesToContext "When migrating prompts to Opus 4.5" ;
+    oc:directiveContent "Only apply these snippets if the user explicitly requests them or reports a specific issue. By default, the migration should only update model strings." ;
+    oc:hasRationale "Avoids unnecessary prompt modifications when the default migration (model string update only) is sufficient" ;
     oc:severityLevel "HIGH" .
+
+oc:kn_5e991a93 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When user requests improved frontend design quality or reports generic-looking outputs" ;
+    oc:directiveContent "Default frontend outputs may look generic ('AI slop' aesthetic) with overused fonts (Inter, Roboto), clichéd purple gradients, and predictable layouts." ;
+    oc:hasRationale "Opus 4.5 converges toward 'on distribution' outputs that lack distinctive design character" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_8eb4b33f a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When integrating snippets into migrated prompts" ;
+    oc:directiveContent "Don't just append snippets; weave them into the existing prompt structure using XML tags that match or complement the existing architecture." ;
+    oc:hasRationale "Properly integrated snippets are more effective than appended additions because they maintain prompt coherence" .
+
+oc:kn_920e2e0e a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When user reports tools being called too frequently or unnecessarily" ;
+    oc:directiveContent "Prompts designed to reduce undertriggering on previous models (e.g., 'CRITICAL: You MUST use this tool', 'ALWAYS call', 'You are REQUIRED to') may cause Opus 4.5 to overtrigger tools." ;
+    oc:hasRationale "Opus 4.5 is more responsive to tool-use cues than prior models; aggressive urgency language causes excessive tool calls" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_94916071 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When applying any snippet to a prompt during migration" ;
+    oc:directiveContent "1. Integrate snippets thoughtfully into existing prompt structure. 2. Wrap additions in descriptive XML tags matching existing structure. 3. Match prompt style (trim for concise, keep detail for verbose). 4. Place logically (coding snippets near coding instructions, tool guidance near tool definitions). 5. Preserve existing content. 6. Summarize all changes after migration." ;
+    oc:stepOrder 1 .
+
+oc:kn_bd33e0a6 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When user reports the model proposing fixes without inspecting relevant code" ;
+    oc:directiveContent "Opus 4.5 may propose solutions without reading code or make assumptions about unread files." ;
+    oc:hasRationale "The model may skip code inspection and rely on assumptions, leading to incorrect fixes" ;
+    oc:severityLevel "HIGH" .
+
+_:ref_2d01020e2e43e081 a oc:WorkflowStep ;
+    dcterms:description "**Match prompt style** - If the prompt is concise, trim the snippet; if verbose, keep full detail" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_737a907474b9a28e a oc:WorkflowStep ;
+    dcterms:description "**Place logically** - Put coding snippets near other coding instructions, tool guidance near tool definitions, etc." ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_81154df53c348506 a oc:WorkflowStep ;
+    dcterms:description "**Integrate thoughtfully** - Don't just append snippets; weave them into the existing prompt structure" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_a22f76bc2798da22 a oc:WorkflowStep ;
+    dcterms:description "**Summarize changes** - After migration, list all model string updates and prompt modifications made" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_6" ;
+    oc:stepOrder 6 .
+
+_:ref_c779841c8ac27c44 a oc:WorkflowStep ;
+    dcterms:description "**Preserve existing content** - Insert snippets without removing functional content" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_5" ;
+    oc:stepOrder 5 .
+
+_:ref_d013d4c02f81ac4e a oc:WorkflowStep ;
+    dcterms:description "**Use XML tags** - Wrap additions in descriptive tags (e.g., `<coding_guidelines>`, `<tool_behavior>`) that match or complement existing prompt structure" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_f9bd7973b4a9ca52 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 1 ;
+    oc:hasStep _:ref_2d01020e2e43e081,
+        _:ref_737a907474b9a28e,
+        _:ref_81154df53c348506,
+        _:ref_a22f76bc2798da22,
+        _:ref_c779841c8ac27c44,
+        _:ref_d013d4c02f81ac4e ;
+    oc:workflowId "procedure_1" ;
+    oc:workflowName "Ordered Procedure" .
 

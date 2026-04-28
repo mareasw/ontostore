@@ -4,97 +4,829 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_office_skills_hr_automation a oc:DeclarativeSkill,
+oc:skill_claude_office_skills_hr_automation a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "hr-automation" ;
-    skos:broader "Workflow automation framework" ;
-    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-office-skills/hr-automation" ;
+    skos:broader "Workflow automation skill" ;
+    prov:wasDerivedFrom "../.agents/skills/anthropics/claude-office-skills/hr-automation" ;
     oc:contentHash "0db98ca7a81ba646394e5b57804daf78031241bbd6dc2e43d92c9a1db642e6d0" ;
-    oc:dependsOnSkill oc:skill_applicant_screening ;
-    oc:differentia "Orchestrates the full employee lifecycle from recruiting through onboarding, management, and offboarding using HRIS/ATS integrations" ;
-    oc:handlesFailure oc:APIKeySet,
-        oc:NetworkTimeout,
+    oc:dependsOnSkill oc:skill_ontoskills_applicant_screening ;
+    oc:differentia "Automates HR lifecycle processes including recruiting, onboarding, employee management, and offboarding using YAML-defined workflow templates" ;
+    oc:handlesFailure oc:InvalidInput,
         oc:PermissionDenied ;
-    oc:hasAllowedTool "airtable",
-        "asana",
-        "bamboohr_api",
-        "google_calendar",
-        "greenhouse_api",
-        "notion",
-        "slack",
-        "workday_api" ;
-    oc:hasArgumentHint "workflow request describing the HR process to automate (e.g., 'create onboarding checklist', 'set up PTO approval workflow', 'automate offboarding')" ;
     oc:hasCategory "automation" ;
     oc:hasDescription "HR workflow automation - recruiting, onboarding, employee management, and offboarding processes" ;
     oc:hasName "hr-automation" ;
-    oc:hasPackageName "hr-automation" ;
-    oc:impartsKnowledge oc:kn_0cf9b632,
-        oc:kn_5f89dd15,
-        oc:kn_6076e55c,
-        oc:kn_65e8cfeb,
-        oc:kn_6d217380,
-        oc:kn_8dd8bc8e,
-        oc:kn_cd00353c ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Automate HR workflows including recruiting, onboarding, employee management, and offboarding. Based on n8n's HR workflow templates." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """interview_scheduling:
+  workflow:
+    1. candidate_advances:
+        trigger: stage_change_to_interview
+        
+    2. check_availability:
+        interviewers: from_hiring_plan
+        candidate: request_via_email
+        
+    3. find_slots:
+        algorithm: first_available_matching
+        buffer: 15_minutes_between
+        
+    4. send_invites:
+        to: [candidate, interviewers]
+        include: [zoom_link, calendar_invite, prep_docs]
+        
+    5. reminders:
+        - 24h_before: all_parties
+        - 1h_before: all_parties
+        
+    6. post_interview:
+        - collect_feedback: from_interviewers
+        - aggregate_scores
+        - trigger_next_stage: if_approved
+""" ;
+                                    oc:codeLanguage "yaml" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 133-159" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Interview Scheduling" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """recruiting_pipeline:
+  stages:
+    - applied
+    - screening
+    - phone_interview
+    - technical_interview
+    - onsite_interview
+    - offer
+    - hired
+    
+  automations:
+    new_application:
+      trigger: application_received
+      actions:
+        - send_confirmation: to_candidate
+        - notify_recruiter: slack
+        - add_to_tracking: airtable
+        - ai_resume_screen: if_enabled
+        
+    stage_change:
+      trigger: candidate_moved
+      actions:
+        - update_candidate: in_ats
+        - notify_team: relevant_interviewers
+        - send_email: stage_specific_template
+        
+    interview_scheduled:
+      trigger: calendar_event_created
+      actions:
+        - send_confirmation: to_candidate
+        - send_prep_materials: to_interviewers
+        - create_scorecard: in_system
+""" ;
+                                    oc:codeLanguage "yaml" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 65-98" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Applicant Pipeline" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """ai_screening:
+  model: gpt-4
+  
+  prompt: |
+    Review this resume for the {job_title} position.
+    
+    Job Requirements:
+    {job_requirements}
+    
+    Resume:
+    {resume_text}
+    
+    Evaluate:
+    1. Skills match (1-10)
+    2. Experience match (1-10)
+    3. Key strengths
+    4. Potential concerns
+    5. Recommended: Yes/No/Maybe
+    
+  automation:
+    - if: score >= 8
+      action: advance_to_screening
+    - if: score 5-7
+      action: flag_for_review
+    - if: score < 5
+      action: auto_reject + send_rejection
+""" ;
+                                    oc:codeLanguage "yaml" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 102-129" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "AI Resume Screening" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Recruiting Automation" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """
+---
+
+*HR Automation Skill - Part of Claude Office Skills*
+""" ;
+                            oc:codeLanguage "" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 478-482" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """trigger: New employee in BambooHR
+actions:
+  - Create accounts (Google, Slack)
+  - Add to Notion onboarding tracker
+  - Send Slack welcome
+  - Schedule calendar events
+  - Create task checklist in Asana
+""" ;
+                            oc:codeLanguage "yaml" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 469-477" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 8 ;
+                    oc:sectionTitle "n8n Workflow" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Output**:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**Request**: \"Create an employee onboarding checklist automation\"" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# Employee Onboarding Automation
+
+## Trigger
+New hire added to HRIS (e.g., BambooHR, Workday)
+
+## Pre-Start Checklist
+
+### Day -14
+- [ ] Send welcome email
+- [ ] Collect: ID, Tax forms, Banking info
+- [ ] Order laptop & equipment
+
+### Day -7
+- [ ] Create email account
+- [ ] Create Slack account
+- [ ] Add to HRIS
+- [ ] Schedule orientation
+- [ ] Assign buddy
+
+### Day -1
+- [ ] Ship/setup equipment
+- [ ] Send Day 1 instructions
+- [ ] Prepare workspace (if office)
+
+## Day 1 Checklist
+
+### Morning
+- [ ] Manager welcome (9am)
+- [ ] IT setup (10am)
+- [ ] Team introductions
+
+### Afternoon
+- [ ] HR orientation (1pm)
+- [ ] Buddy lunch
+- [ ] Tool walkthroughs
+
+## Notifications
+
+```yaml
+overdue_task:
+  - 50% deadline: Friendly reminder
+  - 80% deadline: Urgent reminder
+  - 100% deadline: Escalate to manager
+""" ;
+                            oc:codeLanguage "markdown" ;
+                            oc:contentOrder 3 ;
+                            oc:sourceLocation "lines 421-465" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 7 ;
+                    oc:sectionTitle "Output Example" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """access_revocation:
+  immediate_on_termination:
+    - email: disable
+    - sso: revoke
+    - vpn: revoke
+    - physical_access: revoke
+    - company_credit_cards: cancel
+    
+  within_24_hours:
+    - tool_licenses: remove
+    - shared_drives: transfer_ownership
+    - code_repositories: remove
+    - customer_systems: remove
+    
+  audit:
+    - document_all_revocations
+    - verify_no_remaining_access
+    - compliance_report
+""" ;
+                                    oc:codeLanguage "yaml" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 365-384" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Access Revocation" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """offboarding_workflow:
+  trigger: resignation_submitted OR termination
+  
+  immediate:
+    - acknowledge_resignation: to_employee
+    - notify_hr: for_processing
+    - notify_manager: for_transition_planning
+    - notify_it: for_access_review
+    
+  planning_phase:
+    - calculate_final_pay
+    - schedule_exit_interview
+    - create_transition_plan
+    - document_knowledge_transfer
+    
+  last_week:
+    - knowledge_transfer: sessions
+    - collect_equipment
+    - remove_system_access: scheduled
+    - update_team_distribution
+    
+  last_day:
+    - exit_interview: hr
+    - return_badge_keys
+    - revoke_all_access
+    - send_farewell: if_voluntary
+    
+  post_departure:
+    - process_final_paycheck
+    - send_benefits_info: cobra
+    - archive_files
+    - offboarding_survey: 30_days_later
+""" ;
+                                    oc:codeLanguage "yaml" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 328-361" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Offboarding Workflow" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Offboarding" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """onboarding_checklist:
+  employee_tasks:
+    - complete_i9: deadline_day_3
+    - setup_direct_deposit: deadline_day_7
+    - complete_benefits_enrollment: deadline_day_30
+    - review_handbook: deadline_day_7
+    - complete_training: deadline_day_14
+    
+  manager_tasks:
+    - introduce_to_team: day_1
+    - assign_onboarding_buddy: day_1
+    - set_30_60_90_goals: week_1
+    - schedule_recurring_1on1s: week_1
+    - provide_project_context: week_1
+    
+  it_tasks:
+    - create_email: day_minus_1
+    - provision_tools: day_minus_1
+    - setup_hardware: day_1
+    - grant_system_access: day_1
+    - security_training: week_1
+    
+  notifications:
+    incomplete_task:
+      - remind_owner: at_50%_deadline
+      - remind_owner: at_80%_deadline
+      - escalate: at_100%_deadline
+""" ;
+                                    oc:codeLanguage "yaml" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 215-243" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Onboarding Checklist Automation" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """onboarding_workflow:
+  trigger: offer_accepted
+  duration: 30_days
+  
+  pre_start:
+    day_minus_14:
+      - send_welcome_email
+      - collect_documents: [id, tax_forms, direct_deposit]
+      - order_equipment: laptop, peripherals
+      
+    day_minus_7:
+      - create_accounts: [email, slack, tools]
+      - add_to_systems: hris, payroll
+      - schedule_orientation
+      - assign_buddy
+      
+    day_minus_1:
+      - setup_desk: if_office
+      - ship_equipment: if_remote
+      - send_first_day_info
+      
+  first_day:
+    morning:
+      - welcome_meeting: with_manager
+      - it_setup: credentials, tools
+      - team_introductions
+      
+    afternoon:
+      - hr_orientation: policies, benefits
+      - access_verification
+      - buddy_lunch
+      
+  first_week:
+    - daily_checkins: with_manager
+    - tool_training: as_needed
+    - team_meetings: join_all
+    - documentation_review
+    
+  first_month:
+    - weekly_1on1s: with_manager
+    - project_assignment
+    - goal_setting
+    - 30_day_survey
+""" ;
+                                    oc:codeLanguage "yaml" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 167-211" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "New Hire Workflow" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Onboarding Automation" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """document_compliance:
+  required_documents:
+    - i9: deadline_3_days
+    - w4: deadline_first_payroll
+    - emergency_contact: deadline_7_days
+    - direct_deposit: deadline_first_payroll
+    - handbook_acknowledgment: deadline_7_days
+    - benefits_election: deadline_30_days
+    
+  tracking:
+    - notify_employee: missing_docs
+    - notify_hr: compliance_risk
+    - escalate: after_deadline
+    
+  storage:
+    - location: secure_hris
+    - retention: per_legal_requirements
+    - access: hr_only
+""" ;
+                                    oc:codeLanguage "yaml" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 392-411" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Document Management" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Compliance Tracking" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Performance review cycles" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Time-off management" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Employee onboarding workflows" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "Offboarding processes" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Recruiting pipeline automation" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "This skill covers:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Overview" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """pto_workflow:
+  request:
+    trigger: employee_submits_request
+    fields: [start_date, end_date, type, reason]
+    
+  approval:
+    routing:
+      - if: days <= 3
+        approver: direct_manager
+      - if: days > 3
+        approver: [manager, hr]
+        
+    automation:
+      - notify_approver: slack_dm
+      - set_deadline: 48_hours
+      - if_no_response: escalate
+      
+  approved:
+    actions:
+      - update_calendar: block_dates
+      - notify_team: upcoming_pto
+      - update_hris: deduct_balance
+      - send_confirmation: to_employee
+      
+  denied:
+    actions:
+      - notify_employee: with_reason
+      - log_denial: for_compliance
+""" ;
+                                    oc:codeLanguage "yaml" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 251-280" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Time-Off Requests" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """performance_review_cycle:
+  schedule: quarterly
+  
+  workflow:
+    week_1:
+      - launch_cycle: notify_all
+      - self_assessment: open
+      
+    week_2:
+      - self_assessment: deadline
+      - peer_feedback: open
+      
+    week_3:
+      - peer_feedback: deadline
+      - manager_review: open
+      
+    week_4:
+      - manager_review: deadline
+      - calibration: hr_and_leadership
+      - finalize_ratings
+      
+    week_5:
+      - deliver_reviews: manager_meetings
+      - goal_setting: next_quarter
+      
+  automation:
+    reminders:
+      - 3_days_before_deadline: gentle
+      - 1_day_before: urgent
+      - overdue: daily_until_complete
+      
+    analytics:
+      - completion_rates
+      - score_distribution
+      - feedback_themes
+""" ;
+                                    oc:codeLanguage "yaml" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 284-320" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Performance Reviews" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Employee Management" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "HR Automation" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """name: hr-automation
+description: "HR workflow automation - recruiting, onboarding, employee management, and offboarding processes"
+version: "1.0.0"
+author: claude-office-skills
+license: MIT
+
+category: hr
+tags:
+  - hr
+  - recruiting
+  - onboarding
+  - employee
+  - automation
+department: Human Resources
+
+models:
+  recommended:
+    - claude-sonnet-4
+
+mcp:
+  server: hr-mcp
+  tools:
+    - greenhouse_api
+    - workday_api
+    - bamboohr_api
+
+capabilities:
+  - recruiting_automation
+  - onboarding_workflows
+  - employee_management
+  - offboarding_processes
+  - compliance_tracking
+
+languages:
+  - en
+  - zh
+
+related_skills:
+  - applicant-screening
+  - offer-letter
+  - job-description
+  - slack-workflows
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "30-day onboarding workflow from pre-start preparation through first month" ;
+            oc:hasStep _:ref_19e072f0d7b3be76,
+                _:ref_2e99c5501382befd,
+                _:ref_613961154aba063c,
+                _:ref_ad3cef42c8eb8a2e,
+                _:ref_be3fdcd6d1cc369c,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Weekly 1-on-1s, project assignment, goal setting, 30-day survey" ;
+                    oc:expectedOutcome "Employee productive with clear goals" ;
+                    oc:stepDependsOn _:ref_19e072f0d7b3be76 ;
+                    oc:stepId "first-month" ] ;
+            oc:workflowId "onboarding" ;
+            oc:workflowName "New Hire Onboarding" ],
+        [ a oc:Workflow ;
+            dcterms:description "Complete offboarding workflow from resignation/termination through post-departure" ;
+            oc:hasStep _:ref_0bf9379a1d94ff6f,
+                _:ref_0e30ba7134bd3313,
+                _:ref_69e43b10bbb6255a,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Process final paycheck, send COBRA benefits info, archive files, send 30-day survey" ;
+                    oc:expectedOutcome "Final pay processed and files archived" ;
+                    oc:stepDependsOn _:ref_0bf9379a1d94ff6f ;
+                    oc:stepId "offboard-post-departure" ],
+                _:ref_b3ec6c1405cf91c5 ;
+            oc:workflowId "offboarding" ;
+            oc:workflowName "Employee Offboarding" ],
+        [ a oc:Workflow ;
+            dcterms:description "Automate the full recruiting pipeline from application received through hiring" ;
+            oc:hasStep _:ref_2c6ad975040afa9b,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Collect interviewer feedback and scorecards, aggregate scores, trigger next stage if approved" ;
+                    oc:expectedOutcome "Feedback aggregated and candidate advanced or rejected" ;
+                    oc:stepDependsOn _:ref_a7baff8530acc7b6 ;
+                    oc:stepId "collect-feedback" ],
+                _:ref_6f8811f8f7a62db3,
+                _:ref_a7baff8530acc7b6 ;
+            oc:workflowId "recruiting-pipeline" ;
+            oc:workflowName "Recruiting Pipeline Automation" ] ;
+    oc:impartsKnowledge oc:kn_132bea8d,
+        oc:kn_39a5b92f,
+        oc:kn_43f1db1a,
+        oc:kn_58a22570,
+        oc:kn_8a1e14a0,
+        oc:kn_9dc46a5c,
+        oc:kn_a51b33cc,
+        oc:kn_a60d78a8,
+        oc:kn_c85ff7ce,
+        oc:kn_f97b74ec ;
     oc:isUserInvocable true ;
-    oc:nature "Tool" ;
+    oc:nature "Work" ;
     oc:requiresState oc:EnvironmentReady ;
-    oc:resolvesIntent "automate employee offboarding and access revocation",
+    oc:resolvesIntent "automate HR recruiting pipeline",
+        "automate employee offboarding process",
         "automate performance review cycles",
-        "automate recruiting pipeline and applicant tracking",
-        "create employee onboarding workflows and checklists",
-        "manage time-off requests and approvals",
-        "schedule interviews and collect feedback",
-        "track HR compliance document deadlines" ;
-    oc:yieldsState oc:HRProcessAutomated,
-        oc:NotificationsEnabled,
+        "create employee onboarding workflows",
+        "manage time-off request automation",
+        "track HR document compliance" ;
+    oc:yieldsState oc:DocumentCreated,
         oc:WorkflowConfigured .
 
-oc:kn_0cf9b632 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When configuring AI resume screening automation thresholds" ;
-    oc:directiveContent "Never auto-reject candidates without human review on borderline scores (5-7). Only auto-reject below score 5 and auto-advance above score 8." ;
-    oc:hasRationale "Aggressive auto-rejection thresholds can filter out qualified candidates with non-traditional backgrounds and create diversity/legal risk." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_5f89dd15 a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When configuring compliance tracking and document collection automations" ;
-    oc:directiveContent "I-9 documents must be completed within 3 days of start date, W-4 and direct deposit by first payroll, and benefits election within 30 days — these deadlines are legally mandated and non-negotiable." ;
-    oc:hasRationale "Failure to meet I-9 and other federal document deadlines creates legal liability and potential fines for the organization." ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_6076e55c a oc:KnowledgeNode,
+oc:kn_132bea8d a oc:KnowledgeNode,
         oc:SecurityImplication ;
-    oc:appliesToContext "When executing any offboarding or termination workflow" ;
-    oc:directiveContent "Access revocation must be audited and documented: verify no remaining access across email, SSO, VPN, physical access, credit cards, tool licenses, shared drives, code repositories, and customer systems within 24 hours." ;
-    oc:hasRationale "Incomplete access revocation is a leading cause of data breaches by former employees. A compliance report must be generated after revocation." ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_65e8cfeb a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When designing any employee onboarding workflow" ;
-    oc:directiveContent "Structure onboarding as a time-phased checklist (Day -14, -7, -1, Day 1, Week 1, Month 1) with separate task owners (employee, manager, IT) and escalating reminders at 50%, 80%, and 100% of deadline." ;
-    oc:hasRationale "Distributed ownership with escalation ensures no tasks fall through cracks and accountability is clear across departments." ;
+    oc:appliesToContext "When designing document storage and offboarding audit processes" ;
+    oc:directiveContent "All compliance documents (I-9, W-4, etc.) must be stored in secure HRIS with HR-only access and retention per legal requirements. Document all access revocations and verify no remaining access post-offboarding." ;
+    oc:hasRationale "HR documents contain PII subject to GDPR, CCPA, and other privacy regulations; access audit trails are required for compliance" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_6d217380 a oc:Idempotency,
+oc:kn_39a5b92f a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When building onboarding automations that may be retried or triggered multiple times" ;
-    oc:directiveContent "Account creation and provisioning steps should be idempotent — re-running the onboarding workflow should not duplicate accounts or send duplicate welcome emails." ;
-    oc:hasRationale "HR workflows are often triggered by multiple systems (HRIS, ATS, manual entry). Idempotent operations prevent creating ghost accounts or flooding new hires with duplicate communications." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_8dd8bc8e a oc:KnowledgeNode,
-        oc:WorkflowStrategy ;
-    oc:appliesToContext "When configuring time-off request workflows" ;
-    oc:directiveContent "Route PTO approvals conditionally: requests ≤3 days go to direct manager only; requests >3 days require both manager and HR approval. Set 48-hour response deadline with auto-escalation." ;
-    oc:hasRationale "Tiered approval reduces manager burden on routine requests while ensuring HR visibility on extended absences that impact capacity planning." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_cd00353c a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When automating involuntary termination offboarding workflows" ;
-    oc:directiveContent "Begin offboarding automation with access revocation before knowledge transfer — security containment takes priority over transition niceties." ;
-    oc:hasRationale "Immediate revocation of SSO, VPN, email, and physical access prevents data exfiltration during the notice period." ;
+    oc:appliesToContext "When setting up onboarding document compliance tracking" ;
+    oc:directiveContent "I-9 forms must be completed within 3 days of hire start date; W-4 and direct deposit by first payroll; benefits enrollment within 30 days. These are legal compliance deadlines." ;
+    oc:hasRationale "Missing compliance deadlines creates legal liability and regulatory risk for the organization" ;
     oc:severityLevel "CRITICAL" .
+
+oc:kn_43f1db1a a oc:KnowledgeNode,
+        oc:OutputFormat ;
+    oc:appliesToContext "When generating HR automation workflow documentation" ;
+    oc:directiveContent """# {Workflow_Name} Automation
+## Trigger
+{trigger_description}
+## Pre-Start Checklist
+### Day -14
+- [ ] {task}
+### Day -7
+- [ ] {task}
+### Day -1
+- [ ] {task}
+## Day 1 Checklist
+### Morning
+- [ ] {task} ({time})
+### Afternoon
+- [ ] {task} ({time})
+## Notifications
+- 50% deadline: Friendly reminder
+- 80% deadline: Urgent reminder
+- 100% deadline: Escalate to manager
+## n8n Workflow
+trigger: {trigger}
+actions:
+  - {action_list}""" ;
+    oc:templateVariables "Workflow_Name",
+        "action_list",
+        "task",
+        "time",
+        "trigger",
+        "trigger_description" .
+
+oc:kn_58a22570 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When processing employee termination or offboarding" ;
+    oc:directiveContent "Never delay access revocation for terminated employees. Email, SSO, VPN, physical access, and company credit cards must be disabled immediately on termination. Tool licenses, shared drives, and code repositories must be revoked within 24 hours." ;
+    oc:hasRationale "Delayed access revocation is a major security risk enabling data theft, unauthorized access, and compliance violations" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_8a1e14a0 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When configuring PTO approval workflows" ;
+    oc:directiveContent "Approval routing for time-off should be tiered: direct manager approves requests ≤3 days; both manager and HR approve requests >3 days. Set 48-hour approval deadline with auto-escalation." ;
+    oc:hasRationale "Tiered routing balances operational efficiency for short absences with proper oversight for extended leave" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_9dc46a5c a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When creating new hire onboarding automation" ;
+    oc:directiveContent "1. Trigger on offer_accepted 2. Day -14: send welcome email, collect documents, order equipment 3. Day -7: create accounts (email, Slack, tools), add to HRIS/payroll, schedule orientation, assign buddy 4. Day -1: setup/ship equipment, send first day info 5. Day 1 morning: manager welcome, IT setup, team intros 6. Day 1 afternoon: HR orientation, access verification, buddy lunch 7. Week 1: daily check-ins, tool training, team meetings 8. Month 1: weekly 1-on-1s, project assignment, goal setting, 30-day survey" ;
+    oc:stepOrder 1 .
+
+oc:kn_a51b33cc a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When implementing AI-powered resume screening" ;
+    oc:codeLanguage "yaml" ;
+    oc:directiveContent """ai_screening:
+  prompt: |
+    Review this resume for the {job_title} position.
+    Job Requirements: {job_requirements}
+    Resume: {resume_text}
+    Evaluate: 1. Skills match (1-10) 2. Experience match (1-10) 3. Key strengths 4. Potential concerns 5. Recommended: Yes/No/Maybe
+  automation:
+    - if: score >= 8 → advance_to_screening
+    - if: score 5-7 → flag_for_review
+    - if: score < 5 → auto_reject + send_rejection""" .
+
+oc:kn_a60d78a8 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When creating offboarding automation" ;
+    oc:directiveContent "1. Trigger on resignation/termination 2. Immediate: acknowledge, notify HR/manager/IT 3. Planning: calculate final pay, schedule exit interview, create transition plan, document knowledge transfer 4. Last week: knowledge transfer sessions, collect equipment, schedule access removal 5. Last day: exit interview, return badge/keys, revoke all access, send farewell (if voluntary) 6. Post-departure: process final paycheck, send COBRA info, archive files, 30-day survey" ;
+    oc:stepOrder 2 .
+
+oc:kn_c85ff7ce a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing any HR workflow with deadlines (onboarding checklists, review cycles, document collection)" ;
+    oc:directiveContent "HR workflows should use tiered escalation for pending tasks: remind at 50% of deadline, urgent reminder at 80%, escalate to manager at 100%." ;
+    oc:hasRationale "Progressive escalation prevents tasks from falling through cracks while avoiding excessive notification fatigue" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_f97b74ec a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When automating performance review cycles" ;
+    oc:directiveContent "Performance review cycles should follow a 5-week quarterly cadence: Week 1 launch + self-assessment, Week 2 peer feedback, Week 3 manager review, Week 4 calibration, Week 5 delivery + goal setting." ;
+    oc:hasRationale "Structured cadence ensures consistent evaluation timing and prevents review process delays" ;
+    oc:severityLevel "LOW" .
+
+_:ref_0bf9379a1d94ff6f a oc:WorkflowStep ;
+    dcterms:description "Exit interview, return badge/keys, revoke all access, send farewell if voluntary" ;
+    oc:expectedOutcome "All access revoked and exit interview complete" ;
+    oc:stepDependsOn _:ref_0e30ba7134bd3313 ;
+    oc:stepId "offboard-last-day" .
+
+_:ref_0e30ba7134bd3313 a oc:WorkflowStep ;
+    dcterms:description "Knowledge transfer sessions, collect equipment, schedule system access removal" ;
+    oc:expectedOutcome "Knowledge transferred and equipment collected" ;
+    oc:stepDependsOn _:ref_69e43b10bbb6255a ;
+    oc:stepId "offboard-last-week" .
+
+_:ref_19e072f0d7b3be76 a oc:WorkflowStep ;
+    dcterms:description "Daily manager check-ins, tool training, team meetings, documentation review" ;
+    oc:expectedOutcome "Employee comfortable with tools and team" ;
+    oc:stepDependsOn _:ref_ad3cef42c8eb8a2e ;
+    oc:stepId "first-week" .
+
+_:ref_2c6ad975040afa9b a oc:WorkflowStep ;
+    dcterms:description "AI screens resume against job requirements, scores 1-10 on skills and experience, routes accordingly" ;
+    oc:expectedOutcome "Candidate scored and routed: advance (≥8), flag (5-7), or reject (<5)" ;
+    oc:stepDependsOn _:ref_6f8811f8f7a62db3 ;
+    oc:stepId "screen-candidate" .
+
+_:ref_2e99c5501382befd a oc:WorkflowStep ;
+    dcterms:description "Create email and Slack accounts, add to HRIS and payroll, schedule orientation, assign buddy" ;
+    oc:expectedOutcome "Accounts provisioned and orientation scheduled" ;
+    oc:stepDependsOn _:ref_613961154aba063c ;
+    oc:stepId "pre-start-day-7" .
+
+_:ref_613961154aba063c a oc:WorkflowStep ;
+    dcterms:description "Send welcome email, collect ID/tax/banking documents, order laptop and equipment" ;
+    oc:expectedOutcome "Welcome sent and equipment ordered" ;
+    oc:stepId "pre-start-day-14" .
+
+_:ref_69e43b10bbb6255a a oc:WorkflowStep ;
+    dcterms:description "Calculate final pay, schedule exit interview, create transition plan, document knowledge transfer" ;
+    oc:expectedOutcome "Transition plan documented and exit interview scheduled" ;
+    oc:stepDependsOn _:ref_b3ec6c1405cf91c5 ;
+    oc:stepId "offboard-planning" .
+
+_:ref_6f8811f8f7a62db3 a oc:WorkflowStep ;
+    dcterms:description "Send confirmation to candidate, notify recruiter on Slack, add to tracking, run AI resume screen if enabled" ;
+    oc:expectedOutcome "Candidate acknowledged and tracked in ATS" ;
+    oc:stepId "receive-application" .
+
+_:ref_a7baff8530acc7b6 a oc:WorkflowStep ;
+    dcterms:description "Check interviewer and candidate availability, find matching slots, send invites with Zoom links and prep docs" ;
+    oc:expectedOutcome "Interview scheduled with all parties notified" ;
+    oc:stepDependsOn _:ref_2c6ad975040afa9b ;
+    oc:stepId "schedule-interview" .
+
+_:ref_ad3cef42c8eb8a2e a oc:WorkflowStep ;
+    dcterms:description "Manager welcome, IT setup, team intros, HR orientation, access verification, buddy lunch" ;
+    oc:expectedOutcome "Employee integrated and oriented on Day 1" ;
+    oc:stepDependsOn _:ref_be3fdcd6d1cc369c ;
+    oc:stepId "first-day" .
+
+_:ref_b3ec6c1405cf91c5 a oc:WorkflowStep ;
+    dcterms:description "Acknowledge resignation/termination, notify HR, manager, and IT" ;
+    oc:expectedOutcome "All stakeholders notified" ;
+    oc:stepId "offboard-immediate" .
+
+_:ref_be3fdcd6d1cc369c a oc:WorkflowStep ;
+    dcterms:description "Setup/ship equipment, send Day 1 instructions, prepare workspace" ;
+    oc:expectedOutcome "Equipment ready and instructions sent" ;
+    oc:stepDependsOn _:ref_2e99c5501382befd ;
+    oc:stepId "pre-start-day-1" .
 

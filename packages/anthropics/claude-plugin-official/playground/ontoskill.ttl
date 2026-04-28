@@ -4,95 +4,377 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_plugin_official_playground a oc:DeclarativeSkill,
+oc:skill_claude_plugin_official_playground a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "playground" ;
-    skos:broader "Interactive HTML artifact generator" ;
-    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/playground" ;
+    skos:broader "Interactive HTML playground generator" ;
+    prov:wasDerivedFrom "../.agents/skills/anthropics/claude-plugin-official/playground" ;
     oc:contentHash "100f45302e6ac7adc8bf295f2ed12fc68756c5986bb2900051659e7dbd627359" ;
-    oc:differentia "Creates self-contained single-file playgrounds with controls, live preview, and natural-language prompt output that users configure visually and copy back into Claude" ;
-    oc:handlesFailure oc:FileNotFound,
-        oc:PermissionDenied ;
+    oc:differentia "Creates self-contained single-file visual explorers with live preview, interactive controls, and copyable prompt output that bridges user exploration back to Claude" ;
     oc:hasAllowedTool "Bash",
         "Write" ;
-    oc:hasArgumentHint "topic or domain for the playground (e.g., 'design playground for card component', 'code map for my project architecture')" ;
+    oc:hasArgumentHint "topic or playground type description" ;
     oc:hasCategory "development" ;
     oc:hasDescription "Creates interactive HTML playgrounds — self-contained single-file explorers that let users configure something visually through controls, see a live preview, and copy out a prompt. Use when the user asks to make a playground, explorer, or interactive tool for a topic." ;
     oc:hasName "playground" ;
-    oc:impartsKnowledge oc:kn_10c26d43,
-        oc:kn_37824603,
-        oc:kn_73676581,
-        oc:kn_7cfc1bcd,
-        oc:kn_c5659228,
-        oc:kn_d9796ef9,
-        oc:kn_e1c39730,
-        oc:kn_e54b6796 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "A playground is a self-contained HTML file with interactive controls on one side, a live preview on the other, and a prompt output at the bottom with a copy button. The user adjusts controls, explores visually, then copies the generated prompt back into Claude." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Too many controls at once → group by concern, hide advanced in a collapsible section" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "No defaults or presets → starts empty or broken on load" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Prompt output is just a value dump → write it as a natural instruction" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "External dependencies → if CDN is down, playground is dead" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 6 ;
+                                    oc:itemText "Prompt lacks context → include enough that it's actionable without the playground" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Preview doesn't update instantly → every control change must trigger immediate re-render" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Common mistakes to avoid" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 6 ;
+                                    oc:itemText "**Dark theme.** System font for UI, monospace for code/values. Minimal chrome." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "**Live preview.** Updates instantly on every control change. No \"Apply\" button." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "**Copy button.** Clipboard copy with brief \"Copied!\" feedback." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "**Prompt output.** Natural language, not a value dump. Only mentions non-default choices. Includes enough context to act on without seeing the playground. Updates live." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "**Single HTML file.** Inline all CSS and JS. No external dependencies." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "**Sensible defaults + presets.** Looks good on first load. Include 3-5 named presets that snap all controls to a cohesive combination." ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Core requirements (every playground)" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Keep a single state object. Every control writes to it, every render reads from it." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """const state = { /* all configurable values */ };
+
+function updateAll() {
+  renderPreview(); // update the visual
+  updatePrompt();  // rebuild the prompt text
+}
+// Every control calls updateAll() on change
+""" ;
+                            oc:codeLanguage "javascript" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 40-48" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "State management pattern" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "When the user asks for an interactive playground, explorer, or visual tool for a topic — especially when the input space is large, visual, or structural and hard to express as plain text." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "When to use this skill" ],
+                [ a oc:Section ;
+                    oc:hasContent _:ref_4d1d41662199e168 ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "How to use this skill" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """function updatePrompt() {
+  const parts = [];
+
+  // Only mention non-default values
+  if (state.borderRadius !== DEFAULTS.borderRadius) {
+    parts.push(`border-radius of ${state.borderRadius}px`);
+  }
+
+  // Use qualitative language alongside numbers
+  if (state.shadowBlur > 16) parts.push('a pronounced shadow');
+  else if (state.shadowBlur > 0) parts.push('a subtle shadow');
+
+  prompt.textContent = `Update the card to use ${parts.join(', ')}.`;
+}
+""" ;
+                            oc:codeLanguage "javascript" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 52-67" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Prompt output pattern" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Playground Builder" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """name: playground
+description: Creates interactive HTML playgrounds — self-contained single-file explorers that let users configure something visually through controls, see a live preview, and copy out a prompt. Use when the user asks to make a playground, explorer, or interactive tool for a topic.
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:hasWorkflow _:ref_4d1d41662199e168,
+        [ a oc:Workflow ;
+            dcterms:description "Generate a self-contained HTML playground from a user request by selecting the appropriate template and constructing the file" ;
+            oc:hasStep _:ref_03d951278ce82d8a,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Run `open <filename>.html` to launch the playground in the user's default browser" ;
+                    oc:expectedOutcome "Playground opens in browser for user interaction" ;
+                    oc:stepDependsOn _:ref_03d951278ce82d8a ;
+                    oc:stepId "launch-browser" ],
+                _:ref_a12a403e49a94107,
+                _:ref_d8b69d41dcf9678e ;
+            oc:workflowId "playground-build" ;
+            oc:workflowName "Build Interactive Playground" ] ;
+    oc:impartsKnowledge oc:kn_22b1b9e4,
+        oc:kn_2e3cdb2a,
+        oc:kn_32a6ce71,
+        oc:kn_527530e5,
+        oc:kn_716eedbd,
+        oc:kn_84d31142,
+        oc:kn_a4a901ce,
+        oc:kn_b2d528f2,
+        oc:kn_d3d1cd69,
+        oc:kn_d521b298,
+        oc:kn_dab1a6e8,
+        oc:kn_e5b1c3b0,
+        oc:kn_f6f74f66 ;
     oc:isUserInvocable true ;
     oc:nature "Work" ;
     oc:requiresState oc:EnvironmentReady ;
-    oc:resolvesIntent "build design playground",
+    oc:resolvesIntent "build data explorer",
         "build visual explorer",
-        "create code map visualization",
-        "create data explorer",
+        "create concept map",
+        "create design playground",
         "create interactive playground",
-        "generate interactive tool",
-        "review code diffs interactively",
-        "review documents interactively" ;
+        "design interactive tool",
+        "generate playground HTML" ;
     oc:yieldsState oc:DocumentCreated .
 
-oc:kn_10c26d43 a oc:DesignPrinciple,
+oc:kn_22b1b9e4 a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When building any playground" ;
-    oc:directiveContent "Every playground must be a single self-contained HTML file with all CSS and JS inlined — no external dependencies or CDN references." ;
-    oc:hasRationale "External dependencies create single points of failure; if a CDN is down, the playground is dead." ;
-    oc:severityLevel "CRITICAL" .
+    oc:appliesToContext "When architecting the playground's JavaScript" ;
+    oc:directiveContent "Use a single state object where every control writes to it and every render reads from it. All controls call a single updateAll() function on change." ;
+    oc:hasRationale "Centralized state eliminates sync bugs between controls, preview, and prompt output" ;
+    oc:severityLevel "HIGH" .
 
-oc:kn_37824603 a oc:AntiPattern,
+oc:kn_2e3cdb2a a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When designing the control panel layout" ;
-    oc:directiveContent "Avoid showing too many controls at once — group by concern and hide advanced options in a collapsible section." ;
-    oc:hasRationale "Overwhelming users with all controls simultaneously reduces usability and increases cognitive load." ;
+    oc:appliesToContext "When implementing prompt output generation" ;
+    oc:codeLanguage "javascript" ;
+    oc:directiveContent """function updatePrompt() {
+  const parts = [];
+  if (state.borderRadius !== DEFAULTS.borderRadius) {
+    parts.push(`border-radius of ${state.borderRadius}px`);
+  }
+  if (state.shadowBlur > 16) parts.push('a pronounced shadow');
+  else if (state.shadowBlur > 0) parts.push('a subtle shadow');
+  prompt.textContent = `Update the card to use ${parts.join(', ')}.`;
+}""" .
+
+oc:kn_32a6ce71 a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When user request doesn't map cleanly to a known template" ;
+    oc:directiveContent "If the topic doesn't fit any template cleanly, use the closest matching template and adapt its structure rather than building from scratch." ;
+    oc:hasRationale "Templates encode proven patterns — adapting them is faster and more reliable than free-form construction" ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_73676581 a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "When designing the initial state and preset system" ;
-    oc:directiveContent "Include 3-5 named presets that snap all controls to cohesive combinations, so the playground looks good on first load with sensible defaults." ;
-    oc:hasRationale "Good defaults and presets let users start exploring immediately instead of configuring from scratch." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_7cfc1bcd a oc:Heuristic,
+oc:kn_527530e5 a oc:Idempotency,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When implementing state management in playground JavaScript" ;
-    oc:directiveContent "Use a single state object pattern where every control writes to it and every render reads from it. All controls call updateAll() on change to trigger both renderPreview() and updatePrompt()." ;
-    oc:hasRationale "A single state object prevents sync bugs between controls, preview, and prompt output." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_c5659228 a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "When the playground HTML file has been written" ;
-    oc:directiveContent "After writing the HTML file, run 'open <filename>.html' to launch it in the user's default browser for immediate interaction." ;
-    oc:hasRationale "Users need to see and interact with the playground to evaluate it; auto-opening saves a manual step." ;
+    oc:appliesToContext "Always" ;
+    oc:directiveContent "Playgrounds are idempotent — regenerating the same HTML file with the same parameters produces the same output. No external state is modified." ;
+    oc:hasRationale "File generation is purely a write operation with no side effects on other systems" ;
     oc:severityLevel "LOW" .
 
-oc:kn_d9796ef9 a oc:KnowledgeNode,
-        oc:WorkflowStrategy ;
-    oc:appliesToContext "When identifying which playground type to build" ;
-    oc:directiveContent "Match the user's request to one of six template types (design-playground, data-explorer, concept-map, document-critique, diff-review, code-map) and adapt the closest match if no template fits cleanly." ;
-    oc:hasRationale "Templates provide proven layout and interaction patterns tailored to specific domains, reducing design errors." ;
+oc:kn_716eedbd a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When styling the playground UI" ;
+    oc:directiveContent "Include a copy button with brief 'Copied!' feedback. Use dark theme, system font for UI, monospace for code/values, minimal chrome." ;
+    oc:hasRationale "Consistent styling and reliable copy-to-clipboard make the playground feel polished and production-ready" ;
+    oc:severityLevel "LOW" .
+
+oc:kn_84d31142 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When wiring up controls and preview rendering" ;
+    oc:directiveContent "Live preview must update instantly on every control change. No 'Apply' button. Every control triggers immediate re-render via a single state object pattern." ;
+    oc:hasRationale "Instant feedback is the core UX value of a playground — any delay breaks the exploration loop" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_e1c39730 a oc:Constraint,
+oc:kn_a4a901ce a oc:KnowledgeNode,
+        oc:OutputFormat ;
+    oc:appliesToContext "When structuring the playground HTML layout" ;
+    oc:directiveContent """Single HTML file with:
+- Left panel: Controls grouped by concern
+- Right panel: Live preview
+- Bottom: Natural language prompt output + [Copy] button
+- Presets: 3-5 named configurations
+- Theme: Dark, system font UI, monospace code""" ;
+    oc:templateVariables "controls",
+        "presets",
+        "preview",
+        "prompt_output" .
+
+oc:kn_b2d528f2 a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When implementing control-to-preview binding" ;
-    oc:directiveContent "Live preview must update instantly on every control change — no 'Apply' button or delayed rendering." ;
-    oc:hasRationale "Immediate visual feedback is the core value proposition of a playground; delayed updates break the exploratory workflow." ;
+    oc:appliesToContext "When implementing state management for any playground" ;
+    oc:codeLanguage "javascript" ;
+    oc:directiveContent """const state = { /* all configurable values */ };
+function updateAll() {
+  renderPreview();
+  updatePrompt();
+}
+// Every control calls updateAll() on change""" .
+
+oc:kn_d3d1cd69 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Always when building any playground" ;
+    oc:directiveContent "Every playground MUST be a single HTML file with all CSS and JS inlined. No external dependencies — if a CDN is down, the playground is dead." ;
+    oc:hasRationale "Self-contained files ensure the playground works offline and forever without dependency risk" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_d521b298 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing the control panel layout" ;
+    oc:directiveContent "Avoid presenting too many controls at once. Group by concern and hide advanced options in a collapsible section. Start with 3-5 named presets that snap all controls to a cohesive combination." ;
+    oc:hasRationale "Overwhelming controls on first load defeat the purpose of a playground — users should see something good immediately and explore incrementally" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_dab1a6e8 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When implementing the prompt output generation function" ;
+    oc:directiveContent "Prompt output must use natural language, not a value dump. Only mention non-default choices. Include enough context to be actionable without seeing the playground." ;
+    oc:hasRationale "The prompt is the bridge back to Claude — it must be self-contained and read like an instruction a human would give" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_e54b6796 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When generating prompt output text" ;
-    oc:directiveContent "Never output the prompt as a raw value dump (e.g., 'radius: 12, shadow: 4'). Write it as a natural language instruction that only mentions non-default choices." ;
-    oc:hasRationale "Natural language prompts are actionable without the playground context; value dumps require the user to interpret raw settings." ;
-    oc:severityLevel "HIGH" .
+oc:kn_e5b1c3b0 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When building any playground" ;
+    oc:directiveContent "1. Identify playground type from user request. 2. Load matching template from templates/ directory. 3. Follow template to build the playground HTML. 4. Write HTML file and run `open <filename>.html` to launch in browser." ;
+    oc:stepOrder 1 .
+
+oc:kn_f6f74f66 a oc:KnowledgeNode,
+        oc:Prerequisite ;
+    oc:directiveContent "Templates available in templates/: design-playground.md, data-explorer.md, concept-map.md, document-critique.md, diff-review.md, code-map.md" .
+
+_:ref_5d8bd034870c0ebf a oc:WorkflowStep ;
+    dcterms:description "**Follow the template** to build the playground. If the topic doesn't fit any template cleanly, use the one closest and adapt." ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_6934d25c41d95c10 a oc:BulletItem ;
+    oc:blockType "bullet_item" ;
+    oc:itemOrder 3 ;
+    oc:itemText "`templates/concept-map.md` — Learning and exploration (concept maps, knowledge gaps, scope mapping)" .
+
+_:ref_6a4dd94dc6d74031 a oc:WorkflowStep ;
+    dcterms:description "**Open in browser.** After writing the HTML file, run `open <filename>.html` to launch it in the user's default browser." ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_7a9691673d9be20f a oc:WorkflowStep ;
+    dcterms:description "**Load the matching template** from `templates/`:" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild [ a oc:BulletList ;
+            oc:blockType "bullet_list" ;
+            oc:contentOrder 1 ;
+            oc:hasItem _:ref_6934d25c41d95c10,
+                [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 4 ;
+                    oc:itemText "`templates/document-critique.md` — Document review (suggestions with approve/reject/comment workflow)" ],
+                [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 1 ;
+                    oc:itemText "`templates/design-playground.md` — Visual design decisions (components, layouts, spacing, color, typography)" ],
+                [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 6 ;
+                    oc:itemText "`templates/code-map.md` — Codebase architecture (component relationships, data flow, layer diagrams)" ],
+                [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 2 ;
+                    oc:itemText "`templates/data-explorer.md` — Data and query building (SQL, APIs, pipelines, regex)" ],
+                [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 5 ;
+                    oc:itemText "`templates/diff-review.md` — Code review (git diffs, commits, PRs with line-by-line commenting)" ] ] ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_c530467cfd1ab7ec a oc:WorkflowStep ;
+    dcterms:description "**Identify the playground type** from the user's request" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_03d951278ce82d8a a oc:WorkflowStep ;
+    dcterms:description "Construct the single HTML file following the template: inline all CSS/JS, implement state management, live preview, prompt output, copy button, presets, dark theme" ;
+    oc:expectedOutcome "Complete self-contained HTML file written to disk" ;
+    oc:stepDependsOn _:ref_d8b69d41dcf9678e ;
+    oc:stepId "build-html" .
+
+_:ref_4d1d41662199e168 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 1 ;
+    oc:hasStep _:ref_5d8bd034870c0ebf,
+        _:ref_6a4dd94dc6d74031,
+        _:ref_7a9691673d9be20f,
+        _:ref_c530467cfd1ab7ec ;
+    oc:workflowId "procedure_1" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_a12a403e49a94107 a oc:WorkflowStep ;
+    dcterms:description "Identify the playground type from user request: design, data explorer, concept map, document critique, diff review, or code map" ;
+    oc:expectedOutcome "Correct template type determined" ;
+    oc:stepId "identify-type" .
+
+_:ref_d8b69d41dcf9678e a oc:WorkflowStep ;
+    dcterms:description "Load the matching template from templates/ directory for detailed structural guidance" ;
+    oc:expectedOutcome "Template content loaded and understood" ;
+    oc:stepDependsOn _:ref_a12a403e49a94107 ;
+    oc:stepId "load-template" .
 

@@ -4,74 +4,306 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_plugin_official_math_olympiad_presentation_prompts a oc:DeclarativeSkill,
+oc:skill_claude_plugin_official_math_olympiad_presentation_prompts a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "presentation-prompts" ;
-    skos:broader "Post-verification presentation pass" ;
+    skos:broader "Prompt template" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/math-olympiad" ;
     oc:contentHash "19eb3e242eb5879a5fe2768eea9d0e5a35b3df38a5c02cccd101e0b1f07e7d09" ;
-    oc:differentia "that restructures verified mathematical proofs via a fresh agent to produce clean, publication-quality LaTeX output by eliminating discovery-order scaffolding, overkill constructions, and exposition anti-patterns" ;
-    oc:extends oc:skill_anthropics_claude_plugin_official_math_olympiad ;
-    oc:handlesFailure oc:InvalidProofStructure,
-        oc:PresentationDegraded ;
-    oc:hasArgumentHint "verified proof (passed to fresh subagent)" ;
+    oc:differentia "that instructs a fresh subagent to rewrite verified math proofs into clean, publication-quality LaTeX via a presentation pass" ;
+    oc:extends oc:skill_claude_plugin_official_math_olympiad ;
     oc:hasCategory "research" ;
-    oc:hasRequirement oc:req_4da17534,
-        oc:req_716fc496 ;
-    oc:impartsKnowledge oc:kn_4f8eba68,
-        oc:kn_5a42462b,
-        oc:kn_7454d31e,
-        oc:kn_c4efd65c,
-        oc:kn_cc334bac ;
-    oc:isUserInvocable true ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent """**Premise**: Aletheia's PDFs are beautiful; raw IMO output is not. The
+difference is a _presentation pass_: after a proof is **verified correct**, a
+fresh agent — one who didn't sweat through the discovery — finds the cleanest
+way to say it. The discoverer is too attached to the scaffolding.""" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent """The Erdős paper even criticizes Aletheia's _own_ output: _"somewhat overkill;
+any f whose inverse is at most [X] would suffice, no need to take the double
+exponential."_ The presentation pass is where overkill goes to die.""" ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent """Paste this to a **fresh subagent** along with the verified proof. The agent must
+not have discovery-context; that's the point.""" ],
+                        [ a oc:BlockQuote ;
+                            oc:blockType "blockquote" ;
+                            oc:contentOrder 2 ;
+                            oc:quoteContent """You are given a **verified, correct proof**. Your job is not to check it — it
+is correct. Your job is to find the **cleanest presentation**. The order it
+was discovered in is almost never the order it should be read in.
+
+Work through these questions in order:
+
+**Hindsight shortcuts.** Now that you know the answer, is there a 3-line
+argument? The discoverer built machinery to _find_ the key step; you already
+_have_ the key step. Can the machinery be discarded? (Classic: a long
+case-bash that, in hindsight, collapses once you spot the invariant.)
+
+**Overkill.** Is any bound stronger than needed? Any construction more general
+than the problem requires? If a double exponential works but a linear function
+also works, use the linear one — the reader will wonder what the double
+exponential is hiding. Match the strength of each tool to the strength of what
+it's proving.
+
+**What to cut.** Which steps _verify_ without _illuminating_? Discovery leaves
+a debris field: sanity checks, dead ends backed out of, "note that X (we won't
+use this)". Delete them. If a paragraph can be removed and the proof still
+compiles in the reader's head, remove it.
+
+**Lemma granularity.** Inline a lemma if it's used once and the proof is ≤3
+lines. Keep it standalone if it's used twice, or if its _statement alone_
+clarifies the structure (even with a 1-line proof). Name standalone lemmas
+descriptively — "Combinatorial dimension bound", not "Lemma 2".
+
+**Order.** Lead with the main statement. Then the one idea that makes it work.
+Then the details. Isolate the one genuinely clever step — there's almost
+always exactly one — and let everything else be obviously routine _by
+contrast_.
+
+**Step names.** Number steps _and_ name them: "**Step 3: Fourier inversion and
+translation invariance.**" The name is a promise to the reader about what this
+block accomplishes. Signpost reductions explicitly: "We are reduced to showing
+that…"
+
+Output clean LaTeX using the template below. Aim for: a strong grad student
+could reconstruct every suppressed detail, a professor could skim the step
+names alone and nod.""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "1. The Presentation Pass Prompt" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "The presentation agent should flag and fix these:" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText """**Proof by intimidation.** _"It is trivial to see that…"_, _"Obviously…"_, _"A
+standard argument shows…"_ — if it's trivial, one sentence suffices. Write the
+sentence.""" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "**Orphan lemmas.** Stated, proved, cited once, three lines long. Inline it." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText """**Discovery-order exposition.** "First I tried X, which led me to notice Y…" —
+the reader doesn't care. State Y.""" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText """**Overkill constructions.** The tell: the bound you prove is parametrically
+stronger than what the next line consumes. Weaken it until it's tight.""" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 7 ;
+                                    oc:itemText """**Missing signposts.** A page of computation with no "we are reduced to" / "it
+suffices to show" markers. The reader shouldn't have to reverse-engineer your
+strategy.""" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 6 ;
+                                    oc:itemText """**Unlabeled case splits.** Five cases, no indication of why five or what
+distinguishes them. Name the cases; say upfront which one carries the content.""" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText """**Unnecessary generality.** Proving it for all $n$ when the problem asks about
+$n=3$ and the general case adds no insight, only indices.""" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "3. Anti-Patterns to Catch" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """\\documentclass[11pt]{article}
+\\usepackage[margin=1.25in]{geometry}
+\\usepackage{amsmath, amssymb, amsthm, mathtools}
+\\usepackage[shortlabels]{enumitem}
+\\usepackage{hyperref}
+
+\\theoremstyle{plain}
+\\newtheorem{theorem}{Theorem}
+\\newtheorem{lemma}{Lemma}
+\\newtheorem{claim}{Claim}
+\\newtheorem{proposition}[theorem]{Proposition}
+
+\\theoremstyle{definition}
+\\newtheorem{definition}[theorem]{Definition}
+\\newtheorem*{remark}{Remark}
+
+\\begin{document}
+
+\\section*{Problem}
+% Restate the problem exactly. No paraphrase.
+
+\\section*{Solution}
+
+\\begin{theorem}
+% State what you will prove, in full. If the answer is "yes" or "no"
+% or a specific value, state it here so the reader isn't kept in suspense.
+\\end{theorem}
+
+% If a lemma is reused or structurally load-bearing, state it before
+% the main proof. One-shot verifications get inlined below.
+% \\begin{lemma}\\label{lem:key}
+%   ...
+% \\end{lemma}
+% \\begin{proof} ... \\end{proof}
+
+\\begin{proof}[Proof of Theorem]
+\\textbf{Step 1: [Descriptive name — what this step accomplishes].}
+% e.g. "Reduction to the compact case." / "The key invariant."
+
+% Display important equations; inline routine ones.
+% End a reduction step with: "We are reduced to showing that ..."
+
+\\textbf{Step 2: [Name].}
+% ...
+
+\\textbf{Step $n$: Conclusion.}
+% One or two sentences. Make the contradiction / induction close / final
+% computation land visibly.
+\\end{proof}
+
+\\end{document}
+""" ;
+                            oc:codeLanguage "latex" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 67-119" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Style conventions lifted from the Aletheia samples:**" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 4 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText """Display math for the equation a step _produces_; inline math for the algebra
+getting there.""" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText """Cite precisely when invoking a named result:
+_(Jacquet–Piatetski-Shapiro–Shalika, 1981)_ — not "by a well-known theorem".""" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText """Integer bounds earn the ceiling: if $d \\ge n/k$ and $d \\in \\mathbb{Z}$, write
+$d \\ge \\lceil n/k \\rceil$. Free sharpness.""" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText """In contradiction proofs: state the false assumption plainly ("Suppose, for
+contradiction, that…"), and flag the collision plainly ("We are led to the
+contradiction $0 > 0$.").""" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent """Minimal preamble — Aletheia's environments, none of its ornament. No
+`tcolorbox`, no custom colors.""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "2. LaTeX Output Template" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Presentation Pass — Prompts and Templates" ] ;
+    oc:impartsKnowledge oc:kn_0c5f2c0a,
+        oc:kn_567aa773,
+        oc:kn_70888810,
+        oc:kn_85537025,
+        oc:kn_a9b1b60e,
+        oc:kn_b0123071,
+        oc:kn_ceaa19ad,
+        oc:kn_e9200faa,
+        oc:kn_f231f65f,
+        oc:kn_fa5476ff ;
+    oc:isUserInvocable false ;
     oc:nature "Work" ;
-    oc:requiresState oc:ProofVerified ;
-    oc:resolvesIntent "eliminate discovery scaffolding from proof",
-        "generate publication-quality LaTeX from verified proof",
-        "present proof cleanly",
-        "restructure mathematical proof for readability" ;
-    oc:yieldsState oc:CleanLaTeXOutput .
+    oc:resolvesIntent "format olympiad solution for publication",
+        "generate clean LaTeX from verified proof",
+        "improve proof presentation",
+        "rewrite verified proof for clarity" .
 
-oc:kn_4f8eba68 a oc:KnowledgeNode,
-        oc:WorkflowStrategy ;
-    oc:appliesToContext "When ordering proof steps for any presentation" ;
-    oc:directiveContent "Structure proof presentation as: lead with the main statement, then the one key idea, then details. Isolate the genuinely clever step and let everything else be routine by contrast. Number steps AND name them descriptively. Signpost reductions explicitly ('We are reduced to showing that…')." ;
-    oc:hasRationale "A professor should be able to skim step names alone and nod; a strong grad student should be able to reconstruct every suppressed detail." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_5a42462b a oc:DesignPrinciple,
+oc:kn_0c5f2c0a a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When reviewing bounds and constructions in a proof" ;
-    oc:directiveContent "Match the strength of each tool to the strength of what it's proving — if a linear function works, don't use a double exponential. Weaken overkill bounds until they are tight." ;
-    oc:hasRationale "Overkill bounds make readers wonder what the stronger tool is hiding and obscure the true nature of the argument." ;
+    oc:appliesToContext "When running the presentation pass after proof verification" ;
+    oc:directiveContent "The presentation pass must be done by a fresh agent with no discovery context — the discoverer is too attached to scaffolding and dead ends." ;
+    oc:hasRationale "Separation of discovery and presentation eliminates discovery-order bias and overkill constructions" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_567aa773 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When reviewing proof scope" ;
+    oc:directiveContent "Unnecessary generality — proving for all n when the problem asks about n=3 and the general case adds no insight — must be stripped back to what the problem requires." ;
+    oc:hasRationale "Generality that adds indices without insight is overkill in disguise" ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_7454d31e a oc:Heuristic,
+oc:kn_70888810 a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When reformatting any verified proof for presentation" ;
-    oc:directiveContent "Check for hindsight shortcuts: now that the answer is known, can a 3-line argument replace the machinery? Case-bashes often collapse once the invariant is spotted." ;
-    oc:hasRationale "Discovery builds exploratory machinery; presentation only needs the key step, which is already known." ;
+    oc:appliesToContext "When deciding lemma granularity" ;
+    oc:directiveContent "Inline a lemma if used once and ≤3 lines. Keep standalone if used twice or if its statement alone clarifies structure. Name descriptively — 'Combinatorial dimension bound', not 'Lemma 2'." ;
+    oc:hasRationale "Proper lemma granularity balances readability with structural clarity" .
+
+oc:kn_85537025 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When copy-editing any proof step" ;
+    oc:directiveContent "Proof by intimidation ('trivial to see', 'obviously', 'a standard argument shows') must be replaced with the actual one-sentence argument. If it's truly trivial, write the sentence." ;
+    oc:hasRationale "Unfilled gaps break the reader's ability to reconstruct suppressed details" ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_c4efd65c a oc:DesignPrinciple,
+oc:kn_a9b1b60e a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "After any proof is verified correct, before generating final LaTeX output" ;
-    oc:directiveContent "The discoverer of a proof is too attached to their scaffolding; a fresh agent without discovery-context must perform the presentation pass to find the cleanest exposition." ;
-    oc:hasRationale "Discovery order is almost never the optimal reading order. The discoverer built machinery to find key steps that can be discarded once the answer is known." ;
+    oc:appliesToContext "When ordering proof steps" ;
+    oc:directiveContent "Isolate the one genuinely clever step — there's almost always exactly one — and let everything else be obviously routine by contrast. Lead with the main statement, then the key idea, then details." ;
+    oc:hasRationale "Highlighting the single non-obvious step gives the reader a mental anchor and makes the routine steps feel routine" .
+
+oc:kn_b0123071 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When reviewing any bound or construction in the proof" ;
+    oc:directiveContent "Overkill constructions — where the bound proved is parametrically stronger than what the next step consumes — must be weakened until tight. Match tool strength to what's being proved." ;
+    oc:hasRationale "Overkill forces the reader to wonder what the excess strength is hiding and obscures the true reason the result holds" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_cc334bac a oc:AntiPattern,
+oc:kn_ceaa19ad a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When formatting the final LaTeX output" ;
+    oc:directiveContent "Number steps AND name them: 'Step 3: Fourier inversion and translation invariance.' The name is a promise about what the block accomplishes. Signpost reductions: 'We are reduced to showing that…'" ;
+    oc:hasRationale "Named steps let a professor skim step names and nod; they serve as a table of contents for the proof" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_e9200faa a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When writing or reviewing any mathematical proof presentation" ;
-    oc:directiveContent "Never use discovery-order exposition ('First I tried X, which led me to notice Y…'), proof by intimidation ('It is trivial to see that…'), unnecessary generality (proving for all n when n=3 suffices), or orphan lemmas (stated, proved, cited once, three lines long)." ;
-    oc:hasRationale "These anti-patterns obscure the actual argument, add cognitive load, and violate the principle that every line must illuminate." ;
+    oc:appliesToContext "When starting the presentation pass" ;
+    oc:directiveContent "Check for hindsight shortcuts: now that the answer is known, is there a 3-line argument? Long case-bashes often collapse once you spot the invariant." ;
+    oc:hasRationale "Discovery builds machinery to find the key step; once you have the key step, the machinery can often be discarded" .
+
+oc:kn_f231f65f a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When reviewing proof output for presentation quality" ;
+    oc:directiveContent "Discovery-order exposition ('First I tried X, which led me to notice Y…') must be rewritten to state the key insight directly. The reader doesn't care about the journey." ;
+    oc:hasRationale "Discovery narrative obscures the actual logical structure and wastes reader attention" ;
     oc:severityLevel "HIGH" .
 
-oc:req_4da17534 a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "Mathematical proof writing conventions" .
-
-oc:req_716fc496 a oc:RequirementTool ;
-    oc:isOptional false ;
-    oc:requirementValue "LaTeX" .
+oc:kn_fa5476ff a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When typesetting equations and bounds" ;
+    oc:directiveContent "Display math for the equation a step produces; inline math for the algebra getting there. Integer bounds earn the ceiling: write d ≥ ⌈n/k⌉. Cite named results precisely." ;
+    oc:hasRationale "Visual hierarchy guides the reader's eye to the important outputs; precise citations and sharp bounds reflect mathematical maturity" ;
+    oc:severityLevel "MEDIUM" .
 

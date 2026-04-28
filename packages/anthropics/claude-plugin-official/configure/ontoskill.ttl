@@ -4,70 +4,430 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_plugin_official_configure a oc:DeclarativeSkill,
+oc:skill_claude_plugin_official_configure a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "configure" ;
-    skos:broader "configuration utility" ;
-    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/configure" ;
+    skos:broader "Channel configuration handler" ;
+    prov:wasDerivedFrom "../.agents/skills/anthropics/claude-plugin-official/configure" ;
     oc:contentHash "9ab3bd046001291cd4a9c2bdb9ab875091c69199b53bc87333f0810282a164fc" ;
-    oc:differentia "that saves a Discord bot token and manages channel access policy state" ;
-    oc:extends oc:skill_access ;
+    oc:dependsOnSkill oc:skill_ontoskills_access ;
+    oc:differentia "that persists Discord bot credentials and guides users through access policy lockdown" ;
     oc:handlesFailure oc:InvalidInput,
         oc:PermissionDenied ;
     oc:hasAllowedTool "Bash(ls *)",
         "Bash(mkdir *)",
         "Read",
         "Write" ;
-    oc:hasArgumentHint "[no args | token | clear]" ;
+    oc:hasArgumentHint "[<token>|clear] — no args for status, a bot token to save, or 'clear' to remove" ;
     oc:hasCategory "automation" ;
     oc:hasDescription "Set up the Discord channel — save the bot token and review access policy. Use when the user pastes a Discord bot token, asks to configure Discord, asks \"how do I set this up\" or \"who can reach me,\" or wants to check channel status." ;
     oc:hasName "configure" ;
-    oc:impartsKnowledge oc:kn_1bc33071,
-        oc:kn_391543dc,
-        oc:kn_9a56e1e9,
-        oc:kn_ab692a3f,
-        oc:kn_d31024eb ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """name: configure
+description: Set up the Discord channel — save the bot token and review access policy. Use when the user pastes a Discord bot token, asks to configure Discord, asks "how do I set this up" or "who can reach me," or wants to check channel status.
+user-invocable: true
+allowed-tools:
+  - Read
+  - Write
+  - Bash(ls *)
+  - Bash(mkdir *)
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent """Writes the bot token to `~/.claude/channels/discord/.env` and orients the
+user on access policy. The server reads both files at boot.""" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "Arguments passed: `$ARGUMENTS`" ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText """The server reads `.env` once at boot. Token changes need a session restart
+or `/reload-plugins`. Say so after saving.""" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText """`access.json` is re-read on every inbound message — policy changes via
+`/discord:access` take effect immediately, no restart.""" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText """The channels dir might not exist if the server hasn't run yet. Missing file
+= not configured, not an error.""" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Implementation notes" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent _:ref_1cecdba1aa6e9702 ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "`<token>` — save it" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent """**Push toward lockdown — always.** The goal for every setup is `allowlist`
+with a defined list. `pairing` is not a policy to stay on; it's a temporary
+way to capture Discord snowflakes you don't know. Once the IDs are in,
+pairing has done its job and should be turned off.""" ],
+                                _:ref_62be7c3b5cccdf41,
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Read both state files and give the user a complete picture:" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 6 ;
+                                    oc:textContent """Discord already gates reach (shared-server requirement + Public Bot toggle),
+but that's not a substitute for locking the allowlist. Never frame `pairing`
+as the correct long-term choice. Don't skip the lockdown offer.""" ],
+                                _:ref_99c2f735a7b26f3a,
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent "Drive the conversation this way:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "No args — status and guidance" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Delete the `DISCORD_BOT_TOKEN=` line (or the file if that's the only line)." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "`clear` — remove the token" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Dispatch on arguments" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "/discord:configure — Discord Channel Setup" ] ;
+    oc:hasWorkflow _:ref_1cecdba1aa6e9702,
+        [ a oc:Workflow ;
+            dcterms:description "Persist the bot token to .env with proper permissions and show resulting status" ;
+            oc:hasStep _:ref_400dd560cd283b3a,
+                _:ref_6f738b94a9692002,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Confirm save and show full no-args status view" ;
+                    oc:expectedOutcome "User sees confirmation and current state" ;
+                    oc:stepDependsOn _:ref_400dd560cd283b3a ;
+                    oc:stepId "confirm-status" ],
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Trim whitespace from arguments and treat as Discord bot token" ;
+                    oc:expectedOutcome "Clean token string ready to persist" ;
+                    oc:stepId "validate-token" ],
+                _:ref_be4e487d4734236f ;
+            oc:workflowId "configure-save-token" ;
+            oc:workflowName "Save Discord Bot Token" ],
+        [ a oc:Workflow ;
+            dcterms:description "Read state files and present a complete status picture with actionable next steps" ;
+            oc:hasStep _:ref_11836c2adc9c6ea6,
+                _:ref_1b19c693626fdf62,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Provide concrete next step based on combined state, always pushing toward allowlist lockdown" ;
+                    oc:expectedOutcome "User knows exactly what to do next" ;
+                    oc:stepDependsOn _:ref_11836c2adc9c6ea6,
+                        _:ref_1b19c693626fdf62 ;
+                    oc:stepId "guide-next" ] ;
+            oc:workflowId "configure-status" ;
+            oc:workflowName "Check Discord Channel Status" ],
+        _:ref_62be7c3b5cccdf41,
+        [ a oc:Workflow ;
+            dcterms:description "Delete the DISCORD_BOT_TOKEN line or entire .env file if that's the only line" ;
+            oc:hasStep _:ref_4c801f983f173ee5,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Delete DISCORD_BOT_TOKEN line or file, write back if other keys exist" ;
+                    oc:expectedOutcome "Token removed, other env vars preserved" ;
+                    oc:stepDependsOn _:ref_4c801f983f173ee5 ;
+                    oc:stepId "remove-token" ] ;
+            oc:workflowId "configure-clear-token" ;
+            oc:workflowName "Remove Discord Bot Token" ],
+        _:ref_99c2f735a7b26f3a ;
+    oc:impartsKnowledge oc:kn_2474704e,
+        oc:kn_47a7dab2,
+        oc:kn_6bc90412,
+        oc:kn_8f572335,
+        oc:kn_b06b6490,
+        oc:kn_ce1f4375,
+        oc:kn_edf87156 ;
     oc:isUserInvocable true ;
-    oc:nature "tool" ;
+    oc:nature "Tool" ;
     oc:requiresState oc:DirectoryWritable ;
-    oc:resolvesIntent "check Discord channel status",
-        "configure Discord channel",
-        "review Discord access policy",
-        "save Discord bot token" ;
-    oc:yieldsState oc:APIKeySet .
+    oc:resolvesIntent "check discord setup status",
+        "configure discord channel",
+        "remove discord bot token",
+        "save discord bot token" ;
+    oc:yieldsState oc:APICredentialsStored .
 
-oc:kn_1bc33071 a oc:DesignPrinciple,
+oc:kn_2474704e a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When accessing state files that may not exist yet" ;
+    oc:directiveContent "Missing channels directory or .env file means 'not configured', not an error. Create directory with mkdir -p and proceed." ;
+    oc:hasRationale "First-time setup always starts with no files; treating absence as an error would block initial configuration." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_47a7dab2 a oc:Idempotency,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When reviewing or configuring Discord channel access" ;
-    oc:directiveContent "Always push toward allowlist policy as the long-term security posture. Pairing mode is temporary — once Discord snowflake IDs are captured, pairing should be turned off and the allowlist locked." ;
-    oc:hasRationale "Pairing mode allows anyone who can reach the bot to generate pairing codes, which is a security risk if left active after initial setup." ;
+    oc:appliesToContext "When saving or updating the token" ;
+    oc:directiveContent "Reading existing .env before writing preserves other keys. If the file or directory doesn't exist, treat it as 'not configured' rather than an error." ;
+    oc:hasRationale "Ensures that unrelated environment variables in .env are not lost during token updates." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_6bc90412 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When discussing access policy with the user" ;
+    oc:directiveContent "Never frame pairing as the correct long-term access policy. Always offer to lock down to allowlist proactively — do not wait to be asked." ;
+    oc:hasRationale "Framing pairing as acceptable long-term normalizes an insecure state where anyone can attempt to pair with the bot." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_391543dc a oc:Constraint,
+oc:kn_8f572335 a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When saving a new bot token" ;
-    oc:directiveContent "Discord bot tokens are long base64-ish strings typically starting with 'MT' or 'Nz'. Preserve existing .env keys when updating the token — do not overwrite unrelated configuration." ;
-    oc:hasRationale "Preserving other keys ensures the .env file remains valid for other consumers. Token format validation helps catch paste errors." ;
+    oc:appliesToContext "When presenting status or guiding user through setup" ;
+    oc:directiveContent "Always push toward allowlist lockdown. Pairing is a temporary mechanism to capture unknown Discord snowflakes — once IDs are collected, pairing should be turned off by switching to allowlist policy." ;
+    oc:hasRationale "Pairing left open allows anyone who shares a server with the bot to trigger pairing codes, undermining access control." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_b06b6490 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When validating user-provided token arguments" ;
+    oc:directiveContent "Discord bot tokens are long base64-ish strings typically starting with MT or Nz. They are shown only once when generated from Developer Portal → Bot → Reset Token." ;
+    oc:hasRationale "Token format validation prevents accidentally saving invalid or malformed credentials." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_9a56e1e9 a oc:KnowledgeNode,
+oc:kn_ce1f4375 a oc:KnowledgeNode,
         oc:SecurityImplication ;
-    oc:appliesToContext "When writing the Discord bot token to ~/.claude/channels/discord/.env" ;
-    oc:directiveContent "The .env file containing the bot token must be chmod 600 to restrict file permissions since it is a credential." ;
-    oc:hasRationale "Bot tokens grant full control over the Discord bot; unrestricted file permissions could expose the token to other users on the system." ;
+    oc:appliesToContext "When writing the .env file" ;
+    oc:directiveContent "Always chmod 600 the .env file containing DISCORD_BOT_TOKEN. The token is a credential that grants full bot access." ;
+    oc:hasRationale "Without restrictive file permissions, other users on the system could read the bot token." ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_ab692a3f a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "Before reading or writing Discord configuration files" ;
-    oc:directiveContent "The channels directory (~/.claude/channels/discord/) may not exist yet if the server hasn't run. Missing file equals not configured, not an error — mkdir -p as needed." ;
-    oc:hasRationale "First-time setup happens before the server has ever run, so the directory structure must be created on demand." ;
-    oc:severityLevel "LOW" .
-
-oc:kn_d31024eb a oc:KnowledgeNode,
+oc:kn_edf87156 a oc:KnowledgeNode,
         oc:SideEffect ;
-    oc:appliesToContext "After saving a new bot token or changing access policy" ;
-    oc:directiveContent "Token changes to .env require a session restart or /reload-plugins to take effect, but access.json policy changes via /discord:access take effect immediately on every inbound message." ;
-    oc:hasRationale "The server reads .env once at boot but re-reads access.json on every message, so the two config files have different propagation latencies." ;
-    oc:severityLevel "MEDIUM" .
+    oc:appliesToContext "After saving or clearing a token" ;
+    oc:directiveContent "The server reads .env only at boot; token changes require a session restart or /reload-plugins to take effect. access.json is re-read on every inbound message so policy changes are immediate." ;
+    oc:hasRationale "Users must be informed that token updates are not live — they need to restart to activate new credentials." ;
+    oc:severityLevel "HIGH" .
+
+_:ref_0a669027f6f1391e a oc:BulletItem ;
+    oc:blockType "bullet_item" ;
+    oc:itemOrder 3 ;
+    oc:itemText "Pending pairings: count, with codes and display names if any" .
+
+_:ref_23b6905cac387b4b a oc:BulletItem ;
+    oc:blockType "bullet_item" ;
+    oc:itemOrder 1 ;
+    oc:itemText """No token → *"Run `/discord:configure <token>` with your bot token from
+the Developer Portal → Bot → Reset Token."*""" .
+
+_:ref_257620ca43f63d17 a oc:BulletItem ;
+    oc:blockType "bullet_item" ;
+    oc:itemOrder 2 ;
+    oc:itemText "Allowed senders: count, and list display names or snowflakes" .
+
+_:ref_2abefbd773717088 a oc:WorkflowStep ;
+    dcterms:description """Read existing `.env` if present; update/add the `DISCORD_BOT_TOKEN=` line,
+preserve other keys. Write back, no quotes around the value.""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_37b10295c754454f a oc:WorkflowStep ;
+    dcterms:description "**What next** — end with a concrete next step based on state:" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild [ a oc:BulletList ;
+            oc:blockType "bullet_list" ;
+            oc:contentOrder 1 ;
+            oc:hasItem _:ref_23b6905cac387b4b,
+                [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 3 ;
+                    oc:itemText """Token set, someone allowed → *"Ready. DM your bot to reach the
+assistant."*""" ],
+                [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 2 ;
+                    oc:itemText """Token set, policy is pairing, nobody allowed → *"DM your bot on
+Discord. It replies with a code; approve with `/discord:access pair
+<code>`."*""" ] ] ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_3e40528142b7f3ca a oc:WorkflowStep ;
+    dcterms:description """**If policy is already `allowlist`** → confirm this is the locked state.
+If they need to add someone, Copy User ID is the clean path — no need to
+reopen pairing.""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_6" ;
+    oc:stepOrder 6 .
+
+_:ref_48f4f8ecdbdf9ad3 a oc:WorkflowStep ;
+    dcterms:description """**Access** — read `~/.claude/channels/discord/access.json` (missing file
+= defaults: `dmPolicy: "pairing"`, empty allowlist). Show:""" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild [ a oc:BulletList ;
+            oc:blockType "bullet_list" ;
+            oc:contentOrder 1 ;
+            oc:hasItem _:ref_0a669027f6f1391e,
+                _:ref_257620ca43f63d17,
+                [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 1 ;
+                    oc:itemText "DM policy and what it means in one line" ],
+                [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 4 ;
+                    oc:itemText "Guild channels opted in: count" ] ] ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_536bdfeb5cedee88 a oc:WorkflowStep ;
+    dcterms:description """**If no, people are missing** → *"Have them DM the bot; you'll approve
+each with `/discord:access pair <code>`. Run this skill again once
+everyone's in and we'll lock it."* Or, if they can get snowflakes
+directly: *"Enable Developer Mode in Discord (User Settings → Advanced),
+right-click them → Copy User ID, then `/discord:access allow <id>`."*""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_60d871d1dddf6dfc a oc:WorkflowStep ;
+    dcterms:description "Ask: *\"Is that everyone who should reach you through this bot?\"*" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_61683dd31f92708f a oc:WorkflowStep ;
+    dcterms:description """**If the allowlist is empty and they haven't paired themselves yet** →
+*"DM your bot to capture your own ID first. Then we'll add anyone else
+and lock it down."*""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_5" ;
+    oc:stepOrder 5 .
+
+_:ref_6576487e9d8e7d19 a oc:WorkflowStep ;
+    dcterms:description "Confirm, then show the no-args status so the user sees where they stand." ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_5" ;
+    oc:stepOrder 5 .
+
+_:ref_747d056760422955 a oc:WorkflowStep ;
+    dcterms:description "`chmod 600 ~/.claude/channels/discord/.env` — the token is a credential." ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_993bc41ebca54e25 a oc:WorkflowStep ;
+    dcterms:description "Read the allowlist. Tell the user who's in it." ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_b25b14253cb15a73 a oc:WorkflowStep ;
+    dcterms:description """**If yes and policy is still `pairing`** → *"Good. Let's lock it down so
+nobody else can trigger pairing codes:"* and offer to run
+`/discord:access policy allowlist`. Do this proactively — don't wait to
+be asked.""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_b788f8b971d06616 a oc:WorkflowStep ;
+    dcterms:description "`mkdir -p ~/.claude/channels/discord`" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_c40fbf9309ed402a a oc:WorkflowStep ;
+    dcterms:description """**Token** — check `~/.claude/channels/discord/.env` for
+`DISCORD_BOT_TOKEN`. Show set/not-set; if set, show first 6 chars masked.""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_f0f8897f401e5202 a oc:WorkflowStep ;
+    dcterms:description """Treat `$ARGUMENTS` as the token (trim whitespace). Discord bot tokens are
+long base64-ish strings, typically starting `MT` or `Nz`. Generated from
+Developer Portal → Bot → Reset Token; only shown once.""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_11836c2adc9c6ea6 a oc:WorkflowStep ;
+    dcterms:description "Check ~/.claude/channels/discord/.env for DISCORD_BOT_TOKEN presence" ;
+    oc:expectedOutcome "Determine if token is set, show first 6 chars masked if present" ;
+    oc:stepId "read-env" .
+
+_:ref_1b19c693626fdf62 a oc:WorkflowStep ;
+    dcterms:description "Read ~/.claude/channels/discord/access.json for DM policy, allowlist, pending pairings, guild channels" ;
+    oc:expectedOutcome "Present access policy status with counts and names" ;
+    oc:stepId "read-access" .
+
+_:ref_1cecdba1aa6e9702 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 1 ;
+    oc:hasStep _:ref_2abefbd773717088,
+        _:ref_6576487e9d8e7d19,
+        _:ref_747d056760422955,
+        _:ref_b788f8b971d06616,
+        _:ref_f0f8897f401e5202 ;
+    oc:workflowId "procedure_1" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_400dd560cd283b3a a oc:WorkflowStep ;
+    dcterms:description "chmod 600 the .env file to protect the credential" ;
+    oc:expectedOutcome "File permissions restricted to owner-only read/write" ;
+    oc:stepDependsOn _:ref_be4e487d4734236f ;
+    oc:stepId "chmod" .
+
+_:ref_4c801f983f173ee5 a oc:WorkflowStep ;
+    dcterms:description "Read .env and check for DISCORD_BOT_TOKEN line" ;
+    oc:expectedOutcome "Determine whether to remove one line or entire file" ;
+    oc:stepId "read-env-clear" .
+
+_:ref_62be7c3b5cccdf41 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 5 ;
+    oc:hasStep _:ref_3e40528142b7f3ca,
+        _:ref_536bdfeb5cedee88,
+        _:ref_60d871d1dddf6dfc,
+        _:ref_61683dd31f92708f,
+        _:ref_993bc41ebca54e25,
+        _:ref_b25b14253cb15a73 ;
+    oc:workflowId "procedure_5" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_6f738b94a9692002 a oc:WorkflowStep ;
+    dcterms:description "Create ~/.claude/channels/discord directory if needed" ;
+    oc:expectedOutcome "Directory exists" ;
+    oc:stepId "mkdir" .
+
+_:ref_99c2f735a7b26f3a a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 2 ;
+    oc:hasStep _:ref_37b10295c754454f,
+        _:ref_48f4f8ecdbdf9ad3,
+        _:ref_c40fbf9309ed402a ;
+    oc:workflowId "procedure_2" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_be4e487d4734236f a oc:WorkflowStep ;
+    dcterms:description "Read existing .env if present, update/add DISCORD_BOT_TOKEN line, preserve other keys" ;
+    oc:expectedOutcome "Updated .env content with all original keys plus new token" ;
+    oc:stepDependsOn _:ref_6f738b94a9692002 ;
+    oc:stepId "preserve-env" .
 

@@ -4,110 +4,1008 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_office_skills_doc_parser a oc:DeclarativeSkill,
+oc:skill_claude_office_skills_doc_parser a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "doc-parser" ;
     skos:broader "Document parser" ;
-    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-office-skills/doc-parser" ;
+    prov:wasDerivedFrom "../.agents/skills/anthropics/claude-office-skills/doc-parser" ;
     oc:contentHash "59508a2991414432831153e666b55fa12d3e2321b62ac84f5f313cf8a57ab3d9" ;
-    oc:differentia "that uses IBM's docling library to extract structured content from PDFs, Word docs, images, and HTML while preserving layout, tables, and figures" ;
+    oc:differentia "uses IBM's docling library to parse PDFs, Word, PowerPoint, images, and HTML while preserving structure, extracting tables, figures, and handling multi-column layouts" ;
+    oc:extends oc:skill_ontoskills_office_mcp ;
     oc:handlesFailure oc:FileNotFound,
         oc:InvalidInput,
         oc:PermissionDenied ;
-    oc:hasAllowedTool "Bash",
-        "Edit",
-        "Read",
-        "Write" ;
-    oc:hasArgumentHint "file-path or document to parse" ;
-    oc:hasCategory "document" ;
+    oc:hasArgumentHint "file-path to document and extraction target (text, tables, figures, structure)" ;
+    oc:hasCategory "parsing" ;
     oc:hasDescription ">" ;
     oc:hasName "doc-parser" ;
-    oc:hasRequirement oc:req_19120c81,
-        oc:req_6fc37157,
+    oc:hasRequirement oc:req_238b5ba3,
+        oc:req_6f9de71c,
         oc:req_9281a780,
-        oc:req_c37f263b ;
-    oc:impartsKnowledge oc:kn_0d3380ac,
-        oc:kn_1ee17e84,
-        oc:kn_24f3173a,
-        oc:kn_53fb8ff1,
-        oc:kn_8bf162c1,
-        oc:kn_9a7b3895,
-        oc:kn_9b20e9f0 ;
+        oc:req_99138c58,
+        oc:req_cf7eaa72 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """# ═══════════════════════════════════════════════════════════════════════════════
+# CLAUDE OFFICE SKILL - Enhanced Metadata v2.0
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Basic Information
+name: doc-parser
+description: ">"
+version: "1.0"
+author: claude-office-skills
+license: MIT
+
+# Categorization
+category: parsing
+tags:
+  - parsing
+  - extraction
+  - layout
+  - docling
+department: All
+
+# AI Model Compatibility
+models:
+  recommended:
+    - claude-sonnet-4
+    - claude-opus-4
+  compatible:
+    - claude-3-5-sonnet
+    - gpt-4
+    - gpt-4o
+
+# MCP Tools Integration
+mcp:
+  server: office-mcp
+  tools:
+    - analyze_document_structure
+    - extract_text_from_pdf
+
+# Skill Capabilities
+capabilities:
+  - document_parsing
+  - layout_analysis
+
+# Language Support
+languages:
+  - en
+  - zh
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """from docling.document_converter import DocumentConverter
+from docling.datamodel.base_models import InputFormat
+from docling.datamodel.pipeline_options import PdfPipelineOptions
+
+# Configure pipeline
+pipeline_options = PdfPipelineOptions()
+pipeline_options.do_ocr = True
+pipeline_options.do_table_structure = True
+pipeline_options.table_structure_options.do_cell_matching = True
+
+# Create converter with options
+converter = DocumentConverter(
+    allowed_formats=[InputFormat.PDF, InputFormat.DOCX],
+    pdf_backend_options=pipeline_options
+)
+
+result = converter.convert("document.pdf")
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 118-136" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "Advanced Configuration" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """from docling.document_converter import DocumentConverter
+import pandas as pd
+
+def extract_tables(doc_path):
+    \"\"\"Extract all tables from document.\"\"\"
+    converter = DocumentConverter()
+    result = converter.convert(doc_path)
+    doc = result.document
+    
+    tables = []
+    
+    for element in doc.iterate_items():
+        if element.type == "table":
+            # Get table data
+            table_data = element.export_to_dataframe()
+            tables.append({
+                'page': element.prov[0].page_no if element.prov else None,
+                'dataframe': table_data
+            })
+    
+    return tables
+
+# Usage
+tables = extract_tables("report.pdf")
+for i, table in enumerate(tables):
+    print(f"Table {i+1} on page {table['page']}:")
+    print(table['dataframe'])
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 159-187" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 6 ;
+                            oc:sectionTitle "Extracting Tables" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """def extract_figures(doc_path, output_dir):
+    \"\"\"Extract figures with captions.\"\"\"
+    import os
+    
+    converter = DocumentConverter()
+    result = converter.convert(doc_path)
+    doc = result.document
+    
+    figures = []
+    os.makedirs(output_dir, exist_ok=True)
+    
+    for element in doc.iterate_items():
+        if element.type == "picture":
+            figure_info = {
+                'caption': element.caption if hasattr(element, 'caption') else None,
+                'page': element.prov[0].page_no if element.prov else None,
+            }
+            
+            # Save image if available
+            if hasattr(element, 'image'):
+                img_path = os.path.join(output_dir, f"figure_{len(figures)+1}.png")
+                element.image.save(img_path)
+                figure_info['path'] = img_path
+            
+            figures.append(figure_info)
+    
+    return figures
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 191-219" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 7 ;
+                            oc:sectionTitle "Extracting Figures" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """from docling.document_converter import DocumentConverter
+
+# Initialize converter
+converter = DocumentConverter()
+
+# Convert document
+result = converter.convert("document.pdf")
+
+# Access parsed content
+doc = result.document
+print(doc.export_to_markdown())
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 72-84" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "docling Fundamentals" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 1 ;
+                                    oc:rowCount 5 ;
+                                    oc:tableCaption "### Supported Formats" ;
+                                    oc:tableMarkdown """| Format | Extension | Notes |
+|--------|-----------|-------|
+| PDF | .pdf | Native and scanned |
+| Word | .docx | Full structure preserved |
+| PowerPoint | .pptx | Slides as sections |
+| Images | .png, .jpg | OCR + layout analysis |
+| HTML | .html | Structure preserved |
+""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Supported Formats" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# Document hierarchy
+doc = result.document
+
+# Access metadata
+print(doc.name)
+print(doc.origin)
+
+# Iterate through content
+for element in doc.iterate_items():
+    print(f"Type: {element.type}")
+    print(f"Text: {element.text}")
+    
+    if element.type == "table":
+        print(f"Rows: {len(element.data.table_cells)}")
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 140-155" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 5 ;
+                            oc:sectionTitle "Document Structure" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """from docling.document_converter import DocumentConverter
+from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor
+
+def batch_parse(input_dir, output_dir, max_workers=4):
+    \"\"\"Parse multiple documents in parallel.\"\"\"
+    
+    input_path = Path(input_dir)
+    output_path = Path(output_dir)
+    output_path.mkdir(exist_ok=True)
+    
+    converter = DocumentConverter()
+    
+    def process_single(doc_path):
+        try:
+            result = converter.convert(str(doc_path))
+            md = result.document.export_to_markdown()
+            
+            out_file = output_path / f"{doc_path.stem}.md"
+            with open(out_file, 'w') as f:
+                f.write(md)
+            
+            return {'file': str(doc_path), 'status': 'success'}
+        except Exception as e:
+            return {'file': str(doc_path), 'status': 'error', 'error': str(e)}
+    
+    docs = list(input_path.glob('*.pdf')) + list(input_path.glob('*.docx'))
+    
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        results = list(executor.map(process_single, docs))
+    
+    return results
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 281-314" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 10 ;
+                            oc:sectionTitle "Batch Processing" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """from docling.document_converter import DocumentConverter
+
+converter = DocumentConverter()
+result = converter.convert("document.pdf")
+doc = result.document
+
+# Markdown export
+markdown = doc.export_to_markdown()
+with open("output.md", "w") as f:
+    f.write(markdown)
+
+# Plain text
+text = doc.export_to_text()
+
+# JSON/dict format
+json_doc = doc.export_to_dict()
+
+# HTML format (if supported)
+# html = doc.export_to_html()
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 257-277" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 9 ;
+                            oc:sectionTitle "Export Formats" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """from docling.document_converter import DocumentConverter
+
+# Create converter
+converter = DocumentConverter()
+
+# Convert single document
+result = converter.convert("report.pdf")
+
+# Access document
+doc = result.document
+
+# Export options
+markdown = doc.export_to_markdown()
+text = doc.export_to_text()
+json_doc = doc.export_to_dict()
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 98-114" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Basic Usage" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """from docling.document_converter import DocumentConverter
+
+def parse_multicolumn(doc_path):
+    \"\"\"Parse document with multi-column layout.\"\"\"
+    
+    converter = DocumentConverter()
+    result = converter.convert(doc_path)
+    doc = result.document
+    
+    # docling automatically handles column detection
+    # Text is returned in reading order
+    
+    structured_content = []
+    
+    for element in doc.iterate_items():
+        content_item = {
+            'type': element.type,
+            'text': element.text if hasattr(element, 'text') else None,
+            'level': element.level if hasattr(element, 'level') else None,
+        }
+        
+        # Add bounding box if available
+        if element.prov:
+            content_item['bbox'] = element.prov[0].bbox
+            content_item['page'] = element.prov[0].page_no
+        
+        structured_content.append(content_item)
+    
+    return structured_content
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 223-253" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 8 ;
+                            oc:sectionTitle "Handling Multi-column Layouts" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Domain Knowledge" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "[IBM Research Blog](https://research.ibm.com/)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "[docling GitHub](https://github.com/DS4SD/docling)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "[Documentation](https://ds4sd.github.io/docling/)" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 9 ;
+                    oc:sectionTitle "Resources" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """from docling.document_converter import DocumentConverter
+
+def parse_technical_docs(doc_path):
+    \"\"\"Parse technical documentation.\"\"\"
+    
+    converter = DocumentConverter()
+    result = converter.convert(doc_path)
+    doc = result.document
+    
+    documentation = {
+        'title': None,
+        'version': None,
+        'sections': [],
+        'code_blocks': [],
+        'diagrams': []
+    }
+    
+    current_section = None
+    
+    for element in doc.iterate_items():
+        if element.type == 'title':
+            documentation['title'] = element.text
+        
+        elif element.type == 'heading':
+            current_section = {
+                'title': element.text,
+                'level': element.level if hasattr(element, 'level') else 1,
+                'content': []
+            }
+            documentation['sections'].append(current_section)
+        
+        elif element.type == 'code':
+            if current_section:
+                current_section['content'].append({
+                    'type': 'code',
+                    'content': element.text
+                })
+            documentation['code_blocks'].append(element.text)
+        
+        elif element.type == 'picture':
+            documentation['diagrams'].append({
+                'page': element.prov[0].page_no if element.prov else None,
+                'caption': element.caption if hasattr(element, 'caption') else None
+            })
+    
+    return documentation
+
+docs = parse_technical_docs('api_documentation.pdf')
+print(f"Title: {docs['title']}")
+print(f"Sections: {len(docs['sections'])}")
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 455-506" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Example 2: Technical Documentation Parser" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """from docling.document_converter import DocumentConverter
+
+def parse_financial_report(pdf_path):
+    \"\"\"Extract structured data from financial report.\"\"\"
+    
+    converter = DocumentConverter()
+    result = converter.convert(pdf_path)
+    doc = result.document
+    
+    financial_data = {
+        'income_statement': None,
+        'balance_sheet': None,
+        'cash_flow': None,
+        'notes': []
+    }
+    
+    # Extract tables
+    tables = []
+    for element in doc.iterate_items():
+        if element.type == 'table':
+            table_df = element.export_to_dataframe()
+            
+            # Identify table type
+            if 'revenue' in str(table_df).lower() or 'income' in str(table_df).lower():
+                financial_data['income_statement'] = table_df
+            elif 'asset' in str(table_df).lower() or 'liabilities' in str(table_df).lower():
+                financial_data['balance_sheet'] = table_df
+            elif 'cash' in str(table_df).lower():
+                financial_data['cash_flow'] = table_df
+            else:
+                tables.append(table_df)
+    
+    # Extract markdown for notes
+    financial_data['markdown'] = doc.export_to_markdown()
+    
+    return financial_data
+
+report = parse_financial_report('annual_report.pdf')
+print("Income Statement:")
+print(report['income_statement'])
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 411-452" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Example 1: Parse Financial Report" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """from docling.document_converter import DocumentConverter
+
+def analyze_contract(pdf_path):
+    \"\"\"Parse contract document for key clauses.\"\"\"
+    
+    converter = DocumentConverter()
+    result = converter.convert(pdf_path)
+    doc = result.document
+    
+    contract = {
+        'parties': [],
+        'clauses': [],
+        'dates': [],
+        'amounts': [],
+        'full_text': doc.export_to_text()
+    }
+    
+    import re
+    
+    # Extract dates
+    date_pattern = r'\\b\\d{1,2}[/-]\\d{1,2}[/-]\\d{2,4}\\b|\\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \\d{1,2},? \\d{4}\\b'
+    contract['dates'] = re.findall(date_pattern, contract['full_text'], re.IGNORECASE)
+    
+    # Extract monetary amounts
+    amount_pattern = r'\\$[\\d,]+(?:\\.\\d{2})?|\\b\\d+(?:,\\d{3})*(?:\\.\\d{2})?\\s*(?:USD|dollars)\\b'
+    contract['amounts'] = re.findall(amount_pattern, contract['full_text'], re.IGNORECASE)
+    
+    # Parse sections as clauses
+    for element in doc.iterate_items():
+        if element.type == 'heading':
+            contract['clauses'].append({
+                'title': element.text,
+                'content': ''
+            })
+        elif element.type == 'paragraph' and contract['clauses']:
+            contract['clauses'][-1]['content'] += element.text + '\\n'
+    
+    return contract
+
+contract_data = analyze_contract('agreement.pdf')
+print(f"Key dates: {contract_data['dates']}")
+print(f"Amounts: {contract_data['amounts']}")
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 509-552" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Example 3: Contract Analysis" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Examples" ],
+                [ a oc:Section ;
+                    oc:hasContent _:ref_33f1ad6259bbe6a4 ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Best Practices" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "This skill enables advanced document parsing using **docling** - IBM's state-of-the-art document understanding library. Parse complex PDFs, Word documents, and images while preserving structure, extracting tables, figures, and handling multi-column layouts." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Overview" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Complex nested tables may need manual review" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Some PDF types (encrypted) not supported" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "GPU recommended for best performance" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Very large documents may require chunking" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Handwritten content needs OCR preprocessing" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 7 ;
+                    oc:sectionTitle "Limitations" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """def parse_academic_paper(pdf_path):
+    \"\"\"Parse academic paper structure.\"\"\"
+    
+    converter = DocumentConverter()
+    result = converter.convert(pdf_path)
+    doc = result.document
+    
+    paper = {
+        'title': None,
+        'abstract': None,
+        'sections': [],
+        'references': [],
+        'tables': [],
+        'figures': []
+    }
+    
+    current_section = None
+    
+    for element in doc.iterate_items():
+        text = element.text if hasattr(element, 'text') else ''
+        
+        if element.type == 'title':
+            paper['title'] = text
+        
+        elif element.type == 'heading':
+            if 'abstract' in text.lower():
+                current_section = 'abstract'
+            elif 'reference' in text.lower():
+                current_section = 'references'
+            else:
+                paper['sections'].append({
+                    'title': text,
+                    'content': ''
+                })
+                current_section = 'section'
+        
+        elif element.type == 'paragraph':
+            if current_section == 'abstract':
+                paper['abstract'] = text
+            elif current_section == 'section' and paper['sections']:
+                paper['sections'][-1]['content'] += text + '\\n'
+        
+        elif element.type == 'table':
+            paper['tables'].append({
+                'caption': element.caption if hasattr(element, 'caption') else None,
+                'data': element.export_to_dataframe() if hasattr(element, 'export_to_dataframe') else None
+            })
+    
+    return paper
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 327-377" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Academic Paper Parser" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """def parse_business_report(doc_path):
+    \"\"\"Parse business report into structured format.\"\"\"
+    
+    converter = DocumentConverter()
+    result = converter.convert(doc_path)
+    doc = result.document
+    
+    report = {
+        'metadata': {
+            'title': None,
+            'date': None,
+            'author': None
+        },
+        'executive_summary': None,
+        'sections': [],
+        'key_metrics': [],
+        'recommendations': []
+    }
+    
+    # Parse document structure
+    for element in doc.iterate_items():
+        # Implement parsing logic based on document structure
+        pass
+    
+    return report
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 380-406" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Report to Structured Data" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Common Patterns" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """pip install docling
+
+# For full functionality
+pip install docling[all]
+
+# For OCR support
+pip install docling[ocr]
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 564-572" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 8 ;
+                    oc:sectionTitle "Installation" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Example prompts:**" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 3 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "\"Extract figures and captions from this document\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "\"Parse this PDF and extract all tables\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "\"Convert this academic paper to structured markdown\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "\"Parse this report preserving the document structure\"" ] ],
+                        _:ref_ffda3e95eff34d9e ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "How to Use" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Document Parser Skill" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "Complete workflow for parsing a document using docling and extracting structured content." ;
+            oc:hasStep _:ref_08e219df36a04519,
+                _:ref_1e7ca18a80ea1675,
+                _:ref_34c0dd33ba5d205f,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Export results in desired format (markdown, text, JSON, DataFrames)" ;
+                    oc:expectedOutcome "Final output in the requested format" ;
+                    oc:stepDependsOn _:ref_eac2ec95d4e89f43 ;
+                    oc:stepId "export" ],
+                _:ref_eac2ec95d4e89f43 ;
+            oc:workflowId "parse-document" ;
+            oc:workflowName "Parse a Document" ],
+        _:ref_33f1ad6259bbe6a4,
+        _:ref_ffda3e95eff34d9e ;
+    oc:impartsKnowledge oc:kn_0f721135,
+        oc:kn_17489422,
+        oc:kn_23410116,
+        oc:kn_537d99c4,
+        oc:kn_61e4cee5,
+        oc:kn_6d2e486f,
+        oc:kn_70e997b4,
+        oc:kn_7d18abb4,
+        oc:kn_9479313a,
+        oc:kn_ea443782,
+        oc:kn_f4d24b32,
+        oc:kn_f5184380 ;
     oc:isUserInvocable true ;
     oc:nature "Tool" ;
     oc:requiresState oc:FileExists,
         oc:ToolInstalled ;
-    oc:resolvesIntent "analyze document layout and structure",
-        "convert documents to markdown or structured data",
+    oc:resolvesIntent "analyze document structure and layout",
+        "batch process documents for parsing",
+        "convert PDF to structured markdown",
         "extract figures and captions from documents",
-        "extract tables from PDFs and Word documents",
-        "parse academic papers, financial reports, and contracts",
-        "parse documents and extract structured content" ;
+        "extract tables from documents",
+        "parse documents" ;
     oc:yieldsState oc:DocumentParsed,
-        oc:StructuredDataExtracted .
+        oc:FiguresExtracted,
+        oc:TablesExtracted .
 
-oc:kn_0d3380ac a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When processing documents with known limitations" ;
-    oc:directiveContent "Encrypted PDFs are not supported by docling. Very large documents may require chunking. Complex nested tables may need manual review after extraction." ;
-    oc:hasRationale "These are hard technical limits of the docling library that cannot be worked around programmatically." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_1ee17e84 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When parsing multiple documents in parallel" ;
-    oc:directiveContent "For batch processing, use ThreadPoolExecutor with max_workers=4 and always wrap individual document processing in try/except to isolate failures." ;
-    oc:hasRationale "Parallel processing with error isolation prevents one bad document from failing the entire batch." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_24f3173a a oc:KnowledgeNode,
-        oc:PerformanceProfile ;
-    oc:appliesToContext "When planning document processing workloads" ;
-    oc:directiveContent "GPU is recommended for best performance. For CPU-only environments, expect significantly slower parsing especially for OCR-heavy documents." ;
-    oc:hasRationale "docling uses deep learning models for layout analysis and OCR which benefit greatly from GPU acceleration." ;
+oc:kn_0f721135 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When documents are parsed repeatedly" ;
+    oc:directiveContent "Cache parsed document results to avoid reprocessing the same document multiple times." ;
+    oc:hasRationale "Document parsing is computationally expensive; caching avoids redundant processing and improves response times." ;
     oc:severityLevel "LOW" .
 
-oc:kn_53fb8ff1 a oc:Heuristic,
+oc:kn_17489422 a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When setting up DocumentConverter for specific document types" ;
-    oc:directiveContent "Configure the pipeline options for your document type: enable do_ocr for scanned documents, do_table_structure for table extraction, and do_cell_matching for precise table cells." ;
-    oc:hasRationale "Default pipeline may miss content in specialized documents; tailored configuration maximizes extraction quality." ;
+    oc:appliesToContext "When iterating document elements to extract specific content types" ;
+    oc:codeLanguage "python" ;
+    oc:directiveContent """for element in doc.iterate_items():
+    if element.type == "table":
+        table_df = element.export_to_dataframe()
+    elif element.type == "picture":
+        # Handle figures
+        pass""" .
+
+oc:kn_23410116 a oc:Idempotency,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When re-running parsing on unchanged documents" ;
+    oc:directiveContent "Parsing the same document with the same pipeline options produces deterministic output." ;
+    oc:hasRationale "Deterministic parsing enables reliable caching and consistent result comparison across runs." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_537d99c4 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When configuring advanced pipeline options for PDFs with tables or OCR needs" ;
+    oc:codeLanguage "python" ;
+    oc:directiveContent """from docling.datamodel.pipeline_options import PdfPipelineOptions
+
+pipeline_options = PdfPipelineOptions()
+pipeline_options.do_ocr = True
+pipeline_options.do_table_structure = True
+pipeline_options.table_structure_options.do_cell_matching = True
+
+converter = DocumentConverter(pdf_backend_options=pipeline_options)""" .
+
+oc:kn_61e4cee5 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When parsing any document" ;
+    oc:directiveContent "1. Install docling (pip install docling[all]) 2. Create DocumentConverter with appropriate PdfPipelineOptions 3. Call converter.convert(file_path) 4. Access result.document 5. Export via export_to_markdown(), export_to_text(), or export_to_dict()" ;
+    oc:stepOrder 1 .
+
+oc:kn_6d2e486f a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Basic document parsing — use as the default starting pattern" ;
+    oc:codeLanguage "python" ;
+    oc:directiveContent """from docling.document_converter import DocumentConverter
+
+converter = DocumentConverter()
+result = converter.convert("document.pdf")
+doc = result.document
+markdown = doc.export_to_markdown()""" .
+
+oc:kn_70e997b4 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When encountering encrypted or handwritten documents" ;
+    oc:directiveContent "Encrypted PDFs are not supported by docling; handwritten content requires OCR preprocessing." ;
+    oc:hasRationale "These are hard limitations of the docling library that cannot be worked around without external preprocessing." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_7d18abb4 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Before parsing documents" ;
+    oc:directiveContent "Configure the pipeline options for your document type: enable OCR for scanned documents, enable table structure for tabular data, enable cell matching for precise table extraction." ;
+    oc:hasRationale "Using appropriate pipeline options improves accuracy by activating only the needed processing modules for the document type." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_9479313a a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When extracting tables from complex documents" ;
+    oc:directiveContent "Do not assume table extraction is always accurate — complex nested tables and merged cells may need manual review." ;
+    oc:hasRationale "docling's table structure detection can misinterpret nested or irregular table layouts, leading to incorrect data extraction." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_ea443782 a oc:KnowledgeNode,
+        oc:OutputFormat ;
+    oc:appliesToContext "When reporting parsing results to the user" ;
+    oc:directiveContent """## Parsed Document Result
+- **Source**: {filename}
+- **Format**: {format}
+- **Pages**: {page_count}
+- **Tables**: {table_count}
+- **Figures**: {figure_count}
+- **Content**: {markdown_output}""" ;
+    oc:templateVariables "figure_count",
+        "filename",
+        "format",
+        "markdown_output",
+        "page_count",
+        "table_count" .
+
+oc:kn_f4d24b32 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When parsing large or complex documents" ;
+    oc:directiveContent "Very large documents may require chunking before parsing; GPU is recommended for best performance with docling." ;
+    oc:hasRationale "Large documents can exhaust memory and CPU resources without chunking; GPU acceleration significantly improves OCR and layout analysis speed." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_8bf162c1 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When extracting tables from documents with complex layouts" ;
-    oc:directiveContent "Do not assume table extraction is always accurate for complex nested or merged-cell tables. Always verify extracted table data against the source document." ;
-    oc:hasRationale "Complex nested tables may have cells merged incorrectly or hierarchy misinterpreted, leading to data corruption." ;
-    oc:severityLevel "MEDIUM" .
+oc:kn_f5184380 a oc:KnowledgeNode,
+        oc:Prerequisite ;
+    oc:appliesToContext "Before any document parsing" ;
+    oc:directiveContent "Python 3.10+ and docling library must be installed (pip install docling or pip install docling[all] for full functionality)" .
 
-oc:kn_9a7b3895 a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "Before any document parsing operation" ;
-    oc:directiveContent "Install docling before parsing: run 'pip install docling' or 'pip install docling[all]' for full functionality including OCR support." ;
-    oc:hasRationale "docling is a required dependency; without it, no parsing can occur. The OCR extra is needed for scanned documents." ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_9b20e9f0 a oc:KnowledgeNode,
-        oc:SuccessIndicator ;
-    oc:appliesToContext "After parsing any document" ;
-    oc:directiveContent "Verify parsing success by checking that extracted content includes expected sections, tables have correct row/column counts, and markdown output preserves document hierarchy." ;
-    oc:hasRationale "Silent partial failures are possible; structural validation ensures completeness." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:req_19120c81 a oc:RequirementAPI ;
+oc:req_238b5ba3 a oc:RequirementTool ;
     oc:isOptional true ;
-    oc:requirementValue "office-mcp" .
+    oc:requirementValue "pip install docling[ocr]" .
 
-oc:req_6fc37157 a oc:RequirementTool ;
-    oc:isOptional true ;
-    oc:requirementValue "docling[ocr]" .
+oc:req_6f9de71c a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Understanding of document structure (headings, tables, figures, paragraphs)" .
 
 oc:req_9281a780 a oc:RequirementTool ;
     oc:isOptional false ;
     oc:requirementValue "docling" .
 
-oc:req_c37f263b a oc:RequirementKnowledge ;
+oc:req_99138c58 a oc:RequirementTool ;
+    oc:isOptional true ;
+    oc:requirementValue "pip install docling[all]" .
+
+oc:req_cf7eaa72 a oc:RequirementAPI ;
     oc:isOptional false ;
-    oc:requirementValue "document structure analysis" .
+    oc:requirementValue "office-mcp tools: analyze_document_structure, extract_text_from_pdf" .
+
+_:ref_0fd0d3d068588993 a oc:WorkflowStep ;
+    dcterms:description "Provide the document to parse" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_43e231d066fa87ba a oc:WorkflowStep ;
+    dcterms:description "**Check OCR Quality**: Enable OCR for scanned documents" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_4ca518dd6607e5b8 a oc:WorkflowStep ;
+    dcterms:description "**Use Appropriate Pipeline**: Configure for your document type" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_56853da6bf08e01a a oc:WorkflowStep ;
+    dcterms:description "**Verify Table Extraction**: Complex tables may need review" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_670376720ebf81dd a oc:WorkflowStep ;
+    dcterms:description "Specify what you want to extract (text, tables, figures, etc.)" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_83e541766eea5dce a oc:WorkflowStep ;
+    dcterms:description "**Cache Results**: Store parsed documents for reuse" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_5" ;
+    oc:stepOrder 5 .
+
+_:ref_b62f70f1c0203449 a oc:WorkflowStep ;
+    dcterms:description "I'll parse it and return structured data" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_e52e20adcfd68098 a oc:WorkflowStep ;
+    dcterms:description "**Handle Large Documents**: Process in chunks if needed" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_08e219df36a04519 a oc:WorkflowStep ;
+    dcterms:description "Create DocumentConverter with appropriate pipeline options (OCR, table structure) for the document type" ;
+    oc:expectedOutcome "Configured converter ready for the target document format" ;
+    oc:stepDependsOn _:ref_34c0dd33ba5d205f ;
+    oc:stepId "configure" .
+
+_:ref_1e7ca18a80ea1675 a oc:WorkflowStep ;
+    dcterms:description "Run converter.convert(file_path) on the target document" ;
+    oc:expectedOutcome "Parsed document object with all elements accessible" ;
+    oc:stepDependsOn _:ref_08e219df36a04519 ;
+    oc:stepId "convert" .
+
+_:ref_33f1ad6259bbe6a4 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 1 ;
+    oc:hasStep _:ref_43e231d066fa87ba,
+        _:ref_4ca518dd6607e5b8,
+        _:ref_56853da6bf08e01a,
+        _:ref_83e541766eea5dce,
+        _:ref_e52e20adcfd68098 ;
+    oc:workflowId "procedure_1" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_34c0dd33ba5d205f a oc:WorkflowStep ;
+    dcterms:description "Ensure docling is installed (pip install docling or pip install docling[all])" ;
+    oc:expectedOutcome "docling library available in Python environment" ;
+    oc:stepId "install" .
+
+_:ref_eac2ec95d4e89f43 a oc:WorkflowStep ;
+    dcterms:description "Iterate document elements and extract desired content (tables, figures, text, structure)" ;
+    oc:expectedOutcome "Structured data containing extracted content" ;
+    oc:stepDependsOn _:ref_1e7ca18a80ea1675 ;
+    oc:stepId "extract" .
+
+_:ref_ffda3e95eff34d9e a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 1 ;
+    oc:hasStep _:ref_0fd0d3d068588993,
+        _:ref_670376720ebf81dd,
+        _:ref_b62f70f1c0203449 ;
+    oc:workflowId "procedure_1" ;
+    oc:workflowName "Ordered Procedure" .
 

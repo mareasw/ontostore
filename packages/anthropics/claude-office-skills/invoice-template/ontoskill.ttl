@@ -4,104 +4,471 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_office_skills_invoice_template a oc:ExecutableSkill,
+oc:skill_claude_office_skills_invoice_template a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "invoice-template" ;
-    skos:broader "Template-based document generator" ;
-    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-office-skills/invoice-template" ;
+    skos:broader "document generator" ;
+    prov:wasDerivedFrom "../.agents/skills/anthropics/claude-office-skills/invoice-template" ;
     oc:contentHash "0f1639a933d8a48ce3c787c2879f6c791883370528005499831ed228d8acccac" ;
-    oc:dependsOnSkill oc:skill_office_mcp ;
-    oc:differentia "Produces professional PDF invoices from structured data using ReportLab or HTML/WeasyPrint pipelines with company branding, itemized line items, tax calculations, and payment terms" ;
+    oc:differentia "that creates professional PDF invoices from structured data using templates with itemized billing, tax calculations, and company branding" ;
+    oc:extends oc:skill_ontoskills_office_mcp ;
     oc:handlesFailure oc:InvalidInput,
         oc:PermissionDenied ;
-    oc:hasAllowedTool "Bash",
-        "Read",
-        "Write" ;
-    oc:hasArgumentHint "invoice data (invoice_number, from/to, items, tax_rate) or order data description" ;
+    oc:hasArgumentHint "invoice data (items, amounts, client info) or order data" ;
     oc:hasCategory "finance" ;
     oc:hasDescription "Generate professional PDF invoices from templates" ;
     oc:hasName "invoice-template" ;
-    oc:hasPackageName "claude-office-skills" ;
-    oc:hasPayload oc:payload_0f1639a933d8a48c ;
-    oc:hasRequirement oc:req_24b02bfd,
-        oc:req_31adb754,
-        oc:req_6caa6449,
-        oc:req_99341ad8,
-        oc:req_fd635a4a ;
-    oc:impartsKnowledge oc:kn_07ad1de8,
-        oc:kn_48903047,
-        oc:kn_74eab82e,
-        oc:kn_987bae39,
-        oc:kn_b87fc0a1 ;
+    oc:hasPackageName "invoice-template" ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """# ═══════════════════════════════════════════════════════════════════════════════
+# CLAUDE OFFICE SKILL - Enhanced Metadata v2.0
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Basic Information
+name: invoice-template
+description: "Generate professional PDF invoices from templates"
+version: "1.0"
+author: claude-office-skills
+license: MIT
+
+# Categorization
+category: finance
+tags:
+  - invoice
+  - template
+  - billing
+department: Finance
+
+# AI Model Compatibility
+models:
+  recommended:
+    - claude-sonnet-4
+    - claude-opus-4
+  compatible:
+    - claude-3-5-sonnet
+    - gpt-4
+    - gpt-4o
+
+# MCP Tools Integration
+mcp:
+  server: office-mcp
+  tools:
+    - create_docx
+    - fill_docx_template
+    - docx_to_pdf
+
+# Skill Capabilities
+capabilities:
+  - template_creation
+  - invoice_formatting
+
+# Language Support
+languages:
+  - en
+  - zh
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from reportlab.lib.units import inch
+
+def create_invoice(data: dict, output_path: str):
+    c = canvas.Canvas(output_path, pagesize=letter)
+    width, height = letter
+    
+    # Header
+    c.setFont("Helvetica-Bold", 24)
+    c.drawString(1*inch, height - 1*inch, "INVOICE")
+    
+    # Invoice details
+    c.setFont("Helvetica", 12)
+    c.drawString(1*inch, height - 1.5*inch, f"Invoice #: {data['invoice_number']}")
+    c.drawString(1*inch, height - 1.75*inch, f"Date: {data['date']}")
+    
+    # From/To
+    y = height - 2.5*inch
+    c.drawString(1*inch, y, f"From: {data['from']['name']}")
+    c.drawString(4*inch, y, f"To: {data['to']['name']}")
+    
+    # Items table
+    y = height - 4*inch
+    c.setFont("Helvetica-Bold", 10)
+    c.drawString(1*inch, y, "Description")
+    c.drawString(4*inch, y, "Qty")
+    c.drawString(5*inch, y, "Rate")
+    c.drawString(6*inch, y, "Amount")
+    
+    c.setFont("Helvetica", 10)
+    subtotal = 0
+    for item in data['items']:
+        y -= 0.3*inch
+        amount = item['quantity'] * item['rate']
+        subtotal += amount
+        c.drawString(1*inch, y, item['description'])
+        c.drawString(4*inch, y, str(item['quantity']))
+        c.drawString(5*inch, y, f"${item['rate']:.2f}")
+        c.drawString(6*inch, y, f"${amount:.2f}")
+    
+    # Totals
+    tax = subtotal * data['tax_rate']
+    total = subtotal + tax
+    
+    y -= 0.5*inch
+    c.drawString(5*inch, y, f"Subtotal: ${subtotal:.2f}")
+    y -= 0.25*inch
+    c.drawString(5*inch, y, f"Tax ({data['tax_rate']*100}%): ${tax:.2f}")
+    y -= 0.25*inch
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(5*inch, y, f"Total: ${total:.2f}")
+    
+    c.save()
+    return output_path
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 103-159" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "PDF Generation with ReportLab" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """invoice_data = {
+    "invoice_number": "INV-2026-001",
+    "date": "2026-01-30",
+    "due_date": "2026-02-28",
+    
+    "from": {
+        "name": "Your Company",
+        "address": "123 Business St",
+        "email": "billing@company.com"
+    },
+    
+    "to": {
+        "name": "Client Name",
+        "address": "456 Client Ave",
+        "email": "client@example.com"
+    },
+    
+    "items": [
+        {"description": "Consulting", "quantity": 10, "rate": 150.00},
+        {"description": "Development", "quantity": 20, "rate": 100.00}
+    ],
+    
+    "tax_rate": 0.08,
+    "notes": "Payment due within 30 days"
+}
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 73-99" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Invoice Data Structure" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """from weasyprint import HTML
+from jinja2 import Template
+
+invoice_template = \"\"\"
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial; margin: 40px; }
+        .header { display: flex; justify-content: space-between; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        .total { font-weight: bold; font-size: 18px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>INVOICE</h1>
+        <div>
+            <p>Invoice #: {{ invoice_number }}</p>
+            <p>Date: {{ date }}</p>
+        </div>
+    </div>
+    <table>
+        <tr><th>Description</th><th>Qty</th><th>Rate</th><th>Amount</th></tr>
+        {% for item in items %}
+        <tr>
+            <td>{{ item.description }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>${{ "%.2f"|format(item.rate) }}</td>
+            <td>${{ "%.2f"|format(item.quantity * item.rate) }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <p class="total">Total: ${{ "%.2f"|format(total) }}</p>
+</body>
+</html>
+\"\"\"
+
+def create_invoice_html(data: dict, output_path: str):
+    template = Template(invoice_template)
+    
+    # Calculate total
+    total = sum(i['quantity'] * i['rate'] for i in data['items'])
+    total *= (1 + data.get('tax_rate', 0))
+    data['total'] = total
+    
+    html = template.render(**data)
+    HTML(string=html).write_pdf(output_path)
+    return output_path
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 163-214" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "HTML Template Approach" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Domain Knowledge" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "[Claude Office Skills Hub](https://github.com/claude-office-skills/skills)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "[easy-invoice-pdf Repository](https://github.com/nickmitchko/easy-invoice-pdf)" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Resources" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "This skill generates professional PDF invoices from structured data and templates. Create invoices with company branding, itemized lists, tax calculations, and payment details." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Overview" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# Install required dependencies
+pip install python-docx openpyxl python-pptx reportlab jinja2
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 226-229" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Installation" ],
+                [ a oc:Section ;
+                    oc:hasContent _:ref_89c295ef5839bb11,
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Example prompts:**" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 3 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "\"Generate invoices from order data\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "\"Create recurring invoices\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "\"Batch generate monthly invoices\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "\"Customize invoice templates per client\"" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "How to Use" ],
+                [ a oc:Section ;
+                    oc:hasContent _:ref_b44d6f64bbecd5b4 ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Best Practices" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Invoice Template Skill" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "Create a professional PDF invoice from structured data" ;
+            oc:hasStep _:ref_10540213f8722bb5,
+                _:ref_31f42ee8b64e2326,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Render the invoice to PDF using ReportLab or HTML/WeasyPrint template" ;
+                    oc:expectedOutcome "PDF file created at specified output path" ;
+                    oc:stepDependsOn _:ref_31f42ee8b64e2326 ;
+                    oc:stepId "render-pdf" ] ;
+            oc:workflowId "invoice-generation" ;
+            oc:workflowName "Generate PDF Invoice" ],
+        _:ref_89c295ef5839bb11,
+        _:ref_b44d6f64bbecd5b4,
+        [ a oc:Workflow ;
+            dcterms:description "Generate multiple invoices from a collection of order data" ;
+            oc:hasStep _:ref_0817c9cf9de2d524,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Verify all PDFs were created successfully and log any failures" ;
+                    oc:expectedOutcome "Confirmation of successful batch with error report if any failed" ;
+                    oc:stepDependsOn _:ref_e856f5797871e439 ;
+                    oc:stepId "verify-outputs" ],
+                _:ref_acc08c911083364d,
+                _:ref_e856f5797871e439 ;
+            oc:workflowId "batch-invoice-generation" ;
+            oc:workflowName "Batch Generate Invoices" ] ;
+    oc:impartsKnowledge oc:kn_0eed7d3c,
+        oc:kn_35e1655e,
+        oc:kn_972a95c3,
+        oc:kn_ae953fc0,
+        oc:kn_caa86719 ;
     oc:isUserInvocable true ;
     oc:nature "Work" ;
     oc:requiresState oc:EnvironmentReady ;
     oc:resolvesIntent "batch generate monthly invoices",
-        "create invoices from order data",
         "create recurring invoices",
         "customize invoice templates per client",
         "generate PDF invoices" ;
     oc:yieldsState oc:DocumentCreated .
 
-oc:kn_07ad1de8 a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "Before generating any invoice" ;
-    oc:directiveContent "Validate all required invoice fields (invoice_number, date, from, to, items) before generating the PDF." ;
-    oc:hasRationale "Missing required fields result in malformed or incomplete invoices that may not be legally compliant." ;
+oc:kn_0eed7d3c a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When generating final invoice output" ;
+    oc:directiveContent "Always include payment instructions, terms, and due date on every invoice." ;
+    oc:hasRationale "Clear payment terms reduce disputes and accelerate collections." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_35e1655e a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Before any invoice generation" ;
+    oc:directiveContent "Validate all required fields before generating an invoice — invoice_number, date, from, to, and items are mandatory." ;
+    oc:hasRationale "Missing fields produce malformed invoices that fail payment processing." ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_48903047 a oc:Idempotency,
+oc:kn_972a95c3 a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When regenerating invoices" ;
-    oc:directiveContent "Running invoice generation multiple times with the same input data and output path produces identical PDF files, but overwrites the previous file each time." ;
-    oc:hasRationale "Safe to retry or regenerate, but be aware the file is simply replaced each time." ;
-    oc:severityLevel "LOW" .
+    oc:appliesToContext "When processing invoice items and totals" ;
+    oc:directiveContent "Auto-calculate totals, tax, and line-item amounts from quantity and rate — never trust pre-computed input values." ;
+    oc:hasRationale "Relying on input totals risks arithmetic errors and discrepancies that break trust with clients." ;
+    oc:severityLevel "HIGH" .
 
-oc:kn_74eab82e a oc:KnowledgeNode,
-        oc:SideEffect ;
-    oc:appliesToContext "When generating invoices to a file path" ;
-    oc:directiveContent "This skill creates PDF files on disk at the specified output path. Existing files at the same path will be overwritten without warning." ;
-    oc:hasRationale "Users should be aware that output files overwrite existing files to prevent accidental data loss." ;
+oc:kn_ae953fc0 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When building invoice generation systems" ;
+    oc:directiveContent "Do not hardcode styling or layout directly in generation code without template separation." ;
+    oc:hasRationale "Hardcoded layouts make per-client customization difficult and error-prone." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_987bae39 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When processing invoice item data" ;
-    oc:directiveContent "Never trust input-provided totals or tax calculations. Always recalculate line-item amounts, subtotals, tax, and grand total from raw quantity and rate data." ;
-    oc:hasRationale "Pre-computed totals may be wrong, tampered with, or stale. Independent recalculation ensures financial accuracy." ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_b87fc0a1 a oc:DesignPrinciple,
+oc:kn_caa86719 a oc:DesignPrinciple,
         oc:KnowledgeNode ;
     oc:appliesToContext "When creating invoices for any client" ;
-    oc:directiveContent "Use templates (either ReportLab canvas layouts or Jinja2/WeasyPrint HTML templates) for consistent branding and formatting across all invoices." ;
-    oc:hasRationale "Consistent branding reinforces professionalism and avoids formatting drift across batch-generated invoices." ;
+    oc:directiveContent "Use templates for consistent branding across all invoices — same layout, fonts, colors, and logo placement." ;
+    oc:hasRationale "Consistent branding reinforces professionalism and makes invoices recognizable by clients and accounts payable." ;
     oc:severityLevel "MEDIUM" .
 
-oc:payload_0f1639a933d8a48c a oc:ExecutionPayload ;
-    oc:code """# Requires: pip install reportlab jinja2 weasyprint
-# See SKILL.md for full create_invoice() and create_invoice_html() implementations
-""" ;
-    oc:executor "python" ;
-    oc:timeout 30 .
+_:ref_01a4345b646e0e41 a oc:WorkflowStep ;
+    dcterms:description "**Auto-calculate totals (don't trust input)**" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
 
-oc:req_24b02bfd a oc:RequirementAPI ;
-    oc:isOptional true ;
-    oc:requirementValue "office-mcp MCP server (create_docx, fill_docx_template, docx_to_pdf)" .
+_:ref_8d657b3488778574 a oc:WorkflowStep ;
+    dcterms:description "**Include payment instructions and terms**" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
 
-oc:req_31adb754 a oc:RequirementTool ;
-    oc:isOptional true ;
-    oc:requirementValue "weasyprint" .
+_:ref_8e29174e5fa08c4f a oc:WorkflowStep ;
+    dcterms:description "Provide any required input data or files" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
 
-oc:req_6caa6449 a oc:RequirementTool ;
-    oc:isOptional true ;
-    oc:requirementValue "python-docx" .
+_:ref_cc5607cf05526286 a oc:WorkflowStep ;
+    dcterms:description "I'll execute the appropriate operations" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
 
-oc:req_99341ad8 a oc:RequirementTool ;
-    oc:isOptional false ;
-    oc:requirementValue "jinja2" .
+_:ref_dd66c504325a7f01 a oc:WorkflowStep ;
+    dcterms:description "**Use templates for consistent branding**" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
 
-oc:req_fd635a4a a oc:RequirementTool ;
-    oc:isOptional false ;
-    oc:requirementValue "reportlab" .
+_:ref_e9d6b8d7ce2ef5ad a oc:WorkflowStep ;
+    dcterms:description "Describe what you want to accomplish" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_f2f3b3768ed0a38a a oc:WorkflowStep ;
+    dcterms:description "**Validate required fields before generation**" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_0817c9cf9de2d524 a oc:WorkflowStep ;
+    dcterms:description "Load order/billing data from source (spreadsheet, database, API)" ;
+    oc:expectedOutcome "List of order records ready for invoice mapping" ;
+    oc:stepId "load-orders" .
+
+_:ref_10540213f8722bb5 a oc:WorkflowStep ;
+    dcterms:description "Validate required invoice fields (invoice_number, date, from, to, items)" ;
+    oc:expectedOutcome "All mandatory fields present and correctly typed" ;
+    oc:stepId "validate-input" .
+
+_:ref_31f42ee8b64e2326 a oc:WorkflowStep ;
+    dcterms:description "Auto-calculate line-item amounts, subtotal, tax, and grand total" ;
+    oc:expectedOutcome "Computed totals independent of input values" ;
+    oc:stepDependsOn _:ref_10540213f8722bb5 ;
+    oc:stepId "calculate-totals" .
+
+_:ref_89c295ef5839bb11 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 1 ;
+    oc:hasStep _:ref_8e29174e5fa08c4f,
+        _:ref_cc5607cf05526286,
+        _:ref_e9d6b8d7ce2ef5ad ;
+    oc:workflowId "procedure_1" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_acc08c911083364d a oc:WorkflowStep ;
+    dcterms:description "Transform each order into the invoice data structure" ;
+    oc:expectedOutcome "Array of valid invoice data dictionaries" ;
+    oc:stepDependsOn _:ref_0817c9cf9de2d524 ;
+    oc:stepId "map-to-invoice-data" .
+
+_:ref_b44d6f64bbecd5b4 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 1 ;
+    oc:hasStep _:ref_01a4345b646e0e41,
+        _:ref_8d657b3488778574,
+        _:ref_dd66c504325a7f01,
+        _:ref_f2f3b3768ed0a38a ;
+    oc:workflowId "procedure_1" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_e856f5797871e439 a oc:WorkflowStep ;
+    dcterms:description "Iterate over invoice data and generate a PDF for each" ;
+    oc:expectedOutcome "Collection of PDF files, one per invoice" ;
+    oc:stepDependsOn _:ref_acc08c911083364d ;
+    oc:stepId "generate-each-pdf" .
 

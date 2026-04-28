@@ -4,110 +4,511 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_financial_services_plugin_tear_sheet_equity_research a oc:DeclarativeSkill,
+oc:skill_financial_services_plugin_tear_sheet_equity_research a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "equity-research" ;
     skos:broader "Tear sheet template" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/financial-services-plugin/tear-sheet" ;
     oc:contentHash "4cdec49fad9382dcf291efcf7e23c3195aac3a864b7b853dac51018de882109f" ;
-    oc:differentia "Generates a dense single-page equity research snapshot with valuation multiples, consensus estimates, financial summary, and earnings highlights for buy-side/sell-side analysts" ;
-    oc:extends oc:skill_anthropics_financial_services_plugin_tear_sheet ;
-    oc:handlesFailure oc:FileNotFound,
-        oc:InvalidInput,
-        oc:NetworkTimeout,
-        oc:PermissionDenied ;
+    oc:differentia "that generates a dense single-page equity research snapshot with valuation multiples, consensus estimates, financial trajectory, and analyst-oriented earnings highlights for buy-side/sell-side investment evaluation" ;
+    oc:extends oc:skill_financial_services_plugin_tear_sheet,
+        oc:skill_ontoskills_tear_sheet ;
+    oc:handlesFailure oc:DataUnavailable,
+        oc:NetworkTimeout ;
     oc:hasAllowedTool "Bash",
-        "MCP",
+        "Edit",
         "Read",
         "Write" ;
-    oc:hasArgumentHint "company name or ticker, optional comparable companies" ;
+    oc:hasArgumentHint "company name or ticker with optional comparable companies" ;
     oc:hasCategory "finance" ;
-    oc:hasRequirement oc:req_57886265,
-        oc:req_841cc02d,
-        oc:req_85b874f6 ;
-    oc:impartsKnowledge oc:kn_11d1f986,
-        oc:kn_26dcddb1,
-        oc:kn_38bdaf02,
-        oc:kn_6cba07fc,
-        oc:kn_77bd7d71,
-        oc:kn_8705be89,
-        oc:kn_9e355b5b,
-        oc:kn_e218c930 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 6 ;
+                            oc:textContent """**Query 4 — Earnings:**
+"[Company] most recent earnings call key takeaways guidance"
+→ Earnings Highlights
+→ **Immediately write** to `/tmp/tear-sheet/earnings.txt`""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent """**Query 2 — Historical financials:**
+"[Company] annual income statement revenue gross profit EBITDA net income EPS free cash flow total debt cash and equivalents last 4 fiscal years"
+→ Financial Summary (pull 4 years; display 3; use the earliest year only for YoY growth computation)
+→ **Immediately write** raw values to `/tmp/tear-sheet/financials.csv`""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Start with these queries. If results are incomplete, break into narrower follow-ups." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 7 ;
+                            oc:textContent """**Query 5 — Stock performance:**
+"[Company] stock price return 1 month 3 month 6 month 1 year YTD performance"
+→ Stock Performance (no intermediate file — data goes directly into document)""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent """**Query 2b — Segments (if available):**
+"[Company] revenue by segment business unit last 2 fiscal years"
+→ Revenue & Segment Breakdown (need 2 years for YoY growth). If segment data is unavailable, skip this section — do not leave a blank table.
+→ **Immediately write** to `/tmp/tear-sheet/segments.csv` (skip if no segment data returned)""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 8 ;
+                            oc:textContent """**Query 6 (if user provided comps):**
+"[Comp company] market cap EV/Revenue EV/EBITDA revenue growth" — repeat for each comp
+→ Peer context for Valuation Snapshot
+→ **Immediately write** to `/tmp/tear-sheet/peer-comps.csv`""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent """**Query 3 — Valuation + consensus:**
+"[Company] P/E EV/EBITDA EV/Revenue valuation multiples consensus revenue EPS estimates analyst recommendations price target"
+→ Valuation Snapshot, Consensus Estimates
+→ **Immediately write** multiples to `/tmp/tear-sheet/valuation.csv`
+→ **Immediately write** estimates to `/tmp/tear-sheet/consensus.csv`""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent """**Query 1 — Profile + market data:**
+"[Company] company overview sector industry market capitalization enterprise value stock price 52-week high low shares outstanding beta"
+→ Header, Business Description
+→ **Immediately write** to `/tmp/tear-sheet/company-profile.txt`""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Query Plan" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Valuation Snapshot and Consensus Estimates: 8.5pt text, occupy the visual center — analysts scan these first." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 6 ;
+                                    oc:itemText "Bold any metric showing a notable inflection (growth turning positive, margin expansion/compression)." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Financial Summary table: 8pt text (size: 16), row height 240 DXA. Tightest spacing of any template." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "**This is the densest tear sheet type.** It should feel noticeably more compressed than the other templates." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 7 ;
+                                    oc:itemText "Prioritize information over whitespace at every turn." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Body text: 8.5pt (size: 17) — smaller than the global 9pt default. Every half-point matters on a one-pager." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "Section spacing: minimize. 6pt before section headers (not the global 12pt), 2pt after rules." ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Formatting Notes" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Listed in priority order. If constrained to one page, cut from the bottom." ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "If segment data is available from the tools, include a compact segment revenue table. This is essential context for equity research — analysts need to see which business lines are driving growth." ],
+                                [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 2 ;
+                                    oc:rowCount 2 ;
+                                    oc:tableCaption "If segment data is available from the tools, include a compact segment revenue table. This is essential context for equity research — analysts need to see which business lines are driving growth." ;
+                                    oc:tableMarkdown """| Segment | Revenue ($M) | % of Total | YoY Growth |
+|---|---|---|---|
+| [Segment A] | | | |
+| [Segment B] | | | |
+""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "Keep this compact for the one-pager: table only, no qualitative paragraph. If segment data is unavailable, skip this section entirely — do not include a blank or placeholder table." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 6 ;
+                            oc:sectionTitle "6. Revenue & Segment Breakdown" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 2 ;
+                                    oc:rowCount 5 ;
+                                    oc:tableCaption "Centerpiece of the equity tear sheet." ;
+                                    oc:tableMarkdown """| Metric | Trailing | Forward (NTM) |
+|---|---|---|
+| P/E | | |
+| EV/EBITDA | | |
+| EV/Revenue | | |
+| P/FCF | | |
+| Dividend Yield | | |
+""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Forward multiples are mandatory when available from the tools.** Showing only trailing multiples when forward data exists is a significant gap — analysts value companies on forward earnings. If forward multiples aren't available, show trailing only and note \"Fwd estimates N/A.\"" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Centerpiece of the equity tear sheet." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent "If the user provided comparable companies, add columns for each comp (or a \"Peer Median\" column if 3+ comps). If no user comps, and the tools return peer data, include a Peer Median column. If neither, show the company's multiples only." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "3. Valuation Snapshot" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 2 ;
+                                    oc:rowCount 4 ;
+                                    oc:tableCaption "Period return table. Low analytical value for this audience — cut this before anything else." ;
+                                    oc:tableMarkdown """| Period | Return |
+|---|---|
+| 1 Month | |
+| 3 Month | |
+| YTD | |
+| 1 Year | |
+""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Period return table. Low analytical value for this audience — cut this before anything else." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 9 ;
+                            oc:sectionTitle "9. Stock Performance (cut first)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent """Left column: Ticker (exchange), sector / industry, HQ
+Right column: Stock price, 52-week range, market cap, EV, shares outstanding, beta""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Compact key-value block rendered as a two-column borderless table per the global style config." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "1. Company Header" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Lead with guidance if provided.** If management issued forward guidance, make it the first bullet with a bold **Guidance:** prefix (e.g., \"**Guidance:** FY2026 EPS of $19.40–$19.65, implying 9–10% growth; organic revenue growth of 6–8%.\"). Guidance is the single most actionable forward-looking data point for an analyst — do not bury it among operating highlights." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 6 ;
+                                    oc:textContent "Attribute to management: \"Management highlighted…\" or \"CFO noted…\" rather than declarative claims. This section should feel like an earnings recap, not a press release summary." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Include the quarter and date (e.g., \"Q3 FY2025 — October 2025\"). 3-4 bullets with an **investment lens** — this audience wants segment-level specifics, not strategic themes:" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Beat/miss context (data permitting):** If consensus estimate data is available for the reported period, frame the headline result bullet as a beat/miss: \"Revenue of $X beat/missed consensus of $Y by Z%.\" If consensus data for the reported period is not available from the tools, describe results in absolute terms and growth rates only — do not fabricate consensus figures." ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 5 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Margin trajectory: any commentary on cost structure or profitability trends" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Segment-level performance: which business lines accelerated or decelerated" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent "Then:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 7 ;
+                            oc:sectionTitle "7. Recent Earnings Highlights" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "2-3 sector-relevant KPIs if available from the data (subscriber count, same-store sales, NIM, etc.). If nothing sector-specific, compute ROE and ROIC from the financials already retrieved. Optional — drop if space is tight." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 8 ;
+                            oc:sectionTitle "8. Key Operating Metrics" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 6 ;
+                                    oc:rowCount 3 ;
+                                    oc:tableCaption "Below the main estimates table, include a compact analyst consensus block (if data is available from the tools)" ;
+                                    oc:tableMarkdown """| Analyst Consensus | |
+|---|---|
+| Mean Price Target | $XXX |
+| # of Estimates | XX |
+| Buy / Hold / Sell | XX / XX / XX |
+""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent "Use normalized/adjusted EPS where available — GAAP EPS can be distorted by one-time items and is less useful for forward estimates." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Data availability note:** The depth of consensus data varies by company and coverage. Include whatever the tools return — analyst count, price target, Buy/Hold/Sell distribution — but do not fabricate or estimate any consensus figure. For thinly covered companies, this section may contain only revenue and EPS estimates, which is still valuable." ],
+                                [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 3 ;
+                                    oc:rowCount 3 ;
+                                    oc:tableCaption "**Data availability note:** The depth of consensus data varies by company and coverage. Include whatever the tools return — analyst count, price target, Buy/Hold/Sell distribution — but do not fabricate or estimate any consensus figure. For thinly covered companies, this section may contain only revenue and EPS estimates, which is still valuable." ;
+                                    oc:tableMarkdown """| Metric | FY[year] Est. | FY[year+1] Est. |
+|---|---|---|
+| Revenue | | |
+| EPS (normalized) | | |
+| EBITDA | | |
+""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 7 ;
+                                    oc:textContent "If price target or recommendation data is unavailable, omit the analyst consensus block rather than showing empty rows. Do not fabricate these figures." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "What the Street expects — a key differentiator for this tear sheet type." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 8 ;
+                                    oc:textContent "If consensus data isn't available at all, skip this entire section and note \"Consensus estimates not available.\" Do not estimate." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent "Below the main estimates table, include a compact analyst consensus block (if data is available from the tools):" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "4. Consensus Estimates" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 5 ;
+                                    oc:rowCount 3 ;
+                                    oc:tableCaption "Do NOT append these rows to the 3-year Financial Summary table — blank cells in prior-year columns look like missing data. Instead, render as a separate 2-column sub-table (Metric | Value) directly below, showing only the most recent fiscal year" ;
+                                    oc:tableMarkdown """| Metric | FY[latest] |
+|---|---|
+| Total Debt | $XXM |
+| Cash & Equivalents | $XXM |
+| Net Debt | $XXM |
+""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "Compute derived metrics (growth %, margins) from raw data rather than querying separately." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent """**Capital Structure (separate compact sub-table below the Financial Summary):**
+Do NOT append these rows to the 3-year Financial Summary table — blank cells in prior-year columns look like missing data. Instead, render as a separate 2-column sub-table (Metric | Value) directly below, showing only the most recent fiscal year:""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 6 ;
+                                    oc:textContent "This matches the capital structure format used in Corp Dev and IB/M&A tear sheets. Keep it tight — no extra spacing between the Financial Summary and this sub-table." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Dense single table using actual fiscal year labels." ],
+                                [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 2 ;
+                                    oc:rowCount 9 ;
+                                    oc:tableCaption "Dense single table using actual fiscal year labels." ;
+                                    oc:tableMarkdown """| Metric ($M) | FY20XX | FY20XX | FY20XX |
+|---|---|---|---|
+| Revenue | | | |
+| Revenue Growth % | | | |
+| Gross Margin % | | | |
+| EBITDA | | | |
+| EBITDA Margin % | | | |
+| Net Income | | | |
+| EPS (Diluted) | | | |
+| Free Cash Flow | | | |
+| Net Debt | | | |
+""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 5 ;
+                            oc:sectionTitle "5. Financial Summary (3-Year)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "For well-known, widely covered companies, assume the analyst already knows the basic business. Lead with what's *changing* — strategic pivots, portfolio reshaping, new growth vectors — not a Wikipedia-style overview. For example, for a Fortune 500 company, don't spend a sentence on \"provides financial data to institutions.\" Instead: \"Reshaping its portfolio toward higher-margin data and analytics businesses, with a pending Mobility spin-off and aggressive AI investment through its Kensho subsidiary.\"" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "2-3 tight sentences. **Rewrite in your own words for an analyst audience** — do not paste the CIQ company summary verbatim. The CIQ summary is an input; the output should be concise and thesis-oriented." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "For lesser-known companies, a brief \"what they do\" sentence is appropriate before pivoting to the thesis-relevant dynamics." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "2. Business Description" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Sections" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "A dense snapshot for buy-side or sell-side analysts evaluating an investment. Emphasis on valuation, forward estimates, financial trajectory, and analyst consensus. Everything supports or challenges an investment thesis." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Default page length:** 1 page. Equity research tear sheets are conventionally single-page — density is the point. If the user requests more space, extend to 2 pages." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Purpose" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Equity Research Tear Sheet" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "Sequential query plan for pulling all data needed for an equity research tear sheet from S&P Capital IQ MCP tools." ;
+            oc:hasStep [ a oc:WorkflowStep ;
+                    dcterms:description "Query revenue by segment/business unit for last 2 fiscal years. Write to /tmp/tear-sheet/segments.csv if data returned; skip section if unavailable." ;
+                    oc:expectedOutcome "Segment breakdown data or confirmed unavailability" ;
+                    oc:stepDependsOn _:ref_6ab52d936a5ea678 ;
+                    oc:stepId "q2b-segments" ],
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Query historical financials — pull 4 fiscal years of revenue, gross profit, EBITDA, net income, EPS, FCF, total debt, cash. Write raw values to /tmp/tear-sheet/financials.csv." ;
+                    oc:expectedOutcome "Financial Summary data for 3 displayed years plus 1 year for YoY growth computation" ;
+                    oc:stepDependsOn _:ref_6ab52d936a5ea678 ;
+                    oc:stepId "q2-financials" ],
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Query most recent earnings call key takeaways and guidance. Write to /tmp/tear-sheet/earnings.txt." ;
+                    oc:expectedOutcome "Earnings highlights with guidance and management commentary" ;
+                    oc:stepDependsOn _:ref_6ab52d936a5ea678 ;
+                    oc:stepId "q4-earnings" ],
+                _:ref_5e95bfbf40727778,
+                _:ref_6ab52d936a5ea678,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Query stock price returns for 1M, 3M, 6M, 1Y, YTD periods. No intermediate file — data goes directly into document." ;
+                    oc:expectedOutcome "Period return data for Stock Performance section" ;
+                    oc:stepDependsOn _:ref_6ab52d936a5ea678 ;
+                    oc:stepId "q5-stock-perf" ],
+                [ a oc:WorkflowStep ;
+                    dcterms:description "If user provided comparable companies, query market cap, EV/Revenue, EV/EBITDA, revenue growth for each comp. Write to /tmp/tear-sheet/peer-comps.csv." ;
+                    oc:expectedOutcome "Peer comparison data for Valuation Snapshot peer columns" ;
+                    oc:stepDependsOn _:ref_5e95bfbf40727778 ;
+                    oc:stepId "q6-comps" ] ;
+            oc:workflowId "equity-research-query-plan" ;
+            oc:workflowName "Equity Research Data Retrieval" ] ;
+    oc:impartsKnowledge oc:kn_184523df,
+        oc:kn_4641aa1f,
+        oc:kn_66193547,
+        oc:kn_6a176de5,
+        oc:kn_9a836f34,
+        oc:kn_a41014dc,
+        oc:kn_bc50ad97,
+        oc:kn_d8bc2692,
+        oc:kn_ec50489a,
+        oc:kn_eceb02c6 ;
     oc:isUserInvocable true ;
     oc:nature "Work" ;
     oc:requiresState oc:APIKeySet,
-        oc:ToolInstalled ;
-    oc:resolvesIntent "build valuation and consensus report",
+        oc:NetworkAvailable ;
+    oc:resolvesIntent "build valuation-focused company one-pager",
         "create analyst investment snapshot",
+        "generate buy-side sell-side tear sheet",
         "generate equity research tear sheet",
-        "produce company financial overview for analysts" ;
+        "produce consensus estimates report" ;
     oc:yieldsState oc:DocumentCreated .
 
-oc:kn_11d1f986 a oc:Constraint,
+oc:kn_184523df a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When data gaps are encountered" ;
+    oc:directiveContent "If segment data is unavailable, skip the Revenue & Segment Breakdown section entirely — do not include a blank or placeholder table. If consensus data is unavailable, skip the entire Consensus section and note 'Consensus estimates not available.'" ;
+    oc:hasRationale "Empty placeholder tables look unprofessional and raise questions about completeness; clean omission is better." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_4641aa1f a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing Recent Earnings Highlights section" ;
+    oc:directiveContent "In Earnings Highlights, always lead with guidance if provided (bold **Guidance:** prefix), then frame results as beat/miss if consensus data is available. Attribute claims to management ('Management highlighted…', 'CFO noted…') rather than making declarative assertions." ;
+    oc:hasRationale "Guidance is the single most actionable forward-looking data point for analysts. Management attribution prevents the tear sheet from appearing to make independent claims." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_66193547 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When formatting the Financial Summary section" ;
+    oc:directiveContent "Render Capital Structure as a separate 2-column sub-table below the Financial Summary showing only the most recent fiscal year. Do NOT append capital structure rows to the 3-year Financial Summary table — blank cells in prior-year columns look like missing data." ;
+    oc:hasRationale "Appending to the multi-year table creates visual ambiguity where blank cells could be interpreted as missing data rather than 'not applicable'." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_6a176de5 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When the rendered document exceeds 1-page target" ;
+    oc:directiveContent "Cut sections in strict priority order from bottom up when constrained to one page: Stock Performance (cut first), Key Operating Metrics, Earnings Highlights, Segment Breakdown, Financial Summary, Consensus, Valuation Snapshot, Business Description, Company Header (never cut)." ;
+    oc:hasRationale "Valuation and consensus are the analytical centerpieces; stock performance has the lowest analytical value for this audience." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_9a836f34 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When populating Consensus Estimates or Analyst Consensus blocks" ;
+    oc:directiveContent "Never fabricate or estimate consensus figures. If tools don't return a number, use 'N/A' or 'Not disclosed'. Skip entire sections rather than showing empty tables or fabricated data." ;
+    oc:hasRationale "Fabricated consensus data would violate the data integrity rules and destroy the tear sheet's credibility." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_a41014dc a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When populating the Valuation Snapshot table" ;
+    oc:directiveContent "Forward (NTM) multiples are mandatory when available from the tools. Showing only trailing multiples when forward data exists is a significant gap. If forward multiples aren't available, note 'Fwd estimates N/A.'" ;
+    oc:hasRationale "Analysts value companies on forward earnings; trailing-only multiples are analytically incomplete." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_bc50ad97 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing Business Description section" ;
+    oc:directiveContent "Never paste the CIQ company summary verbatim. Rewrite every narrative section for an analyst audience — concise, thesis-oriented, and focused on what's changing rather than Wikipedia-style overviews." ;
+    oc:hasRationale "Verbatim CIQ summaries signal low-effort output and provide no analytical value. Analysts need a thesis-oriented lens." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_d8bc2692 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When formatting the equity research tear sheet document" ;
+    oc:directiveContent "This is the densest tear sheet type. Use 8pt text for Financial Summary (size: 16), 8.5pt for Valuation/Consensus and body text (size: 17). Section spacing: 6pt before headers (not 12pt), 2pt after rules. Bold metrics showing notable inflections." ;
+    oc:hasRationale "Every half-point of font size matters on a single-page tear sheet. Density and information-over-whitespace is the design goal." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_ec50489a a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When generating any equity research tear sheet" ;
+    oc:directiveContent "Default page length is 1 page. Equity research tear sheets are conventionally single-page — density is the point. Extend to 2 pages only if the user explicitly requests more space." ;
+    oc:hasRationale "Single-page density is the industry convention for equity research snapshots; analysts expect maximum information density in minimal space." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_eceb02c6 a oc:Constraint,
         oc:KnowledgeNode ;
     oc:appliesToContext "When executing Query 2 for historical financials" ;
-    oc:directiveContent "Always pull 4 fiscal years of financial data even though only 3 are displayed. The earliest year is needed to compute YoY revenue growth for the first displayed year." ;
-    oc:hasRationale "Without the fourth year, the earliest displayed year's growth rate shows 'N/A' which looks like missing data rather than a design choice" ;
+    oc:directiveContent "Pull 4 fiscal years of financial data even though only 3 years are displayed. The fourth (earliest) year is needed to compute YoY revenue growth for the first displayed year." ;
+    oc:hasRationale "Without the fourth year, the earliest displayed year's growth rate shows 'N/A' which looks like missing data rather than a design choice." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_26dcddb1 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When the rendered document exceeds the single-page target" ;
-    oc:directiveContent "When constrained to one page, cut sections in strict priority order from the bottom: Stock Performance first (lowest analytical value), then Key Operating Metrics, then Earnings Highlights, and so on." ;
-    oc:hasRationale "The priority ordering ensures the most analytically valuable content (valuation, consensus, financials) is preserved while lower-value sections are sacrificed first" ;
-    oc:severityLevel "MEDIUM" .
+_:ref_5e95bfbf40727778 a oc:WorkflowStep ;
+    dcterms:description "Query valuation multiples (P/E, EV/EBITDA, EV/Revenue) and consensus estimates (revenue, EPS, analyst recommendations, price target). Write to valuation.csv and consensus.csv." ;
+    oc:expectedOutcome "Trailing and forward valuation multiples plus consensus estimates populated" ;
+    oc:stepDependsOn _:ref_6ab52d936a5ea678 ;
+    oc:stepId "q3-valuation" .
 
-oc:kn_38bdaf02 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When populating the Consensus Estimates and analyst consensus block" ;
-    oc:directiveContent "Do not fabricate or estimate any consensus figure, analyst recommendation, or price target. If data is unavailable, omit the section or note 'N/A' / 'Consensus estimates not available.'" ;
-    oc:hasRationale "Fabricated consensus data destroys the tear sheet's credibility — analysts will immediately spot fabricated figures and discount everything else" ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_6cba07fc a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When building the Valuation Snapshot table for equity research tear sheets" ;
-    oc:directiveContent "Forward (NTM) valuation multiples are mandatory when available from the tools. Never show only trailing multiples when forward data exists — analysts value companies on forward earnings." ;
-    oc:hasRationale "Showing only trailing multiples when forward data exists is a significant gap that undermines the tear sheet's analytical credibility for buy-side/sell-side audiences" ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_77bd7d71 a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When formatting the DOCX output for equity research tear sheets" ;
-    oc:directiveContent "This is the densest tear sheet type — it must feel noticeably more compressed than other templates. Use 8pt text for financial tables, 8.5pt for body text, 6pt spacing before section headers, and prioritize information over whitespace." ;
-    oc:hasRationale "Equity research tear sheets are conventionally single-page documents where density is the point — every half-point of font size and every pixel of spacing matters" ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_8705be89 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When writing the Business Description section" ;
-    oc:directiveContent "Never paste the CIQ company summary verbatim into any tear sheet. Rewrite every narrative section for the audience — concise and thesis-oriented for equity research analysts." ;
-    oc:hasRationale "Verbatim CIQ summaries signal low-value output. Analysts need thesis-oriented framing that highlights what's changing, not Wikipedia-style overviews" ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_9e355b5b a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When writing the Recent Earnings Highlights section" ;
-    oc:directiveContent "Lead earnings highlights with guidance if provided — use a bold 'Guidance:' prefix. Guidance is the single most actionable forward-looking data point for an analyst and should never be buried among operating highlights." ;
-    oc:hasRationale "Analysts prioritize forward-looking guidance over backward-looking results; burying guidance signals poor editorial judgment" ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_e218c930 a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "Before Step 4 (DOCX generation)" ;
-    oc:directiveContent "Verify all intermediate data files are present and populated before generating the document. Print a verification summary showing each file's status. Files — not conversation context — are the single source of truth." ;
-    oc:hasRationale "Relying on conversation context for financial data risks using stale or corrupted values from context degradation in long sessions" ;
-    oc:severityLevel "HIGH" .
-
-oc:req_57886265 a oc:RequirementTool ;
-    oc:isOptional false ;
-    oc:requirementValue "Node.js runtime" .
-
-oc:req_841cc02d a oc:RequirementAPI ;
-    oc:isOptional false ;
-    oc:requirementValue "S&P Capital IQ via Kensho LLM-ready API MCP server" .
-
-oc:req_85b874f6 a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "docx-js for Word document generation" .
+_:ref_6ab52d936a5ea678 a oc:WorkflowStep ;
+    dcterms:description "Query company profile + market data (overview, sector, market cap, EV, stock price, 52-week range, shares outstanding, beta). Write to /tmp/tear-sheet/company-profile.txt." ;
+    oc:expectedOutcome "Company header and business description data populated" ;
+    oc:stepId "q1-profile" .
 

@@ -4,93 +4,982 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_office_skills_data_extractor a oc:DeclarativeSkill,
+oc:skill_claude_office_skills_data_extractor a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "data-extractor" ;
-    skos:broader "Document data extraction tool" ;
-    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-office-skills/data-extractor" ;
+    skos:broader "Data extraction utility" ;
+    prov:wasDerivedFrom "../.agents/skills/anthropics/claude-office-skills/data-extractor" ;
     oc:contentHash "29de85bc1599930972f530606f5bc952ca37dffc342d70f8035e871dc675d744" ;
-    oc:differentia "Uses the unstructured library to extract structured elements (text, tables, metadata) from any document format (PDF, Word, HTML, email, images) into consistent, typed output with support for auto-detection, format-specific partitioning, chunking for RAG, and batch processing" ;
+    oc:differentia "Uses the unstructured library to extract structured elements with metadata from any document format (PDF, Word, HTML, email, etc.)" ;
     oc:handlesFailure oc:FileNotFound,
         oc:InvalidInput,
-        oc:UnsupportedFormat ;
-    oc:hasArgumentHint "file-path or document to process" ;
+        oc:PermissionDenied ;
+    oc:hasArgumentHint "file-path or document to extract data from" ;
     oc:hasCategory "document" ;
     oc:hasDescription ">" ;
     oc:hasName "data-extractor" ;
-    oc:hasRequirement oc:req_09a883b9,
+    oc:hasRequirement oc:req_5185bf83,
         oc:req_61f22896,
-        oc:req_ca5386f3 ;
-    oc:impartsKnowledge oc:kn_21ed8505,
-        oc:kn_27600ddc,
-        oc:kn_4d87a461,
-        oc:kn_933d0912,
-        oc:kn_986b6f8a,
-        oc:kn_dc3a9d88 ;
+        oc:req_8121e331 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent _:ref_13be104b012a5e4f,
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 3 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "\"Convert this HTML page to structured elements\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "\"Parse this email and get the body, attachments, and metadata\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "\"Extract all text and tables from this PDF\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "\"Extract data from these mixed-format documents\"" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Example prompts:**" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "How to Use" ],
+                [ a oc:Section ;
+                    oc:hasContent _:ref_abebdba2a52853a4 ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Best Practices" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "This skill enables extraction of structured data from any document format using **unstructured** - a unified library for processing PDFs, Word docs, emails, HTML, and more. Get consistent, structured output regardless of input format." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Overview" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """from unstructured.partition.pdf import partition_pdf
+from unstructured.chunking.title import chunk_by_title
+
+def extract_paper(pdf_path):
+    \"\"\"Extract structured data from research paper.\"\"\"
+    
+    elements = partition_pdf(
+        filename=pdf_path,
+        strategy="hi_res",
+        infer_table_structure=True,
+        include_page_breaks=True
+    )
+    
+    paper = {
+        'title': None,
+        'abstract': None,
+        'sections': [],
+        'tables': [],
+        'references': []
+    }
+    
+    # Find title (usually first Title element)
+    for element in elements:
+        if element.category == "Title" and not paper['title']:
+            paper['title'] = element.text
+            break
+    
+    # Extract tables
+    for element in elements:
+        if element.category == "Table":
+            paper['tables'].append({
+                'page': element.metadata.page_number,
+                'content': element.text,
+                'html': element.metadata.text_as_html if hasattr(element.metadata, 'text_as_html') else None
+            })
+    
+    # Chunk into sections
+    chunks = chunk_by_title(elements, max_characters=2000)
+    
+    current_section = None
+    for chunk in chunks:
+        if chunk.category == "Title":
+            paper['sections'].append({
+                'title': chunk.text,
+                'content': ''
+            })
+        elif paper['sections']:
+            paper['sections'][-1]['content'] += chunk.text + '\\n'
+    
+    return paper
+
+paper = extract_paper('research_paper.pdf')
+print(f"Title: {paper['title']}")
+print(f"Tables: {len(paper['tables'])}")
+print(f"Sections: {len(paper['sections'])}")
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 374-430" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Example 1: Research Paper Extraction" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """from unstructured.partition.auto import partition
+import re
+
+def extract_invoice_data(file_path):
+    \"\"\"Extract key data from invoice.\"\"\"
+    
+    elements = partition(file_path, strategy="hi_res")
+    
+    # Combine all text
+    full_text = '\\n'.join([e.text for e in elements])
+    
+    invoice = {
+        'invoice_number': None,
+        'date': None,
+        'total': None,
+        'vendor': None,
+        'line_items': [],
+        'tables': []
+    }
+    
+    # Extract patterns
+    inv_match = re.search(r'Invoice\\s*#?\\s*:?\\s*(\\w+[-\\w]*)', full_text, re.I)
+    if inv_match:
+        invoice['invoice_number'] = inv_match.group(1)
+    
+    date_match = re.search(r'Date\\s*:?\\s*(\\d{1,2}[-/]\\d{1,2}[-/]\\d{2,4})', full_text, re.I)
+    if date_match:
+        invoice['date'] = date_match.group(1)
+    
+    total_match = re.search(r'Total\\s*:?\\s*\\$?([\\d,]+\\.?\\d*)', full_text, re.I)
+    if total_match:
+        invoice['total'] = float(total_match.group(1).replace(',', ''))
+    
+    # Extract tables
+    for element in elements:
+        if element.category == "Table":
+            invoice['tables'].append(element.text)
+    
+    return invoice
+
+invoice = extract_invoice_data('invoice.pdf')
+print(f"Invoice #: {invoice['invoice_number']}")
+print(f"Total: ${invoice['total']}")
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 433-477" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Example 2: Invoice Data Extraction" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """from unstructured.partition.auto import partition
+from unstructured.chunking.title import chunk_by_title
+from pathlib import Path
+import json
+
+def build_corpus(input_dir, output_path):
+    \"\"\"Build searchable corpus from document collection.\"\"\"
+    
+    input_path = Path(input_dir)
+    corpus = []
+    
+    # Support multiple formats
+    patterns = ['*.pdf', '*.docx', '*.html', '*.txt', '*.md']
+    files = []
+    for pattern in patterns:
+        files.extend(input_path.glob(pattern))
+    
+    for file in files:
+        print(f"Processing: {file.name}")
+        
+        try:
+            elements = partition(str(file))
+            chunks = chunk_by_title(elements, max_characters=1000)
+            
+            for i, chunk in enumerate(chunks):
+                corpus.append({
+                    'id': f"{file.stem}_{i}",
+                    'source': str(file),
+                    'type': type(chunk).__name__,
+                    'text': chunk.text,
+                    'page': chunk.metadata.page_number if chunk.metadata.page_number else None
+                })
+        
+        except Exception as e:
+            print(f"  Error: {e}")
+    
+    # Save corpus
+    with open(output_path, 'w') as f:
+        json.dump(corpus, f, indent=2)
+    
+    print(f"Corpus built: {len(corpus)} chunks from {len(files)} files")
+    return corpus
+
+corpus = build_corpus('./documents', 'corpus.json')
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 480-525" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Example 3: Document Corpus Builder" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Examples" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """from unstructured.partition.auto import partition
+
+elements = partition("document.pdf")
+
+for element in elements:
+    meta = element.metadata
+    
+    # Common metadata fields
+    print(f"Page: {meta.page_number}")
+    print(f"Filename: {meta.filename}")
+    print(f"Filetype: {meta.filetype}")
+    print(f"Coordinates: {meta.coordinates}")
+    print(f"Languages: {meta.languages}")
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 191-205" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 7 ;
+                            oc:sectionTitle "Metadata Access" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """from unstructured.partition.auto import partition
+from unstructured.staging.base import elements_to_json, elements_to_dicts
+
+elements = partition("document.pdf")
+
+# To JSON string
+json_str = elements_to_json(elements)
+
+# To list of dicts
+dicts = elements_to_dicts(elements)
+
+# To DataFrame
+import pandas as pd
+df = pd.DataFrame(dicts)
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 273-288" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 10 ;
+                            oc:sectionTitle "Export Formats" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """from unstructured.partition.auto import partition
+
+# Process any file type
+elements = partition(
+    filename="document.pdf",
+    strategy="auto",          # or "fast", "hi_res", "ocr_only"
+    include_metadata=True,
+    include_page_breaks=True,
+)
+
+# Filter by type
+titles = [e for e in elements if isinstance(e, Title)]
+tables = [e for e in elements if isinstance(e, Table)]
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 124-138" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "Auto Partition" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """from unstructured.partition.auto import partition
+
+# Automatically detect and process any document
+elements = partition("document.pdf")
+
+# Access extracted elements
+for element in elements:
+    print(f"Type: {type(element).__name__}")
+    print(f"Text: {element.text}")
+    print(f"Metadata: {element.metadata}")
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 71-82" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "unstructured Fundamentals" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """from unstructured.partition.auto import partition
+
+elements = partition("report.pdf", infer_table_structure=True)
+
+# Extract tables
+for element in elements:
+    if element.category == "Table":
+        print("Table found:")
+        print(element.text)
+        
+        # Access structured table data
+        if hasattr(element, 'metadata') and element.metadata.text_as_html:
+            print("HTML:", element.metadata.text_as_html)
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 173-187" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 6 ;
+                            oc:sectionTitle "Working with Tables" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# PDF with options
+from unstructured.partition.pdf import partition_pdf
+
+elements = partition_pdf(
+    filename="document.pdf",
+    strategy="hi_res",              # High quality extraction
+    infer_table_structure=True,     # Detect tables
+    include_page_breaks=True,
+    languages=["en"],               # OCR language
+)
+
+# Word documents
+from unstructured.partition.docx import partition_docx
+
+elements = partition_docx(
+    filename="document.docx",
+    include_metadata=True,
+)
+
+# HTML
+from unstructured.partition.html import partition_html
+
+elements = partition_html(
+    filename="page.html",
+    include_metadata=True,
+)
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 142-169" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 5 ;
+                            oc:sectionTitle "Format-Specific Partitioning" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 1 ;
+                                    oc:rowCount 9 ;
+                                    oc:tableCaption "### Supported Formats" ;
+                                    oc:tableMarkdown """| Format | Function | Notes |
+|--------|----------|-------|
+| PDF | `partition_pdf` | Native + scanned |
+| Word | `partition_docx` | Full structure |
+| PowerPoint | `partition_pptx` | Slides & notes |
+| Excel | `partition_xlsx` | Sheets & tables |
+| Email | `partition_email` | Body & attachments |
+| HTML | `partition_html` | Tags preserved |
+| Markdown | `partition_md` | Structure preserved |
+| Plain Text | `partition_text` | Basic parsing |
+| Images | `partition_image` | OCR extraction |
+""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Supported Formats" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """from unstructured.partition.auto import partition
+from unstructured.chunking.title import chunk_by_title
+from unstructured.chunking.basic import chunk_elements
+
+# Partition document
+elements = partition("document.pdf")
+
+# Chunk by title (semantic chunks)
+chunks = chunk_by_title(
+    elements,
+    max_characters=1000,
+    combine_text_under_n_chars=200,
+)
+
+# Or basic chunking
+chunks = chunk_elements(
+    elements,
+    max_characters=500,
+    overlap=50,
+)
+
+for chunk in chunks:
+    print(f"Chunk ({len(chunk.text)} chars):")
+    print(chunk.text[:100] + "...")
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 209-234" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 8 ;
+                            oc:sectionTitle "Chunking for AI/RAG" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """from unstructured.documents.elements import (
+    Title,
+    NarrativeText,
+    Text,
+    ListItem,
+    Table,
+    Image,
+    Header,
+    Footer,
+    PageBreak,
+    Address,
+    EmailAddress,
+)
+
+# Elements have consistent structure
+element.text           # Raw text content
+element.metadata       # Rich metadata
+element.category       # Element type
+element.id            # Unique identifier
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 100-120" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Element Types" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """from unstructured.partition.auto import partition
+from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor
+
+def process_document(file_path):
+    \"\"\"Process single document.\"\"\"
+    try:
+        elements = partition(str(file_path))
+        return {
+            'file': str(file_path),
+            'status': 'success',
+            'elements': len(elements),
+            'text': '\\n\\n'.join([e.text for e in elements])
+        }
+    except Exception as e:
+        return {
+            'file': str(file_path),
+            'status': 'error',
+            'error': str(e)
+        }
+
+def batch_process(input_dir, max_workers=4):
+    \"\"\"Process all documents in directory.\"\"\"
+    input_path = Path(input_dir)
+    files = list(input_path.glob('*'))
+    
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        results = list(executor.map(process_document, files))
+    
+    return results
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 238-269" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 9 ;
+                            oc:sectionTitle "Batch Processing" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Domain Knowledge" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "[Documentation](https://unstructured-io.github.io/unstructured/)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "[unstructured GitHub](https://github.com/Unstructured-IO/unstructured)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "[Unstructured API](https://unstructured.io/api-key)" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 9 ;
+                    oc:sectionTitle "Resources" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# Basic installation
+pip install unstructured
+
+# With all dependencies
+pip install "unstructured[all-docs]"
+
+# For PDF processing
+pip install "unstructured[pdf]"
+
+# For specific formats
+pip install "unstructured[docx,pptx,xlsx]"
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 537-549" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 8 ;
+                    oc:sectionTitle "Installation" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Complex layouts may need manual review" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "OCR quality depends on image quality" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Large files may need chunking" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Some proprietary formats not supported" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "API rate limits for cloud processing" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 7 ;
+                    oc:sectionTitle "Limitations" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """def document_to_json(file_path, output_path=None):
+    \"\"\"Convert document to structured JSON.\"\"\"
+    from unstructured.partition.auto import partition
+    from unstructured.staging.base import elements_to_json
+    import json
+    
+    elements = partition(file_path)
+    
+    # Create structured output
+    output = {
+        'source': file_path,
+        'elements': []
+    }
+    
+    for element in elements:
+        output['elements'].append({
+            'type': type(element).__name__,
+            'text': element.text,
+            'metadata': {
+                'page': element.metadata.page_number,
+                'coordinates': element.metadata.coordinates.to_dict() if element.metadata.coordinates else None
+            }
+        })
+    
+    if output_path:
+        with open(output_path, 'w') as f:
+            json.dump(output, f, indent=2)
+    
+    return output
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 301-331" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Document to JSON" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """from unstructured.partition.email import partition_email
+
+def parse_email(email_path):
+    \"\"\"Extract structured data from email.\"\"\"
+    
+    elements = partition_email(email_path)
+    
+    email_data = {
+        'subject': None,
+        'from': None,
+        'to': [],
+        'date': None,
+        'body': [],
+        'attachments': []
+    }
+    
+    for element in elements:
+        meta = element.metadata
+        
+        # Extract headers from metadata
+        if meta.subject:
+            email_data['subject'] = meta.subject
+        if meta.sent_from:
+            email_data['from'] = meta.sent_from
+        if meta.sent_to:
+            email_data['to'] = meta.sent_to
+        
+        # Body content
+        email_data['body'].append({
+            'type': type(element).__name__,
+            'text': element.text
+        })
+    
+    return email_data
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 334-369" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Email Parser" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Common Patterns" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Data Extractor Skill" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """# ═══════════════════════════════════════════════════════════════════════════════
+# CLAUDE OFFICE SKILL - Enhanced Metadata v2.0
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Basic Information
+name: data-extractor
+description: ">"
+version: "1.0"
+author: claude-office-skills
+license: MIT
+
+# Categorization
+category: parsing
+tags:
+  - extraction
+  - data
+  - unstructured
+department: All
+
+# AI Model Compatibility
+models:
+  recommended:
+    - claude-sonnet-4
+    - claude-opus-4
+  compatible:
+    - claude-3-5-sonnet
+    - gpt-4
+    - gpt-4o
+
+# MCP Tools Integration
+mcp:
+  server: office-mcp
+  tools:
+    - extract_text_from_pdf
+    - extract_tables_from_pdf
+
+# Skill Capabilities
+capabilities:
+  - data_extraction
+  - format_handling
+
+# Language Support
+languages:
+  - en
+  - zh
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:hasWorkflow _:ref_13be104b012a5e4f,
+        [ a oc:Workflow ;
+            dcterms:description "Extract structured data from a single document using unstructured library" ;
+            oc:hasStep [ a oc:WorkflowStep ;
+                    dcterms:description "Export results to desired format (JSON, dict, DataFrame, custom structure)" ;
+                    oc:expectedOutcome "Structured output in requested format" ;
+                    oc:stepDependsOn _:ref_f11933a983bf3695 ;
+                    oc:stepId "export-output" ],
+                _:ref_74d44af44958be9c,
+                _:ref_8991c6e73101ffc5,
+                _:ref_c8176702b7949be7,
+                _:ref_f11933a983bf3695 ;
+            oc:workflowId "extract-data-from-document" ;
+            oc:workflowName "Extract Data from Document" ],
+        _:ref_abebdba2a52853a4 ;
+    oc:impartsKnowledge oc:kn_318cd96f,
+        oc:kn_3b6b766c,
+        oc:kn_4b812b17,
+        oc:kn_65c512d4,
+        oc:kn_7d82557b,
+        oc:kn_95072847,
+        oc:kn_976f9c3f,
+        oc:kn_ab022be7,
+        oc:kn_c5e9f673,
+        oc:kn_c95b9d7f,
+        oc:kn_d540d678,
+        oc:kn_f97beab0,
+        oc:kn_f9f31e2a ;
     oc:isUserInvocable true ;
     oc:nature "Tool" ;
-    oc:requiresState oc:FileExists ;
-    oc:resolvesIntent "batch process multiple documents",
-        "build searchable document corpus",
-        "chunk documents for RAG applications",
-        "convert unstructured documents to JSON",
-        "extract data from emails",
+    oc:requiresState oc:FileExists,
+        oc:ToolInstalled ;
+    oc:resolvesIntent "build searchable corpus from document collections",
+        "convert documents to JSON or structured output",
+        "extract data from PDFs and mixed-format documents",
         "extract text and tables from documents",
-        "parse structured data from PDFs and other formats" ;
+        "parse unstructured data into structured elements" ;
     oc:yieldsState oc:DataExtracted,
         oc:DocumentParsed .
 
-oc:kn_21ed8505 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When selecting partition strategy for any document" ;
-    oc:directiveContent "Choose extraction strategy based on need: use 'fast' for speed on simple documents, 'hi_res' for accuracy on complex layouts with tables, and 'ocr_only' for scanned documents." ;
-    oc:hasRationale "Strategy selection directly impacts extraction quality vs. performance tradeoff; wrong strategy leads to missing data or slow processing." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_27600ddc a oc:KnowledgeNode,
-        oc:KnownIssue ;
-    oc:appliesToContext "When processing very large documents or proprietary formats" ;
-    oc:directiveContent "Large files may require chunking before processing. Some proprietary document formats are not supported. API rate limits apply when using cloud-based processing." ;
-    oc:hasRationale "Memory and rate limits constrain batch processing; oversized files can cause OOM errors or timeout failures." ;
+oc:kn_318cd96f a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "When encountering unusual or proprietary file formats" ;
+    oc:directiveContent "Some proprietary formats are not supported; the library may fail gracefully on unsupported formats." ;
+    oc:hasRationale "Users should validate results rather than assuming complete extraction for exotic formats." ;
     oc:severityLevel "LOW" .
 
-oc:kn_4d87a461 a oc:DesignPrinciple,
+oc:kn_3b6b766c a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When preparing extracted document data for AI/RAG pipelines" ;
-    oc:directiveContent "Use semantic chunking (chunk_by_title) for RAG applications rather than basic character-based chunking to preserve document structure and context boundaries." ;
-    oc:hasRationale "Semantic chunking respects document hierarchy (sections, titles) producing more meaningful retrieval units than arbitrary character splits." ;
+    oc:appliesToContext "When extracting structured elements from any document format" ;
+    oc:codeLanguage "python" ;
+    oc:directiveContent """from unstructured.partition.auto import partition
+
+elements = partition(
+    filename="document.pdf",
+    strategy="auto",
+    include_metadata=True,
+    include_page_breaks=True,
+)
+
+for element in elements:
+    print(f"Type: {type(element).__name__}")
+    print(f"Text: {element.text}")
+    print(f"Metadata: {element.metadata}")""" .
+
+oc:kn_4b812b17 a oc:KnowledgeNode,
+        oc:Prerequisite ;
+    oc:directiveContent "Python 3.x with pip; unstructured library installed with appropriate extras for target formats (e.g., [pdf], [docx], [all-docs])" .
+
+oc:kn_65c512d4 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When processing scanned documents or complex layouts" ;
+    oc:directiveContent "OCR quality depends on source image quality; complex layouts may need manual review after extraction." ;
+    oc:hasRationale "No OCR or extraction tool is perfect; degraded inputs produce degraded outputs." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_933d0912 a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "When configuring partition options for documents with tables or non-English content" ;
-    oc:directiveContent "Always enable infer_table_structure=True when documents contain tables, and specify languages parameter for non-English documents to improve OCR accuracy." ;
-    oc:hasRationale "Table detection must be explicitly enabled to get structured HTML table output; language hints improve OCR token recognition." ;
-    oc:severityLevel "MEDIUM" .
+oc:kn_7d82557b a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "When processing multiple documents" ;
+    oc:directiveContent "Batch processing supports ThreadPoolExecutor with configurable max_workers; default of 4 workers for parallel document processing." ;
+    oc:hasRationale "Parallel processing significantly reduces throughput time for multi-document workloads." .
 
-oc:kn_986b6f8a a oc:Constraint,
+oc:kn_95072847 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When extracting data from any document" ;
+    oc:directiveContent "1. Install unstructured with needed extras (e.g. pip install 'unstructured[all-docs]') 2. Use partition() or format-specific function with appropriate strategy 3. Filter elements by type (Title, Table, NarrativeText) 4. Access element.text and element.metadata for content 5. Export via elements_to_json, elements_to_dicts, or custom structuring" ;
+    oc:stepOrder 1 .
+
+oc:kn_976f9c3f a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When processing scanned PDFs or image-based documents" ;
-    oc:directiveContent "OCR quality depends entirely on source image quality. Complex layouts (multi-column, overlapping elements) may produce incorrect element ordering and require manual review." ;
-    oc:hasRationale "The unstructured library's OCR capabilities are bounded by input fidelity; garbage in, garbage out applies to document extraction." ;
+    oc:appliesToContext "When choosing partition strategy" ;
+    oc:directiveContent "Use 'fast' strategy for speed on simple documents, 'hi_res' for accuracy on complex layouts and scanned PDFs." ;
+    oc:hasRationale "Strategy choice directly impacts extraction quality and processing time trade-off." .
+
+oc:kn_ab022be7 a oc:KnowledgeNode,
+        oc:OutputFormat ;
+    oc:appliesToContext "When outputting structured extraction results" ;
+    oc:directiveContent """{
+  'source': '{file_path}',
+  'elements': [
+    {
+      'type': '{element_type}',
+      'text': '{element_text}',
+      'metadata': {
+        'page': '{page_number}',
+        'coordinates': '{coordinates}'
+      }
+    }
+  ]
+}""" ;
+    oc:templateVariables "coordinates",
+        "element_text",
+        "element_type",
+        "file_path",
+        "page_number" .
+
+oc:kn_c5e9f673 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When processing large documents or batch corpora" ;
+    oc:directiveContent "Do not process large files without chunking — they may exhaust memory or hit API rate limits." ;
+    oc:hasRationale "Large unchunked files cause memory issues and API throttling." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_dc3a9d88 a oc:DesignPrinciple,
+oc:kn_c95b9d7f a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When choosing between auto-detection and format-specific extraction" ;
-    oc:directiveContent "Use partition_auto for unknown document types to get automatic format detection, or use format-specific partition functions (partition_pdf, partition_docx, etc.) when the format is known for more control." ;
-    oc:hasRationale "Auto partition provides convenience at the cost of fine-grained control; format-specific functions allow strategy and language tuning." ;
-    oc:severityLevel "MEDIUM" .
+    oc:appliesToContext "When exporting extracted elements to JSON or dict format" ;
+    oc:codeLanguage "python" ;
+    oc:directiveContent """from unstructured.staging.base import elements_to_json, elements_to_dicts
 
-oc:req_09a883b9 a oc:RequirementAPI ;
+elements = partition("document.pdf")
+json_str = elements_to_json(elements)
+dicts = elements_to_dicts(elements)""" .
+
+oc:kn_d540d678 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When chunking documents for RAG or AI applications" ;
+    oc:codeLanguage "python" ;
+    oc:directiveContent """from unstructured.partition.auto import partition
+from unstructured.chunking.title import chunk_by_title
+
+elements = partition("document.pdf")
+chunks = chunk_by_title(elements, max_characters=1000, combine_text_under_n_chars=200)""" .
+
+oc:kn_f97beab0 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When selecting partition function" ;
+    oc:directiveContent "Use partition_auto for unknown file types; use format-specific partition functions (partition_pdf, partition_docx) when the format is known for better control." ;
+    oc:hasRationale "Auto-detection adds overhead; format-specific functions offer more configuration options." .
+
+oc:kn_f9f31e2a a oc:Command,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When installing unstructured with all format support" ;
+    oc:directiveContent "pip install \"unstructured[all-docs]\"" .
+
+oc:req_5185bf83 a oc:RequirementTool ;
     oc:isOptional true ;
-    oc:requirementValue "unstructured partition functions (partition, partition_pdf, partition_docx, partition_html, partition_email, etc.)" .
+    oc:requirementValue "office-mcp MCP server (for PDF extraction tools)" .
 
 oc:req_61f22896 a oc:RequirementTool ;
     oc:isOptional false ;
     oc:requirementValue "unstructured Python library" .
 
-oc:req_ca5386f3 a oc:RequirementKnowledge ;
+oc:req_8121e331 a oc:RequirementKnowledge ;
     oc:isOptional false ;
-    oc:requirementValue "Python programming for data extraction" .
+    oc:requirementValue "Python 3.x runtime" .
+
+_:ref_288c6be3dad754f2 a oc:WorkflowStep ;
+    dcterms:description "**Specify Language**: For better OCR on non-English docs" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_3ea9d7eb026b672d a oc:WorkflowStep ;
+    dcterms:description "**Enable Table Detection**: For documents with tables" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_4b4224539b185dfa a oc:WorkflowStep ;
+    dcterms:description "**Handle Errors**: Some formats may fail gracefully" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_5" ;
+    oc:stepOrder 5 .
+
+_:ref_50b1652cbe86f538 a oc:WorkflowStep ;
+    dcterms:description "**Choose Strategy Wisely**: \"fast\" for speed, \"hi_res\" for accuracy" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_6c90c641c40a9d33 a oc:WorkflowStep ;
+    dcterms:description "Optionally specify extraction options" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_7549b5a9e0c8d387 a oc:WorkflowStep ;
+    dcterms:description "I'll extract structured elements with metadata" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_7a25a53cb3ddfb02 a oc:WorkflowStep ;
+    dcterms:description "**Chunk for RAG**: Use semantic chunking for AI applications" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_d2e6d04ff90a0614 a oc:WorkflowStep ;
+    dcterms:description "Provide the document to process" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_13be104b012a5e4f a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 1 ;
+    oc:hasStep _:ref_6c90c641c40a9d33,
+        _:ref_7549b5a9e0c8d387,
+        _:ref_d2e6d04ff90a0614 ;
+    oc:workflowId "procedure_1" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_74d44af44958be9c a oc:WorkflowStep ;
+    dcterms:description "Identify document format and select appropriate partition function (auto or format-specific)" ;
+    oc:expectedOutcome "Partition function selected" ;
+    oc:stepId "identify-format" .
+
+_:ref_8991c6e73101ffc5 a oc:WorkflowStep ;
+    dcterms:description "Execute partition function and receive extracted elements" ;
+    oc:expectedOutcome "List of structured elements with text and metadata" ;
+    oc:stepDependsOn _:ref_c8176702b7949be7 ;
+    oc:stepId "run-partition" .
+
+_:ref_abebdba2a52853a4 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 1 ;
+    oc:hasStep _:ref_288c6be3dad754f2,
+        _:ref_3ea9d7eb026b672d,
+        _:ref_4b4224539b185dfa,
+        _:ref_50b1652cbe86f538,
+        _:ref_7a25a53cb3ddfb02 ;
+    oc:workflowId "procedure_1" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_c8176702b7949be7 a oc:WorkflowStep ;
+    dcterms:description "Configure extraction options: strategy (fast/hi_res), table inference, language, metadata inclusion" ;
+    oc:expectedOutcome "Extraction parameters configured" ;
+    oc:stepDependsOn _:ref_74d44af44958be9c ;
+    oc:stepId "configure-extraction" .
+
+_:ref_f11933a983bf3695 a oc:WorkflowStep ;
+    dcterms:description "Filter and structure elements by type (titles, tables, narrative), optionally chunk for RAG" ;
+    oc:expectedOutcome "Filtered, structured data ready for use" ;
+    oc:stepDependsOn _:ref_8991c6e73101ffc5 ;
+    oc:stepId "filter-structure" .
 

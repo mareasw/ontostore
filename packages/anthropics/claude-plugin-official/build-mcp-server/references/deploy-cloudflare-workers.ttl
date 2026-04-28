@@ -4,90 +4,230 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_plugin_official_build_mcp_server_deploy_cloudflare_workers a oc:DeclarativeSkill,
+oc:skill_claude_plugin_official_build_mcp_server_deploy_cloudflare_workers a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "deploy-cloudflare-workers" ;
-    skos:broader "deployment guide" ;
+    skos:broader "Deployment guide" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/build-mcp-server" ;
     oc:contentHash "b72abb420638510187da33b3e5348c6e8b5f319821b339d646517efbb3c8084c" ;
-    oc:differentia "deploys MCP servers to Cloudflare Workers with zero-to-live URL in two commands using the McpAgent runtime" ;
-    oc:extends oc:skill_anthropics_claude_plugin_official_build_mcp_server ;
-    oc:handlesFailure oc:BuildError,
-        oc:DeploymentFailed ;
-    oc:hasArgumentHint "project-name for the MCP server" ;
+    oc:dependsOnSkill oc:skill_ontoskills_build_mcp_server ;
+    oc:differentia "deploys an MCP server to Cloudflare Workers using the agents/mcp scaffold with Durable Objects" ;
+    oc:extends oc:skill_claude_plugin_official_build_mcp_server ;
+    oc:handlesFailure oc:BuildFailed,
+        oc:NetworkTimeout,
+        oc:PermissionDenied ;
     oc:hasCategory "development" ;
-    oc:hasRequirement oc:req_13884422,
-        oc:req_37abe107,
-        oc:req_4c7d6de7,
-        oc:req_f5d063de ;
-    oc:impartsKnowledge oc:kn_4261df90,
-        oc:kn_9ee79a5b,
-        oc:kn_cc5dcffe,
-        oc:kn_cf4fcc00,
-        oc:kn_eb3683df,
-        oc:kn_ff8a12b4 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Trade-off:** This is a Workers-native scaffold, not a deploy target for the Express scaffold in `remote-http-scaffold.md`. Different runtime. If you need portability across hosts, stick with Express. If you just want it live, start here." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Fastest path from zero to a live `https://` MCP URL. Free tier, no credit card to start, two commands to deploy." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Replace the template's calculator example with your tools. Use `registerTool()` (same API as the Express scaffold — the `McpServer` instance is identical):" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { McpAgent } from "agents/mcp";
+import { z } from "zod";
+
+export class MyMCP extends McpAgent {
+  server = new McpServer(
+    { name: "my-service", version: "0.1.0" },
+    { instructions: "Prefer search_items before get_item — IDs aren't guessable." },
+  );
+
+  async init() {
+    this.server.registerTool(
+      "search_items",
+      {
+        description: "Search items by keyword. Returns up to `limit` matches.",
+        inputSchema: {
+          query: z.string().describe("Search keywords"),
+          limit: z.number().int().min(1).max(50).default(10),
+        },
+        annotations: { readOnlyHint: true },
+      },
+      async ({ query, limit }) => {
+        const results = await upstreamApi.search(query, limit);
+        return { content: [{ type: "text", text: JSON.stringify(results, null, 2) }] };
+      },
+    );
+  }
+}
+
+export default {
+  fetch(request: Request, env: Env, ctx: ExecutionContext) {
+    const url = new URL(request.url);
+    if (url.pathname === "/mcp") {
+      return MyMCP.serve("/mcp").fetch(request, env, ctx);
+    }
+    return new Response("Not found", { status: 404 });
+  },
+};
+""" ;
+                            oc:codeLanguage "typescript" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 25-64" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "`McpAgent` is Cloudflare's wrapper — it handles the streamable-HTTP transport, session routing, and Durable Object plumbing. Your code only touches `this.server`, which is the same `McpServer` class from the SDK. Everything in `tool-design.md` and `server-capabilities.md` applies unchanged." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "`src/index.ts`" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "If you rename the `MyMCP` class, update both `new_sqlite_classes` and `class_name` to match." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "The template ships this. The Durable Objects block is **boilerplate** — `McpAgent` uses DO for session state. You don't interact with it directly." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """{
+  "name": "my-mcp-server",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-03-10",
+  "compatibility_flags": ["nodejs_compat"],
+  "migrations": [{ "new_sqlite_classes": ["MyMCP"], "tag": "v1" }],
+  "durable_objects": {
+    "bindings": [{ "class_name": "MyMCP", "name": "MCP_OBJECT" }]
+  }
+}
+""" ;
+                            oc:codeLanguage "jsonc" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 74-85" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "`wrangler.jsonc`" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """npm create cloudflare@latest -- my-mcp-server \\
+  --template=cloudflare/ai/demos/remote-mcp-authless
+cd my-mcp-server
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 11-15" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "This pulls a minimal template with the right deps (`agents`, `zod`) and a working `wrangler.jsonc`." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Bootstrap" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Cloudflare ships `@cloudflare/workers-oauth-provider` — a drop-in that handles the authorization server side (CIMD/DCR endpoints, token issuance, consent UI). It wraps your `McpAgent` and gates `/mcp` behind a token check. See `auth.md` for the protocol details; the CF template `cloudflare/ai/demos/remote-mcp-github-oauth` shows the wiring." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "OAuth" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "`wrangler deploy` prints the live URL. That's the URL users paste into Claude." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """npx wrangler dev     # → http://localhost:8787/mcp
+npx wrangler deploy  # → https://my-mcp-server.<account>.workers.dev/mcp
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 93-96" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "Secrets (upstream API keys): `npx wrangler secret put UPSTREAM_API_KEY`, then read `env.UPSTREAM_API_KEY` inside `init()`." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Run and deploy" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Deploy to Cloudflare Workers" ] ;
+    oc:impartsKnowledge oc:kn_225a8ad6,
+        oc:kn_296a530b,
+        oc:kn_495bc90f,
+        oc:kn_5f94eac5,
+        oc:kn_611510f1,
+        oc:kn_86e1ff38,
+        oc:kn_a4d29b99,
+        oc:kn_ac118cdf,
+        oc:kn_e630b5d3 ;
     oc:isUserInvocable true ;
     oc:nature "Work" ;
-    oc:requiresState oc:CloudflareAuthenticated,
-        oc:NodeInstalled ;
-    oc:resolvesIntent "configure Cloudflare Workers for MCP with Durable Objects",
+    oc:requiresState oc:EnvironmentReady,
+        oc:NetworkAvailable ;
+    oc:resolvesIntent "configure Cloudflare Workers for MCP",
         "deploy MCP server to Cloudflare Workers",
-        "get a live HTTPS URL for an MCP server",
-        "scaffold a Workers-native MCP server" ;
-    oc:yieldsState oc:LiveURLAvailable,
-        oc:MCPServerDeployed .
+        "get live MCP URL quickly",
+        "host MCP server on edge runtime" ;
+    oc:yieldsState oc:MCPServerDeployed .
 
-oc:kn_4261df90 a oc:Heuristic,
+oc:kn_225a8ad6 a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When configuring external API authentication" ;
-    oc:directiveContent "Store upstream API keys via `npx wrangler secret put KEY_NAME`, then read them inside init() using `env.KEY_NAME`. Never hardcode secrets in source." ;
-    oc:hasRationale "Wrangler secrets are encrypted at rest and injected at runtime via the env object, providing secure credential management without exposing values in code." .
+    oc:appliesToContext "When configuring the fetch handler in src/index.ts" ;
+    oc:directiveContent "Route /mcp pathname to MyMCP.serve('/mcp').fetch() and return 404 for all other paths." ;
+    oc:hasRationale "MCP clients expect the SSE/streamable-HTTP endpoint at /mcp; all other routes are irrelevant" .
 
-oc:kn_9ee79a5b a oc:DesignPrinciple,
+oc:kn_296a530b a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When writing tool logic for a Cloudflare Workers MCP server" ;
-    oc:directiveContent "Use McpAgent as the base class — it handles streamable-HTTP transport, session routing, and Durable Object plumbing automatically. Your code only touches this.server, which is the same McpServer class from the SDK." ;
-    oc:hasRationale "Abstracting transport and session management into McpAgent lets you focus solely on tool registration using the standard SDK API." .
-
-oc:kn_cc5dcffe a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When renaming the exported McpAgent class" ;
-    oc:directiveContent "If you rename the MyMCP class, you MUST update both new_sqlite_classes and class_name in wrangler.jsonc to match the new name." ;
-    oc:hasRationale "Cloudflare's Durable Objects binding requires the class name to match across the TypeScript export and the wrangler configuration, or deployment and runtime routing will fail." ;
+    oc:appliesToContext "When renaming the MCP agent class" ;
+    oc:directiveContent "Never rename the MyMCP class without also updating both new_sqlite_classes and class_name in wrangler.jsonc — they must match." ;
+    oc:hasRationale "Durable Objects binding requires class name consistency or runtime initialization fails" ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_cf4fcc00 a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "Before deploying to production" ;
-    oc:directiveContent "Run `npx wrangler dev` to test locally at http://localhost:8787/mcp before deploying. Verify tool responses before running `npx wrangler deploy`." ;
-    oc:hasRationale "Local testing catches configuration errors, missing dependencies, and tool logic bugs before they reach the live URL." .
-
-oc:kn_eb3683df a oc:Constraint,
+oc:kn_495bc90f a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When choosing between Cloudflare Workers and Express scaffold" ;
-    oc:directiveContent "This scaffold is Workers-native and is NOT compatible with the Express scaffold from remote-http-scaffold.md. Different runtime. If you need portability across hosts, stick with Express." ;
-    oc:hasRationale "Workers uses a different runtime (V8 isolates, not Node.js), so code portability between the two scaffolds is not guaranteed." ;
+    oc:appliesToContext "When writing the MCP server entry point for Cloudflare Workers" ;
+    oc:codeLanguage "typescript" ;
+    oc:directiveContent "export class MyMCP extends McpAgent { server = new McpServer(...); async init() { this.server.registerTool(...) } } — use McpAgent wrapper and only touch this.server for tool registration" .
+
+oc:kn_5f94eac5 a oc:KnowledgeNode,
+        oc:Prerequisite ;
+    oc:appliesToContext "Before running any deploy commands" ;
+    oc:directiveContent "Node.js and npm must be installed. Wrangler CLI via npx (no global install needed)." .
+
+oc:kn_611510f1 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When choosing between Workers and Express scaffolds" ;
+    oc:directiveContent "This is a Workers-native scaffold, NOT a deploy target for the Express scaffold from remote-http-scaffold.md. Different runtime. Use Express scaffold for cross-host portability." ;
+    oc:hasRationale "Workers runtime has different APIs and constraints than Node.js/Express — code is not portable between them" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_ff8a12b4 a oc:KnowledgeNode,
-        oc:WorkflowStrategy ;
-    oc:appliesToContext "When adding authentication to a Cloudflare Workers MCP server" ;
-    oc:directiveContent "For OAuth, use the `cloudflare/ai/demos/remote-mcp-github-oauth` template which wires @cloudflare/workers-oauth-provider to gate /mcp behind token checks." ;
-    oc:hasRationale "The workers-oauth-provider handles the authorization server side (CIMD/DCR endpoints, token issuance, consent UI) as a drop-in wrapper around your McpAgent." .
+oc:kn_86e1ff38 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When architecting the server code" ;
+    oc:directiveContent "McpAgent handles streamable-HTTP transport, session routing, and Durable Object plumbing automatically. Your code only touches this.server (same McpServer class from SDK)." ;
+    oc:hasRationale "Avoids reimplementing transport/session concerns — McpAgent abstracts them away" .
 
-oc:req_13884422 a oc:RequirementTool ;
-    oc:isOptional false ;
-    oc:requirementValue "Cloudflare account" .
+oc:kn_a4d29b99 a oc:Command,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When setting upstream API keys as secrets" ;
+    oc:directiveContent "npx wrangler secret put UPSTREAM_API_KEY" .
 
-oc:req_37abe107 a oc:RequirementTool ;
-    oc:isOptional false ;
-    oc:requirementValue "npm/node" .
+oc:kn_ac118cdf a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When deploying from scratch" ;
+    oc:directiveContent "1. npm create cloudflare@latest -- my-mcp-server --template=cloudflare/ai/demos/remote-mcp-authless  2. cd my-mcp-server  3. Replace template calculator with your tools using registerTool() in src/index.ts  4. Update wrangler.jsonc if class name changes  5. npx wrangler dev (local test)  6. npx wrangler deploy (live URL)" ;
+    oc:stepOrder 1 .
 
-oc:req_4c7d6de7 a oc:RequirementTool ;
-    oc:isOptional false ;
-    oc:requirementValue "wrangler CLI" .
-
-oc:req_f5d063de a oc:RequirementKnowledge ;
-    oc:isOptional true ;
-    oc:requirementValue "McpServer SDK API (registerTool)" .
+oc:kn_e630b5d3 a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When authentication is needed" ;
+    oc:directiveContent "For OAuth support, use the cloudflare/ai/demos/remote-mcp-github-oauth template instead of the authless template, and add @cloudflare/workers-oauth-provider for authorization server handling." ;
+    oc:hasRationale "Cloudflare provides a drop-in OAuth provider that handles CIMD/DCR endpoints, token issuance, and consent UI" .
 

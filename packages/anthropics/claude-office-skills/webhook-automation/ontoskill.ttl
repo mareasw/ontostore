@@ -4,81 +4,761 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_office_skills_webhook_automation a oc:DeclarativeSkill,
+oc:skill_claude_office_skills_webhook_automation a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "webhook-automation" ;
-    skos:broader "Integration automation" ;
-    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-office-skills/webhook-automation" ;
+    skos:broader "Integration framework" ;
+    prov:wasDerivedFrom "../.agents/skills/anthropics/claude-office-skills/webhook-automation" ;
     oc:contentHash "289e38ec0cc775d5f54186493a34f65ec57f81364a04d89ec28e07670f2c1fef" ;
-    oc:differentia "builds and manages webhook-based real-time event processing pipelines with signature verification, payload transformation, retry logic, and multi-service orchestration" ;
-    oc:handlesFailure oc:InvalidInput,
+    oc:dependsOnSkill oc:skill_ontoskills_etl_pipeline ;
+    oc:differentia "that builds and manages webhook-based real-time event processing pipelines with signature verification, routing, transformation, and error handling" ;
+    oc:handlesFailure oc:InvalidSignature,
         oc:NetworkTimeout,
-        oc:PermissionDenied ;
-    oc:hasArgumentHint "webhook configuration or integration type (e.g., 'Stripe webhook', 'GitHub webhook', 'event routing rules')" ;
-    oc:hasCategory "automation" ;
+        oc:PayloadValidationError,
+        oc:RateLimited ;
+    oc:hasCategory "integration" ;
     oc:hasDescription "Build and manage webhook-based integrations for real-time event processing and API connections" ;
     oc:hasName "webhook-automation" ;
-    oc:impartsKnowledge oc:kn_6dd06958,
-        oc:kn_76a7d22b,
-        oc:kn_c29d0a07,
-        oc:kn_c586f4e7,
-        oc:kn_c5b22727,
-        oc:kn_e5c45505 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Comprehensive skill for building webhook-based integrations and real-time event processing." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """stripe_webhooks:
+  endpoint_secret: "${STRIPE_WEBHOOK_SECRET}"
+  
+  events:
+    - type: "checkout.session.completed"
+      handler: |
+        async function(event) {
+          const session = event.data.object;
+          await fulfillOrder(session);
+          await sendReceipt(session.customer_email);
+        }
+        
+    - type: "invoice.payment_failed"
+      handler: |
+        async function(event) {
+          const invoice = event.data.object;
+          await notifyCustomer(invoice);
+          await createDunningTask(invoice);
+        }
+        
+    - type: "customer.subscription.updated"
+      handler: |
+        async function(event) {
+          const subscription = event.data.object;
+          await syncSubscriptionStatus(subscription);
+        }
+""" ;
+                                    oc:codeLanguage "yaml" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 220-247" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Stripe Webhooks" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """slack_webhooks:
+  incoming:
+    # Receive slash commands and interactions
+    signing_secret: "${SLACK_SIGNING_SECRET}"
+    
+    events:
+      - type: "slash_command"
+        command: "/deploy"
+        handler: handleDeployCommand
+        
+      - type: "interactive_message"
+        callback_id: "approval_*"
+        handler: handleApproval
+        
+  outgoing:
+    # Send messages to Slack
+    webhook_url: "${SLACK_WEBHOOK_URL}"
+    
+    templates:
+      alert:
+        blocks:
+          - type: section
+            text: "🚨 *Alert:* {{message}}"
+          - type: context
+            elements:
+              - type: mrkdwn
+                text: "Source: {{source}} | Time: {{timestamp}}"
+""" ;
+                                    oc:codeLanguage "yaml" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 283-311" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Slack Webhooks" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """github_webhooks:
+  secret: "${GITHUB_WEBHOOK_SECRET}"
+  
+  events:
+    - type: "push"
+      branches: ["main", "develop"]
+      handler: |
+        async function(event) {
+          await triggerCI(event.repository, event.ref);
+          await notifyTeam(event.commits);
+        }
+        
+    - type: "pull_request"
+      actions: ["opened", "synchronize"]
+      handler: |
+        async function(event) {
+          await runTests(event.pull_request);
+          await requestReview(event.pull_request);
+        }
+        
+    - type: "issues"
+      actions: ["opened"]
+      handler: |
+        async function(event) {
+          await triageIssue(event.issue);
+          await assignOwner(event.issue);
+        }
+""" ;
+                                    oc:codeLanguage "yaml" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 251-279" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "GitHub Webhooks" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Common Integrations" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """error_handling:
+  logging:
+    level: error
+    include:
+      - request_id
+      - event_type
+      - payload_hash
+      - error_message
+      - stack_trace
+      - retry_count
+      
+  alerting:
+    on_failure:
+      - type: slack
+        channel: "#webhook-alerts"
+        threshold: 5  # failures per minute
+        
+    on_dead_letter:
+      - type: pagerduty
+        severity: warning
+""" ;
+                                    oc:codeLanguage "yaml" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 339-360" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Error Logging" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """retry_config:
+  enabled: true
+  
+  policy:
+    max_attempts: 5
+    initial_delay: 1000  # ms
+    max_delay: 60000  # ms
+    backoff_multiplier: 2
+    
+  retry_on:
+    status_codes: [408, 429, 500, 502, 503, 504]
+    exceptions: ["ECONNRESET", "ETIMEDOUT"]
+    
+  dead_letter:
+    enabled: true
+    destination: "failed_webhooks_queue"
+    retention_days: 7
+""" ;
+                                    oc:codeLanguage "yaml" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 317-335" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Retry Strategy" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Error Handling" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """WEBHOOK METRICS - LAST 24 HOURS
+═══════════════════════════════════════
+
+Received:      12,456
+Processed:     12,398 (99.5%)
+Failed:           58 (0.5%)
+Retried:         123
+
+BY SOURCE:
+Stripe     ████████████░░░░ 5,230
+GitHub     ██████████░░░░░░ 4,120
+Slack      ████░░░░░░░░░░░░ 1,850
+Other      ███░░░░░░░░░░░░░ 1,256
+
+LATENCY (p99):
+Processing: 245ms
+Response:   52ms
+
+ERROR BREAKDOWN:
+Timeout:       25
+Invalid Sig:   18
+Parse Error:   10
+Rate Limited:   5
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 464-488" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Metrics Dashboard" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 8 ;
+                    oc:sectionTitle "Monitoring" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """event_router:
+  routes:
+    - event_type: "payment.succeeded"
+      handler: processPayment
+      actions:
+        - update_order_status
+        - send_confirmation_email
+        - notify_fulfillment
+        
+    - event_type: "customer.created"
+      handler: processNewCustomer
+      actions:
+        - create_crm_contact
+        - send_welcome_email
+        - assign_to_sales
+        
+    - event_type: "subscription.cancelled"
+      handler: processChurn
+      actions:
+        - update_subscription_status
+        - trigger_retention_flow
+        - notify_customer_success
+        
+    - event_type: "*"
+      handler: logUnhandled
+      actions:
+        - log_to_monitoring
+""" ;
+                                    oc:codeLanguage "yaml" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 158-186" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Event Router" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """transformations:
+  - name: stripe_to_internal
+    source: stripe_webhook
+    target: internal_order
+    mapping:
+      id: "data.object.id"
+      amount: "data.object.amount / 100"  # Cents to dollars
+      currency: "data.object.currency | uppercase"
+      customer_email: "data.object.receipt_email"
+      created_at: "data.object.created | timestamp"
+      metadata: "data.object.metadata"
+      
+  - name: github_to_slack
+    source: github_webhook
+    target: slack_message
+    mapping:
+      text: |
+        *{{action | capitalize}} {{repository.name}}*
+        {{#if pull_request}}
+        PR: {{pull_request.title}}
+        By: {{pull_request.user.login}}
+        {{/if}}
+      channel: "{{repository.name}}-notifications"
+""" ;
+                                    oc:codeLanguage "yaml" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 190-214" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Payload Transformation" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Event Processing" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """webhook_types:
+  incoming:
+    description: "Receive events from external services"
+    use_cases:
+      - Payment notifications (Stripe, PayPal)
+      - Form submissions
+      - CRM updates
+      - CI/CD events
+      
+  outgoing:
+    description: "Send events to external services"
+    use_cases:
+      - Notify external systems
+      - Trigger workflows
+      - Sync data
+      - Alert integrations
+""" ;
+                                    oc:codeLanguage "yaml" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 74-91" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Webhook Types" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """WEBHOOK FLOW:
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│   Source    │────▶│   Webhook   │────▶│   Handler   │
+│   System    │     │   Endpoint  │     │   Logic     │
+└─────────────┘     └─────────────┘     └──────┬──────┘
+                                               │
+                    ┌──────────────────────────┼───────┐
+                    │                          │       │
+                    ▼                          ▼       ▼
+              ┌──────────┐              ┌──────────┐ ┌──────────┐
+              │  Action  │              │  Action  │ │  Action  │
+              │    A     │              │    B     │ │    C     │
+              └──────────┘              └──────────┘ └──────────┘
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 56-70" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Webhook Architecture" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Core Concepts" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """test_payloads:
+  stripe_payment:
+    type: "checkout.session.completed"
+    data:
+      object:
+        id: "cs_test_123"
+        amount_total: 2000
+        currency: "usd"
+        customer_email: "test@example.com"
+        payment_status: "paid"
+        
+  github_push:
+    ref: "refs/heads/main"
+    repository:
+      name: "my-repo"
+      full_name: "org/my-repo"
+    commits:
+      - id: "abc123"
+        message: "Test commit"
+        author:
+          name: "Test User"
+""" ;
+                                    oc:codeLanguage "yaml" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 366-388" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Test Payload Generator" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """debugging:
+  tools:
+    - name: "Request Bin"
+      url: "https://requestbin.com"
+      use: "Capture and inspect payloads"
+      
+    - name: "ngrok"
+      command: "ngrok http 3000"
+      use: "Expose local server"
+      
+    - name: "Webhook.site"
+      url: "https://webhook.site"
+      use: "Quick webhook testing"
+      
+  logging:
+    enabled: true
+    log_payloads: true
+    log_headers: true
+    mask_secrets: true
+""" ;
+                                    oc:codeLanguage "yaml" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 392-412" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Webhook Debugging" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Webhook Testing" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """// Verify webhook signature
+function verifySignature(payload, signature, secret) {
+  const hmac = crypto.createHmac('sha256', secret);
+  const digest = 'sha256=' + hmac.update(payload).digest('hex');
+  
+  return crypto.timingSafeEqual(
+    Buffer.from(digest),
+    Buffer.from(signature)
+  );
+}
+
+// Usage
+app.post('/webhook', (req, res) => {
+  const signature = req.headers['x-signature-256'];
+  const payload = JSON.stringify(req.body);
+  
+  if (!verifySignature(payload, signature, process.env.WEBHOOK_SECRET)) {
+    return res.status(401).json({ error: 'Invalid signature' });
+  }
+  
+  // Process webhook...
+  processWebhook(req.body);
+  res.status(200).json({ received: true });
+});
+""" ;
+                                    oc:codeLanguage "javascript" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 127-152" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Signature Verification" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """webhook_endpoint:
+  url: "https://api.example.com/webhooks/incoming"
+  method: POST
+  
+  authentication:
+    type: signature
+    header: "X-Signature-256"
+    algorithm: "HMAC-SHA256"
+    secret: "${WEBHOOK_SECRET}"
+    
+  validation:
+    required_headers:
+      - "Content-Type"
+      - "X-Request-ID"
+    content_types:
+      - "application/json"
+      - "application/x-www-form-urlencoded"
+      
+  response:
+    success:
+      status: 200
+      body: { "received": true }
+    error:
+      status: 400
+      body: { "error": "Invalid payload" }
+""" ;
+                                    oc:codeLanguage "yaml" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 97-123" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Basic Endpoint" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Webhook Endpoint Setup" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """security:
+  authentication:
+    - Verify webhook signatures
+    - Use HTTPS only
+    - Rotate secrets regularly
+    
+  validation:
+    - Validate payload schema
+    - Check timestamp freshness
+    - Verify source IP if possible
+    
+  processing:
+    - Idempotent handlers
+    - Rate limiting
+    - Timeout protection
+    
+  storage:
+    - Encrypt secrets at rest
+    - Audit logging
+    - No sensitive data in URLs
+""" ;
+                                    oc:codeLanguage "yaml" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 418-439" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Security Checklist" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """ip_allowlist:
+  stripe:
+    - "3.18.12.63"
+    - "3.130.192.231"
+    # ... more IPs
+    
+  github:
+    - "192.30.252.0/22"
+    - "185.199.108.0/22"
+    # ... more ranges
+    
+  slack:
+    - "54.159.240.0/22"
+    # ... more ranges
+""" ;
+                                    oc:codeLanguage "yaml" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 443-458" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "IP Allowlisting" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 7 ;
+                    oc:sectionTitle "Security Best Practices" ],
+                [ a oc:Section ;
+                    oc:hasContent _:ref_3b8f250dd9a13361 ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 9 ;
+                    oc:sectionTitle "Best Practices" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Webhook Automation" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """name: Webhook Automation
+description: Build and manage webhook-based integrations for real-time event processing and API connections
+version: 1.0.0
+author: Claude Office Skills
+category: integration
+tags:
+  - webhook
+  - api
+  - integration
+  - automation
+  - events
+department: engineering
+models:
+  - claude-3-opus
+  - claude-3-sonnet
+  - gpt-4
+mcp:
+  server: integration-mcp
+  tools:
+    - webhook_create
+    - webhook_receive
+    - http_request
+    - transform_data
+capabilities:
+  - Webhook endpoint creation
+  - Event processing
+  - Data transformation
+  - Multi-service orchestration
+input:
+  - Webhook payloads
+  - API configurations
+  - Transformation rules
+  - Routing logic
+output:
+  - Processed events
+  - API responses
+  - Transformed data
+  - Audit logs
+languages:
+  - en
+related_skills:
+  - etl-pipeline
+  - api-integration
+  - zapier-automation
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:hasWorkflow _:ref_3b8f250dd9a13361 ;
+    oc:impartsKnowledge oc:kn_00ee6429,
+        oc:kn_353348df,
+        oc:kn_3cfa201e,
+        oc:kn_4a576aeb,
+        oc:kn_88e2c034,
+        oc:kn_ad65eff5,
+        oc:kn_bdcf4a2d,
+        oc:kn_ed946cf7 ;
     oc:isUserInvocable true ;
     oc:nature "Work" ;
     oc:requiresState oc:APIKeySet,
+        oc:EnvironmentReady,
         oc:NetworkAvailable ;
-    oc:resolvesIntent "create webhook endpoint",
-        "debug webhooks",
-        "implement webhook retry and error handling",
+    oc:resolvesIntent "configure webhook retry strategy",
+        "create webhook endpoint",
+        "debug webhook integrations",
+        "monitor webhook health",
         "process webhook events",
-        "route events to handlers",
-        "set up webhook integrations with Stripe/GitHub/Slack",
+        "set up Stripe/GitHub/Slack webhooks",
         "transform webhook payloads",
         "verify webhook signatures" ;
-    oc:yieldsState oc:EventProcessed,
-        oc:IntegrationConfigured,
-        oc:WebhookEndpointCreated .
+    oc:yieldsState oc:EventHandlerConfigured,
+        oc:WebhookEndpointCreated,
+        oc:WebhookProcessed .
 
-oc:kn_6dd06958 a oc:KnowledgeNode,
+oc:kn_00ee6429 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When receiving incoming webhooks" ;
+    oc:directiveContent "Never process webhook events synchronously before returning a response — always return 200 immediately and process async" ;
+    oc:hasRationale "Slow responses cause the source system to retry, creating duplicate processing and potential timeouts" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_353348df a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When setting up webhook logging" ;
+    oc:directiveContent "Log everything — request IDs, event types, payload hashes, error messages, stack traces, and retry counts — while masking secrets" ;
+    oc:hasRationale "Webhook debugging is notoriously difficult without comprehensive logging since the flow is asynchronous and event-driven" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_3cfa201e a oc:KnowledgeNode,
+        oc:SuccessIndicator ;
+    oc:appliesToContext "When monitoring webhook health" ;
+    oc:directiveContent "A healthy webhook system shows >99% processing rate, p99 processing latency under 300ms, and zero events in the dead letter queue" ;
+    oc:hasRationale "These thresholds indicate the system is processing events reliably and within acceptable time bounds" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_4a576aeb a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When configuring error handling for webhook processing" ;
+    oc:directiveContent "Implement exponential backoff retry with a dead letter queue for failed webhooks after max retries (5 attempts, initial 1s delay, max 60s, 2x multiplier)" ;
+    oc:hasRationale "Transient failures are common in distributed systems; dead letter queues prevent silent data loss" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_88e2c034 a oc:KnowledgeNode,
+        oc:SecurityImplication ;
+    oc:appliesToContext "When configuring webhook security" ;
+    oc:directiveContent "Enforce HTTPS-only, validate payload schemas, check timestamp freshness, use IP allowlisting where possible, and never put sensitive data in URLs" ;
+    oc:hasRationale "Webhooks expose an HTTP endpoint that could be abused for injection, replay, or DoS attacks" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_ad65eff5 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When building a new webhook integration from scratch" ;
+    oc:directiveContent "1. Define webhook endpoint with authentication (HMAC-SHA256 signature verification) 2. Set up event router mapping event types to handlers 3. Implement payload transformations per integration (Stripe, GitHub, Slack) 4. Configure retry strategy with exponential backoff and dead letter queue 5. Add security measures (HTTPS, IP allowlisting, rate limiting) 6. Set up monitoring with metrics dashboard and alerting 7. Test with sample payloads before going live" ;
+    oc:hasRationale "Provides a systematic approach to building reliable webhook integrations with all critical safeguards in place" ;
+    oc:stepOrder 1 .
+
+oc:kn_bdcf4a2d a oc:KnowledgeNode,
         oc:Standard ;
-    oc:appliesToContext "When receiving incoming webhooks from any external service" ;
-    oc:directiveContent "Always verify webhook signatures using HMAC-SHA256 with timing-safe comparison before processing any payload. Never trust unverified webhook data." ;
-    oc:hasRationale "Without signature verification, anyone can send forged payloads to your endpoint, enabling data corruption, unauthorized actions, or injection attacks" ;
+    oc:appliesToContext "When receiving any incoming webhook" ;
+    oc:directiveContent "Always verify webhook signatures using HMAC-SHA256 with timing-safe comparison before processing any payload" ;
+    oc:hasRationale "Signature verification prevents spoofed webhook payloads from untrusted sources" ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_76a7d22b a oc:AntiPattern,
+oc:kn_ed946cf7 a oc:Idempotency,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When logging webhook payloads for debugging or audit purposes" ;
-    oc:directiveContent "Never put sensitive data (secrets, tokens, PII) in webhook URLs or log payloads without masking. Always mask secrets in debug logs." ;
-    oc:hasRationale "Webhook URLs and logs can be exposed in monitoring dashboards, error trackers, or version control, leaking credentials and violating compliance requirements" ;
+    oc:appliesToContext "When writing webhook handler logic" ;
+    oc:directiveContent "Design all webhook handlers to be idempotent — handle duplicate events gracefully by deduplicating on event ID" ;
+    oc:hasRationale "Webhook providers guarantee at-least-once delivery, so duplicate events are expected, not exceptional" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_c29d0a07 a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "On every incoming webhook request before handler execution" ;
-    oc:directiveContent "Before processing any webhook: verify signature, validate payload schema against expected format, check timestamp freshness, and optionally verify source IP against known allowlists." ;
-    oc:hasRationale "These checks prevent replay attacks, malformed payload errors, and unauthorized sources from triggering business logic" ;
-    oc:severityLevel "HIGH" .
+_:ref_0464d1754acbe67c a oc:WorkflowStep ;
+    dcterms:description "**Retry Logic**: Implement exponential backoff" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_5" ;
+    oc:stepOrder 5 .
 
-oc:kn_c586f4e7 a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When building any webhook handler endpoint" ;
-    oc:directiveContent "Return HTTP 200 immediately upon receiving a webhook, then process the event asynchronously. This prevents timeout-related retries from the source system." ;
-    oc:hasRationale "Source systems (Stripe, GitHub, etc.) will retry delivery if they don't receive a timely acknowledgment, causing duplicate processing" ;
-    oc:severityLevel "HIGH" .
+_:ref_069cf9903f170abf a oc:WorkflowStep ;
+    dcterms:description "**Log Everything**: Maintain audit trail" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
 
-oc:kn_c5b22727 a oc:Idempotency,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When implementing webhook event handler logic" ;
-    oc:directiveContent "Design all webhook handlers to be idempotent — processing the same event multiple times must produce the same result. Use event IDs for deduplication." ;
-    oc:hasRationale "Webhook delivery is at-least-once, not exactly-once. Source systems retry on failure, and network issues can cause duplicate deliveries" ;
-    oc:severityLevel "CRITICAL" .
+_:ref_0776cca56c08c193 a oc:WorkflowStep ;
+    dcterms:description "**Monitoring**: Alert on failures and latency" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_8" ;
+    oc:stepOrder 8 .
 
-oc:kn_e5c45505 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When configuring error handling and retry strategies for webhook processing" ;
-    oc:directiveContent "Implement exponential backoff retry with a dead letter queue for failed webhook processing. Configure max 5 attempts with backoff multiplier of 2, initial delay 1s, max delay 60s." ;
-    oc:hasRationale "Transient failures (timeouts, rate limits, 502/503 errors) are common. Without retries and dead letter queues, events are silently lost" ;
-    oc:severityLevel "HIGH" .
+_:ref_41a287d330c4eaf9 a oc:WorkflowStep ;
+    dcterms:description "**Respond Quickly**: Return 200 immediately, process async" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_6be296aa72c95233 a oc:WorkflowStep ;
+    dcterms:description "**Verify Signatures**: Always validate webhook authenticity" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_7a8640b0ecdf23e2 a oc:WorkflowStep ;
+    dcterms:description "**Idempotency**: Handle duplicate events gracefully" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_b8c9c1f688378f92 a oc:WorkflowStep ;
+    dcterms:description "**Rate Limiting**: Protect against flood attacks" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_7" ;
+    oc:stepOrder 7 .
+
+_:ref_bac1dacbadc553ff a oc:WorkflowStep ;
+    dcterms:description "**Dead Letters**: Don't lose failed events" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_6" ;
+    oc:stepOrder 6 .
+
+_:ref_3b8f250dd9a13361 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 1 ;
+    oc:hasStep _:ref_0464d1754acbe67c,
+        _:ref_069cf9903f170abf,
+        _:ref_0776cca56c08c193,
+        _:ref_41a287d330c4eaf9,
+        _:ref_6be296aa72c95233,
+        _:ref_7a8640b0ecdf23e2,
+        _:ref_b8c9c1f688378f92,
+        _:ref_bac1dacbadc553ff ;
+    oc:workflowId "procedure_1" ;
+    oc:workflowName "Ordered Procedure" .
 

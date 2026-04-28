@@ -4,84 +4,333 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_office_skills_weather_automation a oc:DeclarativeSkill,
+oc:skill_claude_office_skills_weather_automation a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "weather-automation" ;
     skos:broader "Automation skill" ;
-    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-office-skills/weather-automation" ;
+    prov:wasDerivedFrom "../.agents/skills/anthropics/claude-office-skills/weather-automation" ;
     oc:contentHash "0f5da7ff2f2b16e5049fef903b609c1348ce762aeac57a4f22e759cd0fc3fd69" ;
-    oc:differentia "automates weather-based workflows, forecasts, alerts, and location-aware notifications using weather MCP server tools" ;
-    oc:handlesFailure oc:APIKeySet,
+    oc:differentia "that retrieves weather data, forecasts, and alerts to trigger location-aware workflows and notifications" ;
+    oc:handlesFailure oc:InvalidInput,
         oc:LocationNotFound,
         oc:NetworkTimeout ;
-    oc:hasAllowedTool "weather_alerts",
-        "weather_current",
-        "weather_forecast",
-        "weather_historical" ;
-    oc:hasArgumentHint "location and optional date range or alert configuration" ;
-    oc:hasCategory "automation" ;
+    oc:hasCategory "utilities" ;
     oc:hasDescription "Automate weather-based workflows, forecasts, alerts, and location-aware notifications" ;
     oc:hasName "weather-automation" ;
-    oc:hasRequirement oc:req_1c90e0cb,
-        oc:req_993a9c59 ;
-    oc:impartsKnowledge oc:kn_376e49b7,
-        oc:kn_7bc8e08e,
-        oc:kn_ca54433c,
-        oc:kn_df4cd449,
-        oc:kn_e524ecda ;
+    oc:hasRequirement oc:req_439f1d7c,
+        oc:req_5ec689fe,
+        oc:req_714b9833,
+        oc:req_992578c4,
+        oc:req_993a9c59,
+        oc:req_c619bc18 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Automate weather-based workflows and notifications." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """morning_weather:
+  trigger: daily at 6:30 AM
+  actions:
+    - get_forecast:
+        location: home
+        days: 1
+    - send_notification:
+        channel: slack_dm
+        message: |
+          🌤️ Good morning! Today's weather:
+          High: {{high}}°F | Low: {{low}}°F
+          {{conditions}}
+          {{#if rain}}☔ Bring an umbrella!{{/if}}
+""" ;
+                                    oc:codeLanguage "yaml" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 112-126" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Morning Briefing" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """event_weather:
+  trigger: calendar_event_tomorrow
+  condition:
+    event_type: outdoor
+  actions:
+    - get_forecast:
+        location: "{{event.location}}"
+        date: "{{event.date}}"
+    - if:
+        precipitation_chance: "> 50%"
+      then:
+        - notify: organizer
+          message: "Consider backup venue - rain likely"
+""" ;
+                                    oc:codeLanguage "yaml" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 129-143" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Event Planning" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Workflow Examples" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """forecast:
+  location: "New York, NY"
+  days: 7
+  
+  daily:
+    - date: "2024-01-20"
+      high: 45°F
+      low: 32°F
+      conditions: "Snow"
+      precipitation_chance: 80%
+      
+  hourly:
+    interval: 3  # hours
+    periods: 24
+""" ;
+                                    oc:codeLanguage "yaml" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 72-87" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Forecast" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """alert_rules:
+  - name: "Rain Alert"
+    condition:
+      precipitation_chance: "> 70%"
+      within_hours: 6
+    action:
+      notify: slack
+      message: "☔ Rain expected in next 6 hours"
+      
+  - name: "Freeze Warning"
+    condition:
+      temperature: "< 32°F"
+    action:
+      - notify: sms
+      - trigger: home_assistant
+        action: protect_pipes
+""" ;
+                                    oc:codeLanguage "yaml" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 90-107" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Weather Alerts" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """current_weather:
+  location: "San Francisco, CA"
+  # or coordinates
+  lat: 37.7749
+  lon: -122.4194
+  
+  response:
+    temperature: 65°F
+    feels_like: 63°F
+    humidity: 72%
+    wind_speed: 12 mph
+    conditions: "Partly Cloudy"
+    uv_index: 5
+""" ;
+                                    oc:codeLanguage "yaml" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 55-69" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Current Weather" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Core Capabilities" ],
+                [ a oc:Section ;
+                    oc:hasContent _:ref_29d71d7f69ee2ffc ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Best Practices" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Weather Automation" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """name: Weather Automation
+description: Automate weather-based workflows, forecasts, alerts, and location-aware notifications
+version: 1.0.0
+author: Claude Office Skills
+category: utilities
+tags:
+  - weather
+  - forecast
+  - alerts
+  - location
+  - automation
+department: operations
+models:
+  - claude-3-opus
+  - claude-3-sonnet
+  - gpt-4
+mcp:
+  server: weather-mcp
+  tools:
+    - weather_current
+    - weather_forecast
+    - weather_alerts
+    - weather_historical
+capabilities:
+  - Current conditions
+  - Forecast retrieval
+  - Weather alerts
+  - Historical data
+input:
+  - Locations
+  - Date ranges
+  - Alert thresholds
+  - Automation triggers
+output:
+  - Weather data
+  - Forecasts
+  - Alert notifications
+  - Reports
+languages:
+  - en
+related_skills:
+  - calendar-automation
+  - home-assistant
+  - slack-workflows
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:hasWorkflow _:ref_29d71d7f69ee2ffc ;
+    oc:impartsKnowledge oc:kn_5a2e3b92,
+        oc:kn_66738e80,
+        oc:kn_94d7e150,
+        oc:kn_cf1306fa,
+        oc:kn_d80fe706 ;
     oc:isUserInvocable true ;
     oc:nature "Tool" ;
     oc:requiresState oc:APIKeySet,
         oc:NetworkAvailable ;
-    oc:resolvesIntent "automate weather-triggered workflows",
-        "get current weather conditions for a location",
-        "integrate weather data with calendar and smart home systems",
+    oc:resolvesIntent "automate weather-based workflows",
+        "get current weather conditions",
+        "plan events based on weather conditions",
         "retrieve weather forecasts",
         "set up weather alerts and notifications" ;
-    oc:yieldsState oc:AlertConfigured,
+    oc:yieldsState oc:AlertsConfigured,
         oc:NotificationSent,
         oc:WeatherDataRetrieved .
 
-oc:kn_376e49b7 a oc:Heuristic,
+oc:kn_5a2e3b92 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When displaying or processing weather data" ;
+    oc:directiveContent "Support both metric and imperial units for temperature and wind speed." ;
+    oc:hasRationale "Users expect weather data in their preferred unit system; failing to support both limits usability." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_66738e80 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When accepting location input from users or automation triggers" ;
+    oc:directiveContent "Accept multiple location formats: city names, coordinates (lat/lon), and named aliases like 'home' or 'office'." ;
+    oc:hasRationale "Flexible location input improves user experience and enables integration with calendar events and other systems." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_94d7e150 a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "When alert rules include action blocks that notify or trigger external systems" ;
+    oc:directiveContent "Weather automation may trigger external actions: Slack notifications, SMS messages, or Home Assistant device actions." ;
+    oc:hasRationale "These side effects are irreversible once dispatched and may wake or disturb recipients." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_cf1306fa a oc:DesignPrinciple,
         oc:KnowledgeNode ;
     oc:appliesToContext "When configuring weather alert rules" ;
-    oc:directiveContent "Set sensible alert thresholds based on impact severity — lower thresholds for safety-critical conditions (freeze, severe storms), higher thresholds for convenience alerts (rain, heat)." ;
-    oc:hasRationale "Over-alerting causes notification fatigue; under-alerting misses critical conditions. Thresholds should match the consequence severity." ;
+    oc:directiveContent "Set sensible alert thresholds — avoid alert fatigue from overly sensitive triggers." ;
+    oc:hasRationale "Too many false or low-impact alerts cause users to ignore notifications, defeating the purpose of automation." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_7bc8e08e a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "When formatting weather data output for users" ;
-    oc:directiveContent "Support both metric and imperial units for temperature, wind speed, and other measurements." ;
-    oc:hasRationale "Users expect measurements in their familiar unit system; failure to support both causes confusion." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_ca54433c a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When weather data informs safety-critical actions like freeze protection or severe weather response" ;
-    oc:directiveContent "Use reliable weather data sources and cross-reference when accuracy is critical for safety decisions." ;
-    oc:hasRationale "Weather data accuracy varies by provider and region; safety decisions require higher confidence than convenience queries." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_df4cd449 a oc:DesignPrinciple,
+oc:kn_d80fe706 a oc:Heuristic,
         oc:KnowledgeNode ;
     oc:appliesToContext "When making repeated weather queries for the same location" ;
-    oc:directiveContent "Cache frequent weather API requests to avoid rate limiting and reduce latency." ;
-    oc:hasRationale "Weather data changes infrequently (every 15-30 min) and API calls have rate limits and latency costs." ;
+    oc:directiveContent "Cache frequent weather requests to reduce API calls and improve response times." ;
+    oc:hasRationale "Weather APIs often have rate limits and caching avoids unnecessary network calls for data that doesn't change rapidly." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_e524ecda a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When querying weather data for any location" ;
-    oc:directiveContent "Location must be specified either as a city name string or lat/lon coordinates; both formats should be supported." ;
-    oc:hasRationale "Users may have location data in different formats; supporting both ensures flexibility and avoids geocoding errors." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:req_1c90e0cb a oc:RequirementKnowledge ;
+oc:req_439f1d7c a oc:RequirementKnowledge ;
     oc:isOptional false ;
-    oc:requirementValue "Location formats (city name or lat/lon coordinates)" .
+    oc:requirementValue "Location formats: city name or lat/lon coordinates" .
+
+oc:req_5ec689fe a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "weather_historical tool" .
+
+oc:req_714b9833 a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "weather_alerts tool" .
+
+oc:req_992578c4 a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "weather_forecast tool" .
 
 oc:req_993a9c59 a oc:RequirementTool ;
     oc:isOptional false ;
     oc:requirementValue "weather-mcp MCP server" .
+
+oc:req_c619bc18 a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "weather_current tool" .
+
+_:ref_077a20d51d19526c a oc:WorkflowStep ;
+    dcterms:description "**Caching**: Cache frequent requests" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_34e1632b815c6ed8 a oc:WorkflowStep ;
+    dcterms:description "**Units**: Support both metric/imperial" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_8858b830274cae1a a oc:WorkflowStep ;
+    dcterms:description "**Alerts**: Set sensible thresholds" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_b515721443a20a55 a oc:WorkflowStep ;
+    dcterms:description "**Accuracy**: Use reliable data sources" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_f86089895311ced3 a oc:WorkflowStep ;
+    dcterms:description "**Location**: Support multiple formats" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_5" ;
+    oc:stepOrder 5 .
+
+_:ref_29d71d7f69ee2ffc a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 1 ;
+    oc:hasStep _:ref_077a20d51d19526c,
+        _:ref_34e1632b815c6ed8,
+        _:ref_8858b830274cae1a,
+        _:ref_b515721443a20a55,
+        _:ref_f86089895311ced3 ;
+    oc:workflowId "procedure_1" ;
+    oc:workflowName "Ordered Procedure" .
 

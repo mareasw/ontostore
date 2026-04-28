@@ -4,77 +4,405 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_knowledge_work_plugins_contact_research a oc:DeclarativeSkill,
+oc:skill_knowledge_work_plugins_contact_research a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "contact-research" ;
-    skos:broader "contact research agent" ;
-    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/knowledge-work-plugins/contact-research" ;
+    skos:broader "Contact research workflow" ;
+    prov:wasDerivedFrom "../.agents/skills/anthropics/knowledge-work-plugins/contact-research" ;
     oc:contentHash "1ed230d51e5193da8ebab5549dc2d17a8e3a3fd40a7d56e0641da9613dd78af5" ;
-    oc:differentia "that retrieves and synthesizes enriched contact profiles from Common Room using multi-method lookup, Spark enrichment, and account context to surface actionable conversation angles" ;
-    oc:handlesFailure oc:AmbiguousMatch,
-        oc:ContactNotFound,
+    oc:differentia "retrieves and synthesizes comprehensive contact profiles from Common Room using enriched data including activity history, Spark personas, scores, and website visits to surface conversation angles" ;
+    oc:extends oc:skill_ontoskills_account_research ;
+    oc:handlesFailure oc:ContactNotFound,
+        oc:NetworkTimeout,
         oc:PermissionDenied ;
-    oc:hasAllowedTool "Common Room" ;
-    oc:hasArgumentHint "contact identifier (email, social handle, or name + company)" ;
+    oc:hasAllowedTool "web-search" ;
+    oc:hasArgumentHint "name, email, or social handle of the contact to research" ;
     oc:hasCategory "automation" ;
     oc:hasDescription "Research a specific person using Common Room data. Triggers on 'who is [name]', 'look up [email]', 'research [contact]', 'is [name] a warm lead', or any contact-level question." ;
     oc:hasName "contact-research" ;
-    oc:impartsKnowledge oc:kn_0843cec7,
-        oc:kn_1eb9c4f2,
-        oc:kn_606c3dc4,
-        oc:kn_aab97bc9,
-        oc:kn_ee67e988,
-        oc:kn_f2a4c468 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """name: contact-research
+description: "Research a specific person using Common Room data. Triggers on 'who is [name]', 'look up [email]', 'research [contact]', 'is [name] a warm lead', or any contact-level question."
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Retrieve a comprehensive contact profile from Common Room. Supports lookup by email, social handle, or name + company. Returns enriched data including activity history, Spark, scores, website visits, and CRM fields." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "If Spark is unavailable, say so — don't fabricate a persona from title alone" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Scores as raw/percentile only — never labels" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "Flag any contact where the most recent activity is older than 30 days" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Lookup must use the correct method for the input type — don't guess on email vs. handle" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "`Contact Initiated` activity (last 60 days) is the primary engagement signal — lead with it" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 7 ;
+                    oc:sectionTitle "Quality Standards" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Common Room supports multiple lookup methods — use whichever the user has provided:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "If no match is found, respond: \"Common Room doesn't have a record for this person.\" Do not speculate or fabricate profile data." ],
+                        [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 2 ;
+                            oc:rowCount 4 ;
+                            oc:tableCaption "Common Room supports multiple lookup methods — use whichever the user has provided" ;
+                            oc:tableMarkdown """| What the user gives | Lookup method |
+|---------------------|--------------|
+| Email address | Look up by email (most reliable) |
+| LinkedIn, Twitter/X, or GitHub handle | Look up by social handle — specify handle type explicitly |
+| Name + company | Identity resolution by name + org domain; present matches if ambiguous |
+| Name only | Search by name; if multiple matches, show a brief list and ask the user to confirm |
+""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Step 1: Locate the Contact" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Key field groups to know about:**" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 3 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "**Recent activity** — use `Contact Initiated` filter (last 60 days) for their actions, not your team's" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "**Spark** — retrieve all Sparks when tracking engagement evolution over time" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "**Scores** — always return as raw values or percentiles, never labels" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "**Website visits** — total count + specific pages (last 12 weeks)" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Use the Common Room object catalog to see available field groups and their contents. For full profiles, request all groups. For targeted questions, request only what's relevant." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Step 2: Fetch Contact Fields" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "If Spark is available, use it. Spark provides:" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Persona classification: Champion, Economic Buyer, Technical Evaluator, End User, or Gatekeeper" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Social presence and influence signals" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Professional background and job history" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Inferred role in the buying process" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "Retrieve **all Sparks** (not just the most recent) when the user wants to understand how this contact's engagement has evolved over time." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "If Spark is unavailable but real activity data exists (recent actions, website visits, community engagement), infer a persona from those signals. If neither Spark nor activity data is available, classify as Unknown — do not guess a persona from title alone." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Step 3: Run Spark Enrichment (If Available)" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "**`references/contact-signals-guide.md`** — full field descriptions, Spark persona guide, and conversation starter principles" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 8 ;
+                    oc:sectionTitle "Reference Files" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Based on activity and signals, surface the strongest 2–3 hooks:" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "Their role in a known active deal" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Their Spark persona and what that suggests about communication style" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "A job change, promotion, or company news" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "A specific web page they visited recently — especially if it signals evaluation intent" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "A recent `Contact Initiated` activity (community post, product event, support ticket)" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Step 5: Identify Conversation Angles" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Pull an abbreviated account snapshot for this contact's parent company. Note:" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "How this person's engagement compares to their colleagues" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Whether other contacts at this company are also active" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Open opportunities, expansion signals, or churn risk at the account level" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Step 4: Assess Account Context" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Only include sections where data was actually returned. Omit sections with no data rather than filling them with guesses." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "**When data is sparse (e.g., only name, title, email, tags returned; sparkSummary is null):**" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """## [Contact Name] — Profile
+
+**Overview**
+[2 sentences: who they are, their role, and relationship status]
+
+**Details**
+- Title: [title]
+- Company: [company]
+- Email: [email]
+- LinkedIn: [URL]
+- Other profiles: [Twitter/X, GitHub, CRM link if available]
+
+**Scores** [If scores returned]
+[All scores as raw values or percentiles]
+
+**Recent Activity** (last 60 days) [If activity returned]
+[3–5 bullets with dates]
+
+**Website Visits** (last 12 weeks) [If visit data exists]
+[Total visit count + list of pages visited]
+
+**Spark Profile** [If Spark data is non-null]
+[Persona type, background summary, influence signals]
+
+**Segments** [If segments returned]
+[List of segment names this contact belongs to]
+
+**Account Context**
+[1–2 sentences on their company's status]
+
+**Conversation Starters**
+[2–3 specific, signal-backed openers]
+""" ;
+                            oc:codeLanguage "" ;
+                            oc:contentOrder 3 ;
+                            oc:sourceLocation "lines 67-100" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**When data is rich:**" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """## [Contact Name] — Profile (Limited Data)
+
+**Data available:** [List exactly what Common Room returned]
+
+[Present only the returned fields]
+
+**Web Search**
+[Any findings from searching their name + company]
+
+**Note:** Common Room has limited data on this contact. No activity history, scores, or Spark profile available. I can run deeper web searches or look up their company for additional context.
+""" ;
+                            oc:codeLanguage "" ;
+                            oc:contentOrder 5 ;
+                            oc:sourceLocation "lines 104-115" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 6 ;
+                            oc:textContent "Do not generate conversation starters, persona inferences, or engagement assessments from sparse data. These require real signals." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Output Format" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Contact Research" ] ;
+    oc:impartsKnowledge oc:kn_182ab227,
+        oc:kn_1cfe9c0c,
+        oc:kn_59129ab3,
+        oc:kn_96ca1af1,
+        oc:kn_9b1375c7,
+        oc:kn_a6c77e90,
+        oc:kn_c2853dd9,
+        oc:kn_d2d85729,
+        oc:kn_d38e31f7,
+        oc:kn_ee91af8c ;
     oc:isUserInvocable true ;
-    oc:nature "Work" ;
+    oc:nature "Concept" ;
     oc:requiresState oc:APIKeySet,
-        oc:SystemAuthenticated ;
-    oc:resolvesIntent "assess lead warmth and persona classification",
-        "find conversation starters for outreach",
-        "get account context for a contact's company",
-        "look up a person's profile and engagement history",
-        "research a contact by name, email, or social handle" ;
+        oc:NetworkAvailable ;
+    oc:resolvesIntent "assess lead warmth and conversation angles for a contact",
+        "get Spark persona and buying role for a prospect",
+        "look up a person's profile and engagement signals",
+        "research a contact by name or email" ;
     oc:yieldsState oc:ContactProfileRetrieved .
 
-oc:kn_0843cec7 a oc:Constraint,
+oc:kn_182ab227 a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When contact lookup returns no results" ;
-    oc:directiveContent "If no match is found in Common Room, respond that no record exists. Do not speculate or fabricate profile data." ;
-    oc:hasRationale "Fabricating contact data violates data integrity and can lead to misguided sales actions based on false information" ;
-    oc:severityLevel "CRITICAL" .
+    oc:appliesToContext "When classifying a contact's buying role from Spark data" ;
+    oc:directiveContent "Spark personas: Champion (daily user, advocates internally), Economic Buyer (holds budget authority), Technical Evaluator (evaluates fit/integration), End User (primary user, influences renewal), Gatekeeper (controls access)" ;
+    oc:hasRationale "Persona classification guides communication style and relationship strategy" .
 
-oc:kn_1eb9c4f2 a oc:AntiPattern,
+oc:kn_1cfe9c0c a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When Spark data is null or missing for a contact" ;
-    oc:directiveContent "Never fabricate persona classifications from title alone — if Spark is unavailable and no activity data exists, classify persona as Unknown." ;
-    oc:hasRationale "Guessing personas from job titles without behavioral signals leads to inaccurate outreach strategies and damaged credibility" ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_606c3dc4 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When selecting a lookup method based on user-provided input" ;
-    oc:directiveContent "Use email lookup as the primary method when available — it is the most reliable identifier. For name-only lookups, present multiple matches and ask the user to confirm rather than guessing." ;
-    oc:hasRationale "Email is a unique identifier; names alone produce ambiguous results that require disambiguation to avoid researching the wrong person" ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_aab97bc9 a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When formatting the output profile for any contact" ;
-    oc:directiveContent "Omit sections with no data rather than filling them with guesses. For sparse data profiles, present only returned fields and offer web search as an alternative." ;
-    oc:hasRationale "Honest sparse output maintains trust; padding with fabricated content undermines decision-making and violates data integrity" ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_ee67e988 a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "When presenting contact scores and activity data" ;
-    oc:directiveContent "Always return scores as raw values or percentiles, never as labels. Use Contact Initiated activity (last 60 days) as the primary engagement signal." ;
-    oc:hasRationale "Raw values and percentiles preserve precision and allow recipients to draw their own conclusions; labels obscure the underlying data. Contact Initiated actions represent genuine engagement vs. passive or team-driven signals" ;
+    oc:appliesToContext "When assessing contact engagement freshness" ;
+    oc:directiveContent "Flag any contact where the most recent activity is older than 30 days. No activity in 90+ days means the relationship is dormant and may need re-engagement from a different angle." ;
+    oc:hasRationale "Stale engagement signals indicate cooling relationships that require different outreach strategies" ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_f2a4c468 a oc:Heuristic,
+oc:kn_59129ab3 a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When building a comprehensive contact profile or assessing engagement freshness" ;
-    oc:directiveContent "Retrieve all Sparks (not just the most recent) when tracking engagement evolution over time. Flag any contact where the most recent activity is older than 30 days." ;
-    oc:hasRationale "Spark history reveals engagement trajectory; recency flags help prioritize outreach to contacts whose interest may be cooling" ;
+    oc:appliesToContext "When fetching and presenting contact scores and activity data" ;
+    oc:directiveContent "Scores must always be returned as raw values or percentiles, never as labels. Use 'Contact Initiated' filter (last 60 days) for the contact's own actions, not your team's." ;
+    oc:hasRationale "Labels obscure the actual score magnitude and can mislead prioritization decisions" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_96ca1af1 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When contact data is sparse or missing" ;
+    oc:directiveContent "Never fabricate profile data, persona classifications, or conversation starters when real signal data is unavailable. If no match is found, respond that Common Room doesn't have a record." ;
+    oc:hasRationale "Fabricated contact insights damage credibility and lead to poorly targeted outreach" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_9b1375c7 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When determining how to locate a contact in Common Room" ;
+    oc:directiveContent "Lookup method priority: email (most reliable) > social handle (specify type) > name+company (identity resolution) > name only (may return multiple matches requiring confirmation)." ;
+    oc:hasRationale "Using the most specific identifier reduces false matches and ambiguous results" ;
     oc:severityLevel "MEDIUM" .
+
+oc:kn_a6c77e90 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When researching any contact" ;
+    oc:directiveContent "1. Locate contact using appropriate lookup method (email > handle > name+company > name only) 2. Fetch relevant field groups from object catalog 3. Run Spark enrichment if available, infer persona from activity if not, classify as Unknown if neither 4. Pull abbreviated account snapshot for parent company 5. Surface 2-3 strongest conversation angles based on signals" ;
+    oc:stepOrder 1 .
+
+oc:kn_c2853dd9 a oc:KnowledgeNode,
+        oc:OutputFormat ;
+    oc:appliesToContext "When contact data is sparse" ;
+    oc:directiveContent """## {ContactName} — Profile (Limited Data)
+**Data available:** [exact list of returned fields]
+[Present only returned fields]
+**Web Search**
+[Findings from name + company search]
+**Note:** Common Room has limited data. No activity, scores, or Spark available.""" ;
+    oc:templateVariables "AvailableFields",
+        "ContactName",
+        "WebSearchResults" .
+
+oc:kn_d2d85729 a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When Spark enrichment returns null" ;
+    oc:directiveContent "If Spark is unavailable but real activity data exists, infer persona from activity signals. If neither Spark nor activity data exists, classify as Unknown — never guess persona from title alone." ;
+    oc:hasRationale "Title-based persona guessing is unreliable; activity-based inference is more accurate than nothing" .
+
+oc:kn_d38e31f7 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When formatting the contact profile output" ;
+    oc:directiveContent "Only include output sections where data was actually returned. Omit sections with no data rather than filling them with guesses. Do not generate conversation starters from sparse data." ;
+    oc:hasRationale "Empty sections padded with guesses erode trust; clear disclosure of data gaps enables better decisions" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_ee91af8c a oc:KnowledgeNode,
+        oc:OutputFormat ;
+    oc:appliesToContext "When contact data is rich" ;
+    oc:directiveContent """## {ContactName} — Profile
+**Overview**: [who they are, role, relationship status]
+**Details**: Title, Company, Email, LinkedIn, Other profiles
+**Scores**: [raw values or percentiles]
+**Recent Activity** (last 60 days): [3-5 dated bullets]
+**Website Visits** (last 12 weeks): [count + pages]
+**Spark Profile**: [persona, background, influence]
+**Segments**: [segment names]
+**Account Context**: [company status]
+**Conversation Starters**: [2-3 signal-backed openers]""" ;
+    oc:templateVariables "AccountContext",
+        "Company",
+        "ContactName",
+        "ConversationStarters",
+        "Email",
+        "LinkedIn",
+        "RecentActivity",
+        "Scores",
+        "Segments",
+        "SparkProfile",
+        "Title",
+        "WebsiteVisits" .
 

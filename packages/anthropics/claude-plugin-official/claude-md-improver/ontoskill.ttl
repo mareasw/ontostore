@@ -4,73 +4,510 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_plugin_official_claude_md_improver a oc:DeclarativeSkill,
+oc:skill_claude_plugin_official_claude_md_improver a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "claude-md-improver" ;
-    skos:broader "Codebase audit tool" ;
-    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/claude-md-improver" ;
+    skos:broader "File auditor" ;
+    prov:wasDerivedFrom "../.agents/skills/anthropics/claude-plugin-official/claude-md-improver" ;
     oc:contentHash "8241fc8482f8caf48cab457986ab669debfa34eeb511845101866ea89a954a83" ;
-    oc:differentia "Discovers, evaluates, and improves CLAUDE.md files across a repository using a quality rubric with targeted diff-based updates" ;
-    oc:handlesFailure oc:FileNotFound,
-        oc:PermissionDenied ;
+    oc:differentia "that discovers, evaluates, and improves CLAUDE.md files against quality criteria with user-approved updates" ;
     oc:hasAllowedTool "Bash",
         "Edit",
         "Glob",
         "Grep",
         "Read" ;
-    oc:hasArgumentHint "repository path or directory to scan for CLAUDE.md files" ;
+    oc:hasArgumentHint "repository path to scan for CLAUDE.md files" ;
     oc:hasCategory "development" ;
     oc:hasDescription "Audit and improve CLAUDE.md files in repositories. Use when user asks to check, audit, update, improve, or fix CLAUDE.md files. Scans for all CLAUDE.md files, evaluates quality against templates, outputs quality report, then makes targeted updates. Also use when the user mentions \"CLAUDE.md maintenance\" or \"project memory optimization\"." ;
     oc:hasName "claude-md-improver" ;
-    oc:impartsKnowledge oc:kn_0cfc38b5,
-        oc:kn_704ac3d6,
-        oc:kn_a6b1bfde,
-        oc:kn_b9cea48f,
-        oc:kn_d129ae00 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Audit, evaluate, and improve CLAUDE.md files across a codebase to ensure Claude Code has optimal project context." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**This skill can write to CLAUDE.md files.** After presenting a quality report and getting user approval, it updates CLAUDE.md files with targeted improvements." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent "**Note:** Claude auto-discovers CLAUDE.md files in parent directories, making monorepo setups work automatically." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Find all CLAUDE.md files in the repository:" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**File Types & Locations:**" ],
+                                [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 4 ;
+                                    oc:rowCount 5 ;
+                                    oc:tableCaption "**File Types & Locations:**" ;
+                                    oc:tableMarkdown """| Type | Location | Purpose |
+|------|----------|---------|
+| Project root | `./CLAUDE.md` | Primary project context (checked into git, shared with team) |
+| Local overrides | `./.claude.local.md` | Personal/local settings (gitignored, not shared) |
+| Global defaults | `~/.claude/CLAUDE.md` | User-wide defaults across all projects |
+| Package-specific | `./packages/*/CLAUDE.md` | Module-level context in monorepos |
+| Subdirectory | Any nested location | Feature/domain-specific context |
+""" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """find . -name "CLAUDE.md" -o -name ".claude.md" -o -name ".claude.local.md" 2>/dev/null | head -50
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 19-21" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Phase 1: Discovery" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 5 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "**C (50-69)**: Basic info, missing key sections" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "**D (30-49)**: Sparse or outdated" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 5 ;
+                                            oc:itemText "**F (0-29)**: Missing or severely outdated" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "**A (90-100)**: Comprehensive, current, actionable" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "**B (70-89)**: Good coverage, minor gaps" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent "**Quality Scores:**" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "For each CLAUDE.md file, evaluate against quality criteria. See [references/quality-criteria.md](references/quality-criteria.md) for detailed rubrics." ],
+                                [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 3 ;
+                                    oc:rowCount 6 ;
+                                    oc:tableCaption "**Quick Assessment Checklist:**" ;
+                                    oc:tableMarkdown """| Criterion | Weight | Check |
+|-----------|--------|-------|
+| Commands/workflows documented | High | Are build/test/deploy commands present? |
+| Architecture clarity | High | Can Claude understand the codebase structure? |
+| Non-obvious patterns | Medium | Are gotchas and quirks documented? |
+| Conciseness | Medium | No verbose explanations or obvious info? |
+| Currency | High | Does it reflect current codebase state? |
+| Actionability | High | Are instructions executable, not vague? |
+""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Quick Assessment Checklist:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Phase 2: Quality Assessment" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """## CLAUDE.md Quality Report
+
+### Summary
+- Files found: X
+- Average score: X/100
+- Files needing update: X
+
+### File-by-File Assessment
+
+#### 1. ./CLAUDE.md (Project Root)
+**Score: XX/100 (Grade: X)**
+
+| Criterion | Score | Notes |
+|-----------|-------|-------|
+| Commands/workflows | X/20 | ... |
+| Architecture clarity | X/20 | ... |
+| Non-obvious patterns | X/15 | ... |
+| Conciseness | X/15 | ... |
+| Currency | X/15 | ... |
+| Actionability | X/15 | ... |
+
+**Issues:**
+- [List specific problems]
+
+**Recommended additions:**
+- [List what should be added]
+
+#### 2. ./packages/api/CLAUDE.md (Package-specific)
+...
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 3 ;
+                                    oc:sourceLocation "lines 63-93" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**ALWAYS output the quality report BEFORE making any updates.**" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "Format:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Phase 3: Quality Report Output" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "After outputting the quality report, ask user for confirmation before updating." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Update Guidelines (Critical):**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """### Update: ./CLAUDE.md
+
+**Why:** Build command was missing, causing confusion about how to run the project.
+
+```diff
++ ## Quick Start
++
++ ```bash
++ npm install
++ npm run dev  # Start development server on port 3000
++ ```
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 5 ;
+                                    oc:sourceLocation "lines 121-133" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent "**Diff Format:**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """
+### Phase 5: Apply Updates
+
+After user approval, apply changes using the Edit tool. Preserve existing content structure.
+
+## Templates
+
+See [references/templates.md](references/templates.md) for CLAUDE.md templates by project type.
+
+## Common Issues to Flag
+
+1. **Stale commands**: Build commands that no longer work
+2. **Missing dependencies**: Required tools not mentioned
+3. **Outdated architecture**: File structure that's changed
+4. **Missing environment setup**: Required env vars or config
+5. **Broken test commands**: Test scripts that have changed
+6. **Undocumented gotchas**: Non-obvious patterns not captured
+
+## User Tips to Share
+
+When presenting recommendations, remind users:
+
+- **`#` key shortcut**: During a Claude session, press `#` to have Claude auto-incorporate learnings into CLAUDE.md
+- **Keep it concise**: CLAUDE.md should be human-readable; dense is better than verbose
+- **Actionable commands**: All documented commands should be copy-paste ready
+- **Use `.claude.local.md`**: For personal preferences not shared with team (add to `.gitignore`)
+- **Global defaults**: Put user-wide preferences in `~/.claude/CLAUDE.md`
+
+## What Makes a Great CLAUDE.md
+
+**Key principles:**
+- Concise and human-readable
+- Actionable commands that can be copy-pasted
+- Project-specific patterns, not generic advice
+- Non-obvious gotchas and warnings
+
+**Recommended sections** (use only what's relevant):
+- Commands (build, test, dev, lint)
+- Architecture (directory structure)
+- Key Files (entry points, config)
+- Code Style (project conventions)
+- Environment (required vars, setup)
+- Testing (commands, patterns)
+- Gotchas (quirks, common mistakes)
+- Workflow (when to do what)
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 6 ;
+                                    oc:sourceLocation "lines 134-179" ],
+                                _:ref_ed86260653955462 ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "Phase 4: Targeted Updates" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Workflow" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "CLAUDE.md Improver" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """name: claude-md-improver
+description: Audit and improve CLAUDE.md files in repositories. Use when user asks to check, audit, update, improve, or fix CLAUDE.md files. Scans for all CLAUDE.md files, evaluates quality against templates, outputs quality report, then makes targeted updates. Also use when the user mentions "CLAUDE.md maintenance" or "project memory optimization".
+tools: Read, Glob, Grep, Bash, Edit
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "Discover, assess, report on, and improve CLAUDE.md files across a repository" ;
+            oc:hasStep _:ref_5a96bc992a1f2ec6,
+                _:ref_717a47e8cb7c589a,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "After user approval, apply approved changes to CLAUDE.md files using Edit tool, preserving existing structure" ;
+                    oc:expectedOutcome "CLAUDE.md files updated with user-approved improvements only" ;
+                    oc:stepDependsOn _:ref_e93d3b5604903c09 ;
+                    oc:stepId "apply-updates" ],
+                _:ref_e93d3b5604903c09,
+                _:ref_f6fdffd23f127baa ;
+            oc:workflowId "claude-md-audit" ;
+            oc:workflowName "CLAUDE.md Quality Audit and Update" ],
+        _:ref_ed86260653955462 ;
+    oc:impartsKnowledge oc:kn_0ae6b84f,
+        oc:kn_289309ed,
+        oc:kn_5f29787d,
+        oc:kn_8912480e,
+        oc:kn_94485f9c,
+        oc:kn_aa16c7d8,
+        oc:kn_b9ab5335,
+        oc:kn_c6303865,
+        oc:kn_d5c451ba ;
     oc:isUserInvocable true ;
-    oc:nature "Work" ;
+    oc:nature "Tool" ;
     oc:requiresState oc:DirectoryWritable,
         oc:FileExists ;
     oc:resolvesIntent "audit CLAUDE.md files",
-        "check project memory files",
-        "evaluate CLAUDE.md against quality criteria",
-        "fix CLAUDE.md issues",
-        "improve CLAUDE.md quality" ;
+        "check CLAUDE.md for issues",
+        "fix stale CLAUDE.md content",
+        "improve CLAUDE.md quality",
+        "update CLAUDE.md files" ;
     oc:yieldsState oc:DocumentUpdated,
         oc:ReportGenerated .
 
-oc:kn_0cfc38b5 a oc:AntiPattern,
+oc:kn_0ae6b84f a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When assessing CLAUDE.md quality" ;
+    oc:directiveContent "Common CLAUDE.md problems to flag: stale commands that no longer work, missing dependency requirements, outdated architecture descriptions, missing environment setup, broken test commands, undocumented gotchas/non-obvious patterns" ;
+    oc:hasRationale "These are the most frequent and impactful quality issues found in real CLAUDE.md files" .
+
+oc:kn_289309ed a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When proposing or writing CLAUDE.md updates" ;
-    oc:directiveContent "Never add obvious code info, generic best practices, one-off fixes, or verbose explanations to CLAUDE.md files." ;
-    oc:hasRationale "Context window is precious — every line must earn its place; generic advice clutters the file without adding value" ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_704ac3d6 a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "During Phase 2 quality assessment of each CLAUDE.md file" ;
-    oc:directiveContent "CLAUDE.md quality scoring must evaluate 6 weighted criteria: Commands/Workflows (20pts), Architecture Clarity (20pts), Non-Obvious Patterns (15pts), Conciseness (15pts), Currency (15pts), and Actionability (15pts) totaling 100 points." ;
-    oc:hasRationale "Standardized rubric ensures consistent, objective evaluation across all files and prevents subjective bias" ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_a6b1bfde a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "Before applying updates to CLAUDE.md files" ;
-    oc:directiveContent "Before finalizing any CLAUDE.md update, verify: each addition is project-specific, no generic advice, commands are tested and work, file paths are accurate, a new session would find it helpful, and it is the most concise expression." ;
-    oc:hasRationale "Prevents propagation of incorrect or low-value information into project memory files" ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_b9cea48f a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When determining what updates to propose" ;
-    oc:directiveContent "Focus targeted additions on 5 high-value categories: discovered commands/workflows, gotchas and non-obvious patterns, package relationships, testing approaches that worked, and configuration quirks." ;
-    oc:hasRationale "These categories represent information that saves future Claude sessions from repeated discovery and debugging" ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_d129ae00 a oc:KnowledgeNode,
-        oc:WorkflowStrategy ;
-    oc:appliesToContext "Before modifying any CLAUDE.md file" ;
-    oc:directiveContent "Always output the quality report BEFORE making any updates, and get user confirmation before applying changes to CLAUDE.md files." ;
-    oc:hasRationale "Ensures user has visibility and control over changes to project memory files, preventing unintended modifications" ;
+    oc:appliesToContext "When updating CLAUDE.md files" ;
+    oc:directiveContent "ALWAYS output the quality report BEFORE making any updates. Never modify CLAUDE.md files without user confirmation." ;
+    oc:hasRationale "Prevents unwanted changes; user must approve all modifications" ;
     oc:severityLevel "CRITICAL" .
+
+oc:kn_5f29787d a oc:KnowledgeNode,
+        oc:OutputFormat ;
+    oc:appliesToContext "When outputting quality report in Phase 3" ;
+    oc:directiveContent """## CLAUDE.md Quality Report
+
+### Summary
+- Files found: {count}
+- Average score: {score}/100
+- Files needing update: {count}
+
+### File-by-File Assessment
+
+#### {n}. {filepath} ({type})
+**Score: {score}/100 (Grade: {grade})**
+
+| Criterion | Score | Notes |
+|-----------|-------|-------|
+| Commands/workflows | {s}/20 | {notes} |
+| Architecture clarity | {s}/20 | {notes} |
+| Non-obvious patterns | {s}/15 | {notes} |
+| Conciseness | {s}/15 | {notes} |
+| Currency | {s}/15 | {notes} |
+| Actionability | {s}/15 | {notes} |
+
+**Issues:**
+- {issues}
+
+**Recommended additions:**
+- {additions}""" ;
+    oc:templateVariables "additions",
+        "count",
+        "filepath",
+        "grade",
+        "issues",
+        "notes",
+        "s",
+        "score",
+        "type" .
+
+oc:kn_8912480e a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "During quality assessment phase" ;
+    oc:directiveContent "Cross-reference CLAUDE.md content with actual codebase: verify documented commands work, check referenced files exist, confirm architecture descriptions are accurate, verify tech stack is current" ;
+    oc:hasRationale "Stale or incorrect information is worse than no information — it actively misleads future sessions" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_94485f9c a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When evaluating or writing CLAUDE.md content" ;
+    oc:directiveContent "CLAUDE.md content must be: concise (dense, one-line per concept), actionable (copy-paste ready commands), project-specific (not generic advice), current (reflects actual codebase state)" ;
+    oc:hasRationale "These four principles maximize the value of limited context window for future Claude sessions" .
+
+oc:kn_aa16c7d8 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When proposing CLAUDE.md additions" ;
+    oc:directiveContent "Never add: obvious code info (class names explain themselves), generic best practices, one-off fixes unlikely to recur, verbose explanations when a one-liner suffices" ;
+    oc:hasRationale "Context window is precious — every line must earn its place by being project-specific and non-obvious" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_b9ab5335 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When generating template recommendations or evaluating completeness" ;
+    oc:directiveContent "Use only relevant sections from: Commands, Architecture, Key Files, Code Style, Environment, Testing, Gotchas, Workflow. Not all sections needed for every project." ;
+    oc:hasRationale "Over-documentation with irrelevant sections wastes context window and reduces readability" .
+
+oc:kn_c6303865 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Phase 1 Discovery — finding all CLAUDE.md files in a repository" ;
+    oc:codeLanguage "bash" ;
+    oc:directiveContent "find . -name \"CLAUDE.md\" -o -name \".claude.md\" -o -name \".claude.local.md\" 2>/dev/null | head -50" .
+
+oc:kn_d5c451ba a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "Every execution of this skill" ;
+    oc:directiveContent "1. Discovery: find all CLAUDE.md files with `find . -name \"CLAUDE.md\" -o -name \".claude.md\" -o -name \".claude.local.md\"` 2. Quality Assessment: score each file against 6 criteria (Commands/Workflows 20pts, Architecture Clarity 20pts, Non-Obvious Patterns 15pts, Conciseness 15pts, Currency 15pts, Actionability 15pts) 3. Output Quality Report: present file-by-file assessment with scores BEFORE any changes 4. Targeted Updates: propose minimal diff-based additions with explanations 5. Apply Updates: after user approval, apply changes via Edit tool" ;
+    oc:hasRationale "Ensures consistent, thorough audits with user control over all changes" ;
+    oc:stepOrder 1 .
+
+_:ref_3154425a7278259b a oc:BulletItem ;
+    oc:blockType "bullet_item" ;
+    oc:itemOrder 2 ;
+    oc:itemText "Generic best practices already covered" .
+
+_:ref_391b55281893f0ae a oc:BulletItem ;
+    oc:blockType "bullet_item" ;
+    oc:itemOrder 1 ;
+    oc:itemText "Commands or workflows discovered during analysis" .
+
+_:ref_43a53b8210814061 a oc:BulletList ;
+    oc:blockType "bullet_list" ;
+    oc:contentOrder 1 ;
+    oc:hasItem _:ref_3154425a7278259b,
+        [ a oc:BulletItem ;
+            oc:blockType "bullet_item" ;
+            oc:itemOrder 1 ;
+            oc:itemText "Restating what's obvious from the code" ],
+        [ a oc:BulletItem ;
+            oc:blockType "bullet_item" ;
+            oc:itemOrder 3 ;
+            oc:itemText "One-off fixes unlikely to recur" ],
+        [ a oc:BulletItem ;
+            oc:blockType "bullet_item" ;
+            oc:itemOrder 4 ;
+            oc:itemText "Verbose explanations when a one-liner suffices" ] .
+
+_:ref_54306477abf0a2f3 a oc:BulletList ;
+    oc:blockType "bullet_list" ;
+    oc:contentOrder 1 ;
+    oc:hasItem _:ref_391b55281893f0ae,
+        [ a oc:BulletItem ;
+            oc:blockType "bullet_item" ;
+            oc:itemOrder 5 ;
+            oc:itemText "Configuration quirks" ],
+        [ a oc:BulletItem ;
+            oc:blockType "bullet_item" ;
+            oc:itemOrder 2 ;
+            oc:itemText "Gotchas or non-obvious patterns found in code" ],
+        [ a oc:BulletItem ;
+            oc:blockType "bullet_item" ;
+            oc:itemOrder 3 ;
+            oc:itemText "Package relationships that weren't clear" ],
+        [ a oc:BulletItem ;
+            oc:blockType "bullet_item" ;
+            oc:itemOrder 4 ;
+            oc:itemText "Testing approaches that work" ] .
+
+_:ref_7a5e491d12b8a98e a oc:BulletItem ;
+    oc:blockType "bullet_item" ;
+    oc:itemOrder 2 ;
+    oc:itemText "The specific addition (as a diff or quoted block)" .
+
+_:ref_960f37c8ddf93ee0 a oc:WorkflowStep ;
+    dcterms:description "**Keep it minimal** - Avoid:" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild _:ref_43a53b8210814061 ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_a6916238ad496e72 a oc:WorkflowStep ;
+    dcterms:description "**Show diffs** - For each change, show:" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild [ a oc:BulletList ;
+            oc:blockType "bullet_list" ;
+            oc:contentOrder 1 ;
+            oc:hasItem _:ref_7a5e491d12b8a98e,
+                [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 1 ;
+                    oc:itemText "Which CLAUDE.md file to update" ],
+                [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 3 ;
+                    oc:itemText "Brief explanation of why this helps future sessions" ] ] ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_f6ec71cc94a5c1cb a oc:WorkflowStep ;
+    dcterms:description "**Propose targeted additions only** - Focus on genuinely useful info:" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild _:ref_54306477abf0a2f3 ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_5a96bc992a1f2ec6 a oc:WorkflowStep ;
+    dcterms:description "Output formatted quality report with file-by-file assessment, scores, issues, and recommended additions" ;
+    oc:expectedOutcome "User-visible quality report with actionable findings" ;
+    oc:stepDependsOn _:ref_717a47e8cb7c589a ;
+    oc:stepId "report" .
+
+_:ref_717a47e8cb7c589a a oc:WorkflowStep ;
+    dcterms:description "Score each file against 6 quality criteria: Commands/Workflows (20), Architecture (20), Patterns (15), Conciseness (15), Currency (15), Actionability (15)" ;
+    oc:expectedOutcome "Numeric score and grade (A-F) for each file with specific issues identified" ;
+    oc:stepDependsOn _:ref_f6fdffd23f127baa ;
+    oc:stepId "assess" .
+
+_:ref_e93d3b5604903c09 a oc:WorkflowStep ;
+    dcterms:description "Generate targeted diff-based additions with explanations for why each helps future sessions" ;
+    oc:expectedOutcome "Concrete, minimal update proposals in diff format" ;
+    oc:stepDependsOn _:ref_5a96bc992a1f2ec6 ;
+    oc:stepId "propose-updates" .
+
+_:ref_ed86260653955462 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 3 ;
+    oc:hasStep _:ref_960f37c8ddf93ee0,
+        _:ref_a6916238ad496e72,
+        _:ref_f6ec71cc94a5c1cb ;
+    oc:workflowId "procedure_3" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_f6fdffd23f127baa a oc:WorkflowStep ;
+    dcterms:description "Find all CLAUDE.md, .claude.md, and .claude.local.md files in the repository using find command" ;
+    oc:expectedOutcome "Complete list of all CLAUDE.md files with their locations and types" ;
+    oc:stepId "discover" .
 

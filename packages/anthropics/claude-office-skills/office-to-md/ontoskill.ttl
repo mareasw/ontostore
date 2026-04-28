@@ -4,89 +4,869 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_office_skills_office_to_md a oc:DeclarativeSkill,
+oc:skill_claude_office_skills_office_to_md a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "office-to-md" ;
-    skos:broader "format converter" ;
-    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-office-skills/office-to-md" ;
+    skos:broader "Document converter" ;
+    prov:wasDerivedFrom "../.agents/skills/anthropics/claude-office-skills/office-to-md" ;
     oc:contentHash "45527f6cea8286219e710d4a2340344d7c4f9430665cb62c282d00ab6f379ed2" ;
-    oc:differentia "that transforms Office documents (DOCX, XLSX, PPTX, PDF, HTML, images) into Markdown using Microsoft's markitdown library" ;
-    oc:handlesFailure oc:FileNotFound,
+    oc:differentia "Uses Microsoft's markitdown library to transform Office files (Word, Excel, PowerPoint, PDF, HTML, images, audio) into clean Markdown for searchability, version control, and AI consumption" ;
+    oc:handlesFailure oc:ConversionError,
+        oc:FileNotFound,
         oc:InvalidInput ;
-    oc:hasAllowedTool "Bash" ;
-    oc:hasArgumentHint "file-path to Office document (DOCX, XLSX, PPTX, PDF, HTML, images)" ;
-    oc:hasCategory "document" ;
+    oc:hasArgumentHint "file-path to Office document (.docx, .xlsx, .pptx, .pdf, .html, .jpg, .png, .mp3, .wav, .zip)" ;
+    oc:hasCategory "conversion" ;
     oc:hasDescription ">" ;
     oc:hasName "office-to-md" ;
-    oc:hasRequirement oc:req_0fa5fa1a,
-        oc:req_310092fb,
-        oc:req_4eb6a902,
-        oc:req_fd962409 ;
-    oc:impartsKnowledge oc:kn_13cd0498,
-        oc:kn_3a6d20d5,
-        oc:kn_7b3a3cc6,
-        oc:kn_e4ec9c6a,
-        oc:kn_e5550f3a ;
+    oc:hasRequirement oc:req_4eb6a902,
+        oc:req_bbf52832,
+        oc:req_dd9fc2a5 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Complex formatting may be simplified" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Images are not embedded (use vision model for descriptions)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "Comments may not be extracted" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Track changes in Word are not preserved" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Some table structures may not convert perfectly" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 7 ;
+                    oc:sectionTitle "Limitations" ],
+                [ a oc:Section ;
+                    oc:hasContent _:ref_e093d1157ee1d101 ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Best Practices" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """from markitdown import MarkItDown
+
+def excel_to_data_dictionary(xlsx_path):
+    \"\"\"Convert Excel data model to data dictionary documentation.\"\"\"
+    md = MarkItDown()
+    result = md.convert(xlsx_path)
+    
+    # Add documentation structure
+    doc = f\"\"\"# Data Dictionary
+
+Generated from: `{xlsx_path}`
+
+{result.text_content}
+
+## Usage Notes
+
+- All tables are derived from the source Excel file
+- Review data types and constraints before use
+- Contact data team for clarifications
+
+## Change Log
+
+| Date | Change | Author |
+|------|--------|--------|
+| {datetime.now().strftime('%Y-%m-%d')} | Initial generation | Auto |
+\"\"\"
+    
+    return doc
+
+documentation = excel_to_data_dictionary('data_model.xlsx')
+with open('data_dictionary.md', 'w') as f:
+    f.write(documentation)
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 482-515" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Example 3: Excel to Documentation" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """from markitdown import MarkItDown
+from pathlib import Path
+
+def convert_docs_to_wiki(docs_folder, wiki_folder):
+    \"\"\"Convert all Office docs to markdown wiki structure.\"\"\"
+    md = MarkItDown()
+    docs_path = Path(docs_folder)
+    wiki_path = Path(wiki_folder)
+    
+    # Create wiki structure
+    wiki_path.mkdir(exist_ok=True)
+    
+    # Create index
+    index_content = "# Documentation Index\\n\\n"
+    
+    for doc in sorted(docs_path.glob('**/*.docx')):
+        try:
+            result = md.convert(str(doc))
+            
+            # Create relative path in wiki
+            rel_path = doc.relative_to(docs_path)
+            output_file = wiki_path / rel_path.with_suffix('.md')
+            output_file.parent.mkdir(parents=True, exist_ok=True)
+            
+            # Write markdown
+            with open(output_file, 'w') as f:
+                f.write(result.text_content)
+            
+            # Add to index
+            link = str(rel_path.with_suffix('.md')).replace('\\\\', '/')
+            index_content += f"- [{doc.stem}]({link})\\n"
+            
+            print(f"Converted: {doc.name}")
+            
+        except Exception as e:
+            print(f"Error: {doc.name} - {e}")
+    
+    # Write index
+    with open(wiki_path / 'index.md', 'w') as f:
+        f.write(index_content)
+
+convert_docs_to_wiki('./company_docs', './wiki')
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 373-416" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Example 1: Convert Documentation Suite" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """from markitdown import MarkItDown
+import re
+from datetime import datetime
+
+def process_meeting_notes(pptx_path):
+    \"\"\"Extract and structure meeting notes from PowerPoint.\"\"\"
+    md = MarkItDown()
+    result = md.convert(pptx_path)
+    
+    # Parse the markdown
+    content = result.text_content
+    
+    # Extract sections
+    sections = {
+        'attendees': [],
+        'agenda': [],
+        'decisions': [],
+        'action_items': []
+    }
+    
+    current_section = None
+    
+    for line in content.split('\\n'):
+        line_lower = line.lower()
+        
+        if 'attendee' in line_lower or 'participant' in line_lower:
+            current_section = 'attendees'
+        elif 'agenda' in line_lower:
+            current_section = 'agenda'
+        elif 'decision' in line_lower:
+            current_section = 'decisions'
+        elif 'action' in line_lower:
+            current_section = 'action_items'
+        elif line.strip().startswith(('-', '*', '•')) and current_section:
+            sections[current_section].append(line.strip()[1:].strip())
+    
+    # Generate structured output
+    output = f\"\"\"# Meeting Notes
+
+**Date:** {datetime.now().strftime('%Y-%m-%d')}
+**Source:** {pptx_path}
+
+## Attendees
+{chr(10).join('- ' + a for a in sections['attendees'])}
+
+## Agenda
+{chr(10).join('- ' + a for a in sections['agenda'])}
+
+## Decisions Made
+{chr(10).join('- ' + d for d in sections['decisions'])}
+
+## Action Items
+{chr(10).join('- [ ] ' + a for a in sections['action_items'])}
+\"\"\"
+    
+    return output
+
+notes = process_meeting_notes('team_meeting.pptx')
+print(notes)
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 419-479" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Example 2: Meeting Notes Processor" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Examples" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Example prompts:**" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 3 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "\"Convert this Word document to Markdown\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "\"Turn this PowerPoint into Markdown notes\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "\"Convert this Excel file to Markdown tables\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "\"Extract content from this PDF as Markdown\"" ] ],
+                        _:ref_4d05ae9f75448c82 ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "How to Use" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """pip install markitdown
+
+# For image/audio processing
+pip install markitdown[all]
+
+# For specific features
+pip install markitdown[images]  # Image OCR
+pip install markitdown[audio]   # Audio transcription
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 527-536" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 8 ;
+                    oc:sectionTitle "Installation" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "[Supported Formats](https://github.com/microsoft/markitdown#supported-formats)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "[PyPI Package](https://pypi.org/project/markitdown/)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "[GitHub Repository](https://github.com/microsoft/markitdown)" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 9 ;
+                    oc:sectionTitle "Resources" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """from markitdown import MarkItDown
+import anthropic
+
+# Use Claude for image description
+client = anthropic.Anthropic()
+
+md = MarkItDown(
+    llm_client=client,
+    llm_model="claude-sonnet-4-20250514"
+)
+
+result = md.convert("diagram.png")
+print(result.text_content)
+
+# Output: Description of the image content
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 248-264" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 8 ;
+                            oc:sectionTitle "Image Conversion (with Vision Model)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# Annual Report 2024
+
+## Executive Summary
+
+This report summarizes the key achievements and challenges...
+
+### Key Metrics
+
+| Metric | 2023 | 2024 | Change |
+|--------|------|------|--------|
+| Revenue | $10M | $12M | +20% |
+| Users | 50K | 75K | +50% |
+
+## Detailed Analysis
+
+The following sections provide...
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 3 ;
+                                    oc:sourceLocation "lines 152-169" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """from markitdown import MarkItDown
+
+md = MarkItDown()
+
+# Convert Word document
+result = md.convert("report.docx")
+
+# Output preserves:
+# - Headings (as # headers)
+# - Bold/italic formatting
+# - Lists (bulleted and numbered)
+# - Tables (as markdown tables)
+# - Hyperlinks
+
+print(result.text_content)
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 133-149" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Example Output:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "Word Document Conversion" ],
+                        [ a oc:Section ;
+                            oc:hasSubsection [ a oc:Section ;
+                                    oc:hasContent [ a oc:CodeExample ;
+                                            oc:blockType "code_block" ;
+                                            oc:codeContent """# Install
+pip install markitdown
+
+# Convert file
+markitdown document.docx > output.md
+
+# Or with output file
+markitdown document.docx -o output.md
+""" ;
+                                            oc:codeLanguage "bash" ;
+                                            oc:contentOrder 1 ;
+                                            oc:sourceLocation "lines 120-129" ] ;
+                                    oc:sectionLevel 4 ;
+                                    oc:sectionOrder 2 ;
+                                    oc:sectionTitle "Command Line" ],
+                                [ a oc:Section ;
+                                    oc:hasContent [ a oc:CodeExample ;
+                                            oc:blockType "code_block" ;
+                                            oc:codeContent """from markitdown import MarkItDown
+
+# Simple conversion
+md = MarkItDown()
+result = md.convert("document.docx")
+
+# Access content
+markdown_text = result.text_content
+
+# With options
+md = MarkItDown(
+    llm_client=None,      # Optional LLM for enhanced processing
+    llm_model=None        # Model name if using LLM
+)
+""" ;
+                                            oc:codeLanguage "python" ;
+                                            oc:contentOrder 1 ;
+                                            oc:sourceLocation "lines 102-117" ] ;
+                                    oc:sectionLevel 4 ;
+                                    oc:sectionOrder 1 ;
+                                    oc:sectionTitle "Python API" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Basic Usage" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 1 ;
+                                    oc:rowCount 8 ;
+                                    oc:tableCaption "### Supported Formats" ;
+                                    oc:tableMarkdown """| Format | Extension | Notes |
+|--------|-----------|-------|
+| Word | .docx | Full text, tables, basic formatting |
+| Excel | .xlsx | Converts to Markdown tables |
+| PowerPoint | .pptx | Slides as sections |
+| PDF | .pdf | Text extraction |
+| HTML | .html | Clean markdown |
+| Images | .jpg, .png | OCR with vision model |
+| Audio | .mp3, .wav | Transcription |
+| ZIP | .zip | Processes contained files |
+""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Supported Formats" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """from markitdown import MarkItDown
+from pathlib import Path
+
+def batch_convert(input_dir, output_dir):
+    \"\"\"Convert all Office files to Markdown.\"\"\"
+    md = MarkItDown()
+    input_path = Path(input_dir)
+    output_path = Path(output_dir)
+    output_path.mkdir(exist_ok=True)
+    
+    extensions = ['.docx', '.xlsx', '.pptx', '.pdf']
+    
+    for ext in extensions:
+        for file in input_path.glob(f'*{ext}'):
+            try:
+                result = md.convert(str(file))
+                output_file = output_path / f"{file.stem}.md"
+                
+                with open(output_file, 'w') as f:
+                    f.write(result.text_content)
+                
+                print(f"Converted: {file.name}")
+            except Exception as e:
+                print(f"Error converting {file.name}: {e}")
+
+batch_convert('./documents', './markdown')
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 268-295" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 9 ;
+                            oc:sectionTitle "Batch Conversion" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Example Output:**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """from markitdown import MarkItDown
+
+md = MarkItDown()
+result = md.convert("data.xlsx")
+
+# Each sheet becomes a section
+# Data becomes markdown tables
+print(result.text_content)
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 173-182" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """## Sheet1
+
+| Name | Department | Salary |
+|------|------------|--------|
+| John | Engineering | $80,000 |
+| Jane | Marketing | $75,000 |
+
+## Sheet2
+
+| Product | Q1 | Q2 | Q3 | Q4 |
+|---------|----|----|----|----|
+| Widget A | 100 | 120 | 150 | 180 |
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 3 ;
+                                    oc:sourceLocation "lines 185-198" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 5 ;
+                            oc:sectionTitle "Excel Conversion" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """from markitdown import MarkItDown
+
+md = MarkItDown()
+result = md.convert("presentation.pptx")
+
+# Each slide becomes a section
+# Speaker notes included if present
+print(result.text_content)
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 202-211" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Example Output:**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# Slide 1: Company Overview
+
+Our mission is to...
+
+## Key Points
+- Innovation first
+- Customer focused
+- Global reach
+
+---
+
+# Slide 2: Market Analysis
+
+The market opportunity is significant...
+
+**Notes:** Mention the competitor analysis here
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 3 ;
+                                    oc:sourceLocation "lines 214-231" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 6 ;
+                            oc:sectionTitle "PowerPoint Conversion" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """from markitdown import MarkItDown
+
+# Initialize converter
+md = MarkItDown()
+
+# Convert file
+result = md.convert("document.docx")
+print(result.text_content)
+
+# Save to file
+with open("output.md", "w") as f:
+    f.write(result.text_content)
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 71-84" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "markitdown Fundamentals" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """from markitdown import MarkItDown
+
+md = MarkItDown()
+result = md.convert("document.pdf")
+
+# Extracts text content
+# Tables converted where detected
+print(result.text_content)
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 235-244" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 7 ;
+                            oc:sectionTitle "PDF Conversion" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Domain Knowledge" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """from markitdown import MarkItDown
+from pathlib import Path
+import json
+
+def create_ai_corpus(doc_folder, output_file):
+    \"\"\"Convert documents to JSON corpus for AI training/RAG.\"\"\"
+    md = MarkItDown()
+    corpus = []
+    
+    for doc in Path(doc_folder).glob('**/*'):
+        if doc.suffix in ['.docx', '.pdf', '.pptx', '.xlsx']:
+            try:
+                result = md.convert(str(doc))
+                corpus.append({
+                    'source': str(doc),
+                    'filename': doc.name,
+                    'content': result.text_content,
+                    'type': doc.suffix[1:]
+                })
+            except Exception as e:
+                print(f"Skipped {doc.name}: {e}")
+    
+    with open(output_file, 'w') as f:
+        json.dump(corpus, f, indent=2)
+    
+    print(f"Created corpus with {len(corpus)} documents")
+    return corpus
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 340-368" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "AI-Ready Corpus" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """import os
+from datetime import datetime
+from markitdown import MarkItDown
+
+def archive_document(doc_path, archive_dir):
+    \"\"\"Convert and archive Office document to Markdown.\"\"\"
+    md = MarkItDown()
+    result = md.convert(doc_path)
+    
+    # Create archive structure
+    date_str = datetime.now().strftime('%Y-%m-%d')
+    filename = os.path.basename(doc_path)
+    base_name = os.path.splitext(filename)[0]
+    
+    # Save with metadata
+    output_content = f\"\"\"---
+source: {filename}
+converted: {date_str}
+---
+
+{result.text_content}
+\"\"\"
+    
+    output_path = os.path.join(archive_dir, f"{base_name}.md")
+    with open(output_path, 'w') as f:
+        f.write(output_content)
+    
+    return output_path
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 308-337" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Document Archive" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Common Patterns" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "This skill enables conversion from various Office formats to Markdown using **markitdown** - Microsoft's open-source tool for converting documents to Markdown. Perfect for making Office content searchable, version-controllable, and AI-friendly." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Overview" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Office to Markdown Skill" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """# ═══════════════════════════════════════════════════════════════════════════════
+# CLAUDE OFFICE SKILL - Enhanced Metadata v2.0
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Basic Information
+name: office-to-md
+description: ">"
+version: "1.0"
+author: claude-office-skills
+license: MIT
+
+# Categorization
+category: conversion
+tags:
+  - office
+  - markdown
+  - conversion
+  - markitdown
+department: All
+
+# AI Model Compatibility
+models:
+  recommended:
+    - claude-sonnet-4
+    - claude-opus-4
+  compatible:
+    - claude-3-5-sonnet
+    - gpt-4
+    - gpt-4o
+
+# MCP Tools Integration
+mcp:
+  server: office-mcp
+  tools:
+    - docx_to_md
+
+# Skill Capabilities
+capabilities:
+  - office_conversion
+  - markdown_export
+
+# Language Support
+languages:
+  - en
+  - zh
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:hasWorkflow _:ref_4d05ae9f75448c82,
+        _:ref_e093d1157ee1d101 ;
+    oc:impartsKnowledge oc:kn_09e0a99a,
+        oc:kn_31921b4c,
+        oc:kn_35cd0cae,
+        oc:kn_441be773,
+        oc:kn_77c4a302 ;
     oc:isUserInvocable true ;
     oc:nature "Tool" ;
     oc:requiresState oc:FileExists,
         oc:ToolInstalled ;
-    oc:resolvesIntent "batch convert Office files to Markdown",
-        "convert Excel spreadsheets to Markdown tables",
-        "convert PowerPoint presentations to Markdown notes",
-        "convert Word documents to Markdown",
-        "create AI-ready document corpus from Office files",
-        "extract text from PDFs as Markdown" ;
-    oc:yieldsState oc:DocumentCreated .
+    oc:resolvesIntent "batch convert Office documents to Markdown",
+        "convert Excel spreadsheet to Markdown tables",
+        "convert PDF to Markdown",
+        "convert PowerPoint presentation to Markdown notes",
+        "convert Word document to Markdown",
+        "create AI-ready corpus from Office files" ;
+    oc:yieldsState oc:DocumentConverted,
+        oc:MarkdownGenerated .
 
-oc:kn_13cd0498 a oc:Constraint,
+oc:kn_09e0a99a a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When converting documents containing images (JPG, PNG, or embedded images in Office files)" ;
-    oc:directiveContent "Images are not embedded in output Markdown; use a vision model (LLM client) for image description when image content matters." ;
-    oc:hasRationale "Markdown cannot embed binary images; markitdown can optionally use an LLM to describe images" ;
-    oc:severityLevel "MEDIUM" .
+    oc:appliesToContext "After any conversion, before using the output" ;
+    oc:directiveContent "Do not assume converted Markdown perfectly preserves complex formatting — always review output for accuracy, especially tables with merged cells or complex layouts." ;
+    oc:hasRationale "Complex formatting, nested tables, and track changes are simplified or lost during conversion, which can silently corrupt data interpretation." ;
+    oc:severityLevel "HIGH" .
 
-oc:kn_3a6d20d5 a oc:KnowledgeNode,
-        oc:WorkflowStrategy ;
-    oc:appliesToContext "When setting up the markitdown tool for the first time" ;
-    oc:directiveContent "Use pip install markitdown[all] for full feature support including image OCR and audio transcription, or install specific extras as needed." ;
-    oc:hasRationale "Base installation only covers core document formats; optional dependencies enable image and audio processing" ;
+oc:kn_31921b4c a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When preparing source documents for conversion" ;
+    oc:directiveContent "Use consistent heading levels in source documents and check that complex tables convert correctly — manually adjust any that don't." ;
+    oc:hasRationale "Well-structured source documents produce cleaner Markdown output, reducing post-processing effort." ;
     oc:severityLevel "LOW" .
 
-oc:kn_7b3a3cc6 a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "After any conversion operation" ;
-    oc:directiveContent "Always review and validate converted Markdown output for accuracy before using it in production or sharing with stakeholders." ;
-    oc:hasRationale "Conversion fidelity varies by document complexity; manual review catches formatting artifacts or data loss" ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_e4ec9c6a a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When running bulk conversion of multiple Office documents" ;
-    oc:directiveContent "For batch conversions, process files with error handling per-file so a single failure does not stop the entire batch." ;
-    oc:hasRationale "Individual file errors (corrupt files, unsupported formats) should not prevent processing of remaining files" ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_e5550f3a a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When converting any Office document, especially Word docs with complex layouts" ;
-    oc:directiveContent "Do not assume complex formatting is perfectly preserved; tables with merged cells, track changes, and comments may be lost or simplified during conversion." ;
-    oc:hasRationale "markitdown simplifies complex formatting to Markdown equivalents, which cannot represent all Office features" ;
+oc:kn_35cd0cae a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When converting .docx files with tracked changes or complex tables" ;
+    oc:directiveContent "Track changes in Word documents are not preserved, comments may not be extracted, and some table structures may not convert perfectly." ;
+    oc:hasRationale "markitdown's conversion focuses on content extraction rather than full fidelity of Word's revision and collaboration features." ;
     oc:severityLevel "MEDIUM" .
 
-oc:req_0fa5fa1a a oc:RequirementTool ;
-    oc:isOptional true ;
-    oc:requirementValue "office-mcp MCP server (docx_to_md tool)" .
+oc:kn_441be773 a oc:Idempotency,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When re-running conversions on unchanged files" ;
+    oc:directiveContent "Conversion is idempotent for static source files — running the same conversion multiple times produces identical output." ;
+    oc:hasRationale "Safe to re-convert without side effects, enabling automated pipelines and CI/CD integration." ;
+    oc:severityLevel "LOW" .
 
-oc:req_310092fb a oc:RequirementAPI ;
-    oc:isOptional true ;
-    oc:requirementValue "anthropic client (optional, for image/audio processing with vision model)" .
+oc:kn_77c4a302 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting files containing images or audio" ;
+    oc:directiveContent "Images are not embedded in Markdown output — use a vision model (llm_client parameter) for image description, and audio files require markitdown[all] or markitdown[audio] extras." ;
+    oc:hasRationale "markitdown cannot embed binary content; images need OCR/vision processing and audio needs transcription, both requiring additional dependencies." ;
+    oc:severityLevel "MEDIUM" .
 
 oc:req_4eb6a902 a oc:RequirementTool ;
     oc:isOptional false ;
     oc:requirementValue "Python 3.x" .
 
-oc:req_fd962409 a oc:RequirementTool ;
+oc:req_bbf52832 a oc:RequirementTool ;
     oc:isOptional false ;
-    oc:requirementValue "markitdown (pip install markitdown)" .
+    oc:requirementValue "markitdown Python package (pip install markitdown)" .
+
+oc:req_dd9fc2a5 a oc:RequirementAPI ;
+    oc:isOptional true ;
+    oc:requirementValue "Anthropic API key (for image/audio processing with vision model)" .
+
+_:ref_0c8acd7000ab5814 a oc:WorkflowStep ;
+    dcterms:description "**Check Output Quality**: Review converted Markdown for accuracy" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_6caf43ef547ba73d a oc:WorkflowStep ;
+    dcterms:description "Optionally specify conversion options" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_797ba0c15e994b60 a oc:WorkflowStep ;
+    dcterms:description "**Image Handling**: Consider using vision models for important images" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_93d90720e7616c64 a oc:WorkflowStep ;
+    dcterms:description "Provide the Office file (Word, Excel, PowerPoint, PDF, etc.)" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_a14197b33bb11fc5 a oc:WorkflowStep ;
+    dcterms:description "**Handle Tables**: Complex tables may need manual adjustment" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_b14d165248aeca17 a oc:WorkflowStep ;
+    dcterms:description "**Preserve Structure**: Use consistent heading levels in source docs" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_c340ff0d740209a8 a oc:WorkflowStep ;
+    dcterms:description "I'll convert it to clean Markdown" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_db193a85e79cd674 a oc:WorkflowStep ;
+    dcterms:description "**Version Control**: Store converted Markdown in Git for tracking" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_5" ;
+    oc:stepOrder 5 .
+
+_:ref_4d05ae9f75448c82 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 1 ;
+    oc:hasStep _:ref_6caf43ef547ba73d,
+        _:ref_93d90720e7616c64,
+        _:ref_c340ff0d740209a8 ;
+    oc:workflowId "procedure_1" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_e093d1157ee1d101 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 1 ;
+    oc:hasStep _:ref_0c8acd7000ab5814,
+        _:ref_797ba0c15e994b60,
+        _:ref_a14197b33bb11fc5,
+        _:ref_b14d165248aeca17,
+        _:ref_db193a85e79cd674 ;
+    oc:workflowId "procedure_1" ;
+    oc:workflowName "Ordered Procedure" .
 

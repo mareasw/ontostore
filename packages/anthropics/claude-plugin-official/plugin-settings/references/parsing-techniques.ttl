@@ -4,81 +4,982 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_plugin_official_plugin_settings_parsing_techniques a oc:DeclarativeSkill,
+oc:skill_claude_plugin_official_plugin_settings_parsing_techniques a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "parsing-techniques" ;
-    skos:broader "Reference guide" ;
+    skos:broader "Bash parsing guide" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/plugin-settings" ;
     oc:contentHash "bc90aa020aa5fcbb3483d7316754450dcc91d086ee96f9304fa655e878f7712e" ;
-    oc:dependsOnSkill oc:skill_plugin_settings ;
-    oc:differentia "that documents bash techniques for parsing YAML frontmatter and markdown body content from Claude plugin settings files" ;
-    oc:extends oc:skill_anthropics_claude_plugin_official_plugin_settings ;
-    oc:handlesFailure oc:FileNotFound,
-        oc:InvalidInput ;
-    oc:hasArgumentHint "settings-file-path (e.g., .claude/plugin-name.local.md)" ;
+    oc:differentia "that extracts and manipulates YAML frontmatter and markdown body from .claude plugin settings files using sed, awk, grep, and jq" ;
+    oc:extends oc:skill_claude_plugin_official_plugin_settings ;
+    oc:hasAllowedTool "Bash" ;
+    oc:hasArgumentHint "settings-file-path" ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_4e81b15b,
-        oc:kn_6261fa3d,
-        oc:kn_964ccad4,
-        oc:kn_9dda4fe1,
-        oc:kn_b1df850a,
-        oc:kn_ead12967,
-        oc:kn_ff8716e2 ;
-    oc:isUserInvocable false ;
-    oc:nature "Concept" ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Complete guide to parsing `.claude/plugin-name.local.md` files in bash scripts." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Don't:** Re-parse file for each field." ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# Parse once
+FRONTMATTER=$(sed -n '/^---$/,/^---$/{ /^---$/d; p; }' "$FILE")
+
+# Extract multiple fields from cached frontmatter
+FIELD1=$(echo "$FRONTMATTER" | grep '^field1:' | sed 's/field1: *//')
+FIELD2=$(echo "$FRONTMATTER" | grep '^field2:' | sed 's/field2: *//')
+FIELD3=$(echo "$FRONTMATTER" | grep '^field3:' | sed 's/field3: *//')
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 383-391" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "If reading settings multiple times:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 28 ;
+                            oc:sectionTitle "Cache Parsed Values" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Only parse settings when needed:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """#!/bin/bash
+input=$(cat)
+
+# Quick checks first (no file I/O)
+tool_name=$(echo "$input" | jq -r '.tool_name')
+if [[ "$tool_name" != "Write" ]]; then
+  exit 0  # Not a write operation, skip
+fi
+
+# Only now check settings file
+if [[ -f ".claude/my-plugin.local.md" ]]; then
+  # Parse settings
+  # ...
+fi
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 399-414" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 29 ;
+                            oc:sectionTitle "Lazy Loading" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 27 ;
+                    oc:sectionTitle "Performance Optimization" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# Show what was parsed
+echo "Parsed values:" >&2
+echo "  enabled: $ENABLED" >&2
+echo "  mode: $MODE" >&2
+echo "  max_size: $MAX_SIZE" >&2
+
+# Verify expected values
+if [[ "$ENABLED" != "true" ]] && [[ "$ENABLED" != "false" ]]; then
+  echo "⚠️  Unexpected enabled value: $ENABLED" >&2
+fi
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 440-451" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 32 ;
+                            oc:sectionTitle "Validate Parsing" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """#!/bin/bash
+set -x  # Enable debug tracing
+
+FILE=".claude/my-plugin.local.md"
+
+if [[ -f "$FILE" ]]; then
+  echo "Settings file found" >&2
+
+  FRONTMATTER=$(sed -n '/^---$/,/^---$/{ /^---$/d; p; }' "$FILE")
+  echo "Frontmatter:" >&2
+  echo "$FRONTMATTER" >&2
+
+  ENABLED=$(echo "$FRONTMATTER" | grep '^enabled:' | sed 's/enabled: *//')
+  echo "Enabled: $ENABLED" >&2
+fi
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 420-436" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 31 ;
+                            oc:sectionTitle "Print Parsed Values" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 30 ;
+                    oc:sectionTitle "Debugging" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Settings files use markdown with YAML frontmatter:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """---
+field1: value1
+field2: "value with spaces"
+numeric_field: 42
+boolean_field: true
+list_field: ["item1", "item2", "item3"]
+---
+
+# Markdown Content
+
+This body content can be extracted separately.
+It's useful for prompts, documentation, or additional context.
+""" ;
+                            oc:codeLanguage "markdown" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 9-22" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "File Structure" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """MODE=$(echo "$FRONTMATTER" | grep '^mode:' | sed 's/mode: *//')
+
+case "$MODE" in
+  strict|standard|lenient)
+    # Valid mode
+    ;;
+  *)
+    echo "Invalid mode: $MODE (must be strict, standard, or lenient)" >&2
+    exit 1
+    ;;
+esac
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 270-282" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 20 ;
+                            oc:sectionTitle "Validate Field Values" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """FILE=".claude/my-plugin.local.md"
+
+if [[ ! -f "$FILE" ]]; then
+  echo "Settings file not found" >&2
+  exit 1
+fi
+
+if [[ ! -r "$FILE" ]]; then
+  echo "Settings file not readable" >&2
+  exit 1
+fi
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 242-254" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 18 ;
+                            oc:sectionTitle "Validate File Exists and Is Readable" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """MAX_SIZE=$(echo "$FRONTMATTER" | grep '^max_size:' | sed 's/max_size: *//')
+
+if ! [[ "$MAX_SIZE" =~ ^[0-9]+$ ]]; then
+  echo "max_size must be a number" >&2
+  exit 1
+fi
+
+if [[ $MAX_SIZE -lt 1 ]] || [[ $MAX_SIZE -gt 10000000 ]]; then
+  echo "max_size out of range (1-10000000)" >&2
+  exit 1
+fi
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 286-298" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 21 ;
+                            oc:sectionTitle "Validate Numeric Ranges" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# Count --- markers (should be exactly 2 at start)
+MARKER_COUNT=$(grep -c '^---$' "$FILE" 2>/dev/null || echo "0")
+
+if [[ $MARKER_COUNT -lt 2 ]]; then
+  echo "Invalid settings file: missing frontmatter markers" >&2
+  exit 1
+fi
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 258-266" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 19 ;
+                            oc:sectionTitle "Validate Frontmatter Structure" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 17 ;
+                    oc:sectionTitle "Validation Techniques" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**String fields:**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# For proper list handling, use yq or convert to JSON
+# This requires yq to be installed (brew install yq)
+
+# Extract list as JSON array
+LIST=$(echo "$FRONTMATTER" | yq -o json '.list' 2>/dev/null)
+
+# Iterate over items
+echo "$LIST" | jq -r '.[]' | while read -r item; do
+  echo "Processing: $item"
+done
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 10 ;
+                                    oc:sourceLocation "lines 88-99" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 9 ;
+                                    oc:textContent "**List fields (proper parsing with jq):**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """ENABLED=$(echo "$FRONTMATTER" | grep '^enabled:' | sed 's/enabled: *//')
+
+# Use in condition
+if [[ "$ENABLED" == "true" ]]; then
+  # Enabled
+fi
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 4 ;
+                                    oc:sourceLocation "lines 53-60" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent "**Numeric fields:**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """MAX=$(echo "$FRONTMATTER" | grep '^max_value:' | sed 's/max_value: *//')
+
+# Validate it's a number
+if [[ "$MAX" =~ ^[0-9]+$ ]]; then
+  # Use in numeric comparison
+  if [[ $MAX -gt 100 ]]; then
+    # Too large
+  fi
+fi
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 6 ;
+                                    oc:sourceLocation "lines 63-73" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# Simple value
+VALUE=$(echo "$FRONTMATTER" | grep '^field_name:' | sed 's/field_name: *//')
+
+# Quoted value (removes surrounding quotes)
+VALUE=$(echo "$FRONTMATTER" | grep '^field_name:' | sed 's/field_name: *//' | sed 's/^"\\(.*\\)"$/\\1/')
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 44-50" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Boolean fields:**" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 7 ;
+                                    oc:textContent "**List fields (simple):**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# YAML: list: ["item1", "item2", "item3"]
+LIST=$(echo "$FRONTMATTER" | grep '^list:' | sed 's/list: *//')
+# Result: ["item1", "item2", "item3"]
+
+# For simple checks:
+if [[ "$LIST" == *"item1"* ]]; then
+  # List contains item1
+fi
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 8 ;
+                                    oc:sourceLocation "lines 76-85" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 5 ;
+                            oc:sectionTitle "Extract Individual Fields" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**How it works:**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """#!/bin/bash
+FILE=".claude/my-plugin.local.md"
+
+# Extract everything between --- markers (excluding the markers themselves)
+FRONTMATTER=$(sed -n '/^---$/,/^---$/{ /^---$/d; p; }' "$FILE")
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 28-34" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 3 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "`{ /^---$/d; p; }` - Delete the `---` lines, print everything else" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "`sed -n` - Suppress automatic printing" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "`/^---$/,/^---$/` - Range from first `---` to second `---`" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "Extract Frontmatter Block" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Parsing Frontmatter" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Always use temp file + atomic move to prevent corruption:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """#!/bin/bash
+FILE=".claude/my-plugin.local.md"
+NEW_VALUE="updated_value"
+
+# Create temp file
+TEMP_FILE="${FILE}.tmp.$$"
+
+# Update field using sed
+sed "s/^field_name: .*/field_name: $NEW_VALUE/" "$FILE" > "$TEMP_FILE"
+
+# Atomic replace
+mv "$TEMP_FILE" "$FILE"
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 196-209" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 14 ;
+                            oc:sectionTitle "Atomic Updates" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# Increment iteration counter
+CURRENT=$(echo "$FRONTMATTER" | grep '^iteration:' | sed 's/iteration: *//')
+NEXT=$((CURRENT + 1))
+
+# Update file
+TEMP_FILE="${FILE}.tmp.$$"
+sed "s/^iteration: .*/iteration: $NEXT/" "$FILE" > "$TEMP_FILE"
+mv "$TEMP_FILE" "$FILE"
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 213-222" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 15 ;
+                            oc:sectionTitle "Update Single Field" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# Update several fields at once
+TEMP_FILE="${FILE}.tmp.$$"
+
+sed -e "s/^iteration: .*/iteration: $NEXT_ITERATION/" \\
+    -e "s/^pr_number: .*/pr_number: $PR_NUMBER/" \\
+    -e "s/^status: .*/status: $NEW_STATUS/" \\
+    "$FILE" > "$TEMP_FILE"
+
+mv "$TEMP_FILE" "$FILE"
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 226-236" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 16 ;
+                            oc:sectionTitle "Update Multiple Fields" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 13 ;
+                    oc:sectionTitle "Updating Settings Files" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Values with special characters need careful handling:" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Safe parsing:**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# Always quote variables when using
+MESSAGE=$(echo "$FRONTMATTER" | grep '^message:' | sed 's/message: *//' | sed 's/^"\\(.*\\)"$/\\1/')
+
+echo "Message: $MESSAGE"  # Quoted!
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 4 ;
+                                    oc:sourceLocation "lines 370-375" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """message: "Error: Something went wrong!"
+path: "/path/with spaces/file.txt"
+regex: "^[a-zA-Z0-9_]+$"
+""" ;
+                                    oc:codeLanguage "yaml" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 363-367" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 26 ;
+                            oc:sectionTitle "Special Characters" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """field1:
+field2: ""
+field3: null
+""" ;
+                                    oc:codeLanguage "yaml" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 342-346" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Parsing:**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """VALUE=$(echo "$FRONTMATTER" | grep '^field1:' | sed 's/field1: *//')
+# VALUE will be empty string
+
+# Check for empty/null
+if [[ -z "$VALUE" ]] || [[ "$VALUE" == "null" ]]; then
+  VALUE="default"
+fi
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 4 ;
+                                    oc:sourceLocation "lines 349-357" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Handle missing or empty fields:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 25 ;
+                            oc:sectionTitle "Empty Values" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "If the markdown body contains `---`, the parsing still works because we only match the first two:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """---
+field: value
+---
+
+# Body
+
+Here's a separator:
+---
+
+More content after the separator.
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 323-334" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "The `awk '/^---$/{i++; next} i>=2'` pattern handles this correctly." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 24 ;
+                            oc:sectionTitle "--- in Markdown Body" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# These are equivalent:
+field1: value
+field2: "value"
+field3: 'value'
+""" ;
+                                    oc:codeLanguage "yaml" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 306-311" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "YAML allows both quoted and unquoted strings:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# Remove surrounding quotes if present
+VALUE=$(echo "$FRONTMATTER" | grep '^field:' | sed 's/field: *//' | sed 's/^"\\(.*\\)"$/\\1/' | sed "s/^'\\\\(.*\\\\)'$/\\\\1/")
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 4 ;
+                                    oc:sourceLocation "lines 314-317" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Handle both:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 23 ;
+                            oc:sectionTitle "Quotes in Values" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 22 ;
+                    oc:sectionTitle "Edge Cases and Gotchas" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """#!/bin/bash
+set -euo pipefail
+
+# Configuration
+SETTINGS_FILE=".claude/my-plugin.local.md"
+
+# Quick exit if not configured
+if [[ ! -f "$SETTINGS_FILE" ]]; then
+  # Use defaults
+  ENABLED=true
+  MODE=standard
+  MAX_SIZE=1000000
+else
+  # Parse frontmatter
+  FRONTMATTER=$(sed -n '/^---$/,/^---$/{ /^---$/d; p; }' "$SETTINGS_FILE")
+
+  # Extract fields with defaults
+  ENABLED=$(echo "$FRONTMATTER" | grep '^enabled:' | sed 's/enabled: *//')
+  ENABLED=${ENABLED:-true}
+
+  MODE=$(echo "$FRONTMATTER" | grep '^mode:' | sed 's/mode: *//' | sed 's/^"\\(.*\\)"$/\\1/')
+  MODE=${MODE:-standard}
+
+  MAX_SIZE=$(echo "$FRONTMATTER" | grep '^max_size:' | sed 's/max_size: *//')
+  MAX_SIZE=${MAX_SIZE:-1000000}
+
+  # Validate values
+  if [[ "$ENABLED" != "true" ]] && [[ "$ENABLED" != "false" ]]; then
+    echo "⚠️  Invalid enabled value, using default" >&2
+    ENABLED=true
+  fi
+
+  if ! [[ "$MAX_SIZE" =~ ^[0-9]+$ ]]; then
+    echo "⚠️  Invalid max_size, using default" >&2
+    MAX_SIZE=1000000
+  fi
+fi
+
+# Quick exit if disabled
+if [[ "$ENABLED" != "true" ]]; then
+  exit 0
+fi
+
+# Use configuration
+echo "Configuration loaded: mode=$MODE, max_size=$MAX_SIZE" >&2
+
+# Apply logic based on settings
+case "$MODE" in
+  strict)
+    # Strict validation
+    ;;
+  standard)
+    # Standard validation
+    ;;
+  lenient)
+    # Lenient validation
+    ;;
+esac
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 488-547" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "This provides robust settings handling with defaults, validation, and error recovery." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 34 ;
+                    oc:sectionTitle "Complete Example" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """OPTIONAL=$(echo "$FRONTMATTER" | grep '^optional_field:' | sed 's/optional_field: *//' | sed 's/^"\\(.*\\)"$/\\1/')
+
+# Only use if present
+if [[ -n "$OPTIONAL" ]] && [[ "$OPTIONAL" != "null" ]]; then
+  # Field is set, use it
+  echo "Optional field: $OPTIONAL"
+fi
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 158-166" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 11 ;
+                            oc:sectionTitle "Pattern: Optional Field" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# Parse all fields in one pass
+while IFS=': ' read -r key value; do
+  # Remove quotes if present
+  value=$(echo "$value" | sed 's/^"\\(.*\\)"$/\\1/')
+
+  case "$key" in
+    enabled)
+      ENABLED="$value"
+      ;;
+    mode)
+      MODE="$value"
+      ;;
+    max_size)
+      MAX_SIZE="$value"
+      ;;
+  esac
+done <<< "$FRONTMATTER"
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 170-188" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 12 ;
+                            oc:sectionTitle "Pattern: Multiple Fields at Once" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """VALUE=$(echo "$FRONTMATTER" | grep '^field:' | sed 's/field: *//' | sed 's/^"\\(.*\\)"$/\\1/')
+
+# Use default if empty
+if [[ -z "$VALUE" ]]; then
+  VALUE="default_value"
+fi
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 147-154" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 10 ;
+                            oc:sectionTitle "Pattern: Field with Default" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 9 ;
+                    oc:sectionTitle "Common Parsing Patterns" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Important:** Use `jq -n --arg` for safer JSON construction with user content:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """PROMPT=$(awk '/^---$/{i++; next} i>=2' "$FILE")
+
+# Safe JSON construction
+jq -n --arg prompt "$PROMPT" '{
+  "decision": "block",
+  "reason": $prompt
+}'
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 3 ;
+                                    oc:sourceLocation "lines 133-141" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# Extract body
+PROMPT=$(awk '/^---$/{i++; next} i>=2' "$RALPH_STATE_FILE")
+
+# Feed back to Claude
+echo '{"decision": "block", "reason": "'"$PROMPT"'"}' | jq .
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 123-129" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 8 ;
+                            oc:sectionTitle "Use Body as Prompt" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 3 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "`/^---$/` - Match `---` lines" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "`i>=2` - Print all lines after second `---`" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "`{i++; next}` - Increment counter and skip the `---` line" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**How it works:**" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent "**Handles edge case:** If `---` appears in the markdown body, it still works because we only count the first two `---` at the start." ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """#!/bin/bash
+FILE=".claude/my-plugin.local.md"
+
+# Extract everything after the closing ---
+# Counts --- markers: first is opening, second is closing, everything after is body
+BODY=$(awk '/^---$/{i++; next} i>=2' "$FILE")
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 105-112" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 7 ;
+                            oc:sectionTitle "Extract Body Content" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Parsing Markdown Body" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent "**Cons:**" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# Install: brew install yq
+
+# Parse YAML properly
+FRONTMATTER=$(sed -n '/^---$/,/^---$/{ /^---$/d; p; }' "$FILE")
+
+# Extract fields with yq
+ENABLED=$(echo "$FRONTMATTER" | yq '.enabled')
+MODE=$(echo "$FRONTMATTER" | yq '.mode')
+LIST=$(echo "$FRONTMATTER" | yq -o json '.list_field')
+
+# Iterate list properly
+echo "$LIST" | jq -r '.[]' | while read -r item; do
+  echo "Item: $item"
+done
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 457-472" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 7 ;
+                            oc:textContent "**Recommendation:** Use sed/grep for simple fields, yq for complex structures." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "For complex YAML, consider using `yq`:" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 6 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Requires yq installation" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Additional dependency" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "May not be available on all systems" ] ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 4 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Proper YAML parsing" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Better list/object support" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Handles complex structures" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Pros:**" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 33 ;
+                    oc:sectionTitle "Alternative: Using yq" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Settings File Parsing Techniques" ] ;
+    oc:impartsKnowledge oc:kn_013e2b0e,
+        oc:kn_09ea2952,
+        oc:kn_13c99757,
+        oc:kn_1f6a0322,
+        oc:kn_23581ce7,
+        oc:kn_2609df5d,
+        oc:kn_50754e0d,
+        oc:kn_524532c0,
+        oc:kn_6e4ad726,
+        oc:kn_92292284,
+        oc:kn_92a66edb,
+        oc:kn_9c140b8f,
+        oc:kn_b9bde1b9,
+        oc:kn_d79d929a ;
+    oc:isUserInvocable true ;
+    oc:nature "Tool" ;
     oc:requiresState oc:FileExists ;
-    oc:resolvesIntent "extract frontmatter fields from markdown files",
+    oc:resolvesIntent "extract YAML frontmatter from markdown",
         "parse plugin settings files",
-        "read and update .claude plugin configuration",
-        "validate settings file structure and field values" ;
-    oc:yieldsState oc:SettingsParsed .
+        "update settings files atomically",
+        "validate settings file structure and values" ;
+    oc:yieldsState oc:SettingsParsed,
+        oc:SettingsValidated .
 
-oc:kn_4e81b15b a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "Before parsing any .claude plugin settings file" ;
-    oc:directiveContent "Always validate that the settings file has exactly 2 --- markers at the start before attempting to parse frontmatter." ;
-    oc:hasRationale "Missing or malformed frontmatter markers indicate an invalid or corrupted settings file. Early detection prevents confusing downstream parse errors." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_6261fa3d a oc:AntiPattern,
+oc:kn_013e2b0e a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When reading multiple fields from the same settings file" ;
-    oc:directiveContent "Never re-parse the settings file for each field extraction. Parse frontmatter once and cache the result for all subsequent field extractions." ;
-    oc:hasRationale "Repeated file I/O and sed/grep pipelines for each field is wasteful; caching the frontmatter block and extracting from memory is significantly faster." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_964ccad4 a oc:KnowledgeNode,
-        oc:SecurityImplication ;
-    oc:appliesToContext "When feeding parsed settings body content into JSON structures" ;
-    oc:directiveContent "Always use jq -n --arg for constructing JSON with user-supplied content from settings files rather than string interpolation." ;
-    oc:hasRationale "String interpolation with user content ('\"$PROMPT\"') is vulnerable to injection attacks and will break if the content contains quotes, newlines, or special JSON characters." ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_9dda4fe1 a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When extracting markdown body content from settings files" ;
-    oc:directiveContent "The awk pattern '/^---$/{i++; next} i>=2' must be used for body extraction because it correctly handles --- markers that appear within the markdown body itself." ;
-    oc:hasRationale "A naive approach using sed ranges would break if --- appears in the body content. The awk counter approach only counts the first two markers as frontmatter delimiters." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_b1df850a a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When choosing a parsing strategy for settings fields" ;
-    oc:directiveContent "Use sed/grep for simple scalar field extraction; switch to yq for complex structures like nested objects or lists that require proper YAML parsing." ;
-    oc:hasRationale "sed/grep are universally available but cannot handle complex YAML structures correctly. yq provides proper parsing but adds a dependency that may not be available on all systems." ;
+    oc:appliesToContext "When choosing a parsing approach" ;
+    oc:directiveContent "Use sed/grep for simple field extraction, yq for complex YAML structures (nested objects, lists). Prefer pure bash when yq is not guaranteed available." ;
+    oc:hasRationale "yq adds a dependency but handles YAML properly; sed/grep are universally available but fragile with complex structures." ;
     oc:severityLevel "LOW" .
 
-oc:kn_ead12967 a oc:DesignPrinciple,
+oc:kn_09ea2952 a oc:KnowledgeNode,
+        oc:SecurityImplication ;
+    oc:appliesToContext "When feeding parsed body content into JSON output" ;
+    oc:directiveContent "When constructing JSON from parsed values, always use jq -n --arg to safely embed user content. Never interpolate shell variables directly into JSON strings." ;
+    oc:hasRationale "Direct string interpolation can break JSON structure and enable injection if the content contains quotes or special characters." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_13c99757 a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When updating any .claude plugin settings file" ;
-    oc:directiveContent "Use temp file + atomic move (mv) when updating settings files to prevent corruption from partial writes." ;
-    oc:hasRationale "Atomic file replacement ensures the settings file is never in a partially-written state, which could crash the plugin or produce undefined behavior." ;
+    oc:appliesToContext "When extracting markdown body content after frontmatter" ;
+    oc:directiveContent "The awk '/^---$/{i++; next} i>=2' pattern correctly handles --- appearing in the markdown body because it only counts the first two markers." ;
+    oc:hasRationale "A naive sed approach would break if the body content itself contains --- separators." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_1f6a0322 a oc:KnowledgeNode,
+        oc:OutputFormat ;
+    oc:directiveContent """Settings file structure:
+---
+{field}: {value}
+{boolean_field}: true|false
+{numeric_field}: 42
+{list_field}: ["item1", "item2"]
+---
+{Markdown body content}""" ;
+    oc:templateVariables "Markdown body content",
+        "boolean_field",
+        "field",
+        "list_field",
+        "numeric_field",
+        "value" .
+
+oc:kn_23581ce7 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When parsing a plugin settings file" ;
+    oc:directiveContent "1. Check if settings file exists 2. Extract frontmatter with sed range 3. Cache FRONTMATTER variable 4. Extract fields with grep+sed, stripping quotes 5. Apply defaults for missing fields 6. Validate values (enums, ranges, types) 7. Exit early if disabled 8. Apply logic based on settings" ;
+    oc:stepOrder 1 .
+
+oc:kn_2609df5d a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Extracting markdown body after frontmatter" ;
+    oc:codeLanguage "bash" ;
+    oc:directiveContent "BODY=$(awk '/^---$/{i++; next} i>=2' \"$FILE\")" .
+
+oc:kn_50754e0d a oc:Idempotency,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When updating settings files" ;
+    oc:directiveContent "Reading/parsing settings is idempotent; writing must use atomic temp-file+mv to prevent corruption on concurrent access or crash mid-write." ;
+    oc:hasRationale "Non-atomic writes can leave the file in a corrupted state if the process is interrupted between write and replace." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_ff8716e2 a oc:KnowledgeNode,
-        oc:RecoveryTactic ;
-    oc:appliesToContext "When a parsed field value is invalid or missing" ;
-    oc:directiveContent "Always provide sensible defaults when a settings field is missing, empty, null, or fails validation rather than failing outright." ;
-    oc:hasRationale "Plugin settings files may be edited by users who make mistakes. Graceful fallback to defaults keeps the plugin functional while warning about the issue." ;
+oc:kn_524532c0 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Atomically updating a field in a settings file" ;
+    oc:codeLanguage "bash" ;
+    oc:directiveContent """TEMP_FILE="${FILE}.tmp.$$"
+sed "s/^field: .*/field: $NEW_VALUE/" "$FILE" > "$TEMP_FILE"
+mv "$TEMP_FILE" "$FILE\"""" .
+
+oc:kn_6e4ad726 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Validating frontmatter structure before parsing" ;
+    oc:codeLanguage "bash" ;
+    oc:directiveContent """MARKER_COUNT=$(grep -c '^---$' "$FILE" 2>/dev/null || echo "0")
+if [[ $MARKER_COUNT -lt 2 ]]; then
+  echo "Invalid settings file" >&2; exit 1
+fi""" .
+
+oc:kn_92292284 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When extracting multiple fields from a settings file" ;
+    oc:directiveContent "Never re-parse the file for each field extraction. Cache the FRONTMATTER variable once and extract all fields from it." ;
+    oc:hasRationale "Re-reading the file for each field is wasteful I/O and can lead to inconsistent reads if the file changes between parses." ;
     oc:severityLevel "MEDIUM" .
+
+oc:kn_92a66edb a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before any settings parsing" ;
+    oc:directiveContent "Before parsing, verify the file exists (-f), is readable (-r), and has exactly 2 frontmatter markers. Exit early if disabled." ;
+    oc:hasRationale "Prevents cryptic errors from missing or malformed files and avoids unnecessary work when settings are disabled." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_9c140b8f a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When a field is missing or has an invalid value" ;
+    oc:directiveContent "Always provide default values when extracting fields: VALUE=${VALUE:-default}. Validate extracted values and fall back to defaults on invalid input." ;
+    oc:hasRationale "Settings files may be incomplete or manually edited; robust scripts degrade gracefully rather than failing." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_b9bde1b9 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Parsing all fields in a single pass" ;
+    oc:codeLanguage "bash" ;
+    oc:directiveContent """while IFS=': ' read -r key value; do
+  value=$(echo "$value" | sed 's/^"\\(.*\\)"$/\\1/')
+  case "$key" in
+    enabled) ENABLED="$value" ;;
+    mode) MODE="$value" ;;
+  esac
+done <<< "$FRONTMATTER\"""" .
+
+oc:kn_d79d929a a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Extracting a string field with default from YAML frontmatter" ;
+    oc:codeLanguage "bash" ;
+    oc:directiveContent """FRONTMATTER=$(sed -n '/^---$/,/^---$/{ /^---$/d; p; }' "$FILE")
+VALUE=$(echo "$FRONTMATTER" | grep '^field:' | sed 's/field: *//' | sed 's/^"\\(.*\\)"$/\\1/')
+VALUE=${VALUE:-default}""" .
 

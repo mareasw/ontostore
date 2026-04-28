@@ -4,87 +4,297 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_plugin_official_build_mcpb_manifest_schema a oc:DeclarativeSkill,
+oc:skill_claude_plugin_official_build_mcpb_manifest_schema a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "manifest-schema" ;
     skos:broader "Schema specification" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/build-mcpb" ;
     oc:contentHash "6a97f9481107ebdbe8a75f06a5e126ba28021e1e8652677109e53d63a5793c72" ;
-    oc:differentia "Defines the v0.4 MCPB manifest structure for packaging MCP servers, including server launch config, user install-time settings, and compatibility gates" ;
-    oc:extends oc:skill_anthropics_claude_plugin_official_build_mcpb ;
-    oc:handlesFailure oc:InvalidInput,
-        oc:SchemaValidationFailed ;
+    oc:dependsOnSkill oc:skill_ontoskills_build_mcpb ;
+    oc:differentia "defines the MCPB manifest v0.4 structure for packaging MCP servers, including required fields, launch configuration, user config, and compatibility gating" ;
+    oc:extends oc:skill_claude_plugin_official_build_mcpb ;
+    oc:hasArgumentHint "mcpb-manifest.json" ;
     oc:hasCategory "development" ;
-    oc:hasRequirement oc:req_0835657a,
-        oc:req_3b8fa35b ;
-    oc:impartsKnowledge oc:kn_0e2c73e1,
-        oc:kn_2eed15e3,
-        oc:kn_428bb660,
-        oc:kn_491eea2a,
-        oc:kn_5768a2a7,
-        oc:kn_9de6b2ab,
-        oc:kn_b86e17b3 ;
-    oc:isUserInvocable false ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Validated against `github.com/anthropics/mcpb/schemas/mcpb-manifest-v0.4.schema.json`. The schema uses `additionalProperties: false` — unknown keys are rejected. Add `\"$schema\"` to your manifest for editor validation." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """"server": {
+  "type": "node",
+  "entry_point": "server/index.js",
+  "mcp_config": {
+    "command": "node",
+    "args": ["${__dirname}/server/index.js"],
+    "env": {
+      "API_KEY": "${user_config.apiKey}",
+      "ROOT_DIR": "${user_config.rootDir}"
+    }
+  }
+}
+""" ;
+                            oc:codeLanguage "json" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 35-48" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 4 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "`${HOME}` — user's home directory" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "`${__dirname}` — absolute path to the unpacked bundle directory" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "`${user_config.<key>}` — value the user entered at install time" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Substitution variables** (in `args` and `env` only):" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent "**There are no auto-prefixed env vars.** The env var names your server reads are exactly what you declare in `mcp_config.env`. If you write `\"ROOT_DIR\": \"${user_config.rootDir}\"`, your server reads `process.env.ROOT_DIR`." ],
+                        [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 2 ;
+                            oc:rowCount 5 ;
+                            oc:tableCaption "```" ;
+                            oc:tableMarkdown """| Field | Description |
+|---|---|
+| `type` | `"node"`, `"python"`, or `"binary"` |
+| `entry_point` | Relative path to main file. Informational. |
+| `mcp_config.command` | Executable to launch. |
+| `mcp_config.args` | Argv array. Use `${__dirname}` for bundle-relative paths. |
+| `mcp_config.env` | Environment variables. Use `${user_config.KEY}` to substitute user config. |
+""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "`server` — launch configuration" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """"compatibility": {
+  "claude_desktop": ">=1.0.0",
+  "platforms": ["darwin", "win32", "linux"],
+  "runtimes": { "node": ">=20" }
+}
+""" ;
+                            oc:codeLanguage "json" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 112-118" ],
+                        [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 2 ;
+                            oc:rowCount 3 ;
+                            oc:tableCaption "```" ;
+                            oc:tableMarkdown """| Field | Description |
+|---|---|
+| `claude_desktop` | Semver range. Install blocked if host is older. |
+| `platforms` | OS allowlist. Subset of `["darwin", "win32", "linux"]`. |
+| `runtimes` | Required runtime versions, e.g. `{"node": ">=20"}` or `{"python": ">=3.11"}`. |
+""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "`compatibility` — gate installs" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """{
+  "$schema": "https://raw.githubusercontent.com/anthropics/mcpb/main/schemas/mcpb-manifest-v0.4.schema.json",
+  "manifest_version": "0.4",
+  "name": "hello",
+  "version": "0.1.0",
+  "description": "Minimal MCPB server.",
+  "author": { "name": "Your Name" },
+  "server": {
+    "type": "node",
+    "entry_point": "server/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/server/index.js"]
+    }
+  }
+}
+""" ;
+                            oc:codeLanguage "json" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 130-147" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Minimal valid manifest" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "`directory` and `file` types render native OS pickers — prefer these over free-text paths for UX and validation." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """"user_config": {
+  "apiKey": {
+    "type": "string",
+    "title": "API Key",
+    "description": "Your service API key. Stored encrypted.",
+    "sensitive": true,
+    "required": true
+  },
+  "rootDir": {
+    "type": "directory",
+    "title": "Root directory",
+    "description": "Directory to expose to the server.",
+    "default": "${HOME}/Documents"
+  },
+  "maxResults": {
+    "type": "number",
+    "title": "Max results",
+    "description": "Maximum items returned per query.",
+    "default": 50,
+    "min": 1,
+    "max": 500
+  }
+}
+""" ;
+                            oc:codeLanguage "json" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 69-93" ],
+                        [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 2 ;
+                            oc:rowCount 8 ;
+                            oc:tableCaption "```" ;
+                            oc:tableMarkdown """| Field | Required | Description |
+|---|---|---|
+| `type` | ✅ | `"string"`, `"number"`, `"boolean"`, `"directory"`, `"file"` |
+| `title` | ✅ | Form label. |
+| `description` | ✅ | Help text under the input. |
+| `default` | | Pre-filled value. Supports `${HOME}`. |
+| `required` | | If `true`, install blocks until filled. |
+| `sensitive` | | If `true`, stored in OS keychain + masked in UI. **NOT `secret`** — that field doesn't exist. |
+| `multiple` | | If `true`, user can enter multiple values (array). |
+| `min` / `max` | | Numeric bounds (for `type: "number"`). |
+""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "`user_config` — install-time settings" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "**No `minHostVersion`.** It's `compatibility.claude_desktop`." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "**No auto env var prefix.** No `MCPB_CONFIG_*` convention. You wire config → env explicitly in `server.mcp_config.env`." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "**No `permissions` block.** There is no manifest-level filesystem/network/process scoping. The server runs with full user privileges. Enforce boundaries in your tool handlers — see `local-security.md`." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "**No `entry` field.** It's `server` with `entry_point` inside." ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "What MCPB does NOT have" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 1 ;
+                            oc:rowCount 19 ;
+                            oc:tableCaption "## Top-level fields" ;
+                            oc:tableMarkdown """| Field | Required | Description |
+|---|---|---|
+| `manifest_version` | ✅ | Schema version. Use `"0.4"`. |
+| `name` | ✅ | Package identifier (lowercase, hyphens). Must be unique. |
+| `version` | ✅ | Semver version of YOUR package. |
+| `description` | ✅ | One-line summary. Shown in marketplace. |
+| `author` | ✅ | `{name, email?, url?}` |
+| `server` | ✅ | Entry point and launch config. See below. |
+| `display_name` | | Human-friendly name. Falls back to `name`. |
+| `long_description` | | Markdown. Shown on detail page. |
+| `icon` / `icons` | | Path(s) to icon file(s) in the bundle. |
+| `homepage` / `repository` / `documentation` / `support` | | URLs. |
+| `license` | | SPDX identifier. |
+| `keywords` | | String array for search. |
+| `user_config` | | Install-time config fields. See below. |
+| `compatibility` | | Host/platform/runtime requirements. See below. |
+| `tools` / `prompts` | | Optional declarative list for marketplace display. Not enforced at runtime. |
+| `tools_generated` / `prompts_generated` | | `true` if tools/prompts are dynamic (can't list statically). |
+| `screenshots` | | Array of image paths. |
+| `localization` | | i18n bundles. |
+| `privacy_policies` | | URLs. |
+""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Top-level fields" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "MCPB Manifest Schema (v0.4)" ] ;
+    oc:impartsKnowledge oc:kn_56474882,
+        oc:kn_94ba3860,
+        oc:kn_b43c65e0,
+        oc:kn_b95edf39,
+        oc:kn_bb2c34db,
+        oc:kn_ca36569c,
+        oc:kn_d40745fa ;
+    oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:EnvironmentReady ;
-    oc:resolvesIntent "configure server launch parameters in mcpb",
-        "create a valid mcpb manifest",
-        "define user config for mcpb packages",
-        "understand mcpb manifest schema fields",
-        "validate mcpb manifest files" ;
-    oc:yieldsState oc:ManifestValidated .
+    oc:resolvesIntent "configure mcpb server launch settings",
+        "create mcpb manifest",
+        "understand mcpb manifest schema",
+        "validate mcpb manifest" .
 
-oc:kn_0e2c73e1 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When defining user_config fields for API keys or credentials" ;
-    oc:directiveContent "Do NOT use a field called 'secret' on user_config entries — the correct field name is 'sensitive' (boolean). There is no 'secret' field in the schema." ;
-    oc:hasRationale "Using 'secret' will silently be rejected by additionalProperties:false, and sensitive values won't be stored encrypted or masked in the UI." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_2eed15e3 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When authoring manifest fields" ;
-    oc:directiveContent "Do NOT use 'entry' as a top-level field (that is not MCPB) or 'minHostVersion' for host version gating. Use 'server' with 'entry_point' inside, and 'compatibility.claude_desktop' for host version requirements." ;
-    oc:hasRationale "These are common mistakes from conflating MCPB with other package formats; using wrong field names causes silent failures under additionalProperties:false." .
-
-oc:kn_428bb660 a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "When configuring server launch parameters in mcp_config" ;
-    oc:directiveContent "Use substitution variables ${__dirname}, ${user_config.KEY}, and ${HOME} only in server.mcp_config.args and server.mcp_config.env. There are no auto-prefixed environment variables — env var names your server reads are exactly what you declare." ;
-    oc:hasRationale "Explicit wiring prevents surprising name collisions and makes the config-to-runtime mapping transparent and debuggable." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_491eea2a a oc:KnowledgeNode,
-        oc:KnownIssue ;
-    oc:appliesToContext "When planning security for an MCPB package" ;
-    oc:directiveContent "MCPB manifests have no permissions block — there is no manifest-level filesystem, network, or process scoping. Security boundaries must be enforced inside tool handlers." ;
-    oc:hasRationale "The server runs with full user privileges; relying on a non-existent permissions mechanism creates a false sense of security." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_5768a2a7 a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When creating any new MCPB manifest from scratch" ;
-    oc:directiveContent "The minimal required fields are: manifest_version ('0.4'), name (lowercase hyphens), version (semver), description, author (object with name), and server (with type, entry_point, and mcp_config containing command and args)." ;
-    oc:hasRationale "Omitting any required field will cause schema validation to fail, blocking packaging and distribution." .
-
-oc:kn_9de6b2ab a oc:Constraint,
+oc:kn_56474882 a oc:Constraint,
         oc:KnowledgeNode ;
     oc:appliesToContext "When writing or editing any MCPB manifest file" ;
-    oc:directiveContent "The manifest uses additionalProperties: false — any unknown or misspelled top-level keys will cause schema validation to reject the entire manifest." ;
-    oc:hasRationale "Strict schema enforcement prevents subtle bugs from typos and ensures forward compatibility as the schema evolves." ;
+    oc:directiveContent "The schema uses additionalProperties: false — any unknown or misspelled keys in the manifest will be rejected by validation." ;
+    oc:hasRationale "Strict schema enforcement prevents silent misconfiguration and ensures forward compatibility." ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_b86e17b3 a oc:DesignPrinciple,
+oc:kn_94ba3860 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When creating a new MCPB manifest" ;
+    oc:directiveContent "Use manifest_version '0.4', lowercase-hyphen name, semver version, and the required fields: name, version, description, author, server." ;
+    oc:hasRationale "These five fields are required for a valid manifest; omitting any will cause validation failure." .
+
+oc:kn_b43c65e0 a oc:KnowledgeNode,
+        oc:Prerequisite ;
+    oc:appliesToContext "Before submitting or publishing an MCPB package" ;
+    oc:directiveContent "Manifest must validate against mcpb-manifest-v0.4.schema.json. Include $schema for editor autocomplete." .
+
+oc:kn_b95edf39 a oc:Heuristic,
         oc:KnowledgeNode ;
     oc:appliesToContext "When defining user_config fields that accept filesystem paths" ;
-    oc:directiveContent "Prefer type 'directory' or 'file' for path inputs over type 'string' — these render native OS file/directory pickers for better UX and validation." ;
-    oc:hasRationale "Native pickers prevent invalid paths, reduce user error, and provide a better installation experience." .
+    oc:directiveContent "Use 'directory' and 'file' types in user_config instead of free-text 'string' for paths — they render native OS pickers with built-in validation." ;
+    oc:hasRationale "Native pickers improve UX and prevent invalid path entries at install time." .
 
-oc:req_0835657a a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "Familiarity with MCP (Model Context Protocol) server packaging" .
+oc:kn_bb2c34db a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When configuring server environment variables" ;
+    oc:directiveContent "Env var names in mcp_config.env are exactly what the server reads — there is no auto-prefixing. Wire config → env explicitly using ${user_config.KEY} substitution." ;
+    oc:hasRationale "Explicit mapping avoids ambiguity and makes the manifest self-documenting." .
 
-oc:req_3b8fa35b a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "Understanding of JSON schema and semver" .
+oc:kn_ca36569c a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing manifest fields" ;
+    oc:directiveContent "Do NOT use 'secret', 'permissions', 'entry', 'minHostVersion', or auto-prefixed env vars — these fields do not exist in the MCPB schema." ;
+    oc:hasRationale "These are common misconceptions carried from other packaging formats; using them will cause validation errors." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_d40745fa a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When designing secure MCP server packages" ;
+    oc:directiveContent "MCPB has no manifest-level permissions block for filesystem/network/process scoping. Servers run with full user privileges. Enforce boundaries in tool handlers." ;
+    oc:hasRationale "Security boundaries must be implemented at the application level, not the manifest level." ;
+    oc:severityLevel "HIGH" .
 

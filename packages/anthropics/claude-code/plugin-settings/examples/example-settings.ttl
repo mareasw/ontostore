@@ -4,63 +4,286 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_code_plugin_settings_example_settings a oc:DeclarativeSkill,
+oc:skill_claude_code_plugin_settings_example_settings a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "example-settings" ;
-    skos:broader "Configuration templates" ;
+    skos:broader "Template reference" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-code/plugin-settings" ;
     oc:contentHash "f07209b6e2fb62d443ae07d01bc1674c6c741c352a04549bfa978e1f34b9769e" ;
-    oc:differentia "provides example YAML frontmatter patterns for plugin settings, agent state files, and feature flags in .claude/*.local.md files" ;
-    oc:extends oc:skill_anthropics_claude_code_plugin_settings ;
-    oc:handlesFailure oc:FileNotFound,
-        oc:PermissionDenied ;
-    oc:hasArgumentHint "template-type (basic|advanced|agent-state|feature-flag)" ;
+    oc:differentia "that provides example plugin settings file patterns with frontmatter configuration for Claude Code plugins" ;
+    oc:extends oc:skill_claude_code_plugin_settings ;
+    oc:hasArgumentHint "plugin-name (used to create .claude/{plugin-name}.local.md)" ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_0e994ca6,
-        oc:kn_21abdf97,
-        oc:kn_91dffa83,
-        oc:kn_db360782,
-        oc:kn_fc2e6c12 ;
-    oc:isUserInvocable false ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**.claude/my-plugin.local.md:**" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """---
+enabled: true
+strict_mode: false
+max_file_size: 1000000
+allowed_extensions: [".js", ".ts", ".tsx"]
+enable_logging: true
+notification_level: info
+retry_attempts: 3
+timeout_seconds: 60
+custom_path: "/path/to/data"
+---
+
+# My Plugin Advanced Configuration
+
+This project uses custom plugin configuration with:
+- Standard validation mode
+- 1MB file size limit
+- JavaScript/TypeScript files allowed
+- Info-level logging
+- 3 retry attempts
+
+## Additional Notes
+
+Contact @team-lead with questions about this configuration.
+""" ;
+                            oc:codeLanguage "markdown" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 22-47" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Template: Advanced Configuration" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# Plugin settings (user-local, not committed)
+.claude/*.local.md
+.claude/*.local.json
+""" ;
+                            oc:codeLanguage "gitignore" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 140-144" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Always add to project `.gitignore`:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Gitignore" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**.claude/experimental-features.local.md:**" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """---
+enabled: true
+features:
+  - ai_suggestions
+  - auto_formatting
+  - advanced_refactoring
+experimental_mode: false
+---
+
+# Experimental Features Configuration
+
+Current enabled features:
+- AI-powered code suggestions
+- Automatic code formatting
+- Advanced refactoring tools
+
+Experimental mode is OFF (stable features only).
+""" ;
+                            oc:codeLanguage "markdown" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 95-113" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Template: Feature Flag Pattern" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# Check if plugin is configured
+if [[ ! -f ".claude/my-plugin.local.md" ]]; then
+  exit 0  # Not configured, skip hook
+fi
+
+# Read settings
+FRONTMATTER=$(sed -n '/^---$/,/^---$/{ /^---$/d; p; }' ".claude/my-plugin.local.md")
+ENABLED=$(echo "$FRONTMATTER" | grep '^enabled:' | sed 's/enabled: *//')
+
+# Apply settings
+if [[ "$ENABLED" == "true" ]]; then
+  # Hook is active
+  # ...
+fi
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 119-134" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "These templates can be read by hooks:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Usage in Hooks" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**.claude/my-plugin.local.md:**" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """---
+enabled: true
+mode: standard
+---
+
+# My Plugin Configuration
+
+Plugin is active in standard mode.
+""" ;
+                            oc:codeLanguage "markdown" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 7-16" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Template: Basic Configuration" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Users can edit settings files manually:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "Changes require Claude Code restart - hooks can't be hot-swapped." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# Edit settings
+vim .claude/my-plugin.local.md
+
+# Changes take effect after restart
+exit  # Exit Claude Code
+claude  # Restart
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 150-157" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 7 ;
+                    oc:sectionTitle "Editing Settings" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """---
+agent_name: database-implementation
+task_number: 4.2
+pr_number: 5678
+coordinator_session: team-leader
+enabled: true
+dependencies: ["Task 3.5", "Task 4.1"]
+additional_instructions: "Use PostgreSQL, not MySQL"
+---
+
+# Task Assignment: Database Schema Implementation
+
+Implement the database schema for the new features module.
+
+## Requirements
+
+- Create migration files
+- Add indexes for performance
+- Write tests for constraints
+- Document schema in README
+
+## Success Criteria
+
+- Migrations run successfully
+- All tests pass
+- PR created with CI green
+- Schema documented
+
+## Coordination
+
+Depends on:
+- Task 3.5: API endpoint definitions
+- Task 4.1: Data model design
+
+Report status to coordinator session 'team-leader'.
+""" ;
+                            oc:codeLanguage "markdown" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 53-89" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**.claude/multi-agent-swarm.local.md:**" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Template: Agent State File" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Example Plugin Settings File" ] ;
+    oc:impartsKnowledge oc:kn_08e3a1ca,
+        oc:kn_1df02b75,
+        oc:kn_28caec73,
+        oc:kn_4ebe3ac0,
+        oc:kn_8033f457,
+        oc:kn_a05cd273 ;
+    oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:DirectoryWritable ;
     oc:resolvesIntent "configure plugin settings",
-        "create local settings file",
-        "define feature flags for plugins",
-        "set up agent state configuration" ;
-    oc:yieldsState oc:DocumentCreated .
+        "create settings file for a plugin",
+        "set up multi-agent task assignment files",
+        "understand plugin settings file format",
+        "use feature flags in plugin settings" .
 
-oc:kn_0e994ca6 a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "When initializing a plugin for a project" ;
-    oc:directiveContent "Always add '.claude/*.local.md' and '.claude/*.local.json' to the project .gitignore." ;
-    oc:hasRationale "Prevents accidental commits of user-local configuration files." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_21abdf97 a oc:DesignPrinciple,
+oc:kn_08e3a1ca a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When creating or reading any plugin settings file" ;
-    oc:directiveContent "Plugin settings use YAML frontmatter in .claude/*.local.md files with an 'enabled' key as the primary toggle." ;
-    oc:hasRationale "Consistent frontmatter format allows hooks to reliably parse settings with sed/grep without requiring a YAML parser." ;
-    oc:severityLevel "HIGH" .
+    oc:appliesToContext "At the start of any hook that reads plugin settings" ;
+    oc:directiveContent "Check if settings file exists before reading it: if [[ ! -f \".claude/my-plugin.local.md\" ]]; then exit 0; fi" ;
+    oc:hasRationale "Graceful degradation - unconfigured plugins should silently skip rather than error" .
 
-oc:kn_91dffa83 a oc:KnowledgeNode,
-        oc:SideEffect ;
-    oc:appliesToContext "After editing any .claude/*.local.md settings file" ;
-    oc:directiveContent "Settings changes require a Claude Code restart to take effect — hooks cannot be hot-swapped." ;
-    oc:hasRationale "Hooks read settings at startup; modifying files mid-session has no effect until restart, which can confuse users." ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_db360782 a oc:AntiPattern,
+oc:kn_1df02b75 a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When setting up or distributing plugin configurations" ;
-    oc:directiveContent "Never commit .claude/*.local.md or .claude/*.local.json files to version control." ;
-    oc:hasRationale "Local settings are user-specific and machine-specific; committing them leaks local paths, preferences, and potentially secrets." ;
-    oc:severityLevel "CRITICAL" .
+    oc:appliesToContext "When designing any plugin settings file schema" ;
+    oc:directiveContent "Use frontmatter for machine-parseable key-value settings and markdown body for human-readable documentation and instructions" ;
+    oc:hasRationale "Separation of concerns keeps configuration parseable by hooks while remaining self-documenting for humans" .
 
-oc:kn_fc2e6c12 a oc:KnowledgeNode,
-        oc:RecoveryTactic ;
-    oc:appliesToContext "When a hook checks for plugin configuration that may not exist" ;
-    oc:directiveContent "If a hook finds no settings file, it should exit cleanly (exit 0) rather than error." ;
-    oc:hasRationale "Settings files are optional; plugins should gracefully degrade when not configured rather than blocking workflows." .
+oc:kn_28caec73 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When creating any plugin settings file - use YAML frontmatter between --- delimiters" ;
+    oc:codeLanguage "markdown" ;
+    oc:directiveContent """---
+enabled: true
+key: value
+---
+# Title
+Content body""" ;
+    oc:hasRationale "Frontmatter provides machine-readable settings that hooks can parse, while markdown body provides human-readable documentation" .
+
+oc:kn_4ebe3ac0 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "After editing any .claude/*.local.md file" ;
+    oc:directiveContent "Changes to settings files require Claude Code restart - hooks cannot be hot-swapped" ;
+    oc:hasRationale "Hooks read settings at startup; in-process hooks retain stale configuration until restart" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_8033f457 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When reading plugin settings from hook scripts" ;
+    oc:codeLanguage "bash" ;
+    oc:directiveContent """FRONTMATTER=$(sed -n '/^---$/,/^---$/{ /^---$/d; p; }' ".claude/my-plugin.local.md")
+ENABLED=$(echo "$FRONTMATTER" | grep '^enabled:' | sed 's/enabled: *//')""" ;
+    oc:hasRationale "Bash-based YAML parsing extracts frontmatter values without requiring external dependencies" .
+
+oc:kn_a05cd273 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When creating any plugin settings file" ;
+    oc:directiveContent "Always add .claude/*.local.md and .claude/*.local.json to .gitignore - settings files are user-local and must not be committed" ;
+    oc:hasRationale "Local settings contain user-specific configurations that should not leak into the shared repository" ;
+    oc:severityLevel "HIGH" .
 

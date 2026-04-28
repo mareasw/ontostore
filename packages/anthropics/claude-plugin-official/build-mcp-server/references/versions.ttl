@@ -4,69 +4,91 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_plugin_official_build_mcp_server_versions a oc:DeclarativeSkill,
+oc:skill_claude_plugin_official_build_mcp_server_versions a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "versions" ;
-    skos:broader "version registry" ;
+    skos:broader "Version pin registry" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/build-mcp-server" ;
     oc:contentHash "f7592e72c5c357153c3e031c7c768e32f670a654b146509cbeaf6d8d4f2e3752" ;
-    oc:differentia "that centralizes all version-sensitive dependency pins and claims for the build-mcp-server skill family in a single auditable table" ;
-    oc:extends oc:skill_anthropics_claude_plugin_official_build_mcp_server ;
-    oc:handlesFailure oc:VersionMismatch ;
+    oc:differentia "that centralizes all version-sensitive dependency claims for the build-mcp-server skill family with verification commands" ;
+    oc:extends oc:skill_claude_plugin_official_build_mcp_server ;
+    oc:handlesFailure oc:DependencyNotFound,
+        oc:VersionMismatch ;
     oc:hasCategory "development" ;
-    oc:hasRequirement oc:req_9fbf8538,
-        oc:req_d71f6c59,
-        oc:req_fc83f74c ;
-    oc:impartsKnowledge oc:kn_450960fb,
-        oc:kn_56b57442,
-        oc:kn_76a0284a,
-        oc:kn_ea410c97 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Table ;
+                    oc:blockType "table" ;
+                    oc:contentOrder 2 ;
+                    oc:rowCount 6 ;
+                    oc:tableCaption "Every version-sensitive claim in this skill, in one place. When updating the skill, check these first." ;
+                    oc:tableMarkdown """| Claim | Where stated | Last verified |
+|---|---|---|
+| `@modelcontextprotocol/ext-apps@1.2.2` CDN pin | `build-mcp-app/SKILL.md`, `build-mcp-app/references/widget-templates.md` (4×) | 2026-03 |
+| Claude Code ≥2.1.76 for elicitation | `elicitation.md:15`, `build-mcp-server/SKILL.md:43,76` | 2026-03 |
+| MCP spec 2025-11-25 CIMD/DCR status | `auth.md:20,24,41` | 2026-03 |
+| MCPB manifest schema v0.4 | `build-mcpb/references/manifest-schema.md` | 2026-03 |
+| CF `agents` SDK / `McpAgent` API | `deploy-cloudflare-workers.md` | 2026-03 |
+| CF template path `cloudflare/ai/demos/remote-mcp-authless` | `deploy-cloudflare-workers.md` | 2026-03 |
+""" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Every version-sensitive claim in this skill, in one place. When updating the skill, check these first." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# ext-apps latest
+npm view @modelcontextprotocol/ext-apps version
+
+# CF template still exists
+gh api repos/cloudflare/ai/contents/demos/remote-mcp-authless/src/index.ts --jq '.sha'
+
+# MCPB schema
+curl -sI https://raw.githubusercontent.com/anthropics/mcpb/main/schemas/mcpb-manifest-v0.4.schema.json | head -1
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 16-25" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "How to verify" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Version pins" ] ;
+    oc:impartsKnowledge oc:kn_740fb250,
+        oc:kn_94474f62,
+        oc:kn_e9f9b786,
+        oc:kn_f5fe623f ;
     oc:isUserInvocable false ;
     oc:nature "Concept" ;
     oc:requiresState oc:EnvironmentReady ;
-    oc:resolvesIntent "audit MCP dependency compatibility",
-        "check dependency versions",
-        "update version-sensitive claims",
+    oc:resolvesIntent "check version compatibility for MCP server toolchain",
+        "update version-sensitive dependencies",
         "verify version pins" ;
     oc:yieldsState oc:VersionsVerified .
 
-oc:kn_450960fb a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "Before modifying any skill that references versioned dependencies" ;
-    oc:directiveContent "When updating any skill in the build-mcp-server family, check this version pin table first to ensure no dependency claims become stale or invalid." ;
-    oc:hasRationale "Centralized version tracking prevents silent breakage from dependency drift across multiple skill files." ;
+oc:kn_740fb250 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When maintaining or updating any skill in the build-mcp-server family" ;
+    oc:directiveContent "All version-sensitive claims (CDN pins, minimum CLI versions, schema versions, template paths) must be centralized in a single versions table. When updating any skill file, check this table first." ;
+    oc:hasRationale "Scattered version claims across multiple files create silent breakage when dependencies update; centralization enables single-point verification." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_56b57442 a oc:AssumptionBoundary,
+oc:kn_94474f62 a oc:Idempotency,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When relying on version pin accuracy" ;
-    oc:directiveContent "All claims were last verified as of 2026-03. Any change to these dependencies after that date may require re-verification." ;
-    oc:hasRationale "Time-sensitive claims degrade in accuracy; the last-verified date establishes the trust boundary." ;
-    oc:severityLevel "MEDIUM" .
+    oc:appliesToContext "Always — verification commands are non-destructive" ;
+    oc:directiveContent "Version verification commands are read-only and safe to run multiple times; they query remote registries without side effects." ;
+    oc:hasRationale "Safe to include in CI pipelines or pre-commit hooks without risk of state mutation." .
 
-oc:kn_76a0284a a oc:Idempotency,
+oc:kn_e9f9b786 a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When running version verification commands" ;
-    oc:directiveContent "Verification commands are read-only (npm view, gh api, curl -sI) and can be safely re-run without side effects." ;
-    oc:hasRationale "Read-only checks ensure audits are non-destructive and repeatable." ;
-    oc:severityLevel "LOW" .
+    oc:appliesToContext "When using elicitation features, auth flows, or MCPB packaging" ;
+    oc:directiveContent "Claude Code must be ≥2.1.76 for elicitation support. MCP spec 2025-11-05 defines CIMD/DCR status. MCPB manifest schema is v0.4." ;
+    oc:hasRationale "Using features not yet supported by the installed CLI version causes silent failures or undefined behavior." .
 
-oc:kn_ea410c97 a oc:KnowledgeNode,
+oc:kn_f5fe623f a oc:KnowledgeNode,
         oc:PreFlightCheck ;
-    oc:appliesToContext "Before building or deploying MCP servers, apps, or bundles" ;
-    oc:directiveContent "Use the provided bash commands (npm view, gh api, curl -sI) to verify each pinned version or resource still exists before proceeding with builds." ;
-    oc:hasRationale "Catching stale pins early prevents cryptic build failures downstream." ;
-    oc:severityLevel "HIGH" .
-
-oc:req_9fbf8538 a oc:RequirementTool ;
-    oc:isOptional true ;
-    oc:requirementValue "npm" .
-
-oc:req_d71f6c59 a oc:RequirementTool ;
-    oc:isOptional true ;
-    oc:requirementValue "curl" .
-
-oc:req_fc83f74c a oc:RequirementTool ;
-    oc:isOptional true ;
-    oc:requirementValue "gh (GitHub CLI)" .
+    oc:appliesToContext "Before releasing updates to build-mcp-server skills" ;
+    oc:directiveContent "Before shipping skill updates, run the verification commands: npm view for ext-apps version, gh api for CF template existence, and curl for MCPB schema availability." ;
+    oc:hasRationale "Proactive verification catches broken pins before they reach users." .
 

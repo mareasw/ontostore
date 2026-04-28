@@ -4,103 +4,448 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_plugin_official_build_mcp_server_remote_http_scaffold a oc:DeclarativeSkill,
+oc:skill_claude_plugin_official_build_mcp_server_remote_http_scaffold a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "remote-http-scaffold" ;
     skos:broader "MCP server scaffold" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/build-mcp-server" ;
     oc:contentHash "bd5d49e1f4caa895221b7e539bd7cd23ad2c7e2dff5e7cf0bf4b976ebbb178e4" ;
-    oc:dependsOnSkill oc:skill_build_mcp_server ;
-    oc:differentia "provides minimal working Streamable-HTTP MCP server templates in TypeScript (Express) and Python (FastMCP) with deployment and testing guidance" ;
-    oc:extends oc:skill_anthropics_claude_plugin_official_build_mcp_server ;
-    oc:handlesFailure oc:InvalidInput,
-        oc:NetworkTimeout,
-        oc:PermissionDenied ;
+    oc:dependsOnSkill oc:skill_ontoskills_build_mcp_server ;
+    oc:differentia "provides minimal working remote streamable-HTTP MCP server templates in TypeScript and Python with deployment and testing guidance" ;
+    oc:extends oc:skill_claude_plugin_official_build_mcp_server ;
+    oc:handlesFailure oc:DependencyError,
+        oc:InvalidInput,
+        oc:PortConflict ;
+    oc:hasAllowedTool "Bash",
+        "Edit",
+        "Read",
+        "Write" ;
     oc:hasArgumentHint "language preference (typescript or python)" ;
     oc:hasCategory "development" ;
-    oc:hasRequirement oc:req_1a5b433b,
-        oc:req_71f5fa5d,
-        oc:req_eba9bfc4,
-        oc:req_fad69764 ;
-    oc:impartsKnowledge oc:kn_1bbb2221,
-        oc:kn_28df0881,
-        oc:kn_636148c6,
-        oc:kn_7fc7b1d4,
-        oc:kn_a8c5a802,
-        oc:kn_abf42cff,
-        oc:kn_f6b6e229 ;
+    oc:hasRequirement oc:req_78ebd84e,
+        oc:req_8c328374,
+        oc:req_fa949b74 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Minimal working servers in both recommended frameworks. Start here, then add tools." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Once deployed, users add the URL directly — no install step." ],
+                        [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 2 ;
+                            oc:rowCount 3 ;
+                            oc:tableCaption "Once deployed, users add the URL directly — no install step." ;
+                            oc:tableMarkdown """| Surface | How |
+|---|---|
+| **Claude Code** | `claude mcp add --transport http <name> <url>` (add `--scope user` for global, `--header "Authorization: Bearer ..."` for auth) |
+| **Claude Desktop / Claude.ai** | Settings → Connectors → Add custom connector. **Not** `claude_desktop_config.json` — remote servers configured there are ignored. |
+| **Connector directory** | Anthropic maintains a submission guide for listing in the public connector directory. |
+""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Connect users" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "[ ] `Origin` header validated on `/mcp` (spec MUST — DNS rebinding prevention)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "[ ] Errors return structured MCP errors, not HTTP 500s with HTML bodies" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 6 ;
+                                    oc:itemText "[ ] `MCP-Protocol-Version` header honored (return 400 for unsupported versions)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 7 ;
+                                    oc:itemText "[ ] `instructions` field set if tool-use needs hints" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "[ ] `tools/list` returns your tools with complete schemas" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 8 ;
+                                    oc:itemText "[ ] Health check endpoint separate from `/mcp` (hosts poll it)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "[ ] CORS headers set if browser clients will connect" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 9 ;
+                                    oc:itemText "[ ] Secrets from env vars, never hardcoded" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 10 ;
+                                    oc:itemText "[ ] If OAuth: CIMD or DCR endpoint implemented — see `auth.md`" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "[ ] `POST /mcp` responds to `initialize` with server capabilities" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 7 ;
+                    oc:sectionTitle "Deployment checklist" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """const CATALOG = loadActionCatalog(); // { id, description, paramSchema }[]
+
+server.registerTool(
+  "search_actions",
+  {
+    description: "Find available actions matching an intent. Call this first to discover what's possible. Returns action IDs, descriptions, and parameter schemas.",
+    inputSchema: { intent: z.string().describe("What you want to do, in plain English") },
+    annotations: { readOnlyHint: true },
+  },
+  async ({ intent }) => {
+    const matches = rankActions(CATALOG, intent).slice(0, 10);
+    return { content: [{ type: "text", text: JSON.stringify(matches, null, 2) }] };
+  },
+);
+
+server.registerTool(
+  "execute_action",
+  {
+    description: "Execute an action by ID. Get the ID and params schema from search_actions first.",
+    inputSchema: {
+      action_id: z.string(),
+      params: z.record(z.unknown()),
+    },
+  },
+  async ({ action_id, params }) => {
+    const action = CATALOG.find(a => a.id === action_id);
+    if (!action) throw new Error(`Unknown action: ${action_id}`);
+    validate(params, action.paramSchema);
+    const result = await dispatch(action, params);
+    return { content: [{ type: "text", text: JSON.stringify(result) }] };
+  },
+);
+""" ;
+                            oc:codeLanguage "typescript" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 119-152" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "`rankActions` can be simple keyword matching to start. Upgrade to embeddings if precision matters." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "When wrapping 50+ endpoints, don't register them all. Two tools:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Search + execute pattern (large API surface)" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """from fastmcp import FastMCP
+
+mcp = FastMCP(
+    name="my-service",
+    instructions="Prefer search_items before calling get_item directly — IDs aren't guessable.",
+)
+
+@mcp.tool(annotations={"readOnlyHint": True})
+def search_items(query: str, limit: int = 10) -> list[dict]:
+    \"\"\"Search items by keyword. Returns up to `limit` matches ranked by relevance.\"\"\"
+    return upstream_api.search(query, limit)
+
+@mcp.tool(annotations={"readOnlyHint": True})
+def get_item(id: str) -> dict:
+    \"\"\"Fetch a single item by its ID.\"\"\"
+    return upstream_api.get(id)
+
+if __name__ == "__main__":
+    mcp.run(transport="http", host="0.0.0.0", port=3000)
+""" ;
+                            oc:codeLanguage "python" ;
+                            oc:contentOrder 3 ;
+                            oc:sourceLocation "lines 89-109" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "FastMCP derives the JSON schema from type hints and the docstring becomes the tool description. Keep docstrings terse and action-oriented — they land in Claude's context window verbatim." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """pip install fastmcp
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 83-85" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**`server.py`**" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "FastMCP 3.x (Python)" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**Fastest path:** Cloudflare Workers — two commands from zero to a live `https://` URL on the free tier. Uses a Workers-native scaffold (not Express). → `deploy-cloudflare-workers.md`" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**This Express scaffold** runs on any Node host — Render, Railway, Fly.io, a VPS. Containerize it (`node:20-slim`, copy, `npm ci`, `node dist/server.js`) and ship. FastMCP is the same story with a Python base image." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Deploy" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """npx @modelcontextprotocol/inspector --cli http://localhost:3000/mcp \\
+  --transport http --method tools/list
+
+npx @modelcontextprotocol/inspector --cli http://localhost:3000/mcp \\
+  --transport http --method tools/call --tool-name search_items --tool-arg query=test
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 4 ;
+                            oc:sourceLocation "lines 170-176" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "The MCP Inspector connects to any transport and lets you poke tools interactively." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "For scripted checks (CI, smoke tests):" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# Interactive — opens a UI on localhost:6274
+npx @modelcontextprotocol/inspector
+# → select "Streamable HTTP", paste http://localhost:3000/mcp, Connect
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 162-166" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Test it" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """npm init -y
+npm install @modelcontextprotocol/sdk zod express
+npm install -D typescript @types/express @types/node tsx
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 9-13" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
+import express from "express";
+import { z } from "zod";
+
+const server = new McpServer(
+  { name: "my-service", version: "0.1.0" },
+  { instructions: "Prefer search_items before calling get_item directly — IDs aren't guessable." },
+);
+
+// Pattern A: one tool per action
+server.registerTool(
+  "search_items",
+  {
+    description: "Search items by keyword. Returns up to `limit` matches ranked by relevance.",
+    inputSchema: {
+      query: z.string().describe("Search keywords"),
+      limit: z.number().int().min(1).max(50).default(10),
+    },
+    annotations: { readOnlyHint: true },
+  },
+  async ({ query, limit }, extra) => {
+    // extra.signal is an AbortSignal — check it in long loops for cancellation
+    const results = await upstreamApi.search(query, limit);
+    return {
+      content: [{ type: "text", text: JSON.stringify(results, null, 2) }],
+    };
+  },
+);
+
+server.registerTool(
+  "get_item",
+  {
+    description: "Fetch a single item by its ID.",
+    inputSchema: { id: z.string() },
+    annotations: { readOnlyHint: true },
+  },
+  async ({ id }) => {
+    const item = await upstreamApi.get(id);
+    return { content: [{ type: "text", text: JSON.stringify(item) }] };
+  },
+);
+
+// Streamable HTTP transport (stateless mode — simplest)
+const app = express();
+app.use(express.json());
+
+app.post("/mcp", async (req, res) => {
+  const transport = new StreamableHTTPServerTransport({
+    sessionIdGenerator: undefined, // stateless
+  });
+  res.on("close", () => transport.close());
+  await server.connect(transport);
+  await transport.handleRequest(req, res, req.body);
+});
+
+app.listen(process.env.PORT ?? 3000);
+""" ;
+                            oc:codeLanguage "typescript" ;
+                            oc:contentOrder 3 ;
+                            oc:sourceLocation "lines 17-75" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**`src/server.ts`**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "**Stateless vs stateful:** The snippet above creates a fresh transport per request (stateless). Fine for most API-wrapping servers. If tools need to share state across calls in a session (rare), use a session-keyed transport map — see the SDK's `examples/server/simpleStreamableHttp.ts`." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "TypeScript SDK (`@modelcontextprotocol/sdk`)" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Remote Streamable-HTTP MCP Server — Scaffold" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "End-to-end workflow for creating, testing, and deploying a remote streamable-HTTP MCP server" ;
+            oc:hasStep [ a oc:WorkflowStep ;
+                    dcterms:description "Provide users with connection instructions: Claude Code CLI command or Claude Desktop Connectors UI" ;
+                    oc:expectedOutcome "Users can connect and use the server" ;
+                    oc:stepDependsOn _:ref_7972d5fcdcac8eaf ;
+                    oc:stepId "connect-users" ],
+                _:ref_61fbccb102b631d2,
+                _:ref_7972d5fcdcac8eaf,
+                _:ref_86c54da0cec6ab6a,
+                _:ref_cfc91041993a8e78,
+                _:ref_cfea50cc85c29c69,
+                _:ref_eed1f7f5282eeb83 ;
+            oc:workflowId "scaffold-remote-mcp" ;
+            oc:workflowName "Scaffold and Deploy Remote MCP Server" ] ;
+    oc:impartsKnowledge oc:kn_4be00903,
+        oc:kn_57952304,
+        oc:kn_60299ac2,
+        oc:kn_a758fa4a,
+        oc:kn_b70c3f4f,
+        oc:kn_c2843757,
+        oc:kn_ed23b3f1 ;
     oc:isUserInvocable true ;
     oc:nature "Work" ;
-    oc:requiresState oc:EnvironmentReady ;
-    oc:resolvesIntent "bootstrap an MCP server in TypeScript or Python",
-        "create an MCP server with HTTP transport",
-        "scaffold a remote streamable-http MCP server",
-        "test and deploy a remote MCP server" ;
-    oc:yieldsState oc:MCPServerDeployed,
-        oc:MCPServerRunning .
+    oc:requiresState oc:EnvironmentReady,
+        oc:NetworkAvailable ;
+    oc:resolvesIntent "connect MCP server to Claude",
+        "create streamable HTTP MCP server",
+        "deploy MCP server to cloud host",
+        "scaffold remote MCP server",
+        "test MCP server with inspector" ;
+    oc:yieldsState oc:MCPServerRunning .
 
-oc:kn_1bbb2221 a oc:Heuristic,
+oc:kn_4be00903 a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When wrapping APIs with 50+ endpoints as MCP tools" ;
-    oc:directiveContent "Prefer the search-then-execute pattern (2 tools: search_actions + execute_action) over registering 50+ individual tools when wrapping large API surfaces." ;
-    oc:hasRationale "Registering too many tools bloats the context window and degrades model performance. The catalog pattern lets the model discover actions on demand." ;
+    oc:appliesToContext "When configuring StreamableHTTPServerTransport" ;
+    oc:directiveContent "Use stateless transport (sessionIdGenerator: undefined) for most API-wrapping servers. Only use session-keyed transport maps if tools need to share state across calls in a session." ;
+    oc:hasRationale "Stateless mode is simplest and sufficient for most API-wrapping use cases; stateful sessions add complexity and should only be used when truly needed" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_57952304 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When creating any MCP server" ;
+    oc:directiveContent "Set the `instructions` field on McpServer with tool-use hints that don't fit in individual tool descriptions, such as call-order preferences." ;
+    oc:hasRationale "The instructions field lands directly in Claude's system prompt — it's the highest-leverage one-liner in the spec for correcting tool misuse" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_28df0881 a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "Before deploying a remote HTTP MCP server to production" ;
-    oc:directiveContent "Before deploying, verify: POST /mcp responds to initialize with capabilities, tools/list returns complete schemas, errors return structured MCP errors (not HTML 500s), CORS headers are set, Origin header is validated, MCP-Protocol-Version is honored, and secrets come from env vars." ;
-    oc:hasRationale "Skipping these checks leads to broken client connections, security vulnerabilities (DNS rebinding), and unhelpful error responses that break MCP clients." ;
-    oc:severityLevel "CRITICAL" .
+oc:kn_60299ac2 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When telling users how to connect to a deployed remote MCP server" ;
+    oc:directiveContent "For Claude Desktop and Claude.ai, remote servers must be configured via Settings → Connectors → Add custom connector, NOT via claude_desktop_config.json — remote servers configured there are ignored." ;
+    oc:hasRationale "Claude Desktop's config file only supports local stdio servers; remote HTTP servers must use the Connectors UI" ;
+    oc:severityLevel "HIGH" .
 
-oc:kn_636148c6 a oc:KnowledgeNode,
+oc:kn_a758fa4a a oc:KnowledgeNode,
         oc:SecurityImplication ;
-    oc:appliesToContext "When configuring the /mcp POST endpoint" ;
-    oc:directiveContent "Validate the Origin header on /mcp endpoint to prevent DNS rebinding attacks — this is a spec MUST, not optional." ;
-    oc:hasRationale "Without Origin validation, malicious websites can make cross-origin requests to the MCP server, potentially exfiltrating data or triggering unwanted actions." ;
+    oc:appliesToContext "When deploying a remote HTTP MCP server" ;
+    oc:directiveContent "Always validate the Origin header on /mcp endpoint — this is a spec MUST for DNS rebinding prevention." ;
+    oc:hasRationale "Without Origin validation, attackers can perform DNS rebinding attacks to interact with the MCP server from malicious web pages" ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_7fc7b1d4 a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When choosing between stateless and stateful StreamableHTTP transport modes" ;
-    oc:directiveContent "Use stateless mode (fresh transport per request, sessionIdGenerator: undefined) for most API-wrapping servers. Only use stateful sessions when tools genuinely share state across calls." ;
-    oc:hasRationale "Stateless mode is simpler, more scalable, and sufficient for the vast majority of MCP server use cases. Stateful adds complexity for rare coordination needs." ;
-    oc:severityLevel "MEDIUM" .
+oc:kn_b70c3f4f a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before deploying any remote MCP server to production" ;
+    oc:directiveContent "Before deployment, verify: POST /mcp responds to initialize, tools/list returns complete schemas, errors return structured MCP errors (not HTTP 500 HTML), Origin header is validated, MCP-Protocol-Version is honored, CORS headers are set for browser clients, secrets come from env vars, and a separate health check endpoint exists." ;
+    oc:hasRationale "These checks prevent common deployment failures including DNS rebinding attacks, version incompatibility, and unstructured error responses" ;
+    oc:severityLevel "CRITICAL" .
 
-oc:kn_a8c5a802 a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "When writing tool descriptions and docstrings" ;
-    oc:directiveContent "Set tool docstrings/descriptions to be terse and action-oriented — they land in Claude's context window verbatim." ;
-    oc:hasRationale "Verbose descriptions waste context tokens. Every character in a tool description is sent with every request, directly impacting token economy." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_abf42cff a oc:Constraint,
+oc:kn_c2843757 a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When guiding users to connect a remote MCP server to Claude Desktop or Claude.ai" ;
-    oc:directiveContent "Claude Desktop and Claude.ai remote servers must be configured via Settings → Connectors → Add custom connector, NOT via claude_desktop_config.json — remote servers configured there are ignored." ;
-    oc:hasRationale "The legacy JSON config file only supports local stdio servers. Remote HTTP servers require the new connector configuration flow." ;
+    oc:appliesToContext "When designing a hybrid tool surface for a large API" ;
+    oc:directiveContent "Promote the 3–5 most-used actions to dedicated tools when using search + execute pattern. Keep the long tail behind search/execute." ;
+    oc:hasRationale "Dedicated tools for top actions give Claude instant access to the most common operations without a discovery round-trip" .
+
+oc:kn_ed23b3f1 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When wrapping large APIs with dozens to hundreds of endpoints" ;
+    oc:directiveContent "Do not register 50+ individual tools when wrapping a large API surface. Use the search + execute pattern (two tools) instead." ;
+    oc:hasRationale "Every tool schema costs tokens in Claude's context window each turn; flooding with 50+ tools degrades model performance" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_f6b6e229 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When creating an MCP server with interdependent tools" ;
-    oc:directiveContent "Include an instructions field on the server with guidance like 'Prefer search_items before calling get_item directly — IDs aren't guessable' to steer tool-use behavior." ;
-    oc:hasRationale "The instructions field is sent to the model and acts as a system prompt for tool selection, preventing inefficient tool call patterns." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:req_1a5b433b a oc:RequirementTool ;
+oc:req_78ebd84e a oc:RequirementTool ;
     oc:isOptional false ;
-    oc:requirementValue "express and zod (for TypeScript variant)" .
+    oc:requirementValue "@modelcontextprotocol/sdk (for TypeScript) or fastmcp (for Python)" .
 
-oc:req_71f5fa5d a oc:RequirementTool ;
-    oc:isOptional false ;
-    oc:requirementValue "Node.js 20+ or Python 3.10+" .
+oc:req_8c328374 a oc:RequirementTool ;
+    oc:isOptional true ;
+    oc:requirementValue "@modelcontextprotocol/inspector (for testing)" .
 
-oc:req_eba9bfc4 a oc:RequirementTool ;
+oc:req_fa949b74 a oc:RequirementKnowledge ;
     oc:isOptional false ;
-    oc:requirementValue "MCP Inspector (npx @modelcontextprotocol/inspector)" .
+    oc:requirementValue "MCP streamable HTTP transport protocol" .
 
-oc:req_fad69764 a oc:RequirementTool ;
-    oc:isOptional false ;
-    oc:requirementValue "@modelcontextprotocol/sdk (TypeScript) or fastmcp (Python)" .
+_:ref_61fbccb102b631d2 a oc:WorkflowStep ;
+    dcterms:description "Run server locally and test with MCP Inspector (interactive or CLI)" ;
+    oc:expectedOutcome "All tools respond correctly, initialize handshake succeeds" ;
+    oc:stepDependsOn _:ref_cfc91041993a8e78 ;
+    oc:stepId "test-locally" .
+
+_:ref_7972d5fcdcac8eaf a oc:WorkflowStep ;
+    dcterms:description "Deploy to chosen host (Cloudflare Workers for fastest path, or containerize Express/FastMCP for any Node/Python host)" ;
+    oc:expectedOutcome "Server live at HTTPS URL" ;
+    oc:stepDependsOn _:ref_cfea50cc85c29c69 ;
+    oc:stepId "deploy-server" .
+
+_:ref_86c54da0cec6ab6a a oc:WorkflowStep ;
+    dcterms:description "Choose TypeScript SDK or FastMCP (Python) based on user preference and target environment" ;
+    oc:expectedOutcome "Framework selected, dependencies installed" ;
+    oc:stepId "choose-framework" .
+
+_:ref_cfc91041993a8e78 a oc:WorkflowStep ;
+    dcterms:description "Register tools using one-per-action pattern (<15 tools) or search+execute pattern (50+ endpoints). Include descriptions, schemas, and annotations." ;
+    oc:expectedOutcome "Tools registered with complete schemas and descriptions" ;
+    oc:stepDependsOn _:ref_eed1f7f5282eeb83 ;
+    oc:stepId "add-tools" .
+
+_:ref_cfea50cc85c29c69 a oc:WorkflowStep ;
+    dcterms:description "Run deployment checklist: verify initialize response, structured errors, Origin validation, CORS, protocol version, health endpoint, secrets from env vars" ;
+    oc:expectedOutcome "All checklist items pass" ;
+    oc:stepDependsOn _:ref_61fbccb102b631d2 ;
+    oc:stepId "deploy-checklist" .
+
+_:ref_eed1f7f5282eeb83 a oc:WorkflowStep ;
+    dcterms:description "Create the minimal server file using the appropriate scaffold (Express + StreamableHTTPServerTransport for TS, FastMCP for Python)" ;
+    oc:expectedOutcome "Working server file with transport configured" ;
+    oc:stepDependsOn _:ref_86c54da0cec6ab6a ;
+    oc:stepId "scaffold-server" .
 

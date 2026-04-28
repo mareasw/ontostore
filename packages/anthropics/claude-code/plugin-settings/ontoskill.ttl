@@ -4,107 +4,1140 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_code_plugin_settings a oc:ExecutableSkill,
+oc:skill_claude_code_plugin_settings a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "plugin-settings" ;
     skos:broader "Configuration pattern" ;
-    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-code/plugin-settings" ;
+    prov:wasDerivedFrom "../.agents/skills/anthropics/claude-code/plugin-settings" ;
     oc:contentHash "3d11b0865d06cab060fdb5e6d03a74a17bfcb7efb790d75563ef3f5642c9d2af" ;
-    oc:dependsOnSkill oc:skill_plugin_structure ;
-    oc:differentia "that uses YAML frontmatter in .claude/plugin-name.local.md files for per-project plugin settings and state management in Claude Code" ;
+    oc:dependsOnSkill oc:skill_ontoskills_plugin_structure ;
+    oc:differentia "that stores per-project plugin settings in .claude/plugin-name.local.md files using YAML frontmatter and markdown body" ;
     oc:handlesFailure oc:FileNotFound,
         oc:InvalidInput,
         oc:PermissionDenied ;
-    oc:hasAllowedTool "Bash",
-        "Edit",
-        "Glob",
-        "Grep",
+    oc:hasAllowedTool "AskUserQuestion",
+        "Bash",
         "Read",
         "Write" ;
     oc:hasArgumentHint "plugin-name or settings-file-path" ;
     oc:hasCategory "development" ;
     oc:hasDescription "This skill should be used when the user asks about \"plugin settings\", \"store plugin configuration\", \"user-configurable plugin\", \".local.md files\", \"plugin state files\", \"read YAML frontmatter\", \"per-project plugin settings\", or wants to make plugin behavior configurable. Documents the .claude/plugin-name.local.md pattern for storing plugin-specific configuration with YAML frontmatter and markdown content." ;
     oc:hasName "plugin-settings" ;
-    oc:hasPayload oc:payload_3d11b0865d06cab0 ;
-    oc:impartsKnowledge oc:kn_171e87bd,
-        oc:kn_1eda20bd,
-        oc:kn_42e1dd5e,
-        oc:kn_4f1ecca7,
-        oc:kn_4f2cbb48,
-        oc:kn_61541591,
-        oc:kn_d5e68c8c,
-        oc:kn_dc54d4c2 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """---
+enabled: true
+strict_mode: false
+max_retries: 3
+notification_level: info
+coordinator_session: team-leader
+---
+
+# Plugin Configuration
+
+This plugin is configured for standard validation mode.
+Contact @team-lead with questions.
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 45-58" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**.claude/my-plugin.local.md:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Example: Plugin State File" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """---
+enabled: true
+setting1: value1
+setting2: value2
+numeric_setting: 42
+list_setting: ["item1", "item2"]
+---
+
+# Additional Context
+
+This markdown body can contain:
+- Task descriptions
+- Additional instructions
+- Prompts to feed back to Claude
+- Documentation or notes
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 24-40" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Basic Template" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "File Structure" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# Extract everything between --- markers
+FRONTMATTER=$(sed -n '/^---$/,/^---$/{ /^---$/d; p; }' "$FILE")
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 140-143" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Extract Frontmatter" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """VALUE=$(echo "$FRONTMATTER" | grep '^field_name:' | sed 's/field_name: *//' | sed 's/^"\\(.*\\)"$/\\1/')
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 148-150" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent "**Numeric fields:**" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Boolean fields:**" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**String fields:**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """MAX=$(echo "$FRONTMATTER" | grep '^max_value:' | sed 's/max_value: *//')
+# Use: if [[ $MAX -gt 100 ]]; then
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 6 ;
+                                    oc:sourceLocation "lines 159-162" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """ENABLED=$(echo "$FRONTMATTER" | grep '^enabled:' | sed 's/enabled: *//')
+# Compare: if [[ "$ENABLED" == "true" ]]; then
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 4 ;
+                                    oc:sourceLocation "lines 153-156" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Read Individual Fields" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Extract content after second `---`:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# Get everything after closing ---
+BODY=$(awk '/^---$/{i++; next} i>=2' "$FILE")
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 168-171" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Read Markdown Body" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Parsing Techniques" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Agents can reference settings in their instructions:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """---
+name: configured-agent
+description: Agent that adapts to project settings
+---
+
+Check for plugin settings at `.claude/my-plugin.local.md`.
+If present, parse YAML frontmatter and adapt behavior according to:
+- enabled: Whether plugin is active
+- mode: Processing mode (strict, standard, lenient)
+- Additional configuration fields
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 123-134" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "From Agents" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """#!/bin/bash
+set -euo pipefail
+
+# Define state file path
+STATE_FILE=".claude/my-plugin.local.md"
+
+# Quick exit if file doesn't exist
+if [[ ! -f "$STATE_FILE" ]]; then
+  exit 0  # Plugin not configured, skip
+fi
+
+# Parse YAML frontmatter (between --- markers)
+FRONTMATTER=$(sed -n '/^---$/,/^---$/{ /^---$/d; p; }' "$STATE_FILE")
+
+# Extract individual fields
+ENABLED=$(echo "$FRONTMATTER" | grep '^enabled:' | sed 's/enabled: *//' | sed 's/^"\\(.*\\)"$/\\1/')
+STRICT_MODE=$(echo "$FRONTMATTER" | grep '^strict_mode:' | sed 's/strict_mode: *//' | sed 's/^"\\(.*\\)"$/\\1/')
+
+# Check if enabled
+if [[ "$ENABLED" != "true" ]]; then
+  exit 0  # Disabled
+fi
+
+# Use configuration in hook logic
+if [[ "$STRICT_MODE" == "true" ]]; then
+  # Apply strict validation
+  # ...
+fi
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 66-95" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "See `examples/read-settings-hook.sh` for complete working example." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Pattern: Check existence and parse frontmatter**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "From Hooks (Bash Scripts)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Commands can read settings files to customize behavior:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """---
+description: Process data with plugin
+allowed-tools: ["Read", "Bash"]
+---
+
+# Process Command
+
+Steps:
+1. Check if settings exist at `.claude/my-plugin.local.md`
+2. Read configuration using Read tool
+3. Parse YAML frontmatter to extract settings
+4. Apply settings to processing logic
+5. Execute with configured behavior
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 103-117" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "From Commands" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Reading Settings Files" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """---
+agent_name: auth-implementation
+task_number: 3.5
+pr_number: 1234
+coordinator_session: team-leader
+enabled: true
+dependencies: ["Task 3.4"]
+additional_instructions: Use JWT tokens, not sessions
+---
+
+# Task: Implement Authentication
+
+Build JWT-based authentication for the REST API.
+Coordinate with auth-agent on shared types.
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 429-444" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Hook usage (agent-stop-notification.sh):**" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**.claude/multi-agent-swarm.local.md:**" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 4 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Checks if file exists (line 15-18: quick exit if not)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Sends notifications to coordinator if enabled" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "Allows quick activation/deactivation via `enabled: true/false`" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Parses frontmatter to get coordinator_session, agent_name, enabled" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "multi-agent-swarm Plugin" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Hook usage (stop-hook.sh):**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """---
+iteration: 1
+max_iterations: 10
+completion_promise: "All tests passing and build successful"
+---
+
+Fix all the linting errors in the project.
+Make sure tests pass after each fix.
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 455-464" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**.claude/ralph-loop.local.md:**" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 4 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Checks if file exists (line 15-18: quick exit if not active)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Extracts completion_promise for loop termination" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 5 ;
+                                            oc:itemText "Updates iteration count on each loop" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Reads iteration count and max_iterations" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "Reads body as the prompt to feed back" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "ralph-wiggum Plugin" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 9 ;
+                    oc:sectionTitle "Real-World Examples" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Key characteristics:**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Plugins can store user-configurable settings and state in `.claude/plugin-name.local.md` files within the project directory. This pattern uses YAML frontmatter for structured configuration and markdown content for prompts or additional context." ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 3 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Purpose: Per-project plugin configuration and state" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "File location: `.claude/plugin-name.local.md` in project root" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "Lifecycle: User-managed (not in git, should be in `.gitignore`)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Structure: YAML frontmatter + markdown body" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Usage: Read from hooks, commands, and agents" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Overview" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Commands can create settings files:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# Setup Command
+
+Steps:
+1. Ask user for configuration preferences
+2. Create `.claude/my-plugin.local.md` with YAML frontmatter
+3. Set appropriate values based on user input
+4. Inform user that settings are saved
+5. Remind user to restart Claude Code for hooks to recognize changes
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 278-287" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "From Commands" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Provide template in plugin README:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """## Configuration
+
+Create `.claude/my-plugin.local.md` in your project:
+
+\\`\\`\\`markdown
+---
+enabled: true
+mode: standard
+max_retries: 3
+---
+
+# Plugin Configuration
+
+Your settings are active.
+\\`\\`\\`
+
+After creating or editing, restart Claude Code for changes to take effect.
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 293-311" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Template Generation" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Creating Settings Files" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "✅ **DO:**" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "❌ **DON'T:**" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 4 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Use different directory (not `.claude/`)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Use `.md` without `.local` (might be committed)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Use inconsistent naming" ] ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 2 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Use `.local.md` suffix for user-local files" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Match plugin name exactly" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Use `.claude/plugin-name.local.md` format" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "File Naming" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Validate settings values:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """MAX=$(echo "$FRONTMATTER" | grep '^max_value:' | sed 's/max_value: *//')
+
+# Validate numeric range
+if ! [[ "$MAX" =~ ^[0-9]+$ ]] || [[ $MAX -lt 1 ]] || [[ $MAX -gt 100 ]]; then
+  echo "⚠️  Invalid max_value in settings (must be 1-100)" >&2
+  MAX=10  # Use default
+fi
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 357-365" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "Validation" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "Document this in plugin README." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Always add to `.gitignore`:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """.claude/*.local.md
+.claude/*.local.json
+""" ;
+                                    oc:codeLanguage "gitignore" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 331-334" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Gitignore" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """if [[ ! -f "$STATE_FILE" ]]; then
+  # Use defaults
+  ENABLED=true
+  MODE=standard
+else
+  # Read from file
+  # ...
+fi
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 342-351" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Provide sensible defaults when settings file doesn't exist:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Defaults" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """## Changing Settings
+
+After editing `.claude/my-plugin.local.md`:
+1. Save the file
+2. Exit Claude Code
+3. Restart: `claude` or `cc`
+4. New settings will be loaded
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 3 ;
+                                    oc:sourceLocation "lines 373-381" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Important:** Settings changes require Claude Code restart." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "Document in your README:" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent "Hooks cannot be hot-swapped within a session." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 5 ;
+                            oc:sectionTitle "Restart Requirement" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 7 ;
+                    oc:sectionTitle "Best Practices" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """if [[ ! -f ".claude/my-plugin.local.md" ]]; then
+  exit 0  # Not configured
+fi
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 502-506" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "Quick Exit Pattern" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# Extract frontmatter
+FRONTMATTER=$(sed -n '/^---$/,/^---$/{ /^---$/d; p; }' "$FILE")
+
+# Read field
+VALUE=$(echo "$FRONTMATTER" | grep '^field:' | sed 's/field: *//' | sed 's/^"\\(.*\\)"$/\\1/')
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 485-491" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Frontmatter Parsing" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """project-root/
+└── .claude/
+    └── plugin-name.local.md
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 477-481" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "File Location" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# Extract body (after second ---)
+BODY=$(awk '/^---$/{i++; next} i>=2' "$FILE")
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 495-498" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Body Parsing" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 10 ;
+                    oc:sectionTitle "Quick Reference" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 2 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "**`read-settings-hook.sh`** - Hook that reads and uses settings" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "**`example-settings.md`** - Template settings file" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "**`create-settings-command.md`** - Command that creates settings file" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Working examples in `examples/`:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Example Files" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "For detailed implementation patterns:" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 2 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "**`references/parsing-techniques.md`** - Complete guide to parsing YAML frontmatter and markdown bodies" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "**`references/real-world-examples.md`** - Deep dive into multi-agent-swarm and ralph-wiggum implementations" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Reference Files" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 2 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "**`parse-frontmatter.sh`** - Extract frontmatter fields" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "**`validate-settings.sh`** - Validate settings file structure" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Development tools in `scripts/`:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Utility Scripts" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 11 ;
+                    oc:sectionTitle "Additional Resources" ],
+                [ a oc:Section ;
+                    oc:hasContent _:ref_16b67757c1bccedb,
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "To add settings to a plugin:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "Focus on keeping settings simple and providing good defaults when settings file doesn't exist." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 12 ;
+                    oc:sectionTitle "Implementation Workflow" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Settings files should be:" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 2 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Not shared between users" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Readable by user only (`chmod 600`)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Not committed to git" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Permissions" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "If settings contain file paths:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """FILE_PATH=$(echo "$FRONTMATTER" | grep '^data_file:' | sed 's/data_file: *//')
+
+# Check for path traversal
+if [[ "$FILE_PATH" == *".."* ]]; then
+  echo "⚠️  Invalid path in settings (path traversal)" >&2
+  exit 2
+fi
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 407-415" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Validate File Paths" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# Escape quotes in user input
+SAFE_VALUE=$(echo "$USER_INPUT" | sed 's/"/\\\\"/g')
+
+# Write to file
+cat > "$STATE_FILE" <<EOF
+---
+user_setting: "$SAFE_VALUE"
+---
+EOF
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 391-401" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "When writing settings files from user input:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Sanitize User Input" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 8 ;
+                    oc:sectionTitle "Security Considerations" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """---
+agent_name: auth-agent
+task_number: 3.5
+pr_number: 1234
+coordinator_session: team-leader
+enabled: true
+dependencies: ["Task 3.4"]
+---
+
+# Task Assignment
+
+Implement JWT authentication for the API.
+
+**Success Criteria:**
+- Authentication endpoints created
+- Tests passing
+- PR created and CI green
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 3 ;
+                                    oc:sourceLocation "lines 207-225" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent "Read from hooks to coordinate agents:" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Store agent-specific state and configuration:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """AGENT_NAME=$(echo "$FRONTMATTER" | grep '^agent_name:' | sed 's/agent_name: *//')
+COORDINATOR=$(echo "$FRONTMATTER" | grep '^coordinator_session:' | sed 's/coordinator_session: *//')
+
+# Send notification to coordinator
+tmux send-keys -t "$COORDINATOR" "Agent $AGENT_NAME completed task" Enter
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 5 ;
+                                    oc:sourceLocation "lines 229-235" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**.claude/multi-agent-swarm.local.md:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Pattern 2: Agent State Management" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """#!/bin/bash
+STATE_FILE=".claude/security-scan.local.md"
+
+# Quick exit if not configured
+if [[ ! -f "$STATE_FILE" ]]; then
+  exit 0
+fi
+
+# Read enabled flag
+FRONTMATTER=$(sed -n '/^---$/,/^---$/{ /^---$/d; p; }' "$STATE_FILE")
+ENABLED=$(echo "$FRONTMATTER" | grep '^enabled:' | sed 's/enabled: *//')
+
+if [[ "$ENABLED" != "true" ]]; then
+  exit 0  # Disabled
+fi
+
+# Run hook logic
+# ...
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 179-198" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Use settings file to control hook activation:" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Use case:** Enable/disable hooks without editing hooks.json (requires restart)." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Pattern 1: Temporarily Active Hooks" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "Use in hooks or commands:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """---
+validation_level: strict
+max_file_size: 1000000
+allowed_extensions: [".js", ".ts", ".tsx"]
+enable_logging: true
+---
+
+# Validation Configuration
+
+Strict mode enabled for this project.
+All writes validated against security policies.
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 240-252" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """LEVEL=$(echo "$FRONTMATTER" | grep '^validation_level:' | sed 's/validation_level: *//')
+
+case "$LEVEL" in
+  strict)
+    # Apply strict validation
+    ;;
+  standard)
+    # Apply standard validation
+    ;;
+  lenient)
+    # Apply lenient validation
+    ;;
+esac
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 4 ;
+                                    oc:sourceLocation "lines 256-270" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**.claude/my-plugin.local.md:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Pattern 3: Configuration-Driven Behavior" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Common Patterns" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Plugin Settings Pattern for Claude Code Plugins" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """name: Plugin Settings
+description: This skill should be used when the user asks about "plugin settings", "store plugin configuration", "user-configurable plugin", ".local.md files", "plugin state files", "read YAML frontmatter", "per-project plugin settings", or wants to make plugin behavior configurable. Documents the .claude/plugin-name.local.md pattern for storing plugin-specific configuration with YAML frontmatter and markdown content.
+version: 0.1.0
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:hasWorkflow _:ref_16b67757c1bccedb ;
+    oc:impartsKnowledge oc:kn_2609df5d,
+        oc:kn_2c6c1656,
+        oc:kn_31d3bd2d,
+        oc:kn_3c107b95,
+        oc:kn_42589761,
+        oc:kn_4579ddae,
+        oc:kn_46149e9f,
+        oc:kn_63717663,
+        oc:kn_85ab7e24,
+        oc:kn_a6f5babd,
+        oc:kn_acac6701,
+        oc:kn_b0815248,
+        oc:kn_cb8f204e,
+        oc:kn_dacaab72,
+        oc:kn_dc08cd86,
+        oc:kn_eda4549c ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
     oc:requiresState oc:DirectoryWritable,
         oc:FileExists ;
-    oc:resolvesIntent "configure plugin settings",
-        "create per-project plugin state files",
-        "make plugin behavior user-configurable",
-        "parse .local.md settings from hooks and commands",
-        "read YAML frontmatter from local.md files",
+    oc:resolvesIntent "configure plugin behavior per-project",
+        "create settings file",
+        "manage plugin state",
+        "read plugin settings",
         "store plugin configuration" ;
-    oc:yieldsState oc:PluginConfigured,
-        oc:SettingsFileCreated .
+    oc:yieldsState oc:ConfigurationReady,
+        oc:DocumentCreated .
 
-oc:kn_171e87bd a oc:KnowledgeNode,
-        oc:SideEffect ;
-    oc:appliesToContext "After any modification to a .local.md settings file" ;
-    oc:directiveContent "Settings changes require a Claude Code restart to take effect — hooks cannot be hot-swapped within a session." ;
-    oc:hasRationale "Claude Code loads hook configurations at startup; modifying settings files mid-session will not change active hook behavior until restart." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_1eda20bd a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "Before using any parsed settings value in hook or command logic" ;
-    oc:directiveContent "Always provide sensible defaults when a settings file does not exist or a field is missing — never assume a field is present." ;
-    oc:hasRationale "Settings files are user-managed and optional; missing files or fields should not cause hooks to fail." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_42e1dd5e a oc:DesignPrinciple,
+oc:kn_2609df5d a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When designing any plugin that needs user-configurable settings or state persistence" ;
-    oc:directiveContent "Always use the .claude/plugin-name.local.md file path convention with YAML frontmatter for structured config and markdown body for prompts or additional context." ;
-    oc:hasRationale "This convention ensures consistency across plugins, keeps settings per-project, and enables a uniform parsing approach." ;
-    oc:severityLevel "HIGH" .
+    oc:appliesToContext "When extracting markdown body after frontmatter" ;
+    oc:codeLanguage "bash" ;
+    oc:directiveContent "BODY=$(awk '/^---$/{i++; next} i>=2' \"$FILE\")" .
 
-oc:kn_4f1ecca7 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When updating any .local.md settings file from hooks or scripts" ;
-    oc:directiveContent "Never use sed -i for in-place file updates on settings files; always use a temp file plus atomic mv to prevent corruption on interruption." ;
-    oc:hasRationale "Non-atomic updates can leave the settings file in a corrupt state if the process is interrupted mid-write." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_4f2cbb48 a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When parsing YAML frontmatter from bash scripts" ;
-    oc:directiveContent "Use sed/grep for simple key-value field extraction; only use yq for complex YAML structures (nested objects, lists requiring iteration)." ;
-    oc:hasRationale "yq adds a dependency that may not be available on all systems; sed/grep is universally available and sufficient for flat key-value pairs." ;
+oc:kn_2c6c1656 a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "When reading multiple settings fields" ;
+    oc:directiveContent "Parse frontmatter once and cache it, then extract multiple fields from the cached value — don't re-read the file for each field." ;
+    oc:hasRationale "Reduces file I/O and subprocess overhead in hook scripts" ;
     oc:severityLevel "LOW" .
 
-oc:kn_61541591 a oc:Idempotency,
+oc:kn_31d3bd2d a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When hooks both read and write to the same settings file (e.g., loop counters)" ;
-    oc:directiveContent "Parsing settings files is idempotent; however, updating iteration counters or state fields is not — track state changes carefully." ;
-    oc:hasRationale "Stateful updates like incrementing iteration counters change file contents on each run, making the operation non-idempotent." ;
-    oc:severityLevel "MEDIUM" .
+    oc:appliesToContext "After editing any .local.md settings file" ;
+    oc:directiveContent "Settings changes require Claude Code restart — hooks cannot be hot-swapped within a session" ;
+    oc:hasRationale "Hooks are loaded at session start; changes mid-session won't take effect" ;
+    oc:severityLevel "HIGH" .
 
-oc:kn_d5e68c8c a oc:KnowledgeNode,
-        oc:SecurityImplication ;
-    oc:appliesToContext "When creating or reading settings files, especially those containing paths or user input" ;
-    oc:directiveContent "Always add .claude/*.local.md to .gitignore and validate settings file paths for traversal attempts (..) before use." ;
-    oc:hasRationale "Settings files may contain user-specific or sensitive configuration; committing them to git leaks per-user state, and unchecked paths enable directory traversal attacks." ;
+oc:kn_3c107b95 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When creating any plugin settings file" ;
+    oc:directiveContent "Settings files MUST use .claude/plugin-name.local.md naming and be added to .gitignore as .claude/*.local.md" ;
+    oc:hasRationale "The .local.md suffix prevents accidental git commits of user-specific configuration" ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_dc54d4c2 a oc:Heuristic,
+oc:kn_42589761 a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When reading settings from hooks that run on every tool invocation" ;
-    oc:directiveContent "Always implement the quick-exit pattern: check file existence first, then check the enabled flag, before doing any heavy parsing." ;
-    oc:hasRationale "Hooks run frequently; the quick-exit pattern avoids unnecessary I/O and parsing overhead when the plugin is not configured or disabled." ;
+    oc:appliesToContext "When designing plugin configuration" ;
+    oc:directiveContent "Store per-project plugin settings in .claude/plugin-name.local.md using YAML frontmatter for structured config and markdown body for prompts or context." ;
+    oc:hasRationale "Provides human-readable, gitignored, per-project settings accessible from hooks, commands, and agents" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_4579ddae a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Quick-exit pattern for hooks checking settings" ;
+    oc:codeLanguage "bash" ;
+    oc:directiveContent """if [[ ! -f "$STATE_FILE" ]]; then
+  exit 0  # Not configured
+fi""" .
+
+oc:kn_46149e9f a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "In hook scripts reading settings" ;
+    oc:directiveContent "Always use the quick-exit pattern: check if settings file exists first, then check enabled field, before any heavy processing." ;
+    oc:hasRationale "Avoids errors and unnecessary I/O when plugin is not configured or disabled" ;
     oc:severityLevel "MEDIUM" .
 
-oc:payload_3d11b0865d06cab0 a oc:ExecutionPayload ;
-    oc:code "bash scripts/validate-settings.sh .claude/plugin-name.local.md" ;
-    oc:executor "shell" ;
-    oc:timeout 10000 .
+oc:kn_63717663 a oc:Command,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When validating settings file structure" ;
+    oc:directiveContent "bash scripts/validate-settings.sh .claude/plugin-name.local.md" .
+
+oc:kn_85ab7e24 a oc:KnowledgeNode,
+        oc:SecurityImplication ;
+    oc:appliesToContext "When creating settings from user input" ;
+    oc:directiveContent "Sanitize user input when writing to settings files — escape quotes and validate file paths for traversal attacks." ;
+    oc:hasRationale "Unsanitized input in YAML frontmatter or paths can lead to injection or unauthorized file access" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_a6f5babd a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When adding settings to a plugin" ;
+    oc:directiveContent "1. Design settings schema (fields, types, defaults) 2. Create template file in plugin docs 3. Add .gitignore entry for .claude/*.local.md 4. Implement parsing in hooks/commands 5. Use quick-exit pattern 6. Document settings in plugin README 7. Remind users restart is required" ;
+    oc:stepOrder 1 .
+
+oc:kn_acac6701 a oc:Command,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When extracting frontmatter fields from command line" ;
+    oc:directiveContent "bash scripts/parse-frontmatter.sh .claude/plugin-name.local.md [field-name]" .
+
+oc:kn_b0815248 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When updating any settings file programmatically" ;
+    oc:directiveContent "Never use non-atomic file updates (e.g., sed -i). Always use temp file + mv for settings file writes." ;
+    oc:hasRationale "Non-atomic writes can corrupt the file if the process is interrupted mid-write" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_cb8f204e a oc:KnowledgeNode,
+        oc:Prerequisite ;
+    oc:directiveContent "Project must have a .claude/ directory in the project root for settings files" .
+
+oc:kn_dacaab72 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When parsing YAML frontmatter from .local.md files" ;
+    oc:codeLanguage "bash" ;
+    oc:directiveContent """FRONTMATTER=$(sed -n '/^---$/,/^---$/{ /^---$/d; p; }' "$FILE")
+VALUE=$(echo "$FRONTMATTER" | grep '^field:' | sed 's/field: *//' | sed 's/^"\\(.*\\)"$/\\1/')""" .
+
+oc:kn_dc08cd86 a oc:KnowledgeNode,
+        oc:OutputFormat ;
+    oc:appliesToContext "Template for creating .claude/plugin-name.local.md files" ;
+    oc:directiveContent """---
+enabled: {boolean}
+{setting_key}: {setting_value}
+---
+
+# {Plugin Name} Configuration
+
+{description_or_instructions}""" ;
+    oc:templateVariables "Plugin Name",
+        "boolean",
+        "description_or_instructions",
+        "setting_key",
+        "setting_value" .
+
+oc:kn_eda4549c a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When reading plugin settings in hooks or commands" ;
+    oc:directiveContent "Provide sensible defaults when settings file doesn't exist — never assume the file will always be present." ;
+    oc:hasRationale "Plugins should degrade gracefully when not configured rather than failing" ;
+    oc:severityLevel "MEDIUM" .
+
+_:ref_2251e6dfc96001ac a oc:WorkflowStep ;
+    dcterms:description "Add gitignore entry for `.claude/*.local.md`" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_2acdaf96f9909b98 a oc:WorkflowStep ;
+    dcterms:description "Create template file in plugin documentation" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_2c6b0984362f1ab1 a oc:WorkflowStep ;
+    dcterms:description "Document settings in plugin README with template" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_6" ;
+    oc:stepOrder 6 .
+
+_:ref_694ddf730963e15a a oc:WorkflowStep ;
+    dcterms:description "Remind users that changes require Claude Code restart" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_7" ;
+    oc:stepOrder 7 .
+
+_:ref_800ac706e7805c57 a oc:WorkflowStep ;
+    dcterms:description "Design settings schema (which fields, types, defaults)" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_b07441e57432cfba a oc:WorkflowStep ;
+    dcterms:description "Use quick-exit pattern (check file exists, check enabled field)" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_5" ;
+    oc:stepOrder 5 .
+
+_:ref_dd2007f8c69625eb a oc:WorkflowStep ;
+    dcterms:description "Implement settings parsing in hooks/commands" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_16b67757c1bccedb a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 2 ;
+    oc:hasStep _:ref_2251e6dfc96001ac,
+        _:ref_2acdaf96f9909b98,
+        _:ref_2c6b0984362f1ab1,
+        _:ref_694ddf730963e15a,
+        _:ref_800ac706e7805c57,
+        _:ref_b07441e57432cfba,
+        _:ref_dd2007f8c69625eb ;
+    oc:workflowId "procedure_2" ;
+    oc:workflowName "Ordered Procedure" .
 

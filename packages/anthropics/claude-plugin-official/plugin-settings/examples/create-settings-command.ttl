@@ -4,64 +4,239 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_plugin_official_plugin_settings_create_settings_command a oc:DeclarativeSkill,
+oc:skill_claude_plugin_official_plugin_settings_create_settings_command a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "create-settings-command" ;
     skos:broader "Configuration command" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/plugin-settings" ;
     oc:contentHash "abf0a36bb3f6425041046f2da1ebfac5505c5b37656fdd4772cfc4d8bd2fa655" ;
-    oc:differentia "creates a local plugin settings file with user preferences via interactive prompts" ;
-    oc:extends oc:skill_anthropics_claude_plugin_official_plugin_settings ;
+    oc:differentia "creates a local plugin settings file by gathering user preferences via interactive prompts and writing validated configuration to disk" ;
+    oc:extends oc:skill_claude_plugin_official_plugin_settings ;
     oc:handlesFailure oc:InvalidInput,
         oc:PermissionDenied ;
     oc:hasAllowedTool "AskUserQuestion",
         "Write" ;
-    oc:hasArgumentHint "none (interactive prompts)" ;
+    oc:hasArgumentHint "none (interactive prompt-based)" ;
     oc:hasCategory "productivity" ;
-    oc:impartsKnowledge oc:kn_0d9a8dd7,
-        oc:kn_2fcfa197,
-        oc:kn_4fba6933,
-        oc:kn_a7d8e58b,
-        oc:kn_e2eab056 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "This command helps users create a `.claude/my-plugin.local.md` settings file." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Sanitize any free-text fields" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Validate numeric fields are numbers" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Check mode is valid" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Ensure paths don't have traversal attempts" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Always validate user input before writing:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Implementation Notes" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Use AskUserQuestion to gather configuration:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """{
+  "questions": [
+    {
+      "question": "Enable plugin for this project?",
+      "header": "Enable Plugin",
+      "multiSelect": false,
+      "options": [
+        {
+          "label": "Yes",
+          "description": "Plugin will be active"
+        },
+        {
+          "label": "No",
+          "description": "Plugin will be disabled"
+        }
+      ]
+    },
+    {
+      "question": "Validation mode?",
+      "header": "Mode",
+      "multiSelect": false,
+      "options": [
+        {
+          "label": "Strict",
+          "description": "Maximum validation and security checks"
+        },
+        {
+          "label": "Standard",
+          "description": "Balanced validation (recommended)"
+        },
+        {
+          "label": "Lenient",
+          "description": "Minimal validation only"
+        }
+      ]
+    }
+  ]
+}
+""" ;
+                                    oc:codeLanguage "json" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 16-55" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Step 1: Ask User for Preferences" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """---
+enabled: <true if Yes, false if No>
+validation_mode: <strict, standard, or lenient>
+max_file_size: 1000000
+notify_on_errors: true
+---
+
+# Plugin Configuration
+
+Your plugin is configured with <mode> validation mode.
+
+To modify settings, edit this file and restart Claude Code.
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 68-81" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Use Write tool to create `.claude/my-plugin.local.md`:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Step 3: Create Settings File" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Extract answers from AskUserQuestion result:" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 2 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "answers[\"1\"]: mode (Strict/Standard/Lenient)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "answers[\"0\"]: enabled (Yes/No)" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Step 2: Parse Answers" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 2 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "Reminder: Restart Claude Code for changes to take effect" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Current configuration summary" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Settings file created at `.claude/my-plugin.local.md`" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 5 ;
+                                            oc:itemText "Settings file is gitignored (won't be committed)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "How to edit manually if needed" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Tell the user:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "Step 4: Inform User" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Steps" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Create Plugin Settings" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """description: "Create plugin settings file with user preferences"
+allowed-tools: ["Write", "AskUserQuestion"]
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:impartsKnowledge oc:kn_44ed73af,
+        oc:kn_7c336b0b,
+        oc:kn_c3e7f1c5,
+        oc:kn_c4424026,
+        oc:kn_f355d946 ;
     oc:isUserInvocable true ;
-    oc:nature "Work" ;
+    oc:nature "Tool" ;
     oc:requiresState oc:EnvironmentReady ;
     oc:resolvesIntent "configure plugin preferences",
         "create plugin settings",
-        "initialize plugin configuration" ;
-    oc:yieldsState oc:ConfigurationCreated .
+        "initialize plugin configuration file" ;
+    oc:yieldsState oc:FileCreated .
 
-oc:kn_0d9a8dd7 a oc:KnowledgeNode,
+oc:kn_44ed73af a oc:KnowledgeNode,
         oc:SecurityImplication ;
-    oc:appliesToContext "When processing any path-related user input" ;
-    oc:directiveContent "Ensure file paths in settings don't contain directory traversal attempts (e.g., ../ sequences)." ;
-    oc:hasRationale "Path traversal attacks could allow writing files outside the intended .claude/ directory." ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_2fcfa197 a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "Before writing the settings file in Step 3" ;
-    oc:directiveContent "Always validate user input before writing the settings file — check mode is one of strict/standard/lenient, validate numeric fields, and sanitize free-text fields." ;
-    oc:hasRationale "Invalid or malicious input could corrupt the configuration or introduce security vulnerabilities like path traversal." ;
+    oc:appliesToContext "When processing AskUserQuestion responses" ;
+    oc:directiveContent "Sanitize all user-provided input before writing to the settings file. Reject path traversal attempts and validate all free-text fields." ;
+    oc:hasRationale "Prevents injection of malicious content into configuration files" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_4fba6933 a oc:KnowledgeNode,
-        oc:SideEffect ;
-    oc:appliesToContext "After creating the settings file" ;
-    oc:directiveContent "The settings file is written to .claude/my-plugin.local.md and is gitignored — it will not be committed to version control." ;
-    oc:hasRationale "Users need to know that settings are local-only and won't be shared with collaborators or pushed to remote repositories." .
-
-oc:kn_a7d8e58b a oc:KnowledgeNode,
+oc:kn_7c336b0b a oc:KnowledgeNode,
         oc:PostFlightValidation ;
-    oc:appliesToContext "After successfully creating the settings file" ;
-    oc:directiveContent "Inform the user that Claude Code must be restarted for settings changes to take effect." ;
-    oc:hasRationale "Settings are read at startup; without a restart, the new configuration won't be applied, causing user confusion." ;
+    oc:appliesToContext "After settings file creation" ;
+    oc:directiveContent "After writing, confirm the settings file exists and inform the user that Claude Code must be restarted for changes to take effect." ;
+    oc:hasRationale "Settings are only loaded at startup, so a restart is required for the new configuration to be active" .
+
+oc:kn_c3e7f1c5 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Before writing settings file" ;
+    oc:directiveContent "Always validate user input before writing: check mode is one of strict/standard/lenient, validate numeric fields are numbers, ensure paths don't have traversal attempts, sanitize any free-text fields." ;
+    oc:hasRationale "Prevents invalid configuration and security vulnerabilities like path traversal" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_e2eab056 a oc:Idempotency,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When the command is invoked on a project that already has a settings file" ;
-    oc:directiveContent "Re-running this command overwrites any existing settings file at .claude/my-plugin.local.md." ;
-    oc:hasRationale "Users should be warned that existing customizations will be lost if they re-run configuration." ;
-    oc:severityLevel "MEDIUM" .
+oc:kn_c4424026 a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "Always when this command runs" ;
+    oc:directiveContent "Creates file `.claude/my-plugin.local.md` in the project directory. The file is gitignored and will not be committed to version control." ;
+    oc:hasRationale "User must be aware that a file is being written to their project and that it stays local" .
+
+oc:kn_f355d946 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When creating plugin settings" ;
+    oc:directiveContent "1. Use AskUserQuestion to gather enable/disable and validation mode preferences. 2. Parse answers: answers[\"0\"] = enabled (Yes/No), answers[\"1\"] = mode (Strict/Standard/Lenient). 3. Use Write tool to create `.claude/my-plugin.local.md` with frontmatter containing enabled, validation_mode, max_file_size, notify_on_errors. 4. Inform user of file location, config summary, manual edit instructions, and restart requirement." ;
+    oc:stepOrder 1 .
 

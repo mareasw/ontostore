@@ -4,79 +4,246 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_financial_services_plugin_clean_data_xls a oc:DeclarativeSkill,
+oc:skill_financial_services_plugin_clean_data_xls a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "clean-data-xls" ;
-    skos:broader "Data cleaning operation" ;
-    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/financial-services-plugin/clean-data-xls" ;
+    skos:broader "Data cleaning utility" ;
+    prov:wasDerivedFrom "../.agents/skills/anthropics/financial-services-plugin/clean-data-xls" ;
     oc:contentHash "8f807b187c752363228dc0f153406ea1e686665f82fc23eb7aac42c73d450e2a" ;
-    oc:dependsOnSkill oc:skill_xlsx_manipulation ;
-    oc:differentia "that detects and fixes messy spreadsheet data (whitespace, casing, number-as-text, dates, duplicates, encoding) using helper-column formulas for transparency and incremental user confirmation" ;
-    oc:handlesFailure oc:InvalidInput,
+    oc:differentia "that detects and fixes common spreadsheet data quality issues (whitespace, casing, number-as-text, dates, duplicates, encoding) using transparent formula-based transformations" ;
+    oc:extends oc:skill_ontoskills_xlsx_manipulation ;
+    oc:handlesFailure oc:FileNotFound,
+        oc:InvalidInput,
         oc:PermissionDenied ;
     oc:hasAllowedTool "Bash",
         "Edit",
         "Read",
         "Write" ;
-    oc:hasArgumentHint "range (optional, e.g. A1:F200) or full sheet" ;
+    oc:hasArgumentHint "optional range (e.g. A1:F200) or 'full sheet'" ;
     oc:hasCategory "document" ;
     oc:hasDescription "Clean up messy spreadsheet data — trim whitespace, fix inconsistent casing, convert numbers-stored-as-text, standardize dates, remove duplicates, and flag mixed-type columns. Use when data is messy, inconsistent, or needs prep before analysis. Triggers on \"clean this data\", \"clean up this sheet\", \"normalize this data\", \"fix formatting\", \"dedupe\", \"standardize this column\", \"this data is messy\"." ;
     oc:hasName "clean-data-xls" ;
-    oc:impartsKnowledge oc:kn_18e2cdf1,
-        oc:kn_5b953cd7,
-        oc:kn_7a0c924a,
-        oc:kn_9a3fd332,
-        oc:kn_a65f0c6a,
-        oc:kn_ce918735 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """name: clean-data-xls
+description: Clean up messy spreadsheet data — trim whitespace, fix inconsistent casing, convert numbers-stored-as-text, standardize dates, remove duplicates, and flag mixed-type columns. Use when data is messy, inconsistent, or needs prep before analysis. Triggers on "clean this data", "clean up this sheet", "normalize this data", "fix formatting", "dedupe", "standardize this column", "this data is messy".
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Clean messy data in the active sheet or a specified range." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "**If operating on a standalone .xlsx file:** Use Python/openpyxl." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "**If running inside Excel (Office Add-in / Office JS):** Use Office JS directly (`Excel.run(async (context) => {...})`). Read via `range.values`, write helper-column formulas via `range.formulas = [[\"=TRIM(A2)\"]]`. The in-place vs helper-column decision still applies." ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Environment" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 1 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "If a range is given (e.g. `A1:F200`), use it" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Profile each column: detect its dominant type (text / number / date) and identify outliers" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Otherwise use the full used range of the active sheet" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Step 1: Scope" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 1 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "For destructive operations (removing duplicates, filling blanks, overwriting originals), confirm with the user first" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 5 ;
+                                            oc:itemText "Report a before/after summary of what changed" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Only overwrite in place with computed values when the user explicitly asks for it, or when no sensible formula equivalent exists (e.g. encoding/mojibake repair)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "After each category of fix (whitespace → casing → number conversion → dates → dedup), show the user a sample of what changed and get confirmation before moving to the next category" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "**Prefer formulas over hardcoded cleaned values** — where the cleaned output can be expressed as a formula (e.g. `=TRIM(A2)`, `=VALUE(SUBSTITUTE(B2,\"$\",\"\"))`, `=UPPER(C2)`, `=DATEVALUE(D2)`), write the formula in an adjacent helper column rather than computing the result in Python and overwriting the original. This keeps the transformation transparent and auditable." ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "Step 4: Apply" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Show a summary table before changing anything:" ],
+                                [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 2 ;
+                                    oc:rowCount 0 ;
+                                    oc:tableCaption "Show a summary table before changing anything" ;
+                                    oc:tableMarkdown """| Column | Issue | Count | Proposed Fix |
+|---|---|---|---|
+""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Step 3: Propose fixes" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 1 ;
+                                    oc:rowCount 9 ;
+                                    oc:tableCaption "### Step 2: Detect issues" ;
+                                    oc:tableMarkdown """| Issue | What to look for |
+|---|---|
+| Whitespace | leading/trailing spaces, double spaces |
+| Casing | inconsistent casing in categorical columns (`usa` / `USA` / `Usa`) |
+| Number-as-text | numeric values stored as text; stray `$`, `,`, `%` in number cells |
+| Dates | mixed formats in the same column (`3/8/26`, `2026-03-08`, `March 8 2026`) |
+| Duplicates | exact-duplicate rows and near-duplicates (case/whitespace differences) |
+| Blanks | empty cells in otherwise-populated columns |
+| Mixed types | a column that's 98% numbers but has 3 text entries |
+| Encoding | mojibake (`Ã©`, `â€™`), non-printing characters |
+| Errors | `#REF!`, `#N/A`, `#VALUE!`, `#DIV/0!` |
+""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Step 2: Detect issues" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Workflow" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Clean Data" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "Four-step workflow to detect and fix data quality issues in spreadsheet data with user confirmation at each stage." ;
+            oc:hasStep _:ref_045c893adba0ca27,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Apply fixes incrementally by category (whitespace → casing → number conversion → dates → dedup), showing samples and getting confirmation after each. Prefer formula-based helper columns. Report before/after summary." ;
+                    oc:expectedOutcome "Data cleaned with all approved fixes applied and a before/after summary provided." ;
+                    oc:stepDependsOn _:ref_e5c5c284b6d86c6d ;
+                    oc:stepId "apply" ],
+                _:ref_31ef07792cfd151c,
+                _:ref_e5c5c284b6d86c6d ;
+            oc:workflowId "clean-data-xls-main" ;
+            oc:workflowName "Clean Spreadsheet Data" ] ;
+    oc:impartsKnowledge oc:kn_230e140e,
+        oc:kn_252a544d,
+        oc:kn_5d124097,
+        oc:kn_637cf5e1,
+        oc:kn_91733f05,
+        oc:kn_9211eaca,
+        oc:kn_9d9fd099,
+        oc:kn_9f49857e ;
     oc:isUserInvocable true ;
-    oc:nature "Work" ;
+    oc:nature "Tool" ;
     oc:requiresState oc:FileExists ;
     oc:resolvesIntent "clean spreadsheet data",
-        "fix formatting inconsistencies in spreadsheets",
-        "normalize data in Excel or xlsx files",
-        "remove duplicates from spreadsheet data",
-        "standardize column formats in Excel" ;
+        "fix formatting inconsistencies",
+        "normalize messy data",
+        "prepare data for analysis",
+        "remove duplicates",
+        "standardize column formats" ;
     oc:yieldsState oc:DataCleaned .
 
-oc:kn_18e2cdf1 a oc:KnowledgeNode,
-        oc:WorkflowStrategy ;
-    oc:appliesToContext "During Step 4 (Apply) of the cleaning workflow" ;
-    oc:directiveContent "Apply fixes incrementally by category (whitespace → casing → number conversion → dates → dedup), showing a sample of what changed and getting confirmation before moving to the next category." ;
-    oc:hasRationale "Incremental confirmation prevents compounding errors and gives the user control over each transformation step." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_5b953cd7 a oc:KnowledgeNode,
+oc:kn_230e140e a oc:KnowledgeNode,
         oc:Standard ;
-    oc:appliesToContext "When scanning for data quality issues in Step 2" ;
-    oc:directiveContent "Detect and handle all nine issue categories: whitespace, inconsistent casing, numbers-stored-as-text (including stray $, %, commas), mixed date formats, duplicate/near-duplicate rows, blanks, mixed-type columns, encoding problems (mojibake), and Excel error values (#REF!, #N/A, #VALUE!, #DIV/0!)." ;
-    oc:hasRationale "A comprehensive sweep across all common data quality dimensions ensures no issues are missed that would compromise downstream analysis." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_7a0c924a a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When applying destructive operations like removing duplicates, filling blanks, or overwriting originals" ;
-    oc:directiveContent "Never overwrite original data in place without explicit user confirmation. Only do so when no sensible formula equivalent exists (e.g., encoding/mojibake repair)." ;
-    oc:hasRationale "In-place overwrites are irreversible and can destroy source data that may be needed for auditing or rollback." ;
+    oc:appliesToContext "Before applying fixes (Step 3: Propose fixes)" ;
+    oc:directiveContent "Always show a summary table of proposed fixes (Column, Issue, Count, Proposed Fix) before making any changes." ;
+    oc:hasRationale "Prevents unintended data modification and gives the user full visibility into what will change." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_9a3fd332 a oc:Heuristic,
+oc:kn_252a544d a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "During Step 4 (Apply phase)" ;
+    oc:directiveContent "Process fixes incrementally by category (whitespace → casing → number conversion → dates → dedup), showing samples and getting confirmation after each category before proceeding." ;
+    oc:hasRationale "Incremental application prevents compounding errors and allows the user to catch issues early." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_5d124097 a oc:FallbackStrategy,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When determining the execution environment at the start of the cleaning task" ;
-    oc:directiveContent "Use Office JS (Excel.run) when running inside Excel as an Office Add-in; use Python/openpyxl when operating on standalone .xlsx files." ;
-    oc:hasRationale "Using the native API for each environment ensures correct file handling and access to spreadsheet features like formulas." ;
+    oc:appliesToContext "When a formula-based approach is not feasible" ;
+    oc:directiveContent "Only overwrite in-place with computed values when the user explicitly requests it or no sensible formula equivalent exists (e.g., encoding/mojibake repair)." ;
+    oc:hasRationale "Some transformations like character encoding repair cannot be expressed as spreadsheet formulas." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_a65f0c6a a oc:DesignPrinciple,
+oc:kn_637cf5e1 a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When applying any fix that has a formula equivalent (TRIM, UPPER, VALUE, DATEVALUE, etc.)" ;
-    oc:directiveContent "Prefer writing formulas in adjacent helper columns over computing cleaned values in Python and overwriting originals. This keeps transformations transparent, auditable, and reversible." ;
-    oc:hasRationale "Formula-based cleaning preserves the original data and makes it possible for users to trace exactly how each value was transformed." ;
+    oc:appliesToContext "When applying fixes that irreversibly alter or delete data" ;
+    oc:directiveContent "Confirm with the user before destructive operations: removing duplicates, filling blanks, or overwriting original values in-place." ;
+    oc:hasRationale "Destructive operations cannot be undone without the original data; explicit confirmation prevents data loss." ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_ce918735 a oc:KnowledgeNode,
+oc:kn_91733f05 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When applying any fix that can be expressed as an Excel formula (TRIM, UPPER, VALUE, DATEVALUE, etc.)" ;
+    oc:directiveContent "Prefer formula-based transformations in helper columns over hardcoded computed values to keep data transformations transparent and auditable." ;
+    oc:hasRationale "Formulas preserve the transformation logic, making it reviewable and reversible; hardcoded values destroy the audit trail." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_9211eaca a oc:KnowledgeNode,
+        oc:SuccessIndicator ;
+    oc:appliesToContext "After completing all cleaning operations" ;
+    oc:directiveContent "Report a before/after summary showing what changed after all fixes are applied." ;
+    oc:hasRationale "The summary confirms the final state and provides documentation of transformations performed." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_9d9fd099 a oc:KnowledgeNode,
         oc:PreFlightCheck ;
-    oc:appliesToContext "Before applying any cleaning operations" ;
-    oc:directiveContent "Profile each column before making changes: detect dominant type (text/number/date), identify outliers, and present a summary table of all issues with counts and proposed fixes before touching any data." ;
-    oc:hasRationale "Profiling first ensures the agent understands the data's shape and can propose targeted, accurate fixes rather than blind bulk operations." ;
+    oc:appliesToContext "Before beginning any data cleaning operation" ;
+    oc:directiveContent "Detect the execution environment: if inside Excel (Office Add-in/Office JS), use Excel.run with range.values/range.formulas; if standalone .xlsx, use Python/openpyxl." ;
+    oc:hasRationale "The API surface differs between in-Excel and standalone file operations; wrong choice causes runtime errors." ;
     oc:severityLevel "HIGH" .
+
+oc:kn_9f49857e a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Step 1 (Scope phase) when first encountering data" ;
+    oc:directiveContent "Profile each column to detect its dominant type (text/number/date) and identify outliers before deciding on cleaning strategy." ;
+    oc:hasRationale "Type profiling informs which cleaning operations are appropriate per column, avoiding misapplied fixes." ;
+    oc:severityLevel "MEDIUM" .
+
+_:ref_045c893adba0ca27 a oc:WorkflowStep ;
+    dcterms:description "Scan for all 9 issue categories: whitespace, casing, number-as-text, dates, duplicates, blanks, mixed types, encoding, and errors." ;
+    oc:expectedOutcome "Complete inventory of all detected issues across all columns." ;
+    oc:stepDependsOn _:ref_31ef07792cfd151c ;
+    oc:stepId "detect" .
+
+_:ref_31ef07792cfd151c a oc:WorkflowStep ;
+    dcterms:description "Determine the target range (specified or full used range) and profile each column's dominant type and outliers." ;
+    oc:expectedOutcome "Column profiles with detected types and outlier counts identified." ;
+    oc:stepId "scope" .
+
+_:ref_e5c5c284b6d86c6d a oc:WorkflowStep ;
+    dcterms:description "Present a summary table (Column, Issue, Count, Proposed Fix) to the user for review before any changes." ;
+    oc:expectedOutcome "User reviews and approves the proposed fix plan." ;
+    oc:stepDependsOn _:ref_045c893adba0ca27 ;
+    oc:stepId "propose" .
 

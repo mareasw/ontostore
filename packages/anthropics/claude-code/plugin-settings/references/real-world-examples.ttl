@@ -4,77 +4,746 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_code_plugin_settings_real_world_examples a oc:DeclarativeSkill,
+oc:skill_claude_code_plugin_settings_real_world_examples a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "real-world-examples" ;
     skos:broader "Reference documentation" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-code/plugin-settings" ;
     oc:contentHash "565c3af7f6190b7f4dbd9623c471bd2ca5b303432224e69165d18d2bdf62eac6" ;
-    oc:differentia "analyzes production implementations of the .claude/plugin-name.local.md settings pattern through multi-agent-swarm and ralph-wiggum plugin case studies, extracting reusable patterns, best practices, and anti-patterns" ;
-    oc:extends oc:skill_anthropics_claude_code_plugin_settings ;
+    oc:differentia "illustrates the .claude/plugin-name.local.md settings pattern through two production plugin case studies (multi-agent-swarm and ralph-wiggum) with complete shell implementations" ;
+    oc:extends oc:skill_claude_code_plugin_settings ;
+    oc:hasArgumentHint "plugin-name or pattern to study" ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_18eacd16,
-        oc:kn_1f6448d4,
-        oc:kn_244967b7,
-        oc:kn_30d6afd0,
-        oc:kn_9aa1882e,
-        oc:kn_b1d2f766,
-        oc:kn_b55f986b ;
-    oc:isUserInvocable false ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Detailed analysis of how production plugins use the `.claude/plugin-name.local.md` pattern." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Both plugins check file existence first:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """if [[ ! -f "$STATE_FILE" ]]; then
+  exit 0  # Not active
+fi
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 272-276" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Why:** Avoids errors when plugin isn't configured and performs fast." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "1. Quick Exit Pattern" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Both use temp file + atomic move:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """TEMP_FILE="${FILE}.tmp.$$"
+sed "s/^field: .*/field: $NEW_VALUE/" "$FILE" > "$TEMP_FILE"
+mv "$TEMP_FILE" "$FILE"
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 294-298" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Why:** Prevents corruption if process is interrupted." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "3. Atomic Updates" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """sed 's/^"\\(.*\\)"$/\\1/'
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 306-308" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Why:** YAML allows both `field: value` and `field: \"value\"`." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Both strip surrounding quotes from YAML values:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "4. Quote Handling" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Both use an `enabled` field for explicit control:" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Why:** Allows temporary deactivation without deleting file." ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """enabled: true
+""" ;
+                                    oc:codeLanguage "yaml" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 284-286" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "2. Enabled Flag" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Both handle missing/corrupt files gracefully:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """if [[ ! -f "$FILE" ]]; then
+  exit 0  # No error, just not configured
+fi
+
+if [[ -z "$CRITICAL_FIELD" ]]; then
+  echo "Settings file corrupt" >&2
+  rm "$FILE"  # Clean up
+  exit 0
+fi
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 316-326" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Why:** Fails gracefully instead of crashing." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 5 ;
+                            oc:sectionTitle "5. Error Handling" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Best Practices from Real Plugins" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# Update pr_number field
+sed "s/^pr_number: .*/pr_number: $PR_NUM/" \\
+  ".claude/multi-agent-swarm.local.md" > temp.md
+mv temp.md ".claude/multi-agent-swarm.local.md"
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 122-127" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "PR number updated after PR creation:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "Updates" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**.claude/multi-agent-swarm.local.md:**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """---
+agent_name: auth-implementation
+task_number: 3.5
+pr_number: 1234
+coordinator_session: team-leader
+enabled: true
+dependencies: ["Task 3.4"]
+additional_instructions: "Use JWT tokens, not sessions"
+---
+
+# Task: Implement Authentication
+
+Build JWT-based authentication for the REST API.
+
+## Requirements
+- JWT token generation and validation
+- Refresh token flow
+- Secure password hashing
+
+## Success Criteria
+- Auth endpoints implemented
+- Tests passing (100% coverage)
+- PR created and CI green
+- Documentation updated
+
+## Coordination
+Depends on Task 3.4 (user model).
+Report status to 'team-leader' session.
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 11-40" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Settings File Structure" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Implementation:**" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**File:** `hooks/agent-stop-notification.sh`" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """#!/bin/bash
+set -euo pipefail
+
+SWARM_STATE_FILE=".claude/multi-agent-swarm.local.md"
+
+# Quick exit if no swarm active
+if [[ ! -f "$SWARM_STATE_FILE" ]]; then
+  exit 0
+fi
+
+# Parse frontmatter
+FRONTMATTER=$(sed -n '/^---$/,/^---$/{ /^---$/d; p; }' "$SWARM_STATE_FILE")
+
+# Extract configuration
+COORDINATOR_SESSION=$(echo "$FRONTMATTER" | grep '^coordinator_session:' | sed 's/coordinator_session: *//' | sed 's/^"\\(.*\\)"$/\\1/')
+AGENT_NAME=$(echo "$FRONTMATTER" | grep '^agent_name:' | sed 's/agent_name: *//' | sed 's/^"\\(.*\\)"$/\\1/')
+TASK_NUMBER=$(echo "$FRONTMATTER" | grep '^task_number:' | sed 's/task_number: *//' | sed 's/^"\\(.*\\)"$/\\1/')
+PR_NUMBER=$(echo "$FRONTMATTER" | grep '^pr_number:' | sed 's/pr_number: *//' | sed 's/^"\\(.*\\)"$/\\1/')
+ENABLED=$(echo "$FRONTMATTER" | grep '^enabled:' | sed 's/enabled: *//')
+
+# Check if enabled
+if [[ "$ENABLED" != "true" ]]; then
+  exit 0
+fi
+
+# Send notification to coordinator
+NOTIFICATION="🤖 Agent ${AGENT_NAME} (Task ${TASK_NUMBER}, PR #${PR_NUMBER}) is idle."
+
+if tmux has-session -t "$COORDINATOR_SESSION" 2>/dev/null; then
+  tmux send-keys -t "$COORDINATOR_SESSION" "$NOTIFICATION" Enter
+  sleep 0.5
+  tmux send-keys -t "$COORDINATOR_SESSION" Enter
+fi
+
+exit 0
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 4 ;
+                                    oc:sourceLocation "lines 50-86" ],
+                                _:ref_68fca8cd9846baff,
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Purpose:** Send notifications to coordinator when agent becomes idle" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent "**Key patterns:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "How It's Used" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "Settings files are created during swarm launch with:" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**File:** `commands/launch-swarm.md`" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """cat > "$WORKTREE_PATH/.claude/multi-agent-swarm.local.md" <<EOF
+---
+agent_name: $AGENT_NAME
+task_number: $TASK_ID
+pr_number: TBD
+coordinator_session: $COORDINATOR_SESSION
+enabled: true
+dependencies: [$DEPENDENCIES]
+additional_instructions: "$EXTRA_INSTRUCTIONS"
+---
+
+# Task: $TASK_DESCRIPTION
+
+$TASK_DETAILS
+EOF
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 3 ;
+                                    oc:sourceLocation "lines 100-116" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Creation" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "multi-agent-swarm Plugin" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 1 ;
+                            oc:rowCount 7 ;
+                            oc:tableCaption "## Pattern Comparison" ;
+                            oc:tableMarkdown """| Feature | multi-agent-swarm | ralph-wiggum |
+|---------|-------------------|--------------|
+| **File** | `.claude/multi-agent-swarm.local.md` | `.claude/ralph-loop.local.md` |
+| **Purpose** | Agent coordination state | Loop iteration state |
+| **Frontmatter** | Agent metadata | Loop configuration |
+| **Body** | Task assignment | Prompt to loop |
+| **Updates** | PR number, status | Iteration counter |
+| **Deletion** | Manual or on completion | On loop exit |
+| **Hook** | Stop (notifications) | Stop (loop control) |
+""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Pattern Comparison" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# BAD
+FILE="/Users/alice/.claude/my-plugin.local.md"
+
+# GOOD
+FILE=".claude/my-plugin.local.md"
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 334-340" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "❌ Hardcoded Paths" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# BAD: Fails if field missing
+if [[ $MAX -gt 100 ]]; then
+  # MAX might be empty!
+fi
+
+# GOOD: Provide default
+MAX=${MAX:-10}
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 366-374" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "❌ No Default Values" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# BAD
+echo $VALUE
+
+# GOOD
+echo "$VALUE"
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 344-350" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "❌ Unquoted Variables" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# BAD: Assumes exactly 2 --- markers
+sed -n '/^---$/,/^---$/{ /^---$/d; p; }'
+
+# GOOD: Handles --- in body
+awk '/^---$/{i++; next} i>=2'  # For body
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 378-384" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 5 ;
+                            oc:sectionTitle "❌ Ignoring Edge Cases" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# BAD: Can corrupt file if interrupted
+sed -i "s/field: .*/field: $VALUE/" "$FILE"
+
+# GOOD: Atomic
+TEMP_FILE="${FILE}.tmp.$$"
+sed "s/field: .*/field: $VALUE/" "$FILE" > "$TEMP_FILE"
+mv "$TEMP_FILE" "$FILE"
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 354-362" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "❌ Non-Atomic Updates" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Anti-Patterns to Avoid" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "The `.claude/plugin-name.local.md` pattern provides:" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Simple, human-readable configuration" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Easy parsing with standard bash tools" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Per-project settings" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "Supports both structured config (YAML) and freeform content (markdown)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Version-control friendly (gitignored)" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "Use this pattern for any plugin that needs user-configurable behavior or state persistence." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Conclusion" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """#!/bin/bash
+PROMPT="$1"
+MAX_ITERATIONS="${2:-0}"
+COMPLETION_PROMISE="${3:-}"
+
+# Create state file
+cat > ".claude/ralph-loop.local.md" <<EOF
+---
+iteration: 1
+max_iterations: $MAX_ITERATIONS
+completion_promise: "$COMPLETION_PROMISE"
+started_at: "$(date -Iseconds)"
+---
+
+$PROMPT
+EOF
+
+echo "Ralph loop initialized: .claude/ralph-loop.local.md"
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 233-252" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**File:** `scripts/setup-ralph-loop.sh`" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Creation" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """---
+iteration: 1
+max_iterations: 10
+completion_promise: "All tests passing and build successful"
+started_at: "2025-01-15T14:30:00Z"
+---
+
+Fix all the linting errors in the project.
+Make sure tests pass after each fix.
+Document any changes needed in CLAUDE.md.
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 135-146" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**.claude/ralph-loop.local.md:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Settings File Structure" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**File:** `hooks/stop-hook.sh`" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Implementation:**" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Purpose:** Prevent session exit and loop Claude's output back as input" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """#!/bin/bash
+set -euo pipefail
+
+RALPH_STATE_FILE=".claude/ralph-loop.local.md"
+
+# Quick exit if no active loop
+if [[ ! -f "$RALPH_STATE_FILE" ]]; then
+  exit 0
+fi
+
+# Parse frontmatter
+FRONTMATTER=$(sed -n '/^---$/,/^---$/{ /^---$/d; p; }' "$RALPH_STATE_FILE")
+
+# Extract configuration
+ITERATION=$(echo "$FRONTMATTER" | grep '^iteration:' | sed 's/iteration: *//')
+MAX_ITERATIONS=$(echo "$FRONTMATTER" | grep '^max_iterations:' | sed 's/max_iterations: *//')
+COMPLETION_PROMISE=$(echo "$FRONTMATTER" | grep '^completion_promise:' | sed 's/completion_promise: *//' | sed 's/^"\\(.*\\)"$/\\1/')
+
+# Check max iterations
+if [[ $MAX_ITERATIONS -gt 0 ]] && [[ $ITERATION -ge $MAX_ITERATIONS ]]; then
+  echo "🛑 Ralph loop: Max iterations ($MAX_ITERATIONS) reached."
+  rm "$RALPH_STATE_FILE"
+  exit 0
+fi
+
+# Get transcript and check for completion promise
+TRANSCRIPT_PATH=$(echo "$HOOK_INPUT" | jq -r '.transcript_path')
+LAST_OUTPUT=$(grep '"role":"assistant"' "$TRANSCRIPT_PATH" | tail -1 | jq -r '.message.content | map(select(.type == "text")) | map(.text) | join("\\n")')
+
+# Check for completion
+if [[ "$COMPLETION_PROMISE" != "null" ]] && [[ -n "$COMPLETION_PROMISE" ]]; then
+  PROMISE_TEXT=$(echo "$LAST_OUTPUT" | perl -0777 -pe 's/.*?<promise>(.*?)<\\/promise>.*/$1/s; s/^\\s+|\\s+$//g')
+
+  if [[ "$PROMISE_TEXT" = "$COMPLETION_PROMISE" ]]; then
+    echo "✅ Ralph loop: Detected completion"
+    rm "$RALPH_STATE_FILE"
+    exit 0
+  fi
+fi
+
+# Continue loop - increment iteration
+NEXT_ITERATION=$((ITERATION + 1))
+
+# Extract prompt from markdown body
+PROMPT_TEXT=$(awk '/^---$/{i++; next} i>=2' "$RALPH_STATE_FILE")
+
+# Update iteration counter
+TEMP_FILE="${RALPH_STATE_FILE}.tmp.$$"
+sed "s/^iteration: .*/iteration: $NEXT_ITERATION/" "$RALPH_STATE_FILE" > "$TEMP_FILE"
+mv "$TEMP_FILE" "$RALPH_STATE_FILE"
+
+# Block exit and feed prompt back
+jq -n \\
+  --arg prompt "$PROMPT_TEXT" \\
+  --arg msg "🔄 Ralph iteration $NEXT_ITERATION" \\
+  '{
+    "decision": "block",
+    "reason": $prompt,
+    "systemMessage": $msg
+  }'
+
+exit 0
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 4 ;
+                                    oc:sourceLocation "lines 156-219" ],
+                                _:ref_d7dc71e3a8304fac,
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent "**Key patterns:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "How It's Used" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "ralph-wiggum Plugin" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Real-World Plugin Settings Examples" ] ;
+    oc:hasWorkflow _:ref_68fca8cd9846baff,
+        _:ref_d7dc71e3a8304fac ;
+    oc:impartsKnowledge oc:kn_18fe65d8,
+        oc:kn_2b5874ec,
+        oc:kn_40cab6c2,
+        oc:kn_42438a74,
+        oc:kn_4ac631f1,
+        oc:kn_5a40f7a3,
+        oc:kn_689a2f4a,
+        oc:kn_6b66fa6c,
+        oc:kn_b5b4d917 ;
+    oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:EnvironmentReady ;
-    oc:resolvesIntent "avoid anti-patterns when implementing plugin settings",
-        "implement atomic updates and quick-exit patterns for settings hooks",
-        "learn production patterns for .local.md settings files",
-        "see how multi-agent-swarm and ralph-wiggum use plugin settings",
-        "understand real-world plugin settings implementations" .
+    oc:requiresState oc:DirectoryWritable,
+        oc:FileExists ;
+    oc:resolvesIntent "build loop control or agent coordination using .claude local settings",
+        "implement settings files with frontmatter in bash hooks",
+        "learn plugin settings patterns from real examples",
+        "understand atomic update and quick-exit patterns for plugin state" ;
+    oc:yieldsState oc:SettingsFileCreated .
 
-oc:kn_18eacd16 a oc:KnowledgeNode,
-        oc:RecoveryTactic ;
-    oc:appliesToContext "When a parsed field is empty or null and the plugin requires it" ;
-    oc:directiveContent "When a critical settings field is empty or missing after parsing, treat the settings file as corrupt: log a warning to stderr, optionally remove the file, and exit cleanly rather than proceeding with undefined behavior." ;
-    oc:hasRationale "Silent failures from missing fields can cause unpredictable hook behavior; explicit cleanup and exit prevents cascading errors" ;
+oc:kn_18fe65d8 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing any new plugin that needs user-configurable behavior or state persistence" ;
+    oc:directiveContent "Use .claude/plugin-name.local.md with YAML frontmatter for structured config and markdown body for freeform content (prompts, task descriptions)." ;
+    oc:hasRationale "Human-readable, version-control friendly (gitignored), per-project, and parseable with standard bash tools" .
+
+oc:kn_2b5874ec a oc:FallbackStrategy,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When a required frontmatter field is missing or empty" ;
+    oc:directiveContent "Handle missing or corrupt fields gracefully: provide defaults (MAX=${MAX:-10}) and clean up corrupt files rather than crashing." ;
+    oc:hasRationale "Fails gracefully instead of propagating errors through hooks" ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_1f6448d4 a oc:Constraint,
+oc:kn_40cab6c2 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When updating any frontmatter field in a .claude/*.local.md file" ;
+    oc:directiveContent "Use atomic updates for settings files: write to a temp file with unique suffix ($$), then mv to final path." ;
+    oc:hasRationale "Prevents file corruption if the process is interrupted mid-write" ;
+    oc:severityLevel "HIGH" ;
+    oc:stepOrder 2 .
+
+oc:kn_42438a74 a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When defining file paths in any hook, command, or agent that reads plugin settings" ;
-    oc:directiveContent "Use relative paths like .claude/plugin-name.local.md instead of absolute or hardcoded user paths when referencing settings files in hooks and scripts." ;
-    oc:hasRationale "Absolute paths break portability across machines and user accounts; relative paths work in any project checkout" ;
+    oc:appliesToContext "When writing to or reading from plugin settings files" ;
+    oc:directiveContent "Never use hardcoded absolute paths or non-atomic sed -i for settings files. Always use relative paths (.claude/plugin.local.md) and temp-file-plus-mv." ;
+    oc:hasRationale "Absolute paths break portability; sed -i can corrupt on interruption" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_244967b7 a oc:DesignPrinciple,
+oc:kn_4ac631f1 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When implementing any hook that reads plugin settings" ;
+    oc:directiveContent "1. Check file exists (quick exit if not) → 2. Parse frontmatter with sed → 3. Check enabled flag → 4. Extract needed fields → 5. Perform action → 6. Update state atomically if needed" ;
+    oc:hasRationale "Consistent structure across all plugins reduces bugs and improves maintainability" ;
+    oc:stepOrder 1 .
+
+oc:kn_5a40f7a3 a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When designing the schema for a new plugin settings file" ;
-    oc:directiveContent "Include an 'enabled' boolean field in settings frontmatter so users can temporarily deactivate a plugin without deleting its configuration file." ;
-    oc:hasRationale "Deleting and recreating files is error-prone; an enabled flag provides a clean toggle mechanism that preserves configuration" ;
+    oc:appliesToContext "When initializing a new plugin settings file from a script" ;
+    oc:codeLanguage "bash" ;
+    oc:directiveContent "Create settings file with cat > \"$FILE\" <<EOF\\n---\\nkey: $VALUE\\n---\\n\\nBody content\\nEOF" ;
+    oc:hasRationale "Heredoc with variable interpolation generates complete frontmatter+body files in one atomic write" ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_30d6afd0 a oc:DesignPrinciple,
+oc:kn_689a2f4a a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When writing any hook or script that reads .claude/plugin-name.local.md files" ;
-    oc:directiveContent "Always implement the quick-exit pattern: check if the settings file exists before any parsing, and return immediately if it doesn't. This ensures hooks are non-disruptive when the plugin isn't configured." ;
-    oc:hasRationale "Avoids errors and performance overhead when the plugin is not active in a project, making hooks universally safe to install" ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_9aa1882e a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When parsing string fields from YAML frontmatter" ;
-    oc:directiveContent "Always strip surrounding quotes from YAML values using sed 's/^\"\\(.*\\)\"$/\\1/' because YAML allows both field: value and field: \"value\" syntax, and consumers may use either form." ;
-    oc:hasRationale "Without quote stripping, quoted values will retain their quotes, causing subtle comparison failures and unexpected behavior" ;
+    oc:appliesToContext "When parsing YAML frontmatter from .claude/*.local.md in bash" ;
+    oc:codeLanguage "bash" ;
+    oc:directiveContent "Parse frontmatter with: FRONTMATTER=$(sed -n '/^---$/,/^---$/{ /^---$/d; p; }' \"$FILE\"). Strip YAML quotes with: sed 's/^\"\\(.*\\)\"$/\\1/'. Extract body with: awk '/^---$/{i++; next} i>=2'." ;
+    oc:hasRationale "YAML allows both quoted and unquoted values; this normalizes them" ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_b1d2f766 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When updating any .local.md settings file field programmatically" ;
-    oc:directiveContent "Never use sed -i or other non-atomic in-place file edits to update settings files. Always write to a temp file then atomically move it into place with mv." ;
-    oc:hasRationale "Non-atomic edits can corrupt the file if the process is interrupted mid-write, leaving the plugin in an undefined state" ;
-    oc:severityLevel "CRITICAL" .
+oc:kn_6b66fa6c a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When designing any plugin settings schema" ;
+    oc:directiveContent "Include an `enabled: true` frontmatter field in every settings file and check it before acting." ;
+    oc:hasRationale "Allows temporary deactivation without deleting the file or losing configuration" ;
+    oc:severityLevel "MEDIUM" .
 
-oc:kn_b55f986b a oc:Idempotency,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When the plugin settings file does not exist" ;
-    oc:directiveContent "The quick-exit pattern makes hooks idempotent: running them multiple times when no settings file exists produces the same safe result (exit 0)." ;
-    oc:hasRationale "Idempotent hooks can be safely installed globally without side effects on projects that don't use the plugin" ;
-    oc:severityLevel "LOW" .
+oc:kn_b5b4d917 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before any hook or script reads a .claude/*.local.md file" ;
+    oc:directiveContent "Always check if the settings file exists before parsing: if [[ ! -f \"$STATE_FILE\" ]]; then exit 0; fi. This is the quick-exit pattern." ;
+    oc:hasRationale "Avoids errors when plugin isn't configured and keeps hook overhead near zero" ;
+    oc:severityLevel "CRITICAL" ;
+    oc:stepOrder 1 .
+
+_:ref_008e2b5fe546c9aa a oc:WorkflowStep ;
+    dcterms:description "**Quick exit** (line 7-9): Skip if not active" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_1f0fb1fa566c00fb a oc:WorkflowStep ;
+    dcterms:description "**Promise detection** (lines 25-33): Check for completion signal in output" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_3e45ae3e2337a5bf a oc:WorkflowStep ;
+    dcterms:description "**Field extraction** (lines 11-17): Parses each frontmatter field" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_69624943703f091d a oc:WorkflowStep ;
+    dcterms:description "**Loop continuation** (lines 45-53): Block exit and feed prompt back" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_6" ;
+    oc:stepOrder 6 .
+
+_:ref_99335e700756b593 a oc:WorkflowStep ;
+    dcterms:description "**Prompt extraction** (line 38): Read markdown body as next prompt" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_9a89f42bc1661d0f a oc:WorkflowStep ;
+    dcterms:description "**Iteration tracking** (lines 11-20): Count and enforce max iterations" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_a2d4d1425c1703a3 a oc:WorkflowStep ;
+    dcterms:description "**Enabled check** (lines 19-21): Respects enabled flag" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_bc03c9071306d5f7 a oc:WorkflowStep ;
+    dcterms:description "**Action based on settings** (lines 23-29): Uses coordinator_session to send notification" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_cc1edf6d3328c6fe a oc:WorkflowStep ;
+    dcterms:description "**State update** (lines 40-43): Increment iteration atomically" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_5" ;
+    oc:stepOrder 5 .
+
+_:ref_d12d010d73356f1c a oc:WorkflowStep ;
+    dcterms:description "**Quick exit** (line 7-9): Returns immediately if file doesn't exist" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_68fca8cd9846baff a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 6 ;
+    oc:hasStep _:ref_3e45ae3e2337a5bf,
+        _:ref_a2d4d1425c1703a3,
+        _:ref_bc03c9071306d5f7,
+        _:ref_d12d010d73356f1c ;
+    oc:workflowId "procedure_6" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_d7dc71e3a8304fac a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 6 ;
+    oc:hasStep _:ref_008e2b5fe546c9aa,
+        _:ref_1f0fb1fa566c00fb,
+        _:ref_69624943703f091d,
+        _:ref_99335e700756b593,
+        _:ref_9a89f42bc1661d0f,
+        _:ref_cc1edf6d3328c6fe ;
+    oc:workflowId "procedure_6" ;
+    oc:workflowName "Ordered Procedure" .
 

@@ -4,72 +4,402 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_office_skills_batch_processor a oc:DeclarativeSkill,
+oc:skill_claude_office_skills_batch_processor a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "batch-processor" ;
-    skos:broader "document processing workflow" ;
-    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-office-skills/batch-processor" ;
+    skos:broader "Bulk document processing pipeline" ;
+    prov:wasDerivedFrom "../.agents/skills/anthropics/claude-office-skills/batch-processor" ;
     oc:contentHash "48d1b3fc89ac8759be0dab2536d46882c353b90f4db94a9b8c38942ae936c8ee" ;
-    oc:dependsOnSkill oc:skill_batch_convert ;
-    oc:differentia "processes multiple documents in bulk with parallel execution, checkpointing, and progress tracking" ;
-    oc:extends oc:skill_office_mcp ;
+    oc:dependsOnSkill oc:skill_ontoskills_office_mcp ;
+    oc:differentia "processes multiple files in parallel with checkpointing and progress tracking for resume-safe execution" ;
     oc:handlesFailure oc:FileNotFound,
         oc:PermissionDenied,
         oc:ProcessingError ;
-    oc:hasArgumentHint "operation description and file path(s) or directory" ;
+    oc:hasAllowedTool "Bash",
+        "Glob",
+        "Read",
+        "Write" ;
+    oc:hasArgumentHint "operation description and file/folder path" ;
     oc:hasCategory "automation" ;
     oc:hasDescription "Process multiple documents in bulk with parallel execution" ;
     oc:hasName "batch-processor" ;
-    oc:hasPackageName "batch-processor" ;
-    oc:impartsKnowledge oc:kn_26ceda25,
-        oc:kn_568b6623,
-        oc:kn_6ef0f6f0,
-        oc:kn_7ea65e45,
-        oc:kn_ce68eb57 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """# ═══════════════════════════════════════════════════════════════════════════════
+# CLAUDE OFFICE SKILL - Enhanced Metadata v2.0
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Basic Information
+name: batch-processor
+description: "Process multiple documents in bulk with parallel execution"
+version: "1.0"
+author: claude-office-skills
+license: MIT
+
+# Categorization
+category: workflow
+tags:
+  - batch
+  - processor
+  - bulk
+  - automation
+department: All
+
+# AI Model Compatibility
+models:
+  recommended:
+    - claude-sonnet-4
+    - claude-opus-4
+  compatible:
+    - claude-3-5-sonnet
+    - gpt-4
+    - gpt-4o
+
+# MCP Tools Integration
+mcp:
+  server: office-mcp
+  tools:
+    - batch_convert
+
+# Skill Capabilities
+capabilities:
+  - batch_processing
+  - automation
+
+# Language Support
+languages:
+  - en
+  - zh
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """import json
+from pathlib import Path
+
+class BatchProcessor:
+    def __init__(self, checkpoint_file: str = "checkpoint.json"):
+        self.checkpoint_file = checkpoint_file
+        self.processed = self._load_checkpoint()
+    
+    def _load_checkpoint(self):
+        if Path(self.checkpoint_file).exists():
+            return json.load(open(self.checkpoint_file))
+        return {}
+    
+    def _save_checkpoint(self):
+        json.dump(self.processed, open(self.checkpoint_file, "w"))
+    
+    def process(self, files: list, processor_func):
+        for file in files:
+            if str(file) in self.processed:
+                continue  # Skip already processed
+            
+            try:
+                result = processor_func(file)
+                self.processed[str(file)] = {"status": "success", **result}
+            except Exception as e:
+                self.processed[str(file)] = {"status": "error", "error": str(e)}
+            
+            self._save_checkpoint()  # Resume-safe
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 123-152" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Error Handling & Resume" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """from concurrent.futures import ProcessPoolExecutor, as_completed
+from pathlib import Path
+from tqdm import tqdm
+
+def process_file(file_path: Path) -> dict:
+    \"\"\"Process a single file.\"\"\"
+    # Your processing logic here
+    return {"path": str(file_path), "status": "success"}
+
+def batch_process(input_dir: str, pattern: str = "*.*", max_workers: int = 4):
+    \"\"\"Process all matching files in directory.\"\"\"
+    
+    files = list(Path(input_dir).glob(pattern))
+    results = []
+    
+    with ProcessPoolExecutor(max_workers=max_workers) as executor:
+        futures = {executor.submit(process_file, f): f for f in files}
+        
+        for future in tqdm(as_completed(futures), total=len(files)):
+            file = futures[future]
+            try:
+                result = future.result()
+                results.append(result)
+            except Exception as e:
+                results.append({"path": str(file), "error": str(e)})
+    
+    return results
+
+# Usage
+results = batch_process("/documents/invoices", "*.pdf", max_workers=8)
+print(f"Processed {len(results)} files")
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 87-119" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Python Implementation" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """Input: [file1, file2, ..., fileN]
+         │
+         ▼
+    ┌─────────────┐
+    │  Parallel   │  ← Process multiple files concurrently
+    │  Workers    │
+    └─────────────┘
+         │
+         ▼
+Output: [result1, result2, ..., resultN]
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 72-83" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Batch Processing Patterns" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Domain Knowledge" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "[Claude Office Skills Hub](https://github.com/claude-office-skills/skills)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "[Custom Repository](https://github.com/claude-office-skills/skills)" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Resources" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "This skill enables efficient bulk processing of documents - convert, transform, extract, or analyze hundreds of files with parallel execution and progress tracking." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Overview" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# Install required dependencies
+pip install python-docx openpyxl python-pptx reportlab jinja2
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 164-167" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Installation" ],
+                [ a oc:Section ;
+                    oc:hasContent _:ref_0af3a6d823e761f2,
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Example prompts:**" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 3 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "\"Batch rename and organize files\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "\"Extract text from all images in a folder\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "\"Convert 100 PDFs to Word documents\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "\"Mass update document headers/footers\"" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "How to Use" ],
+                [ a oc:Section ;
+                    oc:hasContent _:ref_a40fc38813c43879 ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Best Practices" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Batch Processor Skill" ] ;
+    oc:hasWorkflow _:ref_0af3a6d823e761f2,
+        [ a oc:Workflow ;
+            dcterms:description "Execute bulk document operations with parallel processing and error recovery" ;
+            oc:hasStep _:ref_0371c3da039ef106,
+                _:ref_57470f77174c58ff,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Review failed files from checkpoint log and handle errors" ;
+                    oc:expectedOutcome "Error files logged for retry; successful results available" ;
+                    oc:stepDependsOn _:ref_0371c3da039ef106 ;
+                    oc:stepId "handle-errors" ],
+                _:ref_f6de47eecdd8fec3 ;
+            oc:workflowId "batch-process" ;
+            oc:workflowName "Batch Document Processing" ],
+        _:ref_a40fc38813c43879 ;
+    oc:impartsKnowledge oc:kn_2efad7f1,
+        oc:kn_6ae2cf62,
+        oc:kn_a58fcdf8,
+        oc:kn_c68eb352,
+        oc:kn_c8e2723d,
+        oc:kn_d2e8ffcf ;
     oc:isUserInvocable true ;
     oc:nature "Work" ;
     oc:requiresState oc:DirectoryWritable,
         oc:FileExists ;
-    oc:resolvesIntent "batch rename and organize files",
-        "convert documents in bulk",
-        "extract text from multiple files",
+    oc:resolvesIntent "batch convert documents",
+        "batch rename and organize files",
+        "extract text from batch of files",
         "mass update document properties",
-        "process hundreds of files with parallel execution" ;
-    oc:yieldsState oc:BatchComplete,
+        "process multiple files in bulk" ;
+    oc:yieldsState oc:BatchResultsAvailable,
         oc:DocumentsProcessed .
 
-oc:kn_26ceda25 a oc:KnowledgeNode,
+oc:kn_2efad7f1 a oc:Idempotency,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When checkpoint file exists from a previous run" ;
+    oc:directiveContent "Batch processing with checkpointing is idempotent: re-running skips already-processed files." ;
+    oc:hasRationale "Resume-safe design means the same batch command can be reissued safely after interruption." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_6ae2cf62 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When configuring ProcessPoolExecutor or similar parallel workers" ;
+    oc:directiveContent "Set max_workers to CPU core count for optimal parallel throughput; avoid over-subscription." ;
+    oc:hasRationale "Too many workers cause context-switching overhead; too few leaves CPU idle." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_a58fcdf8 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When implementing the per-file processing function in a batch loop" ;
+    oc:directiveContent "Always wrap individual file processing in try/except to isolate failures; never let one file error halt the entire batch." ;
+    oc:hasRationale "One corrupt or problematic file should not abort processing of hundreds of valid files." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_c68eb352 a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When running long batch jobs that may be interrupted" ;
+    oc:directiveContent "Use checkpoint files (JSON) to track processed files so interrupted jobs can resume without reprocessing." ;
+    oc:hasRationale "Long-running batch jobs on hundreds of files are prone to interruption; checkpointing prevents wasted compute." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_c8e2723d a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Parallel file processing with ProcessPoolExecutor" ;
+    oc:codeLanguage "python" ;
+    oc:directiveContent "futures = {executor.submit(process_file, f): f for f in files}; for future in as_completed(futures): result = future.result()" ;
+    oc:hasRationale "Mapping futures to their source files enables error attribution when futures fail." .
+
+oc:kn_d2e8ffcf a oc:KnowledgeNode,
         oc:SuccessIndicator ;
-    oc:appliesToContext "During any batch processing execution" ;
-    oc:directiveContent "Use progress bars (tqdm) to provide real-time feedback on batch processing progress and log all failures for later review." ;
-    oc:hasRationale "User feedback and failure logging are essential for debugging partial failures and understanding job completion status." ;
+    oc:appliesToContext "When executing any batch operation with more than a handful of files" ;
+    oc:directiveContent "Use tqdm progress bars to provide real-time feedback on batch processing progress and per-file status." ;
+    oc:hasRationale "User visibility into progress prevents premature cancellation and aids debugging of stalled jobs." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_568b6623 a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When processing more than a handful of files in bulk" ;
-    oc:directiveContent "Use parallel workers (ProcessPoolExecutor) to process multiple files concurrently, with max_workers set to CPU core count." ;
-    oc:hasRationale "Parallel execution dramatically reduces wall-clock time for I/O-bound and CPU-bound document operations." ;
-    oc:severityLevel "HIGH" .
+_:ref_1accea803d6abd35 a oc:WorkflowStep ;
+    dcterms:description "**Set reasonable worker counts (CPU cores)**" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
 
-oc:kn_6ef0f6f0 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When running batch jobs on large file sets (dozens or hundreds of files)" ;
-    oc:directiveContent "Implement checkpointing by saving processed file status to a JSON file after each file, allowing resume from interruptions." ;
-    oc:hasRationale "Long-running batch jobs may be interrupted; checkpointing prevents reprocessing already-completed files and saves significant time." ;
-    oc:severityLevel "HIGH" .
+_:ref_3e3a9552e86ba640 a oc:WorkflowStep ;
+    dcterms:description "**Use progress bars (tqdm) for user feedback**" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
 
-oc:kn_7ea65e45 a oc:Idempotency,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When re-running a batch job after interruption or failure" ;
-    oc:directiveContent "The checkpoint-based design makes batch processing idempotent — already-processed files are skipped on re-run." ;
-    oc:hasRationale "Idempotency ensures safe re-execution without duplicate side effects, which is critical for bulk operations that may be interrupted." ;
-    oc:severityLevel "MEDIUM" .
+_:ref_473f8e6f032f0382 a oc:WorkflowStep ;
+    dcterms:description "**Log failures for later review**" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
 
-oc:kn_ce68eb57 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When configuring ProcessPoolExecutor or any parallel processing pool" ;
-    oc:directiveContent "Never set worker counts excessively high — match to available CPU cores rather than using unlimited parallelism." ;
-    oc:hasRationale "Excessive workers cause resource contention, memory exhaustion, and degraded performance rather than speedup." ;
-    oc:severityLevel "MEDIUM" .
+_:ref_60f42ba1399bbe4a a oc:WorkflowStep ;
+    dcterms:description "Provide any required input data or files" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_8ba14866b6b2d502 a oc:WorkflowStep ;
+    dcterms:description "Describe what you want to accomplish" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_dcdce75ba91d3f22 a oc:WorkflowStep ;
+    dcterms:description "**Implement checkpointing for long jobs**" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_f125ee343b3c0672 a oc:WorkflowStep ;
+    dcterms:description "I'll execute the appropriate operations" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_0371c3da039ef106 a oc:WorkflowStep ;
+    dcterms:description "Run parallel processing across all files with progress tracking" ;
+    oc:expectedOutcome "All files processed with results collected per file" ;
+    oc:stepDependsOn _:ref_57470f77174c58ff ;
+    oc:stepId "execute-parallel" .
+
+_:ref_0af3a6d823e761f2 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 1 ;
+    oc:hasStep _:ref_60f42ba1399bbe4a,
+        _:ref_8ba14866b6b2d502,
+        _:ref_f125ee343b3c0672 ;
+    oc:workflowId "procedure_1" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_57470f77174c58ff a oc:WorkflowStep ;
+    dcterms:description "Configure batch parameters: worker count, file pattern, checkpoint location" ;
+    oc:expectedOutcome "Batch processing configured with appropriate settings" ;
+    oc:stepDependsOn _:ref_f6de47eecdd8fec3 ;
+    oc:stepId "configure-batch" .
+
+_:ref_a40fc38813c43879 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 1 ;
+    oc:hasStep _:ref_1accea803d6abd35,
+        _:ref_3e3a9552e86ba640,
+        _:ref_473f8e6f032f0382,
+        _:ref_dcdce75ba91d3f22 ;
+    oc:workflowId "procedure_1" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_f6de47eecdd8fec3 a oc:WorkflowStep ;
+    dcterms:description "Describe the batch operation and provide input files or directory path" ;
+    oc:expectedOutcome "Input files identified and operation type determined" ;
+    oc:stepId "describe-task" .
 

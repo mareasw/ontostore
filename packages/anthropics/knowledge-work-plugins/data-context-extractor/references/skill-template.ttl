@@ -4,61 +4,320 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_knowledge_work_plugins_data_context_extractor_skill_template a oc:DeclarativeSkill,
+oc:skill_knowledge_work_plugins_data_context_extractor_skill_template a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "skill-template" ;
-    skos:broader "Template reference" ;
+    skos:broader "Template generator" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/knowledge-work-plugins/data-context-extractor" ;
     oc:contentHash "0ceedd25de9a1e278832fc84e6124334af1bc6eaf7e4d3a29f31c23451cb3a71" ;
-    oc:differentia "that defines the fill-in-the-blank structure for generating company-specific data analysis skills, including entity disambiguation, business terminology, standard filters, key metrics, data freshness, common query patterns, and troubleshooting sections" ;
-    oc:extends oc:skill_anthropics_knowledge_work_plugins_data_context_extractor ;
-    oc:handlesFailure oc:PlaceholdersUnfilled ;
-    oc:hasArgumentHint "company and warehouse metadata to fill placeholders" ;
+    oc:differentia "produces company-specific data analysis skill files with entity disambiguation, metric definitions, and SQL query patterns for a data warehouse context" ;
+    oc:extends oc:skill_knowledge_work_plugins_data_context_extractor ;
+    oc:handlesFailure oc:InsufficientDataContext,
+        oc:TemplatePlaceholderMissing ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_0d1ec19d,
-        oc:kn_4ae88dd5,
-        oc:kn_6056cd1c,
-        oc:kn_658d4136,
-        oc:kn_9258b9aa ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 3 ;
+                    oc:textContent "**When to override:**" ],
+                [ a oc:BulletList ;
+                    oc:blockType "bullet_list" ;
+                    oc:contentOrder 4 ;
+                    oc:hasItem [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 1 ;
+                            oc:itemText "[SCENARIO_1]: Include [NORMALLY_EXCLUDED] when [CONDITION]" ] ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """---
+name: [company]-data-analyst
+description: "[COMPANY] data analysis skill. Provides context for querying [WAREHOUSE_TYPE] including entity definitions, metric calculations, and common query patterns. Use when analyzing [COMPANY] data for: (1) [PRIMARY_USE_CASE_1], (2) [PRIMARY_USE_CASE_2], (3) [PRIMARY_USE_CASE_3], or any data questions requiring [COMPANY]-specific context."
+---
+
+# [COMPANY] Data Analysis
+
+## SQL Dialect: [WAREHOUSE_TYPE]
+
+[INSERT APPROPRIATE DIALECT SECTION FROM sql-dialects.md]
+
+---
+
+## Entity Disambiguation
+
+When users mention these terms, clarify which entity they mean:
+
+[EXAMPLE FORMAT - customize based on discovery:]
+
+**"User" can mean:**
+- **Account**: An individual login/profile ([PRIMARY_TABLE]: [ID_FIELD])
+- **Organization**: A billing entity that can have multiple accounts ([ORG_TABLE]: [ORG_ID])
+- **[OTHER_TYPE]**: [DEFINITION] ([TABLE]: [ID])
+
+**Relationships:**
+- [ENTITY_1] → [ENTITY_2]: [RELATIONSHIP_TYPE] (join on [JOIN_KEY])
+
+---
+
+## Business Terminology
+
+| Term | Definition | Notes |
+|------|------------|-------|
+| [TERM_1] | [DEFINITION] | [CONTEXT/GOTCHA] |
+| [TERM_2] | [DEFINITION] | [CONTEXT/GOTCHA] |
+| [ACRONYM] | [FULL_NAME] - [EXPLANATION] | |
+
+---
+
+## Standard Filters
+
+Always apply these filters unless explicitly told otherwise:
+
+```sql
+-- Exclude test/internal data
+WHERE [TEST_FLAG_COLUMN] = FALSE
+  AND [INTERNAL_FLAG_COLUMN] = FALSE
+
+-- Exclude invalid/fraud
+  AND [STATUS_COLUMN] != '[EXCLUDED_STATUS]'
+
+-- [OTHER STANDARD EXCLUSIONS]
+""" ;
+                    oc:codeLanguage "markdown" ;
+                    oc:contentOrder 2 ;
+                    oc:sourceLocation "lines 7-60" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Use this template when generating a new data analysis skill. Replace all `[PLACEHOLDER]` values." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "To check data freshness:" ],
+                        [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 1 ;
+                            oc:rowCount 2 ;
+                            oc:tableCaption "## Data Freshness" ;
+                            oc:tableMarkdown """| Table | Update Frequency | Typical Lag |
+|-------|------------------|-------------|
+| [TABLE_1] | [FREQUENCY] | [LAG] |
+| [TABLE_2] | [FREQUENCY] | [LAG] |
+""" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """SELECT MAX([DATE_COLUMN]) as latest_data FROM [TABLE]
+""" ;
+                            oc:codeLanguage "sql" ;
+                            oc:contentOrder 3 ;
+                            oc:sourceLocation "lines 89-91" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Data Freshness" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 2 ;
+                            oc:rowCount 4 ;
+                            oc:tableCaption "Use these reference files for detailed table documentation" ;
+                            oc:tableMarkdown """| Domain | Reference File | Use For |
+|--------|----------------|---------|
+| [DOMAIN_1] | `references/[domain1].md` | [BRIEF_DESCRIPTION] |
+| [DOMAIN_2] | `references/[domain2].md` | [BRIEF_DESCRIPTION] |
+| Entities | `references/entities.md` | Entity definitions and relationships |
+| Metrics | `references/metrics.md` | KPI calculations and formulas |
+""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Use these reference files for detailed table documentation:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Knowledge Base Navigation" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """[SAMPLE_QUERY]
+""" ;
+                                    oc:codeLanguage "sql" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 111-113" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "[PATTERN_1_NAME]" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """[SAMPLE_QUERY]
+""" ;
+                                    oc:codeLanguage "sql" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 116-118" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "[PATTERN_2_NAME]" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Common Query Patterns" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 1 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "**Source**: `[TABLE_NAME].[COLUMN_NAME]`" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "**Formula**: `[EXACT_CALCULATION]`" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "**Definition**: [PLAIN_ENGLISH_EXPLANATION]" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "**Time grain**: [DAILY/WEEKLY/MONTHLY]" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 5 ;
+                                            oc:itemText "**Caveats**: [EDGE_CASES_OR_GOTCHAS]" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "[METRIC_1_NAME]" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "[REPEAT FORMAT]" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "[METRIC_2_NAME]" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Key Metrics" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """
+---
+
+## Customization Notes
+
+When generating a skill:
+
+1. **Fill all placeholders** - Don't leave any `[PLACEHOLDER]` text
+2. **Remove unused sections** - If they don't have dashboards, remove that section
+3. **Add specificity** - Generic advice is less useful than specific column names and values
+4. **Include real examples** - Sample queries should use actual table/column names
+5. **Keep it scannable** - Use tables and code blocks liberally
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 136-148" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 1 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Prefer `[AGGREGATED_TABLE]` over `[RAW_TABLE]` when possible" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "For large tables, use `LIMIT` during exploration" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Filter by `[PARTITION_COLUMN]` first to reduce data scanned" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Performance Tips" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 1 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "**[MISTAKE_1]**: [EXPLANATION] → [CORRECT_APPROACH]" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "**[MISTAKE_2]**: [EXPLANATION] → [CORRECT_APPROACH]" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Common Mistakes" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 1 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "For PII-restricted columns: [ALTERNATIVE_APPROACH]" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "If you encounter permission errors on `[TABLE]`: [WORKAROUND]" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Access Issues" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Troubleshooting" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Generated Skill Template" ] ;
+    oc:impartsKnowledge oc:kn_11286686,
+        oc:kn_a304fbb5,
+        oc:kn_e206f327,
+        oc:kn_eb086ff1,
+        oc:kn_fdd13046 ;
     oc:isUserInvocable false ;
-    oc:nature "Concept" ;
-    oc:requiresState oc:CoreQuestionsAnswered,
-        oc:SchemaDiscovered ;
-    oc:resolvesIntent "create a data context skill template for a warehouse",
-        "generate a company-specific data analysis skill",
-        "structure a data analysis skill with SQL dialect, metrics, and entity definitions" ;
+    oc:nature "Work" ;
+    oc:requiresState oc:DataSourcesDiscovered,
+        oc:EntityDefinitionsExtracted ;
+    oc:resolvesIntent "bootstrap data analyst skill with placeholders",
+        "create company-specific analyst skill",
+        "generate data analysis skill from template" ;
     oc:yieldsState oc:SkillTemplateReady .
 
-oc:kn_0d1ec19d a oc:Heuristic,
+oc:kn_11286686 a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When filling in the template's query patterns and metric definitions" ;
-    oc:directiveContent "Prefer specific column names, table names, and actual SQL examples over generic advice. Include real query patterns with actual schema references." ;
-    oc:hasRationale "Generic advice provides less value than concrete, runnable examples that the agent can adapt; specificity is what makes a generated skill superior to a generic one" .
+    oc:appliesToContext "When defining the Entity Disambiguation section" ;
+    oc:directiveContent "Include entity disambiguation for ambiguous terms (e.g., 'User' could mean Account, Organization, etc.) and document join keys between entities." ;
+    oc:hasRationale "Ambiguous entity references are the most common source of incorrect joins and miscounted metrics in multi-tenant systems." ;
+    oc:severityLevel "MEDIUM" .
 
-oc:kn_4ae88dd5 a oc:DesignPrinciple,
+oc:kn_a304fbb5 a oc:KnowledgeNode,
+        oc:OutputFormat ;
+    oc:appliesToContext "When assembling the final generated skill document" ;
+    oc:directiveContent "The generated skill must include: frontmatter (name, description), SQL dialect section, entity disambiguation, business terminology table, standard filters, key metrics with formulas, data freshness table, knowledge base navigation, common query patterns, and troubleshooting." ;
+    oc:hasRationale "Each section serves a distinct purpose in helping an agent write correct, performant queries for the specific company's data warehouse." .
+
+oc:kn_e206f327 a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When customizing the template for a specific company" ;
-    oc:directiveContent "Remove unused sections rather than leaving them empty. If the company has no dashboards, omit the dashboards section entirely." ;
-    oc:hasRationale "Empty sections create confusion and suggest incompleteness; a lean, relevant skill is more effective than a bloated one with unused sections" .
-
-oc:kn_6056cd1c a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "When generating any company-specific data analysis skill" ;
-    oc:directiveContent "Every generated skill must include: SQL dialect notes, entity disambiguation, business terminology table, standard filters with SQL, at least 2-3 key metrics with formulas, data freshness table, knowledge base navigation, and common query patterns." ;
-    oc:hasRationale "These sections collectively ensure the agent has enough context to write correct queries, avoid common pitfalls, and understand the business domain" ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_658d4136 a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When generating a skill from the template" ;
-    oc:directiveContent "All [PLACEHOLDER] values must be replaced with actual company-specific data before the generated skill is usable. No placeholder text should remain in the final output." ;
-    oc:hasRationale "Leaving placeholders produces a non-functional skill that will confuse the agent when it tries to reference specific tables, columns, or metrics" ;
+    oc:appliesToContext "When generating a new data analysis skill from this template" ;
+    oc:directiveContent "Never leave [PLACEHOLDER] text in the generated skill — every placeholder must be replaced with actual values from the discovered data context." ;
+    oc:hasRationale "Unfilled placeholders produce a non-functional skill that will mislead the agent with generic or missing information." ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_9258b9aa a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "After generating a skill from the template, before packaging and delivery" ;
-    oc:directiveContent "Before delivering a generated skill, verify: complete frontmatter, clear entity disambiguation, defined terminology, documented standard filters, at least 2-3 sample queries per domain, correct SQL dialect syntax, and linked reference files." ;
-    oc:hasRationale "Skipping validation can produce skills with broken SQL, missing sections, or incorrect dialect syntax that will fail in production use" ;
+oc:kn_eb086ff1 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When customizing the template for a specific company" ;
+    oc:directiveContent "Prefer specific column names, table names, and real example queries over generic advice. Remove sections that don't apply to the target company." ;
+    oc:hasRationale "Specificity is the primary value driver — generic data advice provides no advantage over baseline SQL knowledge." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_fdd13046 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When defining the Standard Filters section" ;
+    oc:directiveContent "Standard filters (test/internal/fraud exclusions) must always be included in the generated skill and explicitly documented with override conditions." ;
+    oc:hasRationale "Missing standard filters lead to inflated metrics and incorrect analysis results that include test or invalid data." ;
     oc:severityLevel "HIGH" .
 

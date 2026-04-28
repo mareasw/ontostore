@@ -4,100 +4,385 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_plugin_official_build_mcp_server_tool_design a oc:DeclarativeSkill,
+oc:skill_claude_plugin_official_build_mcp_server_tool_design a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "tool-design" ;
     skos:broader "MCP tool design guide" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/build-mcp-server" ;
     oc:contentHash "548198ecfcf319971d9bfea63436d24722f577c01ccbd7251d5fd0e3ab6a7caa" ;
-    oc:differentia "that specifies how to write tool schemas, descriptions, parameter constraints, return shapes, and annotations so Claude correctly selects and calls MCP tools" ;
-    oc:extends oc:skill_anthropics_claude_plugin_official_build_mcp_server ;
-    oc:handlesFailure oc:AmbiguousToolDescription,
-        oc:InvalidSchema ;
-    oc:hasArgumentHint "tool-name or tool-design context" ;
+    oc:differentia "that teaches how to write tool descriptions, schemas, return shapes, and annotations so Claude uses tools correctly" ;
+    oc:extends oc:skill_claude_plugin_official_build_mcp_server ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_04d9e9f4,
-        oc:kn_07775871,
-        oc:kn_1e14168c,
-        oc:kn_7f7180c9,
-        oc:kn_ba856d0a,
-        oc:kn_bb188199,
-        oc:kn_c41ab64a,
-        oc:kn_d79f334f,
-        oc:kn_f83d0513 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Tool schemas and descriptions are prompt engineering. They land directly in Claude's context and determine whether Claude picks the right tool with the right arguments. Most MCP integration bugs trace back to vague descriptions or loose schemas." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "Always include the text fallback — not all hosts read `structuredContent` yet." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """server.registerTool("get_weather", {
+  description: "Get current weather",
+  inputSchema: { city: z.string() },
+  outputSchema: { temp: z.number(), conditions: z.string() },
+}, async ({ city }) => {
+  const data = await fetchWeather(city);
+  return {
+    content: [{ type: "text", text: JSON.stringify(data) }],  // backward compat
+    structuredContent: data,                                    // typed output
+  };
+});
+""" ;
+                            oc:codeLanguage "typescript" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 149-161" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "`JSON.stringify(result)` in a text block works, but the spec has first-class typed output: `outputSchema` + `structuredContent`. Clients can validate." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 7 ;
+                    oc:sectionTitle "Structured output" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """server.registerTool("delete_file", {
+  description: "Delete a file",
+  inputSchema: { path: z.string() },
+  annotations: { destructiveHint: true, idempotentHint: false },
+}, handler);
+""" ;
+                            oc:codeLanguage "typescript" ;
+                            oc:contentOrder 3 ;
+                            oc:sourceLocation "lines 127-133" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent "Pair with the read/write split advice in `build-mcpb/references/local-security.md` — mark every read tool `readOnlyHint: true`." ],
+                        [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 2 ;
+                            oc:rowCount 4 ;
+                            oc:tableCaption "Hints the host uses for UX — red confirm button for destructive, auto-approve for readonly. All default to unset (host assumes worst case)." ;
+                            oc:tableMarkdown """| Annotation | Meaning | Host behavior |
+|---|---|---|
+| `readOnlyHint: true` | No side effects | May auto-approve |
+| `destructiveHint: true` | Deletes/overwrites | Confirmation dialog |
+| `idempotentHint: true` | Safe to retry | May retry on transient error |
+| `openWorldHint: true` | Talks to external world (web, APIs) | May show network indicator |
+""" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """@mcp.tool(annotations={"destructiveHint": True, "idempotentHint": False})
+def delete_file(path: str) -> str:
+    ...
+""" ;
+                            oc:codeLanguage "python" ;
+                            oc:contentOrder 4 ;
+                            oc:sourceLocation "lines 135-139" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Hints the host uses for UX — red confirm button for destructive, auto-approve for readonly. All default to unset (host assumes worst case)." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Tool annotations" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "The ceiling isn't a hard protocol limit — it's context-window economics. Every tool schema is tokens Claude spends *every turn*. Thirty tools with rich schemas can eat 3–5k tokens before the conversation even starts." ],
+                        [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 1 ;
+                            oc:rowCount 3 ;
+                            oc:tableCaption "## How many tools?" ;
+                            oc:tableMarkdown """| Tool count | Guidance |
+|---|---|
+| 1–15 | One tool per action. Sweet spot. |
+| 15–30 | Still workable. Audit for near-duplicates that could merge. |
+| 30+ | Switch to search + execute. Optionally promote the top 3–5 to dedicated tools. |
+""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "How many tools?" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 3 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Return short confirmations for mutations (`\"Created issue #123\"`)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Return JSON for structured data (`JSON.stringify(result, null, 2)`)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Truncate huge payloads and say so (`\"Showing 10 of 847 results. Refine the query to narrow down.\"`)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Include IDs Claude will need for follow-up calls" ] ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 5 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Return raw HTML" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Return bare success with no identifier (`\"ok\"` after a create — Claude can't reference what it made)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Return megabytes of unfiltered API response" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Do:**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Claude reads whatever you put in `content[].text`. Make it parseable." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "**Don't:**" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Return shapes" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Return MCP tool errors, not exceptions that crash the transport. Include enough detail for Claude to recover or retry differently." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "The hint (\"use search_items…\") turns a dead end into a next step." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """if (!item) {
+  return {
+    isError: true,
+    content: [{
+      type: "text",
+      text: `Item ${id} not found. Use search_items to find valid IDs.`,
+    }],
+  };
+}
+""" ;
+                            oc:codeLanguage "typescript" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 100-110" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Errors" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Describe every parameter.** The `.describe()` text shows up in the schema Claude sees. Omitting it is leaving money on the table." ],
+                        [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 2 ;
+                            oc:rowCount 4 ;
+                            oc:tableCaption "**Tight schemas prevent bad calls.** Every constraint you express in the schema is one fewer thing that can go wrong at runtime." ;
+                            oc:tableMarkdown """| Instead of | Use |
+|---|---|
+| `z.string()` for an ID | `z.string().regex(/^usr_[a-z0-9]{12}$/)` |
+| `z.number()` for a limit | `z.number().int().min(1).max(100).default(20)` |
+| `z.string()` for a choice | `z.enum(["open", "closed", "all"])` |
+| optional with no hint | `.optional().describe("Defaults to the caller's workspace")` |
+""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**Tight schemas prevent bad calls.** Every constraint you express in the schema is one fewer thing that can go wrong at runtime." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """{
+  query: z.string().describe("Keywords to search for. Supports quoted phrases."),
+  status: z.enum(["open", "closed", "all"]).default("open")
+    .describe("Filter by status. Use 'all' to include closed items."),
+  limit: z.number().int().min(1).max(50).default(10)
+    .describe("Max results. Hard cap at 50."),
+}
+""" ;
+                            oc:codeLanguage "typescript" ;
+                            oc:contentOrder 4 ;
+                            oc:sourceLocation "lines 55-63" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Parameter schemas" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Tools can return more than strings:" ],
+                        [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 2 ;
+                            oc:rowCount 5 ;
+                            oc:tableCaption "Tools can return more than strings" ;
+                            oc:tableMarkdown """| Type | Shape | Use for |
+|---|---|---|
+| `text` | `{ type: "text", text: string }` | Default |
+| `image` | `{ type: "image", data: base64, mimeType }` | Screenshots, charts, diagrams |
+| `audio` | `{ type: "audio", data: base64, mimeType }` | TTS output, recordings |
+| `resource_link` | `{ type: "resource_link", uri, name?, description? }` | Pointer — client fetches later |
+| `resource` (embedded) | `{ type: "resource", resource: { uri, text\\|blob, mimeType } }` | Inline the full content |
+""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**`resource_link` vs embedded:** link for large payloads or when the client might not need it (let them decide). Embed when it's small and always needed." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 8 ;
+                    oc:sectionTitle "Content types beyond text" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**The description is the contract.** It's the only thing Claude reads before deciding whether to call the tool. Write it like a one-line manpage entry plus disambiguating hints." ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "Claude will call this for anything vaguely search-shaped, including things it can't do." ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """search_issues — Searches for issues.
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 25-27" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Bad" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 2 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Says what it *doesn't* do (prevents wrong-tool calls)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Says what it does" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Says what it returns" ] ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """search_issues — Search issues by keyword across title and body. Returns up
+to `limit` results ranked by recency. Does NOT search comments or PRs —
+use search_comments / search_prs for those.
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 13-17" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Good" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "When two tools are similar, each description should say when to use the *other* one:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """get_user      — Fetch a user by ID. If you only have an email, use find_user_by_email.
+find_user_by_email — Look up a user by email address. Returns null if not found.
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 35-38" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Disambiguate siblings" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Descriptions" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Tool Design — Writing Tools Claude Uses Correctly" ] ;
+    oc:impartsKnowledge oc:kn_0835828a,
+        oc:kn_1ecf43c8,
+        oc:kn_2525f1be,
+        oc:kn_4cb79365,
+        oc:kn_7854aa6f,
+        oc:kn_a5af1ffe,
+        oc:kn_c98f6af1,
+        oc:kn_f97b24e3 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:MCPServerInitialized,
-        oc:ToolHandlerWritten ;
-    oc:resolvesIntent "configure tool annotations for host UX hints",
-        "constrain parameter schemas to prevent bad arguments",
-        "design MCP tool schemas that Claude uses correctly",
-        "structure tool return values for Claude consumption",
-        "write tool descriptions that prevent wrong-tool calls" ;
-    oc:yieldsState oc:ToolAnnotationsConfigured,
-        oc:ToolDescriptionsWritten,
-        oc:ToolSchemaDefined .
+    oc:resolvesIntent "configure tool annotations for safety",
+        "design MCP tool descriptions",
+        "plan tool count and organization for an MCP server",
+        "structure tool return values for Claude",
+        "write tool schemas that prevent bad calls" .
 
-oc:kn_04d9e9f4 a oc:Heuristic,
+oc:kn_0835828a a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When registering multiple related tools" ;
-    oc:directiveContent "When two tools are similar, each description should say when to use the other one. Disambiguate siblings explicitly in descriptions." ;
-    oc:hasRationale "Without cross-references, Claude cannot distinguish between near-duplicate tools and may call the wrong one." ;
-    oc:severityLevel "HIGH" .
+    oc:appliesToContext "When implementing structured tool output" ;
+    oc:directiveContent "When using structured output (outputSchema + structuredContent), always include the text fallback — not all hosts read structuredContent yet." ;
+    oc:hasRationale "Backward compatibility ensures the tool works across all MCP hosts" .
 
-oc:kn_07775871 a oc:DesignPrinciple,
+oc:kn_1ecf43c8 a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When writing any MCP tool description" ;
-    oc:directiveContent "Tool descriptions are the contract Claude reads before deciding whether to call the tool. Write them like one-line manpage entries plus disambiguating hints — say what it does, what it returns, and what it doesn't do." ;
-    oc:hasRationale "Vague descriptions cause Claude to call the wrong tool for anything vaguely search-shaped. Most MCP integration bugs trace back to vague descriptions." ;
-    oc:severityLevel "CRITICAL" .
+    oc:appliesToContext "When writing tool descriptions" ;
+    oc:directiveContent "Every tool description must say: (1) what it does, (2) what it returns, (3) what it does NOT do — this prevents wrong-tool calls." ;
+    oc:hasRationale "Claude reads only the description before deciding whether to call the tool; it's the contract" .
 
-oc:kn_1e14168c a oc:AntiPattern,
+oc:kn_2525f1be a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When configuring tool annotations" ;
+    oc:directiveContent "Mark read-only tools with readOnlyHint: true, destructive tools with destructiveHint: true. Mark safe-to-retry tools with idempotentHint: true." ;
+    oc:hasRationale "Annotations let hosts show appropriate UX (confirmation dialogs, auto-approve, retry behavior)" .
+
+oc:kn_4cb79365 a oc:Constraint,
         oc:KnowledgeNode ;
     oc:appliesToContext "When handling errors in tool handlers" ;
-    oc:directiveContent "Never throw exceptions that crash the transport. Return MCP tool errors with isError: true and include enough detail for Claude to recover or retry — specifically hint at the next step tool to call." ;
-    oc:hasRationale "A bare error is a dead end. A hint like 'Use search_items to find valid IDs' turns a failure into a recoverable next step." ;
+    oc:directiveContent "Always return MCP tool errors (isError: true with actionable hints), not exceptions that crash the transport. Include recovery hints like 'Use search_items to find valid IDs.'" ;
+    oc:hasRationale "An actionable error hint turns a dead end into a next step Claude can act on" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_7f7180c9 a oc:Heuristic,
+oc:kn_7854aa6f a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When choosing between resource_link and embedded resource content types" ;
-    oc:directiveContent "Use resource_link for large payloads or when the client might not need the data. Use embedded resource when content is small and always needed." ;
-    oc:hasRationale "resource_link lets the client decide whether to fetch, saving bandwidth and context tokens. Embedding is wasteful for large optional data." ;
-    oc:severityLevel "LOW" .
+    oc:appliesToContext "When defining inputSchema for any tool" ;
+    oc:directiveContent "Use tight Zod schemas: regex for IDs, int/min/max for limits, enums for choices, and .describe() on every parameter." ;
+    oc:hasRationale "Every constraint expressed in the schema is one fewer thing that can go wrong at runtime" .
 
-oc:kn_ba856d0a a oc:Constraint,
+oc:kn_a5af1ffe a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When deciding how many tools to expose on an MCP server" ;
-    oc:directiveContent "Keep tool count at 1–15 for one-tool-per-action. At 15–30 audit for near-duplicates. At 30+ switch to search + execute pattern and promote top 3–5 to dedicated tools. Every tool schema costs tokens every turn." ;
-    oc:hasRationale "Thirty tools with rich schemas can eat 3–5k tokens before the conversation starts. Context-window economics limit tool count." ;
-    oc:severityLevel "MEDIUM" .
+    oc:appliesToContext "When writing any MCP tool description" ;
+    oc:directiveContent "Never write vague tool descriptions like 'Searches for issues' — Claude will call it for anything vaguely search-shaped, including things it can't do." ;
+    oc:hasRationale "Vague descriptions cause wrong-tool calls, which is the root cause of most MCP integration bugs" ;
+    oc:severityLevel "CRITICAL" .
 
-oc:kn_bb188199 a oc:DesignPrinciple,
+oc:kn_c98f6af1 a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When registering tools on an MCP server" ;
-    oc:directiveContent "Use tool annotations to communicate behavior to hosts: readOnlyHint for no side effects, destructiveHint for deletes/overwrites, idempotentHint for safe retries, openWorldHint for external API calls." ;
-    oc:hasRationale "Annotations enable host UX optimizations like auto-approve for readonly tools, confirmation dialogs for destructive ones, and retry behavior for idempotent ones." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_c41ab64a a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When designing tool return values" ;
-    oc:directiveContent "Return structured JSON for data, short confirmations with IDs for mutations, and always truncate large payloads with a note. Never return raw HTML, megabytes of unfiltered API response, or bare success with no identifier." ;
-    oc:hasRationale "Claude reads whatever is in content[].text. Unparseable or oversized returns waste context and lose information Claude needs for follow-up calls." ;
+    oc:appliesToContext "When designing tool sets with overlapping functionality" ;
+    oc:directiveContent "When two tools are similar, each description should mention when to use the other one (sibling disambiguation)." ;
+    oc:hasRationale "Cross-referencing siblings prevents Claude from picking the wrong tool in ambiguous situations" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_d79f334f a oc:DesignPrinciple,
+oc:kn_f97b24e3 a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When implementing typed structured output for tools" ;
-    oc:directiveContent "When using structured output (outputSchema + structuredContent), always include a text fallback in content[].text since not all hosts read structuredContent yet." ;
-    oc:hasRationale "Backward compatibility — hosts that don't support structuredContent will silently drop the typed output, leaving Claude with no data." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_f83d0513 a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When defining tool input schemas" ;
-    oc:directiveContent "Use tight parameter schemas with regex patterns, enums, min/max bounds, and .describe() on every parameter. Every constraint expressed in the schema is one fewer thing that can go wrong at runtime." ;
-    oc:hasRationale "Loose schemas (plain z.string() or z.number()) allow invalid arguments through, causing runtime failures that could have been caught structurally." ;
-    oc:severityLevel "HIGH" .
+    oc:appliesToContext "When planning tool count for an MCP server" ;
+    oc:directiveContent "Keep tool count at 1–15 (sweet spot), 15–30 (workable with dedup audit), 30+ (switch to search + execute pattern). Every tool schema costs tokens every turn." ;
+    oc:hasRationale "Context-window economics — thirty tools with rich schemas can eat 3–5k tokens before the conversation starts" .
 

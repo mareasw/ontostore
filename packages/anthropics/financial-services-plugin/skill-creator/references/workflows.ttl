@@ -4,51 +4,98 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_financial_services_plugin_skill_creator_workflows a oc:DeclarativeSkill,
+oc:skill_financial_services_plugin_skill_creator_workflows a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "workflows" ;
-    skos:broader "Workflow pattern guide" ;
+    skos:broader "Workflow pattern" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/financial-services-plugin/skill-creator" ;
     oc:contentHash "ef4846877d5dab47511a01a6cf31476ad64f5bc5945635459295794575338980" ;
-    oc:dependsOnSkill oc:skill_skill_creator ;
-    oc:differentia "provides sequential and conditional workflow templates for structuring multi-step skill operations" ;
-    oc:extends oc:skill_anthropics_financial_services_plugin_skill_creator ;
+    oc:differentia "that guides skill authors in structuring sequential and conditional multi-step processes within SKILL.md files" ;
+    oc:extends oc:skill_financial_services_plugin_skill_creator ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_3a7bb708,
-        oc:kn_7cec6111,
-        oc:kn_af13f501,
-        oc:kn_d2cf1050 ;
-    oc:isUserInvocable false ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "For complex tasks, break operations into clear, sequential steps. It is often helpful to give Claude an overview of the process towards the beginning of SKILL.md:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """Filling a PDF form involves these steps:
+
+1. Analyze the form (run analyze_form.py)
+2. Create field mapping (edit fields.json)
+3. Validate mapping (run validate_fields.py)
+4. Fill the form (run fill_form.py)
+5. Verify output (run verify_output.py)
+""" ;
+                            oc:codeLanguage "markdown" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 7-15" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Sequential Workflows" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "For tasks with branching logic, guide Claude through decision points:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """1. Determine the modification type:
+   **Creating new content?** → Follow "Creation workflow" below
+   **Editing existing content?** → Follow "Editing workflow" below
+
+2. Creation workflow: [steps]
+3. Editing workflow: [steps]
+""" ;
+                            oc:codeLanguage "markdown" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 21-28" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Conditional Workflows" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Workflow Patterns" ] ;
+    oc:impartsKnowledge oc:kn_61501de1,
+        oc:kn_7be9b67e,
+        oc:kn_7ec118bc,
+        oc:kn_b2ef0e2d,
+        oc:kn_da4b0d0d ;
+    oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:resolvesIntent "create branching conditional workflows for skills",
-        "design multi-step skill workflows",
-        "structure sequential task execution" .
+    oc:resolvesIntent "add conditional branching logic to skills",
+        "design sequential workflows for skills",
+        "structure multi-step skill execution" .
 
-oc:kn_3a7bb708 a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "When designing workflows that modify files or external state" ;
-    oc:directiveContent "Structure workflows so that validation/verification steps follow data-modification steps (e.g., validate mapping before filling, verify output after generation)." ;
-    oc:hasRationale "Interleaving verification with modification catches errors early before they cascade through later steps." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_7cec6111 a oc:DesignPrinciple,
+oc:kn_61501de1 a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When a skill must handle multiple distinct operation types" ;
-    oc:directiveContent "Use conditional branching with decision points and clear labels (e.g., 'Creating new content?') to route Claude to the correct sub-workflow." ;
-    oc:hasRationale "Explicit branching prevents Claude from conflating creation and editing logic, which leads to incorrect outputs." ;
-    oc:severityLevel "MEDIUM" .
+    oc:appliesToContext "When structuring any skill with script-based execution" ;
+    oc:directiveContent "Use the pattern: numbered overview list at top of skill → each step references a script, file edit, or sub-procedure → final step is verification." ;
+    oc:hasRationale "This pattern ensures skills are self-documenting, testable at each stage, and end with a validation gate." .
 
-oc:kn_af13f501 a oc:KnowledgeNode,
+oc:kn_7be9b67e a oc:KnowledgeNode,
         oc:WorkflowStrategy ;
-    oc:appliesToContext "When designing multi-step skills with dependent stages" ;
-    oc:directiveContent "For complex tasks, break operations into clear sequential steps and provide an overview of the entire process near the beginning of SKILL.md." ;
-    oc:hasRationale "Sequential overviews help Claude maintain context and track progress through long operations, reducing errors from missed steps." ;
-    oc:severityLevel "HIGH" .
+    oc:appliesToContext "When a skill may follow different execution paths depending on user intent or input state" ;
+    oc:directiveContent "For tasks with branching logic, define explicit decision points that route to named sub-workflows (e.g., 'Creation workflow' vs 'Editing workflow')." ;
+    oc:hasRationale "Conditional workflows prevent Claude from guessing which path to take and ensure consistent behavior across different scenarios." .
 
-oc:kn_d2cf1050 a oc:Heuristic,
+oc:kn_7ec118bc a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When writing any skill workflow definition" ;
-    oc:directiveContent "Each workflow step should reference a concrete action (run a script, edit a file, verify output) rather than abstract goals." ;
-    oc:hasRationale "Actionable steps reduce ambiguity and make the workflow reproducible across invocations." ;
-    oc:severityLevel "MEDIUM" .
+    oc:appliesToContext "When designing conditional workflow sections" ;
+    oc:directiveContent "Every branching decision point must have exactly one clear condition per branch, phrased as a yes/no question or a typed category." ;
+    oc:hasRationale "Ambiguous or overlapping conditions cause Claude to select the wrong branch, producing incorrect outputs." .
+
+oc:kn_b2ef0e2d a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing skills with multi-step operations" ;
+    oc:directiveContent "Break complex tasks into clear, sequential steps and provide an overview of the full process near the beginning of SKILL.md." ;
+    oc:hasRationale "An upfront process overview helps Claude understand the full execution plan before starting, reducing errors and improving coherence." .
+
+oc:kn_da4b0d0d a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing any sequential workflow in SKILL.md" ;
+    oc:directiveContent "Number each step in a workflow and use descriptive action labels (e.g., 'Analyze the form', 'Create field mapping') so Claude can track progress." ;
+    oc:hasRationale "Numbered steps with clear labels give Claude reliable checkpoints and make debugging easier when a step fails." .
 

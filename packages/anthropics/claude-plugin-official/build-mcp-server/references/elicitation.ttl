@@ -4,91 +4,276 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_plugin_official_build_mcp_server_elicitation a oc:DeclarativeSkill,
+oc:skill_claude_plugin_official_build_mcp_server_elicitation a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "elicitation" ;
-    skos:broader "User input pattern" ;
+    skos:broader "MCP specification feature" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/build-mcp-server" ;
     oc:contentHash "d8f19b01b1bd3a8bad0fdb22e1898bb43110343db1d321e6c472f603d288f856" ;
-    oc:dependsOnSkill oc:skill_build_mcp_server ;
-    oc:differentia "that uses spec-native MCP elicitation to pause tool execution and collect structured form input from the user without rich UI" ;
-    oc:extends oc:skill_anthropics_claude_plugin_official_build_mcp_server ;
+    oc:dependsOnSkill oc:skill_ontoskills_build_mcp_server ;
+    oc:differentia "that pauses tool execution mid-call to request structured user input via native client-rendered forms" ;
+    oc:extends oc:skill_claude_plugin_official_build_mcp_server ;
     oc:handlesFailure oc:CapabilityNotSupported,
         oc:UserCancelled,
         oc:UserDeclined ;
-    oc:hasArgumentHint "elicitation schema definition (flat object with primitives)" ;
+    oc:hasArgumentHint "form schema or confirmation prompt" ;
     oc:hasCategory "development" ;
-    oc:hasRequirement oc:req_19d8893e,
-        oc:req_8854e4b5,
-        oc:req_e82419e6 ;
-    oc:impartsKnowledge oc:kn_161b5fbb,
-        oc:kn_271d1551,
-        oc:kn_2fa5bae2,
-        oc:kn_680d45ca,
-        oc:kn_d8bd589e,
-        oc:kn_e1cef01a ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**This is the right answer for simple input.** Widgets (`build-mcp-app`) are for when you need rich UI — charts, searchable lists, visual previews. If you just need a confirmation, a picked option, or a few form fields, elicitation is simpler, spec-native, and works in any compliant host." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Elicitation lets a server pause mid-tool-call and ask the user for structured input. The client renders a native form (no iframe, no HTML). User fills it, server continues." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Elicitation handles: confirm dialogs, enum pickers, short flat forms." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "Reach for `build-mcp-app` widgets when you need:" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 3 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Live-updating progress or streaming content" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Nested or complex data structures" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "Custom layouts, charts, maps" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Scrollable/searchable lists (100+ items)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Visual preview before choosing (image thumbnails, file tree)" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "When to escalate to widgets" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Host support is very recent:" ],
+                        [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 2 ;
+                            oc:rowCount 3 ;
+                            oc:tableCaption "Host support is very recent" ;
+                            oc:tableMarkdown """| Host | Status |
+|---|---|
+| Claude Code | ✅ since v2.1.76 (both `form` and `url` modes) |
+| Claude Desktop | Unconfirmed — likely not yet or very recent |
+| claude.ai | Unknown |
+""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**The SDK throws `CapabilityNotSupported` if the client doesn't advertise elicitation.** There is no graceful degradation built in. You MUST check and have a fallback." ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# fastmcp
+from fastmcp import Context
+from fastmcp.exceptions import CapabilityNotSupported
+
+@mcp.tool
+async def delete_all(ctx: Context) -> str:
+    try:
+        result = await ctx.elicit("Delete all items? This cannot be undone.", response_type=bool)
+        if result.action == "accept" and result.data:
+            await do_delete()
+            return "Deleted."
+        return "Cancelled."
+    except CapabilityNotSupported:
+        return "Confirmation required. Ask the user to confirm deletion, then retry."
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 50-65" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """server.registerTool("delete_all", {
+  description: "Delete all items after confirmation",
+  inputSchema: {},
+}, async ({}, extra) => {
+  const caps = server.getClientCapabilities();
+  if (caps?.elicitation) {
+    const r = await server.elicitInput({
+      mode: "form",
+      message: "Delete all items? This cannot be undone.",
+      requestedSchema: {
+        type: "object",
+        properties: { confirm: { type: "boolean", title: "Confirm deletion" } },
+        required: ["confirm"],
+      },
+    });
+    if (r.action === "accept" && r.content?.confirm) {
+      await deleteAll();
+      return { content: [{ type: "text", text: "Deleted." }] };
+    }
+    return { content: [{ type: "text", text: "Cancelled." }] };
+  }
+  // Fallback: return text asking Claude to relay the question
+  return { content: [{ type: "text", text: "Confirmation required. Please ask the user: 'Delete all items? This cannot be undone.' Then call this tool again with their answer." }] };
+});
+""" ;
+                                    oc:codeLanguage "typescript" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 23-48" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "The canonical pattern" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "⚠️ Check capability first — support is new" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**MUST NOT request passwords, API keys, or tokens via elicitation** — spec requirement. Those go through OAuth or `user_config` with `sensitive: true` (MCPB), not runtime forms." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Security" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "Treat `decline` and `cancel` differently if it matters — `decline` is intentional, `cancel` might be accidental." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "The TS SDK's `server.elicitInput()` auto-validates `accept` responses against your schema via Ajv. fastmcp's `ctx.elicit()` returns a typed discriminated union (`AcceptedElicitation[T] | DeclinedElicitation | CancelledElicitation`)." ],
+                        [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 1 ;
+                            oc:rowCount 3 ;
+                            oc:tableCaption "## Three-state response" ;
+                            oc:tableMarkdown """| Action | Meaning | `content` present? |
+|---|---|---|
+| `accept` | User submitted the form | ✅ validated against your schema |
+| `decline` | User explicitly said no | ❌ |
+| `cancel` | User dismissed (escape, clicked away) | ❌ |
+""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Three-state response" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """await ctx.elicit("Pick a color", response_type=["red", "green", "blue"])  # enum
+await ctx.elicit("Enter email", response_type=str)                         # string
+await ctx.elicit("Confirm?", response_type=bool)                           # boolean
+
+@dataclass
+class ContactInfo:
+    name: str
+    email: str
+await ctx.elicit("Contact details", response_type=ContactInfo)             # flat dataclass
+""" ;
+                            oc:codeLanguage "python" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 98-108" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "Accepts: primitives, `list[str]` (becomes enum), dataclass, TypedDict, Pydantic BaseModel. All must be flat." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "fastmcp response_type shorthand" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "If your data doesn't fit these constraints, that's the signal to escalate to a widget." ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "**Flat objects only** — no nesting, no arrays of objects" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "**Primitives only** — `string`, `number`, `integer`, `boolean`, `enum`" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Use `title` and `description` on each property — they become form labels" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "String formats limited to: `email`, `uri`, `date`, `date-time`" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Elicitation schemas are deliberately limited — keep forms simple:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Schema constraints" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Elicitation — spec-native user input" ] ;
+    oc:impartsKnowledge oc:kn_1debb781,
+        oc:kn_9fcd9467,
+        oc:kn_b2f5e281,
+        oc:kn_dc6c85f8,
+        oc:kn_f12d3606 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:MCPServerRunning,
-        oc:ToolInstalled ;
-    oc:resolvesIntent "collect user confirmation during tool execution",
-        "decide between elicitation and widgets for user input",
-        "gather structured input from the user mid-tool-call",
-        "present simple form choices to the user" ;
-    oc:yieldsState oc:ElicitationResponseReceived,
-        oc:UserInputCollected .
+    oc:requiresState oc:ClientConnected,
+        oc:MCPServerRunning ;
+    oc:resolvesIntent "add user confirmation to MCP tool",
+        "build simple form-based user interaction in MCP",
+        "collect structured input from user during tool execution",
+        "implement safe destructive action confirmation in MCP server" ;
+    oc:yieldsState oc:UserInputCollected .
 
-oc:kn_161b5fbb a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "Before every elicitation call in any MCP tool implementation" ;
-    oc:directiveContent "Always check client capabilities via server.getClientCapabilities() (TS) or catch CapabilityNotSupported (Python) before calling elicitation. The SDK throws CapabilityNotSupported with no graceful degradation if the client doesn't support it." ;
-    oc:hasRationale "Host support is very recent and not universal — Claude Desktop and claude.ai support is unconfirmed. Failing to check causes runtime crashes." ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_271d1551 a oc:FallbackStrategy,
+oc:kn_1debb781 a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When elicitation capability is not available in the client" ;
-    oc:directiveContent "When a host does not support elicitation, return text content asking Claude to relay the question to the user and call the tool again with their answer." ;
-    oc:hasRationale "This provides a universal degradation path — the tool still functions via Claude's natural language interaction even without native form support." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_2fa5bae2 a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When handling elicitation responses in tool implementations" ;
-    oc:directiveContent "Treat the three elicitation response actions differently: accept (user submitted valid data), decline (intentional rejection), cancel (possibly accidental dismissal). Distinguish decline from cancel in your logic when intent matters." ;
-    oc:hasRationale "Decline is an intentional user decision while cancel might be accidental (escape key, clicking away). Differentiating enables appropriate recovery behavior." ;
+    oc:appliesToContext "When handling elicitation responses" ;
+    oc:directiveContent "Treat the three response actions differently: 'accept' means user submitted (content is validated), 'decline' means intentional no, 'cancel' means dismissed (possibly accidental). Have a fallback path for decline/cancel." ;
+    oc:hasRationale "Decline is intentional rejection while cancel might be accidental dismissal — different UX considerations apply." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_680d45ca a oc:Constraint,
+oc:kn_9fcd9467 a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When defining elicitation schemas for any tool" ;
-    oc:directiveContent "Elicitation schemas must be flat objects with primitive types only (string, number, integer, boolean, enum). No nesting, no arrays of objects. String formats limited to email, uri, date, date-time." ;
-    oc:hasRationale "The MCP spec deliberately limits schemas to keep forms simple and renderable across all hosts. Complex data requires widgets instead." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_d8bd589e a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When deciding between elicitation and widgets for user input" ;
-    oc:directiveContent "Use elicitation for simple confirmations, enum pickers, and short flat forms. Escalate to build-mcp-app widgets when you need nested data, scrollable lists (100+ items), visual previews, live progress, or custom layouts." ;
-    oc:hasRationale "Elicitation is spec-native and works in any compliant host with minimal setup. Widgets require richer infrastructure but handle complexity that elicitation cannot." ;
+    oc:appliesToContext "When deciding between elicitation and widgets" ;
+    oc:directiveContent "Use elicitation for simple confirmations, enum pickers, and short flat forms. Escalate to build-mcp-app widgets when you need nested data, searchable lists (100+ items), visual previews, live progress, or custom layouts." ;
+    oc:hasRationale "Elicitation is spec-native and works in any compliant host; widgets provide rich UI but require the build-mcp-app infrastructure." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_e1cef01a a oc:KnowledgeNode,
+oc:kn_b2f5e281 a oc:KnowledgeNode,
         oc:SecurityImplication ;
-    oc:appliesToContext "When designing any elicitation form that might involve credentials" ;
-    oc:directiveContent "MUST NOT request passwords, API keys, or tokens via elicitation. These must go through OAuth or user_config with sensitive: true (MCPB)." ;
-    oc:hasRationale "This is a spec requirement — runtime forms are not secure channels for sensitive data and should not be used for credential collection." ;
+    oc:appliesToContext "When designing any elicitation form" ;
+    oc:directiveContent "Never request passwords, API keys, or tokens via elicitation — this is a spec requirement. Sensitive credentials must go through OAuth or user_config with sensitive:true (MCPB)." ;
+    oc:hasRationale "Elicitation forms are not secure channels for secrets; the spec explicitly prohibits this to prevent credential exposure." ;
     oc:severityLevel "CRITICAL" .
 
-oc:req_19d8893e a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "TypeScript MCP SDK or fastmcp Python SDK" .
+oc:kn_dc6c85f8 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before any elicitation call" ;
+    oc:directiveContent "Always check server.getClientCapabilities() for elicitation support before calling elicitInput(). The SDK throws CapabilityNotSupported with no graceful degradation if the client doesn't support it." ;
+    oc:hasRationale "Host support is very new and inconsistent — Claude Code supports it since v2.1.76, but Claude Desktop and claude.ai support is unconfirmed." ;
+    oc:severityLevel "CRITICAL" .
 
-oc:req_8854e4b5 a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "MCP specification elicitation protocol" .
-
-oc:req_e82419e6 a oc:RequirementTool ;
-    oc:isOptional false ;
-    oc:requirementValue "MCP-compatible host with elicitation capability (Claude Code v2.1.76+)" .
+oc:kn_f12d3606 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing elicitation form schemas" ;
+    oc:directiveContent "Elicitation schemas must be flat objects with primitives only (string, number, integer, boolean, enum). No nesting, no arrays of objects. String formats limited to email, uri, date, date-time." ;
+    oc:hasRationale "The MCP spec deliberately limits schema complexity to keep forms simple and universally renderable by compliant hosts." ;
+    oc:severityLevel "HIGH" .
 

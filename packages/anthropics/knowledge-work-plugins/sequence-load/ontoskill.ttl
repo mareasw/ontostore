@@ -4,85 +4,487 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_knowledge_work_plugins_sequence_load a oc:DeclarativeSkill,
+oc:skill_knowledge_work_plugins_sequence_load a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "sequence-load" ;
-    skos:broader "Apollo outreach automation workflow" ;
-    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/knowledge-work-plugins/sequence-load" ;
+    skos:broader "Outreach automation workflow" ;
+    prov:wasDerivedFrom "../.agents/skills/anthropics/knowledge-work-plugins/sequence-load" ;
     oc:contentHash "827c0084d71019dcff263a26faec2ddefeccd10528ae839459eda3f1ca3fdc79" ;
-    oc:differentia "that finds, enriches, deduplicates, and bulk-loads targeted leads into an email sequence in one end-to-end flow" ;
-    oc:handlesFailure oc:EnrichmentFailed,
+    oc:differentia "that finds, enriches, deduplicates, and bulk-enrolls leads into Apollo sequences end-to-end" ;
+    oc:handlesFailure oc:EmailAccountNotFound,
+        oc:EnrichmentFailed,
         oc:NoMatchingLeads,
-        oc:PermissionDenied,
         oc:SequenceNotFound ;
-    oc:hasArgumentHint "[targeting criteria + sequence name]" ;
+    oc:hasAllowedTool "mcp__claude_ai_Apollo_MCP__apollo_contacts_create",
+        "mcp__claude_ai_Apollo_MCP__apollo_email_accounts_index",
+        "mcp__claude_ai_Apollo_MCP__apollo_emailer_campaigns_add_contact_ids",
+        "mcp__claude_ai_Apollo_MCP__apollo_emailer_campaigns_remove_or_stop_contact_ids",
+        "mcp__claude_ai_Apollo_MCP__apollo_emailer_campaigns_search",
+        "mcp__claude_ai_Apollo_MCP__apollo_mixed_people_api_search",
+        "mcp__claude_ai_Apollo_MCP__apollo_people_bulk_match" ;
+    oc:hasArgumentHint "\"[targeting criteria + sequence name]\"" ;
     oc:hasCategory "automation" ;
     oc:hasDescription "Find leads matching criteria and bulk-add them to an Apollo outreach sequence. Handles enrichment, contact creation, deduplication, and enrollment in one flow." ;
     oc:hasName "sequence-load" ;
-    oc:impartsKnowledge oc:kn_28b8bd84,
-        oc:kn_2b2f6140,
-        oc:kn_3a37ee89,
-        oc:kn_43f37e39,
-        oc:kn_579efd41,
-        oc:kn_dc7ef004,
-        oc:kn_f770b150 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """name: sequence-load
+description: "Find leads matching criteria and bulk-add them to an Apollo outreach sequence. Handles enrichment, contact creation, deduplication, and enrollment in one flow."
+user-invocable: true
+argument-hint: "[targeting criteria + sequence name]"
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Find, enrich, and load contacts into an outreach sequence — end to end. The user provides targeting criteria and a sequence name via \"$ARGUMENTS\"." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 5 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Volume — how many contacts to add (default: 10 if not specified)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Sequence name (text after \"to\", \"into\", or \"→\")" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Targeting criteria:**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "**Sequence info:**" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 3 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Industry keywords → `q_organization_keyword_tags`" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Job titles → `person_titles`" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Seniority levels → `person_seniorities`" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "Locations → `person_locations` or `organization_locations`" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Company size → `organization_num_employees_ranges`" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 6 ;
+                            oc:textContent "If the user just says \"list sequences\", skip to Step 2 and show all available sequences." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "From \"$ARGUMENTS\", extract:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Step 1 — Parse Input" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Show a summary:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Sequence loaded successfully**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "**Contacts enrolled:**" ],
+                        [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 3 ;
+                            oc:rowCount 4 ;
+                            oc:tableCaption "**Sequence loaded successfully**" ;
+                            oc:tableMarkdown """| Field | Value |
+|---|---|
+| Sequence | [Name] |
+| Contacts added | [count] |
+| Sending from | [email address] |
+| Credits used | [count] |
+""" ],
+                        [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 5 ;
+                            oc:rowCount 0 ;
+                            oc:tableCaption "**Contacts enrolled:**" ;
+                            oc:tableMarkdown """| Name | Title | Company | Email |
+|---|---|---|---|
+""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 8 ;
+                    oc:sectionTitle "Step 7 — Confirm Enrollment" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "Collect all created contact IDs." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "For each approved lead:" ],
+                        _:ref_a06ebdda49f4a16d ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Step 5 — Enrich and Create Contacts" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Set `q_name` to the sequence name from input" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Use `mcp__claude_ai_Apollo_MCP__apollo_emailer_campaigns_search` to find the target sequence:" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 4 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Ask the user to pick one" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Show all available sequences in a table: | Name | ID | Status |" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "If no match or multiple matches:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Step 2 — Find the Sequence" ],
+                [ a oc:Section ;
+                    oc:hasContent _:ref_a037ecea6d70fe87,
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Ask the user:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 9 ;
+                    oc:sectionTitle "Step 8 — Offer Next Actions" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Use `mcp__claude_ai_Apollo_MCP__apollo_email_accounts_index` to list linked email accounts." ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "If one account → use automatically" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "If multiple → show them and ask which to send from" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Step 3 — Get Email Account" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 6 ;
+                            oc:textContent "Wait for confirmation before proceeding." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Use `mcp__claude_ai_Apollo_MCP__apollo_mixed_people_api_search` with the targeting criteria." ],
+                        [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 4 ;
+                            oc:rowCount 0 ;
+                            oc:tableCaption "Present the candidates in a preview table" ;
+                            oc:tableMarkdown """| # | Name | Title | Company | Location |
+|---|---|---|---|---|
+""" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Set `per_page` to the requested volume (or 10 by default)" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent "Ask: **\"Add these [N] contacts to [Sequence Name]? This will consume [N] Apollo credits for enrichment.\"**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "Present the candidates in a preview table:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Step 4 — Find Matching People" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "`sequence_active_in_other_campaigns`: `false` (safe default)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "`contact_ids`: array of created contact IDs" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "`send_email_from_email_account_id`: the chosen email account ID" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "`id`: the sequence ID" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "`emailer_campaign_id`: same sequence ID" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Use `mcp__claude_ai_Apollo_MCP__apollo_emailer_campaigns_add_contact_ids` with:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 7 ;
+                    oc:sectionTitle "Step 6 — Add to Sequence" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "`/apollo:sequence-load reload 15 more leads into \"Enterprise Pipeline\"`" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "`/apollo:sequence-load add 20 VP Sales at SaaS companies to my \"Q1 Outbound\" sequence`" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "`/apollo:sequence-load list sequences` (shows all available sequences)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "`/apollo:sequence-load directors of engineering, 500+ employees, US → Demo Follow-up`" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "`/apollo:sequence-load SDR managers at fintech startups → Cold Outreach v2`" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Examples" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Sequence Load" ] ;
+    oc:hasWorkflow _:ref_a037ecea6d70fe87,
+        _:ref_a06ebdda49f4a16d,
+        [ a oc:Workflow ;
+            dcterms:description "End-to-end workflow from parsing targeting criteria through confirming enrollment in an Apollo outreach sequence." ;
+            oc:hasStep _:ref_0e79be6340fd2968,
+                _:ref_2c1361b9bb1113ae,
+                _:ref_2cef251fe1b0e645,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Show enrollment summary table and offer next actions: load more, review sequence, remove/pause contacts." ;
+                    oc:expectedOutcome "User informed of results and offered follow-up actions." ;
+                    oc:stepDependsOn _:ref_dd8ba6a4bea40390 ;
+                    oc:stepId "confirm-and-offer" ],
+                _:ref_69fb72fc4987e210,
+                _:ref_dc84fec4e482acfc,
+                _:ref_dd8ba6a4bea40390 ;
+            oc:workflowId "sequence-load-main" ;
+            oc:workflowName "Find, Enrich, and Load Contacts into Sequence" ] ;
+    oc:impartsKnowledge oc:kn_367255d6,
+        oc:kn_57b30baa,
+        oc:kn_adecf8c2,
+        oc:kn_ca7835fa,
+        oc:kn_fc8abf03 ;
     oc:isUserInvocable true ;
     oc:nature "Work" ;
     oc:requiresState oc:APIKeySet,
         oc:NetworkAvailable ;
-    oc:resolvesIntent "bulk-add contacts to Apollo sequence",
-        "find and enroll prospects in email campaign",
-        "list available Apollo sequences",
-        "load leads into outreach sequence" ;
-    oc:yieldsState oc:ContactsEnrolled,
-        oc:SequenceLoaded .
+    oc:resolvesIntent "add leads to outreach sequence",
+        "bulk-enrich and enroll prospects",
+        "find and load contacts into Apollo sequence",
+        "list available Apollo sequences" ;
+    oc:yieldsState oc:ContactsCreated,
+        oc:SequenceEnrolled .
 
-oc:kn_28b8bd84 a oc:KnowledgeNode,
-        oc:SideEffect ;
-    oc:appliesToContext "Always, during the enrichment and enrollment steps" ;
-    oc:directiveContent "This skill consumes Apollo credits for each contact enriched and sends outreach emails once contacts are enrolled in a sequence." ;
-    oc:hasRationale "Users must be aware of the financial cost (credits) and the real-world impact (emails will be sent) before executing the full workflow." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_2b2f6140 a oc:KnowledgeNode,
-        oc:KnownIssue ;
-    oc:appliesToContext "During Step 3 (get email account)" ;
-    oc:directiveContent "If multiple email accounts are linked, the user must choose which to send from before enrollment can proceed." ;
-    oc:hasRationale "Sending from the wrong email account could result in outreach coming from an unintended sender identity." ;
-    oc:severityLevel "LOW" .
-
-oc:kn_3a37ee89 a oc:Heuristic,
+oc:kn_367255d6 a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When searching for a target sequence by name" ;
-    oc:directiveContent "If sequence search returns no match or multiple matches, display all available sequences in a table and ask the user to disambiguate." ;
-    oc:hasRationale "Sequence names can be ambiguous; showing all options prevents enrolling contacts into the wrong sequence." ;
-    oc:severityLevel "MEDIUM" .
+    oc:appliesToContext "During Step 5 enrichment of multiple leads" ;
+    oc:directiveContent "Batch enrichment calls to apollo_people_bulk_match with up to 10 people per call for efficiency." ;
+    oc:hasRationale "Bulk matching reduces API round-trips and stays within rate limits." .
 
-oc:kn_43f37e39 a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "When creating contacts via apollo_contacts_create" ;
-    oc:directiveContent "Always set run_dedupe to true when creating contacts to prevent duplicate entries." ;
-    oc:hasRationale "Deduplication prevents enrolling the same contact multiple times in sequences, which would trigger duplicate outreach emails." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_579efd41 a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "During Step 5 enrichment via apollo_people_bulk_match" ;
-    oc:directiveContent "Batch enrich up to 10 contacts per bulk match call for efficiency." ;
-    oc:hasRationale "Batching reduces API round-trips and stays within Apollo's bulk match endpoint limits." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_dc7ef004 a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "Between Step 4 (find matching people) and Step 5 (enrich and create contacts)" ;
-    oc:directiveContent "Present candidates in a preview table and wait for explicit user confirmation before proceeding to enrichment and enrollment." ;
-    oc:hasRationale "This ensures the user can review and veto candidates before irreversible actions (credit consumption and sequence enrollment) occur." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_f770b150 a oc:KnowledgeNode,
+oc:kn_57b30baa a oc:KnowledgeNode,
         oc:PreFlightCheck ;
-    oc:appliesToContext "Before Step 5 (enrichment and contact creation)" ;
-    oc:directiveContent "Always confirm with the user before proceeding with enrichment, as it consumes Apollo credits per contact." ;
-    oc:hasRationale "Apollo enrichment costs credits per contact; skipping confirmation could result in unexpected credit consumption and budget overruns." ;
+    oc:appliesToContext "Before beginning the people search in Step 4" ;
+    oc:directiveContent "Verify that a matching Apollo sequence exists and at least one email account is linked before searching for leads." ;
+    oc:hasRationale "Discovering missing sequences or email accounts after finding leads wastes the user's time and potentially their credits." .
+
+oc:kn_adecf8c2 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "After finding matching people and before Step 5 enrichment" ;
+    oc:directiveContent "Always ask for user confirmation before enriching contacts, as enrichment consumes Apollo credits." ;
+    oc:hasRationale "Apollo enrichment costs credits per contact; users must approve the spend before proceeding." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_ca7835fa a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When creating contacts in Apollo via apollo_contacts_create" ;
+    oc:directiveContent "Never skip the deduplication step when creating contacts — always set run_dedupe to true." ;
+    oc:hasRationale "Skipping deduplication can create duplicate contacts, leading to multiple sequence enrollments and unprofessional outreach." ;
     oc:severityLevel "CRITICAL" .
+
+oc:kn_fc8abf03 a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "Always — executing this workflow has financial and communication consequences" ;
+    oc:directiveContent "This skill consumes Apollo credits for each enriched contact and sends outreach emails from the selected account once contacts are enrolled." ;
+    oc:hasRationale "Users must understand the cost implications and that enrolled contacts may receive emails automatically." ;
+    oc:severityLevel "HIGH" .
+
+_:ref_00bed28a32620be1 a oc:WorkflowStep ;
+    dcterms:description "**Remove a contact** — Use `mcp__claude_ai_Apollo_MCP__apollo_emailer_campaigns_remove_or_stop_contact_ids` to remove specific contacts" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_147181bf8da3d7c2 a oc:BulletItem ;
+    oc:blockType "bullet_item" ;
+    oc:itemOrder 1 ;
+    oc:itemText "`first_name`, `last_name`, `domain` for each person" .
+
+_:ref_14da0c5b00943a35 a oc:BulletItem ;
+    oc:blockType "bullet_item" ;
+    oc:itemOrder 2 ;
+    oc:itemText "`direct_phone` or `mobile_phone` if available" .
+
+_:ref_1547960374243798 a oc:WorkflowStep ;
+    dcterms:description "**Review sequence** — Show sequence details and all enrolled contacts" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_1e7eb1b76837455c a oc:WorkflowStep ;
+    dcterms:description "**Create contacts** — For each enriched person, use `mcp__claude_ai_Apollo_MCP__apollo_contacts_create` with:" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild [ a oc:BulletList ;
+            oc:blockType "bullet_list" ;
+            oc:contentOrder 1 ;
+            oc:hasItem _:ref_14da0c5b00943a35,
+                [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 3 ;
+                    oc:itemText "`run_dedupe` set to `true`" ],
+                [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 1 ;
+                    oc:itemText "`first_name`, `last_name`, `email`, `title`, `organization_name`" ] ] ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_419263b97f89296e a oc:WorkflowStep ;
+    dcterms:description "**Pause a contact** — Re-add with `status: \"paused\"` and an `auto_unpause_at` date" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_4e1bfa2ddba6725a a oc:BulletList ;
+    oc:blockType "bullet_list" ;
+    oc:contentOrder 1 ;
+    oc:hasItem _:ref_147181bf8da3d7c2,
+        [ a oc:BulletItem ;
+            oc:blockType "bullet_item" ;
+            oc:itemOrder 2 ;
+            oc:itemText "`reveal_personal_emails` set to `true`" ] .
+
+_:ref_e205a87111106ad1 a oc:WorkflowStep ;
+    dcterms:description "**Enrich** — Use `mcp__claude_ai_Apollo_MCP__apollo_people_bulk_match` (batch up to 10 per call) with:" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild _:ref_4e1bfa2ddba6725a ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_f6e9445e8b016d94 a oc:WorkflowStep ;
+    dcterms:description "**Load more** — Find and add another batch of leads" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_0e79be6340fd2968 a oc:WorkflowStep ;
+    dcterms:description "Search Apollo for the target sequence by name. If ambiguous, show all sequences and ask user to pick." ;
+    oc:expectedOutcome "A single sequence ID identified for enrollment." ;
+    oc:stepDependsOn _:ref_2c1361b9bb1113ae ;
+    oc:stepId "find-sequence" .
+
+_:ref_2cef251fe1b0e645 a oc:WorkflowStep ;
+    dcterms:description "List linked Apollo email accounts. Auto-select if one; ask user if multiple." ;
+    oc:expectedOutcome "An email account ID selected for sending." ;
+    oc:stepId "get-email-account" .
+
+_:ref_69fb72fc4987e210 a oc:WorkflowStep ;
+    dcterms:description "Bulk enrich leads (batch ≤10) to get emails/phones, then create contacts in Apollo with run_dedupe=true. Collect all contact IDs." ;
+    oc:expectedOutcome "All contacts created with deduplication, contact IDs collected." ;
+    oc:stepDependsOn _:ref_dc84fec4e482acfc ;
+    oc:stepId "enrich-and-create" .
+
+_:ref_a037ecea6d70fe87 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 2 ;
+    oc:hasStep _:ref_00bed28a32620be1,
+        _:ref_1547960374243798,
+        _:ref_419263b97f89296e,
+        _:ref_f6e9445e8b016d94 ;
+    oc:workflowId "procedure_2" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_a06ebdda49f4a16d a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 2 ;
+    oc:hasStep _:ref_1e7eb1b76837455c,
+        _:ref_e205a87111106ad1 ;
+    oc:workflowId "procedure_2" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_dc84fec4e482acfc a oc:WorkflowStep ;
+    dcterms:description "Search Apollo mixed people API with targeting criteria. Present preview table and ask for confirmation before proceeding." ;
+    oc:expectedOutcome "Confirmed list of candidate leads ready for enrichment." ;
+    oc:stepDependsOn _:ref_2c1361b9bb1113ae ;
+    oc:stepId "find-people" .
+
+_:ref_dd8ba6a4bea40390 a oc:WorkflowStep ;
+    dcterms:description "Enroll all created contact IDs into the target sequence using the selected email account." ;
+    oc:expectedOutcome "Contacts successfully enrolled in the outreach sequence." ;
+    oc:stepDependsOn _:ref_0e79be6340fd2968,
+        _:ref_2cef251fe1b0e645,
+        _:ref_69fb72fc4987e210 ;
+    oc:stepId "add-to-sequence" .
+
+_:ref_2c1361b9bb1113ae a oc:WorkflowStep ;
+    dcterms:description "Parse $ARGUMENTS to extract targeting criteria (titles, seniorities, industry, company size, location) and sequence name/volume." ;
+    oc:expectedOutcome "Structured targeting parameters and sequence name extracted from user input." ;
+    oc:stepId "parse-input" .
 

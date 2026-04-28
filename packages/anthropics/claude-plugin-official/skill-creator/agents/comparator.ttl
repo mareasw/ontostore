@@ -4,74 +4,652 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_plugin_official_skill_creator_comparator a oc:DeclarativeSkill,
+oc:skill_claude_plugin_official_skill_creator_comparator a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "comparator" ;
-    skos:broader "Evaluation agent" ;
+    skos:broader "Evaluator" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/skill-creator" ;
     oc:contentHash "fe1fc9787c495d864c5d6eada47396478572325fde1b33a96d78bf4b849b7a3e" ;
-    oc:differentia "that compares two outputs blindly without knowing which skill produced them, using a rubric-based scoring system" ;
-    oc:extends oc:skill_anthropics_claude_plugin_official_skill_creator ;
+    oc:differentia "that blindly compares two outputs without knowing their source to determine quality winner" ;
+    oc:extends oc:skill_claude_plugin_official_skill_creator ;
     oc:handlesFailure oc:FileNotFound,
         oc:InvalidInput ;
-    oc:hasAllowedTool "Glob",
-        "Read",
-        "Write" ;
     oc:hasArgumentHint "output_a_path, output_b_path, eval_prompt, expectations" ;
-    oc:hasRequirement oc:req_a4bb58aa,
-        oc:req_d374a021 ;
-    oc:impartsKnowledge oc:kn_673122f6,
-        oc:kn_b40819a5,
-        oc:kn_d8cd7385,
-        oc:kn_ec15e964,
-        oc:kn_f24978d4 ;
+    oc:hasCategory "automation" ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Compare two outputs WITHOUT knowing which skill produced them." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "**reasoning**: Clear explanation of why the winner was chosen (or why it's a tie)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:hasChild [ a oc:BulletList ;
+                                            oc:blockType "bullet_list" ;
+                                            oc:contentOrder 1 ;
+                                            oc:hasItem [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 1 ;
+                                                    oc:itemText "**passed**: Number of expectations that passed" ],
+                                                [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 3 ;
+                                                    oc:itemText "**pass_rate**: Fraction passed (0.0 to 1.0)" ],
+                                                [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 4 ;
+                                                    oc:itemText "**details**: Individual expectation results" ],
+                                                [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 2 ;
+                                                    oc:itemText "**total**: Total number of expectations" ] ] ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "**expectation_results**: (Only if expectations provided)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "**winner**: \"A\", \"B\", or \"TIE\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:hasChild [ a oc:BulletList ;
+                                            oc:blockType "bullet_list" ;
+                                            oc:contentOrder 1 ;
+                                            oc:hasItem [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 2 ;
+                                                    oc:itemText "**strengths**: List of positive aspects" ],
+                                                [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 3 ;
+                                                    oc:itemText "**weaknesses**: List of issues or shortcomings" ],
+                                                [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 1 ;
+                                                    oc:itemText "**score**: 1-10 rating (should match rubric overall_score)" ] ] ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "**output_quality**: Summary quality assessment" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:hasChild [ a oc:BulletList ;
+                                            oc:blockType "bullet_list" ;
+                                            oc:contentOrder 1 ;
+                                            oc:hasItem [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 1 ;
+                                                    oc:itemText "**content**: Scores for content criteria (correctness, completeness, accuracy)" ],
+                                                [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 4 ;
+                                                    oc:itemText "**structure_score**: Average of structure criteria (1-5)" ],
+                                                [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 3 ;
+                                                    oc:itemText "**content_score**: Average of content criteria (1-5)" ],
+                                                [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 5 ;
+                                                    oc:itemText "**overall_score**: Combined score scaled to 1-10" ],
+                                                [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 2 ;
+                                                    oc:itemText "**structure**: Scores for structure criteria (organization, formatting, usability)" ] ] ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "**rubric**: Structured rubric evaluation for each output" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Field Descriptions" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "If no expectations were provided, omit the `expectation_results` field entirely." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Write a JSON file with this structure:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """{
+  "winner": "A",
+  "reasoning": "Output A provides a complete solution with proper formatting and all required fields. Output B is missing the date field and has formatting inconsistencies.",
+  "rubric": {
+    "A": {
+      "content": {
+        "correctness": 5,
+        "completeness": 5,
+        "accuracy": 4
+      },
+      "structure": {
+        "organization": 4,
+        "formatting": 5,
+        "usability": 4
+      },
+      "content_score": 4.7,
+      "structure_score": 4.3,
+      "overall_score": 9.0
+    },
+    "B": {
+      "content": {
+        "correctness": 3,
+        "completeness": 2,
+        "accuracy": 3
+      },
+      "structure": {
+        "organization": 3,
+        "formatting": 2,
+        "usability": 3
+      },
+      "content_score": 2.7,
+      "structure_score": 2.7,
+      "overall_score": 5.4
+    }
+  },
+  "output_quality": {
+    "A": {
+      "score": 9,
+      "strengths": ["Complete solution", "Well-formatted", "All fields present"],
+      "weaknesses": ["Minor style inconsistency in header"]
+    },
+    "B": {
+      "score": 5,
+      "strengths": ["Readable output", "Correct basic structure"],
+      "weaknesses": ["Missing date field", "Formatting inconsistencies", "Partial data extraction"]
+    }
+  },
+  "expectation_results": {
+    "A": {
+      "passed": 4,
+      "total": 5,
+      "pass_rate": 0.80,
+      "details": [
+        {"text": "Output includes name", "passed": true},
+        {"text": "Output includes date", "passed": true},
+        {"text": "Format is PDF", "passed": true},
+        {"text": "Contains signature", "passed": false},
+        {"text": "Readable text", "passed": true}
+      ]
+    },
+    "B": {
+      "passed": 3,
+      "total": 5,
+      "pass_rate": 0.60,
+      "details": [
+        {"text": "Output includes name", "passed": true},
+        {"text": "Output includes date", "passed": false},
+        {"text": "Format is PDF", "passed": true},
+        {"text": "Contains signature", "passed": false},
+        {"text": "Readable text", "passed": true}
+      ]
+    }
+  }
+}
+""" ;
+                            oc:codeLanguage "json" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 95-170" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Output Format" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "**Be decisive**: Choose a winner unless outputs are genuinely equivalent." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "**Be specific**: Cite specific examples when explaining strengths and weaknesses." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "**Be objective**: Don't favor outputs based on style preferences; focus on correctness and completeness." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 7 ;
+                                    oc:itemText "**Handle edge cases**: If both outputs fail, pick the one that fails less badly. If both are excellent, pick the one that's marginally better." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "**Stay blind**: DO NOT try to infer which skill produced which output. Judge purely on output quality." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "**Output quality first**: Assertion scores are secondary to overall task completion." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 6 ;
+                                    oc:itemText "**Explain your reasoning**: The reasoning field should make it clear why you chose the winner." ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Guidelines" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent _:ref_11b2683f64d66ca8 ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Step 1: Read Both Outputs" ],
+                        [ a oc:Section ;
+                            oc:hasContent _:ref_a556079d58facafe ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Step 2: Understand the Task" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "If expectations are provided:" ],
+                                _:ref_609b2a1a7f22e7da ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 5 ;
+                            oc:sectionTitle "Step 5: Check Assertions (if provided)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Based on the task, generate a rubric with two dimensions:" ],
+                                [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 5 ;
+                                    oc:rowCount 3 ;
+                                    oc:tableCaption "**Structure Rubric** (how the output is organized)" ;
+                                    oc:tableMarkdown """| Criterion | 1 (Poor) | 3 (Acceptable) | 5 (Excellent) |
+|-----------|----------|----------------|---------------|
+| Organization | Disorganized | Reasonably organized | Clear, logical structure |
+| Formatting | Inconsistent/broken | Mostly consistent | Professional, polished |
+| Usability | Difficult to use | Usable with effort | Easy to use |
+""" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 7 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Data output → \"Schema correctness\", \"Data types\", \"Completeness\"" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Document → \"Section structure\", \"Heading hierarchy\", \"Paragraph flow\"" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "PDF form → \"Field alignment\", \"Text readability\", \"Data placement\"" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 6 ;
+                                    oc:textContent "Adapt criteria to the specific task. For example:" ],
+                                [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 3 ;
+                                    oc:rowCount 3 ;
+                                    oc:tableCaption "**Content Rubric** (what the output contains)" ;
+                                    oc:tableMarkdown """| Criterion | 1 (Poor) | 3 (Acceptable) | 5 (Excellent) |
+|-----------|----------|----------------|---------------|
+| Correctness | Major errors | Minor errors | Fully correct |
+| Completeness | Missing key elements | Mostly complete | All elements present |
+| Accuracy | Significant inaccuracies | Minor inaccuracies | Accurate throughout |
+""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Content Rubric** (what the output contains):" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent "**Structure Rubric** (how the output is organized):" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Step 3: Generate Evaluation Rubric" ],
+                        [ a oc:Section ;
+                            oc:hasContent _:ref_36d97ce63ec3c2c1,
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "For each output (A and B):" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "Step 4: Evaluate Each Output Against the Rubric" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Compare A and B based on (in priority order):" ],
+                                _:ref_5736f221f86a014f,
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "Be decisive - ties should be rare. One output is usually better, even if marginally." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 6 ;
+                            oc:sectionTitle "Step 6: Determine the Winner" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Save results to a JSON file at the path specified (or `comparison.json` if not specified)." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 7 ;
+                            oc:sectionTitle "Step 7: Write Comparison Results" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Process" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "You receive these parameters in your prompt:" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "**eval_prompt**: The original task/prompt that was executed" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "**output_a_path**: Path to the first output file or directory" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "**expectations**: List of expectations to check (optional - may be empty)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "**output_b_path**: Path to the second output file or directory" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Inputs" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "Your judgment is based purely on output quality and task completion." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "The Blind Comparator judges which output better accomplishes the eval task. You receive two outputs labeled A and B, but you do NOT know which skill produced which. This prevents bias toward a particular skill or approach." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Role" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Blind Comparator Agent" ] ;
+    oc:hasWorkflow _:ref_11b2683f64d66ca8,
+        _:ref_36d97ce63ec3c2c1,
+        _:ref_5736f221f86a014f,
+        [ a oc:Workflow ;
+            dcterms:description "Compare two outputs without knowing their source, evaluate against rubric, and produce structured JSON results." ;
+            oc:hasStep _:ref_1de2f65c443453a3,
+                _:ref_5313280d3ceb1b27,
+                _:ref_663bc69d81e0a81b,
+                _:ref_6ced57671aa7ddcd,
+                _:ref_78a5503ef1e48f17,
+                _:ref_b5687904fdae3847,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Save structured JSON comparison results to specified path (or comparison.json)." ;
+                    oc:expectedOutcome "JSON file with winner, reasoning, rubric, output_quality, and optional expectation_results" ;
+                    oc:stepDependsOn _:ref_663bc69d81e0a81b ;
+                    oc:stepId "write-results" ] ;
+            oc:workflowId "blind-comparison" ;
+            oc:workflowName "Blind Output Comparison" ],
+        _:ref_609b2a1a7f22e7da,
+        _:ref_a556079d58facafe ;
+    oc:impartsKnowledge oc:kn_02dbad88,
+        oc:kn_68ac903c,
+        oc:kn_77d24c44,
+        oc:kn_821f821e,
+        oc:kn_ac61ef05,
+        oc:kn_b7c593a9 ;
     oc:isUserInvocable false ;
-    oc:nature "Work" ;
+    oc:nature "Tool" ;
     oc:requiresState oc:FileExists ;
-    oc:resolvesIntent "compare two outputs",
+    oc:resolvesIntent "blind comparison of skill outputs",
+        "compare two outputs",
         "evaluate output quality",
-        "judge which output is better",
-        "run blind comparison",
-        "score outputs against rubric" ;
-    oc:yieldsState oc:DocumentCreated .
+        "judge which output is better" ;
+    oc:yieldsState oc:ComparisonComplete .
 
-oc:kn_673122f6 a oc:DesignPrinciple,
+oc:kn_02dbad88 a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "Before evaluating outputs, during rubric generation" ;
-    oc:directiveContent "Generate a task-specific rubric with two dimensions (Content and Structure) before scoring, adapting criteria to the specific task type (e.g., PDF forms, documents, data outputs)." ;
-    oc:hasRationale "A standardized but adaptable rubric ensures consistent, fair evaluation across different task types while accounting for domain-specific quality criteria." .
+    oc:appliesToContext "When determining winner" ;
+    oc:directiveContent "Prioritize overall rubric score (content + structure) as primary, assertion pass rates as secondary, and declare TIE only as last resort." ;
+    oc:hasRationale "Overall output quality is more important than passing specific assertions, which are only secondary evidence." .
 
-oc:kn_b40819a5 a oc:FallbackStrategy,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When both outputs are poor quality or both are high quality" ;
-    oc:directiveContent "If both outputs fail, pick the one that fails less badly. If both are excellent, pick the one that's marginally better based on specific cited examples." ;
-    oc:hasRationale "Even in edge cases, providing a directional winner is more actionable for skill improvement than declaring frequent ties." .
+oc:kn_68ac903c a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When both outputs are poor or both are excellent" ;
+    oc:directiveContent "If both outputs fail, pick the one that fails less badly. If both are excellent, pick the one that's marginally better." ;
+    oc:hasRationale "Even in edge cases, a useful comparison should identify the relatively better output." .
 
-oc:kn_d8cd7385 a oc:Constraint,
+oc:kn_77d24c44 a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "Throughout the entire comparison process" ;
-    oc:directiveContent "Never attempt to infer which skill produced which output. Judge purely on output quality to maintain blind comparison integrity." ;
-    oc:hasRationale "Knowing or inferring the source skill introduces confirmation bias and defeats the purpose of blind evaluation." ;
-    oc:severityLevel "CRITICAL" .
+    oc:appliesToContext "When evaluating outputs" ;
+    oc:directiveContent "Do not favor outputs based on style preferences; focus on correctness and completeness." ;
+    oc:hasRationale "Style bias can mask substantive quality differences and lead to unfair comparisons." ;
+    oc:severityLevel "HIGH" .
 
-oc:kn_ec15e964 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When determining the winner between outputs A and B" ;
-    oc:directiveContent "Prioritize overall rubric score first, assertion pass rates second, and declare a TIE only as a last resort. Be decisive — one output is usually better, even if marginally." ;
-    oc:hasRationale "Decisive comparisons provide clearer signal for skill improvement. Rubric scores capture holistic quality while assertions are secondary evidence." .
+oc:kn_821f821e a oc:KnowledgeNode,
+        oc:SuccessIndicator ;
+    oc:appliesToContext "When writing comparison results" ;
+    oc:directiveContent "The reasoning field should cite specific examples from the outputs to explain strengths, weaknesses, and the winner choice." ;
+    oc:hasRationale "Specific citations make the comparison auditable and trustworthy." .
 
-oc:kn_f24978d4 a oc:Idempotency,
+oc:kn_ac61ef05 a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When re-executing comparison on identical outputs" ;
-    oc:directiveContent "The comparison writes a deterministic JSON result to a specified path. Re-running on the same outputs should produce the same winner and rubric scores." ;
-    oc:hasRationale "Consistent evaluation results enable reliable skill quality tracking over time and across evaluation runs." ;
+    oc:appliesToContext "When determining winner" ;
+    oc:directiveContent "Be decisive — choose a winner unless outputs are genuinely equivalent. Ties should be rare." ;
+    oc:hasRationale "One output is usually better even if marginally; indecisiveness reduces evaluation utility." ;
     oc:severityLevel "MEDIUM" .
 
-oc:req_a4bb58aa a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "JSON output writing capability" .
+oc:kn_b7c593a9 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Always during comparison" ;
+    oc:directiveContent "Never attempt to infer which skill produced which output. Judge purely on output quality." ;
+    oc:hasRationale "Preventing bias toward a particular skill or approach ensures fair evaluation." ;
+    oc:severityLevel "CRITICAL" .
 
-oc:req_d374a021 a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "Ability to read and compare file/directory contents" .
+_:ref_2fcc1bcde976c65e a oc:WorkflowStep ;
+    dcterms:description "Note the type, structure, and content of each" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_36e9998ddb015e65 a oc:WorkflowStep ;
+    dcterms:description "Read the eval_prompt carefully" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_379561a3859a8083 a oc:WorkflowStep ;
+    dcterms:description "Examine output A (file or directory)" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_3a1d61a0c335c262 a oc:WorkflowStep ;
+    dcterms:description "Check each expectation against output B" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_3d811e26035bffbd a oc:WorkflowStep ;
+    dcterms:description "**Calculate dimension totals**: Content score, Structure score" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_40c450135e0bc82d a oc:BulletItem ;
+    oc:blockType "bullet_item" ;
+    oc:itemOrder 2 ;
+    oc:itemText "What qualities matter (accuracy, completeness, format)?" .
+
+_:ref_4d3ca3550398dbbf a oc:WorkflowStep ;
+    dcterms:description "Use expectation scores as secondary evidence (not the primary decision factor)" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_5b39fe4b3ea1f574 a oc:WorkflowStep ;
+    dcterms:description "**Tiebreaker**: If truly equal, declare a TIE" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_5b83875cb5e98dea a oc:WorkflowStep ;
+    dcterms:description "Count pass rates for each output" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_5c917726b5e5cd8b a oc:WorkflowStep ;
+    dcterms:description "**Secondary**: Assertion pass rates (if applicable)" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_8284ad76543b539b a oc:WorkflowStep ;
+    dcterms:description "Examine output B (file or directory)" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_856decbbfd833468 a oc:WorkflowStep ;
+    dcterms:description "Check each expectation against output A" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_8d7254d52820a14c a oc:WorkflowStep ;
+    dcterms:description "**Primary**: Overall rubric score (content + structure)" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_a284b67930bfec2d a oc:WorkflowStep ;
+    dcterms:description "Identify what the task requires:" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild [ a oc:BulletList ;
+            oc:blockType "bullet_list" ;
+            oc:contentOrder 1 ;
+            oc:hasItem _:ref_40c450135e0bc82d,
+                [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 3 ;
+                    oc:itemText "What would distinguish a good output from a poor one?" ],
+                [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 1 ;
+                    oc:itemText "What should be produced?" ] ] ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_a5717d540a19c255 a oc:WorkflowStep ;
+    dcterms:description "**Score each criterion** on the rubric (1-5 scale)" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_e8e9c7286868689b a oc:WorkflowStep ;
+    dcterms:description "If outputs are directories, examine all relevant files inside" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_fe30f19b759ccda9 a oc:WorkflowStep ;
+    dcterms:description "**Calculate overall score**: Average of dimension scores, scaled to 1-10" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_11b2683f64d66ca8 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 1 ;
+    oc:hasStep _:ref_2fcc1bcde976c65e,
+        _:ref_379561a3859a8083,
+        _:ref_8284ad76543b539b,
+        _:ref_e8e9c7286868689b ;
+    oc:workflowId "procedure_1" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_1de2f65c443453a3 a oc:WorkflowStep ;
+    dcterms:description "Generate task-specific content and structure rubrics with criteria rated 1-5 (Poor/Acceptable/Excellent)." ;
+    oc:expectedOutcome "Adapted rubric with content criteria (correctness, completeness, accuracy) and structure criteria (organization, formatting, usability)" ;
+    oc:stepDependsOn _:ref_78a5503ef1e48f17 ;
+    oc:stepId "generate-rubric" .
+
+_:ref_36d97ce63ec3c2c1 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 2 ;
+    oc:hasStep _:ref_3d811e26035bffbd,
+        _:ref_a5717d540a19c255,
+        _:ref_fe30f19b759ccda9 ;
+    oc:workflowId "procedure_2" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_5313280d3ceb1b27 a oc:WorkflowStep ;
+    dcterms:description "If expectations provided, check each against both outputs and count pass rates." ;
+    oc:expectedOutcome "Assertion pass rates for both outputs (or skipped if no expectations)" ;
+    oc:stepDependsOn _:ref_6ced57671aa7ddcd ;
+    oc:stepId "check-assertions" .
+
+_:ref_5736f221f86a014f a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 2 ;
+    oc:hasStep _:ref_5b39fe4b3ea1f574,
+        _:ref_5c917726b5e5cd8b,
+        _:ref_8d7254d52820a14c ;
+    oc:workflowId "procedure_2" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_609b2a1a7f22e7da a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 2 ;
+    oc:hasStep _:ref_3a1d61a0c335c262,
+        _:ref_4d3ca3550398dbbf,
+        _:ref_5b83875cb5e98dea,
+        _:ref_856decbbfd833468 ;
+    oc:workflowId "procedure_2" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_663bc69d81e0a81b a oc:WorkflowStep ;
+    dcterms:description "Compare outputs: primary=rubric score, secondary=assertion rates, tiebreaker=TIE declaration." ;
+    oc:expectedOutcome "Winner determined (A, B, or TIE) with clear reasoning" ;
+    oc:stepDependsOn _:ref_5313280d3ceb1b27,
+        _:ref_6ced57671aa7ddcd ;
+    oc:stepId "determine-winner" .
+
+_:ref_78a5503ef1e48f17 a oc:WorkflowStep ;
+    dcterms:description "Read eval_prompt, identify what should be produced, what qualities matter, and what distinguishes good from poor output." ;
+    oc:expectedOutcome "Clear understanding of task requirements and quality criteria" ;
+    oc:stepId "understand-task" .
+
+_:ref_a556079d58facafe a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 1 ;
+    oc:hasStep _:ref_36e9998ddb015e65,
+        _:ref_a284b67930bfec2d ;
+    oc:workflowId "procedure_1" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_b5687904fdae3847 a oc:WorkflowStep ;
+    dcterms:description "Read and examine both output A and output B (files or directories). Note type, structure, and content." ;
+    oc:expectedOutcome "Both outputs fully loaded and understood" ;
+    oc:stepId "read-outputs" .
+
+_:ref_6ced57671aa7ddcd a oc:WorkflowStep ;
+    dcterms:description "Score each output against rubric criteria, calculate content and structure dimension totals, and compute overall score scaled 1-10." ;
+    oc:expectedOutcome "Both outputs scored with dimension totals and overall scores" ;
+    oc:stepDependsOn _:ref_1de2f65c443453a3,
+        _:ref_b5687904fdae3847 ;
+    oc:stepId "evaluate-outputs" .
 
