@@ -4,96 +4,713 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_plugin_official_math_olympiad_adversarial_prompts a oc:DeclarativeSkill,
+oc:skill_claude_plugin_official_math_olympiad_adversarial_prompts a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "adversarial-prompts" ;
     skos:broader "Prompt bank" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/math-olympiad" ;
     oc:contentHash "686f5913da4e3291d64989f1bacb8f99fe69cdb3b5b9e64c8390151e870bae2a" ;
-    oc:differentia "that supplies adversarial verification prompts for mathematical proof checking via isolated verifier subagents with no tool access" ;
-    oc:extends oc:skill_anthropics_claude_plugin_official_math_olympiad ;
-    oc:handlesFailure oc:ProofGapDetected,
-        oc:ProofRefuted,
-        oc:TautologyDetected ;
-    oc:hasAlias "adversarial-verifier",
-        "proof-verifier-prompts",
-        "verifier-prompt-bank" ;
-    oc:hasArgumentHint "problem statement and proposed solution" ;
+    oc:differentia "that arms adversarial verifier subagents with pattern-specific attack strategies for breaking olympiad proofs, using a 7-category refutation taxonomy to catch errors that self-verification misses" ;
+    oc:extends oc:skill_claude_plugin_official_math_olympiad ;
+    oc:handlesFailure oc:VerificationInconclusive ;
     oc:hasCategory "research" ;
-    oc:hasRequirement oc:req_3d1b0739,
-        oc:req_9743672d ;
-    oc:impartsKnowledge oc:kn_263df77b,
-        oc:kn_2adf2ce8,
-        oc:kn_3e6b4376,
-        oc:kn_3ee5e3b5,
-        oc:kn_76c63c11,
-        oc:kn_e3977485,
-        oc:kn_e68c3bb0 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent """**Source**: `shared/verifier_patterns_source.md`. Background: arXiv:2503.21934
+showed self-verified 85.7% IMO success drops to <5% under human grading. These
+prompts are the human grader.""" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 3 ;
+                    oc:textContent """**Verifier isolation**: You do NOT know how other verifiers voted. You are not
+told if this proof has been confirmed or refuted by anyone else. Assume you're
+the first and only reviewer. (Social proof — "3 others confirmed" — biases
+toward agreement.)""" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent """Prompt bank for the verifier subagent. Fresh context: problem statement +
+cleaned solution, NO thinking trace. Agent has NO tools — pure reasoning only.""" ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent "**Output format:**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent """You are an adversarial verifier checking one thing: **did the solution argue
+itself in a circle?**""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent """The trap: long chains feel like progress. "We've reduced it to bounding X!" is
+only progress if X is actually different from what you started with. Sometimes X
+is just the original, wearing a hat.""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent """The solution likely proceeds through a chain of reductions or equivalent
+reformulations, ending at a "final estimate" or "key inequality" that it then
+proves directly. Your task:""" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """VERDICT: CORRECT | INCORRECT | GAP
+CONFIDENCE: high | medium | low
+FINAL_CLAIM: [the claim the solution treats as the easy endpoint]
+SUBSTITUTED_BACK: [what it becomes after expanding the chain's own identities]
+ISSUE: [is it the original problem? trivially equivalent? genuinely simpler? say which and why]
+""" ;
+                            oc:codeLanguage "" ;
+                            oc:contentOrder 6 ;
+                            oc:sourceLocation "lines 178-184" ],
+                        _:ref_fda2f6cbd011b7bc ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "4. Pattern #18 — Tautological Reduction" ],
+                [ a oc:Section ;
+                    oc:hasContent _:ref_168a10bd823f3bf3,
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent """You are an adversarial verifier targeting short proofs. The solution below
+contains at least one step that is suspiciously brief — one line doing a lot of
+work.""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "For the shortest load-bearing step in the solution:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent """The classic failure: "rank depends only on support" — but [[1,1],[1,1]] has rank
+1 and [[1,1],[1,−1]] has rank 2, same support. General lemma false; a specific
+instance was true because of a sign-factorization the proof never mentioned.""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent "**Output format:**" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """VERDICT: CORRECT | INCORRECT | GAP
+CONFIDENCE: high | medium | low
+GENERAL_LEMMA: [the extracted general claim]
+2x2_TEST: [the instance you tried, and what it showed]
+ISSUE: [if the general lemma is false: what special structure the proof failed to invoke]
+""" ;
+                            oc:codeLanguage "" ;
+                            oc:contentOrder 6 ;
+                            oc:sourceLocation "lines 142-148" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "3. Pattern #40 — One-Line-Proof-Too-Clean" ],
+                [ a oc:Section ;
+                    oc:hasContent _:ref_02b95d702b2617e1,
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent """You are an adversarial verifier checking one thing: **did the solution answer
+the easiest interpretation of the question instead of the intended one?**""" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """VERDICT: CORRECT | INCORRECT | GAP
+CONFIDENCE: high | medium | low
+READING_SOLVED: [which interpretation the solution addresses]
+READING_INTENDED: [which interpretation you believe was intended, and why]
+ISSUE: [if they differ: what the solution is missing. If they match: why the easy reading is genuinely the intended one.]
+""" ;
+                            oc:codeLanguage "" ;
+                            oc:contentOrder 7 ;
+                            oc:sourceLocation "lines 215-221" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent """If the solution addresses the EASIEST reading — and especially if the problem
+under that reading would be trivially short for its stated source (an IMO
+problem that becomes a two-liner is a red flag) — then be suspicious. Olympiad
+problems are calibrated to their point values. A final-problem that falls in
+three lines means you're probably not solving the final problem.""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent """Also check: did the solution prove something about _an_ object when the problem
+asked about _all_ such objects? Did it show _possibility_ when the problem
+wanted _necessity_?""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 6 ;
+                            oc:textContent "**Output format:**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "Read the problem statement alone. Before looking at the solution in detail:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 7 ;
+                    oc:sectionTitle "5. Pattern #60 — Specification-Gaming" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent """Your goal is to find ANY reason to refute. These are the seven categories a hole
+falls into:""" ],
+                        _:ref_65d2d8df283120bb,
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent """If none of these fire after a genuine attempt, CONFIRM. Do not confirm because
+the proof _sounds_ confident.""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Reasons to REFUTE (the taxonomy — look for ANY one of these)" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent """The best outcome is (A) — the thesis survives AND you learn why. The corrected
+proof is more informative than the false one.""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "**Output format:**" ],
+                        [ a oc:BlockQuote ;
+                            oc:blockType "blockquote" ;
+                            oc:contentOrder 2 ;
+                            oc:quoteContent """**Adversarial brief**: The principle "[extracted general lemma]" is obviously
+false in general — [trivial counterexample, e.g., [[1,1],[1,1]] has rank 1 and
+[[1,1],[1,−1]] has rank 2, same support].
+
+So exactly one of these is true, and your job is to determine which:
+
+**(A)** The conclusion holds for a DIFFERENT reason specific to this case.
+Find that reason. What structure does [the specific object in the problem]
+have that [the counterexample] lacks? That structure is the real proof.
+
+**(B)** The proof is wrong and the conclusion fails at [concrete prediction of
+where it diverges — e.g., "the first case where the block is ≥2×2, which is
+m=4"].
+
+Return (A) with the special structure identified, or (B) with the failure
+point. "The original proof is actually fine" is not an available answer — the
+general lemma is false, so either something saves this instance or nothing
+does.""" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """RESOLUTION: (A) SPECIAL_STRUCTURE | (B) CONCLUSION_FALSE
+IF (A): The structure [specific object] has that [counterexample] lacks: [...]. Revised proof: [...]
+IF (B): Fails at [parameter/case]. Reason: [...]
+""" ;
+                            oc:codeLanguage "" ;
+                            oc:contentOrder 5 ;
+                            oc:sourceLocation "lines 289-293" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent """Use this instead of a general "fix the hole" prompt when a verifier flagged a
+one-line lemma whose general form is false. This framing forces a binary — the
+reviser cannot return "looks fine.\"""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 9 ;
+                    oc:sectionTitle "7. Adversarial Brief (for the reviser when pattern #40 fires)" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent """**You are NOT grading this. You are trying to BREAK it.** Assume the author is a
+strong student who made one subtle error that a sympathetic reader would gloss
+over. Your job is to find that error. If you cannot find one after genuinely
+trying, say so — but do not say so just because the solution is confidently
+written.""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "Attack each step:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent """You have no tools. Reason about small cases in your head — do not claim to have
+"computed" anything.""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "You are an adversarial verifier. Below is a problem and a proposed solution." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """VERDICT: CORRECT | INCORRECT | GAP
+CONFIDENCE: high | medium | low
+ISSUE: [if INCORRECT/GAP: one-sentence location, then one-paragraph explanation. If CORRECT: the step you tried hardest to break and why it held.]
+""" ;
+                            oc:codeLanguage "" ;
+                            oc:contentOrder 7 ;
+                            oc:sourceLocation "lines 72-76" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 6 ;
+                            oc:textContent "**Output format:**" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 4 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText """Is the claimed inequality actually in the claimed direction? Reason through a
+small case mentally.""" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText """Is every "clearly" / "obviously" / "it follows that" actually clear? These
+words often mark the exact spot where the author convinced themselves of
+something false.""" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText """Does every cited theorem's hypothesis actually hold? Check quantifiers: "for
+all" vs "there exists", pointwise vs average.""" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText """Does the argument use a property that's true for the _generic_ object but not
+the _specific_ one in the problem?""" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText """At each "WLOG": is generality actually preserved, or does the reduction
+discard the hard case?""" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "1. General Adversarial (default)" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent """You are verifier pass {K} of 5. A solution passes only if all five independent
+verifiers agree.""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent """One bias to actively resist: when a solution is well-written, confident, and
+uses standard machinery correctly in _most_ places, you will be inclined to
+trust the one place you can't quite follow. **Invert this.** Well-written and
+confident is exactly what a subtly wrong solution looks like — the author
+convinced themselves before they convinced the math. The place you can't quite
+follow is the place to press hardest.""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent """You have no tools. Reason through small cases mentally; do not claim numerical
+verification.""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "Read the problem. Read the solution. Trace every step yourself, from scratch." ],
+                        [ a oc:Template ;
+                            oc:blockType "template" ;
+                            oc:contentOrder 7 ;
+                            oc:templateContent """VERDICT: CORRECT | INCORRECT | GAP
+CONFIDENCE: high | medium | low
+PASS_NUMBER: {K}
+ISSUE: [if INCORRECT/GAP: exact step and why. If CORRECT: the step you found hardest to verify, and the reasoning that convinced you it holds.]
+""" ;
+                            oc:templateVariables "K" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent """**Verify INDEPENDENTLY.** You have not seen — and must not imagine — what any
+other verifier said. Do not reason "this probably already got checked." Your
+vote is the only vote you control. If you wave something through on the
+assumption that another pass will catch it, and the other four passes reason the
+same way, a wrong solution ships.""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 6 ;
+                            oc:textContent "**Output format:**" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 8 ;
+                    oc:sectionTitle "6. Consecutive-Verify (5-pass loop)" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent """You are an adversarial verifier running a single check: **does this argument
+prove something famously open or famously false?**""" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """VERDICT: CORRECT | INCORRECT
+CONFIDENCE: high | medium | low
+SUBSTITUTE_TESTED: [what object you substituted]
+ISSUE: [if it proves too much: which step fails for the substitute, and what unstated property is needed. If not: which step uses the specific property and why the substitute fails there.]
+""" ;
+                            oc:codeLanguage "" ;
+                            oc:contentOrder 7 ;
+                            oc:sourceLocation "lines 105-110" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "Read the proposed solution. Ignore whether the proof is locally valid. Instead:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 6 ;
+                            oc:textContent "**Output format:**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent """If the substitute conclusion is a known open problem or a known falsehood, the
+original proof has a gap. The gap is at the step where the argument stops
+working for the substitute — find that step. That step is silently using a
+property the author never stated.""" ],
+                        _:ref_9ead78eb60839ca5,
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent """If the argument genuinely uses a property specific to the problem's object that
+the famous substitute lacks, say which property and where it's used.""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "2. Pattern #4 — Would It Prove Too Much?" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Adversarial Verifier Prompts — Math Olympiad" ] ;
+    oc:hasWorkflow _:ref_02b95d702b2617e1,
+        _:ref_168a10bd823f3bf3,
+        _:ref_65d2d8df283120bb,
+        _:ref_9ead78eb60839ca5,
+        _:ref_fda2f6cbd011b7bc ;
+    oc:impartsKnowledge oc:kn_059a7524,
+        oc:kn_08af293d,
+        oc:kn_0dbd5bf8,
+        oc:kn_0fd5d1c5,
+        oc:kn_288805b3,
+        oc:kn_3fd2d9a9,
+        oc:kn_4346933a,
+        oc:kn_78cd727f,
+        oc:kn_895b74cf,
+        oc:kn_93bba410,
+        oc:kn_a7794a2a,
+        oc:kn_cb9bb110,
+        oc:kn_cd8c89e4 ;
     oc:isUserInvocable false ;
     oc:nature "Concept" ;
-    oc:requiresState oc:SolutionGenerated ;
-    oc:resolvesIntent "check if arguments prove too much",
-        "detect subtle errors in olympiad solutions",
-        "force binary resolution of flagged proof issues",
-        "identify tautological reductions in proofs",
-        "refute incorrect proofs through structured attack patterns",
-        "verify mathematical proofs adversarially" ;
-    oc:yieldsState oc:ProofVerified .
+    oc:requiresState oc:ProblemStatementProvided,
+        oc:SolutionCleaned ;
+    oc:resolvesIntent "break olympiad proofs with structured attack strategies",
+        "check for tautological reductions in proofs",
+        "detect proof errors using pattern-specific checks",
+        "flag specification-gaming in math solutions",
+        "test whether a proof proves too much",
+        "verify competition math proof adversarially" ;
+    oc:yieldsState oc:HoleFound,
+        oc:VerificationVerdict .
 
-oc:kn_263df77b a oc:Heuristic,
+oc:kn_059a7524 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "Running the one-line-proof-too-clean check (Pattern #40)" ;
+    oc:directiveContent "1. Extract the general lemma from the shortest load-bearing step. 2. Break it with a 2×2 case. 3. If general form fails but specific instance survives → step is INCORRECT as written; find the hidden special structure." ;
+    oc:hasRationale "Short proofs that seem to work often rely on unstated special structure; the general lemma is false but the specific case holds for a different reason than the proof claims." ;
+    oc:stepOrder 2 .
+
+oc:kn_08af293d a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "Running the 'proves too much' check (Pattern #4)" ;
+    oc:directiveContent "1. Strip argument to skeleton — what properties does it actually use? 2. Find famous object sharing those properties (ζ, Möbius, harmonic series). 3. Rerun argument on substitute. If it proves something open/false → gap found at the step where the substitute diverges." ;
+    oc:hasRationale "This is the most reliable red flag — if your theorem's specialization to ζ proves Lindelöf, you have a gap." ;
+    oc:stepOrder 1 .
+
+oc:kn_0dbd5bf8 a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When a solution is well-written, confident, and uses standard machinery correctly in most places" ;
-    oc:directiveContent "Press hardest on the step you can't quite follow in an otherwise clean proof. The place that resists quick verification is the most likely location of a subtle error." ;
-    oc:hasRationale "A strong student who made one subtle error will have convinced themselves before convincing the reader. The weak point is camouflaged by surrounding correctness." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_2adf2ce8 a oc:KnowledgeNode,
-        oc:WorkflowStrategy ;
-    oc:appliesToContext "When a verifier flags a suspiciously brief load-bearing step in a proof" ;
-    oc:directiveContent "For one-line lemmas suspected of being false: extract the general claim, test it at the smallest nontrivial instance (2×2 case), and if the general form fails, force a binary resolution — either find special structure that saves it, or confirm the conclusion is false." ;
-    oc:hasRationale "This pattern catches cases where the author got the right answer for the wrong reason — the specific instance works but the invoked principle is false in general, meaning the proof lacks the real reason." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_3e6b4376 a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "When starting verification of any olympiad-level solution" ;
-    oc:directiveContent "Before verifying, read the problem statement alone and enumerate 2-3 plausible readings ranked by difficulty. Check whether the solution addresses the easiest reading rather than the intended hardest one." ;
-    oc:hasRationale "Olympiad problems are calibrated to their point values. A solution that turns a hard problem into a trivial exercise likely solved the wrong interpretation." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_3ee5e3b5 a oc:KnowledgeNode,
-        oc:SecurityImplication ;
-    oc:appliesToContext "When evaluating whether a proof's argument structure is sound independent of its specific objects" ;
-    oc:directiveContent "When using the 'proves too much' attack, strip the argument to its skeleton, substitute the most famous object sharing exactly those properties, and check if the conclusion becomes a known open problem or falsehood." ;
-    oc:hasRationale "If an argument proves something famously false when applied to a structurally similar object, the original proof has an unstated dependency on a property the author never identified." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_76c63c11 a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When designing or executing adversarial verification of any mathematical proof" ;
-    oc:directiveContent "Use the seven-category refutation taxonomy to systematically hunt for errors: (1) step doesn't follow, (2) hypothesis not satisfied, (3) claim false in small case, (4) tautological, (5) proves too much, (6) wrong interpretation, (7) hand-wave at the crux." ;
-    oc:hasRationale "Structured attack patterns prevent the verifier from falling into sympathetic reading by providing specific failure modes to check." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_e3977485 a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When running multi-pass consecutive verification or any ensemble of verifiers" ;
-    oc:directiveContent "Verifiers must be isolated from each other's votes and must not know if others confirmed or refuted. Social proof ('3 others confirmed') biases toward agreement." ;
-    oc:hasRationale "Independent verification prevents diffusion of responsibility where each pass assumes another will catch the error." ;
+    oc:appliesToContext "When any verifier evaluates a proof" ;
+    oc:directiveContent "Never confirm a proof because it sounds confident. Self-verified 85.7% IMO success drops to <5% under adversarial grading — confidence is not correctness." ;
+    oc:hasRationale "The entire point of adversarial verification is that confident writing masks subtle errors; a sympathetic reader glosses over the exact gap an adversarial reader catches." ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_e68c3bb0 a oc:AntiPattern,
+oc:kn_0fd5d1c5 a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When evaluating any mathematical proof for correctness" ;
-    oc:directiveContent "Never confirm a proof because it sounds confident or is well-written. A subtly wrong solution looks exactly like a correct one — well-written and confident." ;
-    oc:hasRationale "Self-verification achieves 85.7% IMO success but drops to <5% under human grading (arXiv:2503.21934). Sympathetic reading glosses over the exact error." ;
+    oc:appliesToContext "When configuring verifier subagent prompts" ;
+    oc:directiveContent "Verifier agents have NO tools — pure reasoning only. They must reason through small cases mentally and never claim to have 'computed' anything." ;
+    oc:hasRationale "Tool access would let verifiers substitute numerical checks for logical reasoning, which defeats the purpose of adversarial proof verification." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_288805b3 a oc:KnowledgeNode,
+        oc:OutputFormat ;
+    oc:appliesToContext "General adversarial verifier output" ;
+    oc:directiveContent """VERDICT: CORRECT | INCORRECT | GAP
+CONFIDENCE: high | medium | low
+ISSUE: [if INCORRECT/GAP: one-sentence location + one-paragraph explanation. If CORRECT: the step tried hardest to break and why it held.]""" ;
+    oc:templateVariables "CONFIDENCE",
+        "ISSUE",
+        "VERDICT" .
+
+oc:kn_3fd2d9a9 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "During general adversarial verification (Pattern 1)" ;
+    oc:directiveContent "When a proof step contains 'clearly', 'obviously', 'it follows that', or 'WLOG' — attack that step first. These words mark where authors convinced themselves of something false." ;
+    oc:hasRationale "Pattern analysis shows these hedging phrases disproportionately appear at the exact location of logical gaps." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_4346933a a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When verifying proofs with multi-step reductions (Pattern #18)" ;
+    oc:directiveContent "Long reduction chains that 'simplify' to a final estimate often circle back to the original problem. Substitute the chain's own identities back into the final claim to detect tautological reasoning." ;
+    oc:hasRationale "Tautological reductions are the most insidious error type because the chain FEELS like progress but has done nothing — it renamed the problem and declared it solved." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_78cd727f a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When selecting which verifier prompt to deploy" ;
+    oc:directiveContent "Use pattern-specific attacks ('does this prove too much?', 'is the one-line lemma true in general?', 'did it solve the easy interpretation?') rather than generic 'is this correct?' questioning." ;
+    oc:hasRationale "Specific checks outperform generic verification. The 7-category refutation taxonomy gives verifiers a concrete checklist rather than vague scrutiny." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_895b74cf a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When revising a proof flagged by the one-line-proof-too-clean check" ;
+    oc:directiveContent "When Pattern #40 fires (general lemma false, specific instance survives), force a binary resolution: either find the special structure that saves this instance (A), or identify where the conclusion actually fails (B). The reviser cannot return 'looks fine.'" ;
+    oc:hasRationale "A false general lemma means the proof is incomplete — either hidden structure makes the specific case work (and that structure IS the real proof), or the conclusion is wrong. There is no third option." ;
     oc:severityLevel "CRITICAL" .
 
-oc:req_3d1b0739 a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "Familiarity with mathematical proof techniques and common olympiad problem patterns" .
+oc:kn_93bba410 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "Running the specification-gaming check (Pattern #60)" ;
+    oc:directiveContent "1. Read problem statement alone — list 2-3 plausible readings. 2. Rank by difficulty. 3. Identify which reading the solution addresses. If easiest reading and problem would be trivially short → suspicious." ;
+    oc:hasRationale "50 of 63 'technically correct' solutions in the Aletheia case study solved the wrong interpretation. Olympiad problems are calibrated to point values — a final problem that falls in three lines means you're not solving the final problem." ;
+    oc:stepOrder 4 .
 
-oc:req_9743672d a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "Understanding of the seven-category refutation taxonomy (step doesn't follow, hypothesis not satisfied, claim false in small case, tautological, proves too much, wrong interpretation, hand-wave at crux)" .
+oc:kn_a7794a2a a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "Running the tautological reduction check (Pattern #18)" ;
+    oc:directiveContent "1. List all identities/substitutions in the proof chain. 2. Take the 'final easy' claim. 3. Substitute the chain's own identities back into it. 4. If you recover the original problem → tautology detected." ;
+    oc:stepOrder 3 .
+
+oc:kn_cb9bb110 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "Before launching any verifier agent" ;
+    oc:directiveContent "Always run verification in fresh context with no thinking trace and no knowledge of other verifiers' votes. Each verifier must assume it is the first and only reviewer." ;
+    oc:hasRationale "Dual context isolation (no solver thinking trace + no other verifier verdicts) eliminates two major bias sources: reasoning-chain agreement bias and social-proof bias." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_cd8c89e4 a oc:KnowledgeNode,
+        oc:OutputFormat ;
+    oc:appliesToContext "Adversarial brief reviser output (Pattern #40 resolution)" ;
+    oc:directiveContent """RESOLUTION: (A) SPECIAL_STRUCTURE | (B) CONCLUSION_FALSE
+IF (A): The structure [specific object] has that [counterexample] lacks: [...]. Revised proof: [...]
+IF (B): Fails at [parameter/case]. Reason: [...]""" ;
+    oc:templateVariables "RESOLUTION",
+        "counterexample",
+        "parameter/case",
+        "specific object" .
+
+_:ref_0a9c3e286596db16 a oc:WorkflowStep ;
+    dcterms:description """What do you get? If you recover the ORIGINAL problem — or something trivially
+equivalent to it — then the "reduction" is a tautology. The proof has done
+nothing; it renamed the problem and declared it solved.""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_0c76b4b9ee2b849c a oc:WorkflowStep ;
+    dcterms:description """Find the most famous object that shares exactly those properties. (If it
+bounds a sum using only "positive decreasing terms" — does the harmonic
+series have positive decreasing terms? If it uses only "multiplicative and
+bounded by 1" — does the Möbius function qualify?)""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_103b4946946cd07e a oc:WorkflowStep ;
+    dcterms:description """**Step doesn't follow** — The conclusion of some step is not implied by its
+premises. (Includes direction errors: A>B and C>D does NOT give A−C>B−D.)""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_2ad6ed0e63653905 a oc:WorkflowStep ;
+    dcterms:description """**Claim false in small case** — A stated identity or bound fails at n=2, n=3,
+or the first nontrivial block. Mentally test it.""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_2b562c0e5b1608f0 a oc:WorkflowStep ;
+    dcterms:description """Substitute the chain's OWN identities (from step 1) back into that final
+claim. Expand. Simplify.""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_2eb6b5616d6444d2 a oc:WorkflowStep ;
+    dcterms:description """**Extract the general lemma.** Write down the most general claim the step is
+implicitly using. Not "for this sum" but "for any sum of this shape." Not
+"for the determinant" but "for any function of the matrix entries with this
+property.\"""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_43d419bf4a003967 a oc:WorkflowStep ;
+    dcterms:description "Mentally rerun the argument on that substitute. What does it now prove?" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_735a7569f5215de2 a oc:WorkflowStep ;
+    dcterms:description """List every identity, equality, or substitution the solution establishes along
+the way. (Things like "A = B + C", "the sum splits as X + Y", "by the earlier
+lemma, P = Q".)""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_7520137ad47e9baa a oc:WorkflowStep ;
+    dcterms:description """Write down 2–3 plausible readings of what the problem is asking. Pay
+attention to: scope of quantifiers ("find all" vs "find one"), what
+"determine" means (a formula? a characterization? an existence proof?),
+boundary cases (does n=0 or n=1 count? is the empty set allowed? are
+degenerate configurations included?).""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_80dafe07a56b3b2b a oc:WorkflowStep ;
+    dcterms:description """**Proves too much** — The argument's skeleton applies to a famous object and
+proves something open or false about it. (Pattern #4.)""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_5" ;
+    oc:stepOrder 5 .
+
+_:ref_8a6f39c5464c32f2 a oc:WorkflowStep ;
+    dcterms:description """**Hypothesis not satisfied** — An invoked theorem needs a condition the proof
+never verified. (Pattern #5: "entire" ≠ "analytic in a disk".)""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_90780cc1d857626a a oc:BulletItem ;
+    oc:blockType "bullet_item" ;
+    oc:itemOrder 1 ;
+    oc:itemText "If the general lemma survives your 2×2 attack: the step is probably fine." .
+
+_:ref_afcb804e66b094e6 a oc:WorkflowStep ;
+    dcterms:description """Strip the argument down to its skeleton: what properties of the given objects
+does it _actually use_?""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_b486e8d28ef8127b a oc:WorkflowStep ;
+    dcterms:description "Which reading did the solution actually address?" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_b80e01a1271c9686 a oc:WorkflowStep ;
+    dcterms:description """**Wrong interpretation** — Solves an easier reading of the problem than the
+intended one. (Pattern #60.)""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_6" ;
+    oc:stepOrder 6 .
+
+_:ref_bda5c608f34e52db a oc:WorkflowStep ;
+    dcterms:description """**Hand-wave at the crux** — "iterating and optimizing gives the result", "by
+standard methods", "the details are routine" — at exactly the step that ISN'T
+routine.""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_7" ;
+    oc:stepOrder 7 .
+
+_:ref_c48ffa68a74742f0 a oc:BulletList ;
+    oc:blockType "bullet_list" ;
+    oc:contentOrder 1 ;
+    oc:hasItem _:ref_90780cc1d857626a,
+        [ a oc:BulletItem ;
+            oc:blockType "bullet_item" ;
+            oc:itemOrder 2 ;
+            oc:itemText """If the general lemma FAILS at 2×2 but the specific instance in the proof
+still seems to work: the step is **INCORRECT as written**. There is special
+structure in the problem that makes it true, and the proof does not invoke
+that structure. The author got the right answer for the wrong reason.""" ] .
+
+_:ref_c9f7837ea88cd22d a oc:WorkflowStep ;
+    dcterms:description """**Tautological** — The "gap" at the end is the original problem in disguise.
+(Pattern #18: substitute the proof's own identities back in.)""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_d5c8fc3f120f3650 a oc:WorkflowStep ;
+    dcterms:description "**Judge:**" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild _:ref_c48ffa68a74742f0 ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_d734735eed0f7aff a oc:WorkflowStep ;
+    dcterms:description """Take the FINAL claim — the one the solution presents as "and this is now
+easy" or "this follows from [standard fact]".""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_dfa8c5a21ab8cda0 a oc:WorkflowStep ;
+    dcterms:description """**Try to break the general lemma with a 2×2 case.** Two elements, two terms,
+a 2×2 matrix — the smallest nontrivial instance. Reason it through in your
+head. Can you find values where the general lemma fails?""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_ffc96693020ed147 a oc:WorkflowStep ;
+    dcterms:description "Rank them by how hard they would be to solve." ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_02b95d702b2617e1 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 3 ;
+    oc:hasStep _:ref_7520137ad47e9baa,
+        _:ref_b486e8d28ef8127b,
+        _:ref_ffc96693020ed147 ;
+    oc:workflowId "procedure_3" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_168a10bd823f3bf3 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 3 ;
+    oc:hasStep _:ref_2eb6b5616d6444d2,
+        _:ref_d5c8fc3f120f3650,
+        _:ref_dfa8c5a21ab8cda0 ;
+    oc:workflowId "procedure_3" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_65d2d8df283120bb a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 2 ;
+    oc:hasStep _:ref_103b4946946cd07e,
+        _:ref_2ad6ed0e63653905,
+        _:ref_80dafe07a56b3b2b,
+        _:ref_8a6f39c5464c32f2,
+        _:ref_b80e01a1271c9686,
+        _:ref_bda5c608f34e52db,
+        _:ref_c9f7837ea88cd22d ;
+    oc:workflowId "procedure_2" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_9ead78eb60839ca5 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 3 ;
+    oc:hasStep _:ref_0c76b4b9ee2b849c,
+        _:ref_43d419bf4a003967,
+        _:ref_afcb804e66b094e6 ;
+    oc:workflowId "procedure_3" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_fda2f6cbd011b7bc a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 3 ;
+    oc:hasStep _:ref_0a9c3e286596db16,
+        _:ref_2b562c0e5b1608f0,
+        _:ref_735a7569f5215de2,
+        _:ref_d734735eed0f7aff ;
+    oc:workflowId "procedure_3" ;
+    oc:workflowName "Ordered Procedure" .
 

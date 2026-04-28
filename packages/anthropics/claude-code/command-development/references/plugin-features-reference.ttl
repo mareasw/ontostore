@@ -4,62 +4,1317 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_code_command_development_plugin_features_reference a oc:DeclarativeSkill,
+oc:skill_claude_code_command_development_plugin_features_reference a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "plugin-features-reference" ;
-    skos:broader "documentation reference" ;
+    skos:broader "Reference documentation" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-code/command-development" ;
     oc:contentHash "57e11ae6a4bbc1a4a295d1f036202970911d6029d64f4ab058b63a4c5a899072" ;
-    oc:dependsOnSkill oc:skill_command_development ;
-    oc:differentia "covers plugin-specific command features including CLAUDE_PLUGIN_ROOT, auto-discovery, namespacing, multi-component integration, and validation patterns" ;
-    oc:extends oc:skill_anthropics_claude_code_command_development ;
-    oc:hasArgumentHint "none (reference document)" ;
+    oc:differentia "covers plugin-specific command features including CLAUDE_PLUGIN_ROOT variable, auto-discovery, and integration patterns for commands bundled in Claude Code plugins" ;
+    oc:extends oc:skill_claude_code_command_development ;
+    oc:handlesFailure oc:FileNotFound,
+        oc:InvalidInput ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_0cd647c9,
-        oc:kn_3f4015e1,
-        oc:kn_567f121f,
-        oc:kn_d37e82a9,
-        oc:kn_fd1816ec ;
-    oc:isUserInvocable false ;
-    oc:nature "reference" ;
-    oc:resolvesIntent "discover and namespace plugin commands",
-        "integrate commands with plugin agents skills and hooks",
-        "reference plugin-specific command features",
-        "use CLAUDE_PLUGIN_ROOT for portable paths",
-        "validate inputs and handle errors in plugin commands" .
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "This reference covers features and patterns specific to commands bundled in Claude Code plugins." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """---
+description: Deploy to environment with validation
+argument-hint: [environment]
+---
 
-oc:kn_0cd647c9 a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "When writing any plugin command that references files within the plugin directory" ;
-    oc:directiveContent "Always use ${CLAUDE_PLUGIN_ROOT} for all plugin-internal paths — scripts, templates, configuration, and resources — never use relative paths like ./" ;
-    oc:hasRationale "Relative paths resolve against the current working directory, not the plugin directory, causing file-not-found errors across different installations" ;
+Validate environment: !`echo "$1" | grep -E "^(dev|staging|prod)$" || echo "INVALID"`
+
+$IF($1 in [dev, staging, prod],
+  Deploy to $1 environment using validated configuration,
+  ERROR: Invalid environment '$1'. Must be one of: dev, staging, prod
+)
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 445-457" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Commands should validate inputs before processing:" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Validation approaches:**" ],
+                                _:ref_eb2035e715861f2d ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Input Validation" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Validate required arguments provided:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """---
+description: Create deployment with version
+argument-hint: [environment] [version]
+---
+
+Validate inputs: !`test -n "$1" -a -n "$2" && echo "OK" || echo "MISSING"`
+
+$IF($1 AND $2,
+  Deploy version $2 to $1 environment,
+  ERROR: Both environment and version required. Usage: /deploy [env] [version]
+)
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 488-500" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Required Arguments" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Template ;
+                                    oc:blockType "template" ;
+                                    oc:contentOrder 2 ;
+                                    oc:templateContent """---
+description: Build and validate output
+allowed-tools: Bash(*)
+---
+
+Build: !`bash ${CLAUDE_PLUGIN_ROOT}/scripts/build.sh`
+
+Validate output:
+- Exit code: !`echo $?`
+- Output exists: !`test -d dist && echo "✓" || echo "✗"`
+- File count: !`find dist -type f | wc -l`
+
+Report build status and any validation failures.
+""" ;
+                                    oc:templateVariables "CLAUDE_PLUGIN_ROOT" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Validate command execution results:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 5 ;
+                            oc:sectionTitle "Output Validation" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Verify plugin resources available:" ],
+                                [ a oc:Template ;
+                                    oc:blockType "template" ;
+                                    oc:contentOrder 2 ;
+                                    oc:templateContent """---
+description: Run analysis with plugin tools
+allowed-tools: Bash(test:*)
+---
+
+Validate plugin setup:
+- Config exists: !`test -f ${CLAUDE_PLUGIN_ROOT}/config.json && echo "✓" || echo "✗"`
+- Scripts exist: !`test -d ${CLAUDE_PLUGIN_ROOT}/scripts && echo "✓" || echo "✗"`
+- Tools available: !`test -x ${CLAUDE_PLUGIN_ROOT}/bin/analyze && echo "✓" || echo "✗"`
+
+If all checks pass, proceed with analysis.
+Otherwise, report missing components and installation steps.
+""" ;
+                                    oc:templateVariables "CLAUDE_PLUGIN_ROOT" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "Plugin Resource Validation" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Verify required files exist:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """---
+description: Process configuration file
+argument-hint: [config-file]
+---
+
+Check file: !`test -f $1 && echo "EXISTS" || echo "MISSING"`
+
+Process configuration if file exists: @$1
+
+If file doesn't exist, explain:
+- Expected location
+- Required format
+- How to create it
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 468-482" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "File Existence Checks" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Template ;
+                                    oc:blockType "template" ;
+                                    oc:contentOrder 2 ;
+                                    oc:templateContent """---
+description: Process file with error handling
+argument-hint: [file-path]
+---
+
+Try processing: !`node ${CLAUDE_PLUGIN_ROOT}/scripts/process.js $1 2>&1 || echo "ERROR: $?"`
+
+If processing succeeded:
+- Report results
+- Suggest next steps
+
+If processing failed:
+- Explain likely causes
+- Provide troubleshooting steps
+- Suggest alternative approaches
+""" ;
+                                    oc:templateVariables "CLAUDE_PLUGIN_ROOT" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Handle errors gracefully with helpful messages:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 6 ;
+                            oc:sectionTitle "Graceful Error Handling" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Validation Patterns" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent _:ref_03cfb1f6de7bce53,
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent """For general command development, see main SKILL.md.
+For command examples, see examples/ directory.""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Plugin Commands Should:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 7 ;
+                    oc:sectionTitle "Best Practices Summary" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 3 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Works across different installations" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Enables portable paths within plugin" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Allows referencing plugin files and scripts" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "Essential for multi-file plugin operations" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "`${CLAUDE_PLUGIN_ROOT}` is a special environment variable available in plugin commands that resolves to the absolute path of the plugin directory." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Why it matters:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Purpose" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**File not found errors:**" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 4 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Verify file exists in plugin directory" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Ensure file permissions allow reading/execution" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Check file path is correct relative to plugin root" ] ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 6 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Bash commands automatically handle spaces" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "File references work with spaces in paths" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "No special quoting needed" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Variable not expanding:**" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 2 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Check bash execution is allowed" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Ensure command is loaded from plugin" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Verify syntax is exact: `${CLAUDE_PLUGIN_ROOT}`" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent "**Path with spaces:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 5 ;
+                            oc:sectionTitle "Troubleshooting" ],
+                        [ a oc:Section ;
+                            oc:hasSubsection [ a oc:Section ;
+                                    oc:hasContent [ a oc:Template ;
+                                            oc:blockType "template" ;
+                                            oc:contentOrder 1 ;
+                                            oc:templateContent """---
+description: Run custom linter from plugin
+allowed-tools: Bash(node:*)
+---
+
+Lint results: !`node ${CLAUDE_PLUGIN_ROOT}/bin/lint.js $1`
+
+Review the linting output and suggest fixes.
+""" ;
+                                            oc:templateVariables "CLAUDE_PLUGIN_ROOT" ] ;
+                                    oc:sectionLevel 4 ;
+                                    oc:sectionOrder 1 ;
+                                    oc:sectionTitle "1. Executing Plugin Scripts" ],
+                                [ a oc:Section ;
+                                    oc:hasContent [ a oc:Template ;
+                                            oc:blockType "template" ;
+                                            oc:contentOrder 1 ;
+                                            oc:templateContent """---
+description: Deploy using plugin configuration
+allowed-tools: Read, Bash(*)
+---
+
+Configuration: @${CLAUDE_PLUGIN_ROOT}/config/deploy-config.json
+
+Deploy application using the configuration above for $1 environment.
+""" ;
+                                            oc:templateVariables "CLAUDE_PLUGIN_ROOT" ] ;
+                                    oc:sectionLevel 4 ;
+                                    oc:sectionOrder 2 ;
+                                    oc:sectionTitle "2. Loading Configuration Files" ],
+                                [ a oc:Section ;
+                                    oc:hasContent [ a oc:Template ;
+                                            oc:blockType "template" ;
+                                            oc:contentOrder 1 ;
+                                            oc:templateContent """---
+description: Complete plugin workflow
+allowed-tools: Bash(*), Read
+---
+
+Step 1 - Prepare: !`bash ${CLAUDE_PLUGIN_ROOT}/scripts/prepare.sh $1`
+Step 2 - Config: @${CLAUDE_PLUGIN_ROOT}/config/$1.json
+Step 3 - Execute: !`${CLAUDE_PLUGIN_ROOT}/bin/execute $1`
+
+Review results and report status.
+""" ;
+                                            oc:templateVariables "CLAUDE_PLUGIN_ROOT" ] ;
+                                    oc:sectionLevel 4 ;
+                                    oc:sectionOrder 4 ;
+                                    oc:sectionTitle "4. Multi-Step Plugin Workflows" ],
+                                [ a oc:Section ;
+                                    oc:hasContent [ a oc:Template ;
+                                            oc:blockType "template" ;
+                                            oc:contentOrder 1 ;
+                                            oc:templateContent """---
+description: Generate report from template
+---
+
+Use this template: @${CLAUDE_PLUGIN_ROOT}/templates/api-report.md
+
+Generate a report for @$1 following the template format.
+""" ;
+                                            oc:templateVariables "CLAUDE_PLUGIN_ROOT" ] ;
+                                    oc:sectionLevel 4 ;
+                                    oc:sectionOrder 3 ;
+                                    oc:sectionTitle "3. Accessing Plugin Resources" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Common Patterns" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Reference files within your plugin:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """Run analysis: !`node /path/to/plugins/plugin-name/scripts/analyze.js`
+
+Read template: @/path/to/plugins/plugin-name/templates/report.md
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 4 ;
+                                    oc:sourceLocation "lines 103-107" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Expands to:**" ],
+                                [ a oc:Template ;
+                                    oc:blockType "template" ;
+                                    oc:contentOrder 2 ;
+                                    oc:templateContent """---
+description: Analyze using plugin script
+allowed-tools: Bash(node:*), Read
+---
+
+Run analysis: !`node ${CLAUDE_PLUGIN_ROOT}/scripts/analyze.js`
+
+Read template: @${CLAUDE_PLUGIN_ROOT}/templates/report.md
+""" ;
+                                    oc:templateVariables "CLAUDE_PLUGIN_ROOT" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Basic Usage" ],
+                        [ a oc:Section ;
+                            oc:hasContent _:ref_4ef014f1593f8b68 ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "Best Practices" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "CLAUDE_PLUGIN_ROOT Environment Variable" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**When to use:** Commands that behave differently per environment" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Commands that adapt to environment:" ],
+                                [ a oc:Template ;
+                                    oc:blockType "template" ;
+                                    oc:contentOrder 2 ;
+                                    oc:templateContent """---
+description: Deploy based on environment
+argument-hint: [dev|staging|prod]
+---
+
+Environment config: @${CLAUDE_PLUGIN_ROOT}/config/$1.json
+
+Environment check: !`echo "Deploying to: $1"`
+
+Deploy application using $1 environment configuration.
+Verify deployment and run smoke tests.
+""" ;
+                                    oc:templateVariables "CLAUDE_PLUGIN_ROOT" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "Pattern 4: Environment-Aware Commands" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**When to use:** Complex plugin workflows with multiple steps" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Commands that orchestrate multiple plugin scripts:" ],
+                                [ a oc:Template ;
+                                    oc:blockType "template" ;
+                                    oc:contentOrder 2 ;
+                                    oc:templateContent """---
+description: Complete build and test workflow
+allowed-tools: Bash(*)
+---
+
+Build: !`bash ${CLAUDE_PLUGIN_ROOT}/scripts/build.sh`
+Validate: !`bash ${CLAUDE_PLUGIN_ROOT}/scripts/validate.sh`
+Test: !`bash ${CLAUDE_PLUGIN_ROOT}/scripts/test.sh`
+
+Review all outputs and report:
+1. Build status
+2. Validation results
+3. Test results
+4. Recommended next steps
+""" ;
+                                    oc:templateVariables "CLAUDE_PLUGIN_ROOT" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Pattern 3: Multi-Script Workflow" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Template ;
+                                    oc:blockType "template" ;
+                                    oc:contentOrder 2 ;
+                                    oc:templateContent """---
+description: Deploy using plugin settings
+allowed-tools: Read, Bash(*)
+---
+
+Load configuration: @${CLAUDE_PLUGIN_ROOT}/deploy-config.json
+
+Deploy to $1 environment using:
+1. Configuration settings above
+2. Current git branch: !`git branch --show-current`
+3. Application version: !`cat package.json | grep version`
+
+Execute deployment and monitor progress.
+""" ;
+                                    oc:templateVariables "CLAUDE_PLUGIN_ROOT" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Commands that load plugin-specific configuration:" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**When to use:** Commands that need consistent settings across invocations" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Pattern 1: Configuration-Based Commands" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**When to use:** Commands that need persistent data storage" ],
+                                [ a oc:Template ;
+                                    oc:blockType "template" ;
+                                    oc:contentOrder 2 ;
+                                    oc:templateContent """---
+description: Save analysis results to plugin cache
+allowed-tools: Bash(*), Read, Write
+---
+
+Cache directory: ${CLAUDE_PLUGIN_ROOT}/cache/
+
+Analyze @$1 and save results to cache:
+!`mkdir -p ${CLAUDE_PLUGIN_ROOT}/cache && date > ${CLAUDE_PLUGIN_ROOT}/cache/last-run.txt`
+
+Store analysis for future reference and comparison.
+""" ;
+                                    oc:templateVariables "CLAUDE_PLUGIN_ROOT" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Commands that manage plugin-specific data:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 5 ;
+                            oc:sectionTitle "Pattern 5: Plugin Data Management" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Template ;
+                                    oc:blockType "template" ;
+                                    oc:contentOrder 2 ;
+                                    oc:templateContent """---
+description: Generate documentation from template
+argument-hint: [component-name]
+---
+
+Template: @${CLAUDE_PLUGIN_ROOT}/templates/component-docs.md
+
+Generate documentation for $1 component following the template structure.
+Include:
+- Component purpose and usage
+- API reference
+- Examples
+- Testing guidelines
+""" ;
+                                    oc:templateVariables "CLAUDE_PLUGIN_ROOT" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**When to use:** Standardized output generation" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Commands that use plugin templates:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Pattern 2: Template-Based Generation" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Plugin Command Patterns" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Key points:**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """---
+description: Deep analysis using plugin agent
+argument-hint: [file-path]
+---
+
+Initiate deep code analysis of @$1 using the code-analyzer agent.
+
+The agent will:
+1. Analyze code structure
+2. Identify patterns
+3. Suggest improvements
+4. Generate detailed report
+
+Note: This uses the Task tool to launch the plugin's code-analyzer agent.
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 336-351" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Commands can trigger plugin agents using the Task tool:" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 4 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Agent has access to same plugin resources" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Claude will automatically use Task tool to launch agent" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Agent must be defined in plugin's `agents/` directory" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Invoking Plugin Agents" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Commands that coordinate multiple plugin components:" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**When to use:** Complex workflows leveraging multiple plugin capabilities" ],
+                                [ a oc:Template ;
+                                    oc:blockType "template" ;
+                                    oc:contentOrder 2 ;
+                                    oc:templateContent """---
+description: Comprehensive code review workflow
+argument-hint: [file-path]
+---
+
+File to review: @$1
+
+Execute comprehensive review:
+
+1. **Static Analysis** (via plugin scripts)
+   !`node ${CLAUDE_PLUGIN_ROOT}/scripts/lint.js $1`
+
+2. **Deep Review** (via plugin agent)
+   Launch the code-reviewer agent for detailed analysis.
+
+3. **Best Practices** (via plugin skill)
+   Use the code-standards skill to ensure compliance.
+
+4. **Documentation** (via plugin template)
+   Template: @${CLAUDE_PLUGIN_ROOT}/templates/review-report.md
+
+Generate final report combining all outputs.
+""" ;
+                                    oc:templateVariables "CLAUDE_PLUGIN_ROOT" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "Multi-Component Plugin Commands" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """---
+description: API documentation with best practices
+argument-hint: [api-file]
+---
+
+Document the API in @$1 following our API documentation standards.
+
+Use the api-docs-standards skill to ensure documentation includes:
+- Endpoint descriptions
+- Parameter specifications
+- Response formats
+- Error codes
+- Usage examples
+
+Note: This leverages the plugin's api-docs-standards skill for consistency.
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 362-378" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 4 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Mention skill by name to hint Claude should invoke it" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Skills provide specialized domain knowledge" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Skill must be defined in plugin's `skills/` directory" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Commands can reference plugin skills for specialized knowledge:" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Key points:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Invoking Plugin Skills" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 4 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Document hook interaction in command" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Hooks execute automatically on events" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Commands can prepare state for hooks" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Key points:**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """---
+description: Commit with pre-commit validation
+allowed-tools: Bash(git:*)
+---
+
+Stage changes: !\\`git add $1\\`
+
+Commit changes: !\\`git commit -m "$2"\\`
+
+Note: This commit will trigger the plugin's pre-commit hook for validation.
+Review hook output for any issues.
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 389-401" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Commands can be designed to work with plugin hooks:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Coordinating with Plugin Hooks" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Integration with Plugin Components" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "[Plugin Command Patterns](#plugin-command-patterns)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "[Integration with Plugin Components](#integration-with-plugin-components)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "[Validation Patterns](#validation-patterns)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "[Plugin Command Discovery](#plugin-command-discovery)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "[CLAUDE_PLUGIN_ROOT Environment Variable](#claude_plugin_root-environment-variable)" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Table of Contents" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Key points:**" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 4 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "No manual registration required" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Commands appear in `/help` with \"(plugin:plugin-name)\" label" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "Subdirectories create namespaces" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Commands are discovered at plugin load time" ] ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """plugin-name/
+├── commands/              # Auto-discovered commands
+│   ├── foo.md            # /foo (plugin:plugin-name)
+│   └── bar.md            # /bar (plugin:plugin-name)
+└── plugin.json           # Plugin manifest
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 19-25" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Claude Code automatically discovers commands in plugins using the following locations:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Auto-Discovery" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 4 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Helps organize related commands" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "Use when plugin has 5+ commands" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Shown as \"(plugin:plugin-name:namespace)\" in `/help`" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Subdirectory name becomes namespace" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Organize commands in subdirectories for logical grouping:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """plugin-name/
+└── commands/
+    ├── review/
+    │   ├── security.md    # /security (plugin:plugin-name:review)
+    │   └── style.md       # /style (plugin:plugin-name:review)
+    └── deploy/
+        ├── staging.md     # /staging (plugin:plugin-name:deploy)
+        └── prod.md        # /prod (plugin:plugin-name:deploy)
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 37-46" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Namespace behavior:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Namespaced Plugin Commands" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """Good:
+- /mylyn-sync          (plugin-specific prefix)
+- /analyze-performance (descriptive action)
+- /docker-compose-up   (clear purpose)
+
+Avoid:
+- /test               (conflicts with common name)
+- /run                (too generic)
+- /do-stuff           (not descriptive)
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 4 ;
+                                    oc:sourceLocation "lines 63-73" ],
+                                _:ref_890cadb7907bf2e3,
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Plugin command names should:**" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Examples:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Command Naming Conventions" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Plugin Command Discovery" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Plugin-Specific Command Features Reference" ] ;
+    oc:hasWorkflow _:ref_03cfb1f6de7bce53,
+        _:ref_4ef014f1593f8b68,
+        _:ref_890cadb7907bf2e3,
+        _:ref_eb2035e715861f2d ;
+    oc:impartsKnowledge oc:kn_17d780c0,
+        oc:kn_1814bfc2,
+        oc:kn_24b38ce0,
+        oc:kn_3217086c,
+        oc:kn_36a92d0b,
+        oc:kn_92d3748f,
+        oc:kn_b43848c1,
+        oc:kn_ca22df61,
+        oc:kn_e7da8543,
+        oc:kn_fca3d8f3 ;
+    oc:isUserInvocable false ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "integrate commands with plugin components",
+        "organize plugin commands with namespaces",
+        "reference plugin command features",
+        "use CLAUDE_PLUGIN_ROOT in commands",
+        "validate plugin command inputs" ;
+    oc:yieldsState oc:PluginCommandWritten .
+
+oc:kn_17d780c0 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When referencing any file within a plugin command" ;
+    oc:directiveContent "Always use ${CLAUDE_PLUGIN_ROOT} for all plugin-internal paths — scripts, templates, configuration, and resources — instead of relative paths like ./ which resolve to the current working directory, not the plugin root." ;
+    oc:hasRationale "Relative paths break when the command is invoked from different working directories; CLAUDE_PLUGIN_ROOT ensures portable, installation-agnostic file references." ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_3f4015e1 a oc:KnowledgeNode,
-        oc:WorkflowStrategy ;
-    oc:appliesToContext "When building comprehensive plugin commands that need multiple capabilities" ;
-    oc:directiveContent "Delegate complex multi-step workflows to plugin scripts for execution, agents for deep analysis, skills for domain knowledge, and use templates for standardized output" ;
-    oc:hasRationale "Separation of concerns between scripts (execution), agents (reasoning), skills (knowledge), and templates (formatting) produces maintainable and extensible plugin architectures" ;
+oc:kn_1814bfc2 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing plugin command scope" ;
+    oc:directiveContent "Keep commands focused on one clear purpose. Delegate complex logic to scripts, use agents for multi-step workflows, and reference skills for specialized domain knowledge." ;
+    oc:hasRationale "Focused commands are easier to test, maintain, and compose into larger workflows." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_567f121f a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "Before any plugin command begins its primary operation" ;
-    oc:directiveContent "Validate all inputs early — check required arguments, verify file existence, validate argument formats — before executing the main command logic" ;
-    oc:hasRationale "Early validation prevents confusing downstream errors and provides clear, actionable error messages to the user" ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_d37e82a9 a oc:AntiPattern,
+oc:kn_24b38ce0 a oc:AntiPattern,
         oc:KnowledgeNode ;
     oc:appliesToContext "When naming plugin commands" ;
-    oc:directiveContent "Avoid generic command names like /test, /run, or /do-stuff that conflict with common names or lack descriptive purpose" ;
-    oc:hasRationale "Generic names create conflicts with other plugins and built-in commands, and fail to communicate the command's purpose to users" ;
+    oc:directiveContent "Avoid generic command names like /test, /run, or /do-stuff that conflict with common names or lack descriptiveness. Use hyphenated multi-word names and consider prefixing with the plugin name for uniqueness." ;
+    oc:hasRationale "Generic names cause conflicts with other plugins or built-in commands and make discovery harder in /help listings." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_fd1816ec a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When designing plugin command structure and naming" ;
-    oc:directiveContent "Organize plugin commands in subdirectories for logical grouping when the plugin has 5 or more commands, using the subdirectory name as a namespace" ;
-    oc:hasRationale "Namespacing prevents command name collisions and improves discoverability in /help output with clear grouping" ;
+oc:kn_3217086c a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When building plugin commands end-to-end" ;
+    oc:directiveContent "1. Place .md files in plugin-name/commands/ for auto-discovery. 2. Use ${CLAUDE_PLUGIN_ROOT} for all internal path references. 3. Validate inputs early with bash checks or inline conditionals. 4. Integrate with plugin agents (Task tool), skills (name reference), and hooks (automatic event triggers). 5. Provide graceful error handling with helpful messages and alternatives." ;
+    oc:stepOrder 1 .
+
+oc:kn_36a92d0b a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When writing any plugin command that accepts arguments or depends on files" ;
+    oc:directiveContent "Plugin commands should validate inputs early — check required arguments, verify file existence, and validate argument formats before processing." ;
+    oc:hasRationale "Early validation prevents cryptic errors downstream and provides actionable error messages to users." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_92d3748f a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When troubleshooting plugin command variable expansion failures" ;
+    oc:directiveContent "If CLAUDE_PLUGIN_ROOT is not expanding, verify: (1) the command is loaded from a plugin, (2) bash execution is allowed in allowed-tools, and (3) the syntax is exactly ${CLAUDE_PLUGIN_ROOT} with curly braces." ;
+    oc:hasRationale "These are the three most common causes of variable expansion failure in plugin commands." ;
     oc:severityLevel "MEDIUM" .
+
+oc:kn_b43848c1 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When organizing plugin commands into directories" ;
+    oc:directiveContent "Use subdirectory namespaces when a plugin has 5+ commands to logically group related commands. Subdirectory names become namespaces shown as (plugin:plugin-name:namespace) in /help." ;
+    oc:hasRationale "Namespacing improves discoverability and reduces cognitive load for users browsing available commands." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_ca22df61 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When referencing plugin scripts and templates in command frontmatter" ;
+    oc:codeLanguage "markdown" ;
+    oc:directiveContent """Run analysis: !`node ${CLAUDE_PLUGIN_ROOT}/scripts/analyze.js $1`
+Read template: @${CLAUDE_PLUGIN_ROOT}/templates/report.md""" .
+
+oc:kn_e7da8543 a oc:KnowledgeNode,
+        oc:OutputFormat ;
+    oc:appliesToContext "When authoring a new plugin command" ;
+    oc:directiveContent """---
+description: [action description]
+allowed-tools: [tools]
+argument-hint: [arg-format]
+---
+
+[Command body with ${CLAUDE_PLUGIN_ROOT} references, $1/$2 arguments, and validation]""" ;
+    oc:templateVariables "CLAUDE_PLUGIN_ROOT",
+        "action description",
+        "arg-format",
+        "tools" .
+
+oc:kn_fca3d8f3 a oc:KnowledgeNode,
+        oc:Prerequisite ;
+    oc:appliesToContext "When creating a new plugin command" ;
+    oc:directiveContent "Plugin commands are auto-discovered from the commands/ directory at plugin load time — no manual registration required. Commands appear in /help with the (plugin:plugin-name) label." ;
+    oc:hasRationale "Understanding the auto-discovery mechanism is essential to placing command files correctly." .
+
+_:ref_02968a9386bfc44d a oc:WorkflowStep ;
+    dcterms:description "**Document plugin structure**" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild [ a oc:BulletList ;
+            oc:blockType "bullet_list" ;
+            oc:contentOrder 1 ;
+            oc:hasItem [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 1 ;
+                    oc:itemText "Explain required files" ],
+                [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 3 ;
+                    oc:itemText "Clarify dependencies" ],
+                [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 2 ;
+                    oc:itemText "Document script purposes" ] ] ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_04554fa39b3cc3d0 a oc:WorkflowStep ;
+    dcterms:description "**Validate file existence:**" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild [ a oc:Template ;
+            oc:blockType "template" ;
+            oc:contentOrder 1 ;
+            oc:templateContent """---
+description: Use plugin config if exists
+allowed-tools: Bash(test:*), Read
+---
+
+!`test -f ${CLAUDE_PLUGIN_ROOT}/config.json && echo "exists" || echo "missing"`
+
+If config exists, load it: @${CLAUDE_PLUGIN_ROOT}/config.json
+Otherwise, use defaults...
+""" ;
+            oc:templateVariables "CLAUDE_PLUGIN_ROOT" ] ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_077fb717cef07cbb a oc:WorkflowStep ;
+    dcterms:description "**Combine with arguments:**" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild [ a oc:Template ;
+            oc:blockType "template" ;
+            oc:contentOrder 1 ;
+            oc:templateContent """Run: !`${CLAUDE_PLUGIN_ROOT}/bin/process.sh $1 $2`
+""" ;
+            oc:templateVariables "CLAUDE_PLUGIN_ROOT" ] ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_07b289e4c02eaac6 a oc:BulletItem ;
+    oc:blockType "bullet_item" ;
+    oc:itemOrder 2 ;
+    oc:itemText "Verify file existence" .
+
+_:ref_08765b0d1a550d7c a oc:WorkflowStep ;
+    dcterms:description "**Provide helpful error messages**" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild [ a oc:BulletList ;
+            oc:blockType "bullet_list" ;
+            oc:contentOrder 1 ;
+            oc:hasItem [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 1 ;
+                    oc:itemText "Explain what went wrong" ],
+                [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 3 ;
+                    oc:itemText "Offer alternatives" ],
+                [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 2 ;
+                    oc:itemText "Suggest how to fix" ] ] ;
+    oc:stepId "step_5" ;
+    oc:stepOrder 5 .
+
+_:ref_1121bed91bcce85b a oc:WorkflowStep ;
+    dcterms:description "**Always use for plugin-internal paths:**" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild [ a oc:Template ;
+            oc:blockType "template" ;
+            oc:contentOrder 1 ;
+            oc:templateContent """# Good
+@${CLAUDE_PLUGIN_ROOT}/templates/foo.md
+
+# Bad
+@./templates/foo.md  # Relative to current directory, not plugin
+""" ;
+            oc:templateVariables "CLAUDE_PLUGIN_ROOT" ] ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_159d2eb1cd94997a a oc:BulletList ;
+    oc:blockType "bullet_list" ;
+    oc:contentOrder 1 ;
+    oc:hasItem [ a oc:BulletItem ;
+            oc:blockType "bullet_item" ;
+            oc:itemOrder 2 ;
+            oc:itemText "Test with different arguments" ],
+        [ a oc:BulletItem ;
+            oc:blockType "bullet_item" ;
+            oc:itemOrder 1 ;
+            oc:itemText "Verify paths work everywhere" ],
+        [ a oc:BulletItem ;
+            oc:blockType "bullet_item" ;
+            oc:itemOrder 3 ;
+            oc:itemText "Validate error cases" ] .
+
+_:ref_1919c0ba1d993bd1 a oc:WorkflowStep ;
+    dcterms:description "**Use ${CLAUDE_PLUGIN_ROOT} for all plugin-internal paths**" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild [ a oc:BulletList ;
+            oc:blockType "bullet_list" ;
+            oc:contentOrder 1 ;
+            oc:hasItem [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 1 ;
+                    oc:itemText "Scripts, templates, configuration, resources" ] ] ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_1aaf9e5a49c81ab2 a oc:BulletItem ;
+    oc:blockType "bullet_item" ;
+    oc:itemOrder 2 ;
+    oc:itemText "Invalid arguments" .
+
+_:ref_1bac362cb748dcba a oc:WorkflowStep ;
+    dcterms:description "Script-based validation" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_20e4db653e99c7d1 a oc:WorkflowStep ;
+    dcterms:description "Avoid conflicts with common command names" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_2144d05abd52a724 a oc:BulletList ;
+    oc:blockType "bullet_list" ;
+    oc:contentOrder 1 ;
+    oc:hasItem [ a oc:BulletItem ;
+            oc:blockType "bullet_item" ;
+            oc:itemOrder 1 ;
+            oc:itemText "One clear purpose per command" ],
+        [ a oc:BulletItem ;
+            oc:blockType "bullet_item" ;
+            oc:itemOrder 3 ;
+            oc:itemText "Use agents for multi-step workflows" ],
+        [ a oc:BulletItem ;
+            oc:blockType "bullet_item" ;
+            oc:itemOrder 2 ;
+            oc:itemText "Delegate complex logic to scripts" ] .
+
+_:ref_265cd57aa9b094ef a oc:WorkflowStep ;
+    dcterms:description "Use hyphens for multi-word names" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_319f853c7c0ad141 a oc:BulletItem ;
+    oc:blockType "bullet_item" ;
+    oc:itemOrder 3 ;
+    oc:itemText "Validate argument formats" .
+
+_:ref_4abda777e65cc071 a oc:WorkflowStep ;
+    dcterms:description "Inline validation in prompt" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_4e0298184953bb83 a oc:WorkflowStep ;
+    dcterms:description "Be descriptive and action-oriented" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_4f9a47dc6d9de8fe a oc:WorkflowStep ;
+    dcterms:description "**Handle edge cases**" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild [ a oc:BulletList ;
+            oc:blockType "bullet_list" ;
+            oc:contentOrder 1 ;
+            oc:hasItem _:ref_1aaf9e5a49c81ab2,
+                [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 3 ;
+                    oc:itemText "Failed script execution" ],
+                [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 4 ;
+                    oc:itemText "Missing dependencies" ],
+                [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 1 ;
+                    oc:itemText "Missing files" ] ] ;
+    oc:stepId "step_6" ;
+    oc:stepOrder 6 .
+
+_:ref_502cc385b1886239 a oc:WorkflowStep ;
+    dcterms:description "**Keep commands focused**" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild _:ref_2144d05abd52a724 ;
+    oc:stepId "step_7" ;
+    oc:stepOrder 7 .
+
+_:ref_5bb182bf5117a782 a oc:WorkflowStep ;
+    dcterms:description "**Validate inputs early**" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild [ a oc:BulletList ;
+            oc:blockType "bullet_list" ;
+            oc:contentOrder 1 ;
+            oc:hasItem _:ref_07b289e4c02eaac6,
+                _:ref_319f853c7c0ad141,
+                [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 1 ;
+                    oc:itemText "Check required arguments" ] ] ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_62fbce0eaf9fab6b a oc:BulletList ;
+    oc:blockType "bullet_list" ;
+    oc:contentOrder 1 ;
+    oc:hasItem [ a oc:BulletItem ;
+            oc:blockType "bullet_item" ;
+            oc:itemOrder 3 ;
+            oc:itemText "Coordinate with hooks when relevant" ],
+        [ a oc:BulletItem ;
+            oc:blockType "bullet_item" ;
+            oc:itemOrder 2 ;
+            oc:itemText "Use skills for specialized knowledge" ],
+        [ a oc:BulletItem ;
+            oc:blockType "bullet_item" ;
+            oc:itemOrder 1 ;
+            oc:itemText "Reference agents for complex tasks" ] .
+
+_:ref_7a58265b8f530be2 a oc:WorkflowStep ;
+    dcterms:description "**Integrate with plugin components**" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild _:ref_62fbce0eaf9fab6b ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_86076869fb0aef58 a oc:WorkflowStep ;
+    dcterms:description "Bash validation using grep/test" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_a301babd784989b6 a oc:Template ;
+    oc:blockType "template" ;
+    oc:contentOrder 1 ;
+    oc:templateContent """<!--
+Plugin structure:
+${CLAUDE_PLUGIN_ROOT}/
+├── scripts/analyze.js  (analysis script)
+├── templates/          (report templates)
+└── config/             (configuration files)
+-->
+""" ;
+    oc:templateVariables "CLAUDE_PLUGIN_ROOT" .
+
+_:ref_a358cffa6132637f a oc:WorkflowStep ;
+    dcterms:description "Consider prefixing with plugin name for uniqueness" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_b6916204d1e3e847 a oc:WorkflowStep ;
+    dcterms:description "**Test across installations**" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild _:ref_159d2eb1cd94997a ;
+    oc:stepId "step_8" ;
+    oc:stepOrder 8 .
+
+_:ref_e2cec67e41c43e1f a oc:WorkflowStep ;
+    dcterms:description "**Document plugin file structure:**" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild _:ref_a301babd784989b6 ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_03cfb1f6de7bce53 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 1 ;
+    oc:hasStep _:ref_02968a9386bfc44d,
+        _:ref_08765b0d1a550d7c,
+        _:ref_1919c0ba1d993bd1,
+        _:ref_4f9a47dc6d9de8fe,
+        _:ref_502cc385b1886239,
+        _:ref_5bb182bf5117a782,
+        _:ref_7a58265b8f530be2,
+        _:ref_b6916204d1e3e847 ;
+    oc:workflowId "procedure_1" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_4ef014f1593f8b68 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 1 ;
+    oc:hasStep _:ref_04554fa39b3cc3d0,
+        _:ref_077fb717cef07cbb,
+        _:ref_1121bed91bcce85b,
+        _:ref_e2cec67e41c43e1f ;
+    oc:workflowId "procedure_1" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_890cadb7907bf2e3 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 2 ;
+    oc:hasStep _:ref_20e4db653e99c7d1,
+        _:ref_265cd57aa9b094ef,
+        _:ref_4e0298184953bb83,
+        _:ref_a358cffa6132637f ;
+    oc:workflowId "procedure_2" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_eb2035e715861f2d a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 4 ;
+    oc:hasStep _:ref_1bac362cb748dcba,
+        _:ref_4abda777e65cc071,
+        _:ref_86076869fb0aef58 ;
+    oc:workflowId "procedure_4" ;
+    oc:workflowName "Ordered Procedure" .
 

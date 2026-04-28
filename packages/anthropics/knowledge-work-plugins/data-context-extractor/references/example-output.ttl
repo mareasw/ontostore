@@ -4,60 +4,331 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_knowledge_work_plugins_data_context_extractor_example_output a oc:DeclarativeSkill,
+oc:skill_knowledge_work_plugins_data_context_extractor_example_output a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "example-output" ;
-    skos:broader "Example artifact" ;
+    skos:broader "Reference example" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/knowledge-work-plugins/data-context-extractor" ;
     oc:contentHash "b19e188ed03d9417ff1136187944a6f9125c7da40b6ecb22abe096edd985932e" ;
-    oc:differentia "Demonstrates the expected structure and content of a generated data analysis skill after bootstrap completion, using a fictional e-commerce company as the reference model" ;
-    oc:extends oc:skill_anthropics_knowledge_work_plugins_data_context_extractor ;
-    oc:hasCategory "research" ;
-    oc:impartsKnowledge oc:kn_093b52a0,
-        oc:kn_5e2a3900,
-        oc:kn_6538453b,
-        oc:kn_c607150a,
-        oc:kn_f547d3c9 ;
+    oc:differentia "Demonstrates the expected output format and structure of a generated company-specific data analysis skill using a fictional ShopCo e-commerce company on Snowflake" ;
+    oc:extends oc:skill_knowledge_work_plugins_data_context_extractor ;
+    oc:hasCategory "document" ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "This is an example of what a generated skill looks like after the bootstrap process. This example is for a fictional e-commerce company called \"ShopCo\" using Snowflake." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """---
+name: shopco-data-analyst
+description: "ShopCo data analysis skill for Snowflake. Provides context for querying e-commerce data including customer, order, and product analytics. Use when analyzing ShopCo data for: (1) Revenue and order metrics, (2) Customer behavior and retention, (3) Product performance, or any data questions requiring ShopCo-specific context."
+---
+
+# ShopCo Data Analysis
+
+## SQL Dialect: Snowflake
+
+- **Table references**: `SHOPCO_DW.SCHEMA.TABLE` or with quotes for case-sensitive: `"Column_Name"`
+- **Safe division**: `DIV0(a, b)` returns 0, `DIV0NULL(a, b)` returns NULL
+- **Date functions**:
+  - `DATE_TRUNC('MONTH', date_col)`
+  - `DATEADD(DAY, -1, date_col)`
+  - `DATEDIFF(DAY, start_date, end_date)`
+- **Column exclusion**: `SELECT * EXCLUDE (column_to_exclude)`
+
+---
+
+## Entity Disambiguation
+
+**"Customer" can mean:**
+- **User**: A login account that can browse and save items (CORE.DIM_USERS: user_id)
+- **Customer**: A user who has made at least one purchase (CORE.DIM_CUSTOMERS: customer_id)
+- **Account**: A billing entity, can have multiple users in B2B (CORE.DIM_ACCOUNTS: account_id)
+
+**Relationships:**
+- User → Customer: 1:1 (customer_id = user_id for purchasers)
+- Account → User: 1:many (join on account_id)
+
+---
+
+## Business Terminology
+
+| Term | Definition | Notes |
+|------|------------|-------|
+| GMV | Gross Merchandise Value - total order value before returns/discounts | Use for top-line reporting |
+| NMV | Net Merchandise Value - GMV minus returns and discounts | Use for actual revenue |
+| AOV | Average Order Value - NMV / order count | Exclude $0 orders |
+| LTV | Lifetime Value - total NMV per customer since first order | Rolling calc, updates daily |
+| CAC | Customer Acquisition Cost - marketing spend / new customers | By cohort month |
+
+---
+
+## Standard Filters
+
+Always apply these filters unless explicitly told otherwise:
+
+```sql
+-- Exclude test and internal orders
+WHERE order_status != 'TEST'
+  AND customer_type != 'INTERNAL'
+  AND is_employee_order = FALSE
+
+-- Exclude cancelled orders for revenue metrics
+  AND order_status NOT IN ('CANCELLED', 'FRAUDULENT')
+""" ;
+                            oc:codeLanguage "markdown" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 9-66" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Example SKILL.md" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """SELECT
+    DATE_TRUNC('DAY', order_timestamp) AS order_date,
+    channel,
+    SUM(order_total_gross) AS gmv,
+    COUNT(DISTINCT order_id) AS order_count
+FROM SHOPCO_DW.CORE.FCT_ORDERS
+WHERE order_status NOT IN ('TEST', 'CANCELLED', 'FRAUDULENT')
+  AND order_timestamp >= DATEADD(DAY, -30, CURRENT_DATE())
+GROUP BY 1, 2
+ORDER BY 1 DESC, 3 DESC
+""" ;
+                                    oc:codeLanguage "sql" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 100-111" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Daily GMV by Channel" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """WITH cohorts AS (
+    SELECT
+        customer_id,
+        DATE_TRUNC('MONTH', first_order_date) AS cohort_month
+    FROM SHOPCO_DW.CORE.DIM_CUSTOMERS
+)
+SELECT
+    c.cohort_month,
+    DATEDIFF(MONTH, c.cohort_month, DATE_TRUNC('MONTH', o.order_timestamp)) AS months_since_first,
+    COUNT(DISTINCT c.customer_id) AS active_customers
+FROM cohorts c
+JOIN SHOPCO_DW.CORE.FCT_ORDERS o ON c.customer_id = o.customer_id
+WHERE o.order_status NOT IN ('TEST', 'CANCELLED')
+GROUP BY 1, 2
+ORDER BY 1, 2
+""" ;
+                                    oc:codeLanguage "sql" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 114-130" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """
+---
+
+This example demonstrates:
+- Complete frontmatter with triggering description
+- Dialect-specific SQL notes
+- Clear entity disambiguation
+- Terminology glossary
+- Standard filters as copy-paste SQL
+- Metric definitions with formulas
+- Navigation to reference files
+- Real, runnable query examples
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 3 ;
+                                    oc:sourceLocation "lines 186-198" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """
+---
+
+## Example references/orders.md
+
+```markdown
+# Orders Tables
+
+Order and transaction data for ShopCo.
+
+---
+
+## Key Tables
+
+### FCT_ORDERS
+**Location**: `SHOPCO_DW.CORE.FCT_ORDERS`
+**Description**: Fact table of all orders. One row per order.
+**Primary Key**: `order_id`
+**Update Frequency**: Hourly (15 min lag)
+**Partitioned By**: `order_date`
+
+| Column | Type | Description | Notes |
+|--------|------|-------------|-------|
+| **order_id** | VARCHAR | Unique order identifier | |
+| **customer_id** | VARCHAR | FK to DIM_CUSTOMERS | NULL for guest checkout |
+| **order_timestamp** | TIMESTAMP_NTZ | When order was placed | UTC |
+| **order_date** | DATE | Date portion of order_timestamp | Partition column |
+| **order_status** | VARCHAR | Current status | PENDING, SHIPPED, DELIVERED, CANCELLED, RETURNED |
+| **channel** | VARCHAR | Acquisition channel | WEB, APP, MARKETPLACE |
+| **order_total_gross** | DECIMAL(12,2) | Pre-discount total | |
+| **discount_amount** | DECIMAL(12,2) | Total discounts applied | |
+| **return_amount** | DECIMAL(12,2) | Value of returned items | Updates async |
+
+**Relationships**:
+- Joins to `DIM_CUSTOMERS` on `customer_id`
+- Parent of `FCT_ORDER_ITEMS` via `order_id`
+
+---
+
+## Sample Queries
+
+### Orders with Returns Rate
+```sql
+SELECT
+    DATE_TRUNC('WEEK', order_date) AS week,
+    COUNT(*) AS total_orders,
+    SUM(CASE WHEN return_amount > 0 THEN 1 ELSE 0 END) AS orders_with_returns,
+    DIV0(SUM(CASE WHEN return_amount > 0 THEN 1 ELSE 0 END), COUNT(*)) AS return_rate
+FROM SHOPCO_DW.CORE.FCT_ORDERS
+WHERE order_status NOT IN ('TEST', 'CANCELLED')
+  AND order_date >= DATEADD(MONTH, -3, CURRENT_DATE())
+GROUP BY 1
+ORDER BY 1
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 131-185" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Customer Cohort Retention" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Common Query Patterns" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 1 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "**Caveats**: Returns can occur up to 90 days post-order; use settled_revenue for finalized numbers" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "**Definition**: Actual revenue after returns and discounts" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "**Source**: `CORE.FCT_ORDERS`" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "**Formula**: `SUM(order_total_gross - return_amount - discount_amount)`" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Net Revenue" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 1 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "**Formula**: `SUM(order_total_gross)`" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 5 ;
+                                            oc:itemText "**Caveats**: Includes orders that may later be cancelled or returned" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "**Definition**: Total value of all orders placed" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "**Time grain**: Daily, aggregated to weekly/monthly" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "**Source**: `CORE.FCT_ORDERS.order_total_gross`" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Gross Merchandise Value (GMV)" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Key Metrics" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 1 ;
+                            oc:rowCount 3 ;
+                            oc:tableCaption "## Knowledge Base Navigation" ;
+                            oc:tableMarkdown """| Domain | Reference File | Use For |
+|--------|----------------|---------|
+| Orders | `references/orders.md` | Order tables, GMV/NMV calculations |
+| Customers | `references/customers.md` | User/customer entities, LTV, cohorts |
+| Products | `references/products.md` | Catalog, inventory, categories |
+""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Knowledge Base Navigation" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Example: Generated Skill" ] ;
+    oc:impartsKnowledge oc:kn_0298afb6,
+        oc:kn_0f4a749b,
+        oc:kn_221bcacf,
+        oc:kn_5c554340,
+        oc:kn_d5032fa0 ;
     oc:isUserInvocable false ;
     oc:nature "Work" ;
-    oc:requiresState oc:SkillGenerated ;
-    oc:resolvesIntent "understand expected skill structure",
-        "validate generated skill quality",
-        "visualize generated skill output" ;
-    oc:yieldsState oc:ExampleOutputReviewed .
+    oc:resolvesIntent "see sample data context skill",
+        "understand skill output format",
+        "view example generated skill" .
 
-oc:kn_093b52a0 a oc:Heuristic,
+oc:kn_0298afb6 a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When capturing tribal knowledge during the bootstrap process" ;
-    oc:directiveContent "Always document entity disambiguation (e.g., 'Customer' vs 'User' vs 'Account') with the specific table and ID field for each meaning." ;
-    oc:hasRationale "Ambiguous entity terms are the most common source of incorrect joins and misleading metrics in data analysis" ;
+    oc:appliesToContext "When writing sample SQL queries for a generated skill" ;
+    oc:directiveContent "All sample queries in a generated skill must use real table and column names, correct dialect-specific syntax, and include standard filters — they must be runnable as-is." ;
+    oc:hasRationale "Non-runnable examples are useless as copy-paste templates and mislead the agent about actual schema structure." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_5e2a3900 a oc:AntiPattern,
+oc:kn_0f4a749b a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When packaging and delivering a generated skill" ;
-    oc:directiveContent "Never leave unfilled placeholders like [PLACEHOLDER] or [COMPANY] in the final generated skill output." ;
-    oc:hasRationale "Unfilled placeholders indicate incomplete extraction and will confuse the agent using the skill, leading to generic or incorrect SQL" ;
+    oc:appliesToContext "When generating a new data analysis skill" ;
+    oc:directiveContent "Generated skills must include complete frontmatter (name, description), SQL dialect-specific notes, entity disambiguation, terminology glossary, standard filter SQL, metric definitions with formulas, navigation to reference files, and runnable query examples." ;
+    oc:hasRationale "These sections collectively provide the agent with sufficient context to query the warehouse accurately without hallucinating table names or business logic." .
+
+oc:kn_221bcacf a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When documenting standard exclusions for a generated skill" ;
+    oc:codeLanguage "sql" ;
+    oc:directiveContent """Standard filters should be documented as copy-paste SQL snippets that can be directly injected into WHERE clauses:
+```sql
+WHERE order_status != 'TEST'
+  AND customer_type != 'INTERNAL'
+  AND is_employee_order = FALSE
+  AND order_status NOT IN ('CANCELLED', 'FRAUDULENT')
+```""" ;
+    oc:hasRationale "Concrete SQL snippets eliminate ambiguity about which filters to apply and ensure consistency across queries." .
+
+oc:kn_5c554340 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When documenting ambiguous business terms like 'customer', 'user', or 'account'" ;
+    oc:directiveContent "Entity disambiguation should list each meaning with its table, ID field, and relationship cardinality (e.g., User → Customer: 1:1, Account → User: 1:many)." ;
+    oc:hasRationale "E-commerce and SaaS businesses commonly overload terms; without explicit disambiguation, agents will join wrong tables or misinterpret queries." .
+
+oc:kn_d5032fa0 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When generating skill files from templates" ;
+    oc:directiveContent "Never leave [PLACEHOLDER] text in the generated skill — every placeholder must be replaced with company-specific values during generation." ;
+    oc:hasRationale "Unfilled placeholders indicate incomplete extraction and produce a non-functional skill that will confuse the agent." ;
     oc:severityLevel "CRITICAL" .
-
-oc:kn_6538453b a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When generating or validating a data analysis skill" ;
-    oc:directiveContent "Generated skills must include complete frontmatter, dialect-specific SQL notes, entity disambiguation, terminology glossary, standard filters as runnable SQL, metric definitions with formulas, navigation to reference files, and real runnable query examples." ;
-    oc:hasRationale "These components collectively ensure the generated skill provides enough company-specific context for accurate SQL generation and data analysis" ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_c607150a a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When writing sample queries for generated skills" ;
-    oc:directiveContent "Sample queries must use real table and column names from the discovered schema, not generic placeholders like [TABLE_NAME]." ;
-    oc:hasRationale "Generic queries are not actionable; real table references let analysts copy-paste and iterate directly" ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_f547d3c9 a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "When documenting standard filters in generated skills" ;
-    oc:directiveContent "Standard exclusion filters (test data, internal users, cancelled orders) should be documented as copy-paste SQL snippets that apply by default unless explicitly overridden." ;
-    oc:hasRationale "Default filters prevent accidental inclusion of non-production data in analytics, which is the most common mistake new analysts make" ;
-    oc:severityLevel "MEDIUM" .
 

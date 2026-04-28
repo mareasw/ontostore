@@ -4,64 +4,310 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_plugin_official_build_mcp_server_resources_and_prompts a oc:DeclarativeSkill,
+oc:skill_claude_plugin_official_build_mcp_server_resources_and_prompts a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "resources-and-prompts" ;
-    skos:broader "MCP server primitive guide" ;
+    skos:broader "MCP server primitive" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/build-mcp-server" ;
     oc:contentHash "90537efcaf329ead6cabe42ab197412d39eb8401b6d1d734bf329f8a78cf8a60" ;
-    oc:differentia "explains Resources and Prompts as application-controlled and user-controlled primitives complementary to Tools, with implementation patterns in TypeScript and Python" ;
-    oc:extends oc:skill_anthropics_claude_plugin_official_build_mcp_server ;
-    oc:hasArgumentHint "N/A — conceptual guidance sub-skill, no direct arguments" ;
+    oc:dependsOnSkill oc:skill_ontoskills_build_mcp_server ;
+    oc:differentia "that provides application-controlled data access (Resources) and user-controlled message templates (Prompts) as alternatives to tool-based interactions" ;
+    oc:extends oc:skill_claude_plugin_official_build_mcp_server ;
+    oc:handlesFailure oc:InvalidInput ;
+    oc:hasArgumentHint "resource or prompt type to implement" ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_244d0f81,
-        oc:kn_4f97bda6,
-        oc:kn_883c4736,
-        oc:kn_d0559401,
-        oc:kn_f81951cd ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 3 ;
+                    oc:textContent "Most servers only need tools. Reach for these when the shape of your integration doesn't fit \"Claude calls a function.\"" ],
+                [ a oc:BulletList ;
+                    oc:blockType "bullet_list" ;
+                    oc:contentOrder 2 ;
+                    oc:hasItem [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 1 ;
+                            oc:itemText "**Resources** are application-controlled — the host decides what to pull into context" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 2 ;
+                            oc:itemText "**Prompts** are user-controlled — surfaced as slash commands or menu items" ] ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "MCP defines three server-side primitives. Tools are model-controlled (Claude decides when to call them). The other two are different:" ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "A resource is data identified by a URI. Unlike a tool, it's not *called* — it's *read*. The host browses available resources and decides which to load into context." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**When a resource beats a tool:**" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 5 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "The operation has side effects" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "The result depends on parameters Claude chooses" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "You want Claude (not the host UI) to decide when to pull it in" ] ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 3 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Content that changes independently of conversation (log files, live data)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Large reference data (docs, schemas, configs) that Claude should be able to browse" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Anything where \"Claude decides to fetch\" is the wrong mental model" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "**When a tool is better:**" ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """import { ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
+
+server.registerResource(
+  "file",
+  new ResourceTemplate("file:///{path}", { list: undefined }),
+  { name: "File", description: "Read a file from the workspace" },
+  async (uri, { path }) => ({
+    contents: [{ uri: uri.href, text: await fs.readFile(path, "utf8") }],
+  }),
+);
+""" ;
+                                    oc:codeLanguage "typescript" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 52-63" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """@mcp.resource("file:///{path}")
+def read_file(path: str) -> str:
+    return Path(path).read_text()
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 3 ;
+                                    oc:sourceLocation "lines 65-69" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "RFC 6570 templates let one registration serve many URIs:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Dynamic resources (URI templates)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Resources can notify the client when they change. Declare `subscribe: true` in capabilities, then emit `notifications/resources/updated`. The host re-reads. Useful for log tails, live dashboards, watched files." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Subscriptions" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """// TypeScript SDK
+server.registerResource(
+  "config",
+  "config://app/settings",
+  { name: "App Settings", description: "Current configuration", mimeType: "application/json" },
+  async (uri) => ({
+    contents: [{ uri: uri.href, mimeType: "application/json", text: JSON.stringify(config) }],
+  }),
+);
+""" ;
+                                    oc:codeLanguage "typescript" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 28-38" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# fastmcp
+@mcp.resource("config://app/settings")
+def get_settings() -> str:
+    \"\"\"Current application configuration.\"\"\"
+    return json.dumps(config)
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 40-46" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Static resources" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Resources" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 6 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "No side effects — the handler just builds a message, it doesn't *do* anything" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Arguments are **string-only** (no numbers, booleans, objects) — convert inside the handler" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Returns a `messages[]` array — can include embedded resources/images, not just text" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent "**Constraints:**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**When to use:** canned workflows users run repeatedly — `/summarize-thread`, `/draft-reply`, `/explain-error`. Near-zero code, high UX leverage." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "A prompt is a parameterized message template. The host surfaces it as a slash command or menu item. The user picks it, fills in arguments, and the resulting messages land in the conversation." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """@mcp.prompt
+def summarize(text: str, max_words: str = "100") -> str:
+    \"\"\"Generate a concise summary of the given text.\"\"\"
+    return f"Summarize in {max_words} words:\\n\\n{text}"
+""" ;
+                            oc:codeLanguage "python" ;
+                            oc:contentOrder 4 ;
+                            oc:sourceLocation "lines 100-105" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """server.registerPrompt(
+  "summarize",
+  {
+    title: "Summarize document",
+    description: "Generate a concise summary of the given text",
+    argsSchema: { text: z.string(), max_words: z.string().optional() },
+  },
+  ({ text, max_words }) => ({
+    messages: [{
+      role: "user",
+      content: { type: "text", text: `Summarize in ${max_words ?? "100"} words:\\n\\n${text}` },
+    }],
+  }),
+);
+""" ;
+                            oc:codeLanguage "typescript" ;
+                            oc:contentOrder 3 ;
+                            oc:sourceLocation "lines 83-98" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Prompts" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 1 ;
+                            oc:rowCount 5 ;
+                            oc:tableCaption "## Quick decision table" ;
+                            oc:tableMarkdown """| You want to... | Use |
+|---|---|
+| Let Claude fetch something on demand, with parameters | **Tool** |
+| Expose browsable context (files, docs, schemas) | **Resource** |
+| Expose a dynamic family of things (`db://{table}`) | **Resource template** |
+| Give users a one-click workflow | **Prompt** |
+| Ask the user something mid-tool | **Elicitation** (see `elicitation.md`) |
+""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Quick decision table" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Resources & Prompts — the other two primitives" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "Guide for adding Resources or Prompts to an MCP server after tools are defined" ;
+            oc:hasStep [ a oc:WorkflowStep ;
+                    dcterms:description "Verify the resource is browsable via the host or the prompt appears as a slash command" ;
+                    oc:expectedOutcome "Resource data is readable or prompt messages render correctly" ;
+                    oc:stepDependsOn _:ref_47cb3a778ffda075 ;
+                    oc:stepId "test-integration" ],
+                _:ref_47cb3a778ffda075,
+                _:ref_d652f7c82efe2b7f ;
+            oc:workflowId "resources-and-prompts-implementation" ;
+            oc:workflowName "Implement MCP Resources and Prompts" ] ;
+    oc:impartsKnowledge oc:kn_0c72799a,
+        oc:kn_57fec472,
+        oc:kn_9127e773,
+        oc:kn_9f4998e0,
+        oc:kn_d17614cf,
+        oc:kn_e677b8a4 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
     oc:requiresState oc:EnvironmentReady ;
     oc:resolvesIntent "add prompts to MCP server",
         "add resources to MCP server",
-        "decide between tools resources and prompts",
-        "expose browsable data via MCP resources",
-        "implement MCP prompt handlers",
-        "implement MCP resource templates" ;
+        "create dynamic resource templates",
+        "create slash command prompts",
+        "decide between tools resources and prompts in MCP" ;
     oc:yieldsState oc:DocumentCreated .
 
-oc:kn_244d0f81 a oc:DesignPrinciple,
+oc:kn_0c72799a a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When exposing multiple similar data items as resources" ;
+    oc:directiveContent "For dynamic resource families (e.g., db://{table}), use RFC 6570 URI templates so one registration serves many URIs instead of registering each individually." ;
+    oc:hasRationale "URI templates reduce boilerplate and handle dynamic sets of resources that can't be enumerated at registration time" .
+
+oc:kn_57fec472 a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When choosing between MCP Tools, Resources, and Prompts" ;
-    oc:directiveContent "Use Resources for large reference data, content that changes independently of conversation, or when 'Claude decides to fetch' is the wrong mental model. Use Tools for side effects, parameterized results, or when Claude should decide when to pull data in." ;
-    oc:hasRationale "MCP defines three primitives with different control models: Tools are model-controlled, Resources are application-controlled (host decides), and Prompts are user-controlled. Picking the right primitive ensures the integration follows MCP's intended interaction patterns." ;
+    oc:appliesToContext "When planning an MCP server's feature set" ;
+    oc:directiveContent "Most MCP servers only need tools. Reach for Resources and Prompts only when the integration shape doesn't fit 'Claude calls a function.'" ;
+    oc:hasRationale "Over-engineering with all three primitives adds complexity without value for simple integrations" .
+
+oc:kn_9127e773 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When deciding which MCP primitive to implement for a given feature" ;
+    oc:directiveContent "Resources are application-controlled (host decides when to read them), Prompts are user-controlled (surfaced as slash commands), Tools are model-controlled (Claude decides when to call). Choose the primitive whose control model matches your integration shape." ;
+    oc:hasRationale "Using the wrong primitive creates awkward UX — e.g., putting browsable docs behind a tool means Claude must guess when to fetch them" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_4f97bda6 a oc:Heuristic,
+oc:kn_9f4998e0 a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When exposing dynamic families of data as MCP Resources" ;
-    oc:directiveContent "Use URI templates (RFC 6570) to let one resource registration serve many dynamic URIs, e.g. file:///{path} or db://{table}." ;
-    oc:hasRationale "URI templates reduce boilerplate and provide a clean, RESTful pattern for parameterized resource access without registering each URI individually." ;
-    oc:severityLevel "MEDIUM" .
+    oc:appliesToContext "When implementing MCP Prompts" ;
+    oc:directiveContent "Prompt arguments are string-only — no numbers, booleans, or objects. Convert types inside the handler." ;
+    oc:hasRationale "The MCP spec restricts prompt arguments to strings for simplicity and cross-platform compatibility" ;
+    oc:severityLevel "CRITICAL" .
 
-oc:kn_883c4736 a oc:DesignPrinciple,
+oc:kn_d17614cf a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When architecting an MCP server's surface area" ;
-    oc:directiveContent "Use Resources for browsable context (files, docs, schemas, log tails, live dashboards), Resource templates for dynamic URI families, Prompts for one-click user workflows, and Tools for on-demand parameterized fetching." ;
-    oc:hasRationale "The quick decision table maps intent to the correct primitive, preventing misuse like using Tools for static reference data or Prompts for side-effect operations." ;
-    oc:severityLevel "MEDIUM" .
+    oc:appliesToContext "When choosing between Resources and Tools" ;
+    oc:directiveContent "Use Resources for: large reference data, content that changes independently of conversation, anything where 'Claude decides to fetch' is wrong. Use Tools for: operations with side effects, parameterized results, or when Claude should decide when to pull data." ;
+    oc:hasRationale "Resources are read by the host UI, not called by the model — they fit passive data exposure patterns" .
 
-oc:kn_d0559401 a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When planning an MCP server implementation" ;
-    oc:directiveContent "Most MCP servers only need tools. Only reach for Resources or Prompts when the shape of your integration doesn't fit 'Claude calls a function.'" ;
-    oc:hasRationale "Over-engineering with all three primitives adds complexity. Tools cover the majority of integration patterns; Resources and Prompts address specific UX gaps." ;
-    oc:severityLevel "LOW" .
-
-oc:kn_f81951cd a oc:KnowledgeNode,
+oc:kn_e677b8a4 a oc:KnowledgeNode,
         oc:Standard ;
-    oc:appliesToContext "When implementing MCP Prompt handlers" ;
-    oc:directiveContent "Prompt arguments are string-only — no numbers, booleans, or objects. Convert types inside the handler. Prompts must return a messages[] array and must not have side effects." ;
-    oc:hasRationale "The MCP spec constrains prompt arguments to strings for simplicity and interoperability. Side-effect-free handlers ensure prompts are safe reusable templates." ;
+    oc:appliesToContext "When writing prompt handlers" ;
+    oc:directiveContent "Prompts must have no side effects — the handler only builds a message array, it does not perform actions." ;
+    oc:hasRationale "Prompts are user-triggered templates, not actions; side effects would violate the user-controlled interaction model" ;
     oc:severityLevel "HIGH" .
+
+_:ref_47cb3a778ffda075 a oc:WorkflowStep ;
+    dcterms:description "Implement using the appropriate SDK pattern: static resource, URI template for dynamic resources, or parameterized prompt handler" ;
+    oc:expectedOutcome "Working resource or prompt registered with the MCP server" ;
+    oc:stepDependsOn _:ref_d652f7c82efe2b7f ;
+    oc:stepId "implement-resource-or-prompt" .
+
+_:ref_d652f7c82efe2b7f a oc:WorkflowStep ;
+    dcterms:description "Decide whether the feature needs a Resource (browsable data), Prompt (user workflow), or Tool (model-controlled action) using the decision table" ;
+    oc:expectedOutcome "Correct primitive type selected based on control model and data shape" ;
+    oc:stepId "decide-primitive" .
 

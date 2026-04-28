@@ -4,126 +4,562 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_plugin_official_build_mcpb a oc:DeclarativeSkill,
+oc:skill_claude_plugin_official_build_mcpb a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "build-mcpb" ;
-    skos:broader "MCP server packaging skill" ;
-    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/build-mcpb" ;
+    skos:broader "Packaging tool" ;
+    prov:wasDerivedFrom "../.agents/skills/anthropics/claude-plugin-official/build-mcpb" ;
     oc:contentHash "83861aaf52440ebc702913c36e09448c7e1f6ef894cd6546764972353fa6fff2" ;
-    oc:differentia "bundles a local MCP server with its runtime into a single .mcpb file that runs without requiring Node/Python on the user's machine" ;
-    oc:extends oc:skill_build_mcp_server ;
-    oc:handlesFailure oc:FileNotFound,
-        oc:InvalidInput,
+    oc:differentia "Bundles a local MCP server with its runtime into a single installable .mcpb file that runs without requiring Node, Python, or any toolchain on the user's machine" ;
+    oc:extends oc:skill_ontoskills_build_mcp_server ;
+    oc:handlesFailure oc:InvalidInput,
         oc:PermissionDenied ;
-    oc:hasArgumentHint "MCP server project directory or description of server to package" ;
+    oc:hasArgumentHint "MCP server project directory to package" ;
     oc:hasCategory "development" ;
     oc:hasDescription "This skill should be used when the user wants to \"package an MCP server\", \"bundle an MCP\", \"make an MCPB\", \"ship a local MCP server\", \"distribute a local MCP\", discusses \".mcpb files\", mentions bundling a Node or Python runtime with their MCP server, or needs an MCP server that interacts with the local filesystem, desktop apps, or OS and must be installable without the user having Node/Python set up." ;
     oc:hasName "build-mcpb" ;
-    oc:hasRequirement oc:req_0d5277c6,
-        oc:req_2a24a66a,
-        oc:req_6a8d4711,
-        oc:req_cd3dedd1,
-        oc:req_db4fb765 ;
-    oc:impartsKnowledge oc:kn_0293b663,
-        oc:kn_128a52b4,
-        oc:kn_4aeffbe9,
-        oc:kn_57cd1da6,
-        oc:kn_8475e823,
-        oc:kn_a33fc686,
-        oc:kn_acfa9b2a,
-        oc:kn_d21efcb0,
-        oc:kn_fa5df396 ;
+    oc:hasRequirement oc:req_62808ad2,
+        oc:req_7f8ac735,
+        oc:req_8aa98dda,
+        oc:req_c3b94eef ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Use MCPB when the server must run on the user's machine** — reading local files, driving a desktop app, talking to localhost services, OS-level APIs. If your server only hits cloud APIs, you almost certainly want a remote HTTP server instead (see `build-mcp-server`). Don't pay the MCPB packaging tax for something that could be a URL." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "MCPB is a local MCP server **packaged with its runtime**. The user installs one file; it runs without needing Node, Python, or any toolchain on their machine. It's the sanctioned way to distribute local MCP servers." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """my-server.mcpb              (zip archive)
+├── manifest.json           ← identity, entry point, config schema, compatibility
+├── server/                 ← your MCP server code
+│   ├── index.js
+│   └── node_modules/       ← bundled dependencies (or vendored)
+└── icon.png
+""" ;
+                            oc:codeLanguage "" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 17-24" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "The host reads `manifest.json`, launches `server.mcp_config.command` as a **stdio** MCP server, and pipes messages. From your code's perspective it's identical to a local stdio server — the only difference is packaging." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "What an MCPB bundle contains" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**`server.type`** — `node`, `python`, or `binary`. Informational; the actual launch comes from `mcp_config`." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """{
+  "$schema": "https://raw.githubusercontent.com/anthropics/mcpb/main/schemas/mcpb-manifest-v0.4.schema.json",
+  "manifest_version": "0.4",
+  "name": "local-files",
+  "version": "0.1.0",
+  "description": "Read, search, and watch files on the local filesystem.",
+  "author": { "name": "Your Name" },
+  "server": {
+    "type": "node",
+    "entry_point": "server/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/server/index.js"],
+      "env": {
+        "ROOT_DIR": "${user_config.rootDir}"
+      }
+    }
+  },
+  "user_config": {
+    "rootDir": {
+      "type": "directory",
+      "title": "Root directory",
+      "description": "Directory to expose. Defaults to ~/Documents.",
+      "default": "${HOME}/Documents",
+      "required": true
+    }
+  },
+  "compatibility": {
+    "claude_desktop": ">=1.0.0",
+    "platforms": ["darwin", "win32", "linux"]
+  }
+}
+""" ;
+                            oc:codeLanguage "json" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 32-65" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**`server.mcp_config`** — the literal command/args/env to spawn. Use `${__dirname}` for bundle-relative paths and `${user_config.<key>}` to substitute install-time config. **There's no auto-prefix** — the env var names your server reads are exactly what you put in `env`." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "**`user_config`** — install-time settings surfaced in the host's UI. `type: \"directory\"` renders a native folder picker. `sensitive: true` stores in OS keychain. See `references/manifest-schema.md` for all fields." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Manifest" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "The server itself is a standard stdio MCP server. Nothing MCPB-specific in the tool logic." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "Before hardcoding `ROOT` from a config env var, check if the host supports `roots/list` — the spec-native way to get user-approved directories. See `references/local-security.md` for the pattern." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { z } from "zod";
+import { readFile, readdir } from "node:fs/promises";
+import { join } from "node:path";
+import { homedir } from "node:os";
+
+// ROOT_DIR comes from what you put in manifest's server.mcp_config.env — no auto-prefix
+const ROOT = (process.env.ROOT_DIR ?? join(homedir(), "Documents"));
+
+const server = new McpServer({ name: "local-files", version: "0.1.0" });
+
+server.registerTool(
+  "list_files",
+  {
+    description: "List files in a directory under the configured root.",
+    inputSchema: { path: z.string().default(".") },
+    annotations: { readOnlyHint: true },
+  },
+  async ({ path }) => {
+    const entries = await readdir(join(ROOT, path), { withFileTypes: true });
+    const list = entries.map(e => ({ name: e.name, dir: e.isDirectory() }));
+    return { content: [{ type: "text", text: JSON.stringify(list, null, 2) }] };
+  },
+);
+
+server.registerTool(
+  "read_file",
+  {
+    description: "Read a file's contents. Path is relative to the configured root.",
+    inputSchema: { path: z.string() },
+    annotations: { readOnlyHint: true },
+  },
+  async ({ path }) => {
+    const text = await readFile(join(ROOT, path), "utf8");
+    return { content: [{ type: "text", text }] };
+  },
+);
+
+const transport = new StdioServerTransport();
+await server.connect(transport);
+""" ;
+                            oc:codeLanguage "typescript" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 79-121" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Sandboxing is entirely your job.** There is no manifest-level sandbox — the process runs with full user privileges. Validate paths, refuse to escape `ROOT`, allowlist spawns. See `references/local-security.md`." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Server code: same as local stdio" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# Interactive manifest creation (first time)
+npx @anthropic-ai/mcpb init
+
+# Run the server directly over stdio, poke it with the inspector
+npx @modelcontextprotocol/inspector node server/index.js
+
+# Validate manifest against schema, then pack
+npx @anthropic-ai/mcpb validate
+npx @anthropic-ai/mcpb pack
+
+# Sign for distribution
+npx @anthropic-ai/mcpb sign dist/local-files.mcpb
+
+# Install: drag the .mcpb file onto Claude Desktop
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 173-188" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "Test on a machine **without** your dev toolchain before shipping. \"Works on my machine\" failures in MCPB almost always trace to a dependency that wasn't actually bundled." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 7 ;
+                    oc:sectionTitle "Testing" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """pip install -t server/vendor -r requirements.txt
+npx @anthropic-ai/mcpb pack
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 144-147" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "Vendor dependencies into a subdirectory and prepend it to `sys.path` in your entry script. Native extensions (numpy, etc.) must be built for each target platform — avoid native deps if you can." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Python" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """npm install
+npx esbuild src/index.ts --bundle --platform=node --outfile=server/index.js
+# or: copy node_modules wholesale if native deps resist bundling
+npx @anthropic-ai/mcpb pack
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 133-138" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "`mcpb pack` zips the directory and validates `manifest.json` against the schema." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Node" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Build pipeline" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "`references/local-security.md` — path traversal, sandboxing, least privilege" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "`references/manifest-schema.md` — full `manifest.json` field reference" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 8 ;
+                    oc:sectionTitle "Reference files" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "MCPB servers can serve UI resources exactly like remote MCP apps — the widget mechanism is transport-agnostic. A local file picker that browses the actual disk, a dialog that controls a native app, etc." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "Widget authoring is covered in the **`build-mcp-app`** skill; it works the same here. The only difference is where the server runs." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "MCPB + UI widgets" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "If your server's only job is hitting a cloud API, stop — that's a remote server wearing an MCPB costume. The user gains nothing from running it locally, and you're taking on local-security burden for no reason." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Unlike mobile app stores, MCPB does NOT enforce permissions. The manifest has no `permissions` block — the server runs with full user privileges. `references/local-security.md` is mandatory reading, not optional. Every path must be validated, every spawn must be allowlisted, because nothing stops you at the platform level." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "If you came here expecting filesystem/network scoping from the manifest: it doesn't exist. Build it yourself in tool handlers." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "MCPB has no sandbox — security is on you" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Build an MCPB (Bundled Local MCP Server)" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """name: build-mcpb
+description: This skill should be used when the user wants to "package an MCP server", "bundle an MCP", "make an MCPB", "ship a local MCP server", "distribute a local MCP", discusses ".mcpb files", mentions bundling a Node or Python runtime with their MCP server, or needs an MCP server that interacts with the local filesystem, desktop apps, or OS and must be installable without the user having Node/Python set up.
+version: 0.1.0
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "Complete workflow for packaging a Python MCP server into an MCPB file" ;
+            oc:hasStep [ a oc:WorkflowStep ;
+                    dcterms:description "Test on target platforms. Avoid native extensions (numpy, etc.) or build for each platform separately" ;
+                    oc:expectedOutcome "Server works on all target platforms without dependency issues" ;
+                    oc:stepDependsOn _:ref_bf3af98aa6fdaaee ;
+                    oc:stepId "test-cross-platform" ],
+                _:ref_5a0bdc71a36b55ff,
+                _:ref_a84589dce357219d,
+                _:ref_b2270331c0720471,
+                _:ref_bf3af98aa6fdaaee ;
+            oc:workflowId "build-mcpb-python" ;
+            oc:workflowName "Build Python MCPB Bundle" ],
+        [ a oc:Workflow ;
+            dcterms:description "Complete workflow for packaging a Node.js MCP server into an MCPB file" ;
+            oc:hasStep [ a oc:WorkflowStep ;
+                    dcterms:description "Run: npx @anthropic-ai/mcpb sign dist/my-server.mcpb to sign for distribution" ;
+                    oc:expectedOutcome "Signed .mcpb file ready for distribution" ;
+                    oc:stepDependsOn _:ref_f84cfc5fb9a85238 ;
+                    oc:stepId "sign" ],
+                _:ref_23e787c8aba711e7,
+                _:ref_3b2c828d27489cb2,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Add path traversal protection (resolve + relative containment), command injection prevention (array-args only), and resource limits" ;
+                    oc:expectedOutcome "Every tool handler validates inputs against adversarial patterns" ;
+                    oc:stepDependsOn _:ref_f02f0b47117aad70 ;
+                    oc:stepId "implement-security" ],
+                _:ref_ba0aae34fc363330,
+                _:ref_edbd735e23d17422,
+                _:ref_f02f0b47117aad70,
+                _:ref_f84cfc5fb9a85238 ;
+            oc:workflowId "build-mcpb-node" ;
+            oc:workflowName "Build Node MCPB Bundle" ] ;
+    oc:impartsKnowledge oc:kn_0caaa8d2,
+        oc:kn_16c93561,
+        oc:kn_1afa3a58,
+        oc:kn_38ccac35,
+        oc:kn_3f4dea1e,
+        oc:kn_5bf1fd7d,
+        oc:kn_652d748c,
+        oc:kn_6ec1cbd1,
+        oc:kn_83ceff33,
+        oc:kn_9236687c,
+        oc:kn_97f72e8a,
+        oc:kn_9f6e7337,
+        oc:kn_ad43b25a,
+        oc:kn_b55be86e,
+        oc:kn_cd5a7f2f,
+        oc:kn_deedf3c4 ;
     oc:isUserInvocable true ;
     oc:nature "Work" ;
-    oc:requiresState oc:DirectoryWritable,
-        oc:EnvironmentReady ;
-    oc:resolvesIntent "build a local MCP server installable without toolchain setup",
-        "bundle an MCP server with its runtime for local distribution",
-        "create a manifest.json for an MCPB package",
-        "distribute a local MCP server as a single file",
-        "package an MCP server into a .mcpb bundle" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "build a local MCP server that runs without toolchain setup",
+        "bundle an MCP server with its runtime",
+        "create a distributable .mcpb file",
+        "package an MCP server into an MCPB bundle" ;
     oc:yieldsState oc:DocumentCreated .
 
-oc:kn_0293b663 a oc:KnowledgeNode,
-        oc:RecoveryTactic ;
-    oc:appliesToContext "After building and before distributing an MCPB package" ;
-    oc:directiveContent "Test the final .mcpb on a machine WITHOUT your dev toolchain before shipping. 'Works on my machine' failures in MCPB almost always trace to a dependency that wasn't actually bundled." ;
-    oc:hasRationale "Bundled dependencies may have transitive native extensions or platform-specific binaries that appear to work locally but fail on clean machines." ;
-    oc:severityLevel "HIGH" .
+oc:kn_0caaa8d2 a oc:KnowledgeNode,
+        oc:OutputFormat ;
+    oc:appliesToContext "When creating a manifest.json for an MCPB bundle" ;
+    oc:directiveContent """{
+  "$schema": "https://raw.githubusercontent.com/anthropics/mcpb/main/schemas/mcpb-manifest-v0.4.schema.json",
+  "manifest_version": "0.4",
+  "name": "{package-name}",
+  "version": "{semver}",
+  "description": "{one-line summary}",
+  "author": { "name": "{author}" },
+  "server": {
+    "type": "{node|python|binary}",
+    "entry_point": "server/index.js",
+    "mcp_config": {
+      "command": "{runtime}",
+      "args": ["${__dirname}/server/index.js"],
+      "env": { "{ENV_VAR}": "${user_config.{key}}" }
+    }
+  },
+  "user_config": { ... },
+  "compatibility": { "platforms": ["darwin", "win32", "linux"] }
+}""" ;
+    oc:templateVariables "ENV_VAR",
+        "author",
+        "key",
+        "node|python|binary",
+        "one-line summary",
+        "package-name",
+        "runtime",
+        "semver" .
 
-oc:kn_128a52b4 a oc:DesignPrinciple,
+oc:kn_16c93561 a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When designing the tool surface for an MCPB server" ;
-    oc:directiveContent "Split read and write tools into separate MCP tools. Mark read tools with readOnlyHint: true and destructive tools with destructiveHint: true. Consider not shipping delete tools at all." ;
-    oc:hasRationale "Read-only tools cannot be weaponized regardless of prompt injection. Tool annotations let hosts auto-approve reads and confirm destructive operations, reducing the blast radius of compromised calls." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_4aeffbe9 a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "When any tool accepts a file path parameter joined to a root directory" ;
-    oc:directiveContent "Always validate paths using resolve and relative checks (not String.includes) to prevent traversal attacks. Use the safeJoin pattern: resolve the full path, compute relative path from root, reject if it starts with '..' or is absolute." ;
-    oc:hasRationale "Simple string checks miss encoded traversals and symlink-based escapes. The resolve+relative pattern normalizes all edge cases." ;
+    oc:appliesToContext "Always when building MCPB servers" ;
+    oc:directiveContent "MCPB has NO sandbox, NO permissions block, NO filesystem/network scoping. The server process runs with full user privileges. You must build all security boundaries yourself in tool handlers." ;
+    oc:hasRationale "Unlike mobile app stores, there is no platform-level enforcement. Prompt-injected inputs can make Claude call tools with unintended arguments." ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_57cd1da6 a oc:Constraint,
+oc:kn_1afa3a58 a oc:Command,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When configuring the server.mcp_config.env section of manifest.json" ;
-    oc:directiveContent "There is no auto-prefix for environment variables. The env var names your server reads are exactly what you declare in manifest server.mcp_config.env. Use ${user_config.KEY} for install-time substitution and ${__dirname} for bundle-relative paths." ;
-    oc:hasRationale "Developers often expect a convention like MCPB_CONFIG_* auto-prefixing. The manifest uses exact env var names, so misalignment between manifest env and server code silently yields undefined values." ;
-    oc:severityLevel "HIGH" .
+    oc:appliesToContext "When bundling Node.js server code for MCPB packaging" ;
+    oc:directiveContent "npx esbuild src/index.ts --bundle --platform=node --outfile=server/index.js" .
 
-oc:kn_8475e823 a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "When any MCPB tool spawns a child process" ;
-    oc:directiveContent "Never use exec() or shell=True for spawning processes. Always use execFile with array-args to prevent command injection from user-controlled inputs." ;
-    oc:hasRationale "Shell interpolation of user input is the #1 command injection vector. Array-arg APIs bypass shell parsing entirely." ;
+oc:kn_38ccac35 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When building an MCPB from scratch" ;
+    oc:directiveContent "1. Create manifest.json with server config, user_config, and compatibility 2. Write stdio MCP server code (standard MCP SDK) 3. Validate every path parameter through containment check (resolve + relative) 4. Bundle dependencies (esbuild for Node, pip -t for Python) 5. Run npx @anthropic-ai/mcpb validate 6. Run npx @anthropic-ai/mcpb pack 7. Test on a machine WITHOUT your dev toolchain" ;
+    oc:hasRationale "Order ensures manifest validity, security, proper bundling, and real-world compatibility" ;
+    oc:severityLevel "HIGH" ;
+    oc:stepOrder 1 .
+
+oc:kn_3f4dea1e a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When accepting path parameters in any MCPB tool handler" ;
+    oc:codeLanguage "typescript" ;
+    oc:directiveContent """function safeJoin(root: string, userPath: string): string {
+  const full = resolve(root, userPath);
+  const rel = relative(root, full);
+  if (rel.startsWith('..') || isAbsolute(rel)) {
+    throw new Error(`Path escapes root: ${userPath}`);
+  }
+  return full;
+}""" ;
+    oc:hasRationale "resolve() normalizes .., symlink segments; relative() detects root escape. String.includes('..') misses encoded and symlink-based escapes." .
+
+oc:kn_5bf1fd7d a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When spawning processes in MCPB tool handlers" ;
+    oc:directiveContent "Never pass user input through a shell (exec(), shell=True). Always use array-args (execFile, subprocess with array argv). Validate flags against an allowlist." ;
+    oc:hasRationale "Shell injection allows arbitrary command execution with full user privileges" ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_a33fc686 a oc:AntiPattern,
+oc:kn_652d748c a oc:Command,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When vendoring Python dependencies for MCPB packaging" ;
+    oc:directiveContent "pip install -t server/vendor -r requirements.txt" .
+
+oc:kn_6ec1cbd1 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When determining allowed filesystem paths" ;
+    oc:directiveContent "Before hardcoding ROOT from a config env var, check if the host supports roots/list — the spec-native way to get user-approved directories. Fall back to config env var only if roots are unavailable." ;
+    oc:hasRationale "Using the host's roots mechanism gives user-controlled boundaries rather than hardcoded assumptions" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_83ceff33 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing MCPB tool interfaces" ;
+    oc:directiveContent "Split read and write into separate tools. Make read-only tools the default with readOnlyHint: true. Put destructiveHint: true on delete/overwrite tools. Consider not shipping delete tools at all." ;
+    oc:hasRationale "Read-only tools can't be weaponized into data loss regardless of what Claude is tricked into calling" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_9236687c a oc:Command,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When building and packaging the MCPB bundle after code is ready" ;
+    oc:directiveContent "npx @anthropic-ai/mcpb validate && npx @anthropic-ai/mcpb pack" .
+
+oc:kn_97f72e8a a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When configuring server.mcp_config in manifest.json" ;
+    oc:directiveContent "There are no auto-prefixed env vars. The env var names your server reads are exactly what you declare in server.mcp_config.env. Use ${__dirname} for bundle-relative paths and ${user_config.KEY} for install-time config." ;
+    oc:hasRationale "No MCPB_CONFIG_* convention exists; explicit wiring prevents confusion about where config values come from" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_9f6e7337 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before running npx @anthropic-ai/mcpb pack" ;
+    oc:directiveContent "Before shipping: every path parameter goes through containment check, no exec()/shell=True, write/delete split from read tools, size caps on reads, secrets never logged or returned, tested with adversarial inputs (../../etc/passwd, ; rm -rf ~, 10GB file)." ;
+    oc:hasRationale "Security checklist prevents common local MCP server vulnerabilities from reaching users" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_ad43b25a a oc:AntiPattern,
         oc:KnowledgeNode ;
     oc:appliesToContext "When deciding whether to build an MCPB vs a remote MCP server" ;
-    oc:directiveContent "Do NOT use MCPB for servers that only hit cloud APIs — those should be remote HTTP MCP servers. MCPB is exclusively for servers that must run on the user's machine (filesystem, desktop apps, localhost services, OS APIs)." ;
-    oc:hasRationale "Packaging a cloud-only server as MCPB adds local-security burden for zero user benefit — the user gains nothing from running it locally." ;
+    oc:directiveContent "Do NOT use MCPB packaging for servers that only hit cloud APIs — use a remote HTTP MCP server instead. MCPB is for servers that must run locally (filesystem, desktop apps, localhost services, OS APIs)." ;
+    oc:hasRationale "MCPB adds packaging complexity and local-security burden that is unnecessary for cloud-only servers" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_acfa9b2a a oc:Heuristic,
+oc:kn_b55be86e a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "Before distributing an MCPB file" ;
+    oc:directiveContent "'Works on my machine' failures in MCPB almost always trace to a dependency that wasn't actually bundled. Test on a clean machine without your dev toolchain before shipping." ;
+    oc:hasRationale "Native dependencies or unbundled packages cause runtime failures that are invisible in development" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_cd5a7f2f a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When any tool returns file contents, directory listings, or search results" ;
-    oc:directiveContent "Cap all unbounded outputs: file reads to ~1MB, directory listing counts, and search result matches. Return truncated content with a size notice rather than unbounded payloads." ;
-    oc:hasRationale "Claude will request arbitrarily large files. Uncapped reads cause memory spikes, slow responses, and chat transcript bloat." ;
+    oc:appliesToContext "When implementing tool handlers that read files or list directories" ;
+    oc:directiveContent "Cap file reads, directory listings, and search results. Never return unbounded data — Claude will happily ask to read a 4GB log file." ;
+    oc:hasRationale "Uncapped reads cause memory exhaustion and degrade the chat experience with enormous outputs" ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_d21efcb0 a oc:KnowledgeNode,
+oc:kn_deedf3c4 a oc:KnowledgeNode,
         oc:SecurityImplication ;
-    oc:appliesToContext "When writing any MCPB server tool handler that interacts with the filesystem, spawns processes, or handles user input" ;
-    oc:directiveContent "MCPB has NO sandbox or permissions block — the server process runs with full user privileges. Every path must be validated with resolve+containment checks, every spawned process must be allowlisted, and tool inputs must be treated as untrusted." ;
-    oc:hasRationale "Prompt injection can cause the AI to call tools with malicious arguments. Without platform-level sandboxing, tool handlers are the only defense against path traversal, command injection, and data exfiltration." ;
-    oc:severityLevel "CRITICAL" .
+    oc:appliesToContext "When handling API keys and other sensitive config values" ;
+    oc:directiveContent "Config secrets (sensitive: true in user_config) are stored in OS keychain but delivered via env var. Never log them or include them in tool results — tool results flow into the chat transcript." ;
+    oc:hasRationale "Chat transcripts are visible to users and log exports, creating secret exposure risk" ;
+    oc:severityLevel "HIGH" .
 
-oc:kn_fa5df396 a oc:Idempotency,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When determining which directories an MCPB server may access" ;
-    oc:directiveContent "Use roots/list from the MCP spec to get user-approved workspace boundaries instead of hardcoding a ROOT directory from config. Fall back to config only if the host doesn't support roots." ;
-    oc:hasRationale "roots/list is the spec-native mechanism for workspace boundaries — it respects the host's permission model and user choices rather than assuming a hardcoded path." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:req_0d5277c6 a oc:RequirementKnowledge ;
+oc:req_62808ad2 a oc:RequirementTool ;
     oc:isOptional false ;
-    oc:requirementValue "manifest.json schema v0.4" .
+    oc:requirementValue "npx @anthropic-ai/mcpb CLI" .
 
-oc:req_2a24a66a a oc:RequirementTool ;
+oc:req_7f8ac735 a oc:RequirementKnowledge ;
     oc:isOptional false ;
-    oc:requirementValue "npx @anthropic-ai/mcpb" .
+    oc:requirementValue "MCP stdio server protocol" .
 
-oc:req_6a8d4711 a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "MCP protocol and stdio transport" .
+oc:req_8aa98dda a oc:RequirementTool ;
+    oc:isOptional true ;
+    oc:requirementValue "esbuild (for Node bundling)" .
 
-oc:req_cd3dedd1 a oc:RequirementKnowledge ;
+oc:req_c3b94eef a oc:RequirementTool ;
     oc:isOptional false ;
-    oc:requirementValue "Local MCP security best practices" .
+    oc:requirementValue "Node.js runtime for MCPB CLI" .
 
-oc:req_db4fb765 a oc:RequirementTool ;
-    oc:isOptional false ;
-    oc:requirementValue "node" .
+_:ref_23e787c8aba711e7 a oc:WorkflowStep ;
+    dcterms:description "Run: npx @anthropic-ai/mcpb validate to check manifest against schema" ;
+    oc:expectedOutcome "Validation passes with no errors" ;
+    oc:stepDependsOn _:ref_3b2c828d27489cb2,
+        _:ref_edbd735e23d17422 ;
+    oc:stepId "validate" .
+
+_:ref_3b2c828d27489cb2 a oc:WorkflowStep ;
+    dcterms:description "Run: npx esbuild src/index.ts --bundle --platform=node --outfile=server/index.js (or copy node_modules if native deps resist bundling)" ;
+    oc:expectedOutcome "Self-contained server/index.js with all dependencies bundled" ;
+    oc:stepDependsOn _:ref_f02f0b47117aad70 ;
+    oc:stepId "bundle-deps" .
+
+_:ref_5a0bdc71a36b55ff a oc:WorkflowStep ;
+    dcterms:description "Write stdio MCP server code with security-hardened tool handlers" ;
+    oc:expectedOutcome "Python MCP stdio server with path validation and resource limits" ;
+    oc:stepDependsOn _:ref_a84589dce357219d ;
+    oc:stepId "write-server-py" .
+
+_:ref_b2270331c0720471 a oc:WorkflowStep ;
+    dcterms:description "Run: pip install -t server/vendor -r requirements.txt and prepend vendor to sys.path in entry script" ;
+    oc:expectedOutcome "All Python dependencies vendored into bundle directory" ;
+    oc:stepDependsOn _:ref_5a0bdc71a36b55ff ;
+    oc:stepId "vendor-deps" .
+
+_:ref_ba0aae34fc363330 a oc:WorkflowStep ;
+    dcterms:description "Run: npx @anthropic-ai/mcpb pack to create the .mcpb zip archive" ;
+    oc:expectedOutcome "my-server.mcpb file created in dist/" ;
+    oc:stepDependsOn _:ref_23e787c8aba711e7 ;
+    oc:stepId "pack" .
+
+_:ref_bf3af98aa6fdaaee a oc:WorkflowStep ;
+    dcterms:description "Run: npx @anthropic-ai/mcpb validate && npx @anthropic-ai/mcpb pack" ;
+    oc:expectedOutcome "Validated and packaged .mcpb file" ;
+    oc:stepDependsOn _:ref_a84589dce357219d,
+        _:ref_b2270331c0720471 ;
+    oc:stepId "validate-pack-py" .
+
+_:ref_f84cfc5fb9a85238 a oc:WorkflowStep ;
+    dcterms:description "Test on a machine WITHOUT the dev toolchain. Run inspector: npx @modelcontextprotocol/inspector node server/index.js" ;
+    oc:expectedOutcome "Server launches and responds correctly without missing dependencies" ;
+    oc:stepDependsOn _:ref_ba0aae34fc363330 ;
+    oc:stepId "test-clean" .
+
+_:ref_a84589dce357219d a oc:WorkflowStep ;
+    dcterms:description "Create manifest.json with server.type='python' and appropriate entry_point and mcp_config" ;
+    oc:expectedOutcome "Valid manifest.json for Python server" ;
+    oc:stepId "create-manifest-py" .
+
+_:ref_edbd735e23d17422 a oc:WorkflowStep ;
+    dcterms:description "Create manifest.json with name, version, server config (type, entry_point, mcp_config), user_config, and compatibility" ;
+    oc:expectedOutcome "Valid manifest.json with correct schema reference and all required fields" ;
+    oc:stepId "create-manifest" .
+
+_:ref_f02f0b47117aad70 a oc:WorkflowStep ;
+    dcterms:description "Write stdio MCP server code with tool handlers that validate paths, cap resource sizes, and split read/write operations" ;
+    oc:expectedOutcome "Standard MCP stdio server using @modelcontextprotocol/sdk" ;
+    oc:stepDependsOn _:ref_edbd735e23d17422 ;
+    oc:stepId "write-server" .
 

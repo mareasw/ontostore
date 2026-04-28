@@ -4,68 +4,1509 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_knowledge_work_plugins_build_dashboard a oc:DeclarativeSkill,
+oc:skill_knowledge_work_plugins_build_dashboard a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "build-dashboard" ;
-    skos:broader "HTML dashboard generator" ;
-    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/knowledge-work-plugins/build-dashboard" ;
+    skos:broader "Dashboard generator" ;
+    prov:wasDerivedFrom "../.agents/skills/anthropics/knowledge-work-plugins/build-dashboard" ;
     oc:contentHash "24fdc018c0dada6cb1631bd52376ccdf1408eb99fd699febaf1489dc92602d80" ;
-    oc:differentia "produces self-contained, browser-openable interactive dashboards with charts, filters, KPI cards, and data tables using Chart.js, requiring no server or external dependencies" ;
+    oc:differentia "produces self-contained HTML files with embedded Chart.js, KPI cards, filters, and sortable tables that open directly in a browser without any server or dependencies" ;
     oc:handlesFailure oc:DataNotFound,
         oc:InvalidInput ;
-    oc:hasAllowedTool "Bash",
-        "Write" ;
     oc:hasArgumentHint "\"<description> [data source]\"" ;
     oc:hasCategory "document" ;
     oc:hasDescription "Build an interactive HTML dashboard with charts, filters, and tables. Use when creating an executive overview with KPI cards, turning query results into a shareable self-contained report, building a team monitoring snapshot, or needing multiple charts with filters in one browser-openable file." ;
     oc:hasName "build-dashboard" ;
-    oc:impartsKnowledge oc:kn_0d29e2bd,
-        oc:kn_4ce16f97,
-        oc:kn_955d033d,
-        oc:kn_bfcbdf5e,
-        oc:kn_c2aed237 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """name: build-dashboard
+description: Build an interactive HTML dashboard with charts, filters, and tables. Use when creating an executive overview with KPI cards, turning query results into a shareable self-contained report, building a team monitoring snapshot, or needing multiple charts with filters in one browser-openable file.
+argument-hint: "<description> [data source]"
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "Build a self-contained interactive HTML dashboard with charts, filters, tables, and professional styling. Opens directly in a browser -- no server or dependencies required." ],
+                [ a oc:BlockQuote ;
+                    oc:blockType "blockquote" ;
+                    oc:contentOrder 1 ;
+                    oc:quoteContent "If you see unfamiliar placeholders or need to check which tools are connected, see [CONNECTORS.md](../../CONNECTORS.md)." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """function createBarChart(canvasId, labels, data, options = {}) {
+    const ctx = document.getElementById(canvasId).getContext('2d');
+    const isHorizontal = options.horizontal || labels.length > 8;
+
+    return new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: options.label || 'Value',
+                data: data,
+                backgroundColor: options.colors || COLORS.map(c => c + 'CC'),
+                borderColor: options.colors || COLORS,
+                borderWidth: 1,
+                borderRadius: 4,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: isHorizontal ? 'y' : 'x',
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return formatValue(context.parsed[isHorizontal ? 'x' : 'y'], options.format || 'number');
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    grid: { display: isHorizontal },
+                    ticks: isHorizontal ? {
+                        callback: function(value) {
+                            return formatValue(value, options.format || 'number');
+                        }
+                    } : {}
+                },
+                y: {
+                    beginAtZero: !isHorizontal,
+                    grid: { display: !isHorizontal },
+                    ticks: !isHorizontal ? {
+                        callback: function(value) {
+                            return formatValue(value, options.format || 'number');
+                        }
+                    } : {}
+                }
+            }
+        }
+    });
+}
+""" ;
+                                    oc:codeLanguage "javascript" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 329-384" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 16 ;
+                            oc:sectionTitle "Bar Chart" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """function createDoughnutChart(canvasId, labels, data) {
+    const ctx = document.getElementById(canvasId).getContext('2d');
+    return new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: COLORS.map(c => c + 'CC'),
+                borderColor: '#ffffff',
+                borderWidth: 2,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '60%',
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: { usePointStyle: true, padding: 15 }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const pct = ((context.parsed / total) * 100).toFixed(1);
+                            return `${context.label}: ${formatValue(context.parsed, 'number')} (${pct}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+""" ;
+                                    oc:codeLanguage "javascript" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 388-424" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 17 ;
+                            oc:sectionTitle "Doughnut Chart" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """<div class="chart-container">
+    <h3 class="chart-title">Monthly Revenue Trend</h3>
+    <canvas id="revenue-chart"></canvas>
+</div>
+""" ;
+                                    oc:codeLanguage "html" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 261-266" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 14 ;
+                            oc:sectionTitle "Chart Container Pattern" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """function updateChart(chart, newLabels, newData) {
+    chart.data.labels = newLabels;
+
+    if (Array.isArray(newData[0])) {
+        // Multiple datasets
+        newData.forEach((data, i) => {
+            chart.data.datasets[i].data = data;
+        });
+    } else {
+        chart.data.datasets[0].data = newData;
+    }
+
+    chart.update('none'); // 'none' disables animation for instant update
+}
+""" ;
+                                    oc:codeLanguage "javascript" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 428-443" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 18 ;
+                            oc:sectionTitle "Updating Charts on Filter Change" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """function createLineChart(canvasId, labels, datasets) {
+    const ctx = document.getElementById(canvasId).getContext('2d');
+    return new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: datasets.map((ds, i) => ({
+                label: ds.label,
+                data: ds.data,
+                borderColor: COLORS[i % COLORS.length],
+                backgroundColor: COLORS[i % COLORS.length] + '20',
+                borderWidth: 2,
+                fill: ds.fill || false,
+                tension: 0.3,
+                pointRadius: 3,
+                pointHoverRadius: 6,
+            }))
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: { usePointStyle: true, padding: 20 }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.dataset.label}: ${formatValue(context.parsed.y, 'currency')}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false }
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return formatValue(value, 'currency');
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+""" ;
+                                    oc:codeLanguage "javascript" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 270-325" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 15 ;
+                            oc:sectionTitle "Line Chart" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 13 ;
+                    oc:sectionTitle "Chart.js Integration" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "You can request a specific color scheme to match your brand" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Request \"dark mode\" or \"presentation mode\" for different styling" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Dashboards are fully self-contained HTML files -- share them with anyone by sending the file" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "For real-time dashboards, consider connecting to a BI tool instead. These dashboards are point-in-time snapshots" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 38 ;
+                    oc:sectionTitle "Tips" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Every dashboard follows this structure:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Title</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1" integrity="sha384-jb8JQMbMoBUzgWatfe6COACi2ljcDdZQ2OxczGA3bGNeWe+6DChMTBJemed7ZnvJ" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0" integrity="sha384-cVMg8E3QFwTvGCDuK+ET4PD341jF3W8nO1auiXfuZNQkzbUUiBGLsIQUE+b1mxws" crossorigin="anonymous"></script>
+    <style>
+        /* Dashboard styles go here */
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <header class="dashboard-header">
+            <h1>Dashboard Title</h1>
+            <div class="filters">
+                <!-- Filter controls -->
+            </div>
+        </header>
+
+        <section class="kpi-row">
+            <!-- KPI cards -->
+        </section>
+
+        <section class="chart-row">
+            <!-- Chart containers -->
+        </section>
+
+        <section class="table-section">
+            <!-- Data table -->
+        </section>
+
+        <footer class="dashboard-footer">
+            <span>Data as of: <span id="data-date"></span></span>
+        </footer>
+    </div>
+
+    <script>
+        // Embedded data
+        const DATA = [];
+
+        // Dashboard logic
+        class Dashboard {
+            constructor(data) {
+                this.rawData = data;
+                this.filteredData = data;
+                this.charts = {};
+                this.init();
+            }
+
+            init() {
+                this.setupFilters();
+                this.renderKPIs();
+                this.renderCharts();
+                this.renderTable();
+            }
+
+            applyFilters() {
+                // Filter logic
+                this.filteredData = this.rawData.filter(row => {
+                    // Apply each active filter
+                    return true; // placeholder
+                });
+                this.renderKPIs();
+                this.updateCharts();
+                this.renderTable();
+            }
+
+            // ... methods for each section
+        }
+
+        const dashboard = new Dashboard(DATA);
+    </script>
+</body>
+</html>
+""" ;
+                            oc:codeLanguage "html" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 133-210" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 11 ;
+                    oc:sectionTitle "Base Template" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Instead of embedding raw data and aggregating in the browser:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """// DON'T: embed 50,000 raw rows
+const RAW_DATA = [/* 50,000 rows */];
+
+// DO: pre-aggregate before embedding
+const CHART_DATA = {
+    monthly_revenue: [
+        { month: '2024-01', revenue: 150000, orders: 1200 },
+        { month: '2024-02', revenue: 165000, orders: 1350 },
+        // ... 12 rows instead of 50,000
+    ],
+    top_products: [
+        { product: 'Widget A', revenue: 45000 },
+        // ... 10 rows
+    ],
+    kpis: {
+        total_revenue: 1980000,
+        total_orders: 15600,
+        avg_order_value: 127,
+    }
+};
+""" ;
+                                    oc:codeLanguage "javascript" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 857-878" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 34 ;
+                            oc:sectionTitle "Pre-Aggregation Pattern" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 1 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Limit line charts to <500 data points per series (downsample if needed)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "Disable animations for dashboards with many charts: `animation: false` in Chart.js options" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Limit bar charts to <50 categories" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 5 ;
+                                            oc:itemText "Use `Chart.update('none')` instead of `Chart.update()` for filter-triggered updates" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "For scatter plots, cap at 1,000 points (use sampling for larger datasets)" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 35 ;
+                            oc:sectionTitle "Chart Performance" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 1 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Limit data tables to 100-200 visible rows. Add pagination for more." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Avoid rebuilding the entire DOM on filter change -- update only changed elements" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Use `requestAnimationFrame` for coordinated chart updates" ] ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """// Efficient table pagination
+function renderTablePage(data, page, pageSize = 50) {
+    const start = page * pageSize;
+    const end = Math.min(start + pageSize, data.length);
+    const pageData = data.slice(start, end);
+    // Render only pageData
+    // Show pagination controls: "Showing 1-50 of 2,340"
+}
+""" ;
+                                    oc:codeLanguage "javascript" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 894-903" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 36 ;
+                            oc:sectionTitle "DOM Performance" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 1 ;
+                                    oc:rowCount 4 ;
+                                    oc:tableCaption "### Data Size Guidelines" ;
+                                    oc:tableMarkdown """| Data Size | Approach |
+|---|---|
+| <1,000 rows | Embed directly in HTML. Full interactivity. |
+| 1,000 - 10,000 rows | Embed in HTML. May need to pre-aggregate for charts. |
+| 10,000 - 100,000 rows | Pre-aggregate server-side. Embed only aggregated data. |
+| >100,000 rows | Not suitable for client-side dashboard. Use a BI tool or paginate. |
+""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 33 ;
+                            oc:sectionTitle "Data Size Guidelines" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 32 ;
+                    oc:sectionTitle "Performance Considerations for Large Datasets" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """/build-dashboard Create a template executive dashboard for a SaaS company showing MRR, churn, new customers, and NPS. Use sample data.
+""" ;
+                            oc:codeLanguage "" ;
+                            oc:contentOrder 3 ;
+                            oc:sourceLocation "lines 915-917" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """/build-dashboard Here's our support ticket data [pastes CSV]. Build a dashboard showing volume by priority, response time trends, and resolution rates.
+""" ;
+                            oc:codeLanguage "" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 911-913" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """/build-dashboard Monthly sales dashboard with revenue trend, top products, and regional breakdown. Data is in the orders table.
+""" ;
+                            oc:codeLanguage "" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 907-909" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 37 ;
+                    oc:sectionTitle "Examples" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """<div class="kpi-card">
+    <div class="kpi-label">Total Revenue</div>
+    <div class="kpi-value" id="kpi-revenue">$0</div>
+    <div class="kpi-change positive" id="kpi-revenue-change">+0%</div>
+</div>
+""" ;
+                            oc:codeLanguage "html" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 214-220" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """function renderKPI(elementId, value, previousValue, format = 'number') {
+    const el = document.getElementById(elementId);
+    const changeEl = document.getElementById(elementId + '-change');
+
+    // Format the value
+    el.textContent = formatValue(value, format);
+
+    // Calculate and display change
+    if (previousValue && previousValue !== 0) {
+        const pctChange = ((value - previousValue) / previousValue) * 100;
+        const sign = pctChange >= 0 ? '+' : '';
+        changeEl.textContent = `${sign}${pctChange.toFixed(1)}% vs prior period`;
+        changeEl.className = `kpi-change ${pctChange >= 0 ? 'positive' : 'negative'}`;
+    }
+}
+
+function formatValue(value, format) {
+    switch (format) {
+        case 'currency':
+            if (value >= 1e6) return `$${(value / 1e6).toFixed(1)}M`;
+            if (value >= 1e3) return `$${(value / 1e3).toFixed(1)}K`;
+            return `$${value.toFixed(0)}`;
+        case 'percent':
+            return `${value.toFixed(1)}%`;
+        case 'number':
+            if (value >= 1e6) return `${(value / 1e6).toFixed(1)}M`;
+            if (value >= 1e3) return `${(value / 1e3).toFixed(1)}K`;
+            return value.toLocaleString();
+        default:
+            return value.toString();
+    }
+}
+""" ;
+                            oc:codeLanguage "javascript" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 222-255" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 12 ;
+                    oc:sectionTitle "KPI Card Pattern" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.5;
+}
+
+.dashboard-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: var(--gap);
+}
+
+.dashboard-header {
+    background: var(--bg-header);
+    color: var(--text-on-dark);
+    padding: 20px 24px;
+    border-radius: var(--radius);
+    margin-bottom: var(--gap);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.dashboard-header h1 {
+    font-size: 20px;
+    font-weight: 600;
+}
+""" ;
+                                    oc:codeLanguage "css" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 615-652" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 26 ;
+                            oc:sectionTitle "Layout" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """@media (max-width: 768px) {
+    .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .kpi-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .chart-row {
+        grid-template-columns: 1fr;
+    }
+
+    .filters {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+@media print {
+    body { background: white; }
+    .dashboard-container { max-width: none; }
+    .filters { display: none; }
+    .chart-container { break-inside: avoid; }
+    .kpi-card { border: 1px solid #dee2e6; box-shadow: none; }
+}
+""" ;
+                                    oc:codeLanguage "css" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 812-840" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 31 ;
+                            oc:sectionTitle "Responsive Design" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """.table-section {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    overflow-x: auto;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.data-table thead th {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 2px solid #dee2e6;
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    user-select: none;
+}
+
+.data-table thead th:hover {
+    color: var(--text-primary);
+    background: #f8f9fa;
+}
+
+.data-table tbody td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.data-table tbody tr:hover {
+    background: #f8f9fa;
+}
+
+.data-table tbody tr:last-child td {
+    border-bottom: none;
+}
+""" ;
+                                    oc:codeLanguage "css" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 763-808" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 30 ;
+                            oc:sectionTitle "Data Table" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """.kpi-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--gap);
+    margin-bottom: var(--gap);
+}
+
+.kpi-card {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.kpi-label {
+    font-size: 13px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.kpi-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.kpi-change {
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.kpi-change.positive { color: var(--positive); }
+.kpi-change.negative { color: var(--negative); }
+""" ;
+                                    oc:codeLanguage "css" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 656-693" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 27 ;
+                            oc:sectionTitle "KPI Cards" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """.filters {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.filter-group label {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.filter-group select,
+.filter-group input[type="date"] {
+    padding: 6px 10px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-on-dark);
+    font-size: 13px;
+}
+
+.filter-group select option {
+    background: var(--bg-header);
+    color: var(--text-on-dark);
+}
+""" ;
+                                    oc:codeLanguage "css" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 726-759" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 29 ;
+                            oc:sectionTitle "Filters" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """.chart-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: var(--gap);
+    margin-bottom: var(--gap);
+}
+
+.chart-container {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.chart-container h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+}
+
+.chart-container canvas {
+    max-height: 300px;
+}
+""" ;
+                                    oc:codeLanguage "css" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 697-722" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 28 ;
+                            oc:sectionTitle "Chart Containers" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """:root {
+    /* Background layers */
+    --bg-primary: #f8f9fa;
+    --bg-card: #ffffff;
+    --bg-header: #1a1a2e;
+
+    /* Text */
+    --text-primary: #212529;
+    --text-secondary: #6c757d;
+    --text-on-dark: #ffffff;
+
+    /* Accent colors for data */
+    --color-1: #4C72B0;
+    --color-2: #DD8452;
+    --color-3: #55A868;
+    --color-4: #C44E52;
+    --color-5: #8172B3;
+    --color-6: #937860;
+
+    /* Status colors */
+    --positive: #28a745;
+    --negative: #dc3545;
+    --neutral: #6c757d;
+
+    /* Spacing */
+    --gap: 16px;
+    --radius: 8px;
+}
+""" ;
+                                    oc:codeLanguage "css" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 582-611" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 25 ;
+                            oc:sectionTitle "Color System" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 24 ;
+                    oc:sectionTitle "CSS Styling for Dashboards" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """<div class="filter-group">
+    <label for="filter-region">Region</label>
+    <select id="filter-region" onchange="dashboard.applyFilters()">
+        <option value="all">All Regions</option>
+    </select>
+</div>
+""" ;
+                                    oc:codeLanguage "html" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 449-456" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """function populateFilter(selectId, data, field) {
+    const select = document.getElementById(selectId);
+    const values = [...new Set(data.map(d => d[field]))].sort();
+
+    // Keep the "All" option, add unique values
+    values.forEach(val => {
+        const option = document.createElement('option');
+        option.value = val;
+        option.textContent = val;
+        select.appendChild(option);
+    });
+}
+
+function getFilterValue(selectId) {
+    const val = document.getElementById(selectId).value;
+    return val === 'all' ? null : val;
+}
+""" ;
+                                    oc:codeLanguage "javascript" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 458-476" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 20 ;
+                            oc:sectionTitle "Dropdown Filter" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """<div class="filter-group">
+    <label>Date Range</label>
+    <input type="date" id="filter-date-start" onchange="dashboard.applyFilters()">
+    <span>to</span>
+    <input type="date" id="filter-date-end" onchange="dashboard.applyFilters()">
+</div>
+""" ;
+                                    oc:codeLanguage "html" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 480-487" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """function filterByDateRange(data, dateField, startDate, endDate) {
+    return data.filter(row => {
+        const rowDate = new Date(row[dateField]);
+        if (startDate && rowDate < new Date(startDate)) return false;
+        if (endDate && rowDate > new Date(endDate)) return false;
+        return true;
+    });
+}
+""" ;
+                                    oc:codeLanguage "javascript" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 489-498" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 21 ;
+                            oc:sectionTitle "Date Range Filter" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """function renderTable(containerId, data, columns) {
+    const container = document.getElementById(containerId);
+    let sortCol = null;
+    let sortDir = 'desc';
+
+    function render(sortedData) {
+        let html = '<table class="data-table">';
+
+        // Header
+        html += '<thead><tr>';
+        columns.forEach(col => {
+            const arrow = sortCol === col.field
+                ? (sortDir === 'asc' ? ' ▲' : ' ▼')
+                : '';
+            html += `<th onclick="sortTable('${col.field}')" style="cursor:pointer">${col.label}${arrow}</th>`;
+        });
+        html += '</tr></thead>';
+
+        // Body
+        html += '<tbody>';
+        sortedData.forEach(row => {
+            html += '<tr>';
+            columns.forEach(col => {
+                const value = col.format ? formatValue(row[col.field], col.format) : row[col.field];
+                html += `<td>${value}</td>`;
+            });
+            html += '</tr>';
+        });
+        html += '</tbody></table>';
+
+        container.innerHTML = html;
+    }
+
+    window.sortTable = function(field) {
+        if (sortCol === field) {
+            sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+        } else {
+            sortCol = field;
+            sortDir = 'desc';
+        }
+        const sorted = [...data].sort((a, b) => {
+            const aVal = a[field], bVal = b[field];
+            const cmp = aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
+            return sortDir === 'asc' ? cmp : -cmp;
+        });
+        render(sorted);
+    };
+
+    render(data);
+}
+""" ;
+                                    oc:codeLanguage "javascript" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 525-576" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 23 ;
+                            oc:sectionTitle "Sortable Table" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """applyFilters() {
+    const region = getFilterValue('filter-region');
+    const category = getFilterValue('filter-category');
+    const startDate = document.getElementById('filter-date-start').value;
+    const endDate = document.getElementById('filter-date-end').value;
+
+    this.filteredData = this.rawData.filter(row => {
+        if (region && row.region !== region) return false;
+        if (category && row.category !== category) return false;
+        if (startDate && row.date < startDate) return false;
+        if (endDate && row.date > endDate) return false;
+        return true;
+    });
+
+    this.renderKPIs();
+    this.updateCharts();
+    this.renderTable();
+}
+""" ;
+                                    oc:codeLanguage "javascript" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 502-521" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 22 ;
+                            oc:sectionTitle "Combined Filter Logic" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 19 ;
+                    oc:sectionTitle "Filter and Interactivity Implementation" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """/build-dashboard <description of dashboard> [data source]
+""" ;
+                            oc:codeLanguage "" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 15-17" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Usage" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 2 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "**Purpose**: Executive overview, operational monitoring, deep-dive analysis, team reporting" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "**Audience**: Who will use this dashboard?" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 5 ;
+                                            oc:itemText "**Data source**: Live query, pasted data, CSV file, or sample data" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "**Dimensions**: What should users be able to filter or slice by?" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "**Key metrics**: What numbers matter most?" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Determine:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "1. Understand the Dashboard Requirements" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Use Chart.js for all charts. Common dashboard chart patterns:" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "Use the Chart.js integration patterns below for each chart type." ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 2 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "**Line chart**: Time series trends" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "**Bar chart**: Category comparisons" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 5 ;
+                                            oc:itemText "**Mixed (bar + line)**: Volume with rate overlay" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "**Stacked bar**: Composition over time" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "**Doughnut chart**: Composition (when <6 categories)" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 8 ;
+                            oc:sectionTitle "5. Implement Chart Types" ],
+                        [ a oc:Section ;
+                            oc:hasContent _:ref_6609728d428dd319 ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 10 ;
+                            oc:sectionTitle "7. Save and Open" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent "**If working from a description without data:**" ],
+                                _:ref_16849cd421cd4877,
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**If data warehouse is connected:**" ],
+                                _:ref_340842cb078f3526,
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**If data is pasted or uploaded:**" ],
+                                _:ref_62f089675709e894 ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 5 ;
+                            oc:sectionTitle "2. Gather the Data" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """┌──────────────────────────────────────────────────┐
+│  Dashboard Title                    [Filters ▼]  │
+├────────────┬────────────┬────────────┬───────────┤
+│  KPI Card  │  KPI Card  │  KPI Card  │ KPI Card  │
+├────────────┴────────────┼────────────┴───────────┤
+│                         │                        │
+│    Primary Chart        │   Secondary Chart      │
+│    (largest area)       │                        │
+│                         │                        │
+├─────────────────────────┴────────────────────────┤
+│                                                  │
+│    Detail Table (sortable, scrollable)           │
+│                                                  │
+└──────────────────────────────────────────────────┘
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 50-65" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 4 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "1-3 charts in the middle section for trends and breakdowns" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "2-4 KPI cards at the top for headline numbers" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Optional detail table at the bottom for drill-down data" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "Filters in the header or sidebar depending on complexity" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Follow a standard dashboard layout pattern:" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Adapt the layout to the content:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 6 ;
+                            oc:sectionTitle "3. Design the Dashboard Layout" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 5 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Consistent typography (system fonts for fast loading)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "Responsive design that works on different screen sizes" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 5 ;
+                                            oc:itemText "Print-friendly styles" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Card-based layout with subtle shadows" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Professional color scheme (clean whites, grays, with accent colors for data)" ] ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 9 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "No external data fetches required" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Dashboard works completely offline" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "All data embedded directly in the HTML as JavaScript variables" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 6 ;
+                                    oc:textContent "**Interactivity (JavaScript):**" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 7 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 5 ;
+                                            oc:itemText "Number formatting (commas, currency, percentages)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Chart.js for interactive charts (included via CDN)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Filter dropdowns that update all charts and tables simultaneously" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Sortable table columns" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "Hover tooltips on charts" ] ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 3 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Semantic HTML5 layout" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "KPI cards with values and labels" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 6 ;
+                                            oc:itemText "Data table with sortable headers" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Responsive grid using CSS Grid or Flexbox" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 5 ;
+                                            oc:itemText "Chart containers" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Filter controls (dropdowns, date pickers, toggles)" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 8 ;
+                                    oc:textContent "**Data (embedded JSON):**" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent "**Styling (CSS):**" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Generate a single self-contained HTML file using the base template below. The file includes:" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Structure (HTML):**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 7 ;
+                            oc:sectionTitle "4. Build the HTML Dashboard" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Use the filter and interactivity implementation patterns below for dropdown filters, date range filters, combined filter logic, sortable tables, and chart updates." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 9 ;
+                            oc:sectionTitle "6. Add Interactivity" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Workflow" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "/build-dashboard - Build Interactive Dashboards" ] ;
+    oc:hasWorkflow _:ref_16849cd421cd4877,
+        _:ref_340842cb078f3526,
+        _:ref_62f089675709e894,
+        _:ref_6609728d428dd319,
+        [ a oc:Workflow ;
+            dcterms:description "End-to-end workflow for creating a self-contained HTML dashboard" ;
+            oc:hasStep _:ref_020d55d444192339,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Save HTML file with descriptive name, open in browser, confirm rendering, provide update instructions" ;
+                    oc:expectedOutcome "Dashboard opens correctly in browser and user has customization instructions" ;
+                    oc:stepDependsOn _:ref_d2d662c3c773679a ;
+                    oc:stepId "save-open" ],
+                _:ref_7fbcd41e9f982e8d,
+                _:ref_becfe844181ee656,
+                _:ref_d2d662c3c773679a ;
+            oc:workflowId "build-dashboard-main" ;
+            oc:workflowName "Build Interactive Dashboard" ] ;
+    oc:impartsKnowledge oc:kn_11c16788,
+        oc:kn_2352ba38,
+        oc:kn_78339301,
+        oc:kn_885b63d0,
+        oc:kn_8b63b0ec,
+        oc:kn_8efbc370,
+        oc:kn_a1c762f0,
+        oc:kn_c89a7d1d ;
     oc:isUserInvocable true ;
     oc:nature "Work" ;
     oc:requiresState oc:DataAvailable ;
-    oc:resolvesIntent "build executive overview with KPI cards",
+    oc:resolvesIntent "build HTML dashboard with charts and filters",
         "create interactive dashboard",
-        "generate shareable self-contained HTML report",
-        "turn query results into an interactive dashboard",
-        "visualize data with charts and filters" ;
-    oc:yieldsState oc:DocumentCreated .
+        "create shareable self-contained data dashboard",
+        "generate KPI report with data visualization" ;
+    oc:yieldsState oc:DashboardCreated,
+        oc:FileCreated .
 
-oc:kn_0d29e2bd a oc:Heuristic,
+oc:kn_11c16788 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When structuring dashboard JavaScript" ;
+    oc:codeLanguage "javascript" ;
+    oc:directiveContent "Use a Dashboard class pattern with constructor(data), init(), applyFilters(), renderKPIs(), renderCharts(), renderTable(), and updateCharts() methods. Store raw data, filtered data, and chart references as instance properties." ;
+    oc:hasRationale "Class-based pattern encapsulates state and ensures filter changes propagate to all components consistently" .
+
+oc:kn_2352ba38 a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "When implementing Chart.js visualizations" ;
+    oc:directiveContent "Limit line charts to <500 points per series, bar charts to <50 categories, scatter plots to 1,000 points. Disable animations with `animation: false` for many-chart dashboards. Use `Chart.update('none')` for filter-triggered updates." ;
+    oc:hasRationale "Excessive data points cause rendering lag and poor user experience" .
+
+oc:kn_78339301 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When handling datasets with >10K rows" ;
+    oc:codeLanguage "javascript" ;
+    oc:directiveContent "const CHART_DATA = { monthly_revenue: [...], top_products: [...], kpis: { total_revenue, total_orders, avg_order_value } }; — pre-aggregate data before embedding rather than embedding raw rows." ;
+    oc:hasRationale "Pre-aggregation reduces HTML file size and client-side computation dramatically" .
+
+oc:kn_885b63d0 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When implementing interactivity and filtering" ;
+    oc:directiveContent "Do not rebuild the entire DOM on filter change. Update only changed elements. Limit visible table rows to 100-200 and add pagination for more." ;
+    oc:hasRationale "Full DOM rebuilds on every filter change cause significant performance degradation" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_8b63b0ec a oc:Heuristic,
         oc:KnowledgeNode ;
     oc:appliesToContext "When designing dashboard layout" ;
-    oc:directiveContent "Follow the standard layout pattern: 2-4 KPI cards at top, 1-3 charts in middle, optional detail table at bottom, filters in header. Adapt proportions to content type." ;
-    oc:hasRationale "This layout provides a consistent information hierarchy — headline numbers first, trends second, details third — that matches how executives consume data." ;
-    oc:severityLevel "MEDIUM" .
+    oc:directiveContent "Follow the standard layout: 2-4 KPI cards at top, 1-3 charts in middle, optional sortable detail table at bottom, filters in header. Use CSS Grid with auto-fit for responsive layout." ;
+    oc:hasRationale "Consistent layout pattern ensures scannability and professional appearance across different dashboard types" .
 
-oc:kn_4ce16f97 a oc:DesignPrinciple,
+oc:kn_8efbc370 a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "Always, when building any dashboard" ;
-    oc:directiveContent "Every dashboard must be a single self-contained HTML file with all data embedded as JSON, all CSS inline, and Chart.js loaded via CDN — no external data fetches required." ;
-    oc:hasRationale "Self-containment ensures the dashboard works offline, is shareable as a single file, and requires no server infrastructure." ;
+    oc:appliesToContext "When setting up the HTML template" ;
+    oc:directiveContent "Use Chart.js v4.5.1 loaded via CDN with SRI integrity checks. Include chartjs-adapter-date-fns@3.0.0 for time-series support." ;
+    oc:hasRationale "CDN-loaded Chart.js provides interactive charts without bundling, and SRI ensures script integrity" .
+
+oc:kn_a1c762f0 a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "When determining data embedding strategy based on dataset size" ;
+    oc:directiveContent "For <1K rows embed directly. For 1K-10K rows embed but pre-aggregate for charts. For 10K-100K rows pre-aggregate and embed only aggregated data. For >100K rows do not use client-side dashboards — use a BI tool instead." ;
+    oc:hasRationale "Client-side JavaScript has limited performance for large datasets; embedding raw data causes browser slowdowns" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_c89a7d1d a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When building any dashboard" ;
+    oc:directiveContent "All data must be embedded as JSON directly in the HTML file. No external data fetches. The dashboard must work completely offline." ;
+    oc:hasRationale "Self-containment is the core design principle — dashboards are shareable point-in-time snapshots that must render without network access" ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_955d033d a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "Before starting dashboard construction" ;
-    oc:directiveContent "Before building, determine: purpose (executive/operational/deep-dive), audience, key metrics, filterable dimensions, and data source (live query, pasted data, CSV, or sample data). If no data is provided, create a realistic sample dataset and clearly note it uses sample data." ;
-    oc:hasRationale "Clarifying requirements upfront prevents rework and ensures the dashboard addresses the actual analytical need rather than producing generic output." ;
-    oc:severityLevel "MEDIUM" .
+_:ref_2c90c103ecca6c46 a oc:WorkflowStep ;
+    dcterms:description "Provide instructions for updating data or customizing" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
 
-oc:kn_bfcbdf5e a oc:KnowledgeNode,
-        oc:PerformanceProfile ;
-    oc:appliesToContext "When implementing charts for performance" ;
-    oc:directiveContent "Limit line charts to <500 data points per series, bar charts to <50 categories, scatter plots to 1,000 points. Disable animations with `animation: false` for dashboards with many charts. Use `Chart.update('none')` for filter-triggered updates." ;
-    oc:hasRationale "Chart.js rendering performance degrades significantly beyond these thresholds, causing sluggish filter interactions and poor user experience." ;
-    oc:severityLevel "MEDIUM" .
+_:ref_4f31a9018b3df4bb a oc:WorkflowStep ;
+    dcterms:description "Provide instructions for swapping in real data" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
 
-oc:kn_c2aed237 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When working with large datasets" ;
-    oc:directiveContent "Never embed more than 10,000 raw data rows directly in HTML. For datasets over 1,000 rows, pre-aggregate before embedding. Datasets over 100,000 rows are not suitable for client-side dashboards at all." ;
-    oc:hasRationale "Large embedded datasets cause slow page loads, high memory usage, and poor browser performance. Pre-aggregation reduces data volume while preserving analytical value." ;
-    oc:severityLevel "HIGH" .
+_:ref_529a4ba9e8a1db4f a oc:WorkflowStep ;
+    dcterms:description "Create a realistic sample dataset matching the described schema" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_647e56ce8b04bbd5 a oc:WorkflowStep ;
+    dcterms:description "Embed as JSON in the dashboard" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_7b831c3203308815 a oc:WorkflowStep ;
+    dcterms:description "Query the necessary data" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_819362bbc51db873 a oc:WorkflowStep ;
+    dcterms:description "Save the dashboard as an HTML file with a descriptive name (e.g., `sales_dashboard.html`)" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_8814527fb00f8e37 a oc:WorkflowStep ;
+    dcterms:description "Note in the dashboard that it uses sample data" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_8f905ed9a69a6653 a oc:WorkflowStep ;
+    dcterms:description "Parse and clean the data" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_901755856d2e86b7 a oc:WorkflowStep ;
+    dcterms:description "Embed the results as JSON within the HTML file" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_b4a7470bf169d3b0 a oc:WorkflowStep ;
+    dcterms:description "Confirm it renders correctly" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_dc75fe68298e6374 a oc:WorkflowStep ;
+    dcterms:description "Open it in the user's default browser" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_020d55d444192339 a oc:WorkflowStep ;
+    dcterms:description "Query data warehouse, parse uploaded data, or create realistic sample dataset based on requirements" ;
+    oc:expectedOutcome "Data ready to embed as JSON in the HTML file" ;
+    oc:stepDependsOn _:ref_7fbcd41e9f982e8d ;
+    oc:stepId "gather-data" .
+
+_:ref_16849cd421cd4877 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 2 ;
+    oc:hasStep _:ref_7b831c3203308815,
+        _:ref_901755856d2e86b7 ;
+    oc:workflowId "procedure_2" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_340842cb078f3526 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 4 ;
+    oc:hasStep _:ref_647e56ce8b04bbd5,
+        _:ref_8f905ed9a69a6653 ;
+    oc:workflowId "procedure_4" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_62f089675709e894 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 6 ;
+    oc:hasStep _:ref_4f31a9018b3df4bb,
+        _:ref_529a4ba9e8a1db4f,
+        _:ref_8814527fb00f8e37 ;
+    oc:workflowId "procedure_6" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_6609728d428dd319 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 1 ;
+    oc:hasStep _:ref_2c90c103ecca6c46,
+        _:ref_819362bbc51db873,
+        _:ref_b4a7470bf169d3b0,
+        _:ref_dc75fe68298e6374 ;
+    oc:workflowId "procedure_1" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_7fbcd41e9f982e8d a oc:WorkflowStep ;
+    dcterms:description "Determine purpose, audience, key metrics, filterable dimensions, and data source type" ;
+    oc:expectedOutcome "Clear requirements for dashboard layout, metrics, and data needs" ;
+    oc:stepId "understand-reqs" .
+
+_:ref_becfe844181ee656 a oc:WorkflowStep ;
+    dcterms:description "Design dashboard layout: KPI cards, chart types, table columns, filter controls based on the data and purpose" ;
+    oc:expectedOutcome "Planned layout with specific chart types and filter dimensions" ;
+    oc:stepDependsOn _:ref_020d55d444192339 ;
+    oc:stepId "design-layout" .
+
+_:ref_d2d662c3c773679a a oc:WorkflowStep ;
+    dcterms:description "Generate single self-contained HTML file with embedded CSS, JavaScript, Chart.js CDN, data as JSON, KPI cards, charts, filters, and sortable table" ;
+    oc:expectedOutcome "Complete HTML dashboard file ready for browser" ;
+    oc:stepDependsOn _:ref_becfe844181ee656 ;
+    oc:stepId "build-html" .
 

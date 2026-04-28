@@ -4,23 +4,542 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_code_hook_development_patterns a oc:DeclarativeSkill,
+oc:skill_claude_code_hook_development_patterns a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "patterns" ;
-    skos:broader "Reference guide" ;
+    skos:broader "Reference catalog" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-code/hook-development" ;
     oc:contentHash "cb607fca192bfa892fd198141b86dac9d0ca2c573a280b054b7beaa56fc9a8bf" ;
-    oc:differentia "provides 10 proven, reusable hook configuration patterns for common Claude Code hook use cases including security validation, test enforcement, context loading, notification logging, MCP monitoring, build verification, permission confirmation, code quality checks, flag-based activation, and configuration-driven behavior" ;
-    oc:extends oc:skill_anthropics_claude_code_hook_development ;
+    oc:dependsOnSkill oc:skill_ontoskills_hook_development ;
+    oc:differentia "that provides proven, reusable hook implementation patterns for Claude Code hook development" ;
+    oc:extends oc:skill_claude_code_hook_development ;
     oc:handlesFailure oc:InvalidHookConfiguration ;
-    oc:hasAllowedTool "Bash" ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_089e9218,
-        oc:kn_0a545b71,
-        oc:kn_49cc2568,
-        oc:kn_6b1d6d6a,
-        oc:kn_dba11fe7,
-        oc:kn_f828a666 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "This reference provides common, proven patterns for implementing Claude Code hooks. Use these patterns as starting points for typical hook use cases." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Example script (check-quality.sh):**" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """#!/bin/bash
+input=$(cat)
+file_path=$(echo "$input" | jq -r '.tool_input.file_path')
+
+# Run linter if applicable
+if [[ "$file_path" == *.js ]] || [[ "$file_path" == *.ts ]]; then
+  npx eslint "$file_path" 2>&1 || true
+fi
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 4 ;
+                            oc:sourceLocation "lines 195-204" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Run linters or formatters on file edits:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent "**Use for:** Automatic code quality enforcement." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """{
+  "PostToolUse": [
+    {
+      "matcher": "Write|Edit",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/check-quality.sh"
+        }
+      ]
+    }
+  ]
+}
+""" ;
+                            oc:codeLanguage "json" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 178-192" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 8 ;
+                    oc:sectionTitle "Pattern 8: Code Quality Checks" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Load project-specific context at session start:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """{
+  "SessionStart": [
+    {
+      "matcher": "*",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/load-context.sh"
+        }
+      ]
+    }
+  ]
+}
+""" ;
+                            oc:codeLanguage "json" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 53-67" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """#!/bin/bash
+cd "$CLAUDE_PROJECT_DIR" || exit 1
+
+# Detect project type
+if [ -f "package.json" ]; then
+  echo "📦 Node.js project detected"
+  echo "export PROJECT_TYPE=nodejs" >> "$CLAUDE_ENV_FILE"
+elif [ -f "Cargo.toml" ]; then
+  echo "🦀 Rust project detected"
+  echo "export PROJECT_TYPE=rust" >> "$CLAUDE_ENV_FILE"
+fi
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 4 ;
+                            oc:sourceLocation "lines 70-82" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Example script (load-context.sh):**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent "**Use for:** Automatically detecting and configuring project-specific settings." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Pattern 3: Context Loading" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """{
+  "Stop": [
+    {
+      "matcher": "*",
+      "hooks": [
+        {
+          "type": "prompt",
+          "prompt": "Check if code was modified. If Write/Edit tools were used, verify the project was built (npm run build, cargo build, etc). If not built, block and request build."
+        }
+      ]
+    }
+  ]
+}
+""" ;
+                            oc:codeLanguage "json" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 134-148" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Ensure project builds after code changes:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Use for:** Catching build errors before committing or stopping work." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Pattern 6: Build Verification" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Log all notifications for audit or analysis:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Use for:** Tracking user notifications or integration with external logging systems." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """{
+  "Notification": [
+    {
+      "matcher": "*",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/log-notification.sh"
+        }
+      ]
+    }
+  ]
+}
+""" ;
+                            oc:codeLanguage "json" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 90-104" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Pattern 4: Notification Logging" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """#!/bin/bash
+# Hook only active when flag file exists
+FLAG_FILE="$CLAUDE_PROJECT_DIR/.enable-security-scan"
+
+if [ ! -f "$FLAG_FILE" ]; then
+  # Quick exit when disabled
+  exit 0
+fi
+
+# Flag present, run validation
+input=$(cat)
+file_path=$(echo "$input" | jq -r '.tool_input.file_path')
+
+# Run security scan
+security-scanner "$file_path"
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 265-281" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Activation:**" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 6 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Project-specific validation that's opt-in" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Feature flags for development" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Temporary debugging hooks" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Performance-intensive checks only when needed" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Create hooks that only run when explicitly enabled via flag files:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# Enable the hook
+touch .enable-security-scan
+
+# Disable the hook
+rm .enable-security-scan
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 4 ;
+                            oc:sourceLocation "lines 284-290" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent "**Use for:**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 7 ;
+                            oc:textContent "**Note:** Must restart Claude Code after creating/removing flag files for hooks to recognize changes." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 10 ;
+                    oc:sectionTitle "Pattern 9: Temporarily Active Hooks" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """#!/bin/bash
+CONFIG_FILE="$CLAUDE_PROJECT_DIR/.claude/my-plugin.local.json"
+
+# Read configuration
+if [ -f "$CONFIG_FILE" ]; then
+  strict_mode=$(jq -r '.strictMode // false' "$CONFIG_FILE")
+  max_file_size=$(jq -r '.maxFileSize // 1000000' "$CONFIG_FILE")
+else
+  # Defaults
+  strict_mode=false
+  max_file_size=1000000
+fi
+
+# Skip if not in strict mode
+if [ "$strict_mode" != "true" ]; then
+  exit 0
+fi
+
+# Apply configured limits
+input=$(cat)
+file_size=$(echo "$input" | jq -r '.tool_input.content | length')
+
+if [ "$file_size" -gt "$max_file_size" ]; then
+  echo '{"decision": "deny", "reason": "File exceeds configured size limit"}' >&2
+  exit 2
+fi
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 304-331" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Use JSON configuration to control hook behavior:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent "**Use for:**" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 6 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Team-specific rules" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Dynamic validation criteria" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Per-project settings" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "User-configurable hook behavior" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Configuration file (.claude/my-plugin.local.json):**" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """{
+  "strictMode": true,
+  "maxFileSize": 500000,
+  "allowedPaths": ["/tmp", "/home/user/projects"]
+}
+""" ;
+                            oc:codeLanguage "json" ;
+                            oc:contentOrder 4 ;
+                            oc:sourceLocation "lines 334-340" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 11 ;
+                    oc:sectionTitle "Pattern 10: Configuration-Driven Hooks" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """{
+  "PreToolUse": [
+    {
+      "matcher": "Write|Edit",
+      "hooks": [
+        {
+          "type": "prompt",
+          "prompt": "Validate file write safety"
+        }
+      ]
+    },
+    {
+      "matcher": "Bash",
+      "hooks": [
+        {
+          "type": "prompt",
+          "prompt": "Validate bash command safety"
+        }
+      ]
+    }
+  ],
+  "Stop": [
+    {
+      "matcher": "*",
+      "hooks": [
+        {
+          "type": "prompt",
+          "prompt": "Verify tests run and build succeeded"
+        }
+      ]
+    }
+  ],
+  "SessionStart": [
+    {
+      "matcher": "*",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/load-context.sh"
+        }
+      ]
+    }
+  ]
+}
+""" ;
+                            oc:codeLanguage "json" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 212-257" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "This provides multi-layered protection and automation." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Combine multiple patterns for comprehensive protection:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 9 ;
+                    oc:sectionTitle "Pattern Combinations" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Use for:** Preventing writes to sensitive files or system directories." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Block dangerous file writes using prompt-based hooks:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """{
+  "PreToolUse": [
+    {
+      "matcher": "Write|Edit",
+      "hooks": [
+        {
+          "type": "prompt",
+          "prompt": "File path: $TOOL_INPUT.file_path. Verify: 1) Not in /etc or system directories 2) Not .env or credentials 3) Path doesn't contain '..' traversal. Return 'approve' or 'deny'."
+        }
+      ]
+    }
+  ]
+}
+""" ;
+                            oc:codeLanguage "json" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 9-23" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Pattern 1: Security Validation" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """{
+  "PreToolUse": [
+    {
+      "matcher": "Bash",
+      "hooks": [
+        {
+          "type": "prompt",
+          "prompt": "Command: $TOOL_INPUT.command. If command contains 'rm', 'delete', 'drop', or other destructive operations, return 'ask' to confirm with user. Otherwise 'approve'."
+        }
+      ]
+    }
+  ]
+}
+""" ;
+                            oc:codeLanguage "json" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 156-170" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Use for:** User confirmation on potentially destructive commands." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Ask user before dangerous operations:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 7 ;
+                    oc:sectionTitle "Pattern 7: Permission Confirmation" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Use for:** Enforcing quality standards and preventing incomplete work." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """{
+  "Stop": [
+    {
+      "matcher": "*",
+      "hooks": [
+        {
+          "type": "prompt",
+          "prompt": "Review transcript. If code was modified (Write/Edit tools used), verify tests were executed. If no tests were run, block with reason 'Tests must be run after code changes'."
+        }
+      ]
+    }
+  ]
+}
+""" ;
+                            oc:codeLanguage "json" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 31-45" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Ensure tests run before stopping:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Pattern 2: Test Enforcement" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """{
+  "PreToolUse": [
+    {
+      "matcher": "mcp__.*__delete.*",
+      "hooks": [
+        {
+          "type": "prompt",
+          "prompt": "Deletion operation detected. Verify: Is this deletion intentional? Can it be undone? Are there backups? Return 'approve' only if safe."
+        }
+      ]
+    }
+  ]
+}
+""" ;
+                            oc:codeLanguage "json" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 112-126" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Use for:** Protecting against destructive MCP operations." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Monitor and validate MCP tool usage:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Pattern 5: MCP Tool Monitoring" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Common Hook Patterns" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "Guide for selecting the right hook pattern based on the use case and combining patterns when needed." ;
+            oc:hasStep _:ref_291a13f9adbd65dd,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "If multiple concerns exist (security + quality + testing), combine patterns into a single configuration with multiple matcher entries per lifecycle event" ;
+                    oc:expectedOutcome "Comprehensive multi-pattern hook configuration" ;
+                    oc:stepDependsOn _:ref_9b24f6bdf41f66e9 ;
+                    oc:stepId "combine-if-needed" ],
+                _:ref_5f82542cffbe50d8,
+                _:ref_9b24f6bdf41f66e9,
+                _:ref_bc381c68e837ca50 ;
+            oc:workflowId "hook-pattern-selection" ;
+            oc:workflowName "Select and Apply Hook Pattern" ] ;
+    oc:impartsKnowledge oc:kn_27866d7c,
+        oc:kn_32733267,
+        oc:kn_587ec6cb,
+        oc:kn_5ce34f36,
+        oc:kn_775f8fb3,
+        oc:kn_c02cf55e ;
     oc:isUserInvocable false ;
     oc:nature "Concept" ;
     oc:requiresState oc:EnvironmentReady ;
@@ -29,53 +548,76 @@ oc:skill_anthropics_claude_code_hook_development_patterns a oc:DeclarativeSkill,
         "find hook pattern for build verification",
         "find hook pattern for code quality checks",
         "find hook pattern for configuration-driven hooks",
-        "find hook pattern for context loading on session start",
+        "find hook pattern for context loading",
         "find hook pattern for notification logging",
         "find hook pattern for permission confirmation",
         "find hook pattern for security validation",
         "find hook pattern for temporarily active hooks",
         "find hook pattern for test enforcement" ;
-    oc:yieldsState oc:HookPatternApplied .
+    oc:yieldsState oc:HookPatternsApplied .
 
-oc:kn_089e9218 a oc:DesignPrinciple,
+oc:kn_27866d7c a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When designing a complete hook system for a project" ;
-    oc:directiveContent "Combine multiple hook patterns (PreToolUse + Stop + SessionStart) for comprehensive, multi-layered protection rather than relying on a single hook point." ;
-    oc:hasRationale "Layered hooks catch issues at different lifecycle stages — before action, after action, and at session boundaries — providing defense in depth." ;
+    oc:appliesToContext "When using Pattern 9 (temporarily active hooks) with flag files" ;
+    oc:directiveContent "Must restart Claude Code after creating or removing flag files for hooks to recognize changes." ;
+    oc:hasRationale "Hook configurations are loaded at startup; runtime flag file changes are not hot-reloaded." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_0a545b71 a oc:Heuristic,
+oc:kn_32733267 a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When writing command-type hook scripts" ;
-    oc:directiveContent "Use early-exit (exit 0) in command hooks when conditions aren't met (e.g., flag file missing, strict mode off) to minimize overhead." ;
-    oc:hasRationale "Hooks fire on every matching event, so fast-path exits prevent unnecessary processing and keep the development workflow responsive." ;
+    oc:appliesToContext "When building hooks that need per-project or per-team customization" ;
+    oc:directiveContent "Use JSON configuration files (.claude/*.local.json) with sensible defaults to make hook behavior user-configurable and team-specific." ;
+    oc:hasRationale "Configuration-driven hooks decouple validation rules from hook code, enabling non-developer customization." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_49cc2568 a oc:KnowledgeNode,
+oc:kn_587ec6cb a oc:KnowledgeNode,
         oc:Standard ;
-    oc:appliesToContext "When choosing hook type for a new pattern" ;
-    oc:directiveContent "Use prompt-type hooks for decision/validation logic and command-type hooks for side effects like logging, context loading, and running external tools." ;
-    oc:hasRationale "Prompt hooks leverage LLM reasoning for nuanced decisions (approve/deny/ask), while command hooks execute deterministic scripts reliably for automation tasks." ;
-    oc:severityLevel "MEDIUM" .
+    oc:appliesToContext "When writing bash command hooks that validate tool inputs" ;
+    oc:directiveContent "Command hooks receive JSON input on stdin; use 'jq' to extract fields like .tool_input.file_path. Output denial as JSON to stderr with exit code 2." ;
+    oc:hasRationale "Consistent input/output handling ensures hooks integrate correctly with Claude Code's hook protocol." ;
+    oc:severityLevel "HIGH" .
 
-oc:kn_6b1d6d6a a oc:KnowledgeNode,
+oc:kn_5ce34f36 a oc:KnowledgeNode,
         oc:SecurityImplication ;
-    oc:appliesToContext "When implementing PreToolUse hooks for Write, Edit, or Bash tools" ;
-    oc:directiveContent "Security validation hooks should check for path traversal ('..'), system directories ('/etc'), credential files ('.env'), and destructive operations ('rm', 'delete', 'drop')." ;
-    oc:hasRationale "These checks prevent accidental or malicious modification of sensitive system files, credential exposure, and irreversible data loss." ;
+    oc:appliesToContext "When implementing security validation hooks (Pattern 1)" ;
+    oc:directiveContent "PreToolUse prompt hooks on Write|Edit should verify: not in /etc or system directories, not .env or credentials, no '..' path traversal." ;
+    oc:hasRationale "These checks prevent the agent from writing to sensitive system files or leaking credentials." ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_dba11fe7 a oc:AntiPattern,
+oc:kn_775f8fb3 a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When creating hooks that may need to be temporarily disabled or have project-specific settings" ;
-    oc:directiveContent "Do not hardcode hook behavior directly; prefer flag files or JSON configuration to make hooks toggleable and configurable per project." ;
-    oc:hasRationale "Hardcoded hooks create friction when debugging, add overhead for checks that aren't always needed, and prevent team-specific customization without code changes." ;
+    oc:appliesToContext "When creating performance-intensive or project-specific validation hooks" ;
+    oc:directiveContent "Use flag files ($CLAUDE_PROJECT_DIR/.enable-*) to gate expensive or optional hooks, allowing opt-in activation without code changes." ;
+    oc:hasRationale "Flag files let teams toggle hooks per-project without modifying hook configuration, and provide a clean on/off mechanism." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_f828a666 a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "When using flag-file-based hook activation patterns" ;
-    oc:directiveContent "Must restart Claude Code after creating or removing flag files for hooks to recognize the changes." ;
-    oc:hasRationale "Flag file presence is checked at hook registration time, not at runtime, so changes require a session restart to take effect." ;
-    oc:severityLevel "CRITICAL" .
+oc:kn_c02cf55e a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing comprehensive hook coverage" ;
+    oc:directiveContent "Combine multiple hook patterns across PreToolUse, PostToolUse, Stop, and SessionStart events for layered protection and automation." ;
+    oc:hasRationale "Single hooks provide narrow protection; multi-layered hooks catch issues at different stages of the agent lifecycle." ;
+    oc:severityLevel "MEDIUM" .
+
+_:ref_291a13f9adbd65dd a oc:WorkflowStep ;
+    dcterms:description "Identify which lifecycle event the hook targets: PreToolUse (before tool runs), PostToolUse (after tool runs), Stop (before session ends), SessionStart (at session start), Notification (on notifications)" ;
+    oc:expectedOutcome "Lifecycle event determined" ;
+    oc:stepId "identify-lifecycle" .
+
+_:ref_5f82542cffbe50d8 a oc:WorkflowStep ;
+    dcterms:description "Define matcher: specific tool name (e.g., 'Bash'), pipe-separated list ('Write|Edit'), regex pattern ('mcp__.*__delete.*'), or '*' for all tools" ;
+    oc:expectedOutcome "Matcher configured to target the right tools" ;
+    oc:stepDependsOn _:ref_bc381c68e837ca50 ;
+    oc:stepId "select-matcher" .
+
+_:ref_9b24f6bdf41f66e9 a oc:WorkflowStep ;
+    dcterms:description "Implement the hook using the appropriate pattern template from the 10 common patterns" ;
+    oc:expectedOutcome "Hook configuration written with correct JSON structure" ;
+    oc:stepDependsOn _:ref_5f82542cffbe50d8 ;
+    oc:stepId "implement-pattern" .
+
+_:ref_bc381c68e837ca50 a oc:WorkflowStep ;
+    dcterms:description "Choose hook type: 'prompt' for LLM-based validation/approval, 'command' for script-based actions" ;
+    oc:expectedOutcome "Hook type selected based on whether LLM judgment or script execution is needed" ;
+    oc:stepDependsOn _:ref_291a13f9adbd65dd ;
+    oc:stepId "choose-hook-type" .
 

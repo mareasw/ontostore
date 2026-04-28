@@ -4,68 +4,551 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_office_skills_contract_template a oc:DeclarativeSkill,
+oc:skill_claude_office_skills_contract_template a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "contract-template" ;
     skos:broader "template generator" ;
-    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-office-skills/contract-template" ;
+    prov:wasDerivedFrom "../.agents/skills/anthropics/claude-office-skills/contract-template" ;
     oc:contentHash "79a4341f5fda87cc62c63eb4ae0d5a86eb15623faeac41a41b3bed1141935d68" ;
-    oc:dependsOnSkill oc:skill_office_mcp ;
-    oc:differentia "creates legally enforceable machine-readable contract templates using the Accord Project framework with embedded data models, conditional logic, and executable business rules" ;
-    oc:handlesFailure oc:InvalidInput ;
+    oc:differentia "that creates legally enforceable, machine-readable contract templates using the Accord Project framework with embedded business logic" ;
+    oc:extends oc:skill_ontoskills_office_mcp ;
+    oc:handlesFailure oc:InvalidInput,
+        oc:NetworkTimeout ;
     oc:hasAllowedTool "create_docx",
         "fill_docx_template" ;
-    oc:hasArgumentHint "contract type and terms description" ;
-    oc:hasCategory "document" ;
+    oc:hasArgumentHint "contract type and terms (e.g., 'NDA with variable terms', 'service agreement with payment milestones')" ;
+    oc:hasCategory "template" ;
     oc:hasDescription ">" ;
     oc:hasName "contract-template" ;
-    oc:impartsKnowledge oc:kn_2bb1968a,
-        oc:kn_adb5ab06,
-        oc:kn_c28ec916,
-        oc:kn_ca3af67b,
-        oc:kn_ed2e6492 ;
+    oc:hasPackageName "contract-template" ;
+    oc:hasRequirement oc:req_0eb6219c,
+        oc:req_6b841853,
+        oc:req_c17091d8,
+        oc:req_fb96a740 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """# ═══════════════════════════════════════════════════════════════════════════════
+# CLAUDE OFFICE SKILL - Enhanced Metadata v2.0
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Basic Information
+name: contract-template
+description: ">"
+version: "1.0"
+author: claude-office-skills
+license: MIT
+
+# Categorization
+category: template
+tags:
+  - contract
+  - template
+  - legal
+  - accord
+department: Legal
+
+# AI Model Compatibility
+models:
+  recommended:
+    - claude-sonnet-4
+    - claude-opus-4
+  compatible:
+    - claude-3-5-sonnet
+    - gpt-4
+    - gpt-4o
+
+# MCP Tools Integration
+mcp:
+  server: office-mcp
+  tools:
+    - create_docx
+    - fill_docx_template
+
+# Skill Capabilities
+capabilities:
+  - contract_templating
+  - legal_documents
+
+# Language Support
+languages:
+  - en
+  - zh
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """namespace org.example.service
+
+import org.accordproject.time.*
+
+asset ServiceAgreement extends Contract {
+  o String supplier
+  o String buyer
+  o String serviceDescription
+  o Double paymentAmount
+  o Integer paymentDays
+  o DateTime startDate
+  o Integer termMonths
+  o Boolean latePenalty optional
+  o Double penaltyPercent optional
+}
+
+transaction PaymentRequest {
+  o Double amount
+  o DateTime dueDate
+}
+
+transaction PaymentResponse {
+  o Double amount
+  o Double penalty
+  o DateTime paymentDue
+}
+""" ;
+                                    oc:codeLanguage "cto" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 112-139" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Data Model (Concerto)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Template ;
+                                    oc:blockType "template" ;
+                                    oc:contentOrder 1 ;
+                                    oc:templateContent """# Service Agreement
+
+This Agreement is made between [{supplier}] ("Supplier") 
+and [{buyer}] ("Buyer").
+
+## Services
+The Supplier agrees to provide [{serviceDescription}].
+
+## Payment
+The Buyer shall pay [{paymentAmount}] within 
+[{paymentDays}] days of invoice.
+
+## Term
+This Agreement begins on [{startDate as "MMMM DD, YYYY"}] 
+and continues for [{termMonths}] months.
+
+{{#if latePenalty}}
+## Late Payment
+A penalty of [{penaltyPercent}]% applies to late payments.
+{{/if}}
+""" ;
+                                    oc:templateVariables "buyer",
+                                        "paymentAmount",
+                                        "paymentDays",
+                                        "penaltyPercent",
+                                        "serviceDescription",
+                                        "supplier",
+                                        "termMonths" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Template Syntax (TemplateMark)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """namespace org.example.service
+
+import org.accordproject.time.*
+
+contract ServiceContract over ServiceAgreement {
+  
+  clause payment(request : PaymentRequest) : PaymentResponse {
+    let dueDate = addDuration(request.dueDate, 
+                              Duration{ amount: contract.paymentDays, unit: ~org.accordproject.time.TemporalUnit.days });
+    
+    let penalty = 
+      if contract.latePenalty
+      then request.amount * contract.penaltyPercent / 100.0
+      else 0.0;
+    
+    return PaymentResponse{
+      amount: request.amount,
+      penalty: penalty,
+      paymentDue: dueDate
+    }
+  }
+}
+""" ;
+                                    oc:codeLanguage "ergo" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 143-166" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "Business Logic (Ergo)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """contract-template/
+├── package.json           # Metadata
+├── grammar/
+│   └── template.tem.md    # Natural language template
+├── model/
+│   └── model.cto          # Data model
+├── logic/
+│   └── logic.ergo         # Business logic
+└── text/
+    └── sample.md          # Sample contract
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 72-83" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Template Structure" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# Install
+npm install -g @accordproject/cicero-cli
+
+# Parse contract
+cicero parse --template ./contract-template --sample ./text/sample.md
+
+# Execute logic
+cicero trigger --template ./contract-template \\
+  --sample ./text/sample.md \\
+  --request ./request.json
+
+# Draft new contract
+cicero draft --template ./contract-template --data ./data.json
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 170-184" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 5 ;
+                            oc:sectionTitle "Using Cicero CLI" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Domain Knowledge" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 3 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "\"Design a consulting contract with termination clauses\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "\"Create an NDA template with variable terms\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "\"Build a service agreement with payment milestones\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "\"Generate a rental agreement template\"" ] ],
+                        _:ref_d8cc4058576b8589,
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Example prompts:**" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "How to Use" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "[Accord Project](https://accordproject.org/)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "[GitHub Organization](https://github.com/accordproject)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "[Template Library](https://templates.accordproject.org/)" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Resources" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """{
+  "effectiveDate": "2024-01-15",
+  "disclosingParty": "Tech Corp",
+  "receivingParty": "Consultant LLC",
+  "confidentialScope": "trade secrets, customer lists, and technical specifications",
+  "termYears": 3,
+  "permittedPurpose": "evaluating a potential business relationship",
+  "hasExclusions": false,
+  "returnDays": 30,
+  "monetaryPenalty": true,
+  "penaltyAmount": "$50,000"
+}
+""" ;
+                                    oc:codeLanguage "json" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 246-259" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "data.json" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Template ;
+                                    oc:blockType "template" ;
+                                    oc:contentOrder 1 ;
+                                    oc:templateContent """# Non-Disclosure Agreement
+
+This Non-Disclosure Agreement ("Agreement") is entered into 
+as of [{effectiveDate as "MMMM DD, YYYY"}] by and between:
+
+**Disclosing Party:** [{disclosingParty}]
+**Receiving Party:** [{receivingParty}]
+
+## 1. Confidential Information
+
+"Confidential Information" means all non-public information 
+disclosed by the Disclosing Party, including but not limited to:
+[{confidentialScope}].
+
+## 2. Obligations
+
+The Receiving Party agrees to:
+- Maintain confidentiality for [{termYears}] years
+- Use information only for [{permittedPurpose}]
+- Not disclose to third parties without written consent
+
+## 3. Exclusions
+
+This Agreement does not apply to information that:
+{{#if hasExclusions}}
+[{exclusions}]
+{{else}}
+- Is or becomes publicly available
+- Was known prior to disclosure
+- Is independently developed
+{{/if}}
+
+## 4. Return of Materials
+
+Upon termination, the Receiving Party shall return or destroy 
+all Confidential Information within [{returnDays}] days.
+
+## 5. Remedies
+
+{{#if monetaryPenalty}}
+Breach of this Agreement shall result in liquidated damages 
+of [{penaltyAmount}].
+{{else}}
+The Disclosing Party shall be entitled to seek injunctive relief.
+{{/if}}
+
+**SIGNATURES**
+
+Disclosing Party: ____________________
+Date: ____________________
+
+Receiving Party: ____________________
+Date: ____________________
+""" ;
+                                    oc:templateVariables "confidentialScope",
+                                        "disclosingParty",
+                                        "else",
+                                        "exclusions",
+                                        "penaltyAmount",
+                                        "permittedPurpose",
+                                        "receivingParty",
+                                        "returnDays",
+                                        "termYears" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "template.tem.md" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Example: NDA Template" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "This skill enables creation of smart contract templates using **Accord Project** - an open-source framework for legally enforceable, machine-readable contracts. Create templates with embedded logic that can automate contract execution." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Overview" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Contract Template Skill" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "Generate an Accord Project contract template from user requirements" ;
+            oc:hasStep _:ref_08e6df6fd789fd0f,
+                _:ref_2dfab9d8fc69105a,
+                _:ref_5119e9167aee8772,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Package all files into the contract-template directory structure and optionally generate DOCX via office-mcp" ;
+                    oc:expectedOutcome "Complete, validated contract template ready for use" ;
+                    oc:stepDependsOn _:ref_2dfab9d8fc69105a ;
+                    oc:stepId "package-output" ],
+                _:ref_7a93a4001edb74ec,
+                _:ref_7f8382d96f534ac8,
+                _:ref_a53eea5b3aa2b154 ;
+            oc:workflowId "contract-template-creation" ;
+            oc:workflowName "Create Contract Template" ],
+        _:ref_d8cc4058576b8589 ;
+    oc:impartsKnowledge oc:kn_37acfbb6,
+        oc:kn_3adc0ac5,
+        oc:kn_64c3e712,
+        oc:kn_7b9a5e43,
+        oc:kn_7fb82da5,
+        oc:kn_85681dbf,
+        oc:kn_bd05b9c4,
+        oc:kn_ec9a2530 ;
     oc:isUserInvocable true ;
     oc:nature "Work" ;
-    oc:requiresState oc:EnvironmentReady ;
+    oc:requiresState oc:NetworkAvailable,
+        oc:NodeInstalled ;
     oc:resolvesIntent "build service agreement template",
+        "create consulting contract template",
         "create contract template",
-        "create rental agreement template",
-        "design contract with variable terms and logic",
-        "generate NDA template" ;
+        "design rental agreement template",
+        "generate NDA template",
+        "generate legal document with variable terms" ;
     oc:yieldsState oc:DocumentCreated .
 
-oc:kn_2bb1968a a oc:Heuristic,
+oc:kn_37acfbb6 a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When modeling contracts with optional provisions like penalty clauses or exclusion lists" ;
-    oc:directiveContent "Use optional fields in the Concerto model for conditional clauses (e.g., latePenalty optional Boolean) and pair them with {{#if}} blocks in the template for clean conditional rendering" ;
-    oc:hasRationale "This pattern keeps the data model clean while allowing rich conditional logic without polluting the default template output" ;
+    oc:appliesToContext "When writing template.tem.md grammar files" ;
+    oc:codeLanguage "markdown" ;
+    oc:directiveContent "Use [{variableName}] for template variables and {{#if condition}}...{{/if}} for conditional blocks in TemplateMark grammar files. Date formatting uses [{dateVar as \"MMMM DD, YYYY\"}]." ;
+    oc:hasRationale "TemplateMark syntax enables natural language contracts with embedded variable binding and conditional logic." .
+
+oc:kn_3adc0ac5 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When creating any contract template" ;
+    oc:directiveContent "1. Describe contract type and terms 2. Specify variables and logic rules 3. Generate Accord Project template (package.json, grammar, model, logic, sample)" ;
+    oc:stepOrder 1 .
+
+oc:kn_64c3e712 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When creating any Accord Project contract template" ;
+    oc:directiveContent "Contract templates must follow the Accord Project structure: package.json for metadata, grammar/template.tem.md for natural language template, model/model.cto for data model, logic/logic.ergo for business logic, and text/sample.md for sample contract." ;
+    oc:hasRationale "This standardized structure ensures templates are machine-readable, legally enforceable, and executable." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_7b9a5e43 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing logic.ergo files" ;
+    oc:codeLanguage "ergo" ;
+    oc:directiveContent "Write business logic in Ergo using 'contract [Name] over [AssetType]' with 'clause' functions that accept request transactions and return response transactions. Use if/then/else for conditional penalty calculations." ;
+    oc:hasRationale "Ergo enables deterministic, legally enforceable computation of contract obligations like payment due dates and penalties." .
+
+oc:kn_7fb82da5 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing model.cto data model files" ;
+    oc:codeLanguage "cto" ;
+    oc:directiveContent "Define data models in Concerto (.cto) with namespace, asset extends Contract for agreements, and transaction types for request/response pairs. Use 'optional' keyword for fields that may be absent." ;
+    oc:hasRationale "Concerto models define the typed schema that binds template variables to structured data, enabling type-safe contract execution." .
+
+oc:kn_85681dbf a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing template flexibility" ;
+    oc:directiveContent "Use conditional blocks ({{#if}}) for optional contract clauses like late payment penalties, exclusion lists, and remedy types. Provide default fallback text in {{else}} blocks." ;
+    oc:hasRationale "Conditional blocks allow a single template to cover multiple contract variations without creating separate templates for each variant." .
+
+oc:kn_bd05b9c4 a oc:Command,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When validating and executing Accord Project templates via CLI" ;
+    oc:directiveContent "cicero parse --template ./contract-template --sample ./text/sample.md → cicero trigger --template ./contract-template --sample ./text/sample.md --request ./request.json → cicero draft --template ./contract-template --data ./data.json" ;
+    oc:hasRationale "The parse-trigger-draft workflow ensures templates are syntactically valid, logic executes correctly, and new contracts can be drafted from data." .
+
+oc:kn_ec9a2530 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Before using Cicero CLI commands for template parsing, triggering, or drafting" ;
+    oc:directiveContent "Accord Project Cicero CLI requires Node.js and npm. Install globally with: npm install -g @accordproject/cicero-cli" ;
+    oc:hasRationale "Cicero CLI is the primary toolchain for validating and executing Accord Project templates locally." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_adb5ab06 a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When writing template grammar in TemplateMark format" ;
-    oc:directiveContent "Template variables use [{variableName}] syntax with optional format directives like [{date as \"MMMM DD, YYYY\"}]. Conditional sections use {{#if condition}}...{{/if}} Handlebars-style blocks" ;
-    oc:hasRationale "Correct syntax is required for the Accord Project Cicero engine to parse and bind variables to the data model" ;
-    oc:severityLevel "HIGH" .
+oc:req_0eb6219c a oc:RequirementTool ;
+    oc:isOptional true ;
+    oc:requirementValue "@accordproject/cicero-cli" .
 
-oc:kn_c28ec916 a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When creating any contract template" ;
-    oc:directiveContent "Accord Project templates must follow a three-part structure: TemplateMark grammar (natural language with variables), Concerto data model (typed schema), and Ergo business logic (executable clauses)" ;
-    oc:hasRationale "This tripartite structure ensures contracts are simultaneously human-readable, machine-parseable, and legally executable" ;
-    oc:severityLevel "CRITICAL" .
+oc:req_6b841853 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "Accord Project framework (TemplateMark, Concerto, Ergo)" .
 
-oc:kn_ca3af67b a oc:KnowledgeNode,
-        oc:SecurityImplication ;
-    oc:appliesToContext "Before delivering any generated contract to a user for real-world use" ;
-    oc:directiveContent "Generated contract templates are starting points and must be reviewed by qualified legal counsel before use. The Accord Project framework provides structure but does not guarantee legal enforceability in all jurisdictions" ;
-    oc:hasRationale "Legal compliance varies by jurisdiction and context; AI-generated templates cannot replace professional legal review" ;
-    oc:severityLevel "CRITICAL" .
+oc:req_c17091d8 a oc:RequirementTool ;
+    oc:isOptional true ;
+    oc:requirementValue "Node.js (for Cicero CLI)" .
 
-oc:kn_ed2e6492 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When designing contract templates for reuse" ;
-    oc:directiveContent "Do not hardcode contract terms directly into templates. All variable terms must be parameterized through the Concerto data model and bound via template variables" ;
-    oc:hasRationale "Hardcoded values defeat the purpose of smart contract templates and prevent automated drafting with different data sets" ;
-    oc:severityLevel "HIGH" .
+oc:req_fb96a740 a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "office-mcp MCP server with create_docx and fill_docx_template tools" .
+
+_:ref_37ea79f1e83dafc0 a oc:WorkflowStep ;
+    dcterms:description "Describe the contract type and terms" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_b801ae99fb0dce56 a oc:WorkflowStep ;
+    dcterms:description "Specify variables and logic rules" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_c1cc261b306e8c1d a oc:WorkflowStep ;
+    dcterms:description "I'll generate Accord Project template" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_08e6df6fd789fd0f a oc:WorkflowStep ;
+    dcterms:description "Write Ergo logic (logic.ergo) with contract clauses that compute obligations from request data" ;
+    oc:expectedOutcome "Executable business logic for contract computations (dates, penalties, amounts)" ;
+    oc:stepDependsOn _:ref_5119e9167aee8772 ;
+    oc:stepId "write-business-logic" .
+
+_:ref_2dfab9d8fc69105a a oc:WorkflowStep ;
+    dcterms:description "Run cicero parse and cicero trigger to validate template syntax and logic execution" ;
+    oc:expectedOutcome "Template parses without errors and logic executes correctly with sample data" ;
+    oc:stepDependsOn _:ref_7a93a4001edb74ec ;
+    oc:stepId "validate-template" .
+
+_:ref_7a93a4001edb74ec a oc:WorkflowStep ;
+    dcterms:description "Create sample.md with example contract text and data.json with example variable values" ;
+    oc:expectedOutcome "Test data that can be used to validate the template via Cicero CLI" ;
+    oc:stepDependsOn _:ref_08e6df6fd789fd0f,
+        _:ref_7f8382d96f534ac8 ;
+    oc:stepId "create-sample-data" .
+
+_:ref_7f8382d96f534ac8 a oc:WorkflowStep ;
+    dcterms:description "Write TemplateMark grammar (template.tem.md) with [{variables}] and {{#if}} conditional blocks" ;
+    oc:expectedOutcome "Natural language contract template with embedded variable bindings and conditional logic" ;
+    oc:stepDependsOn _:ref_5119e9167aee8772 ;
+    oc:stepId "write-template-grammar" .
+
+_:ref_a53eea5b3aa2b154 a oc:WorkflowStep ;
+    dcterms:description "Gather contract type, parties, key terms, variables, and conditional clauses from user description" ;
+    oc:expectedOutcome "Clear specification of contract structure and variable fields" ;
+    oc:stepId "gather-requirements" .
+
+_:ref_d8cc4058576b8589 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 1 ;
+    oc:hasStep _:ref_37ea79f1e83dafc0,
+        _:ref_b801ae99fb0dce56,
+        _:ref_c1cc261b306e8c1d ;
+    oc:workflowId "procedure_1" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_5119e9167aee8772 a oc:WorkflowStep ;
+    dcterms:description "Write Concerto model (model.cto) with asset extending Contract, typed fields, and transaction types" ;
+    oc:expectedOutcome "Typed data model with all contract variables and request/response transactions" ;
+    oc:stepDependsOn _:ref_a53eea5b3aa2b154 ;
+    oc:stepId "define-data-model" .
 

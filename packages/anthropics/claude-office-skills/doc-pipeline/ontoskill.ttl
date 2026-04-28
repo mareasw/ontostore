@@ -4,96 +4,420 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_office_skills_doc_pipeline a oc:DeclarativeSkill,
+oc:skill_claude_office_skills_doc_pipeline a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "doc-pipeline" ;
-    skos:broader "document processing pipeline orchestrator" ;
-    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-office-skills/doc-pipeline" ;
+    skos:broader "Pipeline orchestration system" ;
+    prov:wasDerivedFrom "../.agents/skills/anthropics/claude-office-skills/doc-pipeline" ;
     oc:contentHash "4fd5f29f240842b77ea2bd26e15381b6d6e6be96ef04d1d86198b80a4451c171" ;
-    oc:dependsOnSkill oc:skill_docx_manipulation,
-        oc:skill_pdf_extraction,
-        oc:skill_xlsx_manipulation ;
-    oc:differentia "chains multiple document operations (extract, transform, convert) into reusable multi-stage workflows with data flowing between stages" ;
+    oc:dependsOnSkill oc:skill_ontoskills_docx_manipulation,
+        oc:skill_ontoskills_pdf_extraction,
+        oc:skill_ontoskills_smart_ocr,
+        oc:skill_ontoskills_xlsx_manipulation ;
+    oc:differentia "chains document operations (extract, transform, convert, AI analysis) into sequential reusable workflows with data flowing between stages" ;
+    oc:extends oc:skill_ontoskills_batch_processor ;
     oc:handlesFailure oc:FileNotFound,
         oc:InvalidInput,
-        oc:StageExecutionFailed ;
-    oc:hasArgumentHint "pipeline description in natural language (e.g., 'PDF → Extract Text → Translate → Generate DOCX')" ;
-    oc:hasCategory "automation" ;
+        oc:PipelineStageFailed ;
+    oc:hasArgumentHint "pipeline description (e.g., \"PDF → Extract Text → Translate → Generate DOCX\")" ;
+    oc:hasCategory "workflow" ;
     oc:hasDescription "Chain document operations into reusable pipelines" ;
     oc:hasName "doc-pipeline" ;
-    oc:hasRequirement oc:req_47a90164,
-        oc:req_6caa6449,
-        oc:req_99341ad8,
-        oc:req_e18dc245,
-        oc:req_fd635a4a ;
-    oc:impartsKnowledge oc:kn_2b675181,
-        oc:kn_536e4f64,
-        oc:kn_6761d555,
-        oc:kn_9ce38986,
-        oc:kn_b2acff36 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# Install required dependencies
+pip install python-docx openpyxl python-pptx reportlab jinja2
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 170-173" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Installation" ],
+                [ a oc:Section ;
+                    oc:hasContent _:ref_2b9e8b875c7763ed ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Best Practices" ],
+                [ a oc:Section ;
+                    oc:hasContent _:ref_3055758cc1df3119,
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Example prompts:**" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 3 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "\"Multiple inputs → Merge → Format → Output\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "\"Image → OCR → Summarize → Create Report\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "\"PDF → Extract Text → Translate → Generate DOCX\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "\"Excel → Analyze → Generate Charts → Create PPT\"" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "How to Use" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# pipeline.yaml
+name: contract-review-pipeline
+description: Extract, analyze, and report on contracts
+
+stages:
+  - name: extract
+    operation: pdf-extraction
+    input: $input_file
+    output: $extracted_text
+    
+  - name: analyze
+    operation: ai-analyze
+    input: $extracted_text
+    prompt: "Review this contract for risks..."
+    output: $analysis
+    
+  - name: report
+    operation: docx-generation
+    input: $analysis
+    template: templates/review_report.docx
+    output: $output_file
+""" ;
+                                    oc:codeLanguage "yaml" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 79-101" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Pipeline DSL (Domain Specific Language)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """class ConditionalPipeline(Pipeline):
+    def add_conditional_stage(self, name: str, condition: Callable, 
+                               if_true: Callable, if_false: Callable):
+        def conditional_op(data):
+            if condition(data):
+                return if_true(data)
+            return if_false(data)
+        return self.add_stage(name, conditional_op)
+
+# Usage
+pipeline.add_conditional_stage(
+    "ocr_if_needed",
+    condition=lambda d: d.get("has_images"),
+    if_true=run_ocr,
+    if_false=lambda d: d
+)
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 141-158" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "Advanced: Conditional Pipelines" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """from typing import Callable, Any
+from dataclasses import dataclass
+
+@dataclass
+class Stage:
+    name: str
+    operation: Callable
+    
+class Pipeline:
+    def __init__(self, name: str):
+        self.name = name
+        self.stages: list[Stage] = []
+    
+    def add_stage(self, name: str, operation: Callable):
+        self.stages.append(Stage(name, operation))
+        return self  # Fluent API
+    
+    def run(self, input_data: Any) -> Any:
+        data = input_data
+        for stage in self.stages:
+            print(f"Running stage: {stage.name}")
+            data = stage.operation(data)
+        return data
+
+# Example usage
+pipeline = Pipeline("contract-review")
+pipeline.add_stage("extract", extract_pdf_text)
+pipeline.add_stage("analyze", analyze_with_ai)
+pipeline.add_stage("generate", create_docx_report)
+
+result = pipeline.run("/path/to/contract.pdf")
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 105-137" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Python Implementation" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """Stage 1      Stage 2      Stage 3      Stage 4
+┌──────┐    ┌──────┐    ┌──────┐    ┌──────┐
+│Extract│ → │Transform│ → │ AI   │ → │Output│
+│ PDF  │    │  Data  │    │Analyze│   │ DOCX │
+└──────┘    └──────┘    └──────┘    └──────┘
+     │           │           │           │
+     └───────────┴───────────┴───────────┘
+                 Data Flow
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 66-75" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Pipeline Architecture" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Domain Knowledge" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "[Claude Office Skills Hub](https://github.com/claude-office-skills/skills)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "[Custom Repository](https://github.com/claude-office-skills/skills)" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Resources" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "This skill enables building document processing pipelines - chain multiple operations (extract, transform, convert) into reusable workflows with data flowing between stages." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Overview" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Doc Pipeline Skill" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """# ═══════════════════════════════════════════════════════════════════════════════
+# CLAUDE OFFICE SKILL - Enhanced Metadata v2.0
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Basic Information
+name: doc-pipeline
+description: "Chain document operations into reusable pipelines"
+version: "1.0"
+author: claude-office-skills
+license: MIT
+
+# Categorization
+category: workflow
+tags:
+  - pipeline
+  - workflow
+  - document
+  - automation
+department: All
+
+# AI Model Compatibility
+models:
+  recommended:
+    - claude-sonnet-4
+    - claude-opus-4
+  compatible:
+    - claude-3-5-sonnet
+    - gpt-4
+    - gpt-4o
+
+# Skill Capabilities
+capabilities:
+  - document_workflow
+  - pipeline_automation
+
+# Language Support
+languages:
+  - en
+  - zh
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:hasWorkflow _:ref_2b9e8b875c7763ed,
+        _:ref_3055758cc1df3119,
+        [ a oc:Workflow ;
+            dcterms:description "Create a document processing pipeline from user requirements and execute it." ;
+            oc:hasStep _:ref_087914b167212e16,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Verify the final output meets expectations and intermediate data is intact for debugging." ;
+                    oc:expectedOutcome "Confirmed output file or data structure matching user requirements." ;
+                    oc:stepDependsOn _:ref_b6bb838b2b90f495 ;
+                    oc:stepId "validate-output" ],
+                _:ref_a0cb017a33822622,
+                _:ref_b6bb838b2b90f495,
+                _:ref_f5391889b992f6eb ;
+            oc:workflowId "doc-pipeline-build" ;
+            oc:workflowName "Build and Execute Document Pipeline" ] ;
+    oc:impartsKnowledge oc:kn_009d7c3b,
+        oc:kn_2378acc7,
+        oc:kn_289dc39d,
+        oc:kn_3171431c,
+        oc:kn_a040f363,
+        oc:kn_b6142af6 ;
     oc:isUserInvocable true ;
-    oc:nature "Concept" ;
+    oc:nature "Work" ;
     oc:requiresState oc:EnvironmentReady,
         oc:FileExists ;
-    oc:resolvesIntent "automate multi-step document transformations",
-        "chain document operations into a pipeline",
+    oc:resolvesIntent "automate multi-step document processing",
+        "build reusable document workflows",
+        "chain document operations into pipeline",
         "convert documents through multiple stages",
-        "create reusable document processing workflows" ;
+        "create conditional document processing pipelines" ;
     oc:yieldsState oc:DocumentCreated,
         oc:PipelineCompleted .
 
-oc:kn_2b675181 a oc:Heuristic,
+oc:kn_009d7c3b a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When running or troubleshooting pipelines" ;
-    oc:directiveContent "Use intermediate outputs at each stage for debugging and auditability." ;
-    oc:hasRationale "Intermediate outputs let you inspect data at each transformation step, making it possible to isolate which stage introduced an error." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_536e4f64 a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When creating reusable pipeline definitions" ;
-    oc:directiveContent "Make pipelines configurable via YAML or JSON declarations rather than hardcoding operations in code." ;
-    oc:hasRationale "Declarative pipeline definitions separate configuration from logic, enabling non-technical users to modify pipelines and supporting version control of pipeline specs." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_6761d555 a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When designing any document pipeline" ;
-    oc:directiveContent "Each pipeline stage should have a single responsibility — one well-defined transformation per stage." ;
-    oc:hasRationale "Single-responsibility stages are easier to debug, test, reuse, and compose into new pipelines." ;
+    oc:appliesToContext "When designing pipeline stages" ;
+    oc:directiveContent "Keep each pipeline stage focused on a single responsibility — one operation per stage." ;
+    oc:hasRationale "Single-responsibility stages are easier to debug, test, and reuse across different pipelines." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_9ce38986 a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "When building multi-stage pipelines" ;
-    oc:directiveContent "Implement stage-level error handling so that a failure in one stage does not silently corrupt downstream stages." ;
-    oc:hasRationale "Without per-stage error boundaries, failures propagate and produce incorrect or incomplete outputs that are hard to diagnose." ;
+oc:kn_2378acc7 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When creating reusable pipelines" ;
+    oc:directiveContent "Make pipelines configurable via YAML/JSON declarations rather than hardcoding operations." ;
+    oc:hasRationale "Declarative configuration enables non-technical users to modify pipelines and promotes reuse across projects." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_289dc39d a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing pipeline architecture" ;
+    oc:directiveContent "Do not build monolithic stages that perform multiple unrelated operations." ;
+    oc:hasRationale "Monolithic stages reduce reusability, make debugging harder, and prevent conditional branching." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_b2acff36 a oc:KnowledgeNode,
-        oc:SideEffect ;
-    oc:appliesToContext "When executing any pipeline" ;
-    oc:directiveContent "Each pipeline stage transforms and passes data forward; intermediate file artifacts may be created at each stage." ;
-    oc:hasRationale "Awareness of intermediate artifacts is important for disk space management, temp file cleanup, and understanding the pipeline's footprint." ;
-    oc:severityLevel "LOW" .
+oc:kn_3171431c a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When building any pipeline" ;
+    oc:directiveContent "Use intermediate outputs between stages for debugging and error isolation." ;
+    oc:hasRationale "Intermediate outputs allow inspection of data at each stage, making it possible to identify which stage introduced errors." ;
+    oc:severityLevel "MEDIUM" .
 
-oc:req_47a90164 a oc:RequirementTool ;
-    oc:isOptional true ;
-    oc:requirementValue "openpyxl" .
+oc:kn_a040f363 a oc:Idempotency,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When implementing stage operations" ;
+    oc:directiveContent "Pipeline stages should be designed to be idempotent where possible — re-running a stage with the same input should produce the same output." ;
+    oc:hasRationale "Idempotent stages enable safe retries and pipeline resumption without side effects." ;
+    oc:severityLevel "MEDIUM" .
 
-oc:req_6caa6449 a oc:RequirementTool ;
-    oc:isOptional true ;
-    oc:requirementValue "python-docx" .
+oc:kn_b6142af6 a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "On pipeline execution failure" ;
+    oc:directiveContent "Implement stage-level error handling so one failing stage doesn't destroy the entire pipeline's intermediate data." ;
+    oc:hasRationale "Stage-level isolation allows partial results to be preserved and the pipeline to be resumed from the failure point." ;
+    oc:severityLevel "HIGH" .
 
-oc:req_99341ad8 a oc:RequirementTool ;
-    oc:isOptional true ;
-    oc:requirementValue "jinja2" .
+_:ref_02c18c65f7b68934 a oc:WorkflowStep ;
+    dcterms:description "**Use intermediate outputs for debugging**" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
 
-oc:req_e18dc245 a oc:RequirementTool ;
-    oc:isOptional true ;
-    oc:requirementValue "python-pptx" .
+_:ref_37f555f4a250a783 a oc:WorkflowStep ;
+    dcterms:description "I'll execute the appropriate operations" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
 
-oc:req_fd635a4a a oc:RequirementTool ;
-    oc:isOptional true ;
-    oc:requirementValue "reportlab" .
+_:ref_3e06c94557dc2b4d a oc:WorkflowStep ;
+    dcterms:description "**Make pipelines configurable via YAML/JSON**" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_4114804171dcdc17 a oc:WorkflowStep ;
+    dcterms:description "Describe what you want to accomplish" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_8dff2e560213a3e6 a oc:WorkflowStep ;
+    dcterms:description "Provide any required input data or files" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_e28f931a6310ca83 a oc:WorkflowStep ;
+    dcterms:description "**Keep stages focused (single responsibility)**" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_f59779227ec10a35 a oc:WorkflowStep ;
+    dcterms:description "**Implement stage-level error handling**" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_087914b167212e16 a oc:WorkflowStep ;
+    dcterms:description "Parse the user's pipeline description to identify required stages and operations." ;
+    oc:expectedOutcome "A list of pipeline stages with input/output specifications." ;
+    oc:stepId "define-intent" .
+
+_:ref_2b9e8b875c7763ed a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 1 ;
+    oc:hasStep _:ref_02c18c65f7b68934,
+        _:ref_3e06c94557dc2b4d,
+        _:ref_e28f931a6310ca83,
+        _:ref_f59779227ec10a35 ;
+    oc:workflowId "procedure_1" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_3055758cc1df3119 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 1 ;
+    oc:hasStep _:ref_37f555f4a250a783,
+        _:ref_4114804171dcdc17,
+        _:ref_8dff2e560213a3e6 ;
+    oc:workflowId "procedure_1" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_a0cb017a33822622 a oc:WorkflowStep ;
+    dcterms:description "Define the pipeline using YAML DSL or Python Pipeline class, mapping each stage to an operation." ;
+    oc:expectedOutcome "A configured pipeline object or YAML definition." ;
+    oc:stepDependsOn _:ref_087914b167212e16 ;
+    oc:stepId "configure-pipeline" .
+
+_:ref_b6bb838b2b90f495 a oc:WorkflowStep ;
+    dcterms:description "Run the pipeline sequentially, passing data between stages." ;
+    oc:expectedOutcome "Data flows through all stages producing the final output." ;
+    oc:stepDependsOn _:ref_f5391889b992f6eb ;
+    oc:stepId "execute-pipeline" .
+
+_:ref_f5391889b992f6eb a oc:WorkflowStep ;
+    dcterms:description "Verify all input files exist and required dependencies are installed." ;
+    oc:expectedOutcome "Confirmation that inputs are available and environment is ready." ;
+    oc:stepDependsOn _:ref_a0cb017a33822622 ;
+    oc:stepId "validate-inputs" .
 

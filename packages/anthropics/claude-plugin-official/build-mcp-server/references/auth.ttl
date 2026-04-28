@@ -4,86 +4,304 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_plugin_official_build_mcp_server_auth a oc:DeclarativeSkill,
+oc:skill_claude_plugin_official_build_mcp_server_auth a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "auth" ;
     skos:broader "Authentication guide" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/build-mcp-server" ;
     oc:contentHash "c1684118bec544bda013495fa9af79b7e43b47d361a1fec7b8dc87e55638da41" ;
-    oc:differentia "that defines the three-tier auth model (static key, CIMD OAuth, DCR OAuth) for MCP servers with token storage and validation requirements" ;
-    oc:extends oc:skill_anthropics_claude_plugin_official_build_mcp_server ;
+    oc:differentia "that categorizes MCP server auth into three tiers (static key, OAuth CIMD, OAuth DCR) with spec-compliant token handling" ;
+    oc:extends oc:skill_claude_plugin_official_build_mcp_server ;
     oc:handlesFailure oc:InvalidInput,
         oc:PermissionDenied ;
+    oc:hasArgumentHint "auth-tier or deployment context (local/remote/MCPB)" ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_0f717004,
-        oc:kn_176d32eb,
-        oc:kn_1d0b64fe,
-        oc:kn_6371a081,
-        oc:kn_975b78c3,
-        oc:kn_a4945c96,
-        oc:kn_f1f3c394,
-        oc:kn_ff561b65 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Auth is the reason most people end up needing a **remote** server even when a local one would be simpler. OAuth redirects, token storage, and refresh all work cleanly when there's a real hosted endpoint to redirect back to." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "Works for local stdio, MCPB, and remote servers alike. If this is all you need, stop here." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Server reads a key from env. User provides it once at setup. Done." ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """const apiKey = process.env.UPSTREAM_API_KEY;
+if (!apiKey) throw new Error("UPSTREAM_API_KEY not set");
+""" ;
+                                    oc:codeLanguage "typescript" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 13-16" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Tier 1: No auth / static API key" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "Spec 2025-11-25 promoted CIMD to SHOULD (preferred). Advertise support via `client_id_metadata_document_supported: true` in your OAuth AS metadata." ],
+                                _:ref_9e81b6f1e93363bf,
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """┌─────────┐  client_id=https://...  ┌──────────────┐   upstream OAuth   ┌──────────┐
+│ MCP host│ ──────────────────────> │ Your MCP srv │ ─────────────────> │ Upstream │
+└─────────┘ <─── bearer token ───── └──────────────┘ <── access token ──└──────────┘
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 5 ;
+                                    oc:sourceLocation "lines 33-37" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Server responsibilities:**" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Client ID Metadata Document.** The MCP host publishes its client metadata at an HTTPS URL and uses that URL *as* its `client_id`. Your authorization server fetches the document, validates it, and proceeds with the auth-code flow. No registration endpoint, no stored client records." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Tier 2: OAuth 2.0 via CIMD (preferred per spec 2025-11-25)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Backward-compat fallback** — spec 2025-11-25 demoted DCR to MAY. The host discovers your `registration_endpoint`, POSTs its metadata to register itself as a client, gets back a `client_id`, then runs the auth-code flow." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Client priority order:** pre-registered → CIMD (if AS advertises `client_id_metadata_document_supported`) → DCR (if AS has `registration_endpoint`) → prompt user." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "Implement DCR if you need to support hosts that haven't moved to CIMD yet. Same server responsibilities as CIMD, but instead of fetching the `client_id` URL you run a registration endpoint that stores client records." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Tier 3: OAuth 2.0 via Dynamic Client Registration (DCR)" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "The three tiers" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Several MCP-focused hosting providers handle the OAuth plumbing for you — you implement tool logic, they run the authorization server. Check their docs for current capabilities. If the user doesn't have strong hosting preferences, this is usually the fastest path to a working OAuth-protected server." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Hosting providers with built-in DCR/CIMD support" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "If OAuth is required, lean hard toward remote HTTP. If you *must* ship local + OAuth, the `@modelcontextprotocol/sdk` includes a localhost-redirect helper, and MCPB is the right packaging so at least the runtime is predictable." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Local stdio servers **can** do OAuth (open a browser, catch the redirect on a localhost port, stash the token in the OS keychain). It's fragile:" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "No central token refresh or revocation" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Every user re-does the dance" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Breaks in headless/remote environments" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Local servers and OAuth" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "If you're wiring auth from scratch, check these first." ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "`mcpAuthRouter()` — Express router for the full OAuth AS surface (metadata, authorize, token)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "`proxyProvider` — forward auth to an upstream IdP" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "`bearerAuth` — middleware that validates bearer tokens against your verifier" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "`@modelcontextprotocol/sdk/server/auth` ships:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "SDK helpers — don't hand-roll" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Token passthrough is explicitly forbidden.** Don't accept a token, then forward it upstream. If your server needs to call another service, exchange the token or use its own credentials." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Validating \"is this a valid bearer token\" isn't enough. The spec requires validating \"was this token minted *for this server*\" — RFC 8707 audience. A token issued for `api.other-service.com` must be rejected even if the signature checks out." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Token audience validation (spec MUST)" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 1 ;
+                            oc:rowCount 3 ;
+                            oc:tableCaption "## Token storage" ;
+                            oc:tableMarkdown """| Deployment | Store tokens in |
+|---|---|
+| Remote, stateless | Nowhere — host sends bearer each request |
+| Remote, stateful | Session store keyed by MCP session ID (Redis, etc.) |
+| MCPB / local | OS keychain (`keytar` on Node, `keyring` on Python). **Never plaintext on disk.** |
+""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Token storage" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Auth for MCP Servers" ] ;
+    oc:hasWorkflow _:ref_9e81b6f1e93363bf ;
+    oc:impartsKnowledge oc:kn_088669e0,
+        oc:kn_1ebfbdc9,
+        oc:kn_3c215eb8,
+        oc:kn_80a96626,
+        oc:kn_908077f1,
+        oc:kn_a2cfdd68,
+        oc:kn_a5b1ae6d,
+        oc:kn_a6b189d2,
+        oc:kn_b05e164b,
+        oc:kn_c63c9fee ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:EnvironmentReady ;
+    oc:requiresState oc:MCPServerInitialized ;
     oc:resolvesIntent "choose authentication strategy for MCP server",
-        "configure token storage for MCP server",
-        "decide between local and remote MCP server based on auth needs",
+        "configure token storage and validation for MCP server",
         "implement OAuth 2.0 for MCP server",
-        "understand MCP auth spec requirements" ;
-    oc:yieldsState oc:SystemAuthenticated .
+        "understand MCP auth spec requirements (2025-11-25)" ;
+    oc:yieldsState oc:MCPServerAuthenticated .
 
-oc:kn_0f717004 a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "Before processing any authenticated request to the MCP server" ;
-    oc:directiveContent "Validate bearer token audience (RFC 8707) — confirm the token was minted specifically for this server, not just that the signature is valid." ;
-    oc:hasRationale "A token with a valid signature but wrong audience indicates it was issued for a different service; accepting it violates the spec MUST requirement." ;
-    oc:severityLevel "CRITICAL" .
+oc:kn_088669e0 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When choosing an auth strategy for a new MCP server" ;
+    oc:directiveContent "Start with Tier 1 (static API key from env). Only escalate to OAuth if the upstream API or security requirements demand it. If OAuth is needed, prefer remote HTTP hosting over local stdio." ;
+    oc:hasRationale "Static API keys cover most use cases and avoid OAuth complexity; remote hosting avoids the fragility of localhost OAuth redirects" ;
+    oc:severityLevel "HIGH" .
 
-oc:kn_176d32eb a oc:Constraint,
+oc:kn_1ebfbdc9 a oc:KnowledgeNode,
+        oc:Prerequisite ;
+    oc:appliesToContext "When implementing OAuth on an MCP server" ;
+    oc:directiveContent "Use @modelcontextprotocol/sdk/server/auth helpers (mcpAuthRouter, bearerAuth, proxyProvider) rather than hand-rolling OAuth logic." ;
+    oc:hasRationale "The SDK provides battle-tested, spec-compliant auth primitives" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_3c215eb8 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When implementing Tier 2 CIMD OAuth on an MCP server" ;
+    oc:directiveContent """1. Serve OAuth AS Metadata (RFC 8414) at /.well-known/oauth-authorization-server with client_id_metadata_document_supported: true
+2. Serve MCP-protected-resource metadata pointing at (1)
+3. At authorize time: fetch client_id as HTTPS URL, validate returned client metadata, proceed
+4. Validate bearer tokens on incoming /mcp requests""" ;
+    oc:stepOrder 1 .
+
+oc:kn_80a96626 a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When implementing OAuth on any MCP server" ;
-    oc:directiveContent "Use SDK helpers from @modelcontextprotocol/sdk/server/auth (mcpAuthRouter, bearerAuth, proxyProvider) rather than hand-rolling OAuth logic." ;
-    oc:hasRationale "The SDK handles spec-compliant metadata, authorize, token, and validation flows correctly; hand-rolled implementations tend to miss edge cases and spec requirements." .
-
-oc:kn_1d0b64fe a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When handling bearer tokens on incoming MCP requests" ;
-    oc:directiveContent "Token passthrough is explicitly forbidden by the MCP spec. Never accept a bearer token and forward it upstream. If your server calls another service, exchange the token or use its own credentials." ;
-    oc:hasRationale "Token passthrough violates RFC 8707 audience validation and creates security vulnerabilities where tokens minted for one service are accepted by another." ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_6371a081 a oc:KnowledgeNode,
-        oc:KnownIssue ;
-    oc:appliesToContext "When deciding between local stdio and remote HTTP deployment for an OAuth-requiring MCP server" ;
-    oc:directiveContent "Local stdio servers doing OAuth via localhost browser redirect is fragile — it breaks in headless/remote environments, requires every user to repeat the auth dance, and lacks central token refresh or revocation. Lean toward remote HTTP if OAuth is required." ;
-    oc:hasRationale "OAuth redirect flows are designed for hosted endpoints; local localhost redirects introduce reliability and usability problems that remote hosting avoids." ;
+    oc:appliesToContext "When implementing OAuth 2.0 on an MCP server" ;
+    oc:directiveContent "Prefer CIMD (Client ID Metadata Document) over DCR (Dynamic Client Registration). CIMD is SHOULD per spec 2025-11-25; DCR is MAY and exists for backward compatibility only." ;
+    oc:hasRationale "CIMD eliminates the need for a registration endpoint and stored client records, simplifying the auth flow" ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_975b78c3 a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "When implementing OAuth 2.0 for a remote MCP server" ;
-    oc:directiveContent "Prefer OAuth via Client ID Metadata Document (CIMD) per spec 2025-11-25 which promoted it to SHOULD. Only fall back to Dynamic Client Registration (DCR) for backward compatibility with hosts that haven't adopted CIMD." ;
-    oc:hasRationale "CIMD eliminates the need for a registration endpoint and stored client records, simplifying the auth flow while remaining spec-compliant." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_a4945c96 a oc:Heuristic,
+oc:kn_908077f1 a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When a remote MCP server requires OAuth and the user has no hosting preference" ;
-    oc:directiveContent "If the user doesn't have strong hosting preferences, use an MCP-focused hosting provider that handles OAuth plumbing natively — this is usually the fastest path to a working OAuth-protected server." ;
-    oc:hasRationale "Specialized hosting providers eliminate the need to implement authorization server endpoints, token validation, and refresh logic from scratch." .
+    oc:appliesToContext "When an MCP host is determining which auth mechanism to use" ;
+    oc:directiveContent "Client priority order for auth: pre-registered → CIMD (if AS advertises client_id_metadata_document_supported) → DCR (if AS has registration_endpoint) → prompt user." ;
+    oc:hasRationale "This priority order follows the spec's preference and degrades gracefully for older hosts" ;
+    oc:severityLevel "MEDIUM" .
 
-oc:kn_f1f3c394 a oc:AntiPattern,
+oc:kn_a2cfdd68 a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When storing tokens for local or MCPB-packaged MCP servers" ;
-    oc:directiveContent "Never store tokens in plaintext on disk for local/MCPB deployments. Use the OS keychain (keytar on Node, keyring on Python) instead." ;
-    oc:hasRationale "Plaintext token storage exposes credentials to any process or user with file system access, compromising the entire auth chain." ;
+    oc:appliesToContext "When validating incoming bearer tokens on /mcp requests" ;
+    oc:directiveContent "Validate RFC 8707 audience on every bearer token — reject tokens minted for a different server even if the signature is valid." ;
+    oc:hasRationale "Spec MUST requirement: a token for api.other-service.com must be rejected by your server" ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_ff561b65 a oc:DesignPrinciple,
+oc:kn_a5b1ae6d a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When selecting an authentication strategy for an MCP server" ;
-    oc:directiveContent "If all you need is a static API key read from an environment variable, use Tier 1 and stop — no OAuth complexity needed." ;
-    oc:hasRationale "Over-engineering auth adds fragility and maintenance burden with no functional benefit for simple use cases." ;
+    oc:appliesToContext "When storing tokens for local stdio or MCPB-packaged servers" ;
+    oc:directiveContent "Never store tokens in plaintext on disk for local/MCPB deployments. Use OS keychain (keytar on Node, keyring on Python)." ;
+    oc:hasRationale "Plaintext token storage is a security vulnerability; OS keychain provides encrypted, OS-managed credential storage" ;
     oc:severityLevel "HIGH" .
+
+oc:kn_a6b189d2 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When considering OAuth for local stdio MCP servers" ;
+    oc:directiveContent "Local stdio OAuth is fragile — breaks in headless/remote environments, every user repeats the auth dance, and there is no central token refresh or revocation." ;
+    oc:hasRationale "OAuth browser redirects on localhost are unreliable; if OAuth is required, lean toward remote HTTP" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_b05e164b a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When implementing Tier 1 static API key auth" ;
+    oc:codeLanguage "typescript" ;
+    oc:directiveContent """const apiKey = process.env.UPSTREAM_API_KEY;
+if (!apiKey) throw new Error("UPSTREAM_API_KEY not set");""" .
+
+oc:kn_c63c9fee a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When handling bearer tokens on incoming MCP requests" ;
+    oc:directiveContent "Never do token passthrough — do not accept a bearer token and forward it upstream. If your server calls another service, exchange the token or use its own credentials." ;
+    oc:hasRationale "Token passthrough is explicitly forbidden by the MCP spec and violates audience scoping" ;
+    oc:severityLevel "CRITICAL" .
+
+_:ref_0377191b4ad202ce a oc:WorkflowStep ;
+    dcterms:description "Validate bearer tokens on incoming `/mcp` requests" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_8b5fb9b1216b5349 a oc:WorkflowStep ;
+    dcterms:description "At authorize time: fetch `client_id` as an HTTPS URL, validate the returned client metadata, proceed" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_a02686eac7c75d19 a oc:WorkflowStep ;
+    dcterms:description "Serve an MCP-protected-resource metadata document pointing at (1)" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_af66e178521d5f83 a oc:WorkflowStep ;
+    dcterms:description "Serve OAuth Authorization Server Metadata (RFC 8414) at `/.well-known/oauth-authorization-server` with `client_id_metadata_document_supported: true`" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_9e81b6f1e93363bf a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 4 ;
+    oc:hasStep _:ref_0377191b4ad202ce,
+        _:ref_8b5fb9b1216b5349,
+        _:ref_a02686eac7c75d19,
+        _:ref_af66e178521d5f83 ;
+    oc:workflowId "procedure_4" ;
+    oc:workflowName "Ordered Procedure" .
 

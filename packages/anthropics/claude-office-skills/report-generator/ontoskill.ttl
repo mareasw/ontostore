@@ -4,107 +4,430 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_office_skills_report_generator a oc:DeclarativeSkill,
+oc:skill_claude_office_skills_report_generator a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "report-generator" ;
-    skos:broader "Report generation system" ;
-    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-office-skills/report-generator" ;
+    skos:broader "Report generation tool" ;
+    prov:wasDerivedFrom "../.agents/skills/anthropics/claude-office-skills/report-generator" ;
     oc:contentHash "de31d873ebe45a7f66a40ad24ebcef75385ed2c3e4faadf66470b0d71ec320df" ;
-    oc:dependsOnSkill oc:skill_office_mcp ;
     oc:differentia "that creates professional data reports with charts, tables, KPI dashboards, and visualizations from structured data sources" ;
-    oc:handlesFailure oc:DataFormatError,
+    oc:extends oc:skill_ontoskills_office_mcp ;
+    oc:handlesFailure oc:DataProcessingError,
         oc:FileNotFound,
         oc:InvalidInput ;
     oc:hasAllowedTool "create_chart",
         "create_docx",
         "create_pptx",
         "create_xlsx" ;
-    oc:hasArgumentHint "data source (CSV/Excel/JSON path or description) and report type" ;
-    oc:hasCategory "document" ;
+    oc:hasArgumentHint "data source (CSV, Excel, JSON, or description) and report type" ;
+    oc:hasCategory "presentation" ;
     oc:hasDescription "Generate professional data reports with charts, tables, and visualizations" ;
     oc:hasName "report-generator" ;
-    oc:hasRequirement oc:req_4c8562a3,
+    oc:hasRequirement oc:req_41e714c9,
         oc:req_746aacc9,
-        oc:req_82f4d01f,
-        oc:req_9fda19b0,
+        oc:req_bd4204b0,
+        oc:req_fd635a4a,
         oc:req_fe6b6a53 ;
-    oc:impartsKnowledge oc:kn_05a8d43f,
-        oc:kn_3a325487,
-        oc:kn_5f383b9e,
-        oc:kn_614bd549,
-        oc:kn_8f96849a,
-        oc:kn_e9300899 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """import pandas as pd
+import matplotlib.pyplot as plt
+
+def create_sales_report(csv_path, output_path):
+    # Read data
+    df = pd.read_csv(csv_path)
+    
+    # Calculate metrics
+    metrics = {
+        'total_revenue': df['amount'].sum(),
+        'total_orders': len(df),
+        'avg_order': df['amount'].mean(),
+        'top_product': df.groupby('product')['amount'].sum().idxmax()
+    }
+    
+    # Create visualizations
+    fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+    
+    # Revenue by product
+    df.groupby('product')['amount'].sum().plot(
+        kind='bar', ax=axes[0,0], title='Revenue by Product'
+    )
+    
+    # Monthly trend
+    df.groupby('month')['amount'].sum().plot(
+        kind='line', ax=axes[0,1], title='Monthly Revenue'
+    )
+    
+    plt.tight_layout()
+    plt.savefig(output_path.replace('.html', '_charts.png'))
+    
+    # Generate HTML report
+    html = generate_html_report(metrics, 'Sales Report')
+    
+    with open(output_path, 'w') as f:
+        f.write(html)
+    
+    return output_path
+
+create_sales_report('sales_data.csv', 'sales_report.html')
+""" ;
+                            oc:codeLanguage "python" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 157-198" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Example: Sales Report" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "[ReportLab](https://www.reportlab.com/)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "[Plotly](https://plotly.com/)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "[Matplotlib](https://matplotlib.org/)" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Resources" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "This skill enables automatic generation of professional data reports. Create dashboards, KPI summaries, and analytical reports with charts, tables, and insights from your data." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Overview" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """def generate_html_report(data, title):
+    html = f'''
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>{title}</title>
+        <style>
+            body {{ font-family: Arial; margin: 40px; }}
+            .kpi {{ display: flex; gap: 20px; }}
+            .kpi-card {{ background: #f5f5f5; padding: 20px; border-radius: 8px; }}
+            .metric {{ font-size: 2em; font-weight: bold; color: #2563eb; }}
+            table {{ border-collapse: collapse; width: 100%; }}
+            th, td {{ border: 1px solid #ddd; padding: 12px; text-align: left; }}
+        </style>
+    </head>
+    <body>
+        <h1>{title}</h1>
+        <div class="kpi">
+            <div class="kpi-card">
+                <div class="metric">${data['revenue']:,.0f}</div>
+                <div>Total Revenue</div>
+            </div>
+            <div class="kpi-card">
+                <div class="metric">{data['growth']:.1%}</div>
+                <div>Growth Rate</div>
+            </div>
+        </div>
+        <!-- More content -->
+    </body>
+    </html>
+    '''
+    return html
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 120-153" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "HTML Report Template" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# Report structure
+report = {
+    'title': 'Monthly Sales Report',
+    'period': 'January 2024',
+    'sections': [
+        'executive_summary',
+        'kpi_dashboard',
+        'detailed_analysis',
+        'charts',
+        'recommendations'
+    ]
+}
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 74-87" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Report Components" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """import pandas as pd
+import matplotlib.pyplot as plt
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+
+def generate_report(data, output_path):
+    # Load data
+    df = pd.read_csv(data)
+    
+    # Calculate KPIs
+    total_revenue = df['revenue'].sum()
+    avg_order = df['revenue'].mean()
+    growth = df['revenue'].pct_change().mean()
+    
+    # Create charts
+    fig, axes = plt.subplots(2, 2, figsize=(12, 10))
+    df.plot(kind='bar', ax=axes[0,0], title='Revenue by Month')
+    df.plot(kind='line', ax=axes[0,1], title='Trend')
+    plt.savefig('charts.png')
+    
+    # Generate PDF
+    # ... PDF generation code
+    
+    return output_path
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 91-116" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Using Python for Reports" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Domain Knowledge" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 3 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "\"Create a monthly KPI dashboard\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "\"Generate a sales report from this data\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "\"Build an executive summary with charts\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "\"Produce a data analysis report\"" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Example prompts:**" ],
+                        _:ref_e2193add1e89a979 ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "How to Use" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Report Generator Skill" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """# ═══════════════════════════════════════════════════════════════════════════════
+# CLAUDE OFFICE SKILL - Enhanced Metadata v2.0
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Basic Information
+name: report-generator
+description: "Generate professional data reports with charts, tables, and visualizations"
+version: "1.0"
+author: claude-office-skills
+license: MIT
+
+# Categorization
+category: presentation
+tags:
+  - report
+  - generator
+  - data
+  - visualization
+department: All
+
+# AI Model Compatibility
+models:
+  recommended:
+    - claude-sonnet-4
+    - claude-opus-4
+  compatible:
+    - claude-3-5-sonnet
+    - gpt-4
+    - gpt-4o
+
+# MCP Tools Integration
+mcp:
+  server: office-mcp
+  tools:
+    - create_docx
+    - create_xlsx
+    - create_chart
+    - create_pptx
+
+# Skill Capabilities
+capabilities:
+  - report_generation
+  - data_visualization
+
+# Language Support
+languages:
+  - en
+  - zh
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "Standard workflow for generating a professional data report from a data source" ;
+            oc:hasStep _:ref_54d1c78235e5c216,
+                _:ref_753431e2970ed4e4,
+                _:ref_bd9c99471a3c81f3,
+                _:ref_c63ad1b9db7bf3de,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Output the final report file to the user" ;
+                    oc:expectedOutcome "User receives the generated report" ;
+                    oc:stepDependsOn _:ref_bd9c99471a3c81f3 ;
+                    oc:stepId "deliver-report" ] ;
+            oc:workflowId "report-generation" ;
+            oc:workflowName "Generate Data Report" ],
+        _:ref_e2193add1e89a979 ;
+    oc:impartsKnowledge oc:kn_32a08347,
+        oc:kn_5bb785ef,
+        oc:kn_90095110,
+        oc:kn_db45047f,
+        oc:kn_ece2929d ;
     oc:isUserInvocable true ;
     oc:nature "Work" ;
     oc:requiresState oc:DataAvailable,
         oc:EnvironmentReady ;
-    oc:resolvesIntent "build executive summary with charts",
-        "create KPI dashboard",
-        "create sales report from data",
+    oc:resolvesIntent "build executive summary with visualizations",
+        "create KPI dashboard with charts",
         "generate professional data report",
-        "produce data analysis report" ;
-    oc:yieldsState oc:ChartsGenerated,
-        oc:DocumentCreated .
+        "produce data analysis report from CSV or Excel" ;
+    oc:yieldsState oc:DocumentCreated,
+        oc:ReportGenerated .
 
-oc:kn_05a8d43f a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "Before generating a report" ;
-    oc:directiveContent "Verify that the input data source is accessible and contains the expected columns/fields before beginning report generation." ;
-    oc:hasRationale "Early validation prevents wasted computation on malformed or missing data, providing clear error messages to the user." ;
+oc:kn_32a08347 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Before loading any data source" ;
+    oc:directiveContent "Always verify data source format (CSV, Excel, JSON) before processing and handle missing or malformed data gracefully." ;
+    oc:hasRationale "Data quality issues are the most common cause of report generation failures." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_3a325487 a oc:Constraint,
+oc:kn_5bb785ef a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When loading input data for report generation" ;
-    oc:directiveContent "Reports must accept multiple input formats (CSV, Excel, JSON, or described data) and gracefully handle format detection." ;
-    oc:hasRationale "Data sources vary across organizations; rigid format requirements create adoption friction." ;
+    oc:appliesToContext "When planning report content" ;
+    oc:directiveContent "Calculate key KPIs (totals, averages, growth rates, top performers) before creating visualizations so charts reflect accurate metrics." ;
+    oc:hasRationale "Deriving metrics first ensures consistency between summary numbers shown in KPI cards and the underlying chart data." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_5f383b9e a oc:KnowledgeNode,
-        oc:WorkflowStrategy ;
-    oc:appliesToContext "When choosing report output format" ;
-    oc:directiveContent "Use a multi-format output strategy: HTML for interactive viewing, PDF for distribution, and DOCX/PPTX for editable deliverables via the office-mcp tools." ;
-    oc:hasRationale "Different stakeholders need different formats — executives may want PDF summaries while analysts need editable spreadsheets." ;
-    oc:severityLevel "MEDIUM" .
+oc:kn_90095110 a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "When working with datasets exceeding 10,000 rows" ;
+    oc:directiveContent "For large datasets, aggregate data before chart generation rather than plotting raw records. Use figsize=(12-14, 10) for multi-chart layouts." ;
+    oc:hasRationale "Pre-aggregation reduces rendering time and produces cleaner visualizations." ;
+    oc:severityLevel "LOW" .
 
-oc:kn_614bd549 a oc:DesignPrinciple,
+oc:kn_db45047f a oc:DesignPrinciple,
         oc:KnowledgeNode ;
     oc:appliesToContext "When generating any professional data report" ;
-    oc:directiveContent "Reports should include a standard structure: executive summary, KPI dashboard, detailed analysis, charts, and recommendations." ;
-    oc:hasRationale "A consistent structure ensures reports are scannable and actionable for stakeholders, regardless of data domain." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_8f96849a a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When writing report generation code" ;
-    oc:directiveContent "Do not generate reports with hardcoded data values; always derive metrics dynamically from the input dataset." ;
-    oc:hasRationale "Hardcoded values make reports stale and incorrect when data changes, undermining report credibility." ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_e9300899 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When building report KPIs and dashboards" ;
-    oc:directiveContent "Always compute key metrics (totals, averages, growth rates, top performers) before generating visualizations to ensure charts reflect accurate summary statistics." ;
-    oc:hasRationale "Pre-computing metrics avoids visualizing raw data without context, which can mislead report consumers." ;
+    oc:directiveContent "Reports should include five standard sections: executive summary, KPI dashboard, detailed analysis, charts, and recommendations." ;
+    oc:hasRationale "A consistent report structure ensures stakeholders can quickly find relevant information and compare across reporting periods." ;
     oc:severityLevel "HIGH" .
 
-oc:req_4c8562a3 a oc:RequirementKnowledge ;
+oc:kn_ece2929d a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When building report generation pipelines" ;
+    oc:codeLanguage "python" ;
+    oc:directiveContent "Use pandas for data loading and aggregation, matplotlib for chart generation (subplots with 2x2 grid), and either HTML templates or ReportLab for final output formatting." ;
+    oc:hasRationale "Separating data processing, visualization, and formatting concerns enables maintainable and testable report code." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:req_41e714c9 a oc:RequirementTool ;
     oc:isOptional false ;
-    oc:requirementValue "Report design principles" .
+    oc:requirementValue "office-mcp MCP server" .
 
 oc:req_746aacc9 a oc:RequirementTool ;
     oc:isOptional false ;
     oc:requirementValue "pandas" .
 
-oc:req_82f4d01f a oc:RequirementKnowledge ;
+oc:req_bd4204b0 a oc:RequirementKnowledge ;
     oc:isOptional false ;
-    oc:requirementValue "Data analysis fundamentals" .
+    oc:requirementValue "Data analysis and visualization concepts" .
 
-oc:req_9fda19b0 a oc:RequirementTool ;
+oc:req_fd635a4a a oc:RequirementTool ;
     oc:isOptional true ;
-    oc:requirementValue "office-mcp" .
+    oc:requirementValue "reportlab" .
 
 oc:req_fe6b6a53 a oc:RequirementTool ;
-    oc:isOptional false ;
+    oc:isOptional true ;
     oc:requirementValue "matplotlib" .
+
+_:ref_75e9d3b0c9fbcd8c a oc:WorkflowStep ;
+    dcterms:description "I'll generate a formatted report with visualizations" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_8191b0d8fa254909 a oc:WorkflowStep ;
+    dcterms:description "Specify the type of report needed" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_ecfa00a61c0c9671 a oc:WorkflowStep ;
+    dcterms:description "Provide data (CSV, Excel, JSON, or describe it)" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_54d1c78235e5c216 a oc:WorkflowStep ;
+    dcterms:description "Load and validate data from source (CSV, Excel, JSON)" ;
+    oc:expectedOutcome "Clean DataFrame ready for analysis" ;
+    oc:stepId "ingest-data" .
+
+_:ref_753431e2970ed4e4 a oc:WorkflowStep ;
+    dcterms:description "Calculate key performance indicators: totals, averages, growth rates, top performers" ;
+    oc:expectedOutcome "Dictionary of computed KPI metrics" ;
+    oc:stepDependsOn _:ref_54d1c78235e5c216 ;
+    oc:stepId "compute-kpis" .
+
+_:ref_bd9c99471a3c81f3 a oc:WorkflowStep ;
+    dcterms:description "Compile report with title, sections, KPIs, charts, and recommendations into final format (HTML, PDF, DOCX, or PPTX)" ;
+    oc:expectedOutcome "Completed report file in chosen format" ;
+    oc:stepDependsOn _:ref_c63ad1b9db7bf3de ;
+    oc:stepId "assemble-report" .
+
+_:ref_c63ad1b9db7bf3de a oc:WorkflowStep ;
+    dcterms:description "Generate charts (bar, line, trend) using matplotlib or Plotly with proper sizing" ;
+    oc:expectedOutcome "Chart image files saved to disk" ;
+    oc:stepDependsOn _:ref_753431e2970ed4e4 ;
+    oc:stepId "create-visualizations" .
+
+_:ref_e2193add1e89a979 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 1 ;
+    oc:hasStep _:ref_75e9d3b0c9fbcd8c,
+        _:ref_8191b0d8fa254909,
+        _:ref_ecfa00a61c0c9671 ;
+    oc:workflowId "procedure_1" ;
+    oc:workflowName "Ordered Procedure" .
 

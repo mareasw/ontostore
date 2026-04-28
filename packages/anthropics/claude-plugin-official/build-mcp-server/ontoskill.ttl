@@ -4,95 +4,642 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_plugin_official_build_mcp_server a oc:DeclarativeSkill,
+oc:skill_claude_plugin_official_build_mcp_server a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "build-mcp-server" ;
-    skos:broader "Design and scaffold skill" ;
-    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/build-mcp-server" ;
+    skos:broader "Design-decision framework" ;
+    prov:wasDerivedFrom "../.agents/skills/anthropics/claude-plugin-official/build-mcp-server" ;
     oc:contentHash "e5071f0b235ba74ed35fe3cdc36e7c083a8c12171fd791a4cc54487cfca09c65" ;
-    oc:dependsOnSkill oc:skill_build_mcp_app,
-        oc:skill_build_mcpb ;
-    oc:differentia "guides developers through a 5-phase discovery-to-scaffold workflow for MCP server development, selecting deployment model, tool pattern, framework, and auth strategy before handing off to specialized skills" ;
-    oc:handlesFailure oc:DependencyMissing,
+    oc:dependsOnSkill oc:skill_ontoskills_build_mcp_app,
+        oc:skill_ontoskills_build_mcpb ;
+    oc:differentia "that guides developers through interrogating their MCP server use case and selecting the optimal deployment model, tool-design pattern, framework, and auth strategy before scaffolding" ;
+    oc:handlesFailure oc:CapabilityNotSupported,
         oc:InvalidInput ;
     oc:hasArgumentHint "description of what the MCP server should connect to and do" ;
     oc:hasCategory "development" ;
     oc:hasDescription "This skill should be used when the user asks to \"build an MCP server\", \"create an MCP\", \"make an MCP integration\", \"wrap an API for Claude\", \"expose tools to Claude\", \"make an MCP app\", or discusses building something with the Model Context Protocol. It is the entry point for MCP server development — it interrogates the user about their use case, determines the right deployment model (remote HTTP, MCPB, local stdio), picks a tool-design pattern, and hands off to specialized skills." ;
     oc:hasName "build-mcp-server" ;
-    oc:impartsKnowledge oc:kn_0f5db216,
-        oc:kn_127c201c,
-        oc:kn_5f6544f2,
-        oc:kn_60264258,
-        oc:kn_6d11cd12,
-        oc:kn_ce475e55,
-        oc:kn_ec088d89,
-        oc:kn_fd55f8d5 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "You are guiding a developer through designing and building an MCP server that works seamlessly with Claude. MCP servers come in many forms — picking the wrong shape early causes painful rewrites later. Your first job is **discovery, not code**." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "Do not start scaffolding until you have answers to the questions in Phase 1. If the user's opening message already answers them, acknowledge that and skip straight to the recommendation." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Based on the answers, recommend **one** path. Be opinionated. The ranked options:" ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "A script launched via `npx` / `uvx` on the user's machine. Fine for **personal tools and prototypes**. Painful to distribute: users need the right runtime, you can't push updates, and the only distribution channel is Claude Code plugins." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "Recommend this only as a stepping stone. If the user insists, scaffold it but note the MCPB upgrade path." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 5 ;
+                            oc:sectionTitle "Local stdio (npx / uvx) — *not recommended for distribution*" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "→ Hand off to the **`build-mcpb`** skill." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "A local MCP server **packaged with its runtime** so users don't need Node/Python installed. The sanctioned way to ship local servers." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Choose this when** the server *must* run on the user's machine — it reads local files, drives a desktop app, talks to localhost services, or needs OS-level access." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "MCPB (bundled local server)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "Escalate to `build-mcp-app` widgets when you need: nested/complex data, scrollable/searchable lists, visual previews, live updates." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "If a tool just needs the user to confirm, pick an option, or fill a short form, **elicitation** does it with zero UI code. The server sends a flat JSON schema; the host renders a native form. Spec-native, no extra packages." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Caveat:** Host support is new (Claude Code shipped it in v2.1.76; Desktop unconfirmed). The SDK throws if the client doesn't advertise the capability. Always check `clientCapabilities.elicitation` first and have a fallback — see `references/elicitation.md` for the canonical pattern. This is the right spec-correct approach; host coverage will catch up." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Elicitation (structured input, no UI build)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 3 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "One deployment serves all users; you control upgrades" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "Works across Claude desktop, Claude Code, Claude.ai, and third-party MCP hosts" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Zero install friction — users add a URL, done" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "OAuth flows work properly (the server can handle redirects, DCR, token storage)" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent "**Choose this unless** the server *must* touch the user's local machine." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Why it wins:**" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent """→ **Fastest deploy:** Cloudflare Workers — `references/deploy-cloudflare-workers.md` (zero to live URL in two commands)
+→ **Portable Node/Python:** `references/remote-http-scaffold.md` (Express or FastMCP, runs on any host)""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "A hosted service speaking MCP over streamable HTTP. This is the **recommended path** for anything wrapping a cloud API." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "⭐ Remote streamable-HTTP MCP server (default recommendation)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Same as above, plus **UI resources** — interactive widgets rendered in chat. Rich pickers with search, charts, live dashboards, visual previews. Built once, renders in Claude *and* ChatGPT." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent "→ Hand off to the **`build-mcp-app`** skill." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Choose this when** elicitation's flat-form constraints don't fit — you need custom layout, large searchable lists, visual content, or live updates." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "Usually remote, but can be shipped as MCPB if the UI needs to drive a local app." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "MCP app (remote HTTP + interactive UI)" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Phase 2 — Recommend a deployment model" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Ask these questions conversationally (batch them into one message, don't interrogate one-at-a-time). Adapt wording to what the user has already told you." ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 1 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "**Simple structured input** (pick from list, enter a value, confirm) → **Elicitation** — spec-native, zero UI code. *Host support is rolling out* (Claude Code ≥2.1.76) — always pair with a capability check and fallback. See `references/elicitation.md`." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "**Neither** → plain tool returning text/JSON." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "**Rich/visual UI** (charts, custom pickers with search, live dashboards) → **MCP app widgets** — iframe-based, needs `@modelcontextprotocol/ext-apps`. See `build-mcp-app` skill." ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "4. Does a tool need mid-call user input or rich display?" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "This determines the tool-design pattern — see Phase 3." ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 2 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "**Under ~15 actions** → one tool per action" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "**Dozens to hundreds of actions** (e.g. wrapping a large API surface) → search + execute pattern" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "3. How many distinct actions does it expose?" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 1 ;
+                                    oc:rowCount 4 ;
+                                    oc:tableCaption "### 1. What does it connect to?" ;
+                                    oc:tableMarkdown """| If it connects to… | Likely direction |
+|---|---|
+| A cloud API (SaaS, REST, GraphQL) | Remote HTTP server |
+| A local process, filesystem, or desktop app | MCPB or local stdio |
+| Hardware, OS-level APIs, or user-specific state | MCPB |
+| Nothing external — pure logic / computation | Either — default to remote |
+""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "1. What does it connect to?" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 1 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "**Just me / my team, on our machines** → Local stdio is acceptable (easiest to prototype)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "**Anyone who installs it** → Remote HTTP (strongly preferred) or MCPB (if it *must* be local)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "**Users of Claude desktop who want UI widgets** → MCP app (remote or MCPB)" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "2. Who will use it?" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 1 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "OAuth 2.0 → you'll need a remote server with CIMD (preferred) or DCR support; see `references/auth.md`" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "None / API key → straightforward" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 5 ;
+                            oc:sectionTitle "5. What auth does the upstream service use?" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Phase 1 — Interrogate the use case" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 2 ;
+                            oc:rowCount 2 ;
+                            oc:tableCaption "Recommend one of these two. Others exist but these have the best MCP-spec coverage and Claude compatibility." ;
+                            oc:tableMarkdown """| Framework | Language | Use when |
+|---|---|---|
+| **Official TypeScript SDK** (`@modelcontextprotocol/sdk`) | TS/JS | Default choice. Best spec coverage, first to get new features. |
+| **FastMCP 3.x** (`fastmcp` on PyPI) | Python | User prefers Python, or wrapping a Python library. Decorator-based, very low boilerplate. This is jlowin's package — not the frozen FastMCP 1.0 bundled in the official `mcp` SDK. |
+""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "If the user already has a language/stack in mind, go with it — both produce identical wire protocol." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Recommend one of these two. Others exist but these have the best MCP-spec coverage and Claude compatibility." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Phase 4 — Pick a framework" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Tools are one of three server primitives. Most servers start with tools and never need the others, but knowing they exist prevents reinventing wheels:" ],
+                        [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 2 ;
+                            oc:rowCount 4 ;
+                            oc:tableCaption "Tools are one of three server primitives. Most servers start with tools and never need the others, but knowing they exist prevents reinventing wheels" ;
+                            oc:tableMarkdown """| Primitive | Who triggers it | Use when |
+|---|---|---|
+| **Resources** | Host app (not Claude) | Exposing docs/files/data as browsable context |
+| **Prompts** | User (slash command) | Canned workflows ("/summarize-thread") |
+| **Elicitation** | Server, mid-tool | Asking user for input without building UI |
+| **Sampling** | Server, mid-tool | Need LLM inference in your tool logic |
+""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "→ `references/resources-and-prompts.md`, `references/elicitation.md`, `references/server-capabilities.md`" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Beyond tools — the other primitives" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 6 ;
+                                    oc:itemText "`references/elicitation.md` — spec-native user input mid-tool (capability check + fallback)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "`references/deploy-cloudflare-workers.md` — fastest deploy path (Workers-native scaffold)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 7 ;
+                                    oc:itemText "`references/server-capabilities.md` — instructions, sampling, roots, logging, progress, cancellation" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 8 ;
+                                    oc:itemText "`references/versions.md` — version-sensitive claims ledger (check when updating)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "`references/auth.md` — OAuth, CIMD, DCR, token storage patterns" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "`references/tool-design.md` — writing tool descriptions and schemas Claude understands well" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "`references/remote-http-scaffold.md` — minimal remote server in TS SDK and FastMCP" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "`references/resources-and-prompts.md` — the two non-tool primitives" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 8 ;
+                    oc:sectionTitle "Reference files" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Every MCP server exposes tools. How you carve them matters more than most people expect — tool schemas land directly in Claude's context window." ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """create_issue    — Create a new issue. Params: title, body, labels[]
+update_issue    — Update an existing issue. Params: id, title?, body?, state?
+search_issues   — Search issues by query string. Params: query, limit?
+add_comment     — Add a comment to an issue. Params: issue_id, body
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 115-120" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "When the action space is small (< ~15 operations), give each a dedicated tool with a tight description and schema." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Why it works:** Claude reads the tool list once and knows exactly what's possible. No discovery round-trips. Each tool's schema validates inputs precisely." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent "**Especially good when** one or more tools ship an interactive widget (MCP app) — each widget binds naturally to one tool." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Pattern A: One tool per action (small surface)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "The server holds the full catalog internally. Claude searches, picks, executes. Context stays lean." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "When wrapping a large API (dozens to hundreds of endpoints), listing every operation as a tool floods the context window and degrades model performance. Instead, expose **two** tools:" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent "**Hybrid:** Promote the 3–5 most-used actions to dedicated tools, keep the long tail behind search/execute." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent "→ See `references/tool-design.md` for schema examples and description-writing guidance." ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """search_actions  — Given a natural-language intent, return matching actions
+                  with their IDs, descriptions, and parameter schemas.
+execute_action  — Run an action by ID with a params object.
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 130-134" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Pattern B: Search + execute (large surface)" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Phase 3 — Pick a tool-design pattern" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 1 ;
+                            oc:rowCount 7 ;
+                            oc:tableCaption "## Quick reference: decision matrix" ;
+                            oc:tableMarkdown """| Scenario | Deployment | Tool pattern |
+|---|---|---|
+| Wrap a small SaaS API | Remote HTTP | One-per-action |
+| Wrap a large SaaS API (50+ endpoints) | Remote HTTP | Search + execute |
+| SaaS API with rich forms / pickers | MCP app (remote) | One-per-action |
+| Drive a local desktop app | MCPB | One-per-action |
+| Local desktop app with in-chat UI | MCP app (MCPB) | One-per-action |
+| Read/write local filesystem | MCPB | Depends on surface |
+| Personal prototype | Local stdio | Whatever's fastest |
+""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 7 ;
+                    oc:sectionTitle "Quick reference: decision matrix" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "When handing off, restate the design brief in one paragraph so the next skill doesn't re-ask." ],
+                        _:ref_1a1ffa9d74292ffc,
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Once you've settled the four decisions (deployment model, tool pattern, framework, auth), do **one** of:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Phase 5 — Scaffold and hand off" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Build an MCP Server" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """name: build-mcp-server
+description: This skill should be used when the user asks to "build an MCP server", "create an MCP", "make an MCP integration", "wrap an API for Claude", "expose tools to Claude", "make an MCP app", or discusses building something with the Model Context Protocol. It is the entry point for MCP server development — it interrogates the user about their use case, determines the right deployment model (remote HTTP, MCPB, local stdio), picks a tool-design pattern, and hands off to specialized skills.
+version: 0.1.0
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:hasWorkflow _:ref_1a1ffa9d74292ffc,
+        [ a oc:Workflow ;
+            dcterms:description "Progressive discovery and decision workflow for creating an MCP server, from use-case interrogation through scaffolding or hand-off." ;
+            oc:hasStep _:ref_0ada78147f878e9c,
+                _:ref_929e0c11e767a72b,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Scaffold inline (remote HTTP no UI, or stdio) or hand off to build-mcp-app / build-mcpb with a one-paragraph design brief." ;
+                    oc:expectedOutcome "Server scaffolded or specialized skill loaded with context" ;
+                    oc:stepDependsOn _:ref_0ada78147f878e9c,
+                        _:ref_de5916670c783fb5,
+                        _:ref_fbf59c5df35a03d8 ;
+                    oc:stepId "scaffold-or-handoff" ],
+                _:ref_de5916670c783fb5,
+                _:ref_fbf59c5df35a03d8 ;
+            oc:workflowId "build-mcp-server-main" ;
+            oc:workflowName "Design and scaffold an MCP server" ] ;
+    oc:impartsKnowledge oc:kn_0107b75f,
+        oc:kn_10a6f90e,
+        oc:kn_2dbd3336,
+        oc:kn_303783f0,
+        oc:kn_3f2a3d5b,
+        oc:kn_495a4fe1,
+        oc:kn_52ca15b0,
+        oc:kn_6506fdf8,
+        oc:kn_89c5480f,
+        oc:kn_a33da52a,
+        oc:kn_a7fe8d55,
+        oc:kn_ae806529,
+        oc:kn_b68f332f,
+        oc:kn_d4be1e77 ;
     oc:isUserInvocable true ;
-    oc:nature "Work" ;
+    oc:nature "Concept" ;
     oc:requiresState oc:EnvironmentReady ;
     oc:resolvesIntent "build an MCP server",
         "choose MCP deployment model",
-        "create an MCP",
+        "create an MCP server",
         "design MCP server architecture",
-        "expose tools to Claude",
+        "expose tools to Claude via MCP",
         "make an MCP integration",
         "wrap an API for Claude" ;
     oc:yieldsState oc:MCPServerDesigned,
         oc:MCPServerScaffolded .
 
-oc:kn_0f5db216 a oc:KnowledgeNode,
-        oc:KnownIssue ;
-    oc:appliesToContext "When a server requires OAuth but the user wants local deployment" ;
-    oc:directiveContent "Local stdio servers doing OAuth are fragile — they break in headless/remote environments, every user re-does the OAuth dance, and there is no central token refresh or revocation." ;
-    oc:hasRationale "OAuth redirects require a hosted endpoint. If OAuth is required, strongly lean toward remote HTTP. If local + OAuth is unavoidable, MCPB is the right packaging." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_127c201c a oc:Constraint,
+oc:kn_0107b75f a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When designing the tool surface of an MCP server" ;
-    oc:directiveContent "Use one tool per action when the action surface is under ~15 operations. Switch to search + execute pattern for 30+ tools to avoid flooding Claude's context window with tool schemas." ;
-    oc:hasRationale "Every tool schema lands in Claude's context window every turn. Thirty tools with rich schemas can consume 3–5k tokens before conversation starts, degrading model performance." ;
-    oc:severityLevel "HIGH" .
+    oc:appliesToContext "When choosing a deployment model for anything beyond personal prototyping" ;
+    oc:directiveContent "Do not use local stdio (npx/uvx) for distribution. It requires users to have the right runtime, prevents centralized updates, and only works through Claude Code plugins." ;
+    oc:hasRationale "Local stdio is only acceptable for personal tools and prototypes. MCPB is the sanctioned packaging format for local servers that need distribution." .
 
-oc:kn_5f6544f2 a oc:DesignPrinciple,
+oc:kn_10a6f90e a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "Before any code is written for an MCP server" ;
-    oc:directiveContent "Do not start scaffolding until the use case is fully interrogated — what it connects to, who will use it, how many actions it exposes, whether it needs mid-call user input, and what auth the upstream service requires. Wrong early choices cause painful rewrites." ;
-    oc:hasRationale "MCP servers come in many deployment forms (remote HTTP, MCPB, local stdio) and tool patterns; picking the wrong shape early leads to architectural mismatches that are expensive to correct later." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_60264258 a oc:KnowledgeNode,
-        oc:SecurityImplication ;
-    oc:appliesToContext "When implementing auth in any MCP server" ;
-    oc:directiveContent "Token passthrough is explicitly forbidden by the MCP spec — never accept a token and forward it upstream. Validate token audience (RFC 8707) to ensure it was minted for your server specifically." ;
-    oc:hasRationale "Accepting tokens minted for other services and forwarding them upstream is a security vulnerability. The spec requires audience validation as a MUST." ;
+    oc:appliesToContext "When implementing OAuth on an MCP server" ;
+    oc:directiveContent "Token passthrough is explicitly forbidden by the MCP spec. Never accept a bearer token then forward it upstream. Validate token audience (RFC 8707) to ensure it was minted for your server." ;
+    oc:hasRationale "The spec requires audience validation — a token for another service must be rejected even if the signature is valid. If your server calls another service, exchange the token or use its own credentials." ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_6d11cd12 a oc:Heuristic,
+oc:kn_2dbd3336 a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When recommending a deployment model for MCP servers" ;
-    oc:directiveContent "Default to remote streamable-HTTP deployment unless the server must touch the user's local machine. Zero install friction, one deployment serves all users, and OAuth flows work properly." ;
-    oc:hasRationale "Remote HTTP is the simplest path for distribution and maintenance — users add a URL, it works across Claude desktop/Code/web, and the developer controls upgrades." ;
+    oc:appliesToContext "When writing tool descriptions and schemas" ;
+    oc:directiveContent "Tool descriptions are prompt engineering — they land in Claude's context and determine tool selection. Include what the tool does, returns, and does NOT do. Disambiguate sibling tools by referencing each other." ;
+    oc:hasRationale "Most MCP integration bugs trace back to vague descriptions or loose schemas. Tight schemas with .describe() on every parameter prevent wrong-tool calls." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_ce475e55 a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "When implementing elicitation (mid-tool user input) in any MCP server" ;
-    oc:directiveContent "Always check clientCapabilities.elicitation before using elicitation and provide a text-based fallback. The SDK throws CapabilityNotSupported if the client doesn't advertise the capability." ;
-    oc:hasRationale "Elicitation support is rolling out across hosts (Claude Code ≥2.1.76 supports it, Desktop status unconfirmed). Without a capability check and fallback, the tool will crash on unsupported hosts." ;
+oc:kn_303783f0 a oc:KnowledgeNode,
+        oc:OutputFormat ;
+    oc:appliesToContext "When summarizing design decisions before scaffolding or handing off" ;
+    oc:directiveContent """## MCP Server Design Brief
+- **Deployment**: {remote-http|mcp-app|mcpb|stdio}
+- **Tool pattern**: {one-per-action|search+execute|hybrid}
+- **Framework**: {@modelcontextprotocol/sdk|fastmcp}
+- **Auth**: {none|api-key|oauth-cimd|oauth-dcr}
+- **Actions**: {N} distinct operations
+- **Hand-off to**: {scaffold-inline|build-mcp-app|build-mcpb}""" ;
+    oc:templateVariables "actions",
+        "auth",
+        "deployment",
+        "framework",
+        "hand-off",
+        "tool-pattern" .
+
+oc:kn_3f2a3d5b a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "When handing off to build-mcp-app or build-mcpb" ;
+    oc:directiveContent "Before handing off to a specialized skill, restate the design brief in one paragraph so the next skill doesn't re-ask discovery questions." ;
+    oc:hasRationale "Prevents frustrating the user with repeated questions and ensures continuity across skill boundaries." .
+
+oc:kn_495a4fe1 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When starting any MCP server project" ;
+    oc:directiveContent "Discovery before code — interrogate the use case (what it connects to, who uses it, how many actions, mid-call input needs, auth requirements) before scaffolding anything." ;
+    oc:hasRationale "Picking the wrong server shape early causes painful rewrites later. The 5 discovery questions determine deployment model, tool pattern, and auth strategy." ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_ec088d89 a oc:DesignPrinciple,
+oc:kn_52ca15b0 a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When writing MCP tool descriptions and parameter schemas" ;
-    oc:directiveContent "Tool descriptions are prompt engineering — write them like one-line manpage entries that say what the tool does, what it returns, and critically what it does NOT do. Disambiguate sibling tools by referencing each other." ;
-    oc:hasRationale "Tool schemas land directly in Claude's context window and determine whether Claude picks the right tool with the right arguments. Most MCP integration bugs trace to vague descriptions or loose schemas." ;
+    oc:appliesToContext "When recommending a deployment model" ;
+    oc:directiveContent "Default to remote streamable-HTTP deployment unless the server MUST touch the user's local machine. Zero install friction, one deployment serves all users, OAuth works properly." ;
+    oc:hasRationale "Remote HTTP is the recommended default because it eliminates runtime requirements, enables centralized updates, and supports OAuth flows across all Claude surfaces." .
+
+oc:kn_6506fdf8 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When scaffolding a remote streamable-HTTP MCP server" ;
+    oc:codeLanguage "typescript" ;
+    oc:directiveContent """// Remote HTTP server scaffold (stateless)
+const app = express();
+app.use(express.json());
+app.post("/mcp", async (req, res) => {
+  const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });
+  res.on("close", () => transport.close());
+  await server.connect(transport);
+  await transport.handleRequest(req, res, req.body);
+});
+app.listen(process.env.PORT ?? 3000);""" .
+
+oc:kn_89c5480f a oc:KnowledgeNode,
+        oc:Prerequisite ;
+    oc:directiveContent "Either Node.js (for @modelcontextprotocol/sdk) or Python 3.10+ (for fastmcp) must be available for scaffolding." .
+
+oc:kn_a33da52a a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When using elicitation for mid-tool user input" ;
+    oc:directiveContent "Always check clientCapabilities.elicitation before using elicitation. The SDK throws CapabilityNotSupported if unsupported. Always have a text-based fallback." ;
+    oc:hasRationale "Elicitation support is rolling out (Claude Code ≥2.1.76). Without a capability check and fallback, the tool will crash on unsupported hosts." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_fd55f8d5 a oc:AntiPattern,
+oc:kn_a7fe8d55 a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When elicitation fails due to unsupported host" ;
+    oc:directiveContent "If elicitation throws CapabilityNotSupported, fall back to returning text asking Claude to relay the question to the user and retry with their answer." ;
+    oc:hasRationale "Graceful degradation ensures the tool works on all hosts, not just those with elicitation support." .
+
+oc:kn_ae806529 a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When deciding how to distribute an MCP server to users" ;
-    oc:directiveContent "Do not use local stdio (npx/uvx) as a distribution mechanism for MCP servers — it requires users to have the right runtime, prevents push updates, and only works through Claude Code plugins." ;
-    oc:hasRationale "Local stdio is acceptable for personal prototypes but painful at scale. MCPB is the sanctioned packaging for local servers; remote HTTP is preferred for cloud API wrapping." ;
-    oc:severityLevel "MEDIUM" .
+    oc:appliesToContext "When implementing mid-tool user input via elicitation" ;
+    oc:codeLanguage "typescript" ;
+    oc:directiveContent """// Elicitation with capability check + fallback
+const caps = server.getClientCapabilities();
+if (caps?.elicitation) {
+  const r = await server.elicitInput({ mode: "form", message: "...", requestedSchema: { type: "object", properties: {...} } });
+  if (r.action === "accept") { /* proceed */ }
+} else {
+  return { content: [{ type: "text", text: "Ask user to confirm, then retry." }] };
+}""" .
+
+oc:kn_b68f332f a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing the tool surface for an MCP server" ;
+    oc:directiveContent "Use one tool per action for <15 actions; switch to search+execute pattern for 50+ endpoints. Promote the 3-5 most-used actions to dedicated tools in hybrid mode." ;
+    oc:hasRationale "Every tool schema consumes tokens in Claude's context window every turn. 30+ tools with rich schemas can eat 3-5k tokens before conversation starts, degrading model performance." .
+
+oc:kn_d4be1e77 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When guiding a developer through MCP server creation" ;
+    oc:directiveContent "1. Interrogate use case (5 questions: target, audience, action count, UI needs, auth) → 2. Recommend deployment model (remote HTTP / MCP app / MCPB / stdio) → 3. Pick tool-design pattern (one-per-action or search+execute) → 4. Pick framework (TS SDK or FastMCP 3.x) → 5. Scaffold or hand off" ;
+    oc:stepOrder 1 .
+
+_:ref_52de419896fe0aa0 a oc:WorkflowStep ;
+    dcterms:description "**Remote HTTP, no UI** → Scaffold inline using `references/remote-http-scaffold.md` (portable) or `references/deploy-cloudflare-workers.md` (fastest deploy). This skill can finish the job." ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_c97ad41c4401a7d3 a oc:WorkflowStep ;
+    dcterms:description "**MCPB (bundled local)** → Summarize the decisions so far, then load the **`build-mcpb`** skill." ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_df1f85883b5aa7d4 a oc:WorkflowStep ;
+    dcterms:description "**MCP app (UI widgets)** → Summarize the decisions so far, then load the **`build-mcp-app`** skill." ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_e03fe04834b1e917 a oc:WorkflowStep ;
+    dcterms:description "**Local stdio prototype** → Scaffold inline (simplest case), flag the MCPB upgrade path." ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_0ada78147f878e9c a oc:WorkflowStep ;
+    dcterms:description "Select tool-design pattern: one-per-action (<15 actions), search+execute (50+), or hybrid." ;
+    oc:expectedOutcome "Tool surface pattern determined" ;
+    oc:stepDependsOn _:ref_929e0c11e767a72b ;
+    oc:stepId "pick-tool-pattern" .
+
+_:ref_1a1ffa9d74292ffc a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 2 ;
+    oc:hasStep _:ref_52de419896fe0aa0,
+        _:ref_c97ad41c4401a7d3,
+        _:ref_df1f85883b5aa7d4,
+        _:ref_e03fe04834b1e917 ;
+    oc:workflowId "procedure_2" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_de5916670c783fb5 a oc:WorkflowStep ;
+    dcterms:description "Based on answers, recommend one deployment model: remote HTTP (default), MCP app, MCPB, or local stdio. Be opinionated." ;
+    oc:expectedOutcome "Single deployment model chosen" ;
+    oc:stepDependsOn _:ref_929e0c11e767a72b ;
+    oc:stepId "recommend-deployment" .
+
+_:ref_fbf59c5df35a03d8 a oc:WorkflowStep ;
+    dcterms:description "Choose TypeScript SDK (default) or FastMCP 3.x (Python preference). Defer to user's existing stack." ;
+    oc:expectedOutcome "Framework and language selected" ;
+    oc:stepDependsOn _:ref_929e0c11e767a72b ;
+    oc:stepId "pick-framework" .
+
+_:ref_929e0c11e767a72b a oc:WorkflowStep ;
+    dcterms:description "Ask the user 5 discovery questions (target, audience, action count, UI needs, auth) in a single batched message. Skip any already answered." ;
+    oc:expectedOutcome "All 5 use-case parameters are known" ;
+    oc:stepId "interrogate" .
 

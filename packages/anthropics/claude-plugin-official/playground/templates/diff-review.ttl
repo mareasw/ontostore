@@ -4,21 +4,427 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_plugin_official_playground_diff_review a oc:DeclarativeSkill,
+oc:skill_claude_plugin_official_playground_diff_review a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "diff-review" ;
-    skos:broader "interactive playground" ;
+    skos:broader "Interactive playground" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/playground" ;
     oc:contentHash "32112ba4e82fbb8b656af166d1e21f8461cedbb4fdb5d2c314c43d210ea7e37d" ;
-    oc:differentia "displays git diffs with syntax highlighting and line-by-line commenting for code review feedback, generating structured review prompts" ;
-    oc:extends oc:skill_anthropics_claude_plugin_official_playground ;
-    oc:hasAllowedTool "Bash" ;
-    oc:hasArgumentHint "git commit hash, PR diff, or code changes to review" ;
+    oc:differentia "that renders git diffs with syntax highlighting, line-by-line commenting, and structured prompt output for code review feedback" ;
+    oc:extends oc:skill_claude_plugin_official_playground ;
+    oc:handlesFailure oc:InvalidDiffFormat,
+        oc:ParseError ;
+    oc:hasArgumentHint "commit-hash or diff-content" ;
     oc:hasCategory "development" ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Use this template when the playground is about reviewing code diffs: git commits, pull requests, code changes with interactive line-by-line commenting for feedback." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Each diff line gets a unique identifier for comment tracking:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """const comments = {}; // { lineId: commentText }
+
+function selectLine(lineId, lineEl) {
+  // Deselect previous
+  document.querySelectorAll('.diff-line.selected').forEach(el =>
+    el.classList.remove('selected'));
+  document.querySelectorAll('.comment-box.active').forEach(el =>
+    el.classList.remove('active'));
+
+  // Select new
+  lineEl.classList.add('selected');
+  document.getElementById(`comment-box-${lineId}`).classList.add('active');
+}
+
+function saveComment(lineId) {
+  const textarea = document.getElementById(`textarea-${lineId}`);
+  const comment = textarea.value.trim();
+
+  if (comment) {
+    comments[lineId] = comment;
+  } else {
+    delete comments[lineId];
+  }
+
+  renderDiff(); // Re-render to show comment indicator
+  updatePromptOutput();
+}
+""" ;
+                            oc:codeLanguage "javascript" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 68-96" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Comment system" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """+-------------------+----------------------------------+
+|                   |                                  |
+|  Commit Header:   |  Diff Content                    |
+|  • Hash           |  (files with hunks)              |
+|  • Message        |  with line numbers               |
+|  • Author/Date    |  and +/- indicators              |
+|                   |                                  |
++-------------------+----------------------------------+
+|  Prompt Output Panel (fixed bottom-right)            |
+|  [ Copy All ]                                        |
+|  Shows all comments formatted for prompt             |
++------------------------------------------------------+
+""" ;
+                            oc:codeLanguage "" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 7-20" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "Diff review playgrounds display git diffs with syntax highlighting. Users click lines to add comments, which become part of the generated prompt for code review feedback." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Layout" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """function updatePromptOutput() {
+  const commentKeys = Object.keys(comments);
+
+  if (commentKeys.length === 0) {
+    promptContent.innerHTML = '<span class="no-comments">Click on any line to add a comment...</span>';
+    return;
+  }
+
+  let output = 'Code Review Comments:\\n\\n';
+
+  commentKeys.forEach(lineId => {
+    const lineEl = document.querySelector(`[data-line-id="${lineId}"]`);
+    const file = lineEl.dataset.file;
+    const lineNum = lineEl.dataset.lineNum;
+    const content = lineEl.dataset.content;
+
+    output += `📍 ${file}:${lineNum}\\n`;
+    output += `   Code: ${content.trim()}\\n`;
+    output += `   Comment: ${comments[lineId]}\\n\\n`;
+  });
+
+  promptContent.textContent = output;
+}
+""" ;
+                            oc:codeLanguage "javascript" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 102-126" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Generate a structured code review format:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Prompt output format" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Parse diff data into structured format for rendering:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """const diffData = [
+  {
+    file: "path/to/file.py",
+    hunks: [
+      {
+        header: "@@ -41,13 +41,13 @@ function context",
+        lines: [
+          { type: "context", oldNum: 41, newNum: 41, content: "unchanged line" },
+          { type: "deletion", oldNum: 42, newNum: null, content: "removed line" },
+          { type: "addition", oldNum: null, newNum: 42, content: "added line" },
+        ]
+      }
+    ]
+  }
+];
+""" ;
+                            oc:codeLanguage "javascript" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 37-53" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Diff rendering" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 1 ;
+                            oc:rowCount 4 ;
+                            oc:tableCaption "## Control types for diff review" ;
+                            oc:tableMarkdown """| Feature | Control | Behavior |
+|---|---|---|
+| Line commenting | Click any diff line | Opens textarea below the line |
+| Comment indicator | Badge on commented lines | Shows which lines have feedback |
+| Save/Cancel | Buttons in comment box | Persist or discard comment |
+| Copy prompt | Button in prompt panel | Copies all comments to clipboard |
+""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Control types for diff review" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 1 ;
+                            oc:rowCount 4 ;
+                            oc:tableCaption "## Line type styling" ;
+                            oc:tableMarkdown """| Type | Background | Text Color | Prefix |
+|---|---|---|---|
+| `context` | transparent | default | ` ` (space) |
+| `addition` | green tint (#dafbe1 light / rgba(46,160,67,0.15) dark) | green (#1a7f37 light / #7ee787 dark) | `+` |
+| `deletion` | red tint (#ffebe9 light / rgba(248,81,73,0.15) dark) | red (#cf222e light / #f85149 dark) | `-` |
+| `hunk-header` | blue tint (#ddf4ff light) | blue (#0969da light) | `@@` |
+""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Line type styling" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "To create a diff viewer for a specific commit:" ],
+                        _:ref_edf314f7d9a58128 ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 8 ;
+                    oc:sectionTitle "Pre-populating with real data" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "**Comment indicator:** Badge (💬) on lines with saved comments" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "**Edit existing:** Allow editing previously saved comments" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "**Toast notification:** \"Copied to clipboard!\" feedback on copy" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "**Hover hint:** Show \"Click to comment\" tooltip on line hover" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 10 ;
+                    oc:sectionTitle "Interactive features" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Code diff comparison (before/after refactoring)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Git commit review (single commit diff with line comments)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Pull request review (multiple commits, file-level and line-level comments)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Merge conflict resolution (showing both versions with annotations)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "Code audit (security review with findings per line)" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 11 ;
+                    oc:sectionTitle "Example topics" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Store metadata on each line element for prompt generation:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """<div class="diff-line addition"
+     data-line-id="0-1-5"
+     data-file="src/utils/handler.py"
+     data-line-num="45"
+     data-content="subagent_id = tracker.register()">
+""" ;
+                            oc:codeLanguage "html" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 132-138" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 7 ;
+                    oc:sectionTitle "Data attributes for line elements" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """/* Light mode */
+body { background: #f6f8fa; color: #1f2328; }
+.file-card { background: #ffffff; border: 1px solid #d0d7de; }
+.diff-line.addition { background: #dafbe1; }
+.diff-line.deletion { background: #ffebe9; }
+
+/* Dark mode */
+body { background: #0d1117; color: #c9d1d9; }
+.file-card { background: #161b22; border: 1px solid #30363d; }
+.diff-line.addition { background: rgba(46, 160, 67, 0.15); }
+.diff-line.deletion { background: rgba(248, 81, 73, 0.15); }
+""" ;
+                            oc:codeLanguage "css" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 152-164" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Support both light and dark modes:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 9 ;
+                    oc:sectionTitle "Theme support" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Diff Review Template" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "Construct an interactive diff review playground from git commit data" ;
+            oc:hasStep [ a oc:WorkflowStep ;
+                    dcterms:description "Build the prompt output panel that aggregates all comments into structured review format with copy functionality" ;
+                    oc:expectedOutcome "Prompt panel shows formatted review comments and copy-to-clipboard works" ;
+                    oc:stepDependsOn _:ref_bb1b6e9a9a10d8b9 ;
+                    oc:stepId "enable-prompt-output" ],
+                _:ref_40394d10a58aecb0,
+                _:ref_6e7904964a24e48f,
+                _:ref_bb1b6e9a9a10d8b9,
+                _:ref_fcbf8f95ad0f041d ;
+            oc:workflowId "diff-review-build" ;
+            oc:workflowName "Build Diff Review Playground" ],
+        _:ref_edf314f7d9a58128 ;
+    oc:impartsKnowledge oc:kn_2c122779,
+        oc:kn_6c6bc5d5,
+        oc:kn_83b5efd1,
+        oc:kn_9cf6b34e,
+        oc:kn_a38d086d,
+        oc:kn_d9e4ae5e,
+        oc:kn_eac79ce6 ;
     oc:isUserInvocable true ;
-    oc:nature "template" ;
-    oc:resolvesIntent "comment on git commits and pull requests line-by-line",
-        "generate structured code review prompts from inline comments",
-        "review code diffs interactively",
-        "visualize diff output with syntax highlighting" .
+    oc:nature "Work" ;
+    oc:requiresState oc:DiffDataAvailable ;
+    oc:resolvesIntent "comment on git commits and pull requests",
+        "create interactive diff viewer",
+        "generate code review feedback from line comments",
+        "review code diffs" ;
+    oc:yieldsState oc:CodeReviewGenerated .
+
+oc:kn_2c122779 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When assigning identifiers to diff lines for comment tracking" ;
+    oc:directiveContent "Use unique compound line IDs (e.g., '0-1-5' for file 0, hunk 1, line 5) to avoid collisions when multiple files and hunks exist in the same diff." ;
+    oc:hasRationale "Simple sequential numbering would collide across files or hunks, breaking comment association" .
+
+oc:kn_6c6bc5d5 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When parsing and rendering git diff output" ;
+    oc:codeLanguage "javascript" ;
+    oc:directiveContent "Structure diff data as: [{ file: 'path', hunks: [{ header: '@@ ... @@', lines: [{ type: 'context'|'addition'|'deletion', oldNum, newNum, content }] }] }]" ;
+    oc:hasRationale "Normalized structure enables consistent rendering of additions, deletions, and context lines with proper styling" .
+
+oc:kn_83b5efd1 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When pre-populating the playground with a real commit" ;
+    oc:directiveContent "1. Run `git show <commit> --format='%H%n%s%n%an%n%ad' -p` to get diff data. 2. Parse output into the diffData structure (files → hunks → lines). 3. Render commit metadata in header section. 4. Render diff lines with type-based styling." ;
+    oc:hasRationale "Structured parsing ensures all metadata and diff hunks are captured for interactive review" ;
+    oc:stepOrder 1 .
+
+oc:kn_9cf6b34e a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When styling diff line types" ;
+    oc:directiveContent "Support both light and dark themes with specific color values: additions use green (#dafbe1 / rgba(46,160,67,0.15)), deletions use red (#ffebe9 / rgba(248,81,73,0.15)), hunk headers use blue (#ddf4ff)." ;
+    oc:hasRationale "Consistent, accessible color coding ensures added/removed/unchanged lines are immediately distinguishable in both themes" .
+
+oc:kn_a38d086d a oc:KnowledgeNode,
+        oc:OutputFormat ;
+    oc:appliesToContext "When generating the prompt output from user comments" ;
+    oc:directiveContent """Code Review Comments:
+
+📍 {file}:{lineNum}
+   Code: {content}
+   Comment: {userComment}
+
+""" ;
+    oc:hasRationale "Structured format with emoji markers makes comments easy to parse in downstream review workflows" ;
+    oc:templateVariables "content",
+        "file",
+        "lineNum",
+        "userComment" .
+
+oc:kn_d9e4ae5e a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When creating line elements in the DOM" ;
+    oc:directiveContent "Each diff line must carry data attributes: data-line-id (unique), data-file (file path), data-line-num (line number), data-content (line text) for prompt generation." ;
+    oc:hasRationale "These attributes enable the prompt output to reconstruct file:line context for each comment" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_eac79ce6 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When building the diff review playground layout" ;
+    oc:directiveContent "Use a two-panel layout: left sidebar for commit metadata (hash, message, author, date), main area for diff content with file hunks and line numbers." ;
+    oc:hasRationale "Mirrors familiar code review interfaces (GitHub, GitLab) for immediate user familiarity" ;
+    oc:severityLevel "MEDIUM" .
+
+_:ref_55a6712fa2dc8400 a oc:WorkflowStep ;
+    dcterms:description "Run `git show <commit> --format=\"%H%n%s%n%an%n%ad\" -p`" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_8a1b6f7e3da4b2ae a oc:WorkflowStep ;
+    dcterms:description "Parse the output into the `diffData` structure" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_9b8ecb539fd8c1fb a oc:WorkflowStep ;
+    dcterms:description "Include commit metadata in the header section" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_40394d10a58aecb0 a oc:WorkflowStep ;
+    dcterms:description "Parse raw git output into the normalized diffData structure (files → hunks → lines)" ;
+    oc:expectedOutcome "Structured JavaScript array of file objects with hunks and typed lines" ;
+    oc:stepDependsOn _:ref_6e7904964a24e48f ;
+    oc:stepId "parse-diff" .
+
+_:ref_6e7904964a24e48f a oc:WorkflowStep ;
+    dcterms:description "Run git show to fetch commit metadata and diff patches" ;
+    oc:expectedOutcome "Raw git output with commit hash, message, author, date, and diff hunks" ;
+    oc:stepId "fetch-diff" .
+
+_:ref_bb1b6e9a9a10d8b9 a oc:WorkflowStep ;
+    dcterms:description "Wire up line click handlers, comment textarea, save/cancel, and comment indicators" ;
+    oc:expectedOutcome "Users can click lines, write comments, and see 💬 badges on commented lines" ;
+    oc:stepDependsOn _:ref_fcbf8f95ad0f041d ;
+    oc:stepId "attach-interactions" .
+
+_:ref_edf314f7d9a58128 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 2 ;
+    oc:hasStep _:ref_55a6712fa2dc8400,
+        _:ref_8a1b6f7e3da4b2ae,
+        _:ref_9b8ecb539fd8c1fb ;
+    oc:workflowId "procedure_2" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_fcbf8f95ad0f041d a oc:WorkflowStep ;
+    dcterms:description "Render two-panel layout with commit header and diff content with line-type styling" ;
+    oc:expectedOutcome "Visual diff display with syntax highlighting and line numbers" ;
+    oc:stepDependsOn _:ref_40394d10a58aecb0 ;
+    oc:stepId "render-layout" .
 

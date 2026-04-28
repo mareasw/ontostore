@@ -4,75 +4,345 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_plugin_official_build_mcp_server_server_capabilities a oc:DeclarativeSkill,
+oc:skill_claude_plugin_official_build_mcp_server_server_capabilities a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "server-capabilities" ;
-    skos:broader "reference guide" ;
+    skos:broader "Reference" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/build-mcp-server" ;
     oc:contentHash "a4d76934e9fb386a5026c44a1888ea1338ca8f128314547a765827d60a1aaff0" ;
-    oc:differentia "that documents MCP server capabilities beyond core primitives — instructions, sampling, roots, logging, progress, cancellation, and completion — with implementation patterns for TypeScript and Python SDKs" ;
-    oc:extends oc:skill_anthropics_claude_plugin_official_build_mcp_server ;
+    oc:dependsOnSkill oc:skill_ontoskills_build_mcp_server ;
+    oc:differentia "MCP server capabilities beyond the three core primitives — instructions, sampling, roots, logging, progress, cancellation, and completion — with implementation patterns and client support requirements" ;
+    oc:extends oc:skill_claude_plugin_official_build_mcp_server ;
     oc:handlesFailure oc:ClientCapabilityNotSupported ;
-    oc:hasArgumentHint "capability-name (instructions, sampling, roots, logging, progress, cancellation, completion)" ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_191a2755,
-        oc:kn_74c9543c,
-        oc:kn_ad6a4630,
-        oc:kn_c960c516,
-        oc:kn_d4cdf404,
-        oc:kn_f062d3be ;
+    oc:hasRequirement oc:req_065fc826,
+        oc:req_17016cbf ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Features beyond the three core primitives. Most are optional, a few are near-free wins." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """async (args, extra) => {
+  for (const item of items) {
+    if (extra.signal.aborted) throw new Error("Cancelled");
+    await process(item);
+  }
+}
+""" ;
+                            oc:codeLanguage "typescript" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 124-131" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Long tools should check the SDK-provided `AbortSignal`:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "fastmcp handles this via asyncio cancellation — no explicit check needed if your handler is properly async." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Cancellation — honor the abort signal" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """async (args, extra) => {
+  const token = extra._meta?.progressToken;
+  for (let i = 0; i < 100; i++) {
+    if (token !== undefined) {
+      await extra.sendNotification({
+        method: "notifications/progress",
+        params: { progressToken: token, progress: i, total: 100, message: `Step ${i}` },
+      });
+    }
+    await doStep(i);
+  }
+  return { content: [{ type: "text", text: "Done" }] };
+}
+""" ;
+                            oc:codeLanguage "typescript" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 94-108" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Client sends a `progressToken` in request `_meta`. Server emits progress notifications against it." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """async def long_task(ctx: Context) -> str:
+    for i in range(100):
+        await ctx.report_progress(progress=i, total=100, message=f"Step {i}")
+        await do_step(i)
+    return "Done"
+""" ;
+                            oc:codeLanguage "python" ;
+                            oc:contentOrder 3 ;
+                            oc:sourceLocation "lines 110-116" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Progress — for long-running tools" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// In a tool handler
+await extra.sendNotification({
+  method: "notifications/message",
+  params: { level: "info", logger: "my-tool", data: { msg: "Processing", count: 42 } },
+});
+""" ;
+                            oc:codeLanguage "typescript" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 74-80" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Better than stderr for remote servers. Client can filter by level." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "Levels follow syslog: `debug`, `info`, `notice`, `warning`, `error`, `critical`, `alert`, `emergency`. Client sets minimum via `logging/setLevel`." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """await ctx.info("Processing", count=42)   # also: ctx.debug, ctx.warning, ctx.error
+""" ;
+                            oc:codeLanguage "python" ;
+                            oc:contentOrder 3 ;
+                            oc:sourceLocation "lines 82-84" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Logging — structured, level-aware" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """const caps = server.getClientCapabilities();
+if (caps?.roots) {
+  const { roots } = await server.server.listRoots();
+  // roots: [{ uri: "file:///home/user/project", name: "My Project" }]
+}
+""" ;
+                            oc:codeLanguage "typescript" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 54-60" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """roots = await ctx.list_roots()
+""" ;
+                            oc:codeLanguage "python" ;
+                            oc:contentOrder 3 ;
+                            oc:sourceLocation "lines 62-64" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "Particularly relevant for MCPB local servers — see `build-mcpb/references/local-security.md`." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Instead of hardcoding a root directory, ask the host which directories the user approved." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Roots — query workspace boundaries" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "If you've registered prompts or resource templates with arguments, you can offer autocomplete:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "Low priority unless your prompts have many valid values." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """server.registerPrompt("query", {
+  argsSchema: {
+    table: completable(z.string(), async (partial) => tables.filter(t => t.startsWith(partial))),
+  },
+}, ...);
+""" ;
+                            oc:codeLanguage "typescript" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 141-147" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 7 ;
+                    oc:sectionTitle "Completion — autocomplete for prompt args" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "**Requires client support** — check `clientCapabilities.sampling` first. Model preference hints are substring-matched (`\"claude-3-5\"` matches any Claude 3.5 variant)." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# fastmcp
+response = await ctx.sample("Summarize this document", context=doc)
+""" ;
+                            oc:codeLanguage "python" ;
+                            oc:contentOrder 3 ;
+                            oc:sourceLocation "lines 41-44" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "If your tool logic needs LLM inference (summarize, classify, generate), don't ship your own model client. Ask the host to do it." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// Inside a tool handler
+const result = await extra.sendRequest({
+  method: "sampling/createMessage",
+  params: {
+    messages: [{ role: "user", content: { type: "text", text: `Summarize: ${doc}` } }],
+    maxTokens: 500,
+  },
+}, CreateMessageResultSchema);
+""" ;
+                            oc:codeLanguage "typescript" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 30-39" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Sampling — delegate LLM calls to the host" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 1 ;
+                            oc:rowCount 6 ;
+                            oc:tableCaption "## Which capabilities need client support?" ;
+                            oc:tableMarkdown """| Feature | Server declares | Client must support | Fallback if not |
+|---|---|---|---|
+| `instructions` | implicit | — | — (always works) |
+| Logging | `logging: {}` | — | stderr |
+| Progress | — | sends `progressToken` | silently skip |
+| Sampling | — | `sampling: {}` | bring your own LLM |
+| Elicitation | — | `elicitation: {}` | return text, ask Claude to relay |
+| Roots | — | `roots: {}` | config env var |
+""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "Check client caps via `server.getClientCapabilities()` (TS) or `ctx.session.client_params.capabilities` (fastmcp) before using the bottom three." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 8 ;
+                    oc:sectionTitle "Which capabilities need client support?" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """const server = new McpServer(
+  { name: "my-server", version: "1.0.0" },
+  { instructions: "Always call search_items before get_item — IDs aren't guessable." },
+);
+""" ;
+                            oc:codeLanguage "typescript" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 11-16" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "One line of config, lands directly in Claude's system prompt. Use it for tool-use hints that don't fit in individual tool descriptions." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """mcp = FastMCP("my-server", instructions="Always call search_items before get_item — IDs aren't guessable.")
+""" ;
+                            oc:codeLanguage "python" ;
+                            oc:contentOrder 3 ;
+                            oc:sourceLocation "lines 18-20" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "This is the highest-leverage one-liner in the spec. If Claude keeps misusing your tools, put the fix here." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "`instructions` — system prompt injection" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Server capabilities — the rest of the spec" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "Progressive capability configuration for an MCP server, from always-available to opt-in features" ;
+            oc:hasStep [ a oc:WorkflowStep ;
+                    dcterms:description "Check AbortSignal.aborted (TS) in long tool loops; Python fastmcp handles via asyncio cancellation automatically" ;
+                    oc:expectedOutcome "Long-running tools can be cancelled by the client" ;
+                    oc:stepDependsOn _:ref_43beedf9f475573a ;
+                    oc:stepId "add-cancellation" ],
+                _:ref_43beedf9f475573a,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Enable structured logging via `logging: {}` capability and use sendNotification or ctx.info/debug/warning/error methods" ;
+                    oc:expectedOutcome "Server emits structured, level-filterable log messages" ;
+                    oc:stepId "add-logging" ],
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Check client capabilities, then implement sampling, roots, and/or elicitation with appropriate fallbacks" ;
+                    oc:expectedOutcome "Advanced capabilities work when client supports them, degrade gracefully otherwise" ;
+                    oc:stepDependsOn _:ref_de102f87d7f1203b ;
+                    oc:stepId "add-advanced-caps" ],
+                _:ref_de102f87d7f1203b ;
+            oc:workflowId "server-capabilities-setup" ;
+            oc:workflowName "Configure MCP Server Capabilities" ] ;
+    oc:impartsKnowledge oc:kn_17155f62,
+        oc:kn_2494bd10,
+        oc:kn_2759b79b,
+        oc:kn_9639f235,
+        oc:kn_a102cd07 ;
     oc:isUserInvocable true ;
-    oc:nature "concept" ;
+    oc:nature "Concept" ;
     oc:requiresState oc:MCPServerInitialized ;
     oc:resolvesIntent "add autocomplete for prompt arguments",
-        "add server instructions to MCP server",
-        "handle cancellation in MCP tool handlers",
+        "add structured logging to MCP server",
+        "configure server instructions for tool-use hints",
+        "delegate LLM calls to host via sampling",
+        "handle cancellation in MCP tools",
         "implement MCP server capabilities",
-        "implement structured logging in MCP server",
-        "query workspace roots from MCP host",
-        "report progress from long-running tools",
-        "use sampling to delegate LLM calls to host" ;
+        "query workspace roots from client",
+        "report progress for long-running tools" ;
     oc:yieldsState oc:MCPServerCapabilitiesConfigured .
 
-oc:kn_191a2755 a oc:AntiPattern,
+oc:kn_17155f62 a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When tool logic needs LLM inference" ;
-    oc:directiveContent "Do not ship your own LLM client inside MCP tools when sampling is available. Delegate LLM inference calls (summarize, classify, generate) to the host via sampling instead." ;
-    oc:hasRationale "Using the host's LLM avoids bundling model credentials, reduces latency, and leverages the user's existing model configuration" ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_74c9543c a oc:FallbackStrategy,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When client does not declare support for a capability" ;
-    oc:directiveContent "When optional client capabilities are unavailable, use fallbacks: logging → stderr, progress → silently skip, sampling → bring your own LLM, elicitation → return text and ask Claude to relay, roots → config env var." ;
-    oc:hasRationale "Graceful degradation ensures the server remains functional across different MCP clients with varying feature support" ;
-    oc:severityLevel "LOW" .
-
-oc:kn_ad6a4630 a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When Claude is not using tools correctly or tool-use hints don't fit in individual tool descriptions" ;
-    oc:directiveContent "Use server instructions for high-leverage system prompt injection — one line of config that lands directly in Claude's system prompt. If Claude keeps misusing your tools, put the fix here." ;
-    oc:hasRationale "Instructions are the highest-leverage one-liner in the MCP spec for correcting agent behavior without code changes" ;
+    oc:appliesToContext "When Claude repeatedly misuses or calls tools in wrong order" ;
+    oc:directiveContent "Use the `instructions` field on server initialization to inject tool-use hints into Claude's system prompt — it's the highest-leverage one-liner for fixing persistent tool misuse." ;
+    oc:hasRationale "Individual tool descriptions may not provide enough context; system-level instructions ensure Claude sees the guidance on every interaction." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_c960c516 a oc:DesignPrinciple,
+oc:kn_2494bd10 a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When building MCP servers that will run remotely or need observable logging" ;
-    oc:directiveContent "Use structured MCP logging (notifications/message with syslog levels) instead of stderr for remote servers. Client can filter by level." ;
-    oc:hasRationale "Structured logging is level-aware and filterable by the client, making it superior to stderr for production server deployments" ;
+    oc:appliesToContext "When implementing tools that iterate or take significant time" ;
+    oc:directiveContent "Always check `AbortSignal` (TS) or rely on asyncio cancellation (Python) for long-running tool handlers to honor client cancellation requests." ;
+    oc:hasRationale "Ignoring cancellation signals wastes compute resources and degrades user experience when they want to stop a long operation." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_d4cdf404 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When implementing tools that iterate over many items or take significant time" ;
-    oc:directiveContent "Long-running tools should report progress via progressToken and check AbortSignal for cancellation. In Python fastmcp, asyncio cancellation is handled automatically for properly async handlers." ;
-    oc:hasRationale "Progress reporting gives users visibility; cancellation support prevents wasting resources on abandoned requests" ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_f062d3be a oc:KnowledgeNode,
+oc:kn_2759b79b a oc:KnowledgeNode,
         oc:Standard ;
-    oc:appliesToContext "Before using any client-dependent capability (sampling, roots, elicitation)" ;
-    oc:directiveContent "Always check clientCapabilities before using optional features like sampling, elicitation, or roots. Use server.getClientCapabilities() (TS) or ctx.session.client_params.capabilities (Python) to verify support." ;
-    oc:hasRationale "Optional capabilities may not be supported by all clients; failing to check causes runtime errors or silent failures" ;
+    oc:appliesToContext "When implementing sampling, roots, or elicitation features" ;
+    oc:directiveContent "Before using sampling, roots, or elicitation capabilities, check client capabilities via `server.getClientCapabilities()` (TS) or `ctx.session.client_params.capabilities` (Python)." ;
+    oc:hasRationale "These capabilities require explicit client support; using them without checking will cause runtime errors or silent failures." ;
     oc:severityLevel "CRITICAL" .
+
+oc:kn_9639f235 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When tool logic needs LLM inference" ;
+    oc:directiveContent "Do not ship your own LLM client inside an MCP server for summarization, classification, or generation — use the sampling capability to delegate to the host instead." ;
+    oc:hasRationale "Delegating to the host avoids bundling API keys, reduces latency, and keeps the server lightweight." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_a102cd07 a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When client capabilities check fails" ;
+    oc:directiveContent "If a client capability is not supported, use fallbacks: logging → stderr, sampling → bring your own LLM, roots → config env var, elicitation → return text and ask Claude to relay." ;
+    oc:hasRationale "Graceful degradation ensures the server remains functional even with limited client support." .
+
+oc:req_065fc826 a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "MCP protocol basics and three core primitives (tools, resources, prompts)" .
+
+oc:req_17016cbf a oc:RequirementKnowledge ;
+    oc:isOptional false ;
+    oc:requirementValue "TypeScript MCP SDK or Python FastMCP" .
+
+_:ref_43beedf9f475573a a oc:WorkflowStep ;
+    dcterms:description "Implement progress reporting in long-running tools by reading progressToken from _meta and emitting progress notifications" ;
+    oc:expectedOutcome "Long-running tools report progress to client when supported" ;
+    oc:stepDependsOn _:ref_de102f87d7f1203b ;
+    oc:stepId "add-progress" .
+
+_:ref_de102f87d7f1203b a oc:WorkflowStep ;
+    dcterms:description "Add `instructions` field to server constructor with tool-use hints and ordering constraints" ;
+    oc:expectedOutcome "System prompt contains guidance for correct tool usage" ;
+    oc:stepId "add-instructions" .
 

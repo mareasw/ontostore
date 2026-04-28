@@ -4,89 +4,354 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_plugin_official_build_mcpb_local_security a oc:DeclarativeSkill,
+oc:skill_claude_plugin_official_build_mcpb_local_security a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "local-security" ;
-    skos:broader "Security methodology" ;
+    skos:broader "Security hardening guide" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/build-mcpb" ;
     oc:contentHash "7813aae1084e050537241956ba835adceb710804871894b53a9adcdeb3736241" ;
-    oc:differentia "that hardens local MCP servers against prompt injection, path traversal, command injection, and data leakage by applying defense-in-depth at the tool handler level" ;
-    oc:extends oc:skill_anthropics_claude_plugin_official_build_mcpb ;
-    oc:handlesFailure oc:CommandInjectionAttempt,
-        oc:PathTraversalDetected,
-        oc:ResourceLimitExceeded ;
-    oc:hasArgumentHint "(not directly invoked — applied as a reference during MCP server development)" ;
+    oc:differentia "that defines defensive patterns for local MCP servers lacking platform sandboxing, covering path traversal prevention, command injection avoidance, resource limiting, and secret handling" ;
+    oc:extends oc:skill_claude_plugin_official_build_mcpb ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_3f737242,
-        oc:kn_4725f388,
-        oc:kn_61978501,
-        oc:kn_63409822,
-        oc:kn_9e854d84,
-        oc:kn_ab5b3b9f,
-        oc:kn_acf99290,
-        oc:kn_f3796e78 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "Claude drives it. That combination means: **tool inputs are untrusted**, even though they come from an AI the user trusts. A prompt-injected web page can make Claude call your `delete_file` tool with a path you didn't intend." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 3 ;
+                    oc:textContent "Your tool handlers are the only defense. Everything below is about building that defense yourself." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "**MCPB provides no sandbox.** There's no `permissions` block in the manifest, no filesystem scoping, no network allowlist enforced by the platform. The server process runs with the user's full privileges — it can read any file the user can, spawn any process, hit any network endpoint." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Before hardcoding `ROOT` from a config env var, check if the host supports `roots/list`. This is the spec-native way to get user-approved workspace boundaries." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+
+const server = new McpServer({ name: "...", version: "..." });
+
+let allowedRoots: string[] = [];
+server.server.oninitialized = async () => {
+  const caps = server.getClientCapabilities();
+  if (caps?.roots) {
+    const { roots } = await server.server.listRoots();
+    allowedRoots = roots.map(r => new URL(r.uri).pathname);
+  } else {
+    allowedRoots = [process.env.ROOT_DIR ?? process.cwd()];
+  }
+};
+""" ;
+                            oc:codeLanguage "typescript" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 48-63" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "If roots are available, use them. If not, fall back to config. Either way, validate every path against the allowed set." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# fastmcp — inside a tool handler
+async def my_tool(ctx: Context) -> str:
+    try:
+        roots = await ctx.list_roots()
+        allowed = [urlparse(r.uri).path for r in roots]
+    except Exception:
+        allowed = [os.environ.get("ROOT_DIR", os.getcwd())]
+""" ;
+                            oc:codeLanguage "python" ;
+                            oc:contentOrder 3 ;
+                            oc:sourceLocation "lines 65-73" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Roots — ask the host, don't hardcode" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "Pair this with tool annotations — `readOnlyHint: true` on every read tool, `destructiveHint: true` on delete/overwrite tools. Hosts surface these in permission UI (auto-approve reads, confirm-dialog destructive). See `../build-mcp-server/references/tool-design.md`." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """list_files   ← safe to call freely
+read_file    ← safe to call freely
+write_file   ← separate tool, separate scrutiny
+delete_file  ← consider not shipping this at all
+""" ;
+                            oc:codeLanguage "" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 99-104" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "If you ship write/delete, consider requiring explicit confirmation via elicitation (see `../build-mcp-server/references/elicitation.md`) or a confirmation widget (see `build-mcp-app`) so the user approves each destructive call." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Split read and write into separate tools. Most workflows only need read. A tool that's read-only can't be weaponized into data loss no matter what Claude is tricked into calling it with." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Read-only by default" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """import { resolve, relative, isAbsolute } from "node:path";
+
+function safeJoin(root: string, userPath: string): string {
+  const full = resolve(root, userPath);
+  const rel = relative(root, full);
+  if (rel.startsWith("..") || isAbsolute(rel)) {
+    throw new Error(`Path escapes root: ${userPath}`);
+  }
+  return full;
+}
+""" ;
+                            oc:codeLanguage "typescript" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 15-26" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """from pathlib import Path
+
+def safe_join(root: Path, user_path: str) -> Path:
+    full = (root / user_path).resolve()
+    if not full.is_relative_to(root.resolve()):
+        raise ValueError(f"Path escapes root: {user_path}")
+    return full
+""" ;
+                            oc:codeLanguage "python" ;
+                            oc:contentOrder 5 ;
+                            oc:sourceLocation "lines 32-40" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "**Python equivalent:**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "`resolve` normalizes `..`, symlink segments, etc. `relative` tells you if the result left the root. Don't just `String.includes(\"..\")` — that misses encoded and symlink-based escapes." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "The #1 bug in local MCP servers. If you take a path parameter and join it to a root, **resolve and check containment**." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Path traversal" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "Same for directory listings (cap entry count), search results (cap matches), and anything else unbounded." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Claude will happily ask to read a 4GB log file. Cap everything:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """const MAX_BYTES = 1_000_000;
+const buf = await readFile(path);
+if (buf.length > MAX_BYTES) {
+  return {
+    content: [{
+      type: "text",
+      text: `File is ${buf.length} bytes — too large. Showing first ${MAX_BYTES}:\\n\\n`
+            + buf.subarray(0, MAX_BYTES).toString("utf8"),
+    }],
+  };
+}
+""" ;
+                            oc:codeLanguage "typescript" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 116-128" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Resource limits" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "If you're wrapping a CLI, build the full argv as an array. Validate each flag against an allowlist if the tool accepts flags at all." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "If you spawn processes, **never pass user input through a shell**." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// ❌ catastrophic
+exec(`git log ${branch}`);
+
+// ✅ array-args, no shell
+execFile("git", ["log", branch]);
+""" ;
+                            oc:codeLanguage "typescript" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 83-89" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Command injection" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "**Config secrets** (`sensitive: true` in manifest `user_config`): host stores in OS keychain, delivers via env var. Don't log them. Don't include them in tool results." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "**Tool results flow into the chat transcript.** Anything you return, the user (and any log export) can see. Redact before returning." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "**Never store secrets in plaintext files.** If the host's keychain integration isn't enough, use `keytar` (Node) / `keyring` (Python) yourself." ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Secrets" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 6 ;
+                                    oc:itemText "[ ] Tested with adversarial inputs: `../../etc/passwd`, `; rm -rf ~`, 10GB file" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "[ ] No `exec()` / `shell=True` — `execFile` / array-argv only" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "[ ] Every path parameter goes through containment check" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "[ ] Write/delete split from read tools; `readOnlyHint`/`destructiveHint` annotations set" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "[ ] Secrets never logged or returned in tool results" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "[ ] Size caps on file reads, listing lengths, search results" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 7 ;
+                    oc:sectionTitle "Checklist before shipping" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Local MCP Security" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "Systematic security checklist to verify before releasing a local MCP server" ;
+            oc:hasStep _:ref_1ab7ef20b065aaab,
+                _:ref_5b6ea62db72d335a,
+                _:ref_687e683bef0123b2,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Split read and write/delete into separate tools; set readOnlyHint and destructiveHint annotations" ;
+                    oc:expectedOutcome "Read tools are auto-approvable; destructive tools require confirmation" ;
+                    oc:stepId "tool-split-annotations" ],
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Verify secrets are never logged or included in tool results; use OS keychain or keytar/keyring" ;
+                    oc:expectedOutcome "Secrets are never exposed in chat transcripts or logs" ;
+                    oc:stepId "secret-protection" ],
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Test with adversarial inputs: ../../etc/passwd, '; rm -rf ~', and 10GB file" ;
+                    oc:expectedOutcome "All attack vectors are properly rejected or safely handled" ;
+                    oc:stepDependsOn _:ref_1ab7ef20b065aaab,
+                        _:ref_5b6ea62db72d335a,
+                        _:ref_687e683bef0123b2 ;
+                    oc:stepId "adversarial-testing" ] ;
+            oc:workflowId "security-hardening-checklist" ;
+            oc:workflowName "Pre-shipping Security Hardening" ] ;
+    oc:impartsKnowledge oc:kn_04b180f8,
+        oc:kn_4148282b,
+        oc:kn_437c94ee,
+        oc:kn_5a96eba8,
+        oc:kn_6784aa6c,
+        oc:kn_78d139f6,
+        oc:kn_7d83c983,
+        oc:kn_abff0204 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:ToolInstalled ;
-    oc:resolvesIntent "apply security best practices when building MCPB packages",
-        "prevent command injection in MCP tool handlers",
-        "prevent path traversal in MCP tool handlers",
-        "secure a local MCP server against prompt injection attacks" ;
-    oc:yieldsState oc:SecurityHardened .
+    oc:resolvesIntent "harden MCP server with read-only defaults and resource limits",
+        "prevent command injection in MCP tools",
+        "protect secrets in MCP tool results",
+        "secure local MCP server against path traversal" .
 
-oc:kn_3f737242 a oc:Heuristic,
+oc:kn_04b180f8 a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When determining allowed filesystem boundaries for an MCP server" ;
-    oc:directiveContent "Check if the host supports roots/list before hardcoding a root directory from config. Use spec-native workspace boundaries when available, falling back to config or cwd. Validate every path against the allowed set regardless of source." ;
-    oc:hasRationale "Using host-provided roots ensures user-approved workspace boundaries rather than developer-assumed defaults, which is the spec-native approach to scope limitation" ;
+    oc:appliesToContext "When handling any path parameter in tool handlers" ;
+    oc:directiveContent "Never validate path traversal with String.includes(\"..\") — it misses encoded and symlink-based escapes. Always use resolve + relative containment checks." ;
+    oc:hasRationale "String-based checks fail on encoded sequences and symlinks that normalize outside the root directory." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_4148282b a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before releasing any local MCP server" ;
+    oc:directiveContent "Before shipping: verify every path parameter uses containment checks, no exec()/shell=True, write/delete split from read tools with annotations, size caps on unbounded outputs, secrets never logged or returned, and adversarial inputs tested (../../etc/passwd, ; rm -rf ~, 10GB file)." ;
+    oc:hasRationale "A systematic checklist catches the most common and dangerous security gaps in local MCP servers." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_437c94ee a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When determining allowed filesystem roots" ;
+    oc:directiveContent "Check if the host supports roots/list before hardcoding root directories from config. Use spec-native workspace boundaries when available, fall back to env vars otherwise." ;
+    oc:hasRationale "Host-provided roots are user-approved workspace boundaries; hardcoding roots from config may not match the user's actual intent." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_4725f388 a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "Before releasing or distributing an MCPB package" ;
-    oc:directiveContent "Before shipping: verify every path parameter has containment checks, no shell-based exec calls exist, read/write tools are split with proper annotations, size caps are in place, secrets are never logged or returned, and adversarial inputs have been tested (../../etc/passwd, ; rm -rf ~, oversized files)." ;
-    oc:hasRationale "This checklist catches the most common and dangerous vulnerability classes in local MCP servers before they reach users" ;
-    oc:severityLevel "HIGH" .
+oc:kn_5a96eba8 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Always when building local MCP servers" ;
+    oc:directiveContent "MCPB provides no sandbox — the server process runs with the user's full privileges. Tool inputs are untrusted even though they come from an AI the user trusts. Tool handlers are the only defense." ;
+    oc:hasRationale "A prompt-injected web page can make Claude call your tools with unintended parameters, so every tool must validate its own inputs." ;
+    oc:severityLevel "CRITICAL" .
 
-oc:kn_61978501 a oc:KnowledgeNode,
-        oc:Standard ;
+oc:kn_6784aa6c a oc:AntiPattern,
+        oc:KnowledgeNode ;
     oc:appliesToContext "When spawning processes from MCP tool handlers" ;
-    oc:directiveContent "Never pass user input through a shell (no exec() with template strings, no shell=True). Always use execFile with array-args (Node) or subprocess with array argv (Python). Validate each flag against an allowlist if the tool accepts flags." ;
-    oc:hasRationale "Shell interpolation of user input enables arbitrary command execution — the most catastrophic class of vulnerability in local servers" ;
+    oc:directiveContent "Never pass user input through a shell (exec/shell=True). Always use array-args with execFile or subprocess.run without shell." ;
+    oc:hasRationale "Shell interpolation of user input enables arbitrary command execution, the most catastrophic injection vector." ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_63409822 a oc:AntiPattern,
+oc:kn_78d139f6 a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When accepting any file path parameter in a tool handler" ;
-    oc:directiveContent "Never validate path traversal by checking if the string contains '..'. Always use resolve() + relative() (Node) or Path.resolve() + is_relative_to() (Python) to normalize and check containment against a root directory." ;
-    oc:hasRationale "String-based checks miss encoded sequences and symlink-based escapes; resolve+relative handles all normalization including symlinks and encoded traversal" ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_9e854d84 a oc:KnowledgeNode,
-        oc:SecurityImplication ;
-    oc:appliesToContext "When handling API keys, tokens, or any secret material in tool handlers" ;
-    oc:directiveContent "Tool results flow into the chat transcript. Never log secrets, never return secrets in tool results, and redact sensitive values before returning. Config secrets marked sensitive: true are delivered via env var from the OS keychain." ;
-    oc:hasRationale "Anything returned in a tool result is visible to the user and any log export; secrets in transcripts create persistent disclosure vectors" ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_ab5b3b9f a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When any tool handler returns file contents, listings, or search results" ;
-    oc:directiveContent "Cap all unbounded outputs: file reads (e.g., 1MB max), directory listing entry counts, and search result match counts. Return truncated results with a size notice rather than full content." ;
-    oc:hasRationale "Claude will request unbounded resources (e.g., a 4GB log file) without understanding the cost; caps prevent resource exhaustion and context window flooding" ;
+    oc:appliesToContext "When designing MCP tool surfaces" ;
+    oc:directiveContent "Split read and write into separate tools. Ship read-only tools by default (list_files, read_file) and require separate scrutiny for write/delete tools. Set readOnlyHint:true on read tools and destructiveHint:true on destructive tools." ;
+    oc:hasRationale "Read-only tools cannot be weaponized into data loss regardless of what Claude is tricked into calling. Tool annotations let hosts auto-approve reads and confirm destructive operations." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_acf99290 a oc:DesignPrinciple,
+oc:kn_7d83c983 a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When designing the tool surface of an MCP server" ;
-    oc:directiveContent "Split read and write into separate tools. Default to read-only tools. Annotate with readOnlyHint: true on reads and destructiveHint: true on writes/deletes. Consider requiring user confirmation (elicitation) for destructive operations." ;
-    oc:hasRationale "Read-only tools cannot be weaponized into data loss regardless of what Claude is tricked into calling. Tool annotations let hosts surface appropriate permission UI (auto-approve reads, confirm destructive ops)" ;
+    oc:appliesToContext "When handling sensitive config values or credentials" ;
+    oc:directiveContent "Never log secrets or include them in tool results. Tool results flow into the chat transcript visible to the user and any log export. Redact before returning." ;
+    oc:hasRationale "The chat transcript is persistent and shareable; any secret returned by a tool is permanently exposed." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_f3796e78 a oc:Constraint,
+oc:kn_abff0204 a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When building any local MCP server packaged as MCPB" ;
-    oc:directiveContent "MCPB provides no sandbox, no permissions block, no filesystem scoping, and no network allowlist. The server process runs with the user's full privileges. Tool handlers are the only defense." ;
-    oc:hasRationale "Without platform-level enforcement, every tool must defensively validate its own inputs because prompt-injected content can make Claude call tools with malicious arguments" ;
-    oc:severityLevel "CRITICAL" .
+    oc:appliesToContext "When any tool returns potentially large data" ;
+    oc:directiveContent "Cap all unbounded outputs: file reads at ~1MB, directory listings, search results. Return truncated content with a message instead of failing silently." ;
+    oc:hasRationale "Claude will happily ask to read multi-GB files; uncapped responses can exhaust memory and flood the chat transcript." ;
+    oc:severityLevel "HIGH" .
+
+_:ref_1ab7ef20b065aaab a oc:WorkflowStep ;
+    dcterms:description "Add size caps on file reads, directory listings, and search results" ;
+    oc:expectedOutcome "No tool can return unbounded output that exhausts memory" ;
+    oc:stepId "size-caps" .
+
+_:ref_5b6ea62db72d335a a oc:WorkflowStep ;
+    dcterms:description "Ensure no exec()/shell=True usage — only execFile/subprocess with array arguments" ;
+    oc:expectedOutcome "No shell interpolation of user input is possible anywhere in the codebase" ;
+    oc:stepId "no-shell-exec" .
+
+_:ref_687e683bef0123b2 a oc:WorkflowStep ;
+    dcterms:description "Verify every path parameter goes through a resolve + relative containment check (no String.includes tricks)" ;
+    oc:expectedOutcome "All path inputs are validated against allowed roots; traversal attempts like ../../etc/passwd are rejected" ;
+    oc:stepId "path-containment" .
 

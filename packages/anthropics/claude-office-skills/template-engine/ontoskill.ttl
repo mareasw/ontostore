@@ -4,85 +4,460 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_office_skills_template_engine a oc:DeclarativeSkill,
+oc:skill_claude_office_skills_template_engine a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "template-engine" ;
-    skos:broader "document generation engine" ;
-    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-office-skills/template-engine" ;
+    skos:broader "Document generator" ;
+    prov:wasDerivedFrom "../.agents/skills/anthropics/claude-office-skills/template-engine" ;
     oc:contentHash "572fb69ddd00e686a78c9c83e3bfa338c8d5110ed6c04ccb29c3a00f9315529c" ;
-    oc:dependsOnSkill oc:skill_office_mcp ;
-    oc:differentia "auto-fills template placeholders with data using Jinja2-based syntax for bulk mail merge and personalized document creation" ;
+    oc:differentia "auto-fills Jinja2-based templates with structured data for bulk document creation across Word, Excel, and PowerPoint formats" ;
+    oc:extends oc:skill_ontoskills_office_mcp ;
     oc:handlesFailure oc:FileNotFound,
         oc:InvalidInput,
         oc:PermissionDenied ;
     oc:hasAllowedTool "fill_docx_template" ;
-    oc:hasArgumentHint "template-path and data (dict or CSV) for document generation" ;
+    oc:hasArgumentHint "template-path and data (dict or CSV)" ;
     oc:hasCategory "document" ;
     oc:hasDescription "Auto-fill document templates with data - mail merge for any format" ;
     oc:hasName "template-engine" ;
     oc:hasPackageName "template-engine" ;
-    oc:hasRequirement oc:req_0675bcfd,
-        oc:req_19987d29,
+    oc:hasRequirement oc:req_19987d29,
         oc:req_47a90164,
+        oc:req_684e24b8,
         oc:req_6caa6449,
-        oc:req_85275399,
         oc:req_99341ad8,
         oc:req_e18dc245,
         oc:req_fd635a4a ;
-    oc:impartsKnowledge oc:kn_2a056d3a,
-        oc:kn_340ebfed,
-        oc:kn_7fc7c826,
-        oc:kn_a80a4791,
-        oc:kn_c2bcec98 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "This skill enables template-based document generation - define templates with placeholders, then automatically fill them with data. Works with Word, Excel, PowerPoint, and more." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Overview" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# Install required dependencies
+pip install python-docx openpyxl python-pptx reportlab jinja2
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 195-198" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Installation" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """import csv
+from pathlib import Path
+
+def mail_merge(template_path: str, data_csv: str, output_dir: str):
+    \"\"\"Generate documents for each row in CSV.\"\"\"
+    
+    Path(output_dir).mkdir(exist_ok=True)
+    
+    with open(data_csv) as f:
+        reader = csv.DictReader(f)
+        
+        for i, row in enumerate(reader):
+            output_path = f"{output_dir}/document_{i+1}.docx"
+            fill_template(template_path, row, output_path)
+            print(f"Generated: {output_path}")
+
+# Usage with contacts.csv:
+# name,email,company
+# John,john@example.com,Acme
+# Jane,jane@example.com,Corp
+
+mail_merge(
+    "templates/welcome_letter.docx",
+    "data/contacts.csv",
+    "output/letters"
+)
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 135-162" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "Bulk Generation (Mail Merge)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """{{ variable }}           - Simple substitution
+{% for item in list %}   - Loop
+{% if condition %}       - Conditional
+{{ date | format_date }} - Filter
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 72-77" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Template Syntax (Jinja2-based)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """from docxtpl import DocxTemplate
+
+# Template with conditionals:
+# {% if vip %}
+# Thank you for being a VIP member!
+# {% else %}
+# Thank you for your purchase.
+# {% endif %}
+
+doc = DocxTemplate("template.docx")
+doc.render({
+    "name": "John",
+    "vip": True,
+    "discount": 20
+})
+doc.save("output.docx")
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 166-183" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 5 ;
+                            oc:sectionTitle "Advanced: Conditional Content" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """from docxtpl import DocxTemplate
+
+# Create template with placeholders:
+# Dear {{ name }},
+# Thank you for your order #{{ order_id }}...
+
+def fill_template(template_path: str, data: dict, output_path: str):
+    doc = DocxTemplate(template_path)
+    doc.render(data)
+    doc.save(output_path)
+    return output_path
+
+# Usage
+fill_template(
+    "templates/order_confirmation.docx",
+    {
+        "name": "John Smith",
+        "order_id": "ORD-12345",
+        "items": [
+            {"name": "Product A", "qty": 2, "price": 29.99},
+            {"name": "Product B", "qty": 1, "price": 49.99}
+        ],
+        "total": 109.97
+    },
+    "output/confirmation_john.docx"
+)
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 81-108" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Word Template Example" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """from openpyxl import load_workbook
+import re
+
+def fill_excel_template(template_path: str, data: dict, output_path: str):
+    wb = load_workbook(template_path)
+    ws = wb.active
+    
+    # Find and replace placeholders like {{name}}
+    for row in ws.iter_rows():
+        for cell in row:
+            if cell.value and isinstance(cell.value, str):
+                for key, value in data.items():
+                    placeholder = "{{" + key + "}}"
+                    if placeholder in cell.value:
+                        cell.value = cell.value.replace(placeholder, str(value))
+    
+    wb.save(output_path)
+    return output_path
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 112-131" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Excel Template" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Domain Knowledge" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "[Claude Office Skills Hub](https://github.com/claude-office-skills/skills)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "[docxtpl / yumdocs Repository](https://github.com/elapouya/python-docxtpl)" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Resources" ],
+                [ a oc:Section ;
+                    oc:hasContent _:ref_ada9a1c7eac91c2b ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Best Practices" ],
+                [ a oc:Section ;
+                    oc:hasContent _:ref_01ac5dc90f61746f,
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 3 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "\"Generate personalized reports from data\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "\"Create certificates from templates\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "\"Mail merge for bulk letters/contracts\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "\"Auto-fill forms with user data\"" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Example prompts:**" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "How to Use" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Template Engine Skill" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """# ═══════════════════════════════════════════════════════════════════════════════
+# CLAUDE OFFICE SKILL - Enhanced Metadata v2.0
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Basic Information
+name: template-engine
+description: "Auto-fill document templates with data - mail merge for any format"
+version: "1.0"
+author: claude-office-skills
+license: MIT
+
+# Categorization
+category: template
+tags:
+  - template
+  - engine
+  - autofill
+  - docxtpl
+department: All
+
+# AI Model Compatibility
+models:
+  recommended:
+    - claude-sonnet-4
+    - claude-opus-4
+  compatible:
+    - claude-3-5-sonnet
+    - gpt-4
+    - gpt-4o
+
+# MCP Tools Integration
+mcp:
+  server: office-mcp
+  tools:
+    - fill_docx_template
+
+# Skill Capabilities
+capabilities:
+  - template_filling
+  - document_automation
+
+# Language Support
+languages:
+  - en
+  - zh
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:hasWorkflow _:ref_01ac5dc90f61746f,
+        [ a oc:Workflow ;
+            dcterms:description "Fill a single document template with provided data" ;
+            oc:hasStep _:ref_12ee1ee3a76c81c5,
+                _:ref_7bd83eae329e8c48,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Confirm output file exists and has no unresolved placeholders" ;
+                    oc:expectedOutcome "Verified document with all placeholders resolved" ;
+                    oc:stepDependsOn _:ref_7bd83eae329e8c48 ;
+                    oc:stepId "verify-output" ],
+                _:ref_db8226dcd0839624 ;
+            oc:workflowId "template-fill" ;
+            oc:workflowName "Fill Document Template" ],
+        _:ref_ada9a1c7eac91c2b,
+        [ a oc:Workflow ;
+            dcterms:description "Generate multiple documents from a template and CSV data source" ;
+            oc:hasStep [ a oc:WorkflowStep ;
+                    dcterms:description "Report count of generated documents and output file listing" ;
+                    oc:expectedOutcome "Summary of generated files provided to user" ;
+                    oc:stepDependsOn _:ref_a4c50373b0cb239d ;
+                    oc:stepId "report-results" ],
+                _:ref_47290a235ca68faa,
+                _:ref_a4c50373b0cb239d,
+                _:ref_afdfb80b37057fb9 ;
+            oc:workflowId "mail-merge" ;
+            oc:workflowName "Bulk Mail Merge" ] ;
+    oc:impartsKnowledge oc:kn_12bb1952,
+        oc:kn_1772f124,
+        oc:kn_408118da,
+        oc:kn_5ca28901,
+        oc:kn_6541d44f,
+        oc:kn_a0da452d,
+        oc:kn_c6aded50,
+        oc:kn_cb6ce1be,
+        oc:kn_cd873ed0,
+        oc:kn_f0c85335,
+        oc:kn_f4aa0057,
+        oc:kn_fc2ebda5 ;
     oc:isUserInvocable true ;
     oc:nature "Work" ;
-    oc:requiresState oc:DirectoryWritable,
+    oc:requiresState oc:EnvironmentReady,
         oc:FileExists ;
-    oc:resolvesIntent "auto-fill forms with user data",
+    oc:resolvesIntent "auto-fill document templates with data",
+        "batch generate documents from CSV data",
         "create certificates from templates",
         "generate personalized reports from data",
-        "mail merge for bulk letters and contracts",
-        "populate document templates with variable data" ;
+        "mail merge for bulk letters and contracts" ;
     oc:yieldsState oc:DocumentCreated .
 
-oc:kn_2a056d3a a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "When managing templates in production or team environments" ;
-    oc:directiveContent "Keep templates version-controlled alongside their data schemas to maintain compatibility between template structure and data sources." ;
-    oc:hasRationale "Template-data schema mismatches cause silent failures or malformed documents that are difficult to debug without version tracking." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_340ebfed a oc:AntiPattern,
+oc:kn_12bb1952 a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When populating templates where some data fields may be empty or unavailable" ;
-    oc:directiveContent "Do not leave missing data unresolved in templates. Always provide fallback values or default content for optional fields." ;
-    oc:hasRationale "Unresolved {{placeholders}} in final documents appear unprofessional and can expose internal variable names to recipients." ;
-    oc:severityLevel "HIGH" .
+    oc:appliesToContext "When filling Word (.docx) templates with Jinja2 placeholders" ;
+    oc:codeLanguage "python" ;
+    oc:directiveContent """from docxtpl import DocxTemplate
 
-oc:kn_7fc7c826 a oc:KnowledgeNode,
-        oc:SideEffect ;
-    oc:appliesToContext "When running mail merge or batch document generation" ;
-    oc:directiveContent "Template rendering creates new document files on disk. For bulk mail merge operations, this can generate many files rapidly in the output directory." ;
-    oc:hasRationale "Large mail merges can fill disk space or overwhelm file systems if output directories are not managed and cleaned up." ;
-    oc:severityLevel "MEDIUM" .
+def fill_template(template_path: str, data: dict, output_path: str):
+    doc = DocxTemplate(template_path)
+    doc.render(data)
+    doc.save(output_path)
+    return output_path""" .
 
-oc:kn_a80a4791 a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When designing or authoring document templates" ;
-    oc:directiveContent "Use clear, descriptive placeholder naming conventions (e.g., {{client_name}}, {{order_id}}) in templates to avoid ambiguity and improve maintainability." ;
-    oc:hasRationale "Clear naming reduces errors during data binding and makes templates self-documenting for collaborators." ;
-    oc:severityLevel "MEDIUM" .
+oc:kn_1772f124 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When filling any document template" ;
+    oc:directiveContent "1. Identify template format (Word/Excel/PPT) 2. Prepare template with Jinja2 placeholders ({{ variable }}, {% for %}, {% if %}) 3. Validate input data against placeholder names 4. Call fill_docx_template MCP tool or run Python script 5. Verify generated document at output path" ;
+    oc:stepOrder 1 .
 
-oc:kn_c2bcec98 a oc:KnowledgeNode,
+oc:kn_408118da a oc:KnowledgeNode,
         oc:PreFlightCheck ;
-    oc:appliesToContext "Before executing template rendering or mail merge" ;
-    oc:directiveContent "Validate all input data against template placeholders before rendering. Ensure every required variable has a corresponding value and types match expected formats." ;
-    oc:hasRationale "Rendering with missing or mismatched data produces broken documents with raw placeholder text visible to end users." ;
+    oc:appliesToContext "Before executing any template fill operation" ;
+    oc:directiveContent "Verify template file exists, output directory is writable, and all placeholder variables have corresponding data keys before rendering." ;
+    oc:hasRationale "Prevents partial or broken document generation that wastes compute and confuses users." ;
     oc:severityLevel "HIGH" .
 
-oc:req_0675bcfd a oc:RequirementTool ;
-    oc:isOptional false ;
-    oc:requirementValue "office-mcp MCP server with fill_docx_template tool" .
+oc:kn_5ca28901 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Always — template management lifecycle" ;
+    oc:directiveContent "Keep templates version-controlled alongside the code that fills them, treating templates as first-class artifacts in the pipeline." ;
+    oc:hasRationale "Templates evolve with business requirements; version control prevents drift between template structure and data binding code." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_6541d44f a oc:KnowledgeNode,
+        oc:OutputFormat ;
+    oc:appliesToContext "When reporting results of template fill or mail merge operations" ;
+    oc:directiveContent """Generated document at: {output_path}
+Template: {template_path}
+Records processed: {count}
+Output files:
+- {filename_1}
+- {filename_2}""" ;
+    oc:templateVariables "count",
+        "filename_1",
+        "filename_2",
+        "output_path",
+        "template_path" .
+
+oc:kn_a0da452d a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "When executing template fill operations" ;
+    oc:directiveContent "Each template rendering creates or overwrites a file at the specified output path. Bulk mail merge creates one file per CSV row in the output directory." ;
+    oc:hasRationale "Agents must ensure output directories exist and warn users about potential file overwrites before execution." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_c6aded50 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When generating multiple documents from a CSV data source" ;
+    oc:codeLanguage "python" ;
+    oc:directiveContent """import csv
+from pathlib import Path
+
+def mail_merge(template_path: str, data_csv: str, output_dir: str):
+    Path(output_dir).mkdir(exist_ok=True)
+    with open(data_csv) as f:
+        reader = csv.DictReader(f)
+        for i, row in enumerate(reader):
+            output_path = f"{output_dir}/document_{i+1}.docx"
+            fill_template(template_path, row, output_path)""" .
+
+oc:kn_cb6ce1be a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When designing any template with placeholders" ;
+    oc:directiveContent "Use clear placeholder naming conventions like {{client_name}} to avoid ambiguity and make templates self-documenting." ;
+    oc:hasRationale "Clear naming reduces errors during data binding and makes templates maintainable by non-technical users." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_cd873ed0 a oc:KnowledgeNode,
+        oc:Prerequisite ;
+    oc:directiveContent "pip install python-docx openpyxl python-pptx reportlab jinja2 (docxtpl is required for Word Jinja2 templates)" .
+
+oc:kn_f0c85335 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When filling Excel templates with simple find-replace placeholders (no Jinja2 engine)" ;
+    oc:codeLanguage "python" ;
+    oc:directiveContent """from openpyxl import load_workbook
+
+def fill_excel_template(template_path: str, data: dict, output_path: str):
+    wb = load_workbook(template_path)
+    ws = wb.active
+    for row in ws.iter_rows():
+        for cell in row:
+            if cell.value and isinstance(cell.value, str):
+                for key, value in data.items():
+                    placeholder = "{{" + key + "}}"
+                    if placeholder in cell.value:
+                        cell.value = cell.value.replace(placeholder, str(value))
+    wb.save(output_path)
+    return output_path""" .
+
+oc:kn_f4aa0057 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing templates that may receive incomplete data sets" ;
+    oc:directiveContent "Handle missing data gracefully using Jinja2 default filters (e.g., {{ name | default('Valued Customer') }}) rather than letting substitution fail silently." ;
+    oc:hasRationale "Graceful fallbacks ensure documents are always generated, even with partial data, which is critical in bulk mail merge scenarios." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_fc2ebda5 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Before calling doc.render() or any template fill operation" ;
+    oc:directiveContent "Never render a template without validating the input data first — missing or malformed data will produce broken documents or raise Jinja2 errors." ;
+    oc:hasRationale "Unchecked data leads to UndefinedError exceptions or documents with raw placeholder text." ;
+    oc:severityLevel "HIGH" .
 
 oc:req_19987d29 a oc:RequirementTool ;
     oc:isOptional false ;
@@ -92,23 +467,118 @@ oc:req_47a90164 a oc:RequirementTool ;
     oc:isOptional false ;
     oc:requirementValue "openpyxl" .
 
+oc:req_684e24b8 a oc:RequirementAPI ;
+    oc:isOptional false ;
+    oc:requirementValue "fill_docx_template (office-mcp)" .
+
 oc:req_6caa6449 a oc:RequirementTool ;
     oc:isOptional false ;
     oc:requirementValue "python-docx" .
-
-oc:req_85275399 a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "Jinja2 template syntax for placeholders, loops, conditionals, and filters" .
 
 oc:req_99341ad8 a oc:RequirementTool ;
     oc:isOptional false ;
     oc:requirementValue "jinja2" .
 
 oc:req_e18dc245 a oc:RequirementTool ;
-    oc:isOptional false ;
+    oc:isOptional true ;
     oc:requirementValue "python-pptx" .
 
 oc:req_fd635a4a a oc:RequirementTool ;
-    oc:isOptional false ;
+    oc:isOptional true ;
     oc:requirementValue "reportlab" .
+
+_:ref_12e8b931bd546b65 a oc:WorkflowStep ;
+    dcterms:description "**Keep templates version-controlled**" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_1324775329bdef16 a oc:WorkflowStep ;
+    dcterms:description "**Handle missing data gracefully**" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_1d93dae9f89a0f13 a oc:WorkflowStep ;
+    dcterms:description "Describe what you want to accomplish" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_3dd6bf3f019a482b a oc:WorkflowStep ;
+    dcterms:description "**Use clear placeholder naming ({{client_name}})**" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_43a4660cf45e5dc8 a oc:WorkflowStep ;
+    dcterms:description "**Validate data before rendering**" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_43cf7fe39eea53eb a oc:WorkflowStep ;
+    dcterms:description "Provide any required input data or files" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_79e298828a50d9e2 a oc:WorkflowStep ;
+    dcterms:description "I'll execute the appropriate operations" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_01ac5dc90f61746f a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 1 ;
+    oc:hasStep _:ref_1d93dae9f89a0f13,
+        _:ref_43cf7fe39eea53eb,
+        _:ref_79e298828a50d9e2 ;
+    oc:workflowId "procedure_1" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_12ee1ee3a76c81c5 a oc:WorkflowStep ;
+    dcterms:description "Verify template file exists and identify its format (Word/Excel/PPT)" ;
+    oc:expectedOutcome "Template file confirmed accessible with format identified" ;
+    oc:stepId "validate-template" .
+
+_:ref_47290a235ca68faa a oc:WorkflowStep ;
+    dcterms:description "Read CSV headers and confirm they match template placeholders" ;
+    oc:expectedOutcome "CSV columns mapped to template variables" ;
+    oc:stepDependsOn _:ref_afdfb80b37057fb9 ;
+    oc:stepId "parse-csv" .
+
+_:ref_7bd83eae329e8c48 a oc:WorkflowStep ;
+    dcterms:description "Execute template rendering using fill_docx_template MCP tool or Python script" ;
+    oc:expectedOutcome "Filled document saved to output path" ;
+    oc:stepDependsOn _:ref_db8226dcd0839624 ;
+    oc:stepId "render-document" .
+
+_:ref_a4c50373b0cb239d a oc:WorkflowStep ;
+    dcterms:description "Iterate CSV rows and generate one document per row" ;
+    oc:expectedOutcome "All documents generated in output directory" ;
+    oc:stepDependsOn _:ref_47290a235ca68faa ;
+    oc:stepId "generate-documents" .
+
+_:ref_ada9a1c7eac91c2b a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 1 ;
+    oc:hasStep _:ref_12e8b931bd546b65,
+        _:ref_1324775329bdef16,
+        _:ref_3dd6bf3f019a482b,
+        _:ref_43a4660cf45e5dc8 ;
+    oc:workflowId "procedure_1" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_afdfb80b37057fb9 a oc:WorkflowStep ;
+    dcterms:description "Verify template file and CSV data file both exist" ;
+    oc:expectedOutcome "Both input files confirmed accessible" ;
+    oc:stepId "validate-merge-inputs" .
+
+_:ref_db8226dcd0839624 a oc:WorkflowStep ;
+    dcterms:description "Map input data to template placeholder names and validate completeness" ;
+    oc:expectedOutcome "Data dictionary with keys matching all template placeholders" ;
+    oc:stepDependsOn _:ref_12ee1ee3a76c81c5 ;
+    oc:stepId "prepare-data" .
 

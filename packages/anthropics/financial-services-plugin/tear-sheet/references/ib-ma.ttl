@@ -4,91 +4,593 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_financial_services_plugin_tear_sheet_ib_ma a oc:DeclarativeSkill,
+oc:skill_financial_services_plugin_tear_sheet_ib_ma a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "ib-ma" ;
-    skos:broader "company profile" ;
+    skos:broader "tear sheet" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/financial-services-plugin/tear-sheet" ;
     oc:contentHash "a500e736295105dfb5888c71dd19b61bec55bda15c703c40057949cac79deefa" ;
-    oc:differentia "framed for investment banking and M&A transaction context with emphasis on strategic positioning, segment detail, comparable transactions, and deal multiples" ;
-    oc:extends oc:skill_anthropics_financial_services_plugin_tear_sheet ;
-    oc:handlesFailure oc:DataUnavailable,
-        oc:NetworkTimeout,
-        oc:PermissionDenied ;
-    oc:hasArgumentHint "company name, optionally with comparable companies list" ;
+    oc:differentia "generates investment banking M&A company profiles with strategic positioning, segment detail, financial summaries, trading comps, and transaction multiples for deal context" ;
+    oc:extends oc:skill_financial_services_plugin_tear_sheet ;
+    oc:handlesFailure oc:DataNotFound,
+        oc:InvalidInput ;
+    oc:hasAllowedTool "Glob",
+        "Read",
+        "Write",
+        "web-search" ;
+    oc:hasArgumentHint "company name (and optional comparable companies)" ;
     oc:hasCategory "finance" ;
-    oc:impartsKnowledge oc:kn_376755ec,
-        oc:kn_3d8e04ee,
-        oc:kn_69bc45fa,
-        oc:kn_72a317f4,
-        oc:kn_7fa40b5b,
-        oc:kn_be0d4e32,
-        oc:kn_fa491b4b,
-        oc:kn_fa71c49c ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent """**Query 4 — M&A activity:**
+"[Company] acquisitions divestitures completed transactions last 5 years deal value"
+→ Company's own deals
+→ **Immediately write** to `/tmp/tear-sheet/ma-activity.csv`""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 6 ;
+                            oc:textContent """**Query 5 — Comparable transactions (data permitting):**
+Use the specific industry from Query 1 results (e.g., "cloud observability software M&A transactions" not "technology M&A"). If the user specified comps, also try: "[comp company] acquisition deal multiples."
+→ Comparable Transactions
+→ **Append** comparable transactions to `/tmp/tear-sheet/ma-activity.csv` (add `type=precedent` to distinguish from company's own deals)""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Start with these queries. Break apart and follow up if results are incomplete." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent """**Query 3 — Valuation + comps:**
+If the user provided specific comparable companies, query each:
+"[Comp company] enterprise value EV/Revenue EV/EBITDA revenue growth EBITDA margin"
+Otherwise:
+Use the competitors tool to identify 3-5 public peers, then pull EV/Revenue (NTM), EV/EBITDA (NTM), revenue growth %, and EBITDA margin % for each.
+Also: "[Company] enterprise value market capitalization EV/Revenue EV/EBITDA valuation multiples"
+→ Header (EV/market cap), Trading Comps
+→ **Immediately write** company multiples to `/tmp/tear-sheet/valuation.csv`
+→ **Immediately write** peer data to `/tmp/tear-sheet/peer-comps.csv`""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent """**Query 1 — Profile + identification:**
+"[Company] business description headquarters founded employees sector industry ownership structure major shareholders"
+→ Header, Business Overview
+→ **Immediately write** to `/tmp/tear-sheet/company-profile.txt`""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 7 ;
+                            oc:textContent """**Query 6 — Relationships + ownership:**
+"[Company] key customers suppliers partners business relationships institutional ownership insider ownership"
+→ Business Relationships, Ownership (data permitting)
+→ **Immediately write** to `/tmp/tear-sheet/relationships.txt`""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent """**Query 2 — Segments + financials:**
+"[Company] revenue by segment business unit last 2 fiscal years AND annual income statement revenue gross profit EBITDA operating income net income capex free cash flow total debt cash and equivalents last 4 fiscal years"
+→ Segment Breakdown (need 2 years to compute YoY growth), Financial Summary (pull 4 years; display 3; use the earliest year only for YoY growth computation)
+→ **Immediately write** raw financials to `/tmp/tear-sheet/financials.csv`
+→ **Immediately write** segment data to `/tmp/tear-sheet/segments.csv` (skip if no segment data returned)""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Query Plan" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Default page length:** 1-2 pages. IB company profiles routinely spill to a second page, especially when segment and M&A data is rich." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "A company profile for transaction context — potential target, acquirer, or pitchbook inclusion. Emphasis on strategic positioning, segment detail, business relationships, and M&A activity. Valuation framed in transaction multiples, not investment thesis." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Purpose" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "For private companies, the header, business overview, financials, and relationships form the core; other sections may be sparse." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "**M&A Activity is the signature section:** Use Accent color (#2E75B6) fill with white bold text for M&A table headers — this is the only table that uses a different header color from the standard #D6E4F0. It should catch the eye on a scan." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "**Business Relationships: give breathing room when space permits.** 6pt between each relationship group, full descriptors on each entry. But if hitting page 3, compress per the cut order above — this section is high-value but also the most compressible." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Business Overview and Segment Breakdown get the most visual weight." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "**Two-page discipline:** Before rendering, mentally estimate page count. If Business Relationships + M&A Activity together will exceed one full page, start cutting per the cut order." ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 14 ;
+                    oc:sectionTitle "Formatting Notes" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "Never cut: Business Overview (2), Revenue & Segment Breakdown (3), Financial Summary (4 core), M&A Activity company transactions (6a)." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**Target: 2 pages maximum.** IB profiles can use both pages fully, but must not spill to a third. If content exceeds 2 pages, cut in this order (cut each completely before moving to the next):" ],
+                        _:ref_30b16d2f5790e344 ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 13 ;
+                    oc:sectionTitle "Page Budget & Cut Order" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Listed in priority order. See \"Page Budget & Cut Order\" below for explicit cut guidance." ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Key-value block with transaction-relevant identifiers." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "For private companies: note \"Private Company\" prominently; skip ticker, exchange." ],
+                                [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 2 ;
+                                    oc:rowCount 8 ;
+                                    oc:tableCaption "Key-value block with transaction-relevant identifiers." ;
+                                    oc:tableMarkdown """| Field | Notes |
+|---|---|
+| Company name | Large, bold |
+| Ticker & Exchange | If public; omit for private |
+| HQ Location | City, State/Country |
+| Founded | Year |
+| Employees | Approximate headcount |
+| Market Cap / Valuation | Market cap if public; latest known valuation if private |
+| Enterprise Value | |
+| Ownership | Public / PE-backed (name sponsor) / Family / Other |
+""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 5 ;
+                            oc:sectionTitle "1. Company Header" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Forward multiples are mandatory when available.** The table must include NTM multiples if the tools return them. Showing only trailing multiples when forward data exists is a significant gap — bankers price deals on forward earnings." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Company multiples **and operating metrics** — bankers use these together, not multiples in isolation." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 6 ;
+                                    oc:textContent "For private companies, skip this section." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent "If only the company's own multiples are available after attempting peer queries, show those and list selected peer names below the table." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Peer columns are expected.** If the user provided comps, each gets its own column. If not, use the competitors tool to identify 3-5 public peers, pull their multiples and operating metrics, and include them. A company-only trading comps table without peer context is incomplete for any banking use case." ],
+                                [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 4 ;
+                                    oc:rowCount 4 ;
+                                    oc:tableCaption "**Peer columns are expected.** If the user provided comps, each gets its own column. If not, use the competitors tool to identify 3-5 public peers, pull their multiples and operating metrics, and include them. A company-only trading comps table without peer context is incomplete for any banking use case." ;
+                                    oc:tableMarkdown """| Metric | [Company] | [Comp 1] | [Comp 2] | [Comp 3] | Peer Median |
+|---|---|---|---|---|---|
+| EV/Revenue (NTM) | | | | | |
+| EV/EBITDA (NTM) | | | | | |
+| Revenue Growth % | | | | | |
+| EBITDA Margin % | | | | | |
+""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 9 ;
+                            oc:sectionTitle "5. Trading Comps" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 8 ;
+                                    oc:rowCount 0 ;
+                                    oc:tableCaption "Use the specific industry identified earlier (e.g., \"cloud infrastructure software M&A\" not \"technology M&A\"). If the user specified comps, also look for transactions involving those specific companies." ;
+                                    oc:tableMarkdown """| Date | Target | Acquirer | EV ($M) | EV/Rev | EV/EBITDA |
+|---|---|---|---|---|---|
+""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent "**The table must include a dedicated Deal Value column.** Do not merge deal values into a Notes or Rationale column — bankers scan for numbers, and a dedicated column enables that." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 7 ;
+                                    oc:textContent """**b) Comparable Sector Transactions (data permitting):**
+Use the specific industry identified earlier (e.g., "cloud infrastructure software M&A" not "technology M&A"). If the user specified comps, also look for transactions involving those specific companies.""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Two parts. **Deal values are expected in this section** — bankers notice when they're missing." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Hard rule: If the M&A tools return a transaction value, it must appear in the output.** Never downgrade a known deal value to \"Undisclosed\" — this is a data integrity violation. Use \"Undisclosed\" only when the tools genuinely return no value for a transaction." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 6 ;
+                                    oc:textContent "If none found: \"No disclosed transactions in the last 5 years.\"" ],
+                                [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 5 ;
+                                    oc:rowCount 1 ;
+                                    oc:tableCaption "**The table must include a dedicated Deal Value column.** Do not merge deal values into a Notes or Rationale column — bankers scan for numbers, and a dedicated column enables that." ;
+                                    oc:tableMarkdown """| Date | Target / Divested | Deal Value ($M) | Type | Rationale |
+|---|---|---|---|---|
+| | | | Acquisition / Divestiture | |
+""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 9 ;
+                                    oc:textContent "If not available from the tools: \"Comparable transaction data not available from data source.\" Do not fabricate precedent multiples." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**a) Company's Own Transactions:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 10 ;
+                            oc:sectionTitle "6. M&A Activity" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "In M&A context, margins and FCF conversion matter as much as absolute scale — a buyer is evaluating efficiency and cash generation potential." ],
+                                [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 5 ;
+                                    oc:rowCount 5 ;
+                                    oc:tableCaption "**Capital Structure** (compact sub-table below the financial summary)" ;
+                                    oc:tableMarkdown """| Metric | Value |
+|---|---|
+| Total Debt | $XXM |
+| Cash & Equivalents | $XXM |
+| Net Debt | $XXM |
+| Net Debt / EBITDA | X.Xx |
+| S&P Credit Rating | XX (if available) |
+""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 6 ;
+                                    oc:textContent "Pull from the balance sheet data already retrieved. This is standard in any banker's company profile — total debt, leverage ratio, and credit rating tell a buyer what the financing picture looks like. If credit rating is unavailable, omit that row." ],
+                                [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 2 ;
+                                    oc:rowCount 11 ;
+                                    oc:tableCaption "Actual fiscal years as column headers. **If LTM (last twelve months) data is available, add an LTM column to the right of the most recent fiscal year.** Label it \"LTM [quarter end date]\" (e.g., \"LTM Q3 2025\"). Bankers work off LTM for valuation cross-checks — a fiscal-year-only view can be 6+ months stale." ;
+                                    oc:tableMarkdown """| Metric ($M) | FY20XX | FY20XX | FY20XX | LTM [date] |
+|---|---|---|---|---|
+| Revenue | | | | |
+| Revenue Growth % | | | | |
+| Gross Profit | | | | |
+| Gross Margin % | | | | |
+| EBITDA | | | | |
+| EBITDA Margin % | | | | |
+| Operating Income | | | | |
+| Net Income | | | | |
+| Capex | | | | |
+| Free Cash Flow | | | | |
+| FCF Margin % | | | | |
+""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Actual fiscal years as column headers. **If LTM (last twelve months) data is available, add an LTM column to the right of the most recent fiscal year.** Label it \"LTM [quarter end date]\" (e.g., \"LTM Q3 2025\"). Bankers work off LTM for valuation cross-checks — a fiscal-year-only view can be 6+ months stale." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent "**Capital Structure** (compact sub-table below the financial summary):" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 8 ;
+                            oc:sectionTitle "4. Financial Summary (3-Year + LTM)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "The tone should be confident and specific. A banker reading this paragraph should immediately understand the company's strategic positioning." ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 2 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Characterize the revenue model (recurring vs. transactional, subscription vs. license)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "Frame growth vectors that would matter to a buyer or seller" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Identify competitive moats by name (\"proprietary dataset of X\", \"only provider with Y\")" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Name the customer base at scale (\"serves 80% of Fortune 500 banks\")" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**This is a pitchbook paragraph, not a CIQ summary.** Do not paste the company description from the data tools. Rewrite in 4-6 sentences using pitchbook prose:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 6 ;
+                            oc:sectionTitle "2. Business Overview" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "For each entry, include the relationship type and a parenthetical descriptor explaining the nature of the relationship (e.g., \"AWS — cloud infrastructure (primary hosting provider)\", \"JPMorgan — customer (enterprise analytics platform)\"). A name alone without context isn't useful. Give this section breathing room — it's strategically valuable and most competing tear sheets lack it." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent """**Customers:** Top 3-5 named clients
+**Suppliers:** Key vendors and technology providers
+**Partners:** Strategic alliances, distribution, JVs
+**Competitors:** Key competitive names""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Leverages S&P Capital IQ relationship data. Group by type:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 11 ;
+                            oc:sectionTitle "7. Key Business Relationships" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**If segment data isn't available:** Replace the table with 2-3 sentences describing the revenue mix qualitatively (e.g., \"Revenue is primarily derived from subscription licenses (~70%) and professional services (~30%).\"). A blank table looks broken — a qualitative description still conveys useful information." ],
+                                [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 2 ;
+                                    oc:rowCount 3 ;
+                                    oc:tableCaption "Revenue by business unit or product line." ;
+                                    oc:tableMarkdown """| Segment | Revenue ($M) | % of Total | YoY Growth |
+|---|---|---|---|
+| [Segment A] | | | |
+| [Segment B] | | | |
+| **Total** | | **100%** | |
+""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Revenue by business unit or product line." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 7 ;
+                            oc:sectionTitle "3. Revenue & Segment Breakdown" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "For PE-backed companies, name the sponsor, acquisition year, and ownership stake. Ownership structure directly affects deal complexity — a widely held public company, a founder-controlled company, and a PE-backed company each require fundamentally different deal approaches." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent "If ownership data is not returned by the tools, omit this section entirely rather than showing placeholders." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent "**Do not include a Management Team table.** No S&P Global tool returns executive data — see Data Integrity Rule 10. Management names from training data will be stale." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "If the tools return institutional ownership, insider ownership percentage, or top holders, include a compact block:" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent """Top institutional holders (if available): list top 3-5 by ownership %.
+Insider ownership: aggregate percentage.""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 12 ;
+                            oc:sectionTitle "8. Ownership Snapshot (data permitting — omit if tools return nothing)" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Sections" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Investment Banking / M&A Tear Sheet" ] ;
+    oc:hasWorkflow _:ref_30b16d2f5790e344,
+        [ a oc:Workflow ;
+            dcterms:description "Generate a complete investment banking M&A tear sheet through sequential data queries, progressive file saves, and structured output assembly." ;
+            oc:hasStep _:ref_2b41f25938906678,
+                _:ref_39639d7811799236,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Apply formatting: Accent color (#2E75B6) for M&A headers, standard #D6E4F0 for all other tables. Verify no blank tables remain. Final page count check." ;
+                    oc:expectedOutcome "Polished, banker-ready tear sheet output" ;
+                    oc:stepDependsOn _:ref_d4884990d5bf808a ;
+                    oc:stepId "format" ],
+                _:ref_80fa9a14a2c5c6bd,
+                _:ref_c01119dae50c6d21,
+                _:ref_c1536772af4c7a1b,
+                _:ref_d4884990d5bf808a,
+                _:ref_dfbfeabd21c75c8e ;
+            oc:workflowId "ib-ma-tear-sheet" ;
+            oc:workflowName "IB/M&A Tear Sheet Generation" ] ;
+    oc:impartsKnowledge oc:kn_03f61184,
+        oc:kn_2206b3bf,
+        oc:kn_4c566706,
+        oc:kn_59e8414a,
+        oc:kn_5e9117bf,
+        oc:kn_628b4b6f,
+        oc:kn_6ca070bd,
+        oc:kn_8226afeb,
+        oc:kn_a70ee35d ;
     oc:isUserInvocable true ;
     oc:nature "Work" ;
-    oc:requiresState oc:APIKeySet,
-        oc:NetworkAvailable ;
-    oc:resolvesIntent "analyze company for acquisition context",
+    oc:requiresState oc:CompanyIdentified ;
+    oc:resolvesIntent "analyze M&A transaction context",
         "build pitchbook company profile",
-        "create IB/M&A tear sheet",
-        "generate company profile for M&A transaction",
-        "prepare investment banking company profile" ;
-    oc:yieldsState oc:DocumentCreated .
+        "create M&A tear sheet",
+        "create comparable company analysis for M&A",
+        "generate IB company profile",
+        "profile acquisition target" ;
+    oc:yieldsState oc:CompsCollected,
+        oc:DocumentCreated,
+        oc:FinancialDataCollected .
 
-oc:kn_376755ec a oc:KnowledgeNode,
-        oc:KnownIssue ;
-    oc:appliesToContext "When data tools return no segment breakdown for the company" ;
-    oc:directiveContent "If segment data is unavailable, replace the segment table with 2-3 sentences of qualitative revenue mix description. Never show a blank table." ;
-    oc:hasRationale "A blank table looks broken in a pitchbook. A qualitative description still conveys useful information about revenue composition." ;
+oc:kn_03f61184 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When finalizing tear sheet layout" ;
+    oc:directiveContent "Two-page maximum. If content exceeds 2 pages, cut sections in strict priority order: Ownership Snapshot → Comparable Transactions → Business Relationships → Capital Structure → Trading Comps peers. Never cut Business Overview, Segment Breakdown, Financial Summary core, or company M&A transactions." ;
+    oc:hasRationale "IB profiles must be concise for deal context; exceeding 2 pages defeats the purpose of a quick-reference profile." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_2206b3bf a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing the Business Overview section" ;
+    oc:directiveContent "Do not paste the company description directly from data tools. Rewrite as 4-6 sentence pitchbook prose characterizing revenue model, customer base, competitive moats, and growth vectors." ;
+    oc:hasRationale "A CIQ summary reads as generic; pitchbook prose must convey strategic positioning that a banker can immediately act on." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_4c566706 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When formatting the M&A Activity table" ;
+    oc:directiveContent "Use Accent color (#2E75B6) fill with white bold text for M&A table headers — this is the only table that uses a different header color from standard #D6E4F0. M&A Activity is the signature section." ;
+    oc:hasRationale "The M&A section should visually stand out on scan as the signature differentiator of this profile type." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_59e8414a a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When searching for comparable sector transactions" ;
+    oc:directiveContent "Use the specific industry from Query 1 results for comparable transaction searches (e.g., 'cloud observability software M&A' not 'technology M&A')." ;
+    oc:hasRationale "Broad industry searches return irrelevant comps; specific industry framing yields transaction multiples that are actually comparable." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_3d8e04ee a oc:Constraint,
+oc:kn_5e9117bf a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When populating the M&A Activity table (Section 6)" ;
-    oc:directiveContent "If a deal value is returned by M&A tools, it must appear in the output. Never downgrade a known deal value to 'Undisclosed'. Use 'Undisclosed' only when tools genuinely return no value." ;
-    oc:hasRationale "This is a data integrity violation — bankers scan for numbers and rely on accuracy of disclosed values. Downgrading known values erodes trust." ;
+    oc:appliesToContext "When building Trading Comps table" ;
+    oc:directiveContent "Forward (NTM) multiples are mandatory when available. Show only trailing multiples only if forward data does not exist." ;
+    oc:hasRationale "Bankers price deals on forward earnings — trailing-only multiples are stale and create a significant analytical gap." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_628b4b6f a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When building the Financial Summary table" ;
+    oc:directiveContent "If LTM data is available, add an LTM column labeled 'LTM [quarter end date]' to the right of the most recent fiscal year. Fiscal-year-only views can be 6+ months stale." ;
+    oc:hasRationale "Bankers work off LTM for valuation cross-checks; a fiscal-year-only view is significantly outdated." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_6ca070bd a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When considering whether to add management profiles" ;
+    oc:directiveContent "Do not include a Management Team table. S&P Global tools do not return executive data, and management names from training data will be stale." ;
+    oc:hasRationale "Stale or fabricated executive names undermine the credibility of the entire document." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_8226afeb a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When segment breakdown data is missing" ;
+    oc:directiveContent "If segment data is unavailable, replace the segment table with 2-3 qualitative sentences describing revenue mix. Never show a blank table." ;
+    oc:hasRationale "A blank table looks broken and unprofessional; qualitative description still conveys useful information." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_a70ee35d a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When populating M&A Activity table with transaction values" ;
+    oc:directiveContent "Never downgrade a known deal value to 'Undisclosed'. Use 'Undisclosed' only when tools genuinely return no value for a transaction." ;
+    oc:hasRationale "Bankers rely on accurate deal values; fabricating or suppressing known values is a data integrity violation that undermines trust in the tear sheet." ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_69bc45fa a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When populating the Financial Summary table (Section 4)" ;
-    oc:directiveContent "Pull 4 years of financials but display only 3 fiscal years plus LTM if available. Use the earliest year solely for YoY growth computation on the first displayed year." ;
-    oc:hasRationale "Bankers work off LTM for valuation cross-checks — a fiscal-year-only view can be 6+ months stale. The extra hidden year enables accurate YoY growth without cluttering the table." ;
-    oc:severityLevel "MEDIUM" .
+_:ref_22e108f42d28255c a oc:WorkflowStep ;
+    dcterms:description "Comparable Sector Transactions (section 6b) — keep company's own M&A, cut precedents" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
 
-oc:kn_72a317f4 a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When building the Trading Comps table (Section 5)" ;
-    oc:directiveContent "Forward (NTM) multiples are mandatory when available. The trading comps table must include NTM multiples if the tools return them — bankers price deals on forward earnings, not trailing." ;
-    oc:hasRationale "Showing only trailing multiples when forward data exists is a significant analytical gap in any banking deliverable." ;
-    oc:severityLevel "HIGH" .
+_:ref_23d25b35935e723d a oc:WorkflowStep ;
+    dcterms:description "Trading Comparables (section 5) — reduce to 3 peers" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_5" ;
+    oc:stepOrder 5 .
 
-oc:kn_7fa40b5b a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "During the 6-query data gathering phase" ;
-    oc:directiveContent "Write each query result to /tmp/tear-sheet/ immediately upon retrieval. Do not batch writes — persist data as it arrives to enable recovery if later queries fail." ;
-    oc:hasRationale "Progressive persistence ensures partial progress is preserved and reduces data loss risk from interrupted execution." ;
-    oc:severityLevel "MEDIUM" .
+_:ref_3e03815d326b088b a oc:WorkflowStep ;
+    dcterms:description "Ownership Snapshot (section 8) — omit entirely" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
 
-oc:kn_be0d4e32 a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When assembling the tear sheet sections" ;
-    oc:directiveContent "Do not include a Management Team table. No S&P Global tool returns executive data, and management names from training data will be stale." ;
-    oc:hasRationale "Stale or hallucinated executive names undermine credibility. If the data source cannot reliably provide this, omit it entirely." ;
-    oc:severityLevel "HIGH" .
+_:ref_80a6e79c69f3e8ca a oc:WorkflowStep ;
+    dcterms:description "Capital Structure (section 4) — merge Net Debt/EBITDA into Financial Summary as a single row" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
 
-oc:kn_fa491b4b a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When the profile risks exceeding the 2-page target" ;
-    oc:directiveContent "When content exceeds 2 pages, cut sections in strict order: (1) Ownership Snapshot, (2) Comparable Sector Transactions, (3) compress Business Relationships, (4) merge Capital Structure, (5) reduce Trading Comps to 3 peers. Never cut Business Overview, Segment Breakdown, core Financial Summary, or company's own M&A transactions." ;
-    oc:hasRationale "IB profiles can use both pages fully but must not spill to a third. The cut order preserves the most strategically valuable content for M&A context." ;
-    oc:severityLevel "HIGH" .
+_:ref_bf98a4ae77541a70 a oc:WorkflowStep ;
+    dcterms:description "Business Relationships (section 7) — compress to top 3 competitors + top 2 each of suppliers/partners/customers, drop descriptors to parenthetical only" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
 
-oc:kn_fa71c49c a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When writing the Business Overview section (Section 2)" ;
-    oc:directiveContent "Never paste the company description directly from data tools into the Business Overview. Rewrite in pitchbook prose — characterize the revenue model, name the customer base, identify competitive moats, and frame growth vectors." ;
-    oc:hasRationale "Bankers expect synthesized, strategically framed narrative — not raw data dumps. A CIQ summary reads as unprofessional in a pitchbook." ;
-    oc:severityLevel "HIGH" .
+_:ref_2b41f25938906678 a oc:WorkflowStep ;
+    dcterms:description "Query key customers, suppliers, partners, business relationships, and ownership data. Write to /tmp/tear-sheet/relationships.txt." ;
+    oc:expectedOutcome "Strategic relationship and ownership data captured" ;
+    oc:stepDependsOn _:ref_c1536772af4c7a1b ;
+    oc:stepId "q6-relationships" .
+
+_:ref_30b16d2f5790e344 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 2 ;
+    oc:hasStep _:ref_22e108f42d28255c,
+        _:ref_23d25b35935e723d,
+        _:ref_3e03815d326b088b,
+        _:ref_80a6e79c69f3e8ca,
+        _:ref_bf98a4ae77541a70 ;
+    oc:workflowId "procedure_2" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_39639d7811799236 a oc:WorkflowStep ;
+    dcterms:description "Query revenue by segment (2 years for YoY growth) and full income statement (4 years). Write financials to /tmp/tear-sheet/financials.csv and segment data to /tmp/tear-sheet/segments.csv." ;
+    oc:expectedOutcome "Segment breakdown and financial time series captured" ;
+    oc:stepDependsOn _:ref_c1536772af4c7a1b ;
+    oc:stepId "q2-segments" .
+
+_:ref_80fa9a14a2c5c6bd a oc:WorkflowStep ;
+    dcterms:description "Query valuation multiples for the company and 3-5 peer comparables (user-specified or competitor tool). Write company multiples to /tmp/tear-sheet/valuation.csv and peer data to /tmp/tear-sheet/peer-comps.csv." ;
+    oc:expectedOutcome "Trading comps with NTM multiples for company and peers captured" ;
+    oc:stepDependsOn _:ref_c1536772af4c7a1b ;
+    oc:stepId "q3-valuation" .
+
+_:ref_d4884990d5bf808a a oc:WorkflowStep ;
+    dcterms:description "Assemble all sections in priority order (Header → Overview → Segments → Financials → Comps → M&A → Relationships → Ownership). Apply 2-page budget and cut order if needed." ;
+    oc:expectedOutcome "Complete tear sheet document within 2-page limit" ;
+    oc:stepDependsOn _:ref_2b41f25938906678,
+        _:ref_39639d7811799236,
+        _:ref_80fa9a14a2c5c6bd,
+        _:ref_c01119dae50c6d21,
+        _:ref_c1536772af4c7a1b,
+        _:ref_dfbfeabd21c75c8e ;
+    oc:stepId "assemble" .
+
+_:ref_dfbfeabd21c75c8e a oc:WorkflowStep ;
+    dcterms:description "Query comparable sector M&A transactions using specific industry from Q1 results. Append precedent transactions to /tmp/tear-sheet/ma-activity.csv with type=precedent." ;
+    oc:expectedOutcome "Precedent transaction multiples for valuation benchmarking captured" ;
+    oc:stepDependsOn _:ref_c01119dae50c6d21,
+        _:ref_c1536772af4c7a1b ;
+    oc:stepId "q5-precedents" .
+
+_:ref_c01119dae50c6d21 a oc:WorkflowStep ;
+    dcterms:description "Query company's own acquisitions, divestitures, and completed transactions over last 5 years. Write to /tmp/tear-sheet/ma-activity.csv." ;
+    oc:expectedOutcome "Company deal history with deal values captured" ;
+    oc:stepDependsOn _:ref_c1536772af4c7a1b ;
+    oc:stepId "q4-ma" .
+
+_:ref_c1536772af4c7a1b a oc:WorkflowStep ;
+    dcterms:description "Query company profile: business description, headquarters, founded, employees, sector, industry, ownership, major shareholders. Write results to /tmp/tear-sheet/company-profile.txt." ;
+    oc:expectedOutcome "Company identification and descriptive data captured" ;
+    oc:stepId "q1-profile" .
 

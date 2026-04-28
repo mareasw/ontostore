@@ -4,83 +4,822 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_code_hook_development_migration a oc:DeclarativeSkill,
+oc:skill_claude_code_hook_development_migration a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "migration" ;
     skos:broader "Migration guide" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-code/hook-development" ;
     oc:contentHash "7f8e7a795829837f46a0c058c26c8f5c4aa8be5c9fb5316b828229d1802ded77" ;
-    oc:dependsOnSkill oc:skill_hook_development ;
-    oc:differentia "that transforms basic command-based hooks into advanced prompt-based hooks for better maintainability, flexibility, and context-awareness in Claude Code plugins" ;
-    oc:extends oc:skill_anthropics_claude_code_hook_development ;
-    oc:handlesFailure oc:PromptHookTimeout,
-        oc:ValidationLogicLost ;
-    oc:hasArgumentHint "hook-type or plugin-path to migrate" ;
+    oc:dependsOnSkill oc:skill_ontoskills_hook_development ;
+    oc:differentia "that converts basic command hooks to advanced prompt-based hooks with hybrid strategies and migration patterns" ;
+    oc:extends oc:skill_claude_code_hook_development ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_2c5d53c5,
-        oc:kn_3fbdd682,
-        oc:kn_57ca9fea,
-        oc:kn_9d161aa2,
-        oc:kn_d1614be8,
-        oc:kn_dc958927,
-        oc:kn_e83ee636 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "This guide shows how to migrate from basic command hooks to advanced prompt-based hooks for better maintainability and flexibility." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Migrating to prompt-based hooks makes plugins more maintainable, flexible, and powerful. Reserve command hooks for deterministic checks and external tool integration." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 10 ;
+                    oc:sectionTitle "Conclusion" ],
+                [ a oc:Section ;
+                    oc:hasContent _:ref_c13a58e67b27321a ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 7 ;
+                    oc:sectionTitle "Migration Tips" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 6 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Hard-coded path patterns" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "No consideration of file content" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Doesn't understand symlinks" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Missing edge cases (e.g., `/etc` vs `/etc/`)" ] ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """{
+  "PreToolUse": [
+    {
+      "matcher": "Write",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "bash validate-write.sh"
+        }
+      ]
+    }
+  ]
+}
+""" ;
+                                    oc:codeLanguage "json" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 88-102" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Configuration:**" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent "**Problems:**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """#!/bin/bash
+input=$(cat)
+file_path=$(echo "$input" | jq -r '.tool_input.file_path')
+
+# Check for path traversal
+if [[ "$file_path" == *".."* ]]; then
+  echo '{"decision": "deny", "reason": "Path traversal detected"}' >&2
+  exit 2
+fi
+
+# Check for system paths
+if [[ "$file_path" == "/etc/"* ]] || [[ "$file_path" == "/sys/"* ]]; then
+  echo '{"decision": "deny", "reason": "System file"}' >&2
+  exit 2
+fi
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 4 ;
+                                    oc:sourceLocation "lines 105-121" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Script (validate-write.sh):**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Before (Basic Command Hook)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 4 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Natural understanding of \"system directories\"" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 5 ;
+                                            oc:itemText "Easy to extend criteria" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "Can detect secrets in content" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Context-aware (considers content too)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Handles symlinks and edge cases" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Benefits:**" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Configuration:**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """{
+  "PreToolUse": [
+    {
+      "matcher": "Write|Edit",
+      "hooks": [
+        {
+          "type": "prompt",
+          "prompt": "File path: $TOOL_INPUT.file_path. Content preview: $TOOL_INPUT.content (first 200 chars). Verify: 1) Not system directories (/etc, /sys, /usr) 2) Not credentials (.env, tokens, secrets) 3) No path traversal 4) Content doesn't expose secrets. Return 'approve' or 'deny'."
+        }
+      ]
+    }
+  ]
+}
+""" ;
+                                    oc:codeLanguage "json" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 132-146" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "After (Advanced Prompt Hook)" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Migration Example: File Write Validation" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "**More flexible validation**: Can handle complex logic without coding" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "**No bash scripting required**: Simpler to write and maintain" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "**Natural language reasoning**: LLM understands context and intent" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "**Better edge case handling**: Adapts to unexpected scenarios" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Prompt-based hooks offer several advantages:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Why Migrate?" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """{
+  "PreToolUse": [
+    {
+      "matcher": "Bash",
+      "hooks": [
+        {
+          "type": "prompt",
+          "prompt": "Validate bash command safety: destructive ops, privilege escalation, network access"
+        }
+      ]
+    },
+    {
+      "matcher": "Write|Edit",
+      "hooks": [
+        {
+          "type": "prompt",
+          "prompt": "Validate file write safety: system paths, credentials, path traversal, content secrets"
+        }
+      ]
+    }
+  ],
+  "Stop": [
+    {
+      "matcher": "*",
+      "hooks": [
+        {
+          "type": "prompt",
+          "prompt": "Verify tests were run if code was modified"
+        }
+      ]
+    }
+  ]
+}
+""" ;
+                                    oc:codeLanguage "json" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 282-316" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Result:** Simpler, more maintainable, more powerful." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Updated hooks.json" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """my-plugin/
+├── .claude-plugin/plugin.json
+├── hooks/hooks.json
+└── scripts/
+    ├── validate-bash.sh
+    ├── validate-write.sh
+    └── check-tests.sh
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 257-265" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Original Plugin Structure" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """my-plugin/
+├── .claude-plugin/plugin.json
+├── hooks/hooks.json      # Now uses prompt hooks
+└── scripts/              # Archive or delete
+    └── archive/
+        ├── validate-bash.sh
+        ├── validate-write.sh
+        └── check-tests.sh
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 269-278" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "After Migration" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 8 ;
+                    oc:sectionTitle "Complete Migration Example" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """"Check: 1) condition1 2) condition2 3) condition3. Deny if any fail."
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 4 ;
+                                    oc:sourceLocation "lines 363-365" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**After:**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """if [ condition1 ] || [ condition2 ] || [ condition3 ]; then
+  echo "Invalid" >&2
+  exit 2
+fi
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 355-360" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Before:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Pattern: Multiple Conditions → Criteria List" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Before:**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """if [[ "$command" == *"sudo"* ]]; then
+  echo "Privilege escalation" >&2
+  exit 2
+fi
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 325-330" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """"Check for privilege escalation (sudo, su, etc)"
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 4 ;
+                                    oc:sourceLocation "lines 333-335" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**After:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Pattern: String Contains → Natural Language" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """if [[ "$file" =~ \\.(env|secret|key|token)$ ]]; then
+  echo "Credential file" >&2
+  exit 2
+fi
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 340-345" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Before:**" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**After:**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """"Verify not writing to credential files (.env, secrets, keys, tokens)"
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 4 ;
+                                    oc:sourceLocation "lines 348-350" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Pattern: Regex → Intent" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 9 ;
+                    oc:sectionTitle "Common Migration Patterns" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Configuration:**" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Benefits:**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """{
+  "PreToolUse": [
+    {
+      "matcher": "Bash",
+      "hooks": [
+        {
+          "type": "prompt",
+          "prompt": "Command: $TOOL_INPUT.command. Analyze for: 1) Destructive operations (rm -rf, dd, mkfs, etc) 2) Privilege escalation (sudo) 3) Network operations without user consent. Return 'approve' or 'deny' with explanation.",
+          "timeout": 15
+        }
+      ]
+    }
+  ]
+}
+""" ;
+                                    oc:codeLanguage "json" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 58-73" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 4 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "Easy to extend with new criteria" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Understands intent, not just literal strings" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "No script file needed" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 5 ;
+                                            oc:itemText "Context-aware decisions" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Catches all variations and patterns" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 6 ;
+                                            oc:itemText "Natural language explanation in denial" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "After (Advanced Prompt Hook)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """#!/bin/bash
+input=$(cat)
+command=$(echo "$input" | jq -r '.tool_input.command')
+
+# Hard-coded validation logic
+if [[ "$command" == *"rm -rf"* ]]; then
+  echo "Dangerous command detected" >&2
+  exit 2
+fi
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 4 ;
+                                    oc:sourceLocation "lines 36-46" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Script (validate-bash.sh):**" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 6 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "No context awareness" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 5 ;
+                                            oc:itemText "Requires bash scripting knowledge" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Only checks for exact \"rm -rf\" pattern" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Doesn't catch variations like `rm -fr` or `rm -r -f`" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Misses other dangerous commands (`dd`, `mkfs`, etc.)" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent "**Problems:**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """{
+  "PreToolUse": [
+    {
+      "matcher": "Bash",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "bash validate-bash.sh"
+        }
+      ]
+    }
+  ]
+}
+""" ;
+                                    oc:codeLanguage "json" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 19-33" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Configuration:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Before (Basic Command Hook)" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Migration Example: Bash Command Validation" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Command hooks still have their place:" ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Use command hooks when:** Integrating with external tools that provide yes/no answers." ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """#!/bin/bash
+# Run security scanner
+file_path=$(echo "$input" | jq -r '.tool_input.file_path')
+scan_result=$(security-scanner "$file_path")
+
+if [ "$?" -ne 0 ]; then
+  echo "Security scan failed: $scan_result" >&2
+  exit 2
+fi
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 177-187" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "2. External Tool Integration" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Use command hooks when:** Performance is critical and logic is simple." ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """#!/bin/bash
+# Quick regex check
+command=$(echo "$input" | jq -r '.tool_input.command')
+
+if [[ "$command" =~ ^(ls|pwd|echo)$ ]]; then
+  exit 0  # Safe commands
+fi
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 193-201" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "3. Very Fast Checks (< 50ms)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """#!/bin/bash
+# Check file size quickly
+file_path=$(echo "$input" | jq -r '.tool_input.file_path')
+size=$(stat -f%z "$file_path" 2>/dev/null || stat -c%s "$file_path" 2>/dev/null)
+
+if [ "$size" -gt 10000000 ]; then
+  echo '{"decision": "deny", "reason": "File too large"}' >&2
+  exit 2
+fi
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 161-171" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Use command hooks when:** Validation is purely mathematical or deterministic." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "1. Deterministic Performance Checks" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "When to Keep Command Hooks" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "When migrating hooks:" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "[ ] Convert hard-coded patterns to natural language criteria" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "[ ] Set appropriate timeout (usually 15-30s for prompt hooks)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "[ ] Test with edge cases the old hook missed" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "[ ] Identify the validation logic in the command hook" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "[ ] Verify LLM understands the intent" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 7 ;
+                                    oc:itemText "[ ] Remove or archive old script files" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 6 ;
+                                    oc:itemText "[ ] Document the new hook in README" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Migration Checklist" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Combine both for multi-stage validation:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "The command hook does fast deterministic checks, while the prompt hook handles complex reasoning." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """{
+  "PreToolUse": [
+    {
+      "matcher": "Bash",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/quick-check.sh",
+          "timeout": 5
+        },
+        {
+          "type": "prompt",
+          "prompt": "Deep analysis of bash command: $TOOL_INPUT",
+          "timeout": 15
+        }
+      ]
+    }
+  ]
+}
+""" ;
+                            oc:codeLanguage "json" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 209-229" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Hybrid Approach" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Migrating from Basic to Advanced Hooks" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "Step-by-step process for migrating a basic command hook to an advanced prompt-based hook" ;
+            oc:hasStep _:ref_37eca92a402a25d2,
+                _:ref_4e8d1cb653e8aa73,
+                _:ref_54b95247a57e403a,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Document the new hook in README and archive old script files" ;
+                    oc:expectedOutcome "Updated documentation and archived scripts directory" ;
+                    oc:stepDependsOn _:ref_54b95247a57e403a ;
+                    oc:stepId "document-archive" ],
+                _:ref_9399310d422bfc64 ;
+            oc:workflowId "hook-migration" ;
+            oc:workflowName "Command Hook to Prompt Hook Migration" ],
+        _:ref_c13a58e67b27321a ;
+    oc:impartsKnowledge oc:kn_5fcc89ae,
+        oc:kn_a5a4fcf7,
+        oc:kn_c101b26f,
+        oc:kn_d7011d5e,
+        oc:kn_e4c03bd9,
+        oc:kn_e7b26131,
+        oc:kn_eea34a94,
+        oc:kn_ff48ce47 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:CommandHooksExist ;
-    oc:resolvesIntent "convert bash hook scripts to prompt-based hooks",
-        "determine when to keep command hooks vs migrate to prompt hooks",
+    oc:resolvesIntent "combine command and prompt hooks in hybrid approach",
         "migrate command hooks to prompt hooks",
-        "refactor hook validation from scripting to natural language",
-        "upgrade plugin hooks to advanced format" ;
-    oc:yieldsState oc:PromptHooksConfigured,
-        oc:ScriptsArchived .
+        "refactor hook configuration for maintainability",
+        "upgrade bash hook scripts to LLM-based validation" .
 
-oc:kn_2c5d53c5 a oc:DesignPrinciple,
+oc:kn_5fcc89ae a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When a hook needs both fast deterministic validation and nuanced contextual reasoning" ;
-    oc:directiveContent "Use the hybrid approach when beneficial: combine a fast command hook for deterministic checks with a prompt hook for complex reasoning in the same matcher." ;
-    oc:hasRationale "The hybrid approach gets the best of both worlds—fast fail on obvious issues via command hooks, plus intelligent analysis via prompt hooks. Both run in parallel." ;
+    oc:appliesToContext "When configuring prompt hook timeouts" ;
+    oc:directiveContent "Set appropriate timeout for prompt hooks: usually 15-30 seconds. Command hooks used in hybrid setups should use shorter timeouts (e.g., 5s)." ;
+    oc:hasRationale "Prompt hooks require LLM inference time; too-short timeouts cause false approvals, too-long timeouts degrade user experience." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_3fbdd682 a oc:Constraint,
+oc:kn_a5a4fcf7 a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When configuring migrated prompt hooks" ;
-    oc:directiveContent "Set appropriate timeouts for prompt hooks, usually 15-30 seconds. Command hooks default to 60s but prompt hooks should be tighter." ;
-    oc:hasRationale "Prompt hooks that take too long degrade the user experience since they run before/after every matched tool call" ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_57ca9fea a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "Before starting any hook migration" ;
-    oc:directiveContent "Before migrating, identify all validation logic in the existing command hook, list edge cases the old hook missed, and verify the LLM understands the intent of the new prompt." ;
-    oc:hasRationale "Incomplete migration of validation logic creates security gaps. Testing edge cases ensures the prompt hook is at least as comprehensive as the command hook it replaces." ;
+    oc:appliesToContext "When deciding between command and prompt hook types" ;
+    oc:directiveContent "Prompt-based hooks offer natural language reasoning, better edge case handling, no bash scripting requirement, and more flexible validation compared to command hooks." ;
+    oc:hasRationale "Prompt hooks leverage LLM understanding of intent rather than literal string matching, catching variations and patterns that hard-coded scripts miss." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_9d161aa2 a oc:KnowledgeNode,
-        oc:RecoveryTactic ;
-    oc:appliesToContext "After completing a hook migration" ;
-    oc:directiveContent "Archive old script files in a scripts/archive/ directory rather than deleting them, so the original validation logic can be referenced if the prompt hook needs debugging." ;
-    oc:hasRationale "Scripts contain explicit validation logic that may be needed for debugging prompt hook false positives/negatives or as reference if reverting" ;
-    oc:severityLevel "LOW" .
+oc:kn_c101b26f a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When building hybrid hooks with both command and prompt stages" ;
+    oc:codeLanguage "json" ;
+    oc:directiveContent """{
+  "PreToolUse": [
+    {
+      "matcher": "Bash",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/quick-check.sh",
+          "timeout": 5
+        },
+        {
+          "type": "prompt",
+          "prompt": "Deep analysis of bash command: $TOOL_INPUT",
+          "timeout": 15
+        }
+      ]
+    }
+  ]
+}""" .
 
-oc:kn_d1614be8 a oc:KnowledgeNode,
+oc:kn_d7011d5e a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When migrating from command to prompt hooks" ;
+    oc:directiveContent "Do not migrate all hooks at once. Hard-coded bash patterns (exact string matching, simple regex) miss variations, edge cases, and lack context awareness." ;
+    oc:hasRationale "Batch migration risks introducing regressions; incremental migration allows testing each hook's prompt equivalent against edge cases the old hook missed." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_e4c03bd9 a oc:KnowledgeNode,
         oc:WorkflowStrategy ;
-    oc:appliesToContext "When translating bash validation logic into prompt hook prompts" ;
-    oc:directiveContent "Convert hard-coded bash patterns (string contains, regex matches, multiple conditions) into natural language criteria lists. Pattern: 'Check: 1) criterion1 2) criterion2 3) criterion3. Deny if any fail.'" ;
-    oc:hasRationale "Natural language criteria lists let the LLM understand intent rather than matching literal strings, catching variations and edge cases the original script missed" ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_dc958927 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When planning a hook migration project" ;
-    oc:directiveContent "Migrate hooks one at a time rather than all at once. Start with the simplest hook to build confidence, then progressively migrate more complex ones." ;
-    oc:hasRationale "Incremental migration reduces risk and allows validation that prompt hooks catch what command hooks caught before moving on" ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_e83ee636 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When deciding whether to migrate a specific command hook" ;
-    oc:directiveContent "Do not blindly migrate all command hooks to prompt hooks. Keep command hooks for deterministic performance checks, external tool integrations, and very fast checks (<50ms)." ;
-    oc:hasRationale "Command hooks are superior for purely mathematical/deterministic validations and have zero latency overhead. Prompt hooks introduce LLM inference latency (typically 5-30s) which is inappropriate for trivial checks." ;
+    oc:appliesToContext "When multi-stage validation is needed" ;
+    oc:directiveContent "Use hybrid approach: command hook for fast deterministic checks first, then prompt hook for deep reasoning. Both run in sequence under the same matcher." ;
+    oc:hasRationale "Combining both types gets the speed of deterministic checks with the nuanced understanding of LLM reasoning, failing fast on obvious issues." ;
     oc:severityLevel "HIGH" .
+
+oc:kn_e7b26131 a oc:KnowledgeNode,
+        oc:OutputFormat ;
+    oc:appliesToContext "When writing hook validation logic" ;
+    oc:directiveContent "Prompt hook response must return 'approve' or 'deny' with explanation. Command hooks exit 0 to approve, exit 2 with stderr message to deny." ;
+    oc:hasRationale "The hook system uses exit codes (command) or approve/deny strings (prompt) to gate tool execution." .
+
+oc:kn_eea34a94 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When migrating any command hook to prompt hook" ;
+    oc:directiveContent "1. Identify validation logic in command hook. 2. Convert hard-coded patterns to natural language criteria. 3. Test with edge cases the old hook missed. 4. Verify LLM understands the intent. 5. Set appropriate timeout (15-30s). 6. Document the new hook in README. 7. Remove or archive old script files." ;
+    oc:stepOrder 1 .
+
+oc:kn_ff48ce47 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When evaluating whether a command hook should be migrated" ;
+    oc:directiveContent "Keep command hooks for: (1) deterministic performance checks (mathematical/file size), (2) external tool integration (security scanners), (3) very fast checks under 50ms with simple logic." ;
+    oc:hasRationale "Command hooks are faster and deterministic where logic is simple; prompt hooks add latency (15-30s timeout) and non-determinism unnecessary for trivial checks." ;
+    oc:severityLevel "HIGH" .
+
+_:ref_1608c30078834442 a oc:WorkflowStep ;
+    dcterms:description "**Look for improvements**: Use migration as opportunity to enhance validation" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_74a173d30bae647e a oc:WorkflowStep ;
+    dcterms:description "**Start with one hook**: Don't migrate everything at once" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_916a03a3a6cd56a7 a oc:WorkflowStep ;
+    dcterms:description "**Test thoroughly**: Verify prompt hook catches what command hook caught" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_e4f432837f5bba3e a oc:WorkflowStep ;
+    dcterms:description "**Keep scripts for reference**: Archive old scripts in case you need to reference the logic" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_ef4cb85795cc141f a oc:WorkflowStep ;
+    dcterms:description "**Document reasoning**: Explain why prompt hook is better in README" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_5" ;
+    oc:stepOrder 5 .
+
+_:ref_37eca92a402a25d2 a oc:WorkflowStep ;
+    dcterms:description "Convert hard-coded patterns to natural language criteria in prompt configuration" ;
+    oc:expectedOutcome "Prompt hook configuration that expresses validation rules as natural language criteria" ;
+    oc:stepDependsOn _:ref_9399310d422bfc64 ;
+    oc:stepId "convert-patterns" .
+
+_:ref_4e8d1cb653e8aa73 a oc:WorkflowStep ;
+    dcterms:description "Test with edge cases the old hook missed to verify LLM understands intent" ;
+    oc:expectedOutcome "Verified that prompt hook catches all previous patterns plus new edge cases" ;
+    oc:stepDependsOn _:ref_37eca92a402a25d2 ;
+    oc:stepId "test-edge-cases" .
+
+_:ref_54b95247a57e403a a oc:WorkflowStep ;
+    dcterms:description "Set appropriate timeout (usually 15-30s for prompt hooks) and verify performance" ;
+    oc:expectedOutcome "Timeout configured that balances thoroughness with responsiveness" ;
+    oc:stepDependsOn _:ref_4e8d1cb653e8aa73 ;
+    oc:stepId "set-timeout" .
+
+_:ref_9399310d422bfc64 a oc:WorkflowStep ;
+    dcterms:description "Identify the validation logic in the existing command hook script" ;
+    oc:expectedOutcome "Documented list of all validation rules and patterns in the current hook" ;
+    oc:stepId "identify-logic" .
+
+_:ref_c13a58e67b27321a a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 1 ;
+    oc:hasStep _:ref_1608c30078834442,
+        _:ref_74a173d30bae647e,
+        _:ref_916a03a3a6cd56a7,
+        _:ref_e4f432837f5bba3e,
+        _:ref_ef4cb85795cc141f ;
+    oc:workflowId "procedure_1" ;
+    oc:workflowName "Ordered Procedure" .
 

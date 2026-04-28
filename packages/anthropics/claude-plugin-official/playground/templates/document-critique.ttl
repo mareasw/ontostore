@@ -4,61 +4,452 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_plugin_official_playground_document_critique a oc:DeclarativeSkill,
+oc:skill_claude_plugin_official_playground_document_critique a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "document-critique" ;
     skos:broader "Interactive playground template" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/playground" ;
     oc:contentHash "c5bd7a68a53f2075d127e482c93b5f3d0b51c24bf8d301c1124801cca7be2d41" ;
-    oc:differentia "that provides a structured document review interface with approve/reject/comment workflow for generating actionable feedback prompts" ;
-    oc:extends oc:skill_anthropics_claude_plugin_official_playground ;
-    oc:handlesFailure oc:InvalidInput,
-        oc:NoSuggestionsGenerated ;
+    oc:differentia "that provides a structured document review interface with approve/reject/comment workflow for line-by-line suggestions" ;
+    oc:extends oc:skill_claude_plugin_official_playground ;
+    oc:hasAllowedTool "Write" ;
     oc:hasArgumentHint "document content to critique" ;
     oc:hasCategory "document" ;
-    oc:impartsKnowledge oc:kn_25201b12,
-        oc:kn_3f94177b,
-        oc:kn_735fecd5,
-        oc:kn_cf1dc82f,
-        oc:kn_eb945c15 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Use this template when the playground helps review and critique documents: SKILL.md files, READMEs, specs, proposals, or any text that needs structured feedback with approve/reject/comment workflow." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Only include actionable items:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """function updatePrompt() {
+  const approved = state.suggestions.filter(s => s.status === 'approved');
+  const withComments = state.suggestions.filter(s => s.userComment?.trim());
+
+  if (approved.length === 0 && withComments.length === 0) {
+    // Show placeholder
+    return;
+  }
+
+  let prompt = 'Please update [DOCUMENT] with the following changes:\\n\\n';
+
+  if (approved.length > 0) {
+    prompt += '## Approved Improvements\\n\\n';
+    for (const s of approved) {
+      prompt += `**${s.lineRef}:** ${s.suggestion}`;
+      if (s.userComment?.trim()) {
+        prompt += `\\n  → User note: ${s.userComment.trim()}`;
+      }
+      prompt += '\\n\\n';
+    }
+  }
+
+  // Additional feedback from non-approved items with comments
+  // Rejected items listed for context only
+}
+""" ;
+                            oc:codeLanguage "javascript" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 106-132" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Prompt output generation" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 1 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Groups by: Approved Improvements, Additional Feedback, Rejected (for context)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Generates a prompt only from approved suggestions and user comments" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Copy button with \"Copied!\" feedback" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Prompt output (bottom)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 1 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Display full document with line numbers" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Color-code by status: pending (amber), approved (green), rejected (red with opacity)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Highlight lines with suggestions using a colored left border" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "Click a suggestion card to scroll to the relevant line" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Document panel (left)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 1 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:hasChild [ a oc:BulletList ;
+                                                    oc:blockType "bullet_list" ;
+                                                    oc:contentOrder 1 ;
+                                                    oc:hasItem [ a oc:BulletItem ;
+                                                            oc:blockType "bullet_item" ;
+                                                            oc:itemOrder 1 ;
+                                                            oc:itemText "Line reference (e.g., \"Line 3\" or \"Lines 17-24\")" ],
+                                                        [ a oc:BulletItem ;
+                                                            oc:blockType "bullet_item" ;
+                                                            oc:itemOrder 3 ;
+                                                            oc:itemText "Action buttons: Approve / Reject / Comment (or Reset if already decided)" ],
+                                                        [ a oc:BulletItem ;
+                                                            oc:blockType "bullet_item" ;
+                                                            oc:itemOrder 4 ;
+                                                            oc:itemText "Optional textarea for user comments" ],
+                                                        [ a oc:BulletItem ;
+                                                            oc:blockType "bullet_item" ;
+                                                            oc:itemOrder 2 ;
+                                                            oc:itemText "The suggestion text" ] ] ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Each suggestion card shows:" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Filter tabs: All / Pending / Approved / Rejected" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Stats in header showing counts for each status" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Suggestions panel (right)" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Key components" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """const suggestions = [
+  {
+    id: 1,
+    lineRef: "Line 3",
+    targetText: "description: Creates interactive...",
+    suggestion: "The description is too long. Consider shortening.",
+    category: "clarity",  // clarity, completeness, performance, accessibility, ux
+    status: "pending",    // pending, approved, rejected
+    userComment: ""
+  },
+  // ... more suggestions
+];
+
+let state = {
+  suggestions: [...],
+  activeFilter: "all",
+  activeSuggestionId: null
+};
+""" ;
+                            oc:codeLanguage "javascript" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 46-65" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "State structure" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """.doc-line.has-suggestion {
+  border-left: 3px solid #bf8700;  /* amber for pending */
+  background: rgba(191, 135, 0, 0.08);
+}
+
+.doc-line.approved {
+  border-left-color: #1a7f37;  /* green */
+  background: rgba(26, 127, 55, 0.08);
+}
+
+.doc-line.rejected {
+  border-left-color: #cf222e;  /* red */
+  background: rgba(207, 34, 46, 0.08);
+  opacity: 0.6;
+}
+""" ;
+                            oc:codeLanguage "css" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 136-152" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 7 ;
+                    oc:sectionTitle "Styling highlights" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """const suggestion = state.suggestions.find(s => {
+  const match = s.lineRef.match(/Line[s]?\\s*(\\d+)/);
+  if (match) {
+    const targetLine = parseInt(match[1]);
+    return Math.abs(targetLine - lineNum) <= 2; // fuzzy match nearby lines
+  }
+  return false;
+});
+""" ;
+                            oc:codeLanguage "javascript" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 71-80" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Match suggestions to document lines by parsing the lineRef:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Suggestion matching to lines" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Handle markdown-style formatting inline:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// Skip ``` lines, wrap content in code-block-wrapper
+if (line.startsWith('```')) {
+  inCodeBlock = !inCodeBlock;
+  // Open or close wrapper div
+}
+
+// Headers
+if (line.startsWith('# ')) renderedLine = `<h1>...</h1>`;
+if (line.startsWith('## ')) renderedLine = `<h2>...</h2>`;
+
+// Inline formatting (outside code blocks)
+renderedLine = renderedLine.replace(/`([^`]+)`/g, '<code>$1</code>');
+renderedLine = renderedLine.replace(/\\*\\*([^*]+)\\*\\*/g, '<strong>$1</strong>');
+""" ;
+                            oc:codeLanguage "javascript" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 86-100" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Document rendering" ],
+                [ a oc:Section ;
+                    oc:hasContent _:ref_2f7679f9a6645094,
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "When building a critique playground for a specific document:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 8 ;
+                    oc:sectionTitle "Pre-populating suggestions" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """+---------------------------+--------------------+
+|                           |                    |
+|  Document content         |  Suggestions panel |
+|  with line numbers        |  (filterable list) |
+|  and suggestion           |  • Approve         |
+|  highlighting             |  • Reject          |
+|                           |  • Comment         |
+|                           |                    |
++---------------------------+--------------------+
+|  Prompt output (approved + commented items)    |
+|  [ Copy Prompt ]                               |
++------------------------------------------------+
+""" ;
+                            oc:codeLanguage "" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 7-20" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Layout" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Proposal feedback (structure, argumentation, missing context)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Spec review (requirements clarity, missing edge cases, ambiguity)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "SKILL.md review (skill definition quality, completeness, clarity)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "README critique (documentation quality, missing sections, unclear explanations)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "Code comment review (docstring quality, inline comment usefulness)" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 9 ;
+                    oc:sectionTitle "Example use cases" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Document Critique Template" ] ;
+    oc:hasWorkflow _:ref_2f7679f9a6645094,
+        [ a oc:Workflow ;
+            dcterms:description "Generate an interactive critique playground for a given document" ;
+            oc:hasStep _:ref_2fdc44588d075417,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Embed both document content and suggestions array into the playground HTML template and generate the output file" ;
+                    oc:expectedOutcome "Self-contained HTML file that users can interact with to review, approve/reject suggestions, and copy a prompt" ;
+                    oc:stepDependsOn _:ref_2fdc44588d075417 ;
+                    oc:stepId "embed-generate" ],
+                _:ref_8c3639272e3e79b8 ;
+            oc:workflowId "document-critique-build" ;
+            oc:workflowName "Build Document Critique Playground" ] ;
+    oc:impartsKnowledge oc:kn_2117b719,
+        oc:kn_2538efc0,
+        oc:kn_42311422,
+        oc:kn_6ebe4928,
+        oc:kn_731ed7c1,
+        oc:kn_815854d4,
+        oc:kn_bac91d00 ;
     oc:isUserInvocable true ;
-    oc:nature "Work" ;
+    oc:nature "Template" ;
     oc:requiresState oc:DocumentContentAvailable ;
-    oc:resolvesIntent "approve or reject document suggestions",
-        "critique documents",
-        "generate improvement suggestions for documents",
-        "review documents with structured feedback" ;
-    oc:yieldsState oc:ActionablePromptGenerated,
-        oc:DocumentCritiqueGenerated .
+    oc:resolvesIntent "critique skills, READMEs, specs, or proposals",
+        "generate structured feedback with approval workflow",
+        "produce actionable change prompts from approved suggestions",
+        "review documents interactively" ;
+    oc:yieldsState oc:DocumentReviewed,
+        oc:PromptGenerated .
 
-oc:kn_25201b12 a oc:DesignPrinciple,
+oc:kn_2117b719 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When building a critique playground for a specific document" ;
+    oc:directiveContent "1. Read document content. 2. Analyze and generate suggestions with specific line references, actionable text, and category tags (clarity, completeness, performance, accessibility, ux). 3. Embed both document content and suggestions array in the generated HTML." ;
+    oc:hasRationale "Pre-populating suggestions ensures the playground launches with useful, actionable feedback rather than an empty state" ;
+    oc:stepOrder 1 .
+
+oc:kn_2538efc0 a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When building document critique UIs" ;
-    oc:directiveContent "Separate the document view from the suggestions panel to allow parallel review without losing context." ;
-    oc:hasRationale "Side-by-side layout lets users see the original text and suggestions simultaneously, reducing cognitive load and context switching." .
-
-oc:kn_3f94177b a oc:Idempotency,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When toggling suggestion statuses during review" ;
-    oc:directiveContent "The prompt output is regenerated from current suggestion state each time, so approving/rejecting can be freely reversed without corruption." ;
-    oc:hasRationale "State-driven regeneration ensures the prompt always reflects the current set of approvals and comments, making the review process non-destructive." .
-
-oc:kn_735fecd5 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When generating the prompt output from reviewed suggestions" ;
-    oc:directiveContent "Do not include rejected suggestions in the final prompt output — only show them for context." ;
-    oc:hasRationale "Including rejected suggestions as actionable items would result in unwanted changes being applied to the document, defeating the purpose of the review workflow." .
-
-oc:kn_cf1dc82f a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "When generating suggestions for document critique" ;
-    oc:directiveContent "Each suggestion must include a specific line reference, actionable suggestion text, a category tag, and a status field." ;
-    oc:hasRationale "Structured suggestions enable precise matching to document lines and allow systematic filtering, approval, and prompt generation." ;
+    oc:appliesToContext "When generating suggestions for any document critique" ;
+    oc:directiveContent "Suggestions must include specific line references, clear actionable text, and category tags. Use fuzzy matching (±2 lines) to associate suggestions with document lines." ;
+    oc:hasRationale "Precise line anchoring makes suggestions immediately locatable; fuzzy matching tolerates minor formatting drift" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_eb945c15 a oc:Heuristic,
+oc:kn_42311422 a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When matching suggestions to document line numbers" ;
-    oc:directiveContent "Use fuzzy matching (±2 lines) when mapping suggestions to document lines to handle minor line reference discrepancies." ;
-    oc:hasRationale "Line numbers can shift slightly between document versions or when content is reformatted; fuzzy matching prevents suggestions from appearing detached from their target text." .
+    oc:appliesToContext "When initializing the critique playground data model" ;
+    oc:codeLanguage "javascript" ;
+    oc:directiveContent """const suggestions = [{ id, lineRef: 'Line 3', targetText, suggestion, category: 'clarity', status: 'pending', userComment: '' }];
+let state = { suggestions: [...], activeFilter: 'all', activeSuggestionId: null };""" ;
+    oc:hasRationale "This state shape supports filtering, highlighting, and prompt generation from a single source of truth" .
+
+oc:kn_6ebe4928 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When generating the final prompt output" ;
+    oc:directiveContent "Do not include rejected suggestions in the prompt output. Rejected items are listed for context only, not as actionable changes." ;
+    oc:hasRationale "Including rejected items as action items defeats the purpose of the approve/reject workflow and creates confusing instructions" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_731ed7c1 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When creating suggestions" ;
+    oc:directiveContent "Categories are limited to: clarity, completeness, performance, accessibility, ux. Statuses are limited to: pending, approved, rejected." ;
+    oc:hasRationale "A fixed taxonomy enables filter tabs and consistent grouping in the prompt output" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_815854d4 a oc:KnowledgeNode,
+        oc:OutputFormat ;
+    oc:appliesToContext "When generating the copyable prompt output" ;
+    oc:directiveContent """Please update [DOCUMENT] with the following changes:
+
+## Approved Improvements
+
+**{lineRef}:** {suggestion}
+  → User note: {userComment}
+
+## Additional Feedback
+{non-approved items with user comments}
+
+## Rejected (for context)
+{rejected items}""" ;
+    oc:hasRationale "This format separates actionable changes from context-only items, producing a ready-to-paste instruction prompt" .
+
+oc:kn_bac91d00 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When rendering suggestion states in the document panel" ;
+    oc:directiveContent "Color-code suggestion status consistently: pending (amber), approved (green), rejected (red with 0.6 opacity). Use left border highlighting on document lines." ;
+    oc:hasRationale "Consistent visual encoding lets users instantly assess review progress at a glance" .
+
+_:ref_2aa505e126570502 a oc:WorkflowStep ;
+    dcterms:description "Embed both the document content and suggestions array in the HTML" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_505bd9aef86961eb a oc:BulletItem ;
+    oc:blockType "bullet_item" ;
+    oc:itemOrder 1 ;
+    oc:itemText "Specific line references" .
+
+_:ref_720c3e48b373483b a oc:BulletItem ;
+    oc:blockType "bullet_item" ;
+    oc:itemOrder 2 ;
+    oc:itemText "Clear, actionable suggestion text" .
+
+_:ref_ad5cda20b238258e a oc:WorkflowStep ;
+    dcterms:description "Read the document content" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_c64b5f525ff785a1 a oc:BulletList ;
+    oc:blockType "bullet_list" ;
+    oc:contentOrder 1 ;
+    oc:hasItem _:ref_505bd9aef86961eb,
+        _:ref_720c3e48b373483b,
+        [ a oc:BulletItem ;
+            oc:blockType "bullet_item" ;
+            oc:itemOrder 3 ;
+            oc:itemText "Category tags (clarity, completeness, performance, accessibility, ux)" ] .
+
+_:ref_cc9587955447b8b9 a oc:WorkflowStep ;
+    dcterms:description "Analyze and generate suggestions with:" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild _:ref_c64b5f525ff785a1 ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_2f7679f9a6645094 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 2 ;
+    oc:hasStep _:ref_2aa505e126570502,
+        _:ref_ad5cda20b238258e,
+        _:ref_cc9587955447b8b9 ;
+    oc:workflowId "procedure_2" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_2fdc44588d075417 a oc:WorkflowStep ;
+    dcterms:description "Analyze the document and generate suggestions with specific line references, actionable text, and category tags" ;
+    oc:expectedOutcome "Array of suggestion objects with id, lineRef, targetText, suggestion, category, status='pending', userComment" ;
+    oc:stepDependsOn _:ref_8c3639272e3e79b8 ;
+    oc:stepId "analyze-suggest" .
+
+_:ref_8c3639272e3e79b8 a oc:WorkflowStep ;
+    dcterms:description "Read the target document content that will be critiqued" ;
+    oc:expectedOutcome "Full document text is available for analysis" ;
+    oc:stepId "read-doc" .
 

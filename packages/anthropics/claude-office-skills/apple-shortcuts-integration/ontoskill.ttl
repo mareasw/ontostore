@@ -4,104 +4,358 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_office_skills_apple_shortcuts_integration a oc:DeclarativeSkill,
+oc:skill_claude_office_skills_apple_shortcuts_integration a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "apple-shortcuts-integration" ;
-    skos:broader "Apple ecosystem integration skill" ;
-    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-office-skills/apple-shortcuts-integration" ;
+    skos:broader "Automation integration" ;
+    prov:wasDerivedFrom "../.agents/skills/anthropics/claude-office-skills/apple-shortcuts-integration" ;
     oc:contentHash "55d5027698c2da00f9256c5ae47b65255460a53cfefbaf0ef5ab19ed0cb9745c" ;
-    oc:dependsOnSkill oc:skill_calendar_automation ;
-    oc:differentia "creates and triggers Apple Shortcuts, manages Reminders, Notes, and Calendar events via the apple-mcp MCP server for iOS/macOS automation and cross-platform workflows" ;
+    oc:dependsOnSkill oc:skill_ontoskills_calendar_automation,
+        oc:skill_ontoskills_home_assistant_automation,
+        oc:skill_ontoskills_obsidian_automation ;
+    oc:differentia "that bridges AI agents with Apple Shortcuts, Reminders, Notes, and Calendar for iOS/macOS workflow automation" ;
     oc:handlesFailure oc:InvalidInput,
         oc:NetworkTimeout,
-        oc:PermissionDenied,
-        oc:ShortcutNotFound ;
-    oc:hasArgumentHint "shortcut name or action (e.g., 'run Morning Routine', 'create reminder', 'create note')" ;
+        oc:PermissionDenied ;
+    oc:hasAllowedTool "notes_create",
+        "reminders_create",
+        "shortcuts_list",
+        "shortcuts_run" ;
+    oc:hasArgumentHint "shortcut name or action type (reminder, note, calendar event)" ;
     oc:hasCategory "automation" ;
     oc:hasDescription "Create and trigger Apple Shortcuts for iOS/macOS automation and cross-platform workflows" ;
     oc:hasName "apple-shortcuts-integration" ;
-    oc:hasRequirement oc:req_2566f713,
-        oc:req_5fb72c3a,
-        oc:req_7f7e4516,
-        oc:req_8aea7e8b,
-        oc:req_96f3a6cb,
-        oc:req_b8b3e596 ;
-    oc:impartsKnowledge oc:kn_56382969,
-        oc:kn_9b2f17df,
-        oc:kn_9eac74af,
-        oc:kn_a5bc6398,
-        oc:kn_dc2c057b ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Integrate with Apple ecosystem for iOS and macOS automation." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent _:ref_daf64fd6366bfebf ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Best Practices" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """sync_workflow:
+  trigger: note_created
+  actions:
+    - if: tag == "work"
+      then:
+        - sync_to: notion
+        - sync_to: obsidian
+    - if: has_task
+      then:
+        - create_reminder: from_task
+""" ;
+                                    oc:codeLanguage "yaml" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 165-176" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Cross-Platform Sync" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Integration Workflows" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """shortcut_quick_capture:
+  trigger: share_sheet
+  steps:
+    - get_shared_input
+    - create_note:
+        title: "Captured - {{date}}"
+        body: "{{input}}"
+    - notify: "Captured successfully"
+""" ;
+                                    oc:codeLanguage "yaml" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 151-160" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Quick Capture" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """shortcut_daily_log:
+  steps:
+    - get_current_date
+    - prompt_for_input:
+        message: "How was your day?"
+    - append_to_note:
+        title: "Daily Journal"
+        content: |
+          ## {{date}}
+          {{input}}
+    - create_reminder:
+        title: "Journal entry"
+        due: tomorrow 9am
+""" ;
+                                    oc:codeLanguage "yaml" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 134-148" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Daily Log" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Shortcut Examples" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """reminders:
+  create:
+    title: "{{task}}"
+    list: "Work"
+    due_date: "{{date}}"
+    due_time: "09:00"
+    priority: high
+    notes: "{{details}}"
+    
+  query:
+    list: "Shopping"
+    completed: false
+    
+  complete:
+    reminder_id: "{{id}}"
+""" ;
+                                    oc:codeLanguage "yaml" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 70-86" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Apple Reminders" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """shortcut_execution:
+  run:
+    name: "Morning Routine"
+    input: optional
+    
+  run_with_input:
+    name: "Process Text"
+    input: "{{text_to_process}}"
+    
+  run_with_clipboard:
+    name: "Share to App"
+    input: clipboard
+""" ;
+                                    oc:codeLanguage "yaml" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 54-67" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Run Shortcuts" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """notes:
+  create:
+    title: "Meeting Notes - {{date}}"
+    folder: "Work"
+    body: |
+      # {{meeting_title}}
+      
+      ## Attendees
+      {{attendees}}
+      
+      ## Notes
+      {{notes}}
+      
+  append:
+    note_title: "Running Log"
+    content: "- {{date}}: {{entry}}"
+    
+  search:
+    query: "project alpha"
+    folder: "Projects"
+""" ;
+                                    oc:codeLanguage "yaml" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 89-110" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Apple Notes" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """calendar:
+  create_event:
+    title: "{{event_title}}"
+    calendar: "Work"
+    start: "{{start_time}}"
+    end: "{{end_time}}"
+    location: "{{location}}"
+    notes: "{{notes}}"
+    alerts:
+      - 30  # minutes before
+      
+  query:
+    calendar: "all"
+    start: today
+    end: "+7 days"
+""" ;
+                                    oc:codeLanguage "yaml" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 113-129" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "Calendar" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Core Capabilities" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Apple Shortcuts Integration" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """name: Apple Shortcuts Integration
+description: Create and trigger Apple Shortcuts for iOS/macOS automation and cross-platform workflows
+version: 1.0.0
+author: Claude Office Skills
+category: automation
+tags:
+  - apple
+  - shortcuts
+  - ios
+  - macos
+  - automation
+department: operations
+models:
+  - claude-3-opus
+  - claude-3-sonnet
+  - gpt-4
+mcp:
+  server: apple-mcp
+  tools:
+    - shortcuts_run
+    - shortcuts_list
+    - reminders_create
+    - notes_create
+capabilities:
+  - Shortcut execution
+  - Reminders management
+  - Notes creation
+  - Calendar integration
+input:
+  - Shortcut names
+  - Input parameters
+  - Reminder details
+  - Note content
+output:
+  - Shortcut results
+  - Created items
+  - Sync status
+languages:
+  - en
+related_skills:
+  - home-assistant
+  - calendar-automation
+  - obsidian-automation
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:hasWorkflow _:ref_daf64fd6366bfebf ;
+    oc:impartsKnowledge oc:kn_11d63d3e,
+        oc:kn_126e333f,
+        oc:kn_774f2659,
+        oc:kn_79e4e8c2,
+        oc:kn_d5d73934 ;
     oc:isUserInvocable true ;
     oc:nature "Tool" ;
-    oc:requiresState oc:NetworkAvailable,
-        oc:SystemAuthenticated ;
-    oc:resolvesIntent "automate iOS and macOS workflows",
+    oc:requiresState oc:APIKeySet,
+        oc:ToolInstalled ;
+    oc:resolvesIntent "automate cross-platform workflows with Apple ecosystem",
         "create Apple Notes",
         "create Apple Reminders",
-        "manage Calendar events",
-        "run Apple Shortcuts",
-        "sync data across Apple and third-party apps" ;
-    oc:yieldsState oc:CalendarEventCreated,
-        oc:NoteCreated,
-        oc:ReminderCreated,
-        oc:ShortcutExecuted .
+        "create calendar events",
+        "run Apple Shortcuts" ;
+    oc:yieldsState oc:AutomationTriggered,
+        oc:DocumentCreated,
+        oc:ReminderCreated .
 
-oc:kn_56382969 a oc:KnowledgeNode,
-        oc:KnownIssue ;
-    oc:appliesToContext "Before deploying shortcuts to production workflows" ;
-    oc:directiveContent "Shortcuts must be tested on all target devices (iPhone, iPad, Mac) as behavior can differ across platforms." ;
-    oc:hasRationale "Apple Shortcuts runtime behavior varies across iOS, iPadOS, and macOS; actions available on one platform may not exist on another." ;
-    oc:severityLevel "MEDIUM" .
+oc:kn_11d63d3e a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When running shortcuts with input parameters" ;
+    oc:directiveContent "Always validate inputs before passing them to shortcuts — invalid input types or missing required parameters will cause silent failures." ;
+    oc:hasRationale "Apple Shortcuts do not always surface clear error messages; input validation prevents confusing downstream failures." ;
+    oc:severityLevel "HIGH" .
 
-oc:kn_9b2f17df a oc:KnowledgeNode,
+oc:kn_126e333f a oc:KnowledgeNode,
         oc:SecurityImplication ;
-    oc:appliesToContext "When creating shortcuts that handle personal data (notes, reminders, calendar events)" ;
-    oc:directiveContent "Minimize data exposure in shortcuts — only pass necessary information and avoid logging sensitive content." ;
-    oc:hasRationale "Shortcuts may sync across iCloud and multiple devices, increasing the attack surface for personal data." ;
+    oc:appliesToContext "When executing shortcuts that process user data" ;
+    oc:directiveContent "Minimize data exposure when passing content through shortcuts — avoid sending sensitive credentials or personal data through shortcut input parameters." ;
+    oc:hasRationale "Shortcuts may log input or share data across apps; minimizing exposure reduces privacy risk." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_9eac74af a oc:DesignPrinciple,
+oc:kn_774f2659 a oc:FallbackStrategy,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When building or chaining Apple Shortcuts workflows" ;
-    oc:directiveContent "Design shortcuts with graceful failure handling — catch errors and provide meaningful feedback rather than silently failing." ;
-    oc:hasRationale "Apple Shortcuts can fail across device boundaries; graceful handling ensures users know what happened." ;
+    oc:appliesToContext "When shortcut execution fails or times out" ;
+    oc:directiveContent "Implement graceful failure handling for shortcuts — if a shortcut fails, provide the user with the manual steps rather than leaving them with no result." ;
+    oc:hasRationale "Users rely on automation; silent failures erode trust. A fallback ensures the user can still complete their task." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_a5bc6398 a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "When creating or referencing Apple Shortcuts" ;
-    oc:directiveContent "Use clear, descriptive shortcut names that convey purpose at a glance." ;
-    oc:hasRationale "Descriptive naming prevents confusion when managing many shortcuts across iOS and macOS devices." ;
+oc:kn_79e4e8c2 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When creating or naming Apple Shortcuts" ;
+    oc:directiveContent "Use clear, descriptive shortcut names to ensure discoverability and maintainability." ;
+    oc:hasRationale "Descriptive names prevent confusion when triggering shortcuts programmatically and make workflows self-documenting." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_dc2c057b a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When running shortcuts with dynamic input" ;
-    oc:directiveContent "Always validate inputs before passing them to shortcuts, especially text parameters and date/time values." ;
-    oc:hasRationale "Invalid inputs can cause silent failures or unexpected behavior in the Apple Shortcuts runtime." ;
-    oc:severityLevel "HIGH" .
+oc:kn_d5d73934 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When deploying cross-device shortcut workflows" ;
+    oc:directiveContent "Shortcuts may behave differently on iOS vs macOS — always test automation workflows on all target devices before relying on them." ;
+    oc:hasRationale "Apple Shortcuts has platform-specific behaviors (e.g., share sheet availability, file access) that can break workflows silently." ;
+    oc:severityLevel "MEDIUM" .
 
-oc:req_2566f713 a oc:RequirementAPI ;
-    oc:isOptional false ;
-    oc:requirementValue "apple-mcp MCP server" .
+_:ref_0ca8f089a80e651d a oc:WorkflowStep ;
+    dcterms:description "**Error Handling**: Graceful failures" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
 
-oc:req_5fb72c3a a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "Apple Shortcuts naming conventions and structure" .
+_:ref_130de4f9fbb166fc a oc:WorkflowStep ;
+    dcterms:description "**Input Handling**: Validate inputs" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
 
-oc:req_7f7e4516 a oc:RequirementTool ;
-    oc:isOptional false ;
-    oc:requirementValue "shortcuts_run" .
+_:ref_3c38e1b650870fda a oc:WorkflowStep ;
+    dcterms:description "**Naming**: Clear, descriptive shortcut names" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
 
-oc:req_8aea7e8b a oc:RequirementTool ;
-    oc:isOptional false ;
-    oc:requirementValue "shortcuts_list" .
+_:ref_87eba35c9638637c a oc:WorkflowStep ;
+    dcterms:description "**Privacy**: Minimize data exposure" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
 
-oc:req_96f3a6cb a oc:RequirementTool ;
-    oc:isOptional false ;
-    oc:requirementValue "notes_create" .
+_:ref_b00e6683ab995c7d a oc:WorkflowStep ;
+    dcterms:description "**Testing**: Test on all devices" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_5" ;
+    oc:stepOrder 5 .
 
-oc:req_b8b3e596 a oc:RequirementTool ;
-    oc:isOptional false ;
-    oc:requirementValue "reminders_create" .
+_:ref_daf64fd6366bfebf a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 1 ;
+    oc:hasStep _:ref_0ca8f089a80e651d,
+        _:ref_130de4f9fbb166fc,
+        _:ref_3c38e1b650870fda,
+        _:ref_87eba35c9638637c,
+        _:ref_b00e6683ab995c7d ;
+    oc:workflowId "procedure_1" ;
+    oc:workflowName "Ordered Procedure" .
 

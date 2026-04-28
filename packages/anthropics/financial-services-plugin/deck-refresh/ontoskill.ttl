@@ -4,89 +4,375 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_financial_services_plugin_deck_refresh a oc:DeclarativeSkill,
+oc:skill_financial_services_plugin_deck_refresh a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "deck-refresh" ;
-    skos:broader "Presentation update workflow" ;
-    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/financial-services-plugin/deck-refresh" ;
+    skos:broader "presentation update tool" ;
+    prov:wasDerivedFrom "../.agents/skills/anthropics/financial-services-plugin/deck-refresh" ;
     oc:contentHash "b09356b6b7c5b3cbeabcc2d08fb0a33628c3eafaad73bf8f7c8f971db3c6ec1e" ;
-    oc:differentia "that swaps numerical values across an existing deck while preserving all formatting, with a mandatory approval gate before any edits" ;
-    oc:handlesFailure oc:InvalidInput,
-        oc:PermissionDenied ;
-    oc:hasAllowedTool "Edit",
-        "Glob",
-        "Grep",
-        "Read",
-        "Write",
-        "ask_user_question" ;
-    oc:hasArgumentHint "old-to-new value mapping or updated data source file" ;
+    oc:dependsOnSkill oc:skill_ontoskills_pptx_manipulation ;
+    oc:differentia "that swaps numerical values across an existing deck while preserving all original formatting, structure, and narrative" ;
+    oc:hasAllowedTool "ask_user_question" ;
+    oc:hasArgumentHint "existing deck file and new values (pasted mapping, uploaded Excel, or plain-text figures)" ;
     oc:hasCategory "document" ;
     oc:hasDescription "Updates a presentation with new numbers — quarterly refreshes, earnings updates, comp rolls, rebased market data. Use whenever the user asks to \"update the deck with Q4 numbers\", \"refresh the comps\", \"roll this forward\", \"swap in the new earnings\", \"change all the $485M to $512M\", or any request to swap figures across an existing deck without rebuilding it." ;
     oc:hasName "deck-refresh" ;
-    oc:impartsKnowledge oc:kn_567716c1,
-        oc:kn_5f5b29da,
-        oc:kn_68083a29,
-        oc:kn_7babdcb6,
-        oc:kn_7e25f4fe,
-        oc:kn_a199aaab,
-        oc:kn_ea488cfc ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """name: deck-refresh
+description: Updates a presentation with new numbers — quarterly refreshes, earnings updates, comp rolls, rebased market data. Use whenever the user asks to "update the deck with Q4 numbers", "refresh the comps", "roll this forward", "swap in the new earnings", "change all the $485M to $512M", or any request to swap figures across an existing deck without rebuilding it.
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Update numbers across the deck. The deck is the source of truth for formatting; you're only changing values." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "**Not touching formatting** — if the deck uses `$MM` and the user's mapping says `$M`, match the deck, not the mapping. Values change; style stays." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "**Not rebuilding slides** — if a slide's narrative no longer makes sense with the new numbers (\"margins compressed\" but margins went up), flag it, don't rewrite it." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "**Not recalculating unless asked** — derived numbers are the user's call. Your Phase 1 question covers this." ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "What you're not doing" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """$485M → $512M (Revenue)
+  Slide 3  — Title box: "Revenue grew to $485M"
+  Slide 8  — Chart axis label: "485"
+  Slide 15 — Footnote: "$485.0 million in FY24 revenue"
+
+$120M → $135M (Adj. EBITDA)
+  Slide 3  — Table cell
+  Slide 11 — Body text: "$120M of Adj. EBITDA"
+
+FLAGGED — possibly derived, not in your mapping:
+  Slide 3  — "+15% YoY" (growth rate — stale if base year didn't change?)
+  Slide 7  — "12% market share" (was this computed from $485M / market size?)
+""" ;
+                            oc:codeLanguage "" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 58-71" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "The flagged section matters. You're not just executing a find-replace — you're catching the second-order effects the user would've missed at 11pm. If the mapping says `$485M → $512M` and slide 3 also has `+15% YoY` right next to it, that growth rate is probably wrong now. Flag it; don't silently fix it, don't silently leave it." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**This is a destructive operation on a deck someone spent time on.** Show the full change list before editing a single thing. Format it so it's scannable:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "Use `ask_user_question` for the approval: proceed as shown, proceed but skip the flagged items, or let them revise the mapping first." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Phase 3 — Present the plan, get approval" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 6 ;
+                            oc:textContent "Build a list: for each old value, every location it appears, the exact text it appears as, and what it'll become. This list is the plan." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "**Where numbers hide:**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "A deck that says `$485M` on slide 3, `485` on slide 8's chart axis, and `$485.0 million` in a footnote on slide 15 has three instances of the same number. Find-replace misses two of them. You shouldn't." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Read every slide. For each old value, find every instance — including the ones that don't look the same:" ],
+                        [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 2 ;
+                            oc:rowCount 4 ;
+                            oc:tableCaption "Read every slide. For each old value, find every instance — including the ones that don't look the same" ;
+                            oc:tableMarkdown """| Variant | Example |
+|---|---|
+| Scale | `$485M`, `$0.485B`, `$485,000,000` |
+| Precision | `$485M`, `$485.0M`, `~$485M` |
+| Unit style | `$485M`, `$485MM`, `$485 million`, `485M` |
+| Embedded | "revenue grew to $485M", "a $485M business", axis labels |
+""" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 5 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Chart data labels and axis labels" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "Footnotes, source lines, small print" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Table cells" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Chart source data — the numbers driving the bars, not just the labels on them" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Text boxes (obvious)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 6 ;
+                                    oc:itemText "Speaker notes, if the user cares about those" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Phase 2 — Read everything, find everything" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent "Don't reformat anything you didn't need to touch. The deck's existing style is correct by definition; you're a surgeon, not a renovator." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 6 ;
+                            oc:textContent "After the last edit, report what actually happened:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """Updated 11 values across 8 slides.
+
+Changed:
+  [the list from Phase 3, now past-tense]
+
+Still flagged — did NOT change:
+  Slide 3 — "+15% YoY" (derived; confirm separately)
+  Slide 7 — "12% market share"
+""" ;
+                            oc:codeLanguage "" ;
+                            oc:contentOrder 7 ;
+                            oc:sourceLocation "lines 94-103" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "Either way, the standard is the same:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 8 ;
+                            oc:textContent "Run standard visual verification checks on every edited slide. A number that got longer (`$485M` → `$1,205M`) might now overflow its text box or push a table column width. Catch it before the user does." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "For each change, make the smallest edit that accomplishes it. How that happens depends on your environment:" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "**Chat** — regenerate the affected slide with the new value in place, preserving every other element exactly as it was, and write it back to the file." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "**Add-in** — edit the specific run, cell, or chart series directly in the live deck." ] ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 4 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "**Chart data** — update the underlying series values so the bars/lines actually move. Editing just the label without the data leaves a chart that lies." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "**Table cell** — change the cell, leave the table alone." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "**Text in a shape** — change the value, leave font/size/color/bold state exactly as they were. If `$485M` is 14pt navy bold inside a sentence, `$512M` is 14pt navy bold inside the same sentence." ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Phase 4 — Execute, preserve, report" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Use `ask_user_question` to find out how the new numbers are arriving:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "Also ask about **derived numbers**: if revenue moves, does the user want growth rates and share percentages recalculated, or left alone? Most decks have \"+15% YoY\" baked in somewhere that's now stale. Whether to touch those is a judgment call the user should make, not you." ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "**Pasted mapping** — user types or pastes \"revenue $485M → $512M, EBITDA $120M → $135M.\" The clearest case." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "**Uploaded Excel** — old/new columns, or a fresh output sheet the user wants pulled from. Read it, confirm which column is which before you trust it." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "**Just the new values** — \"Q4 revenue was $512M, margins were 22%.\" You figure out what each one replaces. Workable, but confirm the mapping before you touch anything — a \"$512M\" that you map to revenue but the user meant for gross profit is a quiet disaster." ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Phase 1 — Get the data" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "Either way: smallest possible change, existing formatting stays intact." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "This is a four-phase process and the third phase is an approval gate. Don't edit until the user has seen the plan." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "This skill works in both the PowerPoint add-in and chat. Identify which you're in before starting — the edit mechanism differs, the intent doesn't:" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "**Add-in** — the deck is open live; edit text runs, table cells, and chart data directly." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "**Chat** — the deck is an uploaded file; edit it by regenerating the affected slides with the new values and writing the result back." ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Environment check" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Deck Refresh" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "Update numerical values across an existing presentation deck while preserving all formatting, structure, and narrative." ;
+            oc:hasStep [ a oc:WorkflowStep ;
+                    dcterms:description "Execute each approved change with the smallest possible edit. Preserve all formatting (font, size, color, bold state, unit style). Update chart source data, not just labels. Report what changed and what remains flagged." ;
+                    oc:expectedOutcome "All approved values updated; formatting intact; post-edit report delivered; visual verification passed." ;
+                    oc:stepDependsOn _:ref_4dc9aaeca169ad2a ;
+                    oc:stepId "phase4-execute" ],
+                _:ref_4dc9aaeca169ad2a,
+                _:ref_585d13685b5a5230,
+                _:ref_9d985bc38853d618,
+                _:ref_d6a42f4d7514c262 ;
+            oc:workflowId "deck-refresh-main" ;
+            oc:workflowName "Deck Refresh — Four-Phase Value Update" ] ;
+    oc:impartsKnowledge oc:kn_284909b3,
+        oc:kn_5840101f,
+        oc:kn_629bbaf9,
+        oc:kn_90c44fc6,
+        oc:kn_adffe5d5,
+        oc:kn_ccc2cd8b,
+        oc:kn_de933ba2,
+        oc:kn_f45cc9ea ;
     oc:isUserInvocable true ;
     oc:nature "Work" ;
     oc:requiresState oc:FileExists ;
-    oc:resolvesIntent "refresh comparable company data",
-        "refresh deck with new quarterly data",
-        "roll forward financial figures in a deck",
-        "swap values across slides",
-        "update earnings data in presentation",
-        "update presentation numbers" ;
+    oc:resolvesIntent "refresh quarterly figures in presentation",
+        "replace values across slides without rebuilding",
+        "roll forward presentation data",
+        "swap earnings numbers in deck",
+        "update comps in pitch deck",
+        "update deck with new numbers" ;
     oc:yieldsState oc:DocumentUpdated .
 
-oc:kn_567716c1 a oc:AntiPattern,
+oc:kn_284909b3 a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "During Phase 2 when scanning for all instances of values to change" ;
-    oc:directiveContent "Never use a simple find-replace. A number like $485M may appear as '$0.485B', '485' on a chart axis, or '$485.0 million' in a footnote. You must find every variant across every location type." ;
-    oc:hasRationale "Find-replace misses variant representations, leaving a deck with inconsistent numbers that erodes credibility in a client-facing setting" ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_5f5b29da a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When editing any slide element during Phase 4 execution" ;
-    oc:directiveContent "The deck's existing formatting is correct by definition; make the smallest possible edit that accomplishes the change. You are a surgeon, not a renovator." ;
-    oc:hasRationale "The deck was designed by someone who spent time on it; altering formatting risks breaking visual consistency and professional quality" ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_68083a29 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "During Phase 2 discovery and Phase 3 plan presentation" ;
-    oc:directiveContent "Flag all derived numbers (growth rates, share percentages, margins computed from base values) rather than silently recalculating or silently leaving them. The user decides whether to touch them." ;
-    oc:hasRationale "Derived numbers are second-order effects the user would miss; silently changing them risks incorrect assumptions, while silently leaving them creates stale data" ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_7babdcb6 a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When editing any chart element during Phase 4" ;
-    oc:directiveContent "Chart data series values must be updated so bars/lines actually move — editing just the label without the underlying data leaves a chart that lies." ;
-    oc:hasRationale "A chart with updated labels but unchanged underlying data misrepresents the information and is worse than an obvious error" ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_7e25f4fe a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "Always — between Phase 2 (discovery) and Phase 4 (execution)" ;
-    oc:directiveContent "Never edit a single value until the user has reviewed and approved the full change plan showing every instance of every old value and what it will become." ;
-    oc:hasRationale "This is a destructive operation on a carefully crafted deck; an unapproved change to the wrong number or location is a quiet disaster that undermines trust" ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_a199aaab a oc:KnowledgeNode,
-        oc:KnownIssue ;
-    oc:appliesToContext "After Phase 4 execution, before reporting completion" ;
-    oc:directiveContent "When a number gets longer (e.g., $485M → $1,205M), it may overflow its text box or push a table column width. Run visual verification checks on every edited slide after changes." ;
-    oc:hasRationale "Overflow or layout breakage is visible to stakeholders and undermines the professional quality of the deliverable" ;
+    oc:appliesToContext "During Phase 2 — reading all slides" ;
+    oc:directiveContent "Check every location numbers hide: text boxes, table cells, chart data labels, axis labels, chart source data (the actual series values), footnotes, source lines, small print, and speaker notes." ;
+    oc:hasRationale "Numbers are embedded in more places than obvious — chart source data drives visual bars, footnotes contain legal disclosures, axis labels show scaled values." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_ea488cfc a oc:DesignPrinciple,
+oc:kn_5840101f a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "After Phase 4 — post-edit verification" ;
+    oc:directiveContent "After editing, run visual verification checks on every changed slide. Numbers that got longer may overflow text boxes or push table column widths. Catch layout breaks before the user does." ;
+    oc:hasRationale "A value change from $485M to $1,205M adds characters that can break carefully laid out slide geometry, creating an unprofessional result." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_629bbaf9 a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When writing new values during Phase 4 execution" ;
-    oc:directiveContent "Match the deck's unit style, not the user's mapping. If the deck uses $MM and the mapping says $M, use $MM. Values change; style stays." ;
-    oc:hasRationale "Consistency within the deck matters more than consistency with the source data; mixing unit styles looks unprofessional" ;
+    oc:appliesToContext "During Phase 2 — scanning for all instances of each value" ;
+    oc:directiveContent "Never use simple find-replace. The same number appears in multiple formats across a deck ($485M, $0.485B, 485 on a chart axis, $485.0 million in a footnote). Missing any instance creates an inconsistent deck." ;
+    oc:hasRationale "Partial updates are worse than no updates — they create decks where some numbers are current and others are stale, which is misleading." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_90c44fc6 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Throughout execution" ;
+    oc:directiveContent "Do not rebuild slides, rewrite narrative, or recalculate derived numbers unless explicitly asked. If a slide's narrative contradicts the new numbers, flag it — don't fix it." ;
+    oc:hasRationale "The skill's scope is value substitution, not content authoring. Rewriting narrative crosses into a different task and risks introducing errors." ;
     oc:severityLevel "HIGH" .
+
+oc:kn_adffe5d5 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When updating any chart element" ;
+    oc:directiveContent "When chart data is updated, change the underlying series values so the bars/lines actually move. Editing just the label without the data creates a chart that lies." ;
+    oc:hasRationale "Charts are visual representations of data — updating the displayed label but not the underlying data creates a deceptive mismatch between what's shown and what drives the visualization." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_ccc2cd8b a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Before executing any edits (Phase 4)" ;
+    oc:directiveContent "Never edit the deck until the user has explicitly approved the full change plan in Phase 3. This is a destructive operation on a polished artifact." ;
+    oc:hasRationale "Presentations represent hours of formatting work; an unapproved find-replace could silently corrupt data, formatting, or narrative." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_de933ba2 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "During Phase 3 — presenting the change plan" ;
+    oc:directiveContent "Do not silently fix or silently ignore derived numbers (growth rates, share percentages, margins). Flag every potentially stale derived figure for the user to decide." ;
+    oc:hasRationale "Silently fixing derived numbers assumes context the agent may not have; silently leaving them creates a deck with internal contradictions. The user must decide." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_f45cc9ea a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When executing any text replacement (Phase 4)" ;
+    oc:directiveContent "The deck is the source of truth for formatting. Match the deck's unit style ($M vs $MM), precision, and notation — not the user's mapping input. Values change; style stays." ;
+    oc:hasRationale "The deck's existing style was deliberate. Imposing a different notation convention from the input data would break visual consistency." ;
+    oc:severityLevel "HIGH" .
+
+_:ref_4dc9aaeca169ad2a a oc:WorkflowStep ;
+    dcterms:description "Present the full change list in scannable format. Flag derived numbers that may be stale. Use ask_user_question for approval: proceed as shown, skip flagged items, or revise mapping." ;
+    oc:expectedOutcome "User explicitly approves or revises the change plan. No edits made yet." ;
+    oc:stepDependsOn _:ref_585d13685b5a5230 ;
+    oc:stepId "phase3-approve" .
+
+_:ref_585d13685b5a5230 a oc:WorkflowStep ;
+    dcterms:description "Read every slide. Find every instance of each old value across all formats (scale variants, precision variants, unit style variants, embedded in text, chart data, footnotes, speaker notes). Build a full change list with exact locations and text." ;
+    oc:expectedOutcome "Comprehensive change list: for each old value, every location, exact text, and replacement value." ;
+    oc:stepDependsOn _:ref_9d985bc38853d618 ;
+    oc:stepId "phase2-find-all" .
+
+_:ref_9d985bc38853d618 a oc:WorkflowStep ;
+    dcterms:description "Ask user how new numbers arrive (pasted mapping, uploaded Excel, or plain values). Confirm mapping for each value. Ask whether derived numbers (growth rates, shares) should be recalculated." ;
+    oc:expectedOutcome "Complete old→new mapping confirmed by user; derived-number policy established." ;
+    oc:stepDependsOn _:ref_d6a42f4d7514c262 ;
+    oc:stepId "phase1-get-data" .
+
+_:ref_d6a42f4d7514c262 a oc:WorkflowStep ;
+    dcterms:description "Identify execution environment (PowerPoint add-in vs chat) — determines edit mechanism." ;
+    oc:expectedOutcome "Environment identified; correct edit strategy selected." ;
+    oc:stepId "env-check" .
 

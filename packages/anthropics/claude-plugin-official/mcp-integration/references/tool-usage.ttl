@@ -4,86 +4,1143 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_plugin_official_mcp_integration_tool_usage a oc:DeclarativeSkill,
+oc:skill_claude_plugin_official_mcp_integration_tool_usage a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "tool-usage" ;
     skos:broader "Integration guide" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/mcp-integration" ;
     oc:contentHash "8dd0005d7ba6cd2d24e72f9e6102c129b7445fc818e14656ad9ebaef6621a7a6" ;
-    oc:dependsOnSkill oc:skill_mcp_integration ;
-    oc:differentia "that teaches MCP tool invocation patterns, naming conventions, parameter handling, and performance optimization for Claude Code plugin commands and agents" ;
-    oc:extends oc:skill_anthropics_claude_plugin_official_mcp_integration ;
-    oc:handlesFailure oc:AuthenticationError,
-        oc:RateLimitExceeded,
-        oc:ToolCallFailed,
-        oc:ToolNotFound ;
-    oc:hasArgumentHint "command or agent configuration context" ;
+    oc:differentia "that teaches how to use MCP tools in Claude Code plugin commands and agents with proper naming, configuration, error handling, and performance optimization" ;
+    oc:extends oc:skill_claude_plugin_official_mcp_integration ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_56d9e183,
-        oc:kn_ac210eda,
-        oc:kn_b6f47d08,
-        oc:kn_ba250f2b,
-        oc:kn_c9dc6881,
-        oc:kn_ec32ef39,
-        oc:kn_f5f2828d ;
-    oc:isUserInvocable true ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Complete guide to using MCP tools effectively in Claude Code plugin commands and agents." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Agents have broader tool access than commands:" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 2 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Should document which tools they typically use" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Can use any tool Claude determines is necessary" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Don't need pre-allowed lists" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 14 ;
+                            oc:sectionTitle "Agent Tool Access" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Agents can use MCP tools autonomously without pre-allowing them:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """---
+name: asana-status-updater
+description: This agent should be used when the user asks to "update Asana status", "generate project report", or "sync Asana tasks"
+model: inherit
+color: blue
+---
+
+## Role
+
+Autonomous agent for generating Asana project status reports.
+
+## Process
+
+1. **Query tasks**: Use mcp__plugin_asana_asana__asana_search_tasks to get all tasks
+2. **Analyze progress**: Calculate completion rates and identify blockers
+3. **Generate report**: Create formatted status update
+4. **Update Asana**: Use mcp__plugin_asana_asana__asana_create_comment to post report
+
+## Available Tools
+
+The agent has access to all Asana MCP tools without pre-approval.
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 126-148" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 13 ;
+                            oc:sectionTitle "Agent Configuration" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 12 ;
+                    oc:sectionTitle "Using Tools in Agents" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """---
+allowed-tools: [
+  "mcp__plugin_api_server__create_item",
+  "mcp__plugin_api_server__read_item",
+  "mcp__plugin_api_server__update_item",
+  "mcp__plugin_api_server__delete_item"
+]
+---
+
+# Item Management
+
+## Create
+Use create_item with required fields...
+
+## Read
+Use read_item with item ID...
+
+## Update
+Use update_item with item ID and changes...
+
+## Delete
+Use delete_item with item ID (ask for confirmation first)...
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 452-475" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 40 ;
+                            oc:sectionTitle "Pattern: CRUD Operations" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """Steps:
+1. **Setup**: Gather all required information
+2. **Validate**: Check data completeness
+3. **Execute**: Chain of MCP tool calls:
+   - Create parent resource
+   - Create child resources
+   - Link resources together
+   - Add metadata
+4. **Verify**: Confirm all steps succeeded
+5. **Report**: Provide summary to user
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 489-500" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 42 ;
+                            oc:sectionTitle "Pattern: Multi-Step Workflow" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """Steps:
+1. **Search**: mcp__plugin_api_server__search with filters
+2. **Filter**: Apply additional local filtering if needed
+3. **Transform**: Process each result
+4. **Present**: Format and display to user
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 479-485" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 41 ;
+                            oc:sectionTitle "Pattern: Search and Process" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 39 ;
+                    oc:sectionTitle "Common Patterns" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Use `/mcp` command:**" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 4 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "Full tool names for use in configuration" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "All available MCP servers" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Tools provided by each server" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Tool schemas and descriptions" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "This shows:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """/mcp
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 32-34" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 6 ;
+                            oc:sectionTitle "Discovering Tool Names" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """mcp__plugin_<plugin-name>_<server-name>__<tool-name>
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 13-15" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "Format" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 4 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "`mcp__plugin_myplug_database__execute`" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "`mcp__plugin_myplug_database__query`" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "`mcp__plugin_myplug_database__list_tables`" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Asana plugin with asana server:**" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 2 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "`mcp__plugin_asana_asana__asana_search_tasks`" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "`mcp__plugin_asana_asana__asana_get_project`" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "`mcp__plugin_asana_asana__asana_create_task`" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Custom plugin with database server:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 5 ;
+                            oc:sectionTitle "Examples" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Tool Naming Convention" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Avoid: Many individual queries**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """Steps:
+1. Call mcp__plugin_api_server__search with filters:
+   - project_id: "123"
+   - status: "active"
+   - limit: 100
+2. Process all results
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 318-325" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Good: Single query with filters**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """Steps:
+1. For each item ID:
+   - Call mcp__plugin_api_server__get_item
+   - Process item
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 4 ;
+                                    oc:sourceLocation "lines 328-333" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 29 ;
+                            oc:sectionTitle "Batching Requests" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "When tools don't depend on each other, call in parallel:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """Steps:
+1. Make parallel calls (Claude handles this automatically):
+   - mcp__plugin_api_server__get_project
+   - mcp__plugin_api_server__get_users
+   - mcp__plugin_api_server__get_tags
+2. Wait for all to complete
+3. Combine results
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 349-357" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 31 ;
+                            oc:sectionTitle "Parallel Tool Calls" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """Steps:
+1. Call expensive MCP operation: mcp__plugin_api_server__analyze
+2. Store results in variable for reuse
+3. Use cached results for subsequent operations
+4. Only re-fetch if data changes
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 337-343" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 30 ;
+                            oc:sectionTitle "Caching Results" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 28 ;
+                    oc:sectionTitle "Performance Optimization" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """Steps:
+1. Get list of items to process
+2. For each item:
+   - Call mcp__plugin_api_server__update_item
+   - Track success/failure
+3. Report results summary
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 187-194" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Multiple calls with same tool:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 18 ;
+                            oc:sectionTitle "Pattern 3: Batch Operations" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Chain multiple tool calls:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """Steps:
+1. Search for existing items: mcp__plugin_api_server__search
+2. If not found, create new: mcp__plugin_api_server__create
+3. Add metadata: mcp__plugin_api_server__update_metadata
+4. Return final item ID
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 175-181" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 17 ;
+                            oc:sectionTitle "Pattern 2: Sequential Tools" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """Steps:
+1. Validate user provided required fields
+2. Call mcp__plugin_api_server__create_item with validated data
+3. Check for errors
+4. Display confirmation
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 163-169" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Single tool call with validation:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 16 ;
+                            oc:sectionTitle "Pattern 1: Simple Tool Call" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Graceful error handling:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """Steps:
+1. Try to call mcp__plugin_api_server__get_data
+2. If error (rate limit, network, etc.):
+   - Wait and retry (max 3 attempts)
+   - If still failing, inform user
+   - Suggest checking configuration
+3. On success, process data
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 200-208" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 19 ;
+                            oc:sectionTitle "Pattern 4: Error Handling" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 15 ;
+                    oc:sectionTitle "Tool Call Patterns" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """---
+description: Create a new Asana task
+allowed-tools: [
+  "mcp__plugin_asana_asana__asana_create_task"
+]
+---
+
+# Create Task Command
+
+To create a task:
+1. Gather task details from user
+2. Use mcp__plugin_asana_asana__asana_create_task with the details
+3. Confirm creation to user
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 48-62" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Specify MCP tools in command frontmatter:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 8 ;
+                            oc:sectionTitle "Pre-Allowing Tools" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Example command:**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """---
+description: Search and create Asana tasks
+allowed-tools: [
+  "mcp__plugin_asana_asana__asana_search_tasks",
+  "mcp__plugin_asana_asana__asana_create_task"
+]
+---
+
+# Asana Task Management
+
+## Searching Tasks
+
+To search for tasks:
+1. Use mcp__plugin_asana_asana__asana_search_tasks
+2. Provide search filters (assignee, project, etc.)
+3. Display results to user
+
+## Creating Tasks
+
+To create a task:
+1. Gather task details:
+   - Title (required)
+   - Description
+   - Project
+   - Assignee
+   - Due date
+2. Use mcp__plugin_asana_asana__asana_create_task
+3. Show confirmation with task link
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 89-118" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 11 ;
+                            oc:sectionTitle "Tool Usage in Command Instructions" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Caution:** Only use wildcards if the command truly needs access to all tools from a server." ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """---
+allowed-tools: ["mcp__plugin_asana_asana__*"]
+---
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 78-82" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 10 ;
+                            oc:sectionTitle "Wildcard (Use Sparingly)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """---
+allowed-tools: [
+  "mcp__plugin_asana_asana__asana_create_task",
+  "mcp__plugin_asana_asana__asana_search_tasks",
+  "mcp__plugin_asana_asana__asana_get_project"
+]
+---
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 66-74" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 9 ;
+                            oc:sectionTitle "Multiple Tools" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 7 ;
+                    oc:sectionTitle "Using Tools in Commands" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """Steps:
+1. Check required parameters:
+   - Title is not empty
+   - Workspace ID is provided
+   - Due date is valid format (YYYY-MM-DD)
+2. If validation fails, ask user to provide missing data
+3. If validation passes, call MCP tool
+4. Handle tool errors gracefully
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 264-273" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**In commands, validate before calling:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 23 ;
+                            oc:sectionTitle "Parameter Validation" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """{
+  "name": "asana_create_task",
+  "description": "Create a new Asana task",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "description": "Task title"
+      },
+      "notes": {
+        "type": "string",
+        "description": "Task description"
+      },
+      "workspace": {
+        "type": "string",
+        "description": "Workspace GID"
+      }
+    },
+    "required": ["name", "workspace"]
+  }
+}
+""" ;
+                                    oc:codeLanguage "json" ;
+                                    oc:contentOrder 3 ;
+                                    oc:sourceLocation "lines 217-240" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Each MCP tool has a schema defining its parameters. View with `/mcp`." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Example schema:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 21 ;
+                            oc:sectionTitle "Understanding Tool Schemas" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Claude automatically structures tool calls based on schema:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """// Claude generates this internally
+{
+  toolName: "mcp__plugin_asana_asana__asana_create_task",
+  input: {
+    name: "Review PR #123",
+    notes: "Code review for new feature",
+    workspace: "12345",
+    assignee: "67890",
+    due_on: "2025-01-15"
+  }
+}
+""" ;
+                                    oc:codeLanguage "typescript" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 246-258" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 22 ;
+                            oc:sectionTitle "Calling Tools with Parameters" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 20 ;
+                    oc:sectionTitle "Tool Parameters" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """❌ "Could not create task. Please check:
+   1. You're logged into Asana
+   2. You have access to workspace 'Engineering'
+   3. The project 'Q1 Goals' exists"
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 384-389" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Poor error messages:**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """❌ "Error: MCP tool returned 403"
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 4 ;
+                                    oc:sourceLocation "lines 392-394" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Good error messages:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 34 ;
+                            oc:sectionTitle "Error Messages" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Provide feedback:**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """Steps:
+1. Warn user: "This may take a minute..."
+2. Break into smaller steps with updates
+3. Show incremental progress
+4. Final summary when complete
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 4 ;
+                                    oc:sourceLocation "lines 373-379" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """Steps:
+1. Inform user: "Searching Asana tasks..."
+2. Call mcp__plugin_asana_asana__asana_search_tasks
+3. Show progress: "Found 15 tasks, analyzing..."
+4. Present results
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 364-370" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Handle long operations:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 33 ;
+                            oc:sectionTitle "User Experience" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Document MCP tool usage in command:**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """## MCP Tools Used
+
+This command uses the following Asana MCP tools:
+- **asana_search_tasks**: Search for tasks matching criteria
+- **asana_create_task**: Create new task with details
+- **asana_update_task**: Update existing task properties
+
+Ensure you're authenticated to Asana before running this command.
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 399-408" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 35 ;
+                            oc:sectionTitle "Documentation" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 32 ;
+                    oc:sectionTitle "Integration Best Practices" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Effective MCP tool usage requires:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "Follow these patterns for robust MCP tool integration in your plugin commands and agents." ],
+                        _:ref_f1cf6112499e4562 ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 47 ;
+                    oc:sectionTitle "Conclusion" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Once an MCP server is configured, its tools become available with the prefix `mcp__plugin_<plugin-name>_<server-name>__<tool-name>`. Use these tools in commands and agents just like built-in Claude Code tools." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Overview" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Check:**" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 2 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Not making unnecessary tool calls" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Batching queries instead of individual calls" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Caching results when appropriate" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "Parallel calls when possible" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 46 ;
+                            oc:sectionTitle "Performance Issues" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 2 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Required parameters provided" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Authentication is valid" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Parameters match tool schema" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "Check `claude --debug` logs" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Check:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 45 ;
+                            oc:sectionTitle "Tool Calls Failing" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Check:**" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 2 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "Restart Claude Code after config changes" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "MCP server configured correctly" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Tool names match exactly (case-sensitive)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Server connected (check `/mcp`)" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 44 ;
+                            oc:sectionTitle "Tools Not Available" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 43 ;
+                    oc:sectionTitle "Troubleshooting" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """Steps:
+1. Call MCP tool
+2. On success:
+   - Extract relevant data from response
+   - Format for user display
+   - Provide confirmation message
+   - Include relevant links or IDs
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 279-287" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 25 ;
+                            oc:sectionTitle "Success Responses" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """Steps:
+1. Batch operation with multiple MCP calls
+2. Track successes and failures separately
+3. Report summary:
+   - "Successfully processed 8 of 10 items"
+   - "Failed items: [item1, item2] due to [reason]"
+   - Suggest retry or manual intervention
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 303-311" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 27 ;
+                            oc:sectionTitle "Partial Success" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """Steps:
+1. Call MCP tool
+2. On error:
+   - Check error type (auth, rate limit, validation, etc.)
+   - Provide helpful error message
+   - Suggest remediation steps
+   - Don't expose internal error details to user
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 291-299" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 26 ;
+                            oc:sectionTitle "Error Responses" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 24 ;
+                    oc:sectionTitle "Response Handling" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """Steps:
+1. Test with missing authentication
+2. Test with invalid parameters
+3. Test with non-existent resources
+4. Verify graceful error handling
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 4 ;
+                                    oc:sourceLocation "lines 431-437" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """Steps:
+1. Test with empty results
+2. Test with maximum results
+3. Test with special characters
+4. Test with concurrent access
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 6 ;
+                                    oc:sourceLocation "lines 440-446" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent "**Test edge cases:**" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Test error cases:**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """Steps:
+1. Create test data in external service
+2. Run command that queries this data
+3. Verify correct results returned
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 423-428" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Test successful calls:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 38 ;
+                            oc:sectionTitle "Test Scenarios" ],
+                        [ a oc:Section ;
+                            oc:hasContent _:ref_c6149f8c25562902 ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 37 ;
+                            oc:sectionTitle "Local Testing" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 36 ;
+                    oc:sectionTitle "Testing Tool Usage" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Using MCP Tools in Commands and Agents" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "Steps to test MCP tool usage locally before deployment" ;
+            oc:hasStep _:ref_3a55ab224e1188b7,
+                _:ref_63a4b3eb1bf6f92e,
+                _:ref_74d74e9fa7ac5988,
+                _:ref_76fbb98186336482,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Check debug output with claude --debug for issues" ;
+                    oc:expectedOutcome "No errors in debug output, tool calls succeed" ;
+                    oc:stepDependsOn _:ref_76fbb98186336482 ;
+                    oc:stepId "check-debug" ] ;
+            oc:workflowId "mcp-tool-testing" ;
+            oc:workflowName "Local MCP Tool Testing" ],
+        [ a oc:Workflow ;
+            dcterms:description "Essential requirements for effective MCP tool usage in commands and agents" ;
+            oc:hasStep _:ref_15d01d6ff4f135e1,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Test thoroughly before deployment" ;
+                    oc:expectedOutcome "Success, error, and edge cases all pass" ;
+                    oc:stepDependsOn _:ref_a2dbf30c1edb6a9f ;
+                    oc:stepId "test-thoroughly" ],
+                _:ref_7ff45fcc7fcbb38d,
+                _:ref_8a5f72e2ff0b062c,
+                _:ref_a2dbf30c1edb6a9f,
+                _:ref_b5a1f088c1a7e20f ;
+            oc:workflowId "mcp-tool-integration" ;
+            oc:workflowName "MCP Tool Integration Checklist" ],
+        _:ref_c6149f8c25562902,
+        _:ref_f1cf6112499e4562 ;
+    oc:impartsKnowledge oc:kn_0f8a81ca,
+        oc:kn_1aac86ff,
+        oc:kn_77026adb,
+        oc:kn_9f24c7a3,
+        oc:kn_b42471a0,
+        oc:kn_b4fee769,
+        oc:kn_df380f27 ;
+    oc:isUserInvocable false ;
     oc:nature "Concept" ;
-    oc:requiresState oc:MCPServerConfigured ;
     oc:resolvesIntent "configure tool access in command frontmatter",
         "discover available MCP tools",
         "handle MCP tool errors",
-        "optimize MCP tool performance",
+        "optimize MCP tool call performance",
         "use MCP tools in agents",
-        "use MCP tools in commands" ;
-    oc:yieldsState oc:ToolUsageConfigured,
-        oc:ToolsAccessible .
+        "use MCP tools in commands" .
 
-oc:kn_56d9e183 a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "When writing command frontmatter that uses MCP tools" ;
-    oc:directiveContent "Pre-allow specific MCP tools in command frontmatter using the allowed-tools array. Only use wildcards (e.g., mcp__plugin_asana_asana__*) when the command truly needs access to all tools from a server." ;
-    oc:hasRationale "Explicit tool allowlists limit the blast radius of a command and ensure Claude only uses tools the developer intended" ;
+oc:kn_0f8a81ca a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When calling MCP tools that support filtering or bulk operations" ;
+    oc:directiveContent "Avoid making many individual MCP tool calls in a loop when a single batched query with filters can retrieve all needed data. Use batching, caching, and parallel calls instead." ;
+    oc:hasRationale "Individual calls in a loop cause severe performance degradation and may hit rate limits" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_ac210eda a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "Before executing any MCP tool call in a command or agent" ;
-    oc:directiveContent "Before calling an MCP tool, validate all required parameters are present and correctly formatted. Check authentication status for the target service." ;
-    oc:hasRationale "Pre-validation prevents unnecessary API calls, provides better error messages, and avoids rate limiting" ;
+oc:kn_1aac86ff a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When troubleshooting MCP tool call failures" ;
+    oc:directiveContent "When MCP tool calls fail, check: MCP server is configured and connected (via /mcp), authentication is valid, parameters match the tool schema exactly, and tool names are case-sensitive. Restart Claude Code after config changes." ;
+    oc:hasRationale "Most MCP failures stem from misconfiguration, auth issues, or naming mismatches" ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_b6f47d08 a oc:AntiPattern,
+oc:kn_77026adb a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When handling MCP tool call failures in commands and agents" ;
-    oc:directiveContent "Never expose raw internal error details (e.g., 'MCP tool returned 403') to users. Instead provide actionable error messages with remediation steps." ;
-    oc:hasRationale "Raw errors confuse users and leak implementation details; actionable messages guide users toward resolution" ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_ba250f2b a oc:KnowledgeNode,
-        oc:KnownIssue ;
-    oc:appliesToContext "When MCP tools are expected but not appearing or not functioning" ;
-    oc:directiveContent "If tools are not available, check: MCP server configured correctly, server connected via /mcp, tool names match exactly (case-sensitive), and restart Claude Code after config changes." ;
-    oc:hasRationale "Most tool availability issues stem from misconfiguration, naming mismatches, or stale connections that require a restart" ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_c9dc6881 a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When referencing any MCP tool in command frontmatter or agent instructions" ;
-    oc:directiveContent "Use the naming format mcp__plugin_<plugin-name>_<server-name>__<tool-name> to reference MCP tools in commands and agents. Tool names are case-sensitive." ;
-    oc:hasRationale "Consistent naming ensures Claude correctly resolves and calls the intended tool from the right MCP server" ;
+    oc:appliesToContext "When referencing any MCP tool in commands or agents" ;
+    oc:directiveContent "MCP tool names follow the format: mcp__plugin_<plugin-name>_<server-name>__<tool-name>. Tool names are case-sensitive and must match exactly." ;
+    oc:hasRationale "Incorrect tool names cause silent failures; the naming convention ensures tools are uniquely identified across plugins and servers" ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_ec32ef39 a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When choosing between implementing functionality as a command vs an agent" ;
-    oc:directiveContent "Agents have broader tool access than commands — they can use any tool Claude determines necessary without pre-allowed lists. Commands require explicit tool allowlists in frontmatter." ;
-    oc:hasRationale "Commands are scoped and predictable; agents are autonomous and flexible. Choose based on the needed level of tool access control." ;
+oc:kn_9f24c7a3 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When building commands that call MCP tools" ;
+    oc:directiveContent "Always validate required parameters before calling MCP tools, provide user feedback during long operations, format error messages with actionable remediation steps (not raw error codes), and document which MCP tools a command uses." ;
+    oc:hasRationale "Good UX and error handling prevent user confusion and support issues" ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_f5f2828d a oc:Heuristic,
+oc:kn_b42471a0 a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When designing command or agent workflows that make multiple MCP tool calls" ;
-    oc:directiveContent "Batch MCP queries with filters instead of making many individual queries. Cache expensive results for reuse. Make parallel calls when tools don't depend on each other." ;
-    oc:hasRationale "Batching, caching, and parallelism reduce latency, avoid rate limits, and improve user experience" ;
+    oc:appliesToContext "When writing command frontmatter for MCP tool access" ;
+    oc:directiveContent "Commands must pre-allow specific MCP tools in frontmatter using allowed-tools. Wildcards (mcp__plugin_<name>_<server>__*) should only be used when the command truly needs access to all tools from a server." ;
+    oc:hasRationale "Pre-allowing limits the blast radius of a command and ensures only necessary tools are exposed" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_b4fee769 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing agents that use MCP tools" ;
+    oc:directiveContent "Agents have broader tool access than commands — they can use any tool Claude determines necessary without pre-allowed lists. Agents should document which tools they typically use but don't need explicit frontmatter allowlists." ;
+    oc:hasRationale "Agents are autonomous and need flexibility; commands are user-triggered and need tighter scoping" ;
     oc:severityLevel "MEDIUM" .
+
+oc:kn_df380f27 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When designing command or agent workflows with MCP tools" ;
+    oc:directiveContent "Use four core tool call patterns: (1) Simple — single call with validation, (2) Sequential — chain dependent calls, (3) Batch — multiple calls with same tool, (4) Error-handling — try/retry with max attempts and graceful degradation." ;
+    oc:hasRationale "Structured patterns reduce errors and make tool integrations more robust and maintainable" .
+
+_:ref_243150992c648a3d a oc:WorkflowStep ;
+    dcterms:description "**Understanding tool schemas** via `/mcp`" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_3fb8f7a989c97876 a oc:WorkflowStep ;
+    dcterms:description "**Handling errors gracefully**" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_476bbc9a948184ab a oc:WorkflowStep ;
+    dcterms:description "**Optimizing performance** with batching and caching" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_4963b8b380d3347c a oc:WorkflowStep ;
+    dcterms:description "**Test command** that uses tools" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_4b6323dffabc139d a oc:WorkflowStep ;
+    dcterms:description "**Providing good UX** with feedback and clear errors" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_5" ;
+    oc:stepOrder 5 .
+
+_:ref_55ba8be5bbb32438 a oc:WorkflowStep ;
+    dcterms:description "**Pre-allowing tools** in commands appropriately" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_5bc9d89cdd240859 a oc:WorkflowStep ;
+    dcterms:description "**Verify tools available** with `/mcp`" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_793870ae211297fe a oc:WorkflowStep ;
+    dcterms:description "**Configure MCP server** in `.mcp.json`" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_99feb8bff65655c9 a oc:WorkflowStep ;
+    dcterms:description "**Testing thoroughly** before deployment" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_6" ;
+    oc:stepOrder 6 .
+
+_:ref_aa9f954f47a91a93 a oc:WorkflowStep ;
+    dcterms:description "**Check debug output**: `claude --debug`" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_5" ;
+    oc:stepOrder 5 .
+
+_:ref_dd7353a1627fadac a oc:WorkflowStep ;
+    dcterms:description "**Install plugin locally** in `.claude-plugin/`" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_15d01d6ff4f135e1 a oc:WorkflowStep ;
+    dcterms:description "Optimize performance with batching and caching" ;
+    oc:expectedOutcome "Minimal tool calls, no redundant queries" ;
+    oc:stepDependsOn _:ref_7ff45fcc7fcbb38d ;
+    oc:stepId "optimize-performance" .
+
+_:ref_3a55ab224e1188b7 a oc:WorkflowStep ;
+    dcterms:description "Install plugin locally in .claude-plugin/" ;
+    oc:expectedOutcome "Plugin is available in local Claude Code environment" ;
+    oc:stepDependsOn _:ref_63a4b3eb1bf6f92e ;
+    oc:stepId "install-plugin" .
+
+_:ref_63a4b3eb1bf6f92e a oc:WorkflowStep ;
+    dcterms:description "Configure MCP server in .mcp.json" ;
+    oc:expectedOutcome "MCP server configuration file is created" ;
+    oc:stepId "configure-server" .
+
+_:ref_74d74e9fa7ac5988 a oc:WorkflowStep ;
+    dcterms:description "Verify tools are available using /mcp command" ;
+    oc:expectedOutcome "Tools appear with correct names and schemas" ;
+    oc:stepDependsOn _:ref_3a55ab224e1188b7 ;
+    oc:stepId "verify-tools" .
+
+_:ref_76fbb98186336482 a oc:WorkflowStep ;
+    dcterms:description "Test command that uses the MCP tools" ;
+    oc:expectedOutcome "Command executes successfully with expected results" ;
+    oc:stepDependsOn _:ref_74d74e9fa7ac5988 ;
+    oc:stepId "test-command" .
+
+_:ref_7ff45fcc7fcbb38d a oc:WorkflowStep ;
+    dcterms:description "Implement graceful error handling for tool calls" ;
+    oc:stepDependsOn _:ref_8a5f72e2ff0b062c ;
+    oc:stepId "implement-error-handling" .
+
+_:ref_8a5f72e2ff0b062c a oc:WorkflowStep ;
+    dcterms:description "Pre-allow tools in command frontmatter appropriately" ;
+    oc:expectedOutcome "Command has scoped access to needed MCP tools" ;
+    oc:stepDependsOn _:ref_b5a1f088c1a7e20f ;
+    oc:stepId "pre-allow-tools" .
+
+_:ref_a2dbf30c1edb6a9f a oc:WorkflowStep ;
+    dcterms:description "Provide good UX with feedback and clear errors" ;
+    oc:expectedOutcome "User sees progress indicators and actionable error messages" ;
+    oc:stepDependsOn _:ref_15d01d6ff4f135e1 ;
+    oc:stepId "provide-good-ux" .
+
+_:ref_b5a1f088c1a7e20f a oc:WorkflowStep ;
+    dcterms:description "Understand tool schemas via /mcp command" ;
+    oc:expectedOutcome "All tool parameters, types, and requirements are known" ;
+    oc:stepId "understand-schemas" .
+
+_:ref_c6149f8c25562902 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 1 ;
+    oc:hasStep _:ref_4963b8b380d3347c,
+        _:ref_5bc9d89cdd240859,
+        _:ref_793870ae211297fe,
+        _:ref_aa9f954f47a91a93,
+        _:ref_dd7353a1627fadac ;
+    oc:workflowId "procedure_1" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_f1cf6112499e4562 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 2 ;
+    oc:hasStep _:ref_243150992c648a3d,
+        _:ref_3fb8f7a989c97876,
+        _:ref_476bbc9a948184ab,
+        _:ref_4b6323dffabc139d,
+        _:ref_55ba8be5bbb32438,
+        _:ref_99feb8bff65655c9 ;
+    oc:workflowId "procedure_2" ;
+    oc:workflowName "Ordered Procedure" .
 

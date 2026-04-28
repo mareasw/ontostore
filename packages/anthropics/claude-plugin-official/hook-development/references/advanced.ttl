@@ -4,82 +4,890 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_plugin_official_hook_development_advanced a oc:DeclarativeSkill,
+oc:skill_claude_plugin_official_hook_development_advanced a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "advanced" ;
-    skos:broader "reference guide" ;
+    skos:broader "Hook pattern reference" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/hook-development" ;
     oc:contentHash "5b139ceeb6a3ef16555a6eef421e2642e6ca286b5527ee2b4e02c11ae5b75dd5" ;
-    oc:dependsOnSkill oc:skill_hook_development ;
-    oc:differentia "that documents advanced hook patterns including multi-stage validation, conditional execution, state sharing, performance optimization, and security patterns for sophisticated Claude Code automation workflows" ;
-    oc:extends oc:skill_anthropics_claude_plugin_official_hook_development ;
-    oc:handlesFailure oc:HookTimeout,
-        oc:PermissionDenied ;
+    oc:differentia "covers multi-stage validation, conditional execution, state chaining, performance optimization, security patterns, and integration techniques for Claude Code hooks" ;
+    oc:extends oc:skill_claude_plugin_official_hook_development ;
+    oc:hasArgumentHint "hook pattern type (e.g., multi-stage validation, rate limiting, caching)" ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_1d3ddf6d,
-        oc:kn_3e20eee2,
-        oc:kn_6cf3e46f,
-        oc:kn_93f816f1,
-        oc:kn_ad7381b9,
-        oc:kn_cc4318f6,
-        oc:kn_e664c2de ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "This reference covers advanced hook patterns and techniques for sophisticated automation workflows." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "**PostToolUse - Track events:**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**SessionStart - Set up tracking:**" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """#!/bin/bash
+input=$(cat)
+tool_name=$(echo "$input" | jq -r '.tool_name')
+
+if [ "$tool_name" = "Bash" ]; then
+  command=$(echo "$input" | jq -r '.tool_result')
+  if [[ "$command" == *"test"* ]]; then
+    count=$(cat /tmp/test-count-$$ 2>/dev/null || echo "0")
+    echo $((count + 1)) > /tmp/test-count-$$
+  fi
+fi
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 5 ;
+                            oc:sourceLocation "lines 242-254" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Coordinate hooks across different events:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 6 ;
+                            oc:textContent "**Stop - Verify based on tracking:**" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """#!/bin/bash
+# Initialize session tracking
+echo "0" > /tmp/test-count-$$
+echo "0" > /tmp/build-count-$$
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 3 ;
+                            oc:sourceLocation "lines 234-239" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """#!/bin/bash
+test_count=$(cat /tmp/test-count-$$ 2>/dev/null || echo "0")
+
+if [ "$test_count" -eq 0 ]; then
+  echo '{"decision": "block", "reason": "No tests were run"}' >&2
+  exit 2
+fi
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 7 ;
+                            oc:sourceLocation "lines 257-265" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 10 ;
+                    oc:sectionTitle "Cross-Event Workflows" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """#!/bin/bash
+input=$(cat)
+command=$(echo "$input" | jq -r '.tool_input.command')
+
+# Track command frequency
+rate_file="/tmp/hook-rate-$$"
+current_minute=$(date +%Y%m%d%H%M)
+
+if [ -f "$rate_file" ]; then
+  last_minute=$(head -1 "$rate_file")
+  count=$(tail -1 "$rate_file")
+
+  if [ "$current_minute" = "$last_minute" ]; then
+    if [ "$count" -gt 10 ]; then
+      echo '{"decision": "deny", "reason": "Rate limit exceeded"}' >&2
+      exit 2
+    fi
+    count=$((count + 1))
+  else
+    count=1
+  fi
+else
+  count=1
+fi
+
+echo "$current_minute" > "$rate_file"
+echo "$count" >> "$rate_file"
+
+exit 0
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 317-347" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 16 ;
+                            oc:sectionTitle "Rate Limiting" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """#!/bin/bash
+input=$(cat)
+content=$(echo "$input" | jq -r '.tool_input.content')
+
+# Check for common secret patterns
+if echo "$content" | grep -qE "(api[_-]?key|password|secret|token).{0,20}['\\"]?[A-Za-z0-9]{20,}"; then
+  echo '{"decision": "deny", "reason": "Potential secret detected in content"}' >&2
+  exit 2
+fi
+
+exit 0
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 365-377" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 18 ;
+                            oc:sectionTitle "Secret Detection" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """#!/bin/bash
+input=$(cat)
+tool_name=$(echo "$input" | jq -r '.tool_name')
+timestamp=$(date -Iseconds)
+
+# Append to audit log
+echo "$timestamp | $USER | $tool_name | $input" >> ~/.claude/audit.log
+
+exit 0
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 351-361" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 17 ;
+                            oc:sectionTitle "Audit Logging" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 15 ;
+                    oc:sectionTitle "Security Patterns" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """#!/bin/bash
+cd "$CLAUDE_PROJECT_DIR" || exit 1
+
+# Read project-specific config
+if [ -f ".claude-hooks-config.json" ]; then
+  strict_mode=$(jq -r '.strict_mode' .claude-hooks-config.json)
+
+  if [ "$strict_mode" = "true" ]; then
+    # Apply strict validation
+    # ...
+  else
+    # Apply lenient validation
+    # ...
+  fi
+fi
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 119-135" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Example .claude-hooks-config.json:**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Modify hook behavior based on project configuration:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """{
+  "strict_mode": true,
+  "allowed_commands": ["ls", "pwd", "grep"],
+  "forbidden_paths": ["/etc", "/sys"]
+}
+""" ;
+                            oc:codeLanguage "json" ;
+                            oc:contentOrder 4 ;
+                            oc:sourceLocation "lines 138-144" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Dynamic Hook Configuration" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# BAD: Hook takes 2 minutes to run
+sleep 120
+# This will timeout and block the workflow
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 452-456" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 25 ;
+                            oc:sectionTitle "❌ Long-Running Hooks" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# BAD: Script crashes on unexpected input
+file_path=$(echo "$input" | jq -r '.tool_input.file_path')
+cat "$file_path"  # Fails if file doesn't exist
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 460-464" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 26 ;
+                            oc:sectionTitle "❌ Uncaught Exceptions" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# GOOD: Handles errors gracefully
+file_path=$(echo "$input" | jq -r '.tool_input.file_path')
+if [ ! -f "$file_path" ]; then
+  echo '{"continue": true, "systemMessage": "File not found, skipping check"}' >&2
+  exit 0
+fi
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 468-475" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 27 ;
+                            oc:sectionTitle "✅ Proper Error Handling" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# BAD: Assumes hooks run in specific order
+# Hook 1 saves state, Hook 2 reads it
+# This can fail because hooks run in parallel!
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 444-448" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 24 ;
+                            oc:sectionTitle "❌ Assuming Hook Order" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 23 ;
+                    oc:sectionTitle "Common Pitfalls" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "**Important:** This only works for sequential hook events (e.g., PreToolUse then PostToolUse), not parallel hooks." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Share state between hooks using temporary files:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# Hook 1: Analyze and save state
+#!/bin/bash
+input=$(cat)
+command=$(echo "$input" | jq -r '.tool_input.command')
+
+# Analyze command
+risk_level=$(calculate_risk "$command")
+echo "$risk_level" > /tmp/hook-state-$$
+
+exit 0
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 89-100" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# Hook 2: Use saved state
+#!/bin/bash
+risk_level=$(cat /tmp/hook-state-$$ 2>/dev/null || echo "unknown")
+
+if [ "$risk_level" = "high" ]; then
+  echo "High risk operation detected" >&2
+  exit 2
+fi
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 3 ;
+                            oc:sourceLocation "lines 102-111" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Hook Chaining via State" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Advanced hook patterns enable sophisticated automation while maintaining reliability and performance. Use these techniques when basic hooks are insufficient, but always prioritize simplicity and maintainability." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 28 ;
+                    oc:sectionTitle "Conclusion" ],
+                [ a oc:Section ;
+                    oc:hasContent _:ref_0bd89ad927f3ab57 ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 22 ;
+                    oc:sectionTitle "Best Practices for Advanced Hooks" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Create test scenarios that exercise the full hook workflow:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# integration-test.sh
+#!/bin/bash
+
+# Set up test environment
+export CLAUDE_PROJECT_DIR="/tmp/test-project"
+export CLAUDE_PLUGIN_ROOT="$(pwd)"
+mkdir -p "$CLAUDE_PROJECT_DIR"
+
+# Test SessionStart hook
+echo '{}' | bash hooks/session-start.sh
+if [ -f "/tmp/session-initialized" ]; then
+  echo "✓ SessionStart hook works"
+else
+  echo "✗ SessionStart hook failed"
+fi
+
+# Clean up
+rm -rf "$CLAUDE_PROJECT_DIR"
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 408-427" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 21 ;
+                            oc:sectionTitle "Integration Testing" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# test-hook.sh
+#!/bin/bash
+
+# Test 1: Approve safe command
+result=$(echo '{"tool_input": {"command": "ls"}}' | bash validate-bash.sh)
+if [ $? -eq 0 ]; then
+  echo "✓ Test 1 passed"
+else
+  echo "✗ Test 1 failed"
+fi
+
+# Test 2: Block dangerous command
+result=$(echo '{"tool_input": {"command": "rm -rf /"}}' | bash validate-bash.sh)
+if [ $? -eq 2 ]; then
+  echo "✓ Test 2 passed"
+else
+  echo "✗ Test 2 failed"
+fi
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 383-402" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 20 ;
+                            oc:sectionTitle "Unit Testing Hook Scripts" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 19 ;
+                    oc:sectionTitle "Testing Advanced Hooks" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """#!/bin/bash
+input=$(cat)
+tool_name=$(echo "$input" | jq -r '.tool_name')
+decision="blocked"
+
+# Send notification to Slack
+curl -X POST "$SLACK_WEBHOOK" \\
+  -H 'Content-Type: application/json' \\
+  -d "{\\"text\\": \\"Hook ${decision} ${tool_name} operation\\"}" \\
+  2>/dev/null
+
+echo '{"decision": "deny"}' >&2
+exit 2
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 271-285" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 12 ;
+                            oc:sectionTitle "Slack Notifications" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """#!/bin/bash
+input=$(cat)
+
+# Log to database
+psql "$DATABASE_URL" -c "INSERT INTO hook_logs (event, data) VALUES ('PreToolUse', '$input')" \\
+  2>/dev/null
+
+exit 0
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 289-298" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 13 ;
+                            oc:sectionTitle "Database Logging" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """#!/bin/bash
+input=$(cat)
+tool_name=$(echo "$input" | jq -r '.tool_name')
+
+# Send metrics to monitoring system
+echo "hook.pretooluse.${tool_name}:1|c" | nc -u -w1 statsd.local 8125
+
+exit 0
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 302-311" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 14 ;
+                            oc:sectionTitle "Metrics Collection" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 11 ;
+                    oc:sectionTitle "Integration with External Systems" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Use transcript and session context for intelligent decisions:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """{
+  "Stop": [
+    {
+      "matcher": "*",
+      "hooks": [
+        {
+          "type": "prompt",
+          "prompt": "Review the full transcript at $TRANSCRIPT_PATH. Check: 1) Were tests run after code changes? 2) Did the build succeed? 3) Were all user questions answered? 4) Is there any unfinished work? Return 'approve' only if everything is complete."
+        }
+      ]
+    }
+  ]
+}
+""" ;
+                            oc:codeLanguage "json" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 150-164" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "The LLM can read the transcript file and make context-aware decisions." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Context-Aware Prompt Hooks" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """{
+  "PreToolUse": [
+    {
+      "matcher": "Bash",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/quick-check.sh",
+          "timeout": 5
+        },
+        {
+          "type": "prompt",
+          "prompt": "Deep analysis of bash command: $TOOL_INPUT",
+          "timeout": 15
+        }
+      ]
+    }
+  ]
+}
+""" ;
+                            oc:codeLanguage "json" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 9-29" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 6 ;
+                            oc:textContent "The command hook quickly approves obviously safe commands, while the prompt hook analyzes everything else." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Use case:** Fast deterministic checks followed by intelligent analysis" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "**Example quick-check.sh:**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Combine command and prompt hooks for layered validation:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """#!/bin/bash
+input=$(cat)
+command=$(echo "$input" | jq -r '.tool_input.command')
+
+# Immediate approval for safe commands
+if [[ "$command" =~ ^(ls|pwd|echo|date|whoami)$ ]]; then
+  exit 0
+fi
+
+# Let prompt hook handle complex cases
+exit 0
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 5 ;
+                            oc:sourceLocation "lines 34-46" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Multi-Stage Validation" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Execute hooks based on environment or context:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """#!/bin/bash
+# Skip detailed checks for admin users
+if [ "$USER" = "admin" ]; then
+  exit 0
+fi
+
+# Full validation for other users
+input=$(cat)
+# ... validation code ...
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 6 ;
+                            oc:sourceLocation "lines 73-83" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent "**Example: Skip certain checks for trusted users:**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Use cases:**" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 4 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Project-specific validation" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "User-specific rules" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Different behavior in CI vs local development" ] ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """#!/bin/bash
+# Only run in CI environment
+if [ -z "$CI" ]; then
+  echo '{"continue": true}' # Skip in non-CI
+  exit 0
+fi
+
+# Run validation logic in CI
+input=$(cat)
+# ... validation code ...
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 54-65" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Conditional Hook Execution" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """{
+  "PreToolUse": [
+    {
+      "matcher": "Write",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "bash check-size.sh",      // Independent
+          "timeout": 2
+        },
+        {
+          "type": "command",
+          "command": "bash check-path.sh",      // Independent
+          "timeout": 2
+        },
+        {
+          "type": "prompt",
+          "prompt": "Check content safety",     // Independent
+          "timeout": 10
+        }
+      ]
+    }
+  ]
+}
+""" ;
+                                    oc:codeLanguage "json" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 200-225" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Since hooks run in parallel, design them to be independent:" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "All three hooks run simultaneously, reducing total latency." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 9 ;
+                            oc:sectionTitle "Parallel Execution Optimization" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """#!/bin/bash
+input=$(cat)
+file_path=$(echo "$input" | jq -r '.tool_input.file_path')
+cache_key=$(echo -n "$file_path" | md5sum | cut -d' ' -f1)
+cache_file="/tmp/hook-cache-$cache_key"
+
+# Check cache
+if [ -f "$cache_file" ]; then
+  cache_age=$(($(date +%s) - $(stat -f%m "$cache_file" 2>/dev/null || stat -c%Y "$cache_file")))
+  if [ "$cache_age" -lt 300 ]; then  # 5 minute cache
+    cat "$cache_file"
+    exit 0
+  fi
+fi
+
+# Perform validation
+result='{"decision": "approve"}'
+
+# Cache result
+echo "$result" > "$cache_file"
+echo "$result"
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 172-194" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 8 ;
+                            oc:sectionTitle "Caching Validation Results" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 7 ;
+                    oc:sectionTitle "Performance Optimization" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Advanced Hook Use Cases" ] ;
+    oc:hasWorkflow _:ref_0bd89ad927f3ab57 ;
+    oc:impartsKnowledge oc:kn_039ba606,
+        oc:kn_1077aa82,
+        oc:kn_380d12bd,
+        oc:kn_39096c66,
+        oc:kn_47c1d573,
+        oc:kn_4c0425c3,
+        oc:kn_92757163,
+        oc:kn_9f4480d9,
+        oc:kn_aab72a07,
+        oc:kn_afcdcf4d,
+        oc:kn_b397c649,
+        oc:kn_c58829ba,
+        oc:kn_c694a9dd ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:EnvironmentReady ;
-    oc:resolvesIntent "implement multi-stage hook validation",
-        "implement security patterns in hooks",
+    oc:resolvesIntent "add security patterns to hooks",
+        "chain hooks across events",
+        "implement advanced hook patterns",
         "integrate hooks with external systems",
         "optimize hook performance",
-        "share state between hooks",
-        "test advanced hook scripts" ;
-    oc:yieldsState oc:HookConfigured .
+        "test hook scripts" .
 
-oc:kn_1d3ddf6d a oc:AntiPattern,
+oc:kn_039ba606 a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When designing multiple hooks for the same event (e.g., multiple PreToolUse hooks)" ;
-    oc:directiveContent "Never assume hooks execute in a specific order — hooks within the same event run in parallel, so state sharing between them is unreliable." ;
-    oc:hasRationale "Parallel hook execution means race conditions and non-deterministic behavior if hooks depend on each other's output." ;
+    oc:appliesToContext "When optimizing hook performance with caching" ;
+    oc:codeLanguage "bash" ;
+    oc:directiveContent """# Cache validation results
+input=$(cat)
+file_path=$(echo "$input" | jq -r '.tool_input.file_path')
+cache_key=$(echo -n "$file_path" | md5sum | cut -d' ' -f1)
+cache_file="/tmp/hook-cache-$cache_key"
+if [ -f "$cache_file" ]; then
+  cache_age=$(($(date +%s) - $(stat -c%Y "$cache_file")))
+  if [ "$cache_age" -lt 300 ]; then
+    cat "$cache_file"
+    exit 0
+  fi
+fi
+# Perform validation, then cache and output result""" .
+
+oc:kn_1077aa82 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing validation pipelines that need both speed and intelligence" ;
+    oc:directiveContent "Combine command hooks (fast deterministic checks) with prompt hooks (intelligent analysis) for layered validation — command hooks approve safe cases quickly, prompt hooks handle complex ones." ;
+    oc:hasRationale "Command hooks are fast but limited to pattern matching; prompt hooks are slower but can reason about context. Layering gives best of both." .
+
+oc:kn_380d12bd a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When implementing security hooks to prevent secret leakage" ;
+    oc:codeLanguage "bash" ;
+    oc:directiveContent """# Secret detection pattern
+content=$(echo "$input" | jq -r '.tool_input.content')
+if echo "$content" | grep -qE "(api[_-]?key|password|secret|token).{0,20}['\\"]?[A-Za-z0-9]{20,}"; then
+  echo '{"decision": "deny", "reason": "Potential secret detected"}' >&2
+  exit 2
+fi""" .
+
+oc:kn_39096c66 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When creating environment-conditional hooks or project-configurable hooks" ;
+    oc:codeLanguage "bash" ;
+    oc:directiveContent """# Skip hook in non-CI
+if [ -z "$CI" ]; then
+  echo '{"continue": true}'
+  exit 0
+fi
+# Read project config
+if [ -f ".claude-hooks-config.json" ]; then
+  strict_mode=$(jq -r '.strict_mode' .claude-hooks-config.json)
+fi""" .
+
+oc:kn_47c1d573 a oc:KnowledgeNode,
+        oc:Prerequisite ;
+    oc:directiveContent "Requires understanding of Claude Code hook system fundamentals (event types, hook types, matchers, exit codes) covered in the parent skill" .
+
+oc:kn_4c0425c3 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing multiple hooks for the same event (e.g., PreToolUse)" ;
+    oc:directiveContent "Never assume hook execution order — hooks within the same event run in parallel, not sequentially. State sharing between parallel hooks will fail." ;
+    oc:hasRationale "Parallel execution means hooks cannot rely on each other's side effects. State sharing only works across sequential events (PreToolUse → PostToolUse)." ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_3e20eee2 a oc:KnowledgeNode,
-        oc:RecoveryTactic ;
-    oc:appliesToContext "When writing any bash command hook script" ;
-    oc:directiveContent "Always handle errors gracefully in hook scripts — check for missing files, invalid JSON input, and unexpected values, returning continue/approve with a system message rather than crashing." ;
-    oc:hasRationale "An uncaught exception in a hook script causes unpredictable behavior; graceful degradation ensures the workflow continues safely." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_6cf3e46f a oc:KnowledgeNode,
-        oc:SecurityImplication ;
-    oc:appliesToContext "When hooks guard sensitive operations or are deployed in shared/CI environments" ;
-    oc:directiveContent "Use rate limiting, audit logging, and secret detection patterns to prevent abuse and maintain security visibility in hook workflows." ;
-    oc:hasRationale "Without rate limiting, hooks can be bypassed through rapid repeated invocation; without audit logging, blocked operations leave no trace." ;
+oc:kn_92757163 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When writing bash hook scripts that parse JSON input" ;
+    oc:directiveContent "Scripts crash on unexpected input when jq field access fails or file paths don't exist. Always guard with existence checks and provide fallback behavior." ;
+    oc:hasRationale "Hook scripts receive unstructured tool input; missing fields or unexpected formats will cause uncaught errors that silently break validation." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_93f816f1 a oc:Constraint,
+oc:kn_9f4480d9 a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When configuring any hook in hooks.json" ;
-    oc:directiveContent "Always set appropriate timeouts for hooks — command hooks typically 2-5 seconds, prompt hooks 10-15 seconds. Long-running hooks will timeout and block the workflow." ;
-    oc:hasRationale "Without timeouts, a hung hook can freeze the entire Claude Code workflow, degrading user experience." ;
+    oc:appliesToContext "When configuring any hook" ;
+    oc:directiveContent "Always set timeouts on hooks — command hooks should typically be 2-5 seconds, prompt hooks 10-15 seconds. Long-running hooks will timeout and block the entire workflow." ;
+    oc:hasRationale "Without timeouts, a slow or hung hook blocks the agent's entire operation. Default timeouts may be too generous for production use." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_ad7381b9 a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When designing cross-event hook workflows" ;
-    oc:directiveContent "Keep hooks independent and stateless where possible. When state sharing is necessary, use temporary files with unique identifiers (e.g., $$) and only between sequential events (PreToolUse → PostToolUse → Stop)." ;
-    oc:hasRationale "Independent hooks are more reliable, testable, and maintainable. Stateful hooks introduce coupling and failure modes." ;
-    oc:severityLevel "MEDIUM" .
+oc:kn_aab72a07 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When hooks need to communicate or share data" ;
+    oc:directiveContent "Design hooks to be independent and stateless. If state must be shared, use temp files with process-specific names (e.g., /tmp/hook-state-$$) and only between sequential events." ;
+    oc:hasRationale "Independent hooks can run in parallel safely. State coupling introduces fragility and limits composability." .
 
-oc:kn_cc4318f6 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When designing validation workflows that need both speed and depth" ;
-    oc:directiveContent "Combine command hooks (fast, deterministic) with prompt hooks (intelligent, contextual) in a layered validation pipeline for optimal performance." ;
-    oc:hasRationale "Command hooks provide instant approval for obviously safe operations while prompt hooks handle nuanced analysis, minimizing latency." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_e664c2de a oc:KnowledgeNode,
+oc:kn_afcdcf4d a oc:KnowledgeNode,
         oc:PerformanceProfile ;
-    oc:appliesToContext "When hooks perform repeated expensive operations like file scanning or content analysis" ;
-    oc:directiveContent "Use caching (e.g., file-based cache with TTL) for expensive validation results and leverage parallel hook execution by designing independent hooks that run simultaneously." ;
-    oc:hasRationale "Caching avoids redundant computation per-tool-invocation, and parallel execution reduces total latency from sum-of-serial to max-of-parallel." ;
-    oc:severityLevel "MEDIUM" .
+    oc:appliesToContext "When hooks perform repeated expensive checks (e.g., file content analysis)" ;
+    oc:directiveContent "Use caching (keyed by file path hash, 5-minute TTL) for expensive validations. Design independent hooks to run in parallel, reducing total latency." ;
+    oc:hasRationale "Caching avoids redundant work across invocations. Parallel independent hooks reduce wall-clock latency." .
+
+oc:kn_b397c649 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When building any advanced hook system" ;
+    oc:directiveContent "1. Keep hooks independent — don't rely on execution order. 2. Use timeouts for each hook type. 3. Handle errors gracefully with clear messages. 4. Document complex patterns. 5. Test edge cases and failure modes. 6. Monitor hook execution time. 7. Version control hook configs. 8. Provide escape hatches for users." ;
+    oc:hasRationale "These practices ensure reliability, maintainability, and debuggability of production hook systems." ;
+    oc:stepOrder 1 .
+
+oc:kn_c58829ba a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When implementing rate limiting in hooks" ;
+    oc:codeLanguage "bash" ;
+    oc:directiveContent """# Rate limiting pattern
+rate_file="/tmp/hook-rate-$$"
+current_minute=$(date +%Y%m%d%H%M)
+count=1
+if [ -f "$rate_file" ]; then
+  last_minute=$(head -1 "$rate_file")
+  count=$(tail -1 "$rate_file")
+  if [ "$current_minute" = "$last_minute" ]; then
+    if [ "$count" -gt 10 ]; then
+      echo '{"decision": "deny", "reason": "Rate limit exceeded"}' >&2
+      exit 2
+    fi
+    count=$((count + 1))
+  else
+    count=1
+  fi
+fi
+echo "$current_minute" > "$rate_file"
+echo "$count" >> "$rate_file\"""" .
+
+oc:kn_c694a9dd a oc:KnowledgeNode,
+        oc:SecurityImplication ;
+    oc:appliesToContext "When hooks process sensitive data like API keys, passwords, or secrets" ;
+    oc:directiveContent "Implement rate limiting, audit logging, and secret detection as hook patterns. Never log full tool input to unencrypted locations." ;
+    oc:hasRationale "Hooks intercept all tool interactions, making them ideal security checkpoints but also potential leak vectors if logging is careless." ;
+    oc:severityLevel "HIGH" .
+
+_:ref_4817c9c1779e546c a oc:WorkflowStep ;
+    dcterms:description "**Version configuration**: Use version control for hook configs" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_7" ;
+    oc:stepOrder 7 .
+
+_:ref_5ab2f4810b9139a1 a oc:WorkflowStep ;
+    dcterms:description "**Keep hooks independent**: Don't rely on execution order" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_6769f164bf111396 a oc:WorkflowStep ;
+    dcterms:description "**Provide escape hatches**: Allow users to bypass hooks when needed" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_8" ;
+    oc:stepOrder 8 .
+
+_:ref_8b3755bc4235f544 a oc:WorkflowStep ;
+    dcterms:description "**Handle errors gracefully**: Provide clear error messages" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_aaa750fc5e5d131f a oc:WorkflowStep ;
+    dcterms:description "**Document complexity**: Explain advanced patterns in README" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_bad9ea45565f1255 a oc:WorkflowStep ;
+    dcterms:description "**Monitor performance**: Track hook execution time" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_6" ;
+    oc:stepOrder 6 .
+
+_:ref_beee99f7f74537ab a oc:WorkflowStep ;
+    dcterms:description "**Use timeouts**: Set appropriate limits for each hook type" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_f62bc1cda8c1c3a4 a oc:WorkflowStep ;
+    dcterms:description "**Test thoroughly**: Cover edge cases and failure modes" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_5" ;
+    oc:stepOrder 5 .
+
+_:ref_0bd89ad927f3ab57 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 1 ;
+    oc:hasStep _:ref_4817c9c1779e546c,
+        _:ref_5ab2f4810b9139a1,
+        _:ref_6769f164bf111396,
+        _:ref_8b3755bc4235f544,
+        _:ref_aaa750fc5e5d131f,
+        _:ref_bad9ea45565f1255,
+        _:ref_beee99f7f74537ab,
+        _:ref_f62bc1cda8c1c3a4 ;
+    oc:workflowId "procedure_1" ;
+    oc:workflowName "Ordered Procedure" .
 

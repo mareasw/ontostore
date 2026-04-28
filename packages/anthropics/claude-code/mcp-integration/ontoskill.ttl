@@ -4,114 +4,1591 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_code_mcp_integration a oc:DeclarativeSkill,
+oc:skill_claude_code_mcp_integration a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "mcp-integration" ;
-    skos:broader "Integration framework" ;
-    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-code/mcp-integration" ;
+    skos:broader "Integration guide" ;
+    prov:wasDerivedFrom "../.agents/skills/anthropics/claude-code/mcp-integration" ;
     oc:contentHash "31043c6c231724469bb19a373d3cf04e1145f79eadd08c3dada5c0d7bd342809" ;
-    oc:dependsOnSkill oc:skill_plugin_structure ;
-    oc:differentia "that configures Model Context Protocol servers (stdio, SSE, HTTP, WebSocket) within Claude Code plugins to expose external service capabilities as structured tools" ;
-    oc:extends oc:skill_build_mcp_server ;
+    oc:dependsOnSkill oc:skill_ontoskills_build_mcp_server,
+        oc:skill_ontoskills_plugin_structure ;
+    oc:differentia "that configures Model Context Protocol servers into Claude Code plugins for external tool and service access" ;
     oc:handlesFailure oc:AuthenticationFailed,
-        oc:ConfigurationInvalid,
-        oc:ConnectionRefused,
-        oc:ToolDiscoveryFailed ;
-    oc:hasArgumentHint "MCP server configuration (type, URL, auth, or server type choice)" ;
+        oc:InvalidInput,
+        oc:NetworkTimeout,
+        oc:PermissionDenied ;
+    oc:hasArgumentHint "MCP server configuration or integration request" ;
     oc:hasCategory "development" ;
     oc:hasDescription "This skill should be used when the user asks to \"add MCP server\", \"integrate MCP\", \"configure MCP in plugin\", \"use .mcp.json\", \"set up Model Context Protocol\", \"connect external service\", mentions \"${CLAUDE_PLUGIN_ROOT} with MCP\", or discusses MCP server types (SSE, stdio, HTTP, WebSocket). Provides comprehensive guidance for integrating Model Context Protocol servers into Claude Code plugins for external tool and service integration." ;
     oc:hasName "mcp-integration" ;
-    oc:impartsKnowledge oc:kn_0394d8d7,
-        oc:kn_2ce8b579,
-        oc:kn_5bfc4d5b,
-        oc:kn_71ffae5b,
-        oc:kn_873c1fcf,
-        oc:kn_9c12c04a,
-        oc:kn_a7adc11f,
-        oc:kn_bc78011e,
-        oc:kn_c948f04e,
-        oc:kn_d63854b6 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """name: MCP Integration
+description: This skill should be used when the user asks to "add MCP server", "integrate MCP", "configure MCP in plugin", "use .mcp.json", "set up Model Context Protocol", "connect external service", mentions "${CLAUDE_PLUGIN_ROOT} with MCP", or discusses MCP server types (SSE, stdio, HTTP, WebSocket). Provides comprehensive guidance for integrating Model Context Protocol servers into Claude Code plugins for external tool and service integration.
+version: 0.1.0
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "When MCP servers provide tools, they're automatically prefixed:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Example:**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Format:** `mcp__plugin_<plugin-name>_<server-name>__<tool-name>`" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 4 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Tool: `create_task`" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "**Full name:** `mcp__plugin_asana_asana__asana_create_task`" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Plugin: `asana`" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Server: `asana`" ] ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent "**Best practice:** Pre-allow specific tools, not wildcards, for security." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Pre-allow specific MCP tools in command frontmatter:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """---
+allowed-tools: [
+  "mcp__plugin_asana_asana__asana_create_task",
+  "mcp__plugin_asana_asana__asana_search_tasks"
+]
+---
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 206-213" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Wildcard (use sparingly):**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """---
+allowed-tools: ["mcp__plugin_asana_asana__*"]
+---
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 4 ;
+                                    oc:sourceLocation "lines 216-220" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 13 ;
+                            oc:sectionTitle "Using MCP Tools in Commands" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 12 ;
+                    oc:sectionTitle "MCP Tool Naming" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 3 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Provide 10+ related tools from a single service" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Connect to external services (databases, APIs, file systems)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Handle OAuth and complex authentication flows" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Bundle MCP servers with plugins for automatic setup" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Model Context Protocol (MCP) enables Claude Code plugins to integrate with external services and APIs by providing structured tool access. Use MCP integration to expose external service capabilities as tools within Claude Code." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Key capabilities:**" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Overview" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 4 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 6 ;
+                                            oc:itemText "❌ Forget to document setup" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "❌ Pre-allow all tools with wildcards" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 5 ;
+                                            oc:itemText "❌ Skip error handling" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "❌ Commit credentials to git" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "❌ Hardcode absolute paths" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "❌ Use HTTP instead of HTTPS" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**DO:**" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**DON'T:**" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 2 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "✅ Document required environment variables" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 5 ;
+                                            oc:itemText "✅ Test MCP integration before publishing" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "✅ Pre-allow specific MCP tools in commands" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 6 ;
+                                            oc:itemText "✅ Handle connection and tool errors gracefully" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "✅ Use secure connections (HTTPS/WSS)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "✅ Use ${CLAUDE_PLUGIN_ROOT} for portable paths" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 43 ;
+                            oc:sectionTitle "Best Practices" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 1 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 5 ;
+                                            oc:itemText "[ ] HTTPS/WSS used (not HTTP/WS)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 6 ;
+                                            oc:itemText "[ ] ${CLAUDE_PLUGIN_ROOT} used for paths" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "[ ] Server type specified (stdio/SSE/HTTP/ws)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "[ ] Authentication configured" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "[ ] Environment variables documented" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "[ ] Type-specific fields complete (command or url)" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 42 ;
+                            oc:sectionTitle "Configuration Checklist" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 1 ;
+                                    oc:rowCount 4 ;
+                                    oc:tableCaption "### MCP Server Types" ;
+                                    oc:tableMarkdown """| Type | Transport | Best For | Auth |
+|------|-----------|----------|------|
+| stdio | Process | Local tools, custom servers | Env vars |
+| SSE | HTTP | Hosted services, cloud APIs | OAuth |
+| HTTP | REST | API backends, token auth | Tokens |
+| ws | WebSocket | Real-time, streaming | Tokens |
+""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 41 ;
+                            oc:sectionTitle "MCP Server Types" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 40 ;
+                    oc:sectionTitle "Quick Reference" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Working examples in `examples/`:" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 2 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "**`sse-server.json`** - Hosted SSE server with OAuth" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "**`http-server.json`** - REST API with token auth" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "**`stdio-server.json`** - Local stdio MCP server" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 46 ;
+                            oc:sectionTitle "Example Configurations" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 2 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "**`references/server-types.md`** - Deep dive on each server type" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "**`references/tool-usage.md`** - Using MCP tools in commands and agents" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "**`references/authentication.md`** - Authentication patterns and OAuth" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "For detailed information, consult:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 45 ;
+                            oc:sectionTitle "Reference Files" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 1 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "**Testing**: Use `claude --debug` and `/mcp` command" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "**Official MCP Docs**: https://modelcontextprotocol.io/" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "**MCP SDK**: @modelcontextprotocol/sdk" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "**Claude Code MCP Docs**: https://docs.claude.com/en/docs/claude-code/mcp" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 47 ;
+                            oc:sectionTitle "External Resources" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 44 ;
+                    oc:sectionTitle "Additional Resources" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 1 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "[ ] Server URL is correct and accessible" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "[ ] Tools appear in `/mcp` output" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 7 ;
+                                            oc:itemText "[ ] Error cases handled gracefully" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "[ ] Required environment variables documented" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "[ ] MCP configuration is valid JSON" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 6 ;
+                                            oc:itemText "[ ] Tool calls succeed from commands" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 5 ;
+                                            oc:itemText "[ ] Authentication works (OAuth or tokens)" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 36 ;
+                            oc:sectionTitle "Validation Checklist" ],
+                        [ a oc:Section ;
+                            oc:hasContent _:ref_d94dfe530a956e4b ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 35 ;
+                            oc:sectionTitle "Local Testing" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 34 ;
+                    oc:sectionTitle "Testing MCP Integration" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "OAuth handled automatically by Claude Code:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """{
+  "type": "sse",
+  "url": "https://mcp.example.com/sse"
+}
+""" ;
+                                    oc:codeLanguage "json" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 247-252" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "User authenticates in browser on first use. No additional configuration needed." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 16 ;
+                            oc:sectionTitle "OAuth (SSE/HTTP)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Pass configuration to MCP server:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """{
+  "command": "python",
+  "args": ["-m", "my_mcp_server"],
+  "env": {
+    "DATABASE_URL": "${DB_URL}",
+    "API_KEY": "${API_KEY}",
+    "LOG_LEVEL": "info"
+  }
+}
+""" ;
+                                    oc:codeLanguage "json" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 276-286" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 18 ;
+                            oc:sectionTitle "Environment Variables (stdio)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Static or environment variable tokens:" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "Document required environment variables in README." ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """{
+  "type": "http",
+  "url": "https://api.example.com",
+  "headers": {
+    "Authorization": "Bearer ${API_TOKEN}"
+  }
+}
+""" ;
+                                    oc:codeLanguage "json" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 260-268" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 17 ;
+                            oc:sectionTitle "Token-Based (Headers)" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 15 ;
+                    oc:sectionTitle "Authentication Patterns" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 2 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Check server URL and configuration" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Provide fallback behavior in commands" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Inform user of connection issues" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Handle MCP server unavailability:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 28 ;
+                            oc:sectionTitle "Connection Failures" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Validate MCP configuration:" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 2 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Validate JSON syntax" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Check required environment variables" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Test server connectivity during development" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 30 ;
+                            oc:sectionTitle "Configuration Errors" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 2 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Check rate limiting and quotas" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Provide clear error messages" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Validate inputs before calling MCP tools" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Handle failed MCP operations:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 29 ;
+                            oc:sectionTitle "Tool Call Errors" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 27 ;
+                    oc:sectionTitle "Error Handling" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Configuration:**" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Connect to RESTful MCP servers with token authentication." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent "**Use cases:**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """{
+  "api-service": {
+    "type": "http",
+    "url": "https://api.example.com/mcp",
+    "headers": {
+      "Authorization": "Bearer ${API_TOKEN}",
+      "X-Custom-Header": "value"
+    }
+  }
+}
+""" ;
+                                    oc:codeLanguage "json" ;
+                                    oc:contentOrder 3 ;
+                                    oc:sourceLocation "lines 125-136" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 5 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "Stateless interactions" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Token-based authentication" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "REST API-based MCP servers" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Custom API backends" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 9 ;
+                            oc:sectionTitle "HTTP (REST API)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent "**Use cases:**" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 7 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "OAuth flows handled automatically" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "User prompted on first use" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Tokens managed by Claude Code" ] ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 5 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Official hosted MCP servers (Asana, GitHub, etc.)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "OAuth-based authentication" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "No local installation needed" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Cloud services with MCP endpoints" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Connect to hosted MCP servers with OAuth support. Best for cloud services." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Configuration:**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """{
+  "asana": {
+    "type": "sse",
+    "url": "https://mcp.asana.com/sse"
+  }
+}
+""" ;
+                                    oc:codeLanguage "json" ;
+                                    oc:contentOrder 3 ;
+                                    oc:sourceLocation "lines 100-107" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 6 ;
+                                    oc:textContent "**Authentication:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 8 ;
+                            oc:sectionTitle "SSE (Server-Sent Events)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 5 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Persistent connections" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Real-time data streaming" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Push notifications from server" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "Low-latency requirements" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent "**Use cases:**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """{
+  "realtime-service": {
+    "type": "ws",
+    "url": "wss://mcp.example.com/ws",
+    "headers": {
+      "Authorization": "Bearer ${TOKEN}"
+    }
+  }
+}
+""" ;
+                                    oc:codeLanguage "json" ;
+                                    oc:contentOrder 3 ;
+                                    oc:sourceLocation "lines 149-159" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Connect to WebSocket MCP servers for real-time bidirectional communication." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Configuration:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 10 ;
+                            oc:sectionTitle "WebSocket (Real-time)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Configuration:**" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 5 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Local database connections" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Custom MCP servers" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "File system access" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "NPM-packaged MCP servers" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Execute local MCP servers as child processes. Best for local tools and custom servers." ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """{
+  "filesystem": {
+    "command": "npx",
+    "args": ["-y", "@modelcontextprotocol/server-filesystem", "/allowed/path"],
+    "env": {
+      "LOG_LEVEL": "debug"
+    }
+  }
+}
+""" ;
+                                    oc:codeLanguage "json" ;
+                                    oc:contentOrder 3 ;
+                                    oc:sourceLocation "lines 72-82" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent "**Use cases:**" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 7 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Communicates via stdin/stdout" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Claude Code spawns and manages the process" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Terminates when Claude Code exits" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 6 ;
+                                    oc:textContent "**Process management:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 7 ;
+                            oc:sectionTitle "stdio (Local Process)" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "MCP Server Types" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Connection established before first tool use" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Restart required for configuration changes" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "MCP servers start when plugin enables" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Lifecycle:**" ],
+                        _:ref_a1400bfea22230ec,
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent """**Viewing servers:**
+Use `/mcp` command to see all servers including plugin-provided ones.""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**Automatic startup:**" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 14 ;
+                    oc:sectionTitle "Lifecycle Management" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """{
+  "env": {
+    "API_KEY": "${MY_API_KEY}",
+    "DATABASE_URL": "${DB_URL}"
+  }
+}
+""" ;
+                            oc:codeLanguage "json" ;
+                            oc:contentOrder 5 ;
+                            oc:sourceLocation "lines 179-186" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """{
+  "command": "${CLAUDE_PLUGIN_ROOT}/servers/my-server"
+}
+""" ;
+                            oc:codeLanguage "json" ;
+                            oc:contentOrder 3 ;
+                            oc:sourceLocation "lines 172-176" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**${CLAUDE_PLUGIN_ROOT}** - Plugin directory (always use for portability):" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 6 ;
+                            oc:textContent "**Best practice:** Document all required environment variables in plugin README." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "All MCP configurations support environment variable substitution:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "**User environment variables** - From user's shell:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 11 ;
+                    oc:sectionTitle "Environment Variable Expansion" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Always use secure connections:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """✅ "url": "https://mcp.example.com/sse"
+❌ "url": "http://mcp.example.com/sse"
+""" ;
+                                    oc:codeLanguage "json" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 348-351" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 24 ;
+                            oc:sectionTitle "Use HTTPS/WSS" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """✅ allowed-tools: [
+  "mcp__plugin_api_server__read_data",
+  "mcp__plugin_api_server__create_item"
+]
+
+❌ allowed-tools: ["mcp__plugin_api_server__*"]
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 369-376" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Pre-allow only necessary MCP tools:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 26 ;
+                            oc:sectionTitle "Permission Scoping" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 4 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "❌ Commit tokens to git" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "❌ Share tokens in documentation" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "❌ Hardcode tokens in configuration" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**DO:**" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 2 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "✅ Use environment variables for tokens" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "✅ Let OAuth flow handle authentication" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "✅ Document required env vars in README" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**DON'T:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 25 ;
+                            oc:sectionTitle "Token Management" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 23 ;
+                    oc:sectionTitle "Security Best Practices" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Use for:** Adding validation or preprocessing before MCP calls." ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# Command: create-item.md
+---
+allowed-tools: ["mcp__plugin_name_server__create_item"]
+---
+
+Steps:
+1. Gather item details from user
+2. Use mcp__plugin_name_server__create_item
+3. Confirm creation
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 294-304" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Commands use MCP tools with user interaction:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 20 ;
+                            oc:sectionTitle "Pattern 1: Simple Tool Wrapper" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Integrate multiple MCP servers:" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Use for:** Workflows spanning multiple services." ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """{
+  "github": {
+    "type": "sse",
+    "url": "https://mcp.github.com/sse"
+  },
+  "jira": {
+    "type": "sse",
+    "url": "https://mcp.jira.com/sse"
+  }
+}
+""" ;
+                                    oc:codeLanguage "json" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 327-338" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 22 ;
+                            oc:sectionTitle "Pattern 3: Multi-Server Plugin" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Agents use MCP tools autonomously:" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Use for:** Multi-step MCP workflows without user interaction." ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# Agent: data-analyzer.md
+
+Analysis Process:
+1. Query data via mcp__plugin_db_server__query
+2. Process and analyze results
+3. Generate insights report
+""" ;
+                                    oc:codeLanguage "markdown" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 312-319" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 21 ;
+                            oc:sectionTitle "Pattern 2: Autonomous Agent" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 19 ;
+                    oc:sectionTitle "Integration Patterns" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 6 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Re-authenticate" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Clear cached auth tokens" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "Verify environment variables set" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Check token scopes and permissions" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent "**Authentication failing:**" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Tools not available:**" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 4 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Verify server connected successfully" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Run `/mcp` to see available tools" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Check tool names match exactly" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "Restart Claude Code after config changes" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Server not connecting:**" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 2 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "Review authentication configuration" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Check network connectivity" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Verify server is running (stdio)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Check URL is correct" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 39 ;
+                            oc:sectionTitle "Common Issues" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "Look for:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """claude --debug
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 447-449" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 3 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Authentication flows" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "MCP server connection attempts" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Tool discovery logs" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "Tool call errors" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 38 ;
+                            oc:sectionTitle "Enable Debug Logging" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 37 ;
+                    oc:sectionTitle "Debugging" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Plugins can bundle MCP servers in two ways:" ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """{
+  "database-tools": {
+    "command": "${CLAUDE_PLUGIN_ROOT}/servers/db-server",
+    "args": ["--config", "${CLAUDE_PLUGIN_ROOT}/config.json"],
+    "env": {
+      "DB_URL": "${DB_URL}"
+    }
+  }
+}
+""" ;
+                                    oc:codeLanguage "json" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 27-37" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Benefits:**" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Create `.mcp.json` at plugin root:" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 4 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Better for multiple servers" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Clear separation of concerns" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Easier to maintain" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "Method 1: Dedicated .mcp.json (Recommended)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 4 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Single configuration file" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Good for simple single-server plugins" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Add `mcpServers` field to plugin.json:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """{
+  "name": "my-plugin",
+  "version": "1.0.0",
+  "mcpServers": {
+    "plugin-api": {
+      "command": "${CLAUDE_PLUGIN_ROOT}/servers/api-server",
+      "args": ["--port", "8080"]
+    }
+  }
+}
+""" ;
+                                    oc:codeLanguage "json" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 48-59" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Benefits:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 5 ;
+                            oc:sectionTitle "Method 2: Inline in plugin.json" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "MCP Server Configuration Methods" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "MCP servers connect on-demand:" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 2 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Not all servers connect at startup" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Connection pooling managed automatically" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "First tool use triggers connection" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 32 ;
+                            oc:sectionTitle "Lazy Loading" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# Good: Single query with filters
+tasks = search_tasks(project="X", assignee="me", limit=50)
+
+# Avoid: Many individual queries
+for id in task_ids:
+    task = get_task(id)
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 414-421" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Batch similar requests when possible:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 33 ;
+                            oc:sectionTitle "Batching" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 31 ;
+                    oc:sectionTitle "Performance Considerations" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "Focus on stdio for custom/local servers, SSE for hosted services with OAuth." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "To add MCP integration to a plugin:" ],
+                        _:ref_c95e984342b8c471 ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 48 ;
+                    oc:sectionTitle "Implementation Workflow" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "MCP Integration for Claude Code Plugins" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "Diagnostic workflow for resolving MCP server connection and tool access issues" ;
+            oc:hasStep _:ref_068cf7611a575ecc,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "If issues persist: restart Claude Code to reload config, run claude --debug for detailed connection logs" ;
+                    oc:stepDependsOn _:ref_81ef0205baf77c6b ;
+                    oc:stepId "restart-debug" ],
+                _:ref_45d49ae4a1cdd830,
+                _:ref_81ef0205baf77c6b,
+                _:ref_cc31b92c0cb0b179 ;
+            oc:workflowId "mcp-troubleshooting" ;
+            oc:workflowName "Troubleshoot MCP Integration" ],
+        _:ref_a1400bfea22230ec,
+        [ a oc:Workflow ;
+            dcterms:description "Complete workflow for integrating an MCP server into a Claude Code plugin" ;
+            oc:hasStep _:ref_1bb6b2ddbf95bc7c,
+                _:ref_37770e5c0979986c,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Review configuration checklist: valid JSON, correct URLs, HTTPS/WSS, env vars documented, tools available, auth works" ;
+                    oc:expectedOutcome "All checklist items pass" ;
+                    oc:stepDependsOn _:ref_e19ae5465501ba62 ;
+                    oc:stepId "final-review" ],
+                _:ref_5e59397308bf2f10,
+                _:ref_6c7187170722bfce,
+                _:ref_948123aa6efe88e3,
+                _:ref_c3c781ec494d3d32,
+                _:ref_e19ae5465501ba62 ;
+            oc:workflowId "mcp-integration-setup" ;
+            oc:workflowName "Add MCP Integration to Plugin" ],
+        _:ref_c95e984342b8c471,
+        _:ref_d94dfe530a956e4b ;
+    oc:impartsKnowledge oc:kn_4e8b5c39,
+        oc:kn_58f16b52,
+        oc:kn_6088470a,
+        oc:kn_70c3018e,
+        oc:kn_710a2f74,
+        oc:kn_82f71989,
+        oc:kn_a05ef833,
+        oc:kn_c4130068,
+        oc:kn_d3522415,
+        oc:kn_ddab9471 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:EnvironmentReady,
-        oc:PluginStructureUnderstood ;
+    oc:requiresState oc:EnvironmentReady ;
     oc:resolvesIntent "add MCP server to plugin",
-        "configure MCP server types",
-        "create .mcp.json configuration",
-        "integrate external service via MCP",
-        "set up MCP authentication",
-        "use MCP tools in commands and agents" ;
-    oc:yieldsState oc:ExternalServiceConnected,
-        oc:MCPServerConfigured,
+        "configure .mcp.json for plugin",
+        "configure MCP integration",
+        "connect external service via MCP",
+        "integrate MCP in plugin",
+        "set up Model Context Protocol" ;
+    oc:yieldsState oc:MCPServerConfigured,
         oc:MCPToolsAvailable .
 
-oc:kn_0394d8d7 a oc:KnowledgeNode,
+oc:kn_4e8b5c39 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When referencing MCP tools in commands or agents" ;
+    oc:directiveContent "MCP tool names follow the format mcp__plugin_<plugin-name>_<server-name>__<tool-name>. Tool names are case-sensitive and must match exactly when pre-allowed in command frontmatter." ;
+    oc:hasRationale "Incorrect tool names cause silent failures where tools appear unavailable" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_58f16b52 a oc:KnowledgeNode,
         oc:KnownIssue ;
-    oc:appliesToContext "When referencing MCP tools in command allowed-tools or troubleshooting missing tools" ;
-    oc:directiveContent "MCP tool names follow the format mcp__plugin_<plugin-name>_<server-name>__<tool-name> and are case-sensitive. Configuration changes require restarting Claude Code to take effect." ;
-    oc:hasRationale "Mismatched tool names cause silent failures. Restart is required because configuration is parsed at plugin load time, not dynamically." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_2ce8b579 a oc:KnowledgeNode,
-        oc:RecoveryTactic ;
-    oc:appliesToContext "When MCP tools are unavailable or connection errors occur" ;
-    oc:directiveContent "When MCP server connection fails: check URL correctness, verify server is running (stdio), check network connectivity, review authentication config, and use claude --debug for detailed connection logs." ;
-    oc:hasRationale "Most MCP connection failures stem from incorrect URLs, missing environment variables, or stale authentication tokens. Systematic debugging resolves the majority of issues." ;
+    oc:appliesToContext "After modifying .mcp.json or plugin.json MCP configuration" ;
+    oc:directiveContent "MCP servers require Claude Code restart to pick up configuration changes. Tools discovered and registered only at startup." ;
+    oc:hasRationale "Configuration is parsed at plugin load time, not dynamically" ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_5bfc4d5b a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When selecting which MCP server transport type to configure" ;
-    oc:directiveContent "Choose MCP server type based on use case: stdio for local tools/custom servers, SSE for hosted cloud services with OAuth, HTTP for REST APIs with token auth, WebSocket for real-time bidirectional communication." ;
-    oc:hasRationale "Each transport type has distinct advantages: stdio has lowest latency, SSE handles OAuth automatically, HTTP is stateless and simple, WebSocket enables streaming." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_71ffae5b a oc:KnowledgeNode,
+oc:kn_6088470a a oc:KnowledgeNode,
         oc:PerformanceProfile ;
-    oc:appliesToContext "When designing command or agent workflows that call multiple MCP tools" ;
-    oc:directiveContent "Batch similar MCP tool requests into single calls with filters rather than making many individual queries. Use parallel calls for independent operations." ;
-    oc:hasRationale "Each MCP tool call involves network/process overhead. Batching reduces latency and avoids rate limiting, while parallel calls utilize available concurrency." ;
+    oc:appliesToContext "When optimizing MCP tool call performance" ;
+    oc:directiveContent "MCP servers connect on-demand (lazy loading), not at startup. First tool use triggers the connection. Batch queries with filters instead of making many individual calls." ;
+    oc:hasRationale "Batching reduces round-trips and rate limit hits; lazy loading avoids unnecessary connections" ;
+    oc:severityLevel "LOW" .
+
+oc:kn_70c3018e a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When MCP tools are not available or connection fails" ;
+    oc:directiveContent "When MCP server connection fails: check URL correctness, verify server is running (stdio), check network connectivity, review auth configuration, and use claude --debug for connection logs. Restart Claude Code after config changes." ;
+    oc:hasRationale "Most MCP issues stem from configuration errors, auth problems, or stale connections that restart resolves" ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_873c1fcf a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When configuring any MCP server with authentication" ;
-    oc:directiveContent "Never hardcode tokens, API keys, or credentials directly in .mcp.json or plugin.json configuration files. Always use environment variable substitution (${VAR_NAME})." ;
-    oc:hasRationale "Hardcoded credentials can be committed to git, leaked in documentation, and exposed to anyone with access to the plugin source code." ;
-    oc:severityLevel "CRITICAL" .
+oc:kn_710a2f74 a oc:KnowledgeNode,
+        oc:SecurityImplication ;
+    oc:appliesToContext "When designing commands vs agents that use MCP tools" ;
+    oc:directiveContent "Agents can use MCP tools autonomously without pre-allowing. Commands require explicit allowed-tools. This means agents have broader tool access by design." ;
+    oc:hasRationale "Agent autonomy requires flexible tool access, but commands need strict permission scoping for safety" ;
+    oc:severityLevel "MEDIUM" .
 
-oc:kn_9c12c04a a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When referencing local server executables, config files, or scripts in .mcp.json" ;
-    oc:directiveContent "Use ${CLAUDE_PLUGIN_ROOT} for all file paths in MCP configuration to ensure portability across different installation environments." ;
-    oc:hasRationale "Absolute paths break when the plugin is installed in different locations. CLAUDE_PLUGIN_ROOT resolves to the correct directory at runtime." ;
+oc:kn_82f71989 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When configuring SSE, HTTP, or WebSocket MCP servers" ;
+    oc:directiveContent "Always use HTTPS/WSS for network MCP server connections. Never use plain HTTP or WS." ;
+    oc:hasRationale "Unencrypted connections expose authentication tokens and data to interception" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_a7adc11f a oc:Constraint,
+oc:kn_a05ef833 a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When configuring SSE, HTTP, or WebSocket MCP server URLs" ;
-    oc:directiveContent "Always use HTTPS/WSS URLs for network-based MCP servers, never plain HTTP/WS." ;
-    oc:hasRationale "Unencrypted connections expose authentication tokens and data to interception. Secure connections are mandatory for production use." ;
+    oc:appliesToContext "When configuring allowed-tools in command frontmatter" ;
+    oc:directiveContent "Pre-allow specific MCP tools in command frontmatter rather than using wildcards. Use wildcards only when a command truly needs all tools from a server." ;
+    oc:hasRationale "Specific tool permissions reduce the attack surface and prevent unintended tool access" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_c4130068 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing any MCP server configuration (.mcp.json or plugin.json)" ;
+    oc:directiveContent "Never hardcode tokens, credentials, or absolute paths in MCP configuration files. Always use ${VAR} environment variable syntax for tokens and ${CLAUDE_PLUGIN_ROOT} for file paths." ;
+    oc:hasRationale "Hardcoded credentials leak via git commits and absolute paths break portability across environments" ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_bc78011e a oc:AntiPattern,
+oc:kn_d3522415 a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When configuring allowed-tools in command or agent frontmatter" ;
-    oc:directiveContent "Never use wildcard tool pre-approval (mcp__plugin_*__*) in command frontmatter. Always specify individual tool names." ;
-    oc:hasRationale "Wildcard approval grants access to all tools from a server, including potentially destructive operations, violating the principle of least privilege." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_c948f04e a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "After configuring an MCP server, before using tools in commands" ;
-    oc:directiveContent "Before testing MCP integration, verify: valid JSON configuration, correct server URL, required environment variables are set, and run /mcp command to confirm server appears with expected tools." ;
-    oc:hasRationale "Systematic verification catches configuration errors early and avoids confusing runtime failures during command execution." ;
+    oc:appliesToContext "When selecting MCP server type" ;
+    oc:directiveContent "Choose stdio for local/custom servers, SSE for hosted cloud services with OAuth, HTTP for REST APIs with token auth, WebSocket for real-time bidirectional communication." ;
+    oc:hasRationale "Each transport type is optimized for specific communication patterns and auth mechanisms" ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_d63854b6 a oc:KnowledgeNode,
-        oc:WorkflowStrategy ;
-    oc:appliesToContext "When deciding between MCP configuration methods" ;
-    oc:directiveContent "Prefer dedicated .mcp.json at plugin root over inline mcpServers in plugin.json for better separation of concerns and easier maintenance, especially with multiple servers." ;
-    oc:hasRationale "Dedicated .mcp.json provides clear separation, easier debugging, and scales better when integrating multiple external services." ;
+oc:kn_ddab9471 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When choosing MCP configuration method for a plugin" ;
+    oc:directiveContent "Use .mcp.json as a dedicated configuration file (recommended) for clarity and separation of concerns. Use inline mcpServers in plugin.json only for simple single-server plugins." ;
+    oc:hasRationale "Separate .mcp.json is easier to maintain, especially with multiple servers" ;
     oc:severityLevel "MEDIUM" .
+
+_:ref_09801ffdb1f7ba66 a oc:WorkflowStep ;
+    dcterms:description "Test tool calls in commands" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_2e58794492d360b6 a oc:WorkflowStep ;
+    dcterms:description "MCP configuration parsed" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_392173fb0b7cb427 a oc:WorkflowStep ;
+    dcterms:description "Document MCP integration in plugin README" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_9" ;
+    oc:stepOrder 9 .
+
+_:ref_57370d9dc7e83b4f a oc:WorkflowStep ;
+    dcterms:description "Tools discovered and registered" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_871234a8407d9695 a oc:WorkflowStep ;
+    dcterms:description "Plugin loads" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_8804d5515062492d a oc:WorkflowStep ;
+    dcterms:description "Install plugin locally (`.claude-plugin/`)" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_8ea582a5fee1a1fd a oc:WorkflowStep ;
+    dcterms:description "Document required environment variables in README" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_91acfb2d0902523e a oc:WorkflowStep ;
+    dcterms:description "Choose MCP server type (stdio, SSE, HTTP, ws)" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_9521e9deb6babc27 a oc:WorkflowStep ;
+    dcterms:description "Server process started (stdio) or connection established (SSE/HTTP/WS)" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_ab0f30b5fd21b573 a oc:WorkflowStep ;
+    dcterms:description "Test locally with `/mcp` command" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_5" ;
+    oc:stepOrder 5 .
+
+_:ref_b2a4247504a5fd82 a oc:WorkflowStep ;
+    dcterms:description "Check `claude --debug` logs for connection issues" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_5" ;
+    oc:stepOrder 5 .
+
+_:ref_b3189ea7357a2884 a oc:WorkflowStep ;
+    dcterms:description "Handle authentication (OAuth or tokens)" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_7" ;
+    oc:stepOrder 7 .
+
+_:ref_bf5d5f8dced2d9c0 a oc:WorkflowStep ;
+    dcterms:description "Create `.mcp.json` at plugin root with configuration" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_c44f6a901af977c0 a oc:WorkflowStep ;
+    dcterms:description "Pre-allow MCP tools in relevant commands" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_6" ;
+    oc:stepOrder 6 .
+
+_:ref_c6a2f51c44d86175 a oc:WorkflowStep ;
+    dcterms:description "Test error cases (connection failures, auth errors)" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_8" ;
+    oc:stepOrder 8 .
+
+_:ref_d308cafd62e3be40 a oc:WorkflowStep ;
+    dcterms:description "Use ${CLAUDE_PLUGIN_ROOT} for all file references" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_dd8af069f9dec74a a oc:WorkflowStep ;
+    dcterms:description "Configure MCP server in `.mcp.json`" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_f89d3f3b903d797f a oc:WorkflowStep ;
+    dcterms:description "Run `/mcp` to verify server appears" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_ffd9437aa21a294d a oc:WorkflowStep ;
+    dcterms:description "Tools available as `mcp__plugin_...__...`" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_5" ;
+    oc:stepOrder 5 .
+
+_:ref_068cf7611a575ecc a oc:WorkflowStep ;
+    dcterms:description "Verify MCP configuration: valid JSON syntax, correct server type, required fields present" ;
+    oc:stepId "check-config" .
+
+_:ref_1bb6b2ddbf95bc7c a oc:WorkflowStep ;
+    dcterms:description "Pre-allow specific MCP tools in relevant command frontmatter using full mcp__plugin_... names" ;
+    oc:expectedOutcome "Commands list specific allowed MCP tools" ;
+    oc:stepDependsOn _:ref_6c7187170722bfce ;
+    oc:stepId "allow-tools" .
+
+_:ref_37770e5c0979986c a oc:WorkflowStep ;
+    dcterms:description "Choose MCP server type based on use case: stdio (local), SSE (cloud/OAuth), HTTP (REST/token), WebSocket (real-time)" ;
+    oc:expectedOutcome "Server type selected with rationale" ;
+    oc:stepId "choose-type" .
+
+_:ref_45d49ae4a1cdd830 a oc:WorkflowStep ;
+    dcterms:description "Verify authentication: tokens set in env vars, OAuth scopes correct, header format valid (Bearer prefix)" ;
+    oc:stepDependsOn _:ref_cc31b92c0cb0b179 ;
+    oc:stepId "check-auth" .
+
+_:ref_5e59397308bf2f10 a oc:WorkflowStep ;
+    dcterms:description "Document all required environment variables in plugin README with setup instructions" ;
+    oc:stepDependsOn _:ref_c3c781ec494d3d32 ;
+    oc:stepId "document-env" .
+
+_:ref_6c7187170722bfce a oc:WorkflowStep ;
+    dcterms:description "Test locally: install plugin, run /mcp to verify server appears, test tool calls, check claude --debug logs" ;
+    oc:expectedOutcome "MCP server visible in /mcp output, tool calls succeed" ;
+    oc:stepDependsOn _:ref_5e59397308bf2f10 ;
+    oc:stepId "test-local" .
+
+_:ref_81ef0205baf77c6b a oc:WorkflowStep ;
+    dcterms:description "Verify tool availability: run /mcp to list servers and tools, check names match exactly (case-sensitive)" ;
+    oc:stepDependsOn _:ref_45d49ae4a1cdd830 ;
+    oc:stepId "check-tools" .
+
+_:ref_948123aa6efe88e3 a oc:WorkflowStep ;
+    dcterms:description "Create .mcp.json at plugin root with server configuration, using ${CLAUDE_PLUGIN_ROOT} for paths and ${VAR} for env vars" ;
+    oc:expectedOutcome "Valid .mcp.json file created with correct JSON syntax" ;
+    oc:stepDependsOn _:ref_37770e5c0979986c ;
+    oc:stepId "create-config" .
+
+_:ref_a1400bfea22230ec a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 4 ;
+    oc:hasStep _:ref_2e58794492d360b6,
+        _:ref_57370d9dc7e83b4f,
+        _:ref_871234a8407d9695,
+        _:ref_9521e9deb6babc27,
+        _:ref_ffd9437aa21a294d ;
+    oc:workflowId "procedure_4" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_c3c781ec494d3d32 a oc:WorkflowStep ;
+    dcterms:description "Configure authentication: OAuth for SSE (automatic), Bearer tokens for HTTP/WS, environment variables for stdio" ;
+    oc:expectedOutcome "Auth method configured, required env vars documented" ;
+    oc:stepDependsOn _:ref_948123aa6efe88e3 ;
+    oc:stepId "configure-auth" .
+
+_:ref_c95e984342b8c471 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 2 ;
+    oc:hasStep _:ref_392173fb0b7cb427,
+        _:ref_8ea582a5fee1a1fd,
+        _:ref_91acfb2d0902523e,
+        _:ref_ab0f30b5fd21b573,
+        _:ref_b3189ea7357a2884,
+        _:ref_bf5d5f8dced2d9c0,
+        _:ref_c44f6a901af977c0,
+        _:ref_c6a2f51c44d86175,
+        _:ref_d308cafd62e3be40 ;
+    oc:workflowId "procedure_2" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_cc31b92c0cb0b179 a oc:WorkflowStep ;
+    dcterms:description "Check server connectivity: correct URL, server running (stdio), network accessible (SSE/HTTP/WS)" ;
+    oc:stepDependsOn _:ref_068cf7611a575ecc ;
+    oc:stepId "check-connectivity" .
+
+_:ref_d94dfe530a956e4b a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 1 ;
+    oc:hasStep _:ref_09801ffdb1f7ba66,
+        _:ref_8804d5515062492d,
+        _:ref_b2a4247504a5fd82,
+        _:ref_dd8af069f9dec74a,
+        _:ref_f89d3f3b903d797f ;
+    oc:workflowId "procedure_1" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_e19ae5465501ba62 a oc:WorkflowStep ;
+    dcterms:description "Test error cases: connection failures, auth errors, invalid parameters, and verify graceful handling" ;
+    oc:expectedOutcome "All error cases handled with helpful user messages" ;
+    oc:stepDependsOn _:ref_1bb6b2ddbf95bc7c ;
+    oc:stepId "test-errors" .
 

@@ -4,100 +4,285 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_plugin_official_build_mcp_app_iframe_sandbox a oc:DeclarativeSkill,
+oc:skill_claude_plugin_official_build_mcp_app_iframe_sandbox a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "iframe-sandbox" ;
-    skos:broader "Reference guide" ;
+    skos:broader "Constraint reference" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/build-mcp-app" ;
     oc:contentHash "ee7e91e909e271b99091c9a7e150930c38b115e33eb1683ce30f9825fc0b9dd1" ;
-    oc:differentia "that documents iframe sandbox and CSP constraints for MCP app widgets, providing workarounds for blocked scripts, links, images, and debugging" ;
-    oc:extends oc:skill_anthropics_claude_plugin_official_build_mcp_app ;
-    oc:hasArgumentHint "widget HTML or CSP error description" ;
+    oc:dependsOnSkill oc:skill_ontoskills_build_mcp_app ;
+    oc:differentia "documents sandbox and CSP limitations of MCP-app widget iframes with verified fixes for each failure mode" ;
+    oc:extends oc:skill_claude_plugin_official_build_mcp_app ;
+    oc:handlesFailure oc:CSPViolation,
+        oc:CacheStale,
+        oc:ImportBlocked,
+        oc:WidgetBlank ;
     oc:hasCategory "development" ;
-    oc:hasRequirement oc:req_2f92bf42,
-        oc:req_81adff35,
-        oc:req_cdc0681e ;
-    oc:impartsKnowledge oc:kn_47488326,
-        oc:kn_5c5326f5,
-        oc:kn_6335d3fd,
-        oc:kn_6a916a39,
-        oc:kn_6bc2a03d,
-        oc:kn_c05b1899,
-        oc:kn_cf5441a9,
-        oc:kn_d2a38c7c ;
-    oc:isUserInvocable false ;
-    oc:nature "Concept" ;
-    oc:resolvesIntent "debug blank widget iframe",
-        "fix external image loading in iframed widgets",
-        "handle CSP restrictions in MCP widgets",
-        "implement dark mode in sandboxed widgets",
-        "inline ext-apps bundle into widget HTML" .
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent """MCP-app widgets run inside a sandboxed `<iframe>` in the host (Claude Desktop,
+claude.ai). The sandbox and CSP attributes lock down what the widget can do.
+Every item below was observed failing with a silent blank iframe until the
+fix was applied — the error only appears in the iframe's own devtools console,
+not the host's.""" ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """el.addEventListener("click", (e) => {
+  e.preventDefault();
+  app.openLink({ url: el.href });
+});
+""" ;
+                            oc:codeLanguage "js" ;
+                            oc:contentOrder 3 ;
+                            oc:sourceLocation "lines 84-89" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "Intercept anchor clicks:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// ✗ blocked
+window.open(url, "_blank");
+// ✗ blocked
+<a href="…" target="_blank">…</a>
 
-oc:kn_47488326 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When performing build-time bundle inlining into widget HTML" ;
-    oc:directiveContent "Use the () => bundle arrow function form for String.replace callbacks when inlining the ext-apps bundle. The minified bundle contains $ sequences that String.replace interprets as special replacement patterns when passed as a bare string." ;
-    oc:hasRationale "JavaScript's String.replace treats $n, $&, $', $` in replacement strings as special patterns. The minified ~300KB bundle is full of these sequences, causing corruption if passed as a bare string replacement." ;
-    oc:severityLevel "HIGH" .
+// ✓ host-mediated
+await app.openLink({ url });
+""" ;
+                            oc:codeLanguage "js" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 72-80" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Outbound links" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent """Add `referrerpolicy="no-referrer"` on the `<img>` as a fallback for any URL
+that survives un-inlined.""" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """async function toDataUrl(url: string): Promise<string | undefined> {
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
+    if (!res.ok) return undefined;
+    const buf = Buffer.from(await res.arrayBuffer());
+    const mime = res.headers.get("content-type") ?? "image/jpeg";
+    return `data:${mime};base64,${buf.toString("base64")}`;
+  } catch {
+    return undefined;
+  }
+}
 
-oc:kn_5c5326f5 a oc:KnowledgeNode,
+// in the tool handler
+const inlined = await Promise.all(
+  items.map(async (it) =>
+    it.thumb ? { ...it, thumb: await toDataUrl(it.thumb) ?? it.thumb } : it,
+  ),
+);
+""" ;
+                            oc:codeLanguage "ts" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 99-118" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent """CSP `img-src` defaults (plus many CDN referrer policies) block
+`<img src="https://external-cdn/…">` from loading. Inline them server-side in
+the tool handler:""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "External images" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent """The `() => bundle` replacer form (rather than a bare string) is important —
+`String.replace` interprets `$…` sequences in a string replacement, and the
+minified bundle is full of them.""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "Widget side:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """import { readFileSync } from "node:fs";
+import { createRequire } from "node:module";
+const require = createRequire(import.meta.url);
+
+const bundle = readFileSync(
+  require.resolve("@modelcontextprotocol/ext-apps/app-with-deps"),
+  "utf8",
+).replace(/export\\{([^}]+)\\};?\\s*$/, (_, body) =>
+  "globalThis.ExtApps={" +
+  body.split(",").map((pair) => {
+    const [local, exported] = pair.split(" as ").map((s) => s.trim());
+    return `${exported ?? local}:${local}`;
+  }).join(",") + "};",
+);
+
+const widgetHtml = readFileSync("./widgets/widget.html", "utf8")
+  .replace("/*__EXT_APPS_BUNDLE__*/", () => bundle);
+""" ;
+                            oc:codeLanguage "ts" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 31-49" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent """`@modelcontextprotocol/ext-apps` ships a self-contained browser build at the
+`app-with-deps` export (~300KB). It's minified ESM ending in `export{…}`; to
+use it from an inline `<script type="module">` block, rewrite the export
+statement into a global assignment at build time:""" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """<script type="module">
+/*__EXT_APPS_BUNDLE__*/
+const { App } = globalThis.ExtApps;
+(async () => {
+  const app = new App({ name: "…", version: "…" }, {});
+  // …
+})();
+</script>
+""" ;
+                            oc:codeLanguage "html" ;
+                            oc:contentOrder 4 ;
+                            oc:sourceLocation "lines 53-62" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Inlining the ext-apps bundle" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """:root { --ink:#0f1111; --bg:#fff; color-scheme:light; }
+:root.dark { --ink:#e6e6e6; --bg:#1f2428; color-scheme:dark; }
+:root.dark .thumb { mix-blend-mode: normal; } /* multiply → images vanish in dark */
+""" ;
+                            oc:codeLanguage "css" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 136-140" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """const applyTheme = (theme) =>
+  document.documentElement.classList.toggle("dark", theme === "dark");
+
+app.onhostcontextchanged = (ctx) => applyTheme(ctx.theme);
+await app.connect();
+applyTheme(app.getHostContext()?.theme);
+""" ;
+                            oc:codeLanguage "js" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 127-134" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Dark mode" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 1 ;
+                            oc:rowCount 6 ;
+                            oc:tableCaption "## Problem → fix table" ;
+                            oc:tableMarkdown """| Symptom | Root cause | Fix |
+|---|---|---|
+| Widget renders as blank rectangle, no error | CSP `script-src` blocks esm.sh fetching transitive `@modelcontextprotocol/sdk` deps | Inline the `ext-apps/app-with-deps` bundle into the HTML |
+| `window.open()` does nothing | Sandbox lacks `allow-popups` | Use `app.openLink({ url })` |
+| `<a target="_blank">` does nothing | Same | `e.preventDefault()` + `app.openLink({ url })` on click |
+| External `<img src>` broken | CSP `img-src` + referrer hotlink blocking | Fetch server-side, ship as `data:` URL in the tool result payload |
+| Widget edits don't appear after server restart | Host caches UI resources | Fully quit the host (⌘Q / Alt+F4) and relaunch |
+| Top-level `await` throws | Older iframe contexts | Wrap module body in an async IIFE |
+""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Problem → fix table" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent """The iframe has its own console. In Claude Desktop, open DevTools (View → Toggle
+Developer Tools), then switch the context dropdown (top-left of the Console
+tab) from "top" to the widget's iframe. CSP violations, uncaught exceptions,
+and import errors all surface there — the host's main console stays silent.""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Debugging" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Iframe sandbox constraints" ] ;
+    oc:impartsKnowledge oc:kn_0d095d18,
+        oc:kn_23d56c4f,
+        oc:kn_3dce4882,
+        oc:kn_4cd46c43,
+        oc:kn_d3b7f8bd,
+        oc:kn_dccabdd2,
+        oc:kn_e6335133,
+        oc:kn_f664336e ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:EnvironmentReady,
+        oc:MCPAppWidgetCreated ;
+    oc:resolvesIntent "debug blank iframe widget",
+        "fix CSP errors in MCP app widgets",
+        "handle sandbox restrictions in iframe-based MCP apps",
+        "implement dark mode in MCP app widgets",
+        "inline external dependencies for sandboxed iframes" ;
+    oc:yieldsState oc:WidgetRendering,
+        oc:WidgetSandboxCompliant .
+
+oc:kn_0d095d18 a oc:KnowledgeNode,
         oc:KnownIssue ;
-    oc:appliesToContext "When iterating on widget HTML during development" ;
-    oc:directiveContent "Widget HTML edits may not appear after server restart because the host (Claude Desktop) aggressively caches UI resources. Fully quit the host (Cmd+Q / Alt+F4) and relaunch to force a cold re-fetch." ;
-    oc:hasRationale "The host caches resource responses; a simple window-close doesn't clear the cache. Only a full process restart triggers a fresh resource fetch." ;
+    oc:appliesToContext "When iterating on widget development and changes don't seem to take effect" ;
+    oc:directiveContent "Widget edits may not appear after a server restart because the host caches UI resources. Fully quit the host (⌘Q on macOS, Alt+F4 on Windows) and relaunch to pick up changes." ;
+    oc:hasRationale "Host caching is aggressive and does not respect hot-reload patterns" ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_6335d3fd a oc:KnowledgeNode,
+oc:kn_23d56c4f a oc:KnowledgeNode,
         oc:RecoveryTactic ;
     oc:appliesToContext "When a widget renders as a blank rectangle with no visible error" ;
-    oc:directiveContent "To debug CSP violations and silent widget failures, open the iframe's own devtools console (not the host's main console). In Claude Desktop: View → Toggle Developer Tools, then switch the Console context dropdown from 'top' to the widget's iframe." ;
-    oc:hasRationale "The iframe has its own isolated console context. CSP violations, uncaught exceptions, and import errors surface only there — the host's main console stays silent about iframe issues." ;
+    oc:directiveContent "To debug iframe issues, open DevTools (View → Toggle Developer Tools) then switch the Console context dropdown from 'top' to the widget's iframe. CSP violations and uncaught exceptions only surface there." ;
+    oc:hasRationale "The iframe has its own console context; the host's main console stays silent for iframe-originated errors" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_6a916a39 a oc:AntiPattern,
+oc:kn_3dce4882 a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When rendering thumbnails or images in widget HTML" ;
-    oc:directiveContent "Do not use external <img src> URLs directly in widget HTML. CSP img-src and CDN referrer policies block them. Instead, fetch images server-side and embed as data: URLs in the tool result payload." ;
-    oc:hasRationale "Both the CSP img-src restriction and CDN hotlink protection (referrer-based) prevent external images from loading inside the sandboxed iframe." ;
-    oc:severityLevel "HIGH" .
+    oc:appliesToContext "When implementing theme support in MCP app widgets" ;
+    oc:directiveContent "For dark mode, use CSS custom properties on :root toggled by a .dark class, and apply mix-blend-mode: normal on images in dark mode to prevent them from vanishing (multiply blend makes images invisible on dark backgrounds)." ;
+    oc:hasRationale "Default mix-blend-mode: multiply causes thumbnail images to vanish against dark backgrounds" .
 
-oc:kn_6bc2a03d a oc:DesignPrinciple,
+oc:kn_4cd46c43 a oc:Idempotency,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When styling widgets to match the host application theme" ;
-    oc:directiveContent "Implement dark mode using app.getHostContext()?.theme after connect() and subscribe via app.onhostcontextchanged. Toggle a .dark class on the root element, use CSS custom properties with :root.dark overrides, and disable mix-blend-mode: multiply in dark mode (it makes images vanish)." ;
-    oc:hasRationale "The host can switch themes mid-conversation. Using the provided API ensures the widget stays in sync. The multiply blend mode bug in dark mode causes images to become invisible against dark backgrounds." ;
+    oc:appliesToContext "When writing inline module scripts for widget HTML" ;
+    oc:directiveContent "Top-level await throws in older iframe contexts. Wrap the module body in an async IIFE to ensure compatibility." ;
+    oc:hasRationale "Older iframe execution contexts do not support top-level await at the module level" ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_c05b1899 a oc:AntiPattern,
+oc:kn_d3b7f8bd a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When writing widget HTML for MCP apps" ;
-    oc:directiveContent "Never import @modelcontextprotocol/ext-apps from a CDN like esm.sh inside widget HTML. The iframe CSP blocks transitive dependency fetches, resulting in a silently blank widget with errors only visible in the iframe's own devtools console." ;
-    oc:hasRationale "The sandbox CSP script-src attribute blocks external script fetches. The ext-apps SDK has transitive deps that also get blocked, causing the entire widget to fail silently." ;
+    oc:appliesToContext "When building MCP-app widget HTML that runs inside the host iframe sandbox" ;
+    oc:directiveContent "The sandboxed iframe in Claude Desktop/claude.ai blocks script-src imports from esm.sh, window.open(), anchor target=_blank, and external img-src by default. Every restriction must be worked around with specific host-mediated APIs or server-side inlining." ;
+    oc:hasRationale "CSP and sandbox attributes are opaque — failures render as blank iframes with no error in the host console, making diagnosis extremely difficult" ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_cf5441a9 a oc:Constraint,
+oc:kn_dccabdd2 a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When implementing any outbound link or navigation in widget HTML" ;
-    oc:directiveContent "window.open() and <a target='_blank'> are blocked by the iframe sandbox attribute. All outbound navigation must go through app.openLink({ url }) with click interception via preventDefault()." ;
-    oc:hasRationale "The iframe sandbox lacks the allow-popups permission, so direct popup/navigation calls silently fail without error." ;
+    oc:appliesToContext "When opening outbound links from MCP app widgets" ;
+    oc:directiveContent "Never use window.open() or <a target='_blank'> in widget HTML — both are silently blocked by the sandbox. Always use app.openLink({ url }) instead." ;
+    oc:hasRationale "The sandbox lacks allow-popups; violations produce no visible error, just a silent no-op" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_d2a38c7c a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "When writing widget script module code" ;
-    oc:directiveContent "Wrap top-level await in an async IIFE. Older iframe contexts may not support top-level await in module scripts, causing uncaught exceptions." ;
-    oc:hasRationale "Some host iframe environments have older JavaScript engines that haven't implemented top-level await in ES modules, leading to silent failures." ;
-    oc:severityLevel "MEDIUM" .
+oc:kn_e6335133 a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "When building the inline bundle replacement step" ;
+    oc:directiveContent "When using String.replace to inline the ext-apps bundle, use the replacer function form () => bundle instead of a bare string, because the minified bundle contains $… sequences that String.replace interprets as special substitution patterns." ;
+    oc:hasRationale "Silent corruption of the inlined bundle leads to runtime parse errors that are hard to trace" ;
+    oc:severityLevel "HIGH" .
 
-oc:req_2f92bf42 a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "Build-time HTML transformation (replacing placeholder strings with bundled JS)" .
-
-oc:req_81adff35 a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "Understanding of Content Security Policy (CSP) and iframe sandbox attributes" .
-
-oc:req_cdc0681e a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "MCP app widget architecture (App class, registerAppTool, registerAppResource)" .
+oc:kn_f664336e a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When rendering images from external CDNs in widget HTML" ;
+    oc:directiveContent "External images should be fetched server-side and shipped as data: URLs in the tool result payload. Add referrerpolicy='no-referrer' on <img> tags as a fallback for any URLs that survive un-inlined." ;
+    oc:hasRationale "CSP img-src defaults and CDN referrer-hotlink blocking both prevent direct external image loading" .
 

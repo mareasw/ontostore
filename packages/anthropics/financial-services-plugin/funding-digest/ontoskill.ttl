@@ -4,116 +4,1397 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_financial_services_plugin_funding_digest a oc:DeclarativeSkill,
+oc:skill_financial_services_plugin_funding_digest a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "funding-digest" ;
-    skos:broader "Data-driven report generator" ;
-    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/financial-services-plugin/funding-digest" ;
+    skos:broader "Financial briefing generator" ;
+    prov:wasDerivedFrom "../.agents/skills/anthropics/financial-services-plugin/funding-digest" ;
     oc:contentHash "07be19455fb3a414a4c6b1d9b59253eb47a059ac9c971fc100b003e439d96bc8" ;
-    oc:dependsOnSkill oc:skill_pptx_manipulation ;
-    oc:differentia "that compiles recent funding rounds and capital markets activity into a polished single-slide PowerPoint briefing with key takeaways, valuation data, and Capital IQ deal links" ;
-    oc:handlesFailure oc:FileNotFound,
-        oc:InvalidInput,
+    oc:dependsOnSkill oc:skill_ontoskills_pitch_deck ;
+    oc:differentia "that compiles weekly funding round activity across watched sectors into a single-slide executive PowerPoint with Capital IQ deal links, valuation data, and AI-generated analyst takeaways" ;
+    oc:handlesFailure oc:InvalidInput,
         oc:NetworkTimeout,
         oc:PermissionDenied ;
-    oc:hasAllowedTool "get_company_summary_from_identifiers",
-        "get_competitors_from_identifiers",
-        "get_funding_summary_from_identifiers",
-        "get_info_from_identifiers",
-        "get_rounds_of_funding_from_identifiers",
-        "get_rounds_of_funding_info_from_transaction_ids" ;
-    oc:hasArgumentHint "sectors, time period, optional specific companies (e.g., 'AI and fintech, last 2 weeks')" ;
+    oc:hasAllowedTool "Bash",
+        "Edit",
+        "Read",
+        "Write" ;
+    oc:hasArgumentHint "sectors and time period (e.g., 'AI and fintech, last 7 days')" ;
     oc:hasCategory "finance" ;
     oc:hasDescription "Generate a polished one-page PowerPoint slide summarizing key takeaways from recent funding rounds and notable capital markets activity across a user's watched sectors or companies. Use this skill when the user asks for a deal flow summary, weekly recap, funding digest, transaction roundup, or capital markets briefing. Triggers on: 'deal flow digest', 'weekly funding recap', 'deal roundup', 'transaction summary this week', 'what happened in [sector] this week', 'capital markets update', or any request to compile recent funding activity into a briefing slide. Produces a professional single-slide PPTX with key takeaways, valuation data, and Capital IQ deal links." ;
     oc:hasName "funding-digest" ;
-    oc:impartsKnowledge oc:kn_05a26c61,
-        oc:kn_20c79945,
-        oc:kn_640947f8,
-        oc:kn_a6420534,
-        oc:kn_b111b8eb,
-        oc:kn_b9d49651,
-        oc:kn_c50bffe0,
-        oc:kn_d79e98fa,
-        oc:kn_e6c590d7,
-        oc:kn_ed4acd6f ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "**Footer** — At the bottom of the generated slide, as a prominent yellow banner: \"Analysis is AI-generated — please confirm all outputs\"" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent """**AI DISCLAIMER (MANDATORY):**
+You MUST include the following disclaimer text in the powerpoint footer. This is not optional — the report is incomplete without it:""" ],
+                [ a oc:BlockQuote ;
+                    oc:blockType "blockquote" ;
+                    oc:contentOrder 3 ;
+                    oc:quoteContent "**\"Analysis is AI-generated — please confirm all outputs\"**" ],
+                [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """name: funding-digest
+description: "Generate a polished one-page PowerPoint slide summarizing key takeaways from recent funding rounds and notable capital markets activity across a user's watched sectors or companies. Use this skill when the user asks for a deal flow summary, weekly recap, funding digest, transaction roundup, or capital markets briefing. Triggers on: 'deal flow digest', 'weekly funding recap', 'deal roundup', 'transaction summary this week', 'what happened in [sector] this week', 'capital markets update', or any request to compile recent funding activity into a briefing slide. Produces a professional single-slide PPTX with key takeaways, valuation data, and Capital IQ deal links."
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Generate an analyst-quality **single-slide PowerPoint** that summarizes key takeaways from recent funding rounds across watched sectors or companies, using S&P Global Capital IQ data. Each deal links back to its Capital IQ profile for quick drill-down." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "S&P Global's identifier system resolves company names to legal entities. This works well for most companies but has known failure modes that cause empty results. **Apply these rules throughout the workflow to avoid silent data loss.**" ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**This single pre-validation step prevents the majority of empty-result issues.** Batch all candidates into a single `get_info_from_identifiers` call (it handles large batches well) and triage before proceeding." ],
+                                _:ref_a2a5f27a896cac39,
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Before** calling any funding tools, run every identifier through `get_info_from_identifiers`. This is the cheapest and most reliable way to catch problems early. Check two things in the response:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 5 ;
+                            oc:sectionTitle "Rule 0: Pre-validate ALL identifiers before querying funding" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "S&P Global handles case variations (\"openai\" = \"OpenAI\") but is strict on spelling and punctuation. \"Character AI\" may fail where \"Character.ai\" succeeds. When in doubt, use the `company_id` (e.g., `C_1829047235`) which is guaranteed to resolve." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 11 ;
+                            oc:sectionTitle "Rule 6: Identifier resolution is case-insensitive but spelling-sensitive" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "Using the wrong role returns empty results silently. For deal flow digests, you almost always want `company_raising_funds`. Only use the investor role when specifically analyzing an investor's portfolio activity." ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 1 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "`company_investing_in_round_of_funding` → \"What did investor Y invest in?\" (investor perspective)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "`company_raising_funds` → \"What rounds did X raise?\" (company perspective)" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 10 ;
+                            oc:sectionTitle "Rule 5: The `role` parameter is critical" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "If `get_rounds_of_funding_from_identifiers` returns empty for a company you expect to have data:" ],
+                                _:ref_e40d419ecfed7b57 ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 6 ;
+                            oc:sectionTitle "Rule 1: Never trust empty results without a fallback" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "The summary tool is faster but less reliable — it can return errors or incomplete data even when detailed rounds exist. Always use the detailed rounds tool as the primary data source. The summary tool is acceptable only for quick aggregate checks (total raised, round count) and should be verified against the rounds tool if results seem low." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 8 ;
+                            oc:sectionTitle "Rule 3: Use `get_rounds_of_funding_from_identifiers` as the primary tool, not `get_funding_summary_from_identifiers`" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Companies that are divisions or wholly-owned subsidiaries of larger companies (e.g., DeepMind under Alphabet, GitHub under Microsoft, BeReal under Voodoo) will return **zero funding rounds**. Their capital events are tracked at the parent level." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**How to detect:** The `status` field from `get_info_from_identifiers` will show `\"Operating Subsidiary\"`. The `references/sector-seeds.md` file also flags known subsidiaries with ⚠️ warnings. Skip these for funding queries." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 7 ;
+                            oc:sectionTitle "Rule 2: Subsidiaries have no funding rounds" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "When processing large company universes (50+ companies), batch in groups of 15–20. After each batch, check for companies that returned empty results and run them through the fallback steps in Rule 1 before moving on." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 9 ;
+                            oc:sectionTitle "Rule 4: Batch carefully and validate" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Entity Resolution & Tool Robustness" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent """**Returning user (has a watchlist):**
+If the user has previously defined sectors or companies to track, use that list. Check conversation history for prior watchlists.""" ],
+                                [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 4 ;
+                                    oc:rowCount 3 ;
+                                    oc:tableCaption "Ask for" ;
+                                    oc:tableMarkdown """| Parameter | Default | Notes |
+|-----------|---------|-------|
+| **Sectors** | *(at least one)* | e.g., "AI, Fintech, Biotech" |
+| **Specific companies** | Optional | Supplement sector-level coverage |
+| **Time period** | Last 7 days | "This week", "last 2 weeks", "this month" |
+""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent "Calculate the exact `start_date` and `end_date` from the time period." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Determine what the digest should cover. There are two setups:" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent """**New user:**
+Ask for:""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 13 ;
+                            oc:sectionTitle "Step 1: Establish Coverage & Period" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "Create a **single-slide** PowerPoint using `pptxgenjs`. The slide should be information-dense but visually clean — think \"executive dashboard\" not \"wall of text.\"" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Read `/mnt/skills/public/pptx/SKILL.md` and `/mnt/skills/public/pptx/pptxgenjs.md` before creating the slide." ] ;
+                            oc:hasSubsection [ a oc:Section ;
+                                    oc:hasContent [ a oc:CodeExample ;
+                                            oc:blockType "code_block" ;
+                                            oc:codeContent """┌─────────────────────────────────────────────────────────────┐
+│  DEAL FLOW DIGEST                                           │
+│  [Period] · [Sectors]                           [Date]      │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐       │
+│  │  $X.XB  │  │  N      │  │  $X.XB  │  │  $X.XB  │       │
+│  │ Raised  │  │ Rounds  │  │ Avg Pre │  │ Largest │       │
+│  └─────────┘  └─────────┘  └─────────┘  └─────────┘       │
+│                                                             │
+│  KEY TAKEAWAYS                                              │
+│  ─────────────────────────────────────────────────          │
+│  [Logo] Takeaway 1 text goes here...                        │
+│  [Logo] Takeaway 2 text goes here...                        │
+│  [Logo] Takeaway 3 text goes here...                        │
+│  [Logo] Takeaway 4 text goes here...                        │
+│                                                             │
+│  TOP DEALS                                                  │
+│  ┌──────────────────────────────────────────────────────────┐│
+│  │Company│Type │Announced│Closed│Amount│Pre-$│Post-$│Lead│🔗││
+│  │───────│─────│─────────│──────│──────│─────│──────│────│──││
+│  │ ...   │ ... │  ...    │ ...  │ ...  │ ... │ ...  │... │🔗││
+│  └──────────────────────────────────────────────────────────┘│
+│                                                             │
+│  [Footer: Deal Flow Digest · Sources: S&P Global Capital IQ]│
+│  [Footer: AI Disclaimer]                                    │
+└─────────────────────────────────────────────────────────────┘
+""" ;
+                                            oc:codeLanguage "" ;
+                                            oc:contentOrder 1 ;
+                                            oc:sourceLocation "lines 316-344" ] ;
+                                    oc:sectionLevel 4 ;
+                                    oc:sectionOrder 23 ;
+                                    oc:sectionTitle "Slide Layout" ],
+                                [ a oc:Section ;
+                                    oc:hasContent [ a oc:Paragraph ;
+                                            oc:blockType "paragraph" ;
+                                            oc:contentOrder 6 ;
+                                            oc:textContent "**Stat Cards (top row):**" ],
+                                        [ a oc:BulletList ;
+                                            oc:blockType "bullet_list" ;
+                                            oc:contentOrder 5 ;
+                                            oc:hasItem [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 3 ;
+                                                    oc:itemText "Stat labels: 10–12pt, medium gray (`6B6B6B`)" ],
+                                                [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 2 ;
+                                                    oc:itemText "Stat numbers: 36–44pt, bold, near-black" ],
+                                                [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 4 ;
+                                                    oc:itemText "Takeaway text: 12–14pt, near-black, left-aligned" ],
+                                                [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 1 ;
+                                                    oc:itemText "Title: 28–32pt, bold, white on near-black header bar" ],
+                                                [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 5 ;
+                                                    oc:itemText "Table text: 9–11pt, near-black with gray (`6B6B6B`) for secondary columns" ],
+                                                [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 6 ;
+                                                    oc:itemText "Link text: 9–10pt, muted blue (`2B5797`)" ],
+                                                [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 7 ;
+                                                    oc:itemText "Footer: 8pt, medium gray" ] ],
+                                        [ a oc:Paragraph ;
+                                            oc:blockType "paragraph" ;
+                                            oc:contentOrder 8 ;
+                                            oc:textContent "**Key Takeaways (middle section):**" ],
+                                        [ a oc:BulletList ;
+                                            oc:blockType "bullet_list" ;
+                                            oc:contentOrder 7 ;
+                                            oc:hasItem [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 1 ;
+                                                    oc:itemText "4 key metrics as large-number callouts: Total Raised, # Rounds, Avg Pre-Money Valuation, Largest Round" ],
+                                                [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 2 ;
+                                                    oc:itemText "Each in a card with `F5F5F5` fill and a thin `D0D0D0` border — no shadow, no color fills" ],
+                                                [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 3 ;
+                                                    oc:itemText "If a stat is surprising or extreme (e.g., 3x normal volume, a record deal), a small colored dot or underline may be placed next to that single number — otherwise keep fully monochrome" ],
+                                                [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 4 ;
+                                                    oc:itemText "If pre-money valuations are mostly undisclosed, substitute with a different metric (e.g., Median Round Size, # New Unicorns)" ] ],
+                                        [ a oc:Paragraph ;
+                                            oc:blockType "paragraph" ;
+                                            oc:contentOrder 10 ;
+                                            oc:textContent "**Top Deals Table (bottom section):**" ],
+                                        [ a oc:BulletList ;
+                                            oc:blockType "bullet_list" ;
+                                            oc:contentOrder 18 ;
+                                            oc:hasItem [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 1 ;
+                                                    oc:itemText "Small text in medium gray: \"Deal Flow Digest · [Period] · Sources: S&P Global Capital IQ · Generated [Date]\"" ] ],
+                                        [ a oc:Paragraph ;
+                                            oc:blockType "paragraph" ;
+                                            oc:contentOrder 12 ;
+                                            oc:textContent """**Deal Link Implementation (pptxgenjs):**
+In pptxgenjs, hyperlinks are added to table cells using the `options.hyperlink` property on the cell object:""" ],
+                                        [ a oc:Paragraph ;
+                                            oc:blockType "paragraph" ;
+                                            oc:contentOrder 1 ;
+                                            oc:textContent "**Color philosophy: Minimal, monochrome-first.** The slide should feel like a high-end financial brief — black, white, and gray dominate. Color is used **only** where it carries meaning (e.g., a red indicator for a down round, a green indicator for a standout metric) or where the reader would naturally expect it (company logos). Never use color for purely decorative purposes like background fills, accent bars, or gradient effects." ],
+                                        [ a oc:CodeExample ;
+                                            oc:blockType "code_block" ;
+                                            oc:codeContent """// Table cell with Capital IQ deal link
+{
+  text: "View →",
+  options: {
+    hyperlink: {
+      url: `https://www.capitaliq.spglobal.com/web/client?#offering/capitalOfferingProfile?id=${transactionId}`
+    },
+    color: "2B5797",
+    fontSize: 9,
+    fontFace: "Arial"
+  }
+}
+""" ;
+                                            oc:codeLanguage "javascript" ;
+                                            oc:contentOrder 13 ;
+                                            oc:sourceLocation "lines 402-415" ],
+                                        [ a oc:BulletList ;
+                                            oc:blockType "bullet_list" ;
+                                            oc:contentOrder 3 ;
+                                            oc:hasItem [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 6 ;
+                                                    oc:itemText "Card backgrounds: `F5F5F5` (off-white / very light gray) — stat card fills, alternating table rows" ],
+                                                [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 3 ;
+                                                    oc:itemText "Primary text: `1A1A1A` (near-black) — all body text, stat numbers, takeaways" ],
+                                                [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 5 ;
+                                                    oc:itemText "Borders & dividers: `D0D0D0` (light gray) — subtle structural lines, card outlines, table borders" ],
+                                                [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 4 ;
+                                                    oc:itemText "Secondary text: `6B6B6B` (medium gray) — labels, captions, footer, date stamps" ],
+                                                [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:hasChild [ a oc:BulletList ;
+                                                            oc:blockType "bullet_list" ;
+                                                            oc:contentOrder 1 ;
+                                                            oc:hasItem [ a oc:BulletItem ;
+                                                                    oc:blockType "bullet_item" ;
+                                                                    oc:itemOrder 2 ;
+                                                                    oc:itemText "Standout positive metrics (new unicorn, outsized round): `2E7D32` (muted green) — same minimal usage: a dot, a small tag, or a single highlighted number" ],
+                                                                [ a oc:BulletItem ;
+                                                                    oc:blockType "bullet_item" ;
+                                                                    oc:itemOrder 3 ;
+                                                                    oc:itemText "If no data points warrant a color indicator, **use no color at all**. A fully monochrome slide is perfectly correct." ],
+                                                                [ a oc:BulletItem ;
+                                                                    oc:blockType "bullet_item" ;
+                                                                    oc:itemOrder 1 ;
+                                                                    oc:itemText "Down rounds or negative signals: `C0392B` (muted red) — use only as a small dot, tag, or single-word highlight, never as a fill or background" ] ] ;
+                                                    oc:itemOrder 8 ;
+                                                    oc:itemText "**Semantic color (sparingly):**" ],
+                                                [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 2 ;
+                                                    oc:itemText "Header bar: `1A1A1A` (near-black) — strong contrast for the title region" ],
+                                                [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 1 ;
+                                                    oc:itemText "Primary background: `FFFFFF` (white) — clean, open slide background" ],
+                                                [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 7 ;
+                                                    oc:itemText "Link text: `2B5797` (muted blue) — Capital IQ deal links in the table (the only blue on the slide)" ] ],
+                                        [ a oc:BulletList ;
+                                            oc:blockType "bullet_list" ;
+                                            oc:contentOrder 9 ;
+                                            oc:hasItem [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 3 ;
+                                                    oc:itemText "Left-aligned, with enough spacing to breathe" ],
+                                                [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 2 ;
+                                                    oc:itemText "If no logo available, use a **gray circle** with the company initial in white — not a colored circle" ],
+                                                [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 5 ;
+                                                    oc:itemText "Include valuation context where available (e.g., \"at a $5B post-money valuation\")" ],
+                                                [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 1 ;
+                                                    oc:itemText "3–5 one-line takeaways, each prefixed with the relevant company logo (small, ~0.35\" tall)" ],
+                                                [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 4 ;
+                                                    oc:itemText "Down-round or negative takeaways may use a small red dot prefix; otherwise no color" ] ],
+                                        [ a oc:Paragraph ;
+                                            oc:blockType "paragraph" ;
+                                            oc:contentOrder 16 ;
+                                            oc:textContent "Adjust `colW` values as needed, but always recompute `TABLE_X` from `(SLIDE_W - sum(colW)) / 2` to keep the table centered." ],
+                                        [ a oc:Paragraph ;
+                                            oc:blockType "paragraph" ;
+                                            oc:contentOrder 17 ;
+                                            oc:textContent "**Footer:**" ],
+                                        [ a oc:BulletList ;
+                                            oc:blockType "bullet_list" ;
+                                            oc:contentOrder 20 ;
+                                            oc:hasItem [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 5 ;
+                                                    oc:itemText "When in doubt, leave it gray." ],
+                                                [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 1 ;
+                                                    oc:itemText "Company logos are the only \"full color\" elements on the slide — they appear as-is from the source." ],
+                                                [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 3 ;
+                                                    oc:itemText "Outside of logos and links, the slide should look correct printed on a black-and-white printer." ],
+                                                [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 2 ;
+                                                    oc:itemText "Deal links use muted blue (`2B5797`) — this is the only non-monochrome text color besides semantic red/green." ],
+                                                [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 4 ;
+                                                    oc:itemText "Never apply color to backgrounds, accent bars, decorative shapes, or section dividers." ] ],
+                                        [ a oc:Paragraph ;
+                                            oc:blockType "paragraph" ;
+                                            oc:contentOrder 2 ;
+                                            oc:textContent "**Color palette — Monochrome Executive:**" ],
+                                        [ a oc:Paragraph ;
+                                            oc:blockType "paragraph" ;
+                                            oc:contentOrder 4 ;
+                                            oc:textContent "**Typography:**" ],
+                                        [ a oc:CodeExample ;
+                                            oc:blockType "code_block" ;
+                                            oc:codeContent """const SLIDE_W = 13.33; // 16:9 slide width
+const TABLE_W = 12.5;  // total table width (sum of all column widths)
+const TABLE_X = (SLIDE_W - TABLE_W) / 2; // ≈ 0.42"
+
+slide.addTable(tableRows, {
+  x: TABLE_X,
+  y: tableY,
+  w: TABLE_W,
+  colW: [1.8, 0.9, 0.9, 0.9, 1.0, 1.1, 1.2, 1.6, 0.7], // Company, Type, Announced, Closed, Amount, Pre-$, Post-$, Lead, Link
+  // ... other options
+});
+""" ;
+                                            oc:codeLanguage "javascript" ;
+                                            oc:contentOrder 15 ;
+                                            oc:sourceLocation "lines 419-431" ],
+                                        [ a oc:Paragraph ;
+                                            oc:blockType "paragraph" ;
+                                            oc:contentOrder 19 ;
+                                            oc:textContent "**General color rules (enforce strictly):**" ],
+                                        [ a oc:Paragraph ;
+                                            oc:blockType "paragraph" ;
+                                            oc:contentOrder 14 ;
+                                            oc:textContent """**Table Centering (pptxgenjs):**
+Always center the deal table on the slide. Calculate the x position dynamically:""" ],
+                                        [ a oc:BulletList ;
+                                            oc:blockType "bullet_list" ;
+                                            oc:contentOrder 11 ;
+                                            oc:hasItem [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 9 ;
+                                                    oc:itemText "No colored fills in table cells. If a deal is a down round, a small red text tag \"(↓ down)\" may appear next to the amount — that is the only permitted color in the table." ],
+                                                [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:hasChild [ a oc:Paragraph ;
+                                                            oc:blockType "paragraph" ;
+                                                            oc:contentOrder 2 ;
+                                                            oc:textContent "where `<transaction_id>` is the `transaction_id` from `get_rounds_of_funding_from_identifiers`." ],
+                                                        [ a oc:CodeExample ;
+                                                            oc:blockType "code_block" ;
+                                                            oc:codeContent """https://www.capitaliq.spglobal.com/web/client?#offering/capitalOfferingProfile?id=<transaction_id>
+""" ;
+                                                            oc:codeLanguage "" ;
+                                                            oc:contentOrder 1 ;
+                                                            oc:sourceLocation "lines 390-392" ] ;
+                                                    oc:itemOrder 4 ;
+                                                    oc:itemText "The **Deal Link** column contains a clickable \"View →\" text linking to Capital IQ:" ],
+                                                [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 7 ;
+                                                    oc:itemText "**Center the table horizontally** on the slide. Calculate the table's total width, then set `x` so it is centered within the slide width: `x = (slideWidth - tableWidth) / 2`. For a 16:9 layout (13.33\" wide), if the table is 12\" wide, use `x = 0.67`. Never left-align the table to the slide edge." ],
+                                                [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 6 ;
+                                                    oc:itemText "Header row with near-black (`1A1A1A`) fill and white text; alternating rows in `F5F5F5` and `FFFFFF`" ],
+                                                [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 1 ;
+                                                    oc:itemText "Compact table showing the 4–6 most notable deals" ],
+                                                [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 8 ;
+                                                    oc:itemText "Keep it tight — this is a reference, not the focal point" ],
+                                                [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 2 ;
+                                                    oc:itemText "Columns: Company, Type (Series X), Announced (date), Closed (date), Amount ($M), Pre-Money ($M), Post-Money ($M), Lead Investor, Deal Link" ],
+                                                [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 5 ;
+                                                    oc:itemText "If pre-money or post-money valuation is not disclosed, show \"—\" in that cell" ],
+                                                [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 3 ;
+                                                    oc:itemText "**Announced** and **Closed** columns show dates in `MMM DD` format (e.g., \"Jan 15\"). These columns are required and must always be present. If a date is not available, show \"—\"." ] ] ;
+                                    oc:sectionLevel 4 ;
+                                    oc:sectionOrder 24 ;
+                                    oc:sectionTitle "Design Specifications" ],
+                                [ a oc:Section ;
+                                    oc:hasContent [ a oc:Paragraph ;
+                                            oc:blockType "paragraph" ;
+                                            oc:contentOrder 2 ;
+                                            oc:textContent "Use factory functions (not shared objects) for shadows and repeated styles per the pptxgenjs pitfalls guidance." ],
+                                        [ a oc:CodeExample ;
+                                            oc:blockType "code_block" ;
+                                            oc:codeContent """const pptxgen = require("pptxgenjs");
+const pres = new pptxgen();
+pres.layout = "LAYOUT_16x9";
+pres.title = "Deal Flow Digest";
+
+const slide = pres.addSlide();
+const SLIDE_W = 13.33; // 16:9 slide width in inches
+
+// 1. Dark header bar with title and period
+// 2. Stat cards row (4 cards: Total Raised, # Rounds, Avg Pre-Money, Largest Round)
+// 3. Key takeaways section with logos (include valuation context)
+// 4. Top deals table with Announced, Closed, Pre-Money, Post-Money columns and Capital IQ deal links
+//    - Center the table: x = (SLIDE_W - tableWidth) / 2
+// 5. Footer
+
+pres.writeFile({ fileName: "/home/claude/deal-flow-digest.pptx" });
+""" ;
+                                            oc:codeLanguage "javascript" ;
+                                            oc:contentOrder 1 ;
+                                            oc:sourceLocation "lines 446-463" ] ;
+                                    oc:sectionLevel 4 ;
+                                    oc:sectionOrder 25 ;
+                                    oc:sectionTitle "Code Structure" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 22 ;
+                            oc:sectionTitle "Step 7: Generate the One-Page PPTX" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "For each sector specified, build a company universe using a validated bootstrapping approach:" ],
+                                _:ref_7058627f0cca8896,
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "If the user provides specific companies, add those directly but still run them through the pre-validation triage. Never skip validation — even well-known brand names can fail silently." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent "Keep the universe manageable — aim for 15–40 **resolved, operating** companies per sector. For a multi-sector digest, this might total 50–100+ companies." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 14 ;
+                            oc:sectionTitle "Step 2: Build the Company Universe" ],
+                        [ a oc:Section ;
+                            oc:hasContent _:ref_7a9bf929767bdc1e ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 27 ;
+                            oc:sectionTitle "Step 9: Present Results" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "For any company involved in a significant deal (large round, notable valuation shift), get a brief description:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """get_company_summary_from_identifiers(identifiers=[notable_companies])
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 181-183" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "This adds context to the narrative (e.g., \"The company, an AI infrastructure startup founded in 2021, is expanding into...\")." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 16 ;
+                            oc:sectionTitle "Step 4: Pull Company Context for Notable Deals" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "For each company featured in the key takeaways or notable deals, generate a logo using a two-tier local pipeline. **Do not use Clearbit** (`logo.clearbit.com`) — it is deprecated and consistently fails. External logo CDNs (Brandfetch, logo.dev, Google Favicons) require API keys or are blocked by network restrictions. Instead, use the following approach:" ] ;
+                            oc:hasSubsection [ a oc:Section ;
+                                    oc:hasContent [ a oc:BulletList ;
+                                            oc:blockType "bullet_list" ;
+                                            oc:contentOrder 3 ;
+                                            oc:hasItem [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 5 ;
+                                                    oc:itemText "Never mix logo styles randomly — if most companies resolve to brand icons, the few fallbacks should blend in naturally" ],
+                                                [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 3 ;
+                                                    oc:itemText "On the slide, display logos at 0.35\"–0.5\" tall — they're accents, not focal points" ],
+                                                [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 1 ;
+                                                    oc:itemText "Save all logos to `/home/claude/logos/[company-name].png`" ],
+                                                [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 2 ;
+                                                    oc:itemText "All logos are 128×128 PNG with transparent backgrounds" ],
+                                                [ a oc:BulletItem ;
+                                                    oc:blockType "bullet_item" ;
+                                                    oc:itemOrder 4 ;
+                                                    oc:itemText "Initial-fallback circles use gray (`BDBDBD`) fill with white text — consistent with the monochrome palette" ] ],
+                                        [ a oc:CodeExample ;
+                                            oc:blockType "code_block" ;
+                                            oc:codeContent """async function fetchLogo(companyName, outputDir) {
+    const fileName = companyName.toLowerCase().replace(/[\\s.]+/g, '-') + '.png';
+    const outPath = path.join(outputDir, fileName);
+
+    // Tier 1: Try simple-icons
+    const icon = findSimpleIcon(companyName);
+    if (icon) {
+        await simpleIconToPng(icon, outPath);
+        return { path: outPath, source: 'simple-icons' };
+    }
+
+    // Tier 2: Generate initial-based fallback
+    await generateInitialLogo(companyName, outPath);
+    return { path: outPath, source: 'initial-fallback' };
+}
+""" ;
+                                            oc:codeLanguage "javascript" ;
+                                            oc:contentOrder 1 ;
+                                            oc:sourceLocation "lines 283-299" ],
+                                        [ a oc:Paragraph ;
+                                            oc:blockType "paragraph" ;
+                                            oc:contentOrder 2 ;
+                                            oc:textContent "**Logo guidelines:**" ] ;
+                                    oc:sectionLevel 4 ;
+                                    oc:sectionOrder 21 ;
+                                    oc:sectionTitle "Complete Pipeline" ],
+                                [ a oc:Section ;
+                                    oc:hasContent [ a oc:Paragraph ;
+                                            oc:blockType "paragraph" ;
+                                            oc:contentOrder 3 ;
+                                            oc:textContent "**Lookup strategy:**" ],
+                                        [ a oc:CodeExample ;
+                                            oc:blockType "code_block" ;
+                                            oc:codeContent """const si = require('simple-icons');
+const sharp = require('sharp');
+
+// Find an icon by exact title match (case-insensitive)
+function findSimpleIcon(companyName) {
+    // Try exact match first
+    for (const [key, val] of Object.entries(si)) {
+        if (!key.startsWith('si') || !val || !val.title) continue;
+        if (val.title.toLowerCase() === companyName.toLowerCase()) return val;
+    }
+    // Try without common suffixes (AI, Inc., Corp.)
+    const stripped = companyName.replace(/\\s*(AI|Inc\\.?|Corp\\.?|Ltd\\.?)$/i, '').trim();
+    if (stripped !== companyName) {
+        for (const [key, val] of Object.entries(si)) {
+            if (!key.startsWith('si') || !val || !val.title) continue;
+            if (val.title.toLowerCase() === stripped.toLowerCase()) return val;
+        }
+    }
+    return null;
+}
+
+// Convert SVG to PNG with the brand's official color
+async function simpleIconToPng(icon, outputPath) {
+    const coloredSvg = icon.svg.replace('<svg', `<svg fill="#${icon.hex}"`);
+    await sharp(Buffer.from(coloredSvg))
+        .resize(128, 128, { fit: 'contain', background: { r: 255, g: 255, b: 255, alpha: 0 } })
+        .png()
+        .toFile(outputPath);
+}
+""" ;
+                                            oc:codeLanguage "javascript" ;
+                                            oc:contentOrder 4 ;
+                                            oc:sourceLocation "lines 229-259" ],
+                                        [ a oc:Paragraph ;
+                                            oc:blockType "paragraph" ;
+                                            oc:contentOrder 5 ;
+                                            oc:textContent "**Coverage:** ~43% of typical deal flow companies (strong for major tech brands like Stripe, Anthropic, Databricks, Snowflake, Discord, Shopify, SpaceX, Mistral AI, Hugging Face; weaker for niche fintech, biotech, or early-stage companies)." ],
+                                        [ a oc:CodeExample ;
+                                            oc:blockType "code_block" ;
+                                            oc:codeContent """npm install simple-icons sharp
+""" ;
+                                            oc:codeLanguage "bash" ;
+                                            oc:contentOrder 2 ;
+                                            oc:sourceLocation "lines 223-225" ],
+                                        [ a oc:Paragraph ;
+                                            oc:blockType "paragraph" ;
+                                            oc:contentOrder 1 ;
+                                            oc:textContent "The `simple-icons` package bundles high-quality SVG icons for thousands of well-known brands. It works entirely offline — no API keys, no network calls. Install it alongside `sharp` for SVG → PNG conversion:" ] ;
+                                    oc:sectionLevel 4 ;
+                                    oc:sectionOrder 19 ;
+                                    oc:sectionTitle "Tier 1: `simple-icons` npm Package (3,300+ Brand SVGs, No Network Required)" ],
+                                [ a oc:Section ;
+                                    oc:hasContent [ a oc:Paragraph ;
+                                            oc:blockType "paragraph" ;
+                                            oc:contentOrder 1 ;
+                                            oc:textContent "For companies not found in `simple-icons`, generate a clean initial-based logo as a PNG:" ],
+                                        [ a oc:CodeExample ;
+                                            oc:blockType "code_block" ;
+                                            oc:codeContent """async function generateInitialLogo(companyName, outputPath) {
+    const initial = companyName.charAt(0).toUpperCase();
+    const svg = `
+    <svg width="128" height="128" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="64" cy="64" r="64" fill="#BDBDBD"/>
+        <text x="64" y="64" font-family="Arial, Helvetica, sans-serif"
+              font-size="56" font-weight="bold" fill="#FFFFFF"
+              text-anchor="middle" dominant-baseline="central">${initial}</text>
+    </svg>`;
+    await sharp(Buffer.from(svg)).png().toFile(outputPath);
+}
+""" ;
+                                            oc:codeLanguage "javascript" ;
+                                            oc:contentOrder 2 ;
+                                            oc:sourceLocation "lines 267-279" ] ;
+                                    oc:sectionLevel 4 ;
+                                    oc:sectionOrder 20 ;
+                                    oc:sectionTitle "Tier 2: Initial-Based Fallback via `sharp` (100% Coverage)" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 18 ;
+                            oc:sectionTitle "Step 6: Generate Company Logos" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """get_rounds_of_funding_info_from_transaction_ids(
+    transaction_ids=[all_funding_ids]
+)
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 7 ;
+                                    oc:sourceLocation "lines 154-158" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 6 ;
+                                    oc:textContent "Collect all `transaction_id` values from successful results, then enrich with detailed round info:" ],
+                                [ a oc:BlockQuote ;
+                                    oc:blockType "blockquote" ;
+                                    oc:contentOrder 11 ;
+                                    oc:quoteContent "**Dates are required.** The announcement and close dates must always appear in the final slide's deal table. If only one date is available, show it and mark the other as \"—\"." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "Process in batches of 15–20 if the universe is large." ],
+                                _:ref_8addbfd664a08142,
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "For all companies in the universe:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """get_rounds_of_funding_from_identifiers(
+    identifiers=[batch],
+    role="company_raising_funds",
+    start_date="YYYY-MM-DD",
+    end_date="YYYY-MM-DD"
+)
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 137-144" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent "**After each batch, identify companies with empty results.** For any company expected to have activity:" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 8 ;
+                                    oc:textContent "Pass ALL transaction IDs in a single call (or small number of calls) rather than one per transaction — the tool handles batches efficiently." ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 10 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "`transaction_id` — needed for the Capital IQ deal link" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 8 ;
+                                            oc:itemText "Round type (Series A, B, C, etc.)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 5 ;
+                                            oc:itemText "**Pre-money valuation** (if disclosed)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "**Announcement date** — when the round was publicly announced" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "Amount raised" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 6 ;
+                                            oc:itemText "**Post-money valuation** (if disclosed)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 9 ;
+                                            oc:itemText "Security terms" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 7 ;
+                                            oc:itemText "Lead investors" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "**Close date** — when the round officially closed" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 11 ;
+                                            oc:itemText "Pricing trend (up-round / down-round / flat)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 10 ;
+                                            oc:itemText "Advisors" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 9 ;
+                                    oc:textContent "**Extract the following from each round (critical for the slide):**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 15 ;
+                            oc:sectionTitle "Step 3: Pull Funding Rounds" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Follow the QA process from the PPTX skill:" ],
+                                _:ref_b7f2d7ff9e986ca3 ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 26 ;
+                            oc:sectionTitle "Step 8: QA the Slide" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Before designing the slide, analyze the data to surface the story:" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 7 ;
+                                    oc:textContent "Examples:" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 8 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "\"Down-round activity ticked up: 2 of 6 late-stage rounds priced below prior valuations.\"" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "\"AI sector raised $2.4B across 8 rounds — 3x the prior week, led by a $800M mega-round from [Company] at a $12B post-money valuation.\"" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "\"[Company] closed a $200M Series D at $3.5B pre-money, up from $1.8B in its Series C — signaling strong demand for AI developer tools.\"" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Flag as \"Notable\":**" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 3 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "Significant valuation jumps (post-money ≥ 2x the last known valuation)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 6 ;
+                                            oc:itemText "Unusually large investor syndicates" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Rounds ≥ $100M" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "New unicorns (post-money valuation crossing $1B)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Down rounds (pricing trend = down)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 5 ;
+                                            oc:itemText "Repeat raisers (same company raising again within 6 months)" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent "**Identify Trends:**" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 5 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Which sub-sectors are hottest (most rounds, most capital)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 6 ;
+                                            oc:itemText "Valuation trends (are pre-money valuations compressing or expanding?)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 5 ;
+                                            oc:itemText "Geographic concentration" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Total capital deployed this period vs. typical (if historical data available)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "Most active investors across the digest" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Round stage distribution (is early-stage or late-stage dominating?)" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 6 ;
+                                    oc:textContent """**Select Key Takeaways (3–5):**
+Distill the most important signals into 3–5 concise bullet-style takeaways. These are the centerpiece of the slide. Each takeaway should be one sentence, punchy, and data-backed.""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 17 ;
+                            oc:sectionTitle "Step 5: Identify Highlights & Trends" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 12 ;
+                    oc:sectionTitle "Workflow" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "\"What happened in venture this week across all sectors I follow?\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "\"Give me a weekly deal flow digest for AI and fintech\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "\"Summarize this week's funding in biotech\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "\"Quick deal flow slide for climate tech this month\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "\"Deal roundup for my coverage — cybersecurity, cloud infrastructure, and dev tools — last 2 weeks\"" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 31 ;
+                    oc:sectionTitle "Example Prompts" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "**Read** `/mnt/skills/public/pptx/SKILL.md` before generating the PowerPoint (and its sub-reference `pptxgenjs.md` for creating from scratch)" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "This skill produces a one-slide PPTX briefing:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Nested Skills" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Trigger on any of these patterns:" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 7 ;
+                                    oc:itemText "Any periodic briefing request about deals, raises, or rounds" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 6 ;
+                                    oc:itemText "\"Summarize recent funding activity\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "\"What deals closed in [sector/companies] recently?\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "\"Capital markets update for my coverage universe\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "\"Weekly funding recap for [sector]\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "\"Transaction roundup\" or \"deal roundup\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "\"Give me a deal flow digest for this week\"" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "When to Use" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 1 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 7 ;
+                                            oc:itemText "**Invalid transaction IDs for links:** If a `transaction_id` from the funding tool doesn't produce a valid Capital IQ URL, omit the link cell for that row rather than including a broken link." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "**No activity in period:** If a sector had zero funding rounds, note this explicitly on the slide (\"No transactions recorded in [Sector] during the period\") — absence of activity is itself informative." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 6 ;
+                                            oc:itemText "**Stale seeds:** If competitor expansion returns very few results for a sector, the seed companies may be too niche. Broaden by adding 2–3 more well-known names and re-expanding." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "**Too many deals for one slide:** If there are more than 6 notable deals, show the top 6 in the table and add a footnote: \"+N additional deals not shown.\" Prioritize by deal size." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "**Sparse valuation data:** If pre-money and post-money valuations are undisclosed for most transactions, note the data limitation in a footer annotation and use \"—\" in the table. Adjust the stat card to show a different metric (e.g., Median Round Size) instead of Avg Pre-Money." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 5 ;
+                                            oc:itemText "**Large universes:** For multi-sector digests with 100+ companies, batch all API calls in groups of 15–20. Prioritize depth on notable deals over completeness on minor ones." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "**Logo retrieval failures:** The `simple-icons` npm package provides ~43% coverage for typical deal flow companies. For the remainder, use the `sharp`-generated initial-based fallback. Keep a consistent icon style — don't mix random approaches. If `simple-icons` or `sharp` fail to install, fall back to pptxgenjs shape-based initials (gray ellipse + white text overlay) which require no external dependencies." ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 30 ;
+                            oc:sectionTitle "Data Quality Issues" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 1 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "**Subsidiary companies:** DeepMind, GitHub, Instagram, WhatsApp, YouTube, BeReal, etc. are subsidiaries — they have zero independent funding rounds. Note these as \"acquired/subsidiary\" in context but do not report them as \"no activity.\"" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "**`get_funding_summary_from_identifiers` errors or returns zeros:** Fall back to `get_rounds_of_funding_from_identifiers` — the summary tool is less reliable. Never rely on the summary tool as the sole data source." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "**Empty results for a known company:** First check `get_info_from_identifiers` — if that fails, try the alias from `references/sector-seeds.md` or the `company_id` directly. Common brand→legal mismatches: Together AI → \"Together Computer, Inc.\", Character.ai → \"Character Technologies, Inc.\", Runway ML → \"Runway AI, Inc.\"." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "**Defunct companies:** Companies like Convoy (shut down Oct 2023) still resolve in S&P Global but will never have new activity. The `references/sector-seeds.md` file flags these — check it before including a company." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 5 ;
+                                            oc:itemText "**Wrong `role` parameter:** If investor-perspective queries return empty, verify you're using `company_investing_in_round_of_funding`, not `company_raising_funds` (and vice versa)." ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 29 ;
+                            oc:sectionTitle "Entity Resolution Failures" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 28 ;
+                    oc:sectionTitle "Error Handling" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Weekly Deal Flow Digest" ] ;
+    oc:hasWorkflow _:ref_7058627f0cca8896,
+        _:ref_7a9bf929767bdc1e,
+        _:ref_8addbfd664a08142,
+        _:ref_a2a5f27a896cac39,
+        _:ref_b7f2d7ff9e986ca3,
+        _:ref_e40d419ecfed7b57 ;
+    oc:impartsKnowledge oc:kn_06fcf281,
+        oc:kn_2475722c,
+        oc:kn_3190f06c,
+        oc:kn_3a9bb77e,
+        oc:kn_8e5e17a1,
+        oc:kn_ee2d93c2 ;
     oc:isUserInvocable true ;
     oc:nature "Work" ;
     oc:requiresState oc:APIKeySet,
         oc:NetworkAvailable ;
-    oc:resolvesIntent "compile transaction roundup",
-        "create weekly funding recap",
-        "generate deal flow digest",
-        "produce funding briefing slide",
-        "summarize capital markets activity" ;
+    oc:resolvesIntent "compile capital markets briefing",
+        "create funding recap slide",
+        "generate weekly deal flow digest",
+        "produce deal roundup presentation",
+        "summarize recent funding rounds" ;
     oc:yieldsState oc:DocumentCreated .
 
-oc:kn_05a26c61 a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "Before any funding round queries, always batch all candidate identifiers into a single get_info_from_identifiers call" ;
-    oc:directiveContent "Pre-validate ALL company identifiers via get_info_from_identifiers before querying funding data. Check both resolution status and operating status ('Operating' vs 'Operating Subsidiary' vs other)." ;
-    oc:hasRationale "This single pre-validation step prevents the majority of empty-result issues caused by brand name mismatches, subsidiary companies, or defunct entities" ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_20c79945 a oc:KnowledgeNode,
-        oc:SideEffect ;
-    oc:appliesToContext "Always, when generating any funding digest slide" ;
-    oc:directiveContent "The AI disclaimer 'Analysis is AI-generated — please confirm all outputs' MUST appear as a prominent yellow banner in the PowerPoint footer. The report is incomplete without it." ;
-    oc:hasRationale "Mandatory compliance requirement — AI-generated financial analysis must be clearly labeled" ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_640947f8 a oc:AntiPattern,
+oc:kn_06fcf281 a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When generating company logos for the slide" ;
-    oc:directiveContent "Never use Clearbit (logo.clearbit.com) for company logos — it is deprecated and consistently fails. Use simple-icons npm package for known brands and sharp-generated initial-based fallback for others." ;
-    oc:hasRationale "Clearbit is unreliable and external logo CDNs require API keys or are blocked by network restrictions" ;
+    oc:appliesToContext "When generating company logos" ;
+    oc:directiveContent "Never use Clearbit (logo.clearbit.com) for company logos — it is deprecated and consistently fails. Do not use external logo CDNs requiring API keys." ;
+    oc:hasRationale "Clearbit is deprecated; use simple-icons npm package (offline) or sharp-generated initial-based fallback instead" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_a6420534 a oc:Constraint,
+oc:kn_2475722c a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Before any funding round queries" ;
+    oc:directiveContent "Never skip pre-validation of company identifiers before querying funding tools. Always run get_info_from_identifiers first to check resolution and status (Operating vs Operating Subsidiary)." ;
+    oc:hasRationale "Skipping pre-validation causes silent empty results — subsidiaries return zero funding rounds and unresolved names waste API calls" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_3190f06c a oc:Constraint,
         oc:KnowledgeNode ;
     oc:appliesToContext "When calling get_rounds_of_funding_from_identifiers" ;
-    oc:directiveContent "The 'role' parameter must be 'company_raising_funds' for deal flow digests (company perspective). Using 'company_investing_in_round_of_funding' returns empty results silently." ;
-    oc:hasRationale "Wrong role parameter returns empty results silently with no error message, causing false negatives" ;
+    oc:directiveContent "The role parameter must be 'company_raising_funds' for deal flow digests. Using 'company_investing_in_round_of_funding' returns empty results silently." ;
+    oc:hasRationale "Wrong role parameter is a silent failure mode — no error, just empty data" ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_b111b8eb a oc:AntiPattern,
+oc:kn_3a9bb77e a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When pulling funding data for any company in the universe" ;
-    oc:directiveContent "Never use get_funding_summary_from_identifiers as the primary data source. Always use get_rounds_of_funding_from_identifiers as the primary tool; the summary tool is less reliable and can return errors or incomplete data." ;
-    oc:hasRationale "The summary tool can return errors or incomplete data even when detailed rounds exist, leading to silent data loss" ;
+    oc:appliesToContext "When processing company universes" ;
+    oc:directiveContent "Subsidiaries (status='Operating Subsidiary') have zero independent funding rounds — their capital events are tracked at the parent level. Do not query them for funding; note as context only." ;
+    oc:hasRationale "Querying subsidiaries wastes API calls and returns empty results that may be misinterpreted as 'no activity'" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_b9d49651 a oc:Constraint,
+oc:kn_8e5e17a1 a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When triaging companies after pre-validation — DeepMind, GitHub, BeReal, Instagram, WhatsApp, YouTube are common examples" ;
-    oc:directiveContent "Subsidiary companies (status='Operating Subsidiary') will return zero independent funding rounds. Skip them for funding queries and note them as context instead." ;
-    oc:hasRationale "Their capital events are tracked at the parent level; querying them wastes API calls and produces misleading 'no activity' results" ;
+    oc:appliesToContext "When designing the PPTX slide layout" ;
+    oc:directiveContent "The slide must follow a monochrome-first design philosophy: black, white, and gray dominate. Color is only permitted for semantic meaning (red for down rounds, green for standout metrics) or company logos. The slide should look correct on a black-and-white printer." ;
+    oc:hasRationale "Maintains professional financial briefing aesthetic and ensures readability across all output formats" .
+
+oc:kn_ee2d93c2 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When querying funding data" ;
+    oc:directiveContent "Never use get_funding_summary_from_identifiers as the primary data source. It is less reliable and can return errors or incomplete data even when detailed rounds exist." ;
+    oc:hasRationale "The summary tool is faster but unreliable; always use get_rounds_of_funding_from_identifiers as primary and summary only for quick aggregate checks" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_c50bffe0 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When processing large company universes (50+ companies) for funding rounds" ;
-    oc:directiveContent "Process company universes in batches of 15-20 identifiers. After each batch, check for empty results and retry with legal entity names or company_id before moving on." ;
-    oc:hasRationale "Batching prevents API timeouts and allows incremental error recovery without losing progress on the entire universe" ;
-    oc:severityLevel "MEDIUM" .
+_:ref_01867fc3525f962d a oc:WorkflowStep ;
+    dcterms:description "**Validate expanded universe:**" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild [ a oc:Paragraph ;
+            oc:blockType "paragraph" ;
+            oc:contentOrder 2 ;
+            oc:textContent "Apply the same triage. Filter by `simple_industry` matching the target sector. Drop any unresolved names or subsidiaries." ],
+        [ a oc:CodeExample ;
+            oc:blockType "code_block" ;
+            oc:codeContent """get_info_from_identifiers(identifiers=[new_competitors])
+""" ;
+            oc:codeLanguage "" ;
+            oc:contentOrder 1 ;
+            oc:sourceLocation "lines 124-126" ] ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
 
-oc:kn_d79e98fa a oc:KnowledgeNode,
-        oc:PostFlightValidation ;
-    oc:appliesToContext "After generating the PPTX file, before presenting to the user" ;
-    oc:directiveContent "QA the slide using markitdown for content verification, LibreOffice PDF conversion + pdftoppm for visual inspection, and manual Capital IQ URL validation for link correctness. Require at least one fix-and-verify cycle." ;
-    oc:hasRationale "Catches overlapping elements, text overflow, alignment issues, broken links, and data accuracy problems before delivery" ;
-    oc:severityLevel "HIGH" .
+_:ref_04892aae25d4f49f a oc:WorkflowStep ;
+    dcterms:description "**Seed companies** from domain knowledge (see `references/sector-seeds.md`)" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild [ a oc:BulletList ;
+            oc:blockType "bullet_list" ;
+            oc:contentOrder 1 ;
+            oc:hasItem [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 2 ;
+                    oc:itemText "The seeds file includes `company_id` values for known alias mismatches. Use these directly if the brand name fails." ],
+                [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 1 ;
+                    oc:itemText "Pay attention to the ⚠️ warnings and alias notes in the seeds file — some well-known companies are subsidiaries, have been acquired, or require a specific legal name to resolve." ] ] ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
 
-oc:kn_e6c590d7 a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When designing the single-slide PowerPoint layout" ;
-    oc:directiveContent "Use a monochrome-first color philosophy: black, white, and gray dominate. Color is used only where it carries semantic meaning (red for down rounds, green for standout metrics, blue for links) or in company logos. The slide should look correct on a black-and-white printer." ;
-    oc:hasRationale "Financial briefings demand visual restraint; excessive color undermines credibility and distracts from data" ;
-    oc:severityLevel "MEDIUM" .
+_:ref_0cfb3d0276b5f5d1 a oc:CodeExample ;
+    oc:blockType "code_block" ;
+    oc:codeContent """get_competitors_from_identifiers(identifiers=[resolved_seeds], competitor_source="all")
+""" ;
+    oc:codeLanguage "" ;
+    oc:contentOrder 1 ;
+    oc:sourceLocation "lines 119-121" .
 
-oc:kn_ed4acd6f a oc:FallbackStrategy,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When logo generation pipeline encounters installation failures" ;
-    oc:directiveContent "If simple-icons or sharp fail to install, fall back to pptxgenjs shape-based initials (gray ellipse + white text overlay) which require no external dependencies." ;
-    oc:hasRationale "Ensures the slide can always be completed even without npm package availability" ;
-    oc:severityLevel "LOW" .
+_:ref_0ea4947196bc624a a oc:WorkflowStep ;
+    dcterms:description "**What is the `status` field?**" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild [ a oc:BulletList ;
+            oc:blockType "bullet_list" ;
+            oc:contentOrder 1 ;
+            oc:hasItem [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 1 ;
+                    oc:itemText "`\"Operating\"` → Safe to query for funding rounds." ],
+                [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 2 ;
+                    oc:itemText "`\"Operating Subsidiary\"` → The company exists but is owned by a parent. It will return **zero funding rounds**. Note this in the digest as context (e.g., \"acquired by [Parent]\") but do not query for funding." ],
+                [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 3 ;
+                    oc:itemText "Any other status (e.g., closed, inactive) → The company is no longer operating. Historical data may exist but no new activity." ] ] ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_24282cefe4a2afe1 a oc:CodeExample ;
+    oc:blockType "code_block" ;
+    oc:codeContent """get_info_from_identifiers(identifiers=[all_seeds_for_this_sector])
+""" ;
+    oc:codeLanguage "" ;
+    oc:contentOrder 1 ;
+    oc:sourceLocation "lines 111-113" .
+
+_:ref_242b96d6218358c4 a oc:WorkflowStep ;
+    dcterms:description "**Visual QA:** Convert to image and inspect:" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild [ a oc:Paragraph ;
+            oc:blockType "paragraph" ;
+            oc:contentOrder 2 ;
+            oc:textContent "Check for overlapping elements, text overflow, alignment issues, low-contrast text, logo sizing problems, and that deal link text is visible." ],
+        [ a oc:CodeExample ;
+            oc:blockType "code_block" ;
+            oc:codeContent """python /mnt/skills/public/pptx/scripts/office/soffice.py --headless --convert-to pdf deal-flow-digest.pptx
+pdftoppm -jpeg -r 200 deal-flow-digest.pdf slide
+""" ;
+            oc:codeLanguage "bash" ;
+            oc:contentOrder 1 ;
+            oc:sourceLocation "lines 473-476" ] ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_36989ddd6b6d361c a oc:WorkflowStep ;
+    dcterms:description "Log the company as \"no data\" only after exhausting fallbacks." ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_36b0ef67087791cd a oc:WorkflowStep ;
+    dcterms:description "Retry with the legal entity name or alternate identifier (see Entity Resolution rules above)." ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_3f83d5b28319e91a a oc:BulletItem ;
+    oc:blockType "bullet_item" ;
+    oc:itemOrder 1 ;
+    oc:itemText "✅ **Resolved & Operating** (`status` = \"Operating\") → proceed to competitor expansion" .
+
+_:ref_46a8b2ba302430bd a oc:WorkflowStep ;
+    dcterms:description "**Did it resolve at all?** If the identifier returns empty/error, the name doesn't exist in S&P Global. Try the alias from `references/sector-seeds.md`, the legal entity name, or the `company_id` directly." ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_4962b83557d1866a a oc:WorkflowStep ;
+    dcterms:description "**Link QA:** Verify that the Capital IQ URLs in the table are correctly formatted with the right transaction IDs." ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_4f77039cbf44d6b6 a oc:WorkflowStep ;
+    dcterms:description "**Fix and re-verify** — at least one fix-and-verify cycle before declaring done." ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_550196f1db1663c8 a oc:WorkflowStep ;
+    dcterms:description "**Pre-validate all seeds immediately** (Rule 0):" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild _:ref_24282cefe4a2afe1,
+        [ a oc:BulletList ;
+            oc:blockType "bullet_list" ;
+            oc:contentOrder 3 ;
+            oc:hasItem _:ref_3f83d5b28319e91a,
+                [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 2 ;
+                    oc:itemText "❌ **Unresolved or Subsidiary** → retry with alias/legal name from seeds file; subsidiaries are noted for context but excluded from funding queries" ] ],
+        [ a oc:Paragraph ;
+            oc:blockType "paragraph" ;
+            oc:contentOrder 2 ;
+            oc:textContent "Triage the results into two buckets:" ] ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_5d56fef72b10e5f9 a oc:BulletList ;
+    oc:blockType "bullet_list" ;
+    oc:contentOrder 1 ;
+    oc:hasItem [ a oc:BulletItem ;
+            oc:blockType "bullet_item" ;
+            oc:itemOrder 3 ;
+            oc:itemText "Flag any concerning trends (down rounds, valuation compression, etc.)" ],
+        [ a oc:BulletItem ;
+            oc:blockType "bullet_item" ;
+            oc:itemOrder 2 ;
+            oc:itemText "Call out the single most notable deal and its valuation" ],
+        [ a oc:BulletItem ;
+            oc:blockType "bullet_item" ;
+            oc:itemOrder 1 ;
+            oc:itemText "\"Your digest covers X rounds totaling $Y raised across [sectors].\"" ] .
+
+_:ref_62ded907118f3c09 a oc:WorkflowStep ;
+    dcterms:description "Use `present_files` to share the slide" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_77379061e679c7ee a oc:WorkflowStep ;
+    dcterms:description "**Verify the company exists in S&P.** If you skipped Rule 0, call `get_info_from_identifiers(identifiers=[\"Company\"])` now — if this also returns empty, the company may be too early-stage or not yet indexed." ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_92feeaa105f8dfe0 a oc:WorkflowStep ;
+    dcterms:description "**Content QA:** `python -m markitdown deal-flow-digest.pptx` — verify all text, numbers, company names, valuation figures, and deal links are correct" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_b3ed3778c24cc967 a oc:WorkflowStep ;
+    dcterms:description "**Expand via competitors** (using only the ✅ resolved seeds):" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild _:ref_0cfb3d0276b5f5d1 ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_c5e8529bc268fc48 a oc:WorkflowStep ;
+    dcterms:description "**Try the legal entity name or company_id.** Brand names usually work, but some don't. See the alias table in `references/sector-seeds.md` for known mismatches. Common pattern: \"[Brand] AI\" → \"[Legal Name], Inc.\" (e.g., Together AI → \"Together Computer, Inc.\", Character.ai → \"Character Technologies, Inc.\", Runway ML → \"Runway AI, Inc.\")." ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_d79b84ef02d479c2 a oc:WorkflowStep ;
+    dcterms:description "Copy the final `.pptx` to `/mnt/user-data/outputs/`" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_ec0f77e9b20d40bf a oc:WorkflowStep ;
+    dcterms:description "Provide a 2–3 sentence verbal summary:" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild _:ref_5d56fef72b10e5f9 ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_7058627f0cca8896 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 2 ;
+    oc:hasStep _:ref_01867fc3525f962d,
+        _:ref_04892aae25d4f49f,
+        _:ref_550196f1db1663c8,
+        _:ref_b3ed3778c24cc967 ;
+    oc:workflowId "procedure_2" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_7a9bf929767bdc1e a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 1 ;
+    oc:hasStep _:ref_62ded907118f3c09,
+        _:ref_d79b84ef02d479c2,
+        _:ref_ec0f77e9b20d40bf ;
+    oc:workflowId "procedure_1" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_8addbfd664a08142 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 5 ;
+    oc:hasStep _:ref_36989ddd6b6d361c,
+        _:ref_36b0ef67087791cd ;
+    oc:workflowId "procedure_5" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_a2a5f27a896cac39 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 2 ;
+    oc:hasStep _:ref_0ea4947196bc624a,
+        _:ref_46a8b2ba302430bd ;
+    oc:workflowId "procedure_2" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_b7f2d7ff9e986ca3 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 2 ;
+    oc:hasStep _:ref_242b96d6218358c4,
+        _:ref_4962b83557d1866a,
+        _:ref_4f77039cbf44d6b6,
+        _:ref_92feeaa105f8dfe0 ;
+    oc:workflowId "procedure_2" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_e40d419ecfed7b57 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 2 ;
+    oc:hasStep _:ref_77379061e679c7ee,
+        _:ref_c5e8529bc268fc48 ;
+    oc:workflowId "procedure_2" ;
+    oc:workflowName "Ordered Procedure" .
 

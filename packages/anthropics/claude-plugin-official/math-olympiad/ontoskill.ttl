@@ -4,115 +4,972 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_plugin_official_math_olympiad a oc:ExecutableSkill,
+oc:skill_claude_plugin_official_math_olympiad a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "math-olympiad" ;
     skos:broader "Competition math problem solver" ;
-    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/math-olympiad" ;
+    prov:wasDerivedFrom "../.agents/skills/anthropics/claude-plugin-official/math-olympiad" ;
     oc:contentHash "84766ffdb312de59ac42d9c26f8d1e4844abd0b13a1127e0c5e45a30bba87acb" ;
-    oc:differentia "that uses multi-agent parallel solving with adversarial verification, dual context isolation, and calibrated abstention to produce verified proofs or honest abstentions for olympiad-level problems" ;
-    oc:handlesFailure oc:InvalidInput,
-        oc:PermissionDenied ;
+    oc:differentia "that uses adversarial multi-agent verification with dual context isolation to catch errors self-verification misses, optimizing for conditional accuracy over coverage" ;
+    oc:handlesFailure oc:ComputationTimeout,
+        oc:InvalidInput ;
     oc:hasAllowedTool "Bash",
         "Python" ;
-    oc:hasArgumentHint "competition math problem statement, proof to verify, or request to simplify a proof" ;
+    oc:hasArgumentHint "competition math problem statement or proof to verify" ;
     oc:hasCategory "research" ;
     oc:hasDescription "Solve competition math problems (IMO, Putnam, USAMO, AIME) with adversarial verification that catches the errors self-verification misses. Activates when asked to 'solve this IMO problem', 'prove this olympiad inequality', 'verify this competition proof', 'find a counterexample', 'is this proof correct', or for any problem with 'IMO', 'Putnam', 'USAMO', 'olympiad', or 'competition math' in it. Uses pure reasoning (no tools) — then a fresh-context adversarial verifier attacks the proof using specific failure patterns, not generic 'check logic'. Outputs calibrated confidence — will say 'no confident solution' rather than bluff. If LaTeX is available, produces a clean PDF after verification passes." ;
     oc:hasName "math-olympiad" ;
-    oc:hasPayload oc:payload_84766ffdb312de59 ;
-    oc:impartsKnowledge oc:kn_08692538,
-        oc:kn_178f8ae4,
-        oc:kn_3f9f1bc2,
-        oc:kn_5cb484e0,
-        oc:kn_622a946c,
-        oc:kn_82616eb7,
-        oc:kn_99ea2dc7,
-        oc:kn_c3a27a7f,
-        oc:kn_d57ff24c,
-        oc:kn_e555b3ff ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """name: math-olympiad
+description:
+  "Solve competition math problems (IMO, Putnam, USAMO, AIME) with adversarial
+  verification that catches the errors self-verification misses. Activates when
+  asked to 'solve this IMO problem', 'prove this olympiad inequality', 'verify
+  this competition proof', 'find a counterexample', 'is this proof correct', or
+  for any problem with 'IMO', 'Putnam', 'USAMO', 'olympiad', or 'competition
+  math' in it. Uses pure reasoning (no tools) — then a fresh-context adversarial
+  verifier attacks the proof using specific failure patterns, not generic 'check
+  logic'. Outputs calibrated confidence — will say 'no confident solution'
+  rather than bluff. If LaTeX is available, produces a clean PDF after
+  verification passes."
+version: 0.1.0
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent """**Tool policy**: Solvers and verifiers use THINKING ONLY in the tight-budget
+workflow. Competition math is reasoning. Computation is for deep mode (§6c), and
+even then bounded — a recurrence that's doubly-exponential can't be computed
+past n~30, work mod 2^m instead.""" ],
+                        _:ref_4482bccabea55179 ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "The five things that change outcomes" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Pigeonhole early exit**: stop launching verifiers once the outcome is decided." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent """**Asymmetric thresholds**: 4 HOLDS to confirm, 2 HOLE FOUND to refute. Why
+asymmetric: one flaky verifier shouldn't kill a correct proof; but two
+independent dissents is a real signal.""" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 4 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "4 say HOLDS → confirmed, stop (save the 5th)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "2 say HOLE FOUND → refuted, stop (save the remaining 3 calls)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText """After 3 verifiers: if 2 HOLDS + 1 HOLE, launch 2 more (outcome undecided). If
+3 HOLDS + 0 HOLE, launch 1 more (could still hit 4-1).""" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent """Rank solutions by (verdict, verifier confidence). Take the top one. Run up to 5
+fresh verifier agents.""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent """**Dual context-isolation**: each verifier is blind to (a) the solver's thinking
+trace — already stripped in step 3 — AND (b) other verifiers' verdicts. Each
+verifier thinks it's the first. No "3 agents already confirmed this" social
+proof.""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 6 ;
+                                    oc:textContent "**A solver cannot verify its own solution.** Different agent, fresh context." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 10 ;
+                            oc:sectionTitle "5. Rank and vote-verify (asymmetric + early exit)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 6 ;
+                                    oc:textContent """**NO WEB. NO LOOKUP.** Deep mode may use Bash/Python for bounded computation,
+but NEVER WebFetch, WebSearch, or any network access. Finding the solution on
+AoPS or a blog is not solving the problem — it's cheating on an olympiad, and it
+teaches us nothing about the skill's actual capability. Put this at the TOP of
+the deep-mode prompt:""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 12 ;
+                                    oc:textContent """**Orchestrator self-restraint**: The orchestrator itself must not web-search the
+problem "to help" the deep agent. If you're tempted to Fetch an AoPS thread
+"just to check the answer," don't — that contaminates the skill's output and
+misrepresents its capability.""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Deep mode** is a single focused agent with:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """NO WEB ACCESS. Do not use WebFetch, WebSearch, or any tool that touches the internet. Do not look up this problem, its solution, or related problems. You are solving this yourself — the only allowed computation is local (Bash/Python for mod-k arithmetic, small-case enumeration n≤10, symbolic identity checks). If you invoke a web tool, the proof is void.
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 7 ;
+                                    oc:sourceLocation "lines 292-294" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 3 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "**Unlimited time** — no wall-clock pressure" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText """**Targeted computation allowed** — modular arithmetic checks, small-case
+enumeration, symbolic verification of identities. NOT exploratory brute force
+or unbounded recursion.""" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText """**The abstention reason as starting point** — if verifiers found a specific
+gap, start there. If solvers never claimed complete, start from what they
+partially proved.""" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent """The standard workflow is tight-budget: 8 solvers, ~15 min, pure reasoning. When
+it abstains, the problem may need more time, not more capability.""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent """**What deep mode is NOT**: open-ended exploration, literature search, looking up
+solutions, multi-day investigation. That's a different workflow
+(`math-research`). Deep mode is still "solve THIS problem yourself" — just
+without the clock.""" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 10 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "The problem statement" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "The verifier gap descriptions (what specifically didn't close)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "The best partial proof from tight-budget solvers" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText """The instruction: "NO WEB ACCESS — do not look up this problem or its solution.
+Bounded local computation allowed (mod 2^k, small cases n≤10, symbolic
+identity checks via Bash/Python only). 60-second computation limit. If n≤10
+brute force reveals a pattern the tight-budget solvers missed, that pattern IS
+the proof structure.\"""" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 9 ;
+                                    oc:textContent """**Step 6d (not optional)**: After any ABSTAIN at the verify stage, automatically
+launch one deep-mode agent before writing the abstention into the output. Give
+it:""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 11 ;
+                                    oc:textContent """The deep agent may find the construction the pure-reasoning solvers couldn't
+see. If it also abstains, THEN write the abstention. Do not skip this step —
+problems with √n or log n answers are often invisible to pure reasoning because
+the optimal structure is the asymmetric one.""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent """The archetype: a focused agent that gets the proven-so-far state plus "one case
+of Lemma 5 is open" — and finds a 3-line argument the case split was obscuring.
+Often under 10 minutes with almost no computation. Deep mode is about giving the
+problem sustained attention, not throwing compute at it.""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 8 ;
+                                    oc:textContent """**Computation bounds in deep mode** (bug #8 lesson): A6's b\\_{n+1}=2b_n²+b_n+1
+is doubly-exponential; b_99 has ~10^{2^98} digits. Never compute such objects
+exactly — work in ℤ/2^m, or track only v_p(·), or prove the recursion mod the
+quantity you care about. If a computation is running longer than 60 seconds,
+it's probably unbounded. Kill it and work symbolically.""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 13 ;
+                            oc:sectionTitle "6c. Deep mode (when tight-budget abstains)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 6 ;
+                                    oc:textContent """This is also a presentation-pass win: the split-free proof is shorter AND more
+general.""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent """If a proof splits into cases and one case proves easily but the other resists:
+**before grinding through the hard case, ask whether there's a route that makes
+the split disappear.**""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent """Concrete shape: proving f(n) ≤ cn for a constrained function f, with a case
+split on a prime p dividing f(n). One branch closes by index arguments in
+(ℤ/p^e)\\*. The other branch resists — same group structure, but the arithmetic
+doesn't contradict. The fix: the hypothesis "p | f(n)" plugged back into the
+governing equation implies **f(p) = p itself**. Once you have that, a
+Fermat+Dirichlet argument kills both branches in three lines. The case split was
+a detour — it was splitting on a variable that, under the hypothesis, takes a
+known value.""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent "Check when stuck on case B:" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 5 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Is there a different pair (a,b) to plug into the governing equation?" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Are you proving too much? (A cleaner contradiction needs less machinery.)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "What does case B's hypothesis imply about f at _other_ inputs?" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent """The pattern that saves you: the hard case's very hypothesis often implies
+something strong about an _intermediate object_ you haven't looked at. Use that
+implication directly instead of the original chain.""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 11 ;
+                            oc:sectionTitle "5b. When one case won't close — step back before grinding" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "If 3 revise cycles all fail: **stop and admit it.**" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent """Do NOT guess. A wrong confident answer is worse than an honest "couldn't solve
+it." The metric that matters is CONDITIONAL accuracy — when you say "solved,"
+are you right?""" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """**Verdict**: no confident solution
+
+**What was tried**: [approaches]
+**What WAS proven**: [any lemma or partial result that survived verification]
+**Where it breaks**: [the unfixed hole]
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 329-335" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 14 ;
+                            oc:sectionTitle "7. Calibrated abstention" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 3 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Is anything OVERKILL? (constructing a double exponential when linear suffices)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Which lemmas should be inlined? Which deserve to stand alone?" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "What's the simplest way to say this?" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "Now that we know the answer, is there a 3-line hindsight proof?" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent """Output: LaTeX-formatted proof. If `pdflatex` is available
+(`scripts/check_latex.sh` returns 0), also compile to PDF via
+`scripts/compile_pdf.sh`.""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent """A VERIFIED-CORRECT proof is often not a BEAUTIFUL proof. The order you
+discovered it is rarely the best order to present it. Launch a fresh
+presentation agent with the verified proof.""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "Load `references/presentation_prompts.md`. The agent asks:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 15 ;
+                            oc:sectionTitle "8. Presentation pass (after correctness is established)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "Up to 3 revise cycles. Then re-run the vote on the revised proof." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent """If verification finds a hole: launch a reviser agent. It gets (cleaned
+solution + verifier's hole report). STILL no access to the original thinking —
+the reviser works from the hole, not by rereading how you got there.""" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """A verifier found this issue in the proof:
+[hole report]
+
+Fix the proof. If the hole is fundamental (the approach doesn't work), say so and return **Verdict: no confident solution** with what partial progress remains.
+
+For any step you cannot fully close, mark it inline: [GAP: specific description of what remains]. Gaps in the proof text, not in a separate list — they're greppable and the next reviser knows exactly where to look.
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 244-251" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent """**If pattern #40 fired** (one-line-proof-too-clean), the reviser gets a stronger
+brief — the Adversarial Brief template from `references/adversarial_prompts.md`
+§7. It forces a binary: "the general lemma is obviously false (here's a 2×2
+counterexample) — so either find what's special about THIS case, or find where
+the proof breaks." Can't return "looks fine.\"""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 12 ;
+                            oc:sectionTitle "6. Revise (if needed)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Before solving anything, identify the interpretation." ],
+                                [ a oc:BlockQuote ;
+                                    oc:blockType "blockquote" ;
+                                    oc:contentOrder 2 ;
+                                    oc:quoteContent """Read the problem statement. List 2-3 ways it could be interpreted. For each:
+is this reading TRIVIAL? If one reading makes the problem easy and another
+makes it hard, the hard one is almost certainly intended. State which
+interpretation you're solving and WHY you believe it's the intended one.""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent """The Aletheia case study found 50 of 63 "technically correct" solutions were for
+the wrong interpretation. Olympiad problems often have a trap easy reading.""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 6 ;
+                            oc:sectionTitle "1. Interpretation check (30 seconds, catches 50/63 of one class of errors)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 3 ;
+                                    oc:rowCount 5 ;
+                                    oc:tableCaption "`references/adversarial_prompts.md` for the prompts. The key patterns it runs" ;
+                                    oc:tableMarkdown """| Pattern | The check                                                                                                                                                          |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **#4**  | Does this theorem specialize to a famous object (ζ, quadratic reciprocity, etc.) and prove something open about it? → gap                                          |
+| **#18** | Substitute the proof's own intermediate identities into any "remaining gap." Recover the original claim? → tautological                                            |
+| **#40** | Is any step a "one-line lemma"? Extract the GENERAL form. Find a 2×2 counterexample. If the general form is false, find what special structure saves THIS instance |
+| **#5**  | For each invoked theorem: re-check hypotheses FROM SCRATCH. "Continuous on [0,1]" ≠ "continuous on ℝ"                                                              |
+| **#6**  | Any infinite sum "bounded" via a regularized value? Check the boundary — if there's a pole there, the sum diverges                                                 |
+""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent """For each cleaned solution, launch a fresh verifier agent. **Fresh context**: it
+sees only (problem statement + cleaned solution). **No tools.**""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent "Verifier returns:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """**Verdict**: HOLDS | HOLE FOUND | UNCLEAR
+
+**If HOLE FOUND**:
+- Location: [quote the problematic step]
+- Pattern: [which check fired, or "other"]
+- Why it breaks: [specific]
+- Fixable?: [yes with X / no, fundamental]
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 6 ;
+                                    oc:sourceLocation "lines 177-185" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent "Full pattern list: `references/verifier_patterns.md`" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent """The verifier's job is to ATTACK, not grade. Load
+`references/adversarial_prompts.md` for the prompts. The key patterns it runs:""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 9 ;
+                            oc:sectionTitle "4. Adversarial verify (fresh context, pattern-armed)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 9 ;
+                                    oc:textContent """**Retry policy**: If an agent fails or times out, retry once. Transient failures
+happen.""" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """**Verdict**: complete solution | partial result | no progress
+**Rounds**: [how many verify→correct cycles]
+**Method**: [key idea, one paragraph]
+**Detailed Solution**: [full step-by-step, every step justified]
+**Answer**: [if applicable]
+**Self-verification notes**: [what you caught and fixed; remaining concerns]
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 8 ;
+                                    oc:sourceLocation "lines 130-137" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 6 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 7 ;
+                                            oc:itemText "Drop a condition — where does it become trivially false?" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Consider the extremal case" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Work out small cases (test past n=3)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 6 ;
+                                            oc:itemText "Work backwards" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Look for an invariant or monovariant" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 8 ;
+                                            oc:itemText "Generalize (inventor's paradox — more structure is sometimes easier)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "Try induction" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 5 ;
+                                            oc:itemText "What symmetries?" ] ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """NO COMPUTATION. Do not use Bash, Python, WebSearch, Read, Write, or any tool that runs code or fetches data. Numerical verification is not a proof step. "I computed n=1..10 and the pattern holds" is not a proof.
+
+(If your agent harness requires a StructuredOutput or similar return-mechanism tool call, that is NOT a computation tool — call it to return your answer. The restriction is on tools that DO work, not tools that REPORT work.)
+
+Your internal process (iterate until done):
+- Solve: Complete rigorous solution.
+- Self-improve: Reread. Fix gaps before a grader sees it.
+- Self-verify: Strict grader mode. Every step justified?
+- Correct: Fix and re-verify. Up to 5 rounds.
+- Stop: Self-verify passes twice clean, OR 5 rounds, OR approach fundamentally wrong.
+
+A correct answer from flawed reasoning is a failure. If incomplete, say so honestly. Never hide gaps.
+
+PROBLEM: <insert the problem statement here>
+ANGLE: <insert one starting angle here>
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 3 ;
+                                    oc:sourceLocation "lines 94-110" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent """Launch 8-12 attempt agents in parallel. **Each agent internally iterates** —
+solve → self-improve → self-verify → correct → repeat. This is the Yang-Huang
+structure that achieves 85.7% on IMO: one-shot solving isn't enough; per-attempt
+refinement matters.""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent "Starting angles (vary across agents — see `references/solver_heuristics.md`):" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent """**The Agent tool cannot enforce tool restriction.** Subagents get the full tool
+set. The only mechanism is the prompt. Use this prompt VERBATIM — do not
+summarize, do not synthesize your own:""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent """The first two paragraphs are load-bearing. A session that writes its own prompt
+and omits them will produce subagents that grind Python for 30 iterations and
+confidently get wrong answers — a pattern that fits n≤10 but fails at n=100 is
+not a proof.""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 7 ;
+                                    oc:textContent "Each returns its FINAL state (not intermediate rounds):" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 7 ;
+                            oc:sectionTitle "2. Generate candidates with internal refinement (parallel, thinking only)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent """Extract only the **Method** + **Proof** + **Answer** sections from each solver's
+output. The verifier never sees how the solver got there.""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "What remains: problem statement + clean final argument only." ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 2 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "All false starts and backtracking" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "All thinking-block content" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "All \"Let me try...\" / \"Actually wait...\" / \"Hmm\" prose" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent """The thinking trace biases the verifier toward agreement — a long chain of
+reasoning reads as supporting evidence even when the conclusion is wrong. Before
+any verification, strip:""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 8 ;
+                            oc:sectionTitle "3. Clean the solution (context isolation — the #1 lever)" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "The Workflow" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 1 ;
+                            oc:rowCount 4 ;
+                            oc:tableCaption "## When to use which approach" ;
+                            oc:tableMarkdown """| Problem                                              | Approach                                                                       | Verification              |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------ | ------------------------- |
+| AIME numeric answer                                  | Best-of-N → majority vote                                                      | Answer check only         |
+| Olympiad proof (IMO/Putnam/USAMO)                    | Full workflow below                                                            | 5-pass adversarial        |
+| "Is this proof correct?"                             | Skip to verification (step 4)                                                  | Adversarial + spec-gaming |
+| **Full problem set** (e.g. all 6 from a competition) | Sequential: one full workflow per problem, collect results, compile single PDF | Per-problem adversarial   |
+""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent """**Batch in one Workflow**: Set `opts.label` on every `agent()` call to include
+the problem ID (e.g., `label: "P3:solver:2"`). Without labels, 36 results come
+back with no problem association. Run problems in parallel — the label is what
+matters, not ordering.""" ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent """Don't try to solve all N problems in one agent's context — each problem needs
+its own thinking budget and its own fresh-context verifier. The composition is
+mechanical: collect the per-problem outputs, fill in LaTeX sections, compile
+once. | "Simplify this proof" | Skip to presentation (step 8) | — |""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent """Launch one solver workflow per problem (same VERBATIM prompt, different
+statement). Run them in parallel. When all return, run adversarial verification
+per problem. Problems that pass get their proof in the PDF; problems that
+abstain get "No confident solution" with partial notes.""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "For a full problem set" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "When to use which approach" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent """Skip the proof machinery. Run 5-7 solvers with varied approaches, take majority
+vote on the numeric answer. If no majority: verify the top 2 candidates by
+substitution.""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 17 ;
+                    oc:sectionTitle "For numeric-answer problems (AIME-style)" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent """Weaker models: more parallel attempts, faster abstention. Stronger models:
+deeper verification, more presentation effort.""" ],
+                        [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 2 ;
+                            oc:rowCount 3 ;
+                            oc:tableCaption "Read `references/model_tier_defaults.md` for full details. Summary" ;
+                            oc:tableMarkdown """| Model  | Solvers | Verify passes          | Abstain after  | Presentation           |
+| ------ | ------- | ---------------------- | -------------- | ---------------------- |
+| Haiku  | 8       | 3                      | 2 revise fails | skip                   |
+| Sonnet | 4       | 5                      | 3 revise fails | yes                    |
+| Opus   | 3       | 5 + full pattern sweep | 4 revise fails | 2 drafts, pick cleaner |
+""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Read `references/model_tier_defaults.md` for full details. Summary:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 16 ;
+                    oc:sectionTitle "Model tier defaults" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "`references/adversarial_prompts.md` — ready-to-use verifier prompts" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "`references/verifier_patterns.md` — the 12 adversarial checks" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "`references/model_tier_defaults.md` — per-model configuration" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "`references/presentation_prompts.md` — beautification prompts + LaTeX template" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 18 ;
+                    oc:sectionTitle "Key references" ],
+                [ a oc:Section ;
+                    oc:hasContent _:ref_59e3333dd339ea36 ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 19 ;
+                    oc:sectionTitle "What makes this different from generic verify-and-refine" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Math Olympiad Solver" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "Simplified workflow for numeric-answer competition problems using best-of-N majority voting" ;
+            oc:hasStep _:ref_cd90994c2c9cf945,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Take majority vote on numeric answer. If no majority, verify top 2 candidates by substitution." ;
+                    oc:expectedOutcome "Single numeric answer with verification" ;
+                    oc:stepDependsOn _:ref_cd90994c2c9cf945 ;
+                    oc:stepId "vote-numeric" ] ;
+            oc:workflowId "aime-numeric" ;
+            oc:workflowName "AIME Numeric Answer Workflow" ],
+        [ a oc:Workflow ;
+            dcterms:description "Full 8-step workflow for solving IMO/Putnam/USAMO-style proof problems with adversarial verification, revision, and presentation" ;
+            oc:hasStep _:ref_269534020c9b82d4,
+                _:ref_484f0a0d5d372373,
+                _:ref_67d6063c4dca3a6a,
+                _:ref_6e7e91e43a3472aa,
+                _:ref_9ac27aa240e43418,
+                _:ref_acb860e316245dd5,
+                _:ref_cae7ee3818b2be15,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Launch fresh presentation agent with verified proof. Apply hindsight shortcuts, remove overkill, optimize lemma granularity and ordering. Output LaTeX; compile PDF if pdflatex available." ;
+                    oc:expectedOutcome "Clean, elegant LaTeX proof document; optionally compiled to PDF" ;
+                    oc:stepDependsOn _:ref_acb860e316245dd5 ;
+                    oc:stepId "present" ] ;
+            oc:workflowId "olympiad-proof-solve" ;
+            oc:workflowName "Olympiad Proof Problem Workflow" ],
+        _:ref_4482bccabea55179,
+        _:ref_59e3333dd339ea36 ;
+    oc:impartsKnowledge oc:kn_0d273e7e,
+        oc:kn_141dd60a,
+        oc:kn_32649101,
+        oc:kn_4c364a8b,
+        oc:kn_5ea7a784,
+        oc:kn_aa3e5829,
+        oc:kn_aecb1d3b,
+        oc:kn_c9e005f3,
+        oc:kn_ce172d0b,
+        oc:kn_dea7d1a7,
+        oc:kn_f2d736f8,
+        oc:kn_f32b5565,
+        oc:kn_fd0ee92c ;
     oc:isUserInvocable true ;
     oc:nature "Work" ;
     oc:requiresState oc:EnvironmentReady ;
-    oc:resolvesIntent "find counterexamples to mathematical claims",
-        "generate clean LaTeX presentations of verified proofs",
-        "prove olympiad inequalities",
-        "simplify mathematical proofs",
-        "solve competition math problems",
-        "verify olympiad proofs" ;
+    oc:resolvesIntent "evaluate proof correctness",
+        "find counterexamples to mathematical claims",
+        "process full competition problem sets",
+        "simplify and present mathematical proofs",
+        "solve AIME-style numeric answer problems",
+        "solve olympiad math problems",
+        "verify competition math proofs" ;
     oc:yieldsState oc:DocumentCreated .
 
-oc:kn_08692538 a oc:Constraint,
+oc:kn_0d273e7e a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When verification repeatedly finds holes that cannot be fixed" ;
-    oc:directiveContent "Calibrated abstention is mandatory: after 3 failed revise cycles, output 'no confident solution' with partial results. Wrong-and-confident is worse than honest abstain." ;
-    oc:hasRationale "The metric that matters is conditional accuracy — when the system says 'solved,' it should be right. Coverage at the cost of false positives degrades trust." ;
+    oc:appliesToContext "Deep mode computation only" ;
+    oc:directiveContent "For doubly-exponential recurrences (e.g., b_{n+1}=2b_n²+b_n+1), never compute exactly — work mod 2^m, track v_p(·), or prove the recursion mod the quantity you care about. Kill any computation running longer than 60 seconds." ;
+    oc:hasRationale "b_99 has ~10^{2^98} digits. Exact computation is impossible; symbolic or modular reasoning is the only viable approach." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_141dd60a a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "Resource planning for problem sets" ;
+    oc:directiveContent "Tight-budget workflow: 8-12 parallel solvers, ~15 min, pure reasoning. Deep mode: single agent, unlimited time, bounded computation. Model tier scales: Haiku uses more solvers (12) with wider voting (7); Opus uses fewer solvers (4) with 12 dedicated pattern-specific verifiers." ;
+    oc:hasRationale "Weaker models compensate with width (more parallel attempts); stronger models invest in depth (targeted adversarial verification). The pigeonhole exit saves verification cost." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_32649101 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When one case proves easily but the other resists" ;
+    oc:directiveContent "When stuck on a hard case in a case split, step back and ask whether the split can be eliminated. The hard case's hypothesis often implies something strong about an intermediate object — use that implication directly instead of grinding." ;
+    oc:hasRationale "Three lines sometimes do what twelve pages couldn't. The case split may be obscuring a unified argument that's simpler and more general." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_4c364a8b a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When verification repeatedly finds holes" ;
+    oc:directiveContent "Calibrated abstention: if revision cycles fail, output 'no confident solution' with partial results rather than guessing. Wrong-and-confident is worse than honest abstain. Optimize conditional accuracy, not coverage." ;
+    oc:hasRationale "The metric that matters is conditional accuracy — when you say 'solved,' are you right? A wrong confident answer is worse than an honest 'couldn't solve it.'" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_5ea7a784 a oc:KnowledgeNode,
+        oc:SecurityImplication ;
+    oc:appliesToContext "Always, especially during deep mode" ;
+    oc:directiveContent "The orchestrator itself must not web-search the problem 'to help' any subagent. If tempted to Fetch an AoPS thread 'just to check the answer,' don't — this contaminates output and misrepresents capability." ;
+    oc:hasRationale "Orchestrator web access would violate the same integrity constraint as subagent web access — the output would no longer reflect genuine problem-solving." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_aa3e5829 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When launching solver subagents in tight-budget workflow" ;
+    oc:directiveContent "Never allow subagent solvers to use computation tools. The prompt must explicitly forbid Bash, Python, WebSearch, Read, Write and state 'Numerical verification is not a proof step' — use this prompt VERBATIM, do not summarize." ;
+    oc:hasRationale "Subagents that write their own prompts and omit tool restrictions will grind Python for 30 iterations and confidently get wrong answers — a pattern that fits n≤10 but fails at n=100 is not a proof." ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_178f8ae4 a oc:KnowledgeNode,
+oc:kn_aecb1d3b a oc:KnowledgeNode,
         oc:PreFlightCheck ;
-    oc:appliesToContext "When preparing to launch parallel solver agents" ;
-    oc:directiveContent "Before launching solver agents, verify the problem statement is unambiguous, set opts.label on every agent() call with the problem ID (e.g., 'P3:solver:2'), and confirm starting angles are varied across parallel agents." ;
-    oc:hasRationale "Without labels, results from batch runs cannot be associated with problems. Without varied starting angles, parallel agents converge on the same approach." ;
+    oc:appliesToContext "Before launching the workflow" ;
+    oc:directiveContent "Before solving: (1) check LaTeX availability via scripts/check_latex.sh, (2) identify model tier for solver/verifier count defaults, (3) classify problem type (AIME numeric vs olympiad proof vs verification-only vs presentation-only)." ;
+    oc:hasRationale "Problem type determines the entire workflow path. Model tier controls parallel solver count, verify passes, and abstention thresholds." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_3f9f1bc2 a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "Before beginning any problem-solving workflow" ;
-    oc:directiveContent "Always run an interpretation check before solving: list 2-3 readings of the problem, identify which makes it trivial vs hard, and solve the hard reading. Olympiad problems often plant easy misreadings as traps." ;
-    oc:hasRationale "The Aletheia case study found 50 of 63 'technically correct' solutions were for the wrong interpretation — solving the wrong problem is the dominant failure mode." ;
+oc:kn_c9e005f3 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "All modes including deep mode" ;
+    oc:directiveContent "Never allow web access or solution lookup, even in deep mode. NO WebFetch, WebSearch, or any network access. Finding a solution on AoPS or a blog is not solving — it contaminates the skill's output and misrepresents capability." ;
+    oc:hasRationale "The skill measures genuine problem-solving capability. Web lookup is cheating on an olympiad and provides no signal about actual reasoning ability." ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_5cb484e0 a oc:KnowledgeNode,
+oc:kn_ce172d0b a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Before any verification step" ;
+    oc:directiveContent "Never let a verifier see the solver's thinking trace — it biases toward agreement. Strip all thinking-block content, false starts, and backtracking before verification; provide only problem statement + clean final argument." ;
+    oc:hasRationale "A long chain of reasoning reads as supporting evidence even when the conclusion is wrong. The Aletheia case study showed self-verification drops from 85.7% to <5% accuracy under human grading." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_dea7d1a7 a oc:KnowledgeNode,
         oc:RecoveryTactic ;
-    oc:appliesToContext "After any ABSTAIN at the verify stage" ;
-    oc:directiveContent "When tight-budget workflow abstains, always launch one deep-mode agent before writing the final abstention — give it the partial proof, verifier gap descriptions, and bounded local computation access." ;
-    oc:hasRationale "Problems with √n or log n answers are often invisible to pure reasoning because the optimal structure is asymmetric; bounded computation can reveal patterns that pure reasoning misses." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_622a946c a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When deep-mode agents use bounded computation for recurrence problems" ;
-    oc:directiveContent "For recurrences with polynomial degree ≥ 2, never compute terms exactly — work in ℤ/2^m or track v_p(·) instead. Doubly-exponential growth means b_30 has trillions of digits." ;
-    oc:hasRationale "Exact computation of doubly-exponential sequences is infeasible and causes timeout; modular arithmetic or valuation tracking preserves the needed information symbolically." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_82616eb7 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When running adversarial verification on any proof" ;
-    oc:directiveContent "Never let a verifier see the solver's thinking trace — strip all reasoning blocks, false starts, and backtracking before verification. A verifier that sees the reasoning is biased toward agreement." ;
-    oc:hasRationale "Long chains of reasoning read as supporting evidence even when the conclusion is wrong — this is the #1 lever for verification quality, as demonstrated by self-verified 85.7% IMO success dropping to <5% under human grading." ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_99ea2dc7 a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When running multi-verifier vote-verify on candidate solutions" ;
-    oc:directiveContent "Use asymmetric vote thresholds: 4 HOLDS to confirm a proof, but only 2 HOLE FOUND to refute it. Apply pigeonhole early exit to save verification cost on clear cases." ;
-    oc:hasRationale "One flaky verifier shouldn't kill a correct proof, but two independent dissents is a real signal. Pigeonhole exit saves ~30% of verification calls when the outcome is already decided." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_c3a27a7f a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "Always — in both tight-budget and deep-mode workflows" ;
-    oc:directiveContent "Never use web access, web search, or any network tool to look up problem solutions. Finding the answer on AoPS or a blog voids the proof and misrepresents the skill's capability." ;
-    oc:hasRationale "Olympiad solving must test actual reasoning capability, not retrieval. The orchestrator itself must also refrain from web-searching to 'help' the deep agent." ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_d57ff24c a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When verifying any proof that makes a general claim about a class of objects" ;
-    oc:directiveContent "Do not claim a proof is correct if its specialization to a famous object (ζ, quadratic reciprocity, etc.) would settle a known open problem — this is the most reliable red flag for a hidden gap." ;
-    oc:hasRationale "If the argument's skeleton applies to a canonical hard instance and proves something open or false about it, there is always a gap at the step where the argument stops working for that instance." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_e555b3ff a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When stuck on a case-split proof where one branch closes easily but the other resists" ;
-    oc:directiveContent "When a proof splits into cases and one resists, step back before grinding — the hard case's hypothesis often implies something strong about an intermediate object that collapses both cases in a few lines." ;
-    oc:hasRationale "Case splits often obscure unified arguments; the variable being split on may take a known value under the hypothesis, making the entire split unnecessary." ;
+    oc:appliesToContext "When tight-budget workflow abstains" ;
+    oc:directiveContent "After any ABSTAIN at verify stage, automatically launch one deep-mode agent before finalizing the abstention. Give it the problem, best partial proof, verifier gap descriptions, and bounded computation permission. Only write the abstention if deep mode also fails." ;
+    oc:hasRationale "Problems with √n or log n answers are often invisible to pure reasoning because the optimal structure is asymmetric. Bounded computation can reveal patterns pure reasoning misses." ;
     oc:severityLevel "MEDIUM" .
 
-oc:payload_84766ffdb312de59 a oc:ExecutionPayload ;
-    oc:code "bash scripts/check_latex.sh && bash scripts/compile_pdf.sh {body_tex} {output_dir}" ;
-    oc:executor "shell" ;
-    oc:timeout 120 .
+oc:kn_f2d736f8 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "During vote-verification step" ;
+    oc:directiveContent "Use asymmetric voting thresholds: 4 HOLDS to confirm a proof, only 2 HOLE FOUND to refute. Each verifier is blind to both the solver's thinking trace AND other verifiers' verdicts — dual context isolation." ;
+    oc:hasRationale "One flaky verifier shouldn't kill a correct proof, but two independent dissents is a real signal. Social proof ('3 agents already confirmed') biases toward agreement." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_f32b5565 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "First step of every problem solve" ;
+    oc:directiveContent "Interpretation check is mandatory before solving. List 2-3 ways the problem could be interpreted; if one reading makes it trivial and another hard, the hard one is intended. State which interpretation you are solving and why." ;
+    oc:hasRationale "50 of 63 'technically correct' solutions in the Aletheia case study were for the wrong interpretation. Olympiad problems often plant an easy misreading as a trap." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_fd0ee92c a oc:Idempotency,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "During vote-verification" ;
+    oc:directiveContent "Verification is deterministic in structure but not in outcome — different verifier instances may reach different verdicts on the same proof. The voting mechanism handles this: 4-of-5 confirms, 2-of-5 refutes." ;
+    oc:hasRationale "Individual verifiers are noisy (especially Haiku); the ensemble corrects for this. The pigeonhole early exit saves ~30% of verification cost on clear cases." ;
+    oc:severityLevel "LOW" .
+
+_:ref_0671a31b43fe370d a oc:WorkflowStep ;
+    dcterms:description """**Specification-gaming check first**: explicitly asks "is this the intended
+interpretation?" before solving. The #1 failure mode in prior work (50/63
+"correct" answers solved the wrong reading).""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_0ab88d3488234e1f a oc:WorkflowStep ;
+    dcterms:description """**Calibrated abstention**: will say "no confident solution" with partial
+results. Optimizes conditional accuracy, not coverage.""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_5" ;
+    oc:stepOrder 5 .
+
+_:ref_3f955f68d8933c13 a oc:WorkflowStep ;
+    dcterms:description """**Say "no confident solution"** — wrong-and-confident is worse than honest
+abstain.""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_5" ;
+    oc:stepOrder 5 .
+
+_:ref_400e5f0a3982dcf3 a oc:WorkflowStep ;
+    dcterms:description """**Same gap twice → step back** — the case split may be obscuring a unified
+argument. Three lines sometimes does what twelve pages couldn't.""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_5f43e9b721a7bed4 a oc:WorkflowStep ;
+    dcterms:description """**Pattern-specific attacks**: not "is this correct?" but "does this make the
+#40 mistake? the #4 mistake?" Specific beats generic. The 7-category
+refutation taxonomy gives the verifier a checklist.""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_689d24c05529679e a oc:WorkflowStep ;
+    dcterms:description """**Presentation pass**: correctness and elegance are separate steps. The
+presentation agent gets the VERIFIED proof and finds the cleanest way to say
+it.""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_6" ;
+    oc:stepOrder 6 .
+
+_:ref_962fb00648443abc a oc:WorkflowStep ;
+    dcterms:description """**"Does this prove RH?"** — if your theorem's specialization to ζ is a famous
+open problem, you have a gap. Most reliable red flag.""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_ba11c0cff152f8ca a oc:WorkflowStep ;
+    dcterms:description """**Short proof → extract the general lemma** — try 2×2 counterexamples. If
+general form is false, find what's special about THIS instance.""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_d83f2d83a1f57448 a oc:WorkflowStep ;
+    dcterms:description """**Asymmetric vote + pigeonhole exit**: 4-to-confirm, 2-to-refute. One flaky
+verifier doesn't kill a correct proof; two dissents does. Stop launching
+verifiers once the outcome is decided — saves ~30% of verification cost on
+clear cases.""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_e6cdc45a65f6a78b a oc:WorkflowStep ;
+    dcterms:description """**Strip thinking before verifying** — a verifier that sees the reasoning is
+biased toward agreement. Fresh context, cleaned proof only.""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_ecca37eac9c6f735 a oc:WorkflowStep ;
+    dcterms:description """**Dual context isolation**: verifier is blind to (a) the solver's thinking
+trace — which biases toward agreement — and (b) other verifiers' verdicts —
+social proof also biases. Each verifier thinks it's first.""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_269534020c9b82d4 a oc:WorkflowStep ;
+    dcterms:description "Launch fresh adversarial verifier agents per cleaned solution. Each runs pattern-specific attacks (#4, #18, #40, #5, #6) in fresh context with no tools" ;
+    oc:expectedOutcome "Verifier verdicts: HOLDS, HOLE FOUND (with location/pattern/fixability), or UNCLEAR" ;
+    oc:stepDependsOn _:ref_6e7e91e43a3472aa ;
+    oc:stepId "verify" .
+
+_:ref_4482bccabea55179 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 1 ;
+    oc:hasStep _:ref_3f955f68d8933c13,
+        _:ref_400e5f0a3982dcf3,
+        _:ref_962fb00648443abc,
+        _:ref_ba11c0cff152f8ca,
+        _:ref_e6cdc45a65f6a78b ;
+    oc:workflowId "procedure_1" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_484f0a0d5d372373 a oc:WorkflowStep ;
+    dcterms:description "Launch 8-12 parallel solver agents with varied starting angles using VERBATIM no-computation prompt. Each internally iterates: solve→self-improve→self-verify→correct up to 5 rounds" ;
+    oc:expectedOutcome "Candidate solutions with verdicts (complete/partial/no progress), key methods, and detailed proofs" ;
+    oc:stepDependsOn _:ref_67d6063c4dca3a6a ;
+    oc:stepId "solve" .
+
+_:ref_59e3333dd339ea36 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 1 ;
+    oc:hasStep _:ref_0671a31b43fe370d,
+        _:ref_0ab88d3488234e1f,
+        _:ref_5f43e9b721a7bed4,
+        _:ref_689d24c05529679e,
+        _:ref_d83f2d83a1f57448,
+        _:ref_ecca37eac9c6f735 ;
+    oc:workflowId "procedure_1" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_67d6063c4dca3a6a a oc:WorkflowStep ;
+    dcterms:description "Interpretation check: list 2-3 possible readings, identify the hard (intended) one, state chosen interpretation with rationale" ;
+    oc:expectedOutcome "Correct problem interpretation identified; trivial misreadings ruled out" ;
+    oc:stepId "interpret" .
+
+_:ref_6e7e91e43a3472aa a oc:WorkflowStep ;
+    dcterms:description "Clean solutions: strip all thinking-block content, false starts, and backtracking. Extract only Method + Proof + Answer from each solver" ;
+    oc:expectedOutcome "Context-isolated clean arguments with no solver thinking trace" ;
+    oc:stepDependsOn _:ref_484f0a0d5d372373 ;
+    oc:stepId "clean" .
+
+_:ref_9ac27aa240e43418 a oc:WorkflowStep ;
+    dcterms:description "Rank solutions by verdict/confidence. Run up to 5 fresh verifiers with asymmetric thresholds (4 HOLDS confirm, 2 HOLE refutes). Apply pigeonhole early exit." ;
+    oc:expectedOutcome "Proof confirmed (4+ HOLDS), refuted (2+ HOLES), or undecided" ;
+    oc:stepDependsOn _:ref_269534020c9b82d4 ;
+    oc:stepId "vote" .
+
+_:ref_acb860e316245dd5 a oc:WorkflowStep ;
+    dcterms:description "If tight-budget abstains: launch one deep-mode agent with partial proof + gap descriptions + bounded computation. No web access. Auto-triggered — do not skip." ;
+    oc:expectedOutcome "Either a complete proof from sustained attention, or confirmation of abstention" ;
+    oc:stepDependsOn _:ref_cae7ee3818b2be15 ;
+    oc:stepId "deep-mode" .
+
+_:ref_cae7ee3818b2be15 a oc:WorkflowStep ;
+    dcterms:description "If holes found: launch reviser agents (up to 3 cycles) with hole report only. Pattern #40 fires get adversarial brief forcing binary outcome. Re-vote after revision." ;
+    oc:expectedOutcome "Revised proof that either passes verification or triggers calibrated abstention" ;
+    oc:stepDependsOn _:ref_9ac27aa240e43418 ;
+    oc:stepId "revise" .
+
+_:ref_cd90994c2c9cf945 a oc:WorkflowStep ;
+    dcterms:description "Launch 5-7 solver agents with varied approaches, no proof machinery" ;
+    oc:expectedOutcome "Multiple numeric answer candidates" ;
+    oc:stepId "solve-numeric" .
 

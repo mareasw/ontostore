@@ -4,91 +4,929 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_office_skills_batch_convert a oc:DeclarativeSkill,
+oc:skill_claude_office_skills_batch_convert a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "batch-convert" ;
-    skos:broader "Document converter" ;
-    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-office-skills/batch-convert" ;
+    skos:broader "Document conversion pipeline" ;
+    prov:wasDerivedFrom "../.agents/skills/anthropics/claude-office-skills/batch-convert" ;
     oc:contentHash "510e37534436d730c5f38b74bbe08b20b41cddb99a1f8628bf01d37f5f33925b" ;
-    oc:dependsOnSkill oc:skill_office_mcp ;
-    oc:differentia "that batch-processes files between multiple formats (DOCX, PDF, MD, HTML, XLSX, PPTX) using a unified parallel pipeline" ;
-    oc:handlesFailure oc:ConversionError,
-        oc:FileNotFound,
-        oc:InsufficientDiskSpace,
-        oc:ToolNotInstalled ;
-    oc:hasAllowedTool "Bash",
-        "Glob",
-        "Read",
-        "Write" ;
-    oc:hasArgumentHint "source path, target format, [output directory]" ;
+    oc:differentia "that batch-converts files between multiple formats (DOCX, PDF, MD, HTML, XLSX, PPTX) with parallel processing and automatic format detection" ;
+    oc:extends oc:skill_ontoskills_office_mcp ;
+    oc:handlesFailure oc:FileNotFound,
+        oc:InvalidInput,
+        oc:PermissionDenied ;
+    oc:hasArgumentHint "source folder or files, target format(s)" ;
     oc:hasCategory "document" ;
     oc:hasDescription "Batch convert documents between multiple formats using a unified pipeline" ;
     oc:hasName "batch-convert" ;
-    oc:impartsKnowledge oc:kn_03a50d6e,
-        oc:kn_3fbb1b68,
-        oc:kn_419a5ea2,
-        oc:kn_6675f8e7,
-        oc:kn_97f995b4,
-        oc:kn_a32f38c1,
-        oc:kn_dae1cc23 ;
+    oc:hasPackageName "batch-convert" ;
+    oc:hasRequirement oc:req_47a90164,
+        oc:req_6caa6449,
+        oc:req_755ee7ba,
+        oc:req_8bbd66ec,
+        oc:req_c2789dcc,
+        oc:req_d5e3ef33,
+        oc:req_d652728a ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """# ═══════════════════════════════════════════════════════════════════════════════
+# CLAUDE OFFICE SKILL - Enhanced Metadata v2.0
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Basic Information
+name: batch-convert
+description: "Batch convert documents between multiple formats using a unified pipeline"
+version: "1.0"
+author: claude-office-skills
+license: MIT
+
+# Categorization
+category: conversion
+tags:
+  - batch
+  - conversion
+  - bulk
+  - automation
+department: All
+
+# AI Model Compatibility
+models:
+  recommended:
+    - claude-sonnet-4
+    - claude-opus-4
+  compatible:
+    - claude-3-5-sonnet
+    - gpt-4
+    - gpt-4o
+
+# MCP Tools Integration
+mcp:
+  server: office-mcp
+  tools:
+    - batch_convert
+
+# Skill Capabilities
+capabilities:
+  - bulk_conversion
+  - automation
+
+# Language Support
+languages:
+  - en
+  - zh
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """def detect_and_convert(file_path, target_format):
+    \"\"\"Automatically detect format and convert.\"\"\"
+    import mimetypes
+    
+    mime_type, _ = mimetypes.guess_type(str(file_path))
+    
+    format_map = {
+        'application/pdf': 'pdf',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'xlsx',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'pptx',
+        'text/markdown': 'md',
+        'text/html': 'html',
+    }
+    
+    source_format = format_map.get(mime_type, Path(file_path).suffix[1:])
+    
+    converter = DocumentConverter()
+    return converter.convert(file_path, target_format)
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 280-300" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Format Detection Pipeline" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """def convert_to_multiple_formats(input_file, output_formats, output_dir):
+    \"\"\"Convert one file to multiple formats.\"\"\"
+    converter = DocumentConverter()
+    results = {}
+    
+    for fmt in output_formats:
+        try:
+            output = converter.convert(input_file, fmt, output_dir)
+            results[fmt] = {'status': 'success', 'path': str(output)}
+        except Exception as e:
+            results[fmt] = {'status': 'error', 'error': str(e)}
+    
+    return results
+
+# Convert README to multiple formats
+results = convert_to_multiple_formats(
+    'README.md',
+    ['docx', 'pdf', 'html'],
+    './exports'
+)
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 303-324" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Multi-Format Output" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Common Patterns" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# Markdown conversions (using Pandoc)
+def _md_to_docx(self, input_path, output_path):
+    subprocess.run(['pandoc', str(input_path), '-o', str(output_path)], check=True)
+    return output_path
+
+def _md_to_pdf(self, input_path, output_path):
+    subprocess.run(['pandoc', str(input_path), '-o', str(output_path)], check=True)
+    return output_path
+
+def _md_to_html(self, input_path, output_path):
+    subprocess.run(['pandoc', str(input_path), '-s', '-o', str(output_path)], check=True)
+    return output_path
+
+def _md_to_pptx(self, input_path, output_path):
+    subprocess.run(['marp', str(input_path), '-o', str(output_path)], check=True)
+    return output_path
+
+# Office to Markdown (using markitdown)
+def _docx_to_md(self, input_path, output_path):
+    from markitdown import MarkItDown
+    md = MarkItDown()
+    result = md.convert(str(input_path))
+    with open(output_path, 'w') as f:
+        f.write(result.text_content)
+    return output_path
+
+def _xlsx_to_md(self, input_path, output_path):
+    from markitdown import MarkItDown
+    md = MarkItDown()
+    result = md.convert(str(input_path))
+    with open(output_path, 'w') as f:
+        f.write(result.text_content)
+    return output_path
+
+def _pptx_to_md(self, input_path, output_path):
+    from markitdown import MarkItDown
+    md = MarkItDown()
+    result = md.convert(str(input_path))
+    with open(output_path, 'w') as f:
+        f.write(result.text_content)
+    return output_path
+
+# PDF conversions
+def _pdf_to_docx(self, input_path, output_path):
+    from pdf2docx import Converter
+    cv = Converter(str(input_path))
+    cv.convert(str(output_path))
+    cv.close()
+    return output_path
+
+def _pdf_to_md(self, input_path, output_path):
+    from markitdown import MarkItDown
+    md = MarkItDown()
+    result = md.convert(str(input_path))
+    with open(output_path, 'w') as f:
+        f.write(result.text_content)
+    return output_path
+
+# Office to PDF (using LibreOffice)
+def _docx_to_pdf(self, input_path, output_path):
+    subprocess.run([
+        'soffice', '--headless', '--convert-to', 'pdf',
+        '--outdir', str(output_path.parent), str(input_path)
+    ], check=True)
+    return output_path
+
+def _xlsx_to_pdf(self, input_path, output_path):
+    subprocess.run([
+        'soffice', '--headless', '--convert-to', 'pdf',
+        '--outdir', str(output_path.parent), str(input_path)
+    ], check=True)
+    return output_path
+
+def _pptx_to_pdf(self, input_path, output_path):
+    subprocess.run([
+        'soffice', '--headless', '--convert-to', 'pdf',
+        '--outdir', str(output_path.parent), str(input_path)
+    ], check=True)
+    return output_path
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 166-246" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Converter Implementations" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 1 ;
+                                    oc:rowCount 6 ;
+                                    oc:tableCaption "### Supported Format Matrix" ;
+                                    oc:tableMarkdown """| From | To: DOCX | To: PDF | To: MD | To: HTML | To: PPTX |
+|------|----------|---------|--------|----------|----------|
+| DOCX | - | ✅ | ✅ | ✅ | - |
+| PDF | ✅ | - | ✅ | ✅ | - |
+| MD | ✅ | ✅ | - | ✅ | ✅ |
+| HTML | ✅ | ✅ | ✅ | - | - |
+| XLSX | - | ✅ | ✅ | ✅ | - |
+| PPTX | - | ✅ | ✅ | ✅ | - |
+""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Supported Format Matrix" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import subprocess
+import os
+
+class DocumentConverter:
+    \"\"\"Unified document conversion pipeline.\"\"\"
+    
+    def __init__(self, max_workers=4):
+        self.max_workers = max_workers
+        self.converters = {
+            ('md', 'docx'): self._md_to_docx,
+            ('md', 'pdf'): self._md_to_pdf,
+            ('md', 'html'): self._md_to_html,
+            ('md', 'pptx'): self._md_to_pptx,
+            ('docx', 'pdf'): self._docx_to_pdf,
+            ('docx', 'md'): self._docx_to_md,
+            ('pdf', 'docx'): self._pdf_to_docx,
+            ('pdf', 'md'): self._pdf_to_md,
+            ('xlsx', 'pdf'): self._xlsx_to_pdf,
+            ('xlsx', 'md'): self._xlsx_to_md,
+            ('pptx', 'pdf'): self._pptx_to_pdf,
+            ('pptx', 'md'): self._pptx_to_md,
+            ('html', 'md'): self._html_to_md,
+            ('html', 'pdf'): self._html_to_pdf,
+        }
+    
+    def convert(self, input_path, output_format, output_dir=None):
+        \"\"\"Convert single file to target format.\"\"\"
+        input_path = Path(input_path)
+        input_format = input_path.suffix[1:].lower()
+        
+        if output_dir:
+            output_path = Path(output_dir) / f"{input_path.stem}.{output_format}"
+        else:
+            output_path = input_path.with_suffix(f".{output_format}")
+        
+        converter_key = (input_format, output_format)
+        if converter_key not in self.converters:
+            raise ValueError(f"Conversion not supported: {input_format} -> {output_format}")
+        
+        converter = self.converters[converter_key]
+        return converter(input_path, output_path)
+    
+    def batch_convert(self, input_dir, output_format, output_dir=None, 
+                      file_pattern="*", recursive=False):
+        \"\"\"Batch convert all matching files.\"\"\"
+        input_path = Path(input_dir)
+        output_path = Path(output_dir) if output_dir else input_path / "converted"
+        output_path.mkdir(exist_ok=True)
+        
+        # Find files
+        if recursive:
+            files = list(input_path.rglob(file_pattern))
+        else:
+            files = list(input_path.glob(file_pattern))
+        
+        # Filter to supported formats
+        supported_ext = ['.md', '.docx', '.pdf', '.xlsx', '.pptx', '.html']
+        files = [f for f in files if f.suffix.lower() in supported_ext]
+        
+        results = []
+        
+        with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+            future_to_file = {
+                executor.submit(self.convert, f, output_format, output_path): f
+                for f in files
+            }
+            
+            for future in as_completed(future_to_file):
+                file = future_to_file[future]
+                try:
+                    result = future.result()
+                    results.append({'file': str(file), 'status': 'success', 'output': str(result)})
+                except Exception as e:
+                    results.append({'file': str(file), 'status': 'error', 'error': str(e)})
+        
+        return results
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 83-162" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Core Pipeline" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """from tqdm import tqdm
+
+def batch_convert_with_progress(converter, input_dir, output_format, output_dir=None):
+    \"\"\"Batch convert with progress bar.\"\"\"
+    input_path = Path(input_dir)
+    files = list(input_path.glob('*'))
+    
+    results = []
+    for file in tqdm(files, desc=f"Converting to {output_format}"):
+        try:
+            result = converter.convert(file, output_format, output_dir)
+            results.append({'file': str(file), 'status': 'success'})
+        except Exception as e:
+            results.append({'file': str(file), 'status': 'error', 'error': str(e)})
+    
+    return results
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 250-267" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "Progress Tracking" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Domain Knowledge" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "This skill enables batch conversion of documents between multiple formats using a unified pipeline. Convert hundreds of files at once with consistent settings, automatic format detection, and parallel processing for maximum efficiency." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Overview" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """def generate_reports_pipeline(data_files, template_dir, output_dir):
+    \"\"\"Generate reports from data files using templates.\"\"\"
+    
+    from datetime import datetime
+    
+    converter = DocumentConverter()
+    output_path = Path(output_dir)
+    output_path.mkdir(exist_ok=True)
+    
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    
+    reports = []
+    
+    for data_file in data_files:
+        # Load data
+        data_path = Path(data_file)
+        
+        # Generate markdown report
+        md_content = f\"\"\"---
+title: Report - {data_path.stem}
+date: {datetime.now().strftime('%Y-%m-%d')}
+---
+
+# {data_path.stem} Report
+
+Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+
+## Data Summary
+
+\"\"\"
+        
+        # Add data content (simplified)
+        if data_path.suffix == '.xlsx':
+            from markitdown import MarkItDown
+            md = MarkItDown()
+            result = md.convert(str(data_path))
+            md_content += result.text_content
+        
+        # Save markdown
+        md_file = output_path / f"{data_path.stem}_{timestamp}.md"
+        with open(md_file, 'w') as f:
+            f.write(md_content)
+        
+        # Convert to PDF and DOCX
+        for fmt in ['pdf', 'docx']:
+            try:
+                output = converter.convert(md_file, fmt, output_path)
+                reports.append({'source': str(data_file), 'output': str(output), 'format': fmt})
+            except Exception as e:
+                print(f"Error converting {data_file} to {fmt}: {e}")
+    
+    return reports
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 420-473" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Example 3: Report Generation Pipeline" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """from pathlib import Path
+import json
+
+def export_documentation(docs_dir, export_dir):
+    \"\"\"Export all documentation to multiple formats.\"\"\"
+    
+    converter = DocumentConverter(max_workers=8)
+    docs_path = Path(docs_dir)
+    export_path = Path(export_dir)
+    
+    # Create format directories
+    for fmt in ['pdf', 'docx', 'html']:
+        (export_path / fmt).mkdir(parents=True, exist_ok=True)
+    
+    all_results = {}
+    
+    # Find all markdown files
+    md_files = list(docs_path.rglob('*.md'))
+    
+    for md_file in md_files:
+        file_results = {}
+        
+        for fmt in ['pdf', 'docx', 'html']:
+            output_dir = export_path / fmt
+            try:
+                output = converter.convert(md_file, fmt, output_dir)
+                file_results[fmt] = 'success'
+            except Exception as e:
+                file_results[fmt] = f'error: {e}'
+        
+        all_results[str(md_file)] = file_results
+        print(f"Processed: {md_file.name}")
+    
+    # Save report
+    with open(export_path / 'export_report.json', 'w') as f:
+        json.dump(all_results, f, indent=2)
+    
+    return all_results
+
+results = export_documentation('./docs', './exports')
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 329-370" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Example 1: Documentation Export" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """def migrate_legacy_docs(source_dir, target_dir):
+    \"\"\"Migrate legacy documents to modern formats.\"\"\"
+    
+    converter = DocumentConverter(max_workers=4)
+    
+    # Migration rules
+    migrations = [
+        ('*.doc', 'docx'),   # Old Word to new
+        ('*.xls', 'xlsx'),   # Old Excel to new
+        ('*.ppt', 'pptx'),   # Old PowerPoint to new
+        ('*.rtf', 'docx'),   # RTF to Word
+    ]
+    
+    source_path = Path(source_dir)
+    target_path = Path(target_dir)
+    target_path.mkdir(exist_ok=True)
+    
+    total_migrated = 0
+    errors = []
+    
+    for pattern, target_format in migrations:
+        files = list(source_path.glob(pattern))
+        
+        for file in files:
+            try:
+                # Use LibreOffice for legacy formats
+                subprocess.run([
+                    'soffice', '--headless',
+                    '--convert-to', target_format,
+                    '--outdir', str(target_path),
+                    str(file)
+                ], check=True)
+                
+                total_migrated += 1
+                print(f"Migrated: {file.name}")
+                
+            except Exception as e:
+                errors.append({'file': str(file), 'error': str(e)})
+    
+    print(f"\\nMigration complete: {total_migrated} files")
+    print(f"Errors: {len(errors)}")
+    
+    return {'migrated': total_migrated, 'errors': errors}
+""" ;
+                                    oc:codeLanguage "python" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 373-417" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Example 2: Legacy Document Migration" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Examples" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "[Pandoc Documentation](https://pandoc.org/MANUAL.html)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "[LibreOffice CLI](https://help.libreoffice.org/latest/en-US/text/shared/guide/start_parameters.html)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "[markitdown GitHub](https://github.com/microsoft/markitdown)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "[pdf2docx Documentation](https://pdf2docx.readthedocs.io/)" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 9 ;
+                    oc:sectionTitle "Resources" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# Core dependencies
+pip install pdf2docx markitdown python-docx openpyxl
+
+# Pandoc (for MD conversions)
+brew install pandoc  # macOS
+apt install pandoc   # Ubuntu
+
+# Marp (for PPTX)
+npm install -g @marp-team/marp-cli
+
+# LibreOffice (for Office formats)
+brew install libreoffice  # macOS
+apt install libreoffice   # Ubuntu
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 485-499" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 8 ;
+                    oc:sectionTitle "Installation" ],
+                [ a oc:Section ;
+                    oc:hasContent _:ref_848fd8a983810b1c ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Best Practices" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Example prompts:**" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 3 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "\"Convert all PDFs in this folder to Word documents\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "\"Batch convert these markdown files to PDF and HTML\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "\"Process all Office files and convert to Markdown\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "\"Convert this folder of images to a single PDF\"" ] ],
+                        _:ref_ffe4c9389cb7c0c0 ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "How to Use" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Some format combinations not supported" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "Quality varies by source document complexity" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Some conversions need external tools (LibreOffice, Pandoc)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Large files may require more time" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Complex formatting may be lost in conversion" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 7 ;
+                    oc:sectionTitle "Limitations" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Batch Convert Skill" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "Convert a folder of documents to a target format with verification" ;
+            oc:hasStep _:ref_02abce225196498c,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Review results for errors and spot-check output quality" ;
+                    oc:expectedOutcome "Conversion report with success/error counts and quality verification" ;
+                    oc:stepDependsOn _:ref_02abce225196498c ;
+                    oc:stepId "verify-output" ],
+                _:ref_7aeac898396707e7,
+                _:ref_b9793f377b1d8ff3,
+                _:ref_bf3709135e3f1c6f ;
+            oc:workflowId "batch-convert-workflow" ;
+            oc:workflowName "Batch Convert Documents" ],
+        _:ref_848fd8a983810b1c,
+        _:ref_ffe4c9389cb7c0c0 ;
+    oc:impartsKnowledge oc:kn_22ec5e79,
+        oc:kn_3d34f039,
+        oc:kn_48def2a9,
+        oc:kn_49b6cabb,
+        oc:kn_5482ff1f,
+        oc:kn_65f89fe5,
+        oc:kn_6f03e2cf,
+        oc:kn_94b6daf7,
+        oc:kn_95b40528,
+        oc:kn_ace63b3f,
+        oc:kn_bb68bd9a,
+        oc:kn_dcd06f7d,
+        oc:kn_e1fb700e,
+        oc:kn_e4bbe34c,
+        oc:kn_f060a6eb ;
     oc:isUserInvocable true ;
-    oc:nature "Tool" ;
+    oc:nature "Work" ;
     oc:requiresState oc:FileExists,
         oc:ToolInstalled ;
-    oc:resolvesIntent "batch convert PDFs to Word documents",
-        "convert documents between formats in bulk",
-        "convert entire folders of files to a target format",
-        "export markdown files to PDF and HTML",
-        "migrate legacy documents to modern formats" ;
-    oc:yieldsState oc:BatchConversionComplete,
-        oc:FileConverted .
+    oc:resolvesIntent "batch convert files",
+        "bulk convert documents to PDF",
+        "convert Office files to Markdown",
+        "convert PDF to DOCX",
+        "convert documents between formats",
+        "convert markdown to Word",
+        "migrate legacy document formats" ;
+    oc:yieldsState oc:DocumentCreated .
 
-oc:kn_03a50d6e a oc:KnowledgeNode,
+oc:kn_22ec5e79 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When any conversion is attempted" ;
+    oc:directiveContent "Conversions require external tools: Pandoc for Markdown, LibreOffice for Office-to-PDF, Marp for MD-to-PPTX, and pdf2docx for PDF-to-DOCX. Missing tools will cause conversion failures." ;
+    oc:hasRationale "The pipeline delegates to external CLI tools; if they are not installed, conversions will fail with subprocess errors." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_3d34f039 a oc:KnowledgeNode,
+        oc:Prerequisite ;
+    oc:appliesToContext "When converting DOCX/XLSX/PPTX to PDF" ;
+    oc:directiveContent "LibreOffice must be installed for Office-to-PDF conversions (soffice --headless)" .
+
+oc:kn_48def2a9 a oc:KnowledgeNode,
+        oc:SuccessIndicator ;
+    oc:appliesToContext "After batch conversion completes" ;
+    oc:directiveContent "A successful batch conversion returns a results list where each entry has status='success' and an output path. Spot-check a sample of output files for formatting fidelity." ;
+    oc:hasRationale "Programmatic success does not guarantee format fidelity; visual verification catches quality issues." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_49b6cabb a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting a single file" ;
+    oc:codeLanguage "python" ;
+    oc:directiveContent """converter = DocumentConverter()
+converter.convert('input.md', 'pdf', output_dir='./output')""" .
+
+oc:kn_5482ff1f a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting more than 10 files" ;
+    oc:directiveContent "Use parallel processing (ThreadPoolExecutor) with max_workers=4-8 for batch operations to maximize throughput without overwhelming system resources." ;
+    oc:hasRationale "Parallel processing significantly reduces total conversion time while keeping resource usage manageable." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_65f89fe5 a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "When converting large numbers of files or large documents" ;
+    oc:directiveContent "Batch conversion creates new files in the output directory and may consume significant disk space. Ensure sufficient storage before starting large batches." ;
+    oc:hasRationale "Running out of disk space mid-batch causes partial failures and corrupt output." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_6f03e2cf a oc:Command,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Installing Python dependencies for document conversion" ;
+    oc:directiveContent "pip install pdf2docx markitdown python-docx openpyxl" .
+
+oc:kn_94b6daf7 a oc:KnowledgeNode,
+        oc:OutputFormat ;
+    oc:directiveContent """[
+  {'file': '{source_path}', 'status': 'success', 'output': '{output_path}'},
+  {'file': '{source_path}', 'status': 'error', 'error': '{error_message}'}
+]""" ;
+    oc:templateVariables "error_message",
+        "output_path",
+        "source_path" .
+
+oc:kn_95b40528 a oc:KnowledgeNode,
         oc:PreFlightCheck ;
-    oc:appliesToContext "Before any batch conversion operation" ;
-    oc:directiveContent "Always test conversion on a small sample of files before running batch processing on hundreds of files." ;
-    oc:hasRationale "Testing a sample catches format incompatibilities and quality issues early, preventing wasted time on large failed batches." ;
+    oc:appliesToContext "Before executing any batch conversion" ;
+    oc:directiveContent "Verify that all required external tools (pandoc, soffice, marp) are installed and accessible on PATH before starting a batch conversion." ;
+    oc:hasRationale "Prevents partial batch failures caused by missing dependencies." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_3fbb1b68 a oc:KnowledgeNode,
-        oc:SideEffect ;
-    oc:appliesToContext "When running batch conversions with LibreOffice-based converters" ;
-    oc:directiveContent "Batch conversion creates output files in a 'converted' subdirectory by default, and uses LibreOffice headless mode which may conflict with running LibreOffice instances." ;
-    oc:hasRationale "LibreOffice headless mode cannot run alongside an open LibreOffice instance; concurrent sessions may corrupt output or fail." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_419a5ea2 a oc:AntiPattern,
+oc:kn_ace63b3f a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When converting documents with rich formatting" ;
-    oc:directiveContent "Do not assume complex formatting (tables, images, embedded objects) will be preserved perfectly across conversions. Complex documents may lose formatting fidelity." ;
-    oc:hasRationale "Conversion tools like markitdown and Pandoc prioritize content over layout; complex styling, embedded charts, and intricate formatting may degrade or be lost entirely." ;
-    oc:severityLevel "MEDIUM" .
+    oc:appliesToContext "When performing batch conversion of files" ;
+    oc:codeLanguage "python" ;
+    oc:directiveContent """converter = DocumentConverter(max_workers=4)
+results = converter.batch_convert(
+    input_dir='./source',
+    output_format='pdf',
+    output_dir='./converted',
+    file_pattern='*.docx',
+    recursive=False
+)""" .
 
-oc:kn_6675f8e7 a oc:DesignPrinciple,
+oc:kn_bb68bd9a a oc:KnowledgeNode,
+        oc:Prerequisite ;
+    oc:appliesToContext "When converting to or from Markdown" ;
+    oc:directiveContent "Pandoc must be installed for Markdown conversions (brew install pandoc / apt install pandoc)" .
+
+oc:kn_dcd06f7d a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "Before any batch conversion job" ;
+    oc:directiveContent "Always test a small sample of files before running a full batch conversion to verify format fidelity and output quality." ;
+    oc:hasRationale "Batch failures on hundreds of files waste time and may produce corrupt output that's hard to diagnose." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_e1fb700e a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When processing large batches of files" ;
-    oc:directiveContent "Use parallel processing (ThreadPoolExecutor with max_workers=4 by default) for batch operations but reduce workers if encountering resource contention." ;
-    oc:hasRationale "Parallel processing significantly speeds up batch conversions, but too many workers can cause memory pressure or tool contention (especially LibreOffice)." ;
-    oc:severityLevel "LOW" .
+    oc:appliesToContext "When converting documents with complex layouts or embedded media" ;
+    oc:directiveContent "Do not assume complex formatting (tables, images, embedded objects) will survive conversion intact. Always verify output quality for documents with rich formatting." ;
+    oc:hasRationale "Conversion tools simplify formatting; complex layouts may lose structure, resulting in inaccurate or broken output." ;
+    oc:severityLevel "HIGH" .
 
-oc:kn_97f995b4 a oc:Constraint,
+oc:kn_e4bbe34c a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:directiveContent "1. Verify external tools installed (pandoc, soffice, marp) 2. Test convert a sample file 3. Check disk space for output 4. Run batch_convert with parallel workers 5. Review results list for errors 6. Spot-check output files for quality" ;
+    oc:stepOrder 1 .
+
+oc:kn_f060a6eb a oc:Constraint,
         oc:KnowledgeNode ;
     oc:appliesToContext "When selecting source and target formats" ;
-    oc:directiveContent "Not all format combinations are supported. The supported matrix is: DOCX→{PDF,MD,HTML}, PDF→{DOCX,MD,HTML}, MD→{DOCX,PDF,HTML,PPTX}, HTML→{DOCX,PDF,MD}, XLSX→{PDF,MD,HTML}, PPTX→{PDF,MD,HTML}." ;
-    oc:hasRationale "Requesting an unsupported conversion pair will raise a ValueError and halt processing for that file." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_a32f38c1 a oc:KnowledgeNode,
-        oc:PostFlightValidation ;
-    oc:appliesToContext "After completing a batch conversion" ;
-    oc:directiveContent "Spot-check converted files after batch processing to verify output quality and completeness." ;
-    oc:hasRationale "Automated conversion may succeed technically but produce degraded output; manual verification catches quality issues before distribution." ;
+    oc:directiveContent "Some format combinations are not supported (e.g., DOCX to PPTX, PDF to PPTX). Check the supported format matrix before attempting conversion." ;
+    oc:hasRationale "Unsupported conversion paths will raise errors and halt processing." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_dae1cc23 a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "Before starting any conversion batch" ;
-    oc:directiveContent "Verify that required external tools (Pandoc, LibreOffice, Marp) are installed before attempting conversions that depend on them." ;
-    oc:hasRationale "Conversions will fail silently or with confusing errors if the underlying tools (Pandoc for MD, LibreOffice for Office→PDF, Marp for MD→PPTX) are missing." ;
-    oc:severityLevel "CRITICAL" .
+oc:req_47a90164 a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "openpyxl" .
+
+oc:req_6caa6449 a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "python-docx" .
+
+oc:req_755ee7ba a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "markitdown" .
+
+oc:req_8bbd66ec a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "LibreOffice (soffice)" .
+
+oc:req_c2789dcc a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "pandoc" .
+
+oc:req_d5e3ef33 a oc:RequirementTool ;
+    oc:isOptional true ;
+    oc:requirementValue "Marp CLI" .
+
+oc:req_d652728a a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "pdf2docx" .
+
+_:ref_0818cb9fc26faf1c a oc:WorkflowStep ;
+    dcterms:description "**Handle Errors Gracefully**: Log failures, continue processing" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_42d4f93bd5f62d1b a oc:WorkflowStep ;
+    dcterms:description "Specify the source folder or files" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_4d588fb5e0b02445 a oc:WorkflowStep ;
+    dcterms:description "**Use Parallel Processing**: Speed up with multiple workers" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_594c8b1d0a465b4f a oc:WorkflowStep ;
+    dcterms:description "**Verify Output**: Spot-check converted files" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_5" ;
+    oc:stepOrder 5 .
+
+_:ref_59e099692bcdafba a oc:WorkflowStep ;
+    dcterms:description "Choose target format(s)" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_a735ba502f1620a6 a oc:WorkflowStep ;
+    dcterms:description "**Test Sample First**: Convert a few files before batch processing" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_c5ff69fc979ef6b9 a oc:WorkflowStep ;
+    dcterms:description "Optionally configure conversion options" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_d3f50f68e139499f a oc:WorkflowStep ;
+    dcterms:description "I'll process all files with progress tracking" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_f23abde1b57e565f a oc:WorkflowStep ;
+    dcterms:description "**Check Disk Space**: Ensure sufficient space for output" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_02abce225196498c a oc:WorkflowStep ;
+    dcterms:description "Execute batch conversion with parallel workers" ;
+    oc:expectedOutcome "All files processed with results list returned" ;
+    oc:stepDependsOn _:ref_7aeac898396707e7,
+        _:ref_b9793f377b1d8ff3 ;
+    oc:stepId "run-batch" .
+
+_:ref_7aeac898396707e7 a oc:WorkflowStep ;
+    dcterms:description "Verify sufficient disk space for output files" ;
+    oc:expectedOutcome "Confirmed adequate storage available" ;
+    oc:stepId "check-space" .
+
+_:ref_848fd8a983810b1c a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 1 ;
+    oc:hasStep _:ref_0818cb9fc26faf1c,
+        _:ref_4d588fb5e0b02445,
+        _:ref_594c8b1d0a465b4f,
+        _:ref_a735ba502f1620a6,
+        _:ref_f23abde1b57e565f ;
+    oc:workflowId "procedure_1" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_b9793f377b1d8ff3 a oc:WorkflowStep ;
+    dcterms:description "Convert a single sample file to verify format fidelity" ;
+    oc:expectedOutcome "Sample output file created with acceptable quality" ;
+    oc:stepDependsOn _:ref_bf3709135e3f1c6f ;
+    oc:stepId "test-sample" .
+
+_:ref_bf3709135e3f1c6f a oc:WorkflowStep ;
+    dcterms:description "Verify external tools are installed (pandoc, soffice, marp)" ;
+    oc:expectedOutcome "All required tools accessible on PATH" ;
+    oc:stepId "verify-tools" .
+
+_:ref_ffe4c9389cb7c0c0 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 1 ;
+    oc:hasStep _:ref_42d4f93bd5f62d1b,
+        _:ref_59e099692bcdafba,
+        _:ref_c5ff69fc979ef6b9,
+        _:ref_d3f50f68e139499f ;
+    oc:workflowId "procedure_1" ;
+    oc:workflowName "Ordered Procedure" .
 

@@ -4,65 +4,212 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_plugin_official_math_olympiad_model_tier_defaults a oc:DeclarativeSkill,
+oc:skill_claude_plugin_official_math_olympiad_model_tier_defaults a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "model-tier-defaults" ;
     skos:broader "Configuration framework" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/math-olympiad" ;
     oc:contentHash "fa44e35b3c73c12c4098568df2d8fc6ff54dbed16b8d592e82272554c3eeaeb0" ;
-    oc:differentia "scales math olympiad solving parameters (solver count, vote budget, abstain threshold, pattern sweep, presentation pass) adaptively across Haiku, Sonnet, and Opus model tiers to compensate for per-tier capability differences" ;
-    oc:extends oc:skill_anthropics_claude_plugin_official_math_olympiad ;
-    oc:handlesFailure oc:UnknownModelTier ;
-    oc:hasArgumentHint "model-tier (haiku|sonnet|opus)" ;
+    oc:dependsOnSkill oc:skill_ontoskills_math_olympiad ;
+    oc:differentia "scales math olympiad solver parameters (parallelism, voting thresholds, verification depth) to match model capability tiers (Haiku, Sonnet, Opus)" ;
+    oc:extends oc:skill_claude_plugin_official_math_olympiad ;
+    oc:handlesFailure oc:ModelTierUnknown ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_321ae134,
-        oc:kn_36dc7e96,
-        oc:kn_96d6e81f,
-        oc:kn_c333dc80,
-        oc:kn_df9caa0b,
-        oc:kn_fa4025a4 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent """Parameters scale with model capability. Budget is not the constraint — the
+constraints are diminishing returns (more voters stop helping past a point) and
+the asymmetric noise floor (Haiku verifiers are individually less reliable, so
+the right response is width not depth).""" ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText """**Vote budget**: 5 general verifiers (4-confirm / 2-refute) PLUS one dedicated
+verifier per pattern in `verifier_patterns.md` (12 targeted attacks). Any
+pattern-specific HOLE FOUND counts toward refute.""" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText """**Abstain threshold**: 5 consecutive revise cycles fail (trust the model's
+ability to eventually fix)""" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText """**Presentation pass**: 3 drafts with different instructions ("most elegant,"
+"most elementary," "shortest"), comparator picks the best. Strong models can
+genuinely produce different _styles_ of proof.""" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "**Parallel solvers**: 4" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 6 ;
+                                    oc:itemText """**Rationale**: Opus can execute the deep patterns (#19 base-vs-derived, #22
+mean-first) that need real mathematical judgment. The 12 dedicated pattern
+passes are where the model's capability is best spent — it's the difference
+between "be skeptical" and "check THIS specific thing.\"""" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "**Pattern sweep**: all 12, each with its own dedicated agent" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Depth. Each sample is strong, so invest in making the adversarial pass harder." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Opus" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Width compensates for per-sample noise. Scaffolding is where the leverage is." ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 6 ;
+                                    oc:itemText """**Rationale**: The skill's value is highest where the base model is weakest.
+Give Haiku the full harness. The 3-refute threshold (higher than Sonnet's 2)
+accounts for Haiku verifiers being individually noisier — don't let 2 confused
+Haikus kill a correct proof.""" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText """**Vote budget**: 7 verifiers, need 5-confirm / 3-refute (pigeonhole exit: stop
+when outcome decided)""" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText """**Pattern sweep**: all 12 patterns — Haiku can follow a checklist, the
+patterns are the scaffold""" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText """**Parallel solvers**: 12 (wide fan — each individual solve is weaker, so cast
+a wider net)""" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "**Abstain threshold**: 3 consecutive revise cycles fail" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText """**Presentation pass**: yes, 3 drafts, comparator picks cleanest. Haiku's raw
+output is rougher, so this matters MORE not less.""" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Haiku" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Balanced." ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 6 ;
+                                    oc:itemText "**Rationale**: 4-of-5 tolerates one flake. 2 dissents is signal." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "**Abstain threshold**: 3 consecutive revise cycles fail" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "**Presentation pass**: 2 drafts, comparator picks cleaner" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "**Vote budget**: 5 verifiers, need 4-confirm / 2-refute" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "**Parallel solvers**: 6" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "**Pattern sweep**: all 12" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Sonnet" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent """If the orchestrating session doesn't know which model it is, default to Sonnet
+configuration. A reasonable heuristic: ask the model to self-identify in its
+first response and match against `haiku`/`sonnet`/`opus` in the output.""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Identifying the tier" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent """Kept at all tiers — not because of cost, but because once
+`inflight >= confirm_needed + refute_needed - 1`, the remaining votes carry no
+information regardless of how they land. Launching them anyway is pure latency.""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "On the pigeonhole exit" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Model Tier Defaults" ] ;
+    oc:impartsKnowledge oc:kn_7ea5e8ed,
+        oc:kn_7f736698,
+        oc:kn_89f61c68,
+        oc:kn_b4bf3f45,
+        oc:kn_f423d760 ;
     oc:isUserInvocable false ;
     oc:nature "Concept" ;
     oc:requiresState oc:ModelTierIdentified ;
-    oc:resolvesIntent "configure solving parameters for different model tiers",
-        "determine parallel solver count and vote budget by model capability",
-        "identify which model tier is in use and apply appropriate defaults",
-        "scale verification and presentation strategies by model strength" ;
-    oc:yieldsState oc:SolvingParametersConfigured .
+    oc:resolvesIntent "configure solver parameters for different model tiers",
+        "determine parallelism and verification strategy based on model capability",
+        "optimize math olympiad harness for Haiku, Sonnet, or Opus" ;
+    oc:yieldsState oc:SolverParametersConfigured .
 
-oc:kn_321ae134 a oc:Constraint,
+oc:kn_7ea5e8ed a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When determining when to give up on a problem after repeated revision failures" ;
-    oc:directiveContent "Abstain thresholds must be tier-appropriate: Haiku/Sonnet at 3 consecutive revise cycles, Opus at 5 consecutive revise cycles." ;
-    oc:hasRationale "Stronger models have higher likelihood of eventually fixing issues, so investing more revision cycles is justified for Opus." .
+    oc:appliesToContext "When running verification with Haiku-tier verifiers" ;
+    oc:directiveContent "Haiku requires 3-refute threshold (higher than Sonnet's 2) to prevent two noisy Haiku verifiers from killing a correct proof." ;
+    oc:hasRationale "Haiku verifiers are individually noisier, so the refute threshold must be raised to avoid false negatives." ;
+    oc:severityLevel "HIGH" .
 
-oc:kn_36dc7e96 a oc:Heuristic,
+oc:kn_7f736698 a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When model tier is unknown at startup" ;
-    oc:directiveContent "If the orchestrating session cannot identify its model tier, default to Sonnet configuration. A reasonable heuristic is to ask the model to self-identify in its first response." ;
-    oc:hasRationale "Sonnet represents the balanced middle ground; misidentifying as Haiku wastes capacity, misidentifying as Opus under-verification risks false positives." .
+    oc:appliesToContext "When configuring the math olympiad solver harness for a specific model tier" ;
+    oc:directiveContent "Haiku should use width (12 parallel solvers, 7 verifiers with 5-confirm/3-refute) because per-sample reliability is lower; Opus should use depth (4 solvers, 5 general verifiers + 12 dedicated pattern verifiers) because per-sample reliability is higher." ;
+    oc:hasRationale "Budget is not the constraint — diminishing returns and asymmetric noise floor determine optimal configuration." ;
+    oc:severityLevel "CRITICAL" .
 
-oc:kn_96d6e81f a oc:DesignPrinciple,
+oc:kn_89f61c68 a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When managing verification vote budgets at any tier" ;
-    oc:directiveContent "Use the pigeonhole exit: stop launching verification votes once inflight >= confirm_needed + refute_needed - 1, because remaining votes carry zero information regardless of outcome." ;
-    oc:hasRationale "Once the outcome is mathematically determined, additional votes are pure latency with no information gain — this is a correctness optimization, not a cost optimization." .
+    oc:appliesToContext "When managing the voting/verification loop at any tier" ;
+    oc:directiveContent "Use the pigeonhole exit: stop launching verifiers once inflight >= confirm_needed + refute_needed - 1, because remaining votes carry no information regardless of outcome." ;
+    oc:hasRationale "Continuing past the pigeonhole bound is pure latency with no informational gain." ;
+    oc:severityLevel "HIGH" .
 
-oc:kn_c333dc80 a oc:DesignPrinciple,
+oc:kn_b4bf3f45 a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When configuring the final presentation refinement stage" ;
-    oc:directiveContent "Presentation passes matter MORE for weaker models, not less. Haiku gets 3 drafts with comparator; Opus gets 3 drafts with deliberately different stylistic instructions (elegant, elementary, shortest)." ;
-    oc:hasRationale "Haiku's raw output is rougher so cleanup is critical. Opus can genuinely produce different proof styles, so stylistic diversity in drafts leverages its capability." .
+    oc:appliesToContext "When running Opus-tier verification" ;
+    oc:directiveContent "Opus gets 12 dedicated pattern-specific verification agents (one per verifier_patterns.md pattern) where any pattern-specific hole found counts toward refute — this is the highest-value use of Opus capability." ;
+    oc:hasRationale "Opus can execute deep patterns requiring real mathematical judgment; dedicated pattern passes are more valuable than general skepticism." .
 
-oc:kn_df9caa0b a oc:Heuristic,
+oc:kn_f423d760 a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When setting verification voting thresholds" ;
-    oc:directiveContent "Haiku needs 5-confirm/3-refute (higher refute threshold), Sonnet needs 4-confirm/2-refute, Opus adds 12 dedicated pattern-specific verifiers on top of 5 general verifiers." ;
-    oc:hasRationale "Haiku verifiers are individually noisier, so a higher refute threshold prevents two confused verifiers from killing a correct proof. Opus's dedicated pattern verifiers transform generic skepticism into targeted attack." .
-
-oc:kn_fa4025a4 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When configuring solver parallelism for any model tier" ;
-    oc:directiveContent "Scale parallel solver count inversely with model capability: Haiku gets 12 (width), Sonnet gets 6 (balanced), Opus gets 4 (depth). Weaker models compensate by casting a wider net." ;
-    oc:hasRationale "Weaker individual samples require more parallel attempts to achieve comparable coverage; stronger models benefit more from investing compute in deeper verification per sample." .
+    oc:appliesToContext "When model tier cannot be determined from environment" ;
+    oc:directiveContent "If the orchestrating session does not know which model it is, default to Sonnet configuration. Ask the model to self-identify in its first response and match against haiku/sonnet/opus." ;
+    oc:hasRationale "Sonnet is the balanced middle ground and the safest default when capability is unknown." ;
+    oc:severityLevel "MEDIUM" .
 

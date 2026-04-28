@@ -4,104 +4,454 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-oc:skill_anthropics_claude_plugin_official_build_mcp_app_widget_templates a oc:DeclarativeSkill,
+oc:skill_claude_plugin_official_build_mcp_app_widget_templates a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "widget-templates" ;
-    skos:broader "template library" ;
+    skos:broader "HTML template library" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/anthropics/claude-plugin-official/build-mcp-app" ;
     oc:contentHash "d165f546ed7f91ece474d7605abc91e54e410ecebd3b649829687282c4887386" ;
-    oc:differentia "provides minimal HTML scaffolds for common MCP widget shapes (picker, confirm, progress, display, carousel) that inline the ext-apps bundle and communicate via App.sendMessage" ;
-    oc:extends oc:skill_anthropics_claude_plugin_official_build_mcp_app ;
-    oc:hasArgumentHint "widget type (picker, confirm, progress, display, carousel)" ;
+    oc:differentia "provides minimal copy-and-paste widget scaffolds for MCP app iframes, covering picker, confirm, progress, display-only, and carousel patterns using the @modelcontextprotocol/ext-apps SDK" ;
+    oc:extends oc:skill_claude_plugin_official_build_mcp_app ;
+    oc:handlesFailure oc:InvalidInput ;
+    oc:hasArgumentHint "widget-type (picker|confirm|progress|display|carousel)" ;
     oc:hasCategory "development" ;
-    oc:hasRequirement oc:req_3370e128,
-        oc:req_3ea77834,
-        oc:req_539f87f2 ;
-    oc:impartsKnowledge oc:kn_0e4f05ad,
-        oc:kn_19b5e99f,
-        oc:kn_21de3ee1,
-        oc:kn_5239b6f2,
-        oc:kn_87f248f6,
-        oc:kn_b03e8f2d,
-        oc:kn_bece947e,
-        oc:kn_e4da63aa,
-        oc:kn_fc9f9bbc ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "All templates inline the `App` class from `@modelcontextprotocol/ext-apps` at build time — the iframe's CSP blocks CDN script imports. They're intentionally framework-free; widgets are small enough that React/Vue hydration cost usually isn't worth it." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Minimal HTML scaffolds for the common widget shapes. Copy, fill in, ship." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "For presenting multiple items (product picks, search results) in a horizontal scroll rail. Patterns that tested well:" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "**Silent state via `updateModelContext`** — cart/selection changes should inform Claude without spamming the chat. Reserve `sendMessage` for terminal actions (\"checkout\", \"done\")." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "**Outbound links via `app.openLink`** — `window.open` and `<a target=\"_blank\">` are blocked by the sandbox." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "**Skip nav chevrons** — users know how to scroll. `scroll-snap-type` can cause a few-px-off-flush initial render; omit it and `scrollLeft = 0` after rendering." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "**Put Claude's reasoning in each item** — a `note` field rendered as a small callout on the card gives users the \"why\" inline." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "**Layout-fork by item count** — `items.length === 1` → detail/PDP layout, `> 1` → carousel. Handle in widget JS, keep the tool schema flat." ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "**Images:** the iframe CSP blocks remote `img-src`. Fetch thumbnails server-side in the tool handler, embed as `data:` URLs in the JSON payload, and render from those. Add `referrerpolicy=\"no-referrer\"` as a fallback." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """<style>
+  .rail { display: flex; gap: 10px; overflow-x: auto; padding: 12px; scrollbar-width: none; }
+  .rail::-webkit-scrollbar { display: none; }
+  .card { flex: 0 0 220px; border: 1px solid #ddd; border-radius: 6px; padding: 10px; }
+  .thumb-box { aspect-ratio: 1 / 1; display: grid; place-items: center; background: #f7f8f8; }
+  .thumb { max-width: 100%; max-height: 100%; object-fit: contain; }
+  .note { font-size: 12px; color: #666; border-left: 3px solid orange; padding: 2px 8px; margin: 8px 0; }
+</style>
+<div class="rail" id="rail"></div>
+""" ;
+                            oc:codeLanguage "html" ;
+                            oc:contentOrder 3 ;
+                            oc:sourceLocation "lines 237-247" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Carousel (multi-item display with actions)" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """<!doctype html>
+<meta charset="utf-8" />
+<style>
+  body { font: 14px system-ui; margin: 0; }
+  ul { list-style: none; padding: 0; margin: 0; max-height: 280px; overflow-y: auto; }
+  li { padding: 10px 14px; cursor: pointer; border-bottom: 1px solid #eee; }
+  li:hover { background: #f5f5f5; }
+  .sub { color: #666; font-size: 12px; }
+</style>
+<ul id="list"></ul>
+<script type="module">
+/*__EXT_APPS_BUNDLE__*/
+const { App } = globalThis.ExtApps;
+(async () => {
+  const app = new App({ name: "Picker", version: "1.0.0" }, {});
+  const ul = document.getElementById("list");
+
+  app.ontoolresult = ({ content }) => {
+    const { items } = JSON.parse(content[0].text);
+    ul.innerHTML = "";
+    for (const it of items) {
+      const li = document.createElement("li");
+      li.innerHTML = `<div>${it.label}</div><div class="sub">${it.sub ?? ""}</div>`;
+      li.addEventListener("click", () => {
+        app.sendMessage({
+          role: "user",
+          content: [{ type: "text", text: `Selected: ${it.id}` }],
+        });
+      });
+      ul.append(li);
+    }
+  };
+
+  await app.connect();
+})();
+</script>
+""" ;
+                            oc:codeLanguage "html" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 46-83" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Tool returns:** `{ content: [{ type: \"text\", text: JSON.stringify({ items: [{ id, label, sub? }] }) }] }`" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Picker (single-select list)" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "Server side, emit progress via `extra.sendNotification({ method: \"notifications/progress\", ... })` — see `apps-sdk-messages.md`." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """<!doctype html>
+<meta charset="utf-8" />
+<style>
+  body { font: 14px system-ui; margin: 16px; }
+  .bar { height: 8px; background: #eee; border-radius: 4px; overflow: hidden; }
+  .fill { height: 100%; background: #2a7; transition: width 200ms; }
+</style>
+<p id="label">Starting…</p>
+<div class="bar"><div id="fill" class="fill" style="width:0%"></div></div>
+<script type="module">
+/*__EXT_APPS_BUNDLE__*/
+const { App } = globalThis.ExtApps;
+(async () => {
+  const app = new App({ name: "Progress", version: "1.0.0" }, {});
+  const label = document.getElementById("label");
+  const fill = document.getElementById("fill");
+
+  // The tool result fires when the job completes — intermediate updates
+  // arrive via the same handler if the server streams them
+  app.ontoolresult = ({ content }) => {
+    const state = JSON.parse(content[0].text);
+    if (state.progress !== undefined) {
+      label.textContent = state.message ?? `${state.progress}/${state.total}`;
+      fill.style.width = `${(state.progress / state.total) * 100}%`;
+    }
+    if (state.done) {
+      label.textContent = "Complete";
+      fill.style.width = "100%";
+    }
+  };
+
+  await app.connect();
+})();
+</script>
+""" ;
+                            oc:codeLanguage "html" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 137-172" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Progress (long-running)" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Tool returns:** `{ content: [{ type: \"text\", text: JSON.stringify({ message, confirmLabel? }) }] }`" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """<!doctype html>
+<meta charset="utf-8" />
+<style>
+  body { font: 14px system-ui; margin: 16px; }
+  .actions { display: flex; gap: 8px; margin-top: 16px; }
+  button { padding: 8px 16px; cursor: pointer; }
+  .danger { background: #d33; color: white; border: none; }
+</style>
+<p id="msg"></p>
+<div class="actions">
+  <button id="cancel">Cancel</button>
+  <button id="confirm" class="danger">Confirm</button>
+</div>
+<script type="module">
+/*__EXT_APPS_BUNDLE__*/
+const { App } = globalThis.ExtApps;
+(async () => {
+  const app = new App({ name: "Confirm", version: "1.0.0" }, {});
+
+  app.ontoolresult = ({ content }) => {
+    const { message, confirmLabel } = JSON.parse(content[0].text);
+    document.getElementById("msg").textContent = message;
+    if (confirmLabel) document.getElementById("confirm").textContent = confirmLabel;
+  };
+
+  await app.connect();
+
+  document.getElementById("confirm").addEventListener("click", () => {
+    app.sendMessage({ role: "user", content: [{ type: "text", text: "Confirmed." }] });
+  });
+  document.getElementById("cancel").addEventListener("click", () => {
+    app.sendMessage({ role: "user", content: [{ type: "text", text: "Cancelled." }] });
+  });
+})();
+</script>
+""" ;
+                            oc:codeLanguage "html" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 91-127" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Note:** For simple confirmation, prefer **elicitation** over a widget — see `../build-mcp-server/references/elicitation.md`. Use this widget when you need custom styling or context beyond what a native form offers." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Confirm dialog" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """import { readFileSync } from "node:fs";
+import { createRequire } from "node:module";
+import { registerAppResource, RESOURCE_MIME_TYPE } from "@modelcontextprotocol/ext-apps/server";
+
+const require = createRequire(import.meta.url);
+
+const bundle = readFileSync(
+  require.resolve("@modelcontextprotocol/ext-apps/app-with-deps"), "utf8",
+).replace(/export\\{([^}]+)\\};?\\s*$/, (_, body) =>
+  "globalThis.ExtApps={" +
+  body.split(",").map((p) => {
+    const [local, exported] = p.split(" as ").map((s) => s.trim());
+    return `${exported ?? local}:${local}`;
+  }).join(",") + "};",
+);
+
+const pickerHtml = readFileSync("./widgets/picker.html", "utf8")
+  .replace("/*__EXT_APPS_BUNDLE__*/", () => bundle);
+
+registerAppResource(server, "Picker", "ui://widgets/picker.html", {},
+  async () => ({
+    contents: [{ uri: "ui://widgets/picker.html", mimeType: RESOURCE_MIME_TYPE, text: pickerHtml }],
+  }),
+);
+""" ;
+                            oc:codeLanguage "typescript" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 13-38" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "Bundle once per server startup (or at build time); reuse the `bundle` string across all widget templates." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Widgets are static HTML with one placeholder: `/*__EXT_APPS_BUNDLE__*/` gets replaced at server startup with the `ext-apps/app-with-deps` bundle (rewritten to expose `globalThis.ExtApps`)." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Serving widget HTML" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """registerAppTool(server, "show_chart", {
+  description: "Render a revenue chart",
+  inputSchema: { range: z.enum(["week", "month", "year"]) },
+  _meta: { ui: { resourceUri: "ui://widgets/chart.html" } },
+}, async ({ range }) => {
+  const data = await fetchRevenue(range);
+  return {
+    content: [{
+      type: "text",
+      text: `Revenue is up ${data.change}% over the ${range}. Chart rendered.\\n\\n` +
+            JSON.stringify(data.points),
+    }],
+  };
+});
+""" ;
+                            oc:codeLanguage "typescript" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 182-197" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Display widgets don't call `sendMessage` — they render and sit there. The tool should return a text summary **alongside** the widget so Claude can keep reasoning while the user sees the visual:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """<!doctype html>
+<meta charset="utf-8" />
+<style>body { font: 14px system-ui; margin: 12px; }</style>
+<canvas id="chart" width="400" height="200"></canvas>
+<script type="module">
+/*__EXT_APPS_BUNDLE__*/
+const { App } = globalThis.ExtApps;
+(async () => {
+  const app = new App({ name: "Chart", version: "1.0.0" }, {});
+
+  app.ontoolresult = ({ content }) => {
+    // Parse the JSON points from the text content (after the summary line)
+    const text = content[0].text;
+    const jsonStart = text.indexOf("\\n\\n") + 2;
+    const points = JSON.parse(text.slice(jsonStart));
+    drawChart(document.getElementById("chart"), points);
+  };
+
+  await app.connect();
+
+  function drawChart(canvas, points) { /* ... */ }
+})();
+</script>
+""" ;
+                            oc:codeLanguage "html" ;
+                            oc:contentOrder 3 ;
+                            oc:sourceLocation "lines 199-223" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Display-only (chart / preview)" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Widget Templates" ] ;
+    oc:impartsKnowledge oc:kn_1613fce1,
+        oc:kn_2a30f1cc,
+        oc:kn_3973ee12,
+        oc:kn_52d6e740,
+        oc:kn_665adcf5,
+        oc:kn_67d6e00d,
+        oc:kn_7e7e59a9,
+        oc:kn_8c5d6ecf,
+        oc:kn_9aa6220f,
+        oc:kn_a5a7e339,
+        oc:kn_cd2f6acf,
+        oc:kn_cf459ffc,
+        oc:kn_fa6fcbf6 ;
     oc:isUserInvocable true ;
-    oc:nature "concept" ;
-    oc:resolvesIntent "build interactive widget templates",
-        "create MCP widget UI",
-        "render picker confirm progress display or carousel widgets",
-        "scaffold widget HTML for MCP apps" .
+    oc:nature "Work" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "build carousel widget",
+        "build confirm dialog widget",
+        "build display-only chart widget",
+        "build interactive picker widget",
+        "build progress bar widget",
+        "create MCP widget HTML",
+        "serve widget HTML with inlined ext-apps bundle" ;
+    oc:yieldsState oc:DocumentCreated .
 
-oc:kn_0e4f05ad a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When building any MCP widget HTML template" ;
-    oc:directiveContent "All widget templates must inline the App class from @modelcontextprotocol/ext-apps at build time via the /*__EXT_APPS_BUNDLE__*/ placeholder — the iframe's CSP blocks CDN script imports." ;
-    oc:hasRationale "CSP restrictions prevent external script loading inside the widget iframe, so the bundle must be inlined at build time." ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_19b5e99f a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When serving multiple widget templates from an MCP server" ;
-    oc:directiveContent "Bundle once per server startup (or at build time) and reuse the bundle string across all widget templates. Avoid re-reading and re-processing the bundle for each widget." ;
-    oc:hasRationale "The bundle rewriting is expensive; reusing it avoids redundant file I/O and string processing per widget registration." .
-
-oc:kn_21de3ee1 a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When rendering images in widgets (especially carousel)" ;
-    oc:directiveContent "The iframe CSP blocks remote img-src. Fetch thumbnails server-side in the tool handler, embed as data: URLs in the JSON payload, and add referrerpolicy='no-referrer' as a fallback." ;
-    oc:hasRationale "CSP prevents loading external images directly; server-side fetching and data URL embedding is the only reliable approach." ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_5239b6f2 a oc:AntiPattern,
+oc:kn_1613fce1 a oc:AntiPattern,
         oc:KnowledgeNode ;
     oc:appliesToContext "When building carousel widgets" ;
-    oc:directiveContent "Do not use scroll-snap-type on carousels — it can cause a few-pixel-off-flush initial render. Use scrollLeft = 0 after rendering instead." ;
-    oc:hasRationale "CSS scroll snap can create subtle layout glitches on initial render that degrade the user experience." ;
-    oc:severityLevel "LOW" .
-
-oc:kn_87f248f6 a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When implementing a confirmation interaction" ;
-    oc:directiveContent "For simple confirmations, prefer MCP elicitation over a confirm widget. Only use the confirm widget when you need custom styling or context beyond what a native form offers." ;
-    oc:hasRationale "Elicitation is lighter-weight and more accessible for simple binary confirmations; widgets add complexity that should be justified." ;
+    oc:directiveContent "For carousel widgets, skip navigation chevrons and scroll-snap-type. Users know how to scroll horizontally. Reset scrollLeft to 0 after rendering instead." ;
+    oc:hasRationale "scroll-snap-type can cause a few-pixel-off initial render; nav chevrons add unnecessary complexity for a horizontal scroll rail." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_b03e8f2d a oc:DesignPrinciple,
+oc:kn_2a30f1cc a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When designing widget interaction patterns" ;
-    oc:directiveContent "Use silent state via updateModelContext for transient changes (cart/selection updates). Reserve sendMessage for terminal actions like 'checkout' or 'done' to avoid spamming the chat." ;
-    oc:hasRationale "Flooded chat with intermediate state changes degrades the conversation experience; only terminal actions warrant user-facing messages." ;
-    oc:severityLevel "HIGH" .
+    oc:appliesToContext "When building interactive widgets with ongoing state" ;
+    oc:directiveContent "For carousel widgets, use silent state updates via app.updateModelContext for selection/cart changes, reserving app.sendMessage only for terminal actions like 'checkout' or 'done'." ;
+    oc:hasRationale "Avoids spamming the chat with intermediate state changes while keeping Claude informed of current context." .
 
-oc:kn_bece947e a oc:DesignPrinciple,
+oc:kn_3973ee12 a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When building display-only widgets (charts, previews)" ;
-    oc:directiveContent "Display-only widgets should not call sendMessage. The tool should return a text summary alongside the widget so Claude can keep reasoning while the user sees the visual." ;
-    oc:hasRationale "Claude needs text content to continue reasoning; without it, the model loses context about what was rendered." .
-
-oc:kn_e4da63aa a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When adding external links in widget HTML" ;
-    oc:directiveContent "window.open and <a target='_blank'> are blocked by the sandbox. Use app.openLink for outbound links instead." ;
-    oc:hasRationale "The iframe sandbox prevents traditional link-opening mechanisms; the ext-apps App class provides the approved alternative." ;
+    oc:appliesToContext "When writing widget HTML/CSS/JS" ;
+    oc:directiveContent "Never use window.open(), <a target=\"_blank\">, external CSS, external fonts, eval(), new Function(), or inline event handlers (onclick=\"...\") in widget HTML." ;
+    oc:hasRationale "The iframe sandbox and CSP block popups, external resources, eval, and inline event handlers. Use addEventListener, inline <style> tags, system-ui fonts, and app.openLink() instead." ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_fc9f9bbc a oc:Heuristic,
+oc:kn_52d6e740 a oc:KnowledgeNode,
+        oc:SecurityImplication ;
+    oc:appliesToContext "When widgets need to display images" ;
+    oc:directiveContent "Fetch external images server-side in the tool handler and embed as data: URLs in the JSON payload — the iframe CSP blocks remote img-src and referrer hotlink policies block direct CDN images." ;
+    oc:hasRationale "Both CSP restrictions and CDN referrer policies prevent loading external images directly in the sandboxed iframe." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_665adcf5 a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When deciding whether to use a JS framework in a widget" ;
-    oc:directiveContent "Widgets should be framework-free (no React/Vue). They are small enough that framework hydration cost isn't worth it — use vanilla JS." ;
-    oc:hasRationale "MCP widgets are small, focused UI components where framework overhead outweighs benefits." .
+    oc:appliesToContext "When creating any MCP widget" ;
+    oc:directiveContent "All widget templates must inline the @modelcontextprotocol/ext-apps bundle at build time via the /*__EXT_APPS_BUNDLE__*/ placeholder — the iframe CSP blocks CDN script imports." ;
+    oc:hasRationale "The sandboxed iframe enforces a restrictive Content-Security-Policy that prevents loading external scripts." ;
+    oc:severityLevel "CRITICAL" .
 
-oc:req_3370e128 a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "MCP server registerAppResource and registerAppTool patterns" .
+oc:kn_67d6e00d a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When deciding between elicitation and a confirm widget" ;
+    oc:directiveContent "For simple confirmations, prefer MCP elicitation over a custom confirm widget. Use the confirm widget only when custom styling or richer context is needed." ;
+    oc:hasRationale "Elicitation is lighter weight and native to the protocol; widgets add iframe overhead." .
 
-oc:req_3ea77834 a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "@modelcontextprotocol/ext-apps package and App class API" .
+oc:kn_7e7e59a9 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When choosing widget architecture" ;
+    oc:directiveContent "Keep widgets framework-free (no React/Vue). Widgets are small enough that framework hydration cost isn't worth it." ;
+    oc:hasRationale "Simplicity and fast loading matter more than component architecture for small interactive surfaces inside iframes." .
 
-oc:req_539f87f2 a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "iframe CSP constraints for MCP widgets" .
+oc:kn_8c5d6ecf a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When building chart/preview display widgets" ;
+    oc:directiveContent "Display-only widgets should return a text summary alongside visual data so Claude can keep reasoning while the user sees the visual." ;
+    oc:hasRationale "Claude needs the data in text form to continue the conversation; the widget is for the human's visual benefit." .
+
+oc:kn_9aa6220f a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When building any MCP widget" ;
+    oc:directiveContent "1. Choose template type (picker, confirm, progress, display, carousel). 2. Copy the HTML scaffold. 3. Inline ext-apps bundle by replacing /*__EXT_APPS_BUNDLE__*/. 4. Register as app resource via registerAppResource with ui:// URI. 5. Create tool with _meta.ui.resourceUri pointing to the resource URI. 6. Return JSON data matching the template's expected shape from the tool handler." ;
+    oc:hasRationale "Provides the standard creation workflow from template to working widget." ;
+    oc:stepOrder 1 .
+
+oc:kn_a5a7e339 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Every widget's script module body" ;
+    oc:codeLanguage "javascript" ;
+    oc:directiveContent """const { App } = globalThis.ExtApps;
+(async () => {
+  const app = new App({ name: "WidgetName", version: "1.0.0" }, {});
+  app.ontoolresult = ({ content }) => { /* parse and render */ };
+  await app.connect();
+})();""" ;
+    oc:hasRationale "This is the universal scaffold pattern for all MCP widgets — set handlers before connect to avoid missing early results." .
+
+oc:kn_cd2f6acf a oc:KnowledgeNode,
+        oc:OutputFormat ;
+    oc:appliesToContext "When returning tool results for each widget type" ;
+    oc:directiveContent """Picker: { items: [{ id, label, sub? }] }
+Confirm: { message, confirmLabel? }
+Progress: { progress, total, message?, done? }
+Display: text summary + JSON data on separate lines
+Carousel: items with note field for inline reasoning""" ;
+    oc:hasRationale "Each widget template expects a specific JSON shape from the tool handler to render correctly." .
+
+oc:kn_cf459ffc a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Server-side bundle preparation for all widget templates" ;
+    oc:codeLanguage "typescript" ;
+    oc:directiveContent """const bundle = readFileSync(
+  require.resolve("@modelcontextprotocol/ext-apps/app-with-deps"), "utf8",
+).replace(/export\\{([^}]+)\\};?\\s*$/, (_, body) =>
+  "globalThis.ExtApps={" +
+  body.split(",").map((p) => {
+    const [local, exported] = p.split(" as ").map((s) => s.trim());
+    return `${exported ?? local}:${local}`;
+  }).join(",") + "};",
+);""" ;
+    oc:hasRationale "Rewrites the ESM export into a globalThis assignment so it works from an inline script module without import statements." .
+
+oc:kn_fa6fcbf6 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before serving any widget HTML" ;
+    oc:directiveContent "Bundle the ext-apps/app-with-deps once per server startup (or at build time) and reuse across all widget templates. Use the replacer function form () => bundle in String.replace to avoid $-sequence mangling in the minified bundle." ;
+    oc:hasRationale "The minified bundle contains $ characters that String.replace would misinterpret as special replacement patterns if passed as a bare string." ;
+    oc:severityLevel "HIGH" .
 
