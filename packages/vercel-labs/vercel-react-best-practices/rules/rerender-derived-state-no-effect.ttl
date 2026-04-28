@@ -7,59 +7,120 @@
 oc:skill_vercel_labs_vercel_react_best_practices_rerender_derived_state_no_effect a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "rerender-derived-state-no-effect" ;
-    skos:broader "React performance optimization pattern" ;
+    skos:broader "React rendering optimization pattern" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "cb11ec76f50aa7b6847269f02d79b120c889a30d9ecd2c1d578f75144419c77a" ;
-    oc:differentia "calculates derived state during render instead of storing redundant state or using useEffect, avoiding extra re-renders and state drift" ;
-    oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
-    oc:handlesFailure oc:RedundantRenderDetected,
-        oc:StateDriftDetected ;
+    oc:differentia "derives computed values during render instead of storing them in state or updating via effects" ;
+    oc:extends oc:skill_ontoskills_vercel_react_best_practices,
+        oc:skill_vercel_labs_vercel_react_best_practices ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_1bacfd7d,
-        oc:kn_596f75dc,
-        oc:kn_b0240a86,
-        oc:kn_edd2a2f5,
-        oc:kn_ee47280c ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Calculate Derived State During Rendering
+impact: MEDIUM
+impactDescription: avoids redundant renders and state drift
+tags: rerender, derived-state, useEffect, state
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 6 ;
+                    oc:textContent "References: [You Might Not Need an Effect](https://react.dev/learn/you-might-not-need-an-effect)" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function Form() {
+  const [firstName, setFirstName] = useState('First')
+  const [lastName, setLastName] = useState('Last')
+  const fullName = firstName + ' ' + lastName
+
+  return <p>{fullName}</p>
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 5 ;
+                    oc:sourceLocation "lines 30-38" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "If a value can be computed from current props/state, do not store it in state or update it in an effect. Derive it during render to avoid extra renders and state drift. Do not set state in effects solely in response to prop changes; prefer derived values or keyed resets instead." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "**Correct (derive during render):**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function Form() {
+  const [firstName, setFirstName] = useState('First')
+  const [lastName, setLastName] = useState('Last')
+  const [fullName, setFullName] = useState('')
+
+  useEffect(() => {
+    setFullName(firstName + ' ' + lastName)
+  }, [firstName, lastName])
+
+  return <p>{fullName}</p>
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-26" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Incorrect (redundant state and effect):**" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Calculate Derived State During Rendering" ] ;
+    oc:impartsKnowledge oc:kn_070132b4,
+        oc:kn_3eef081e,
+        oc:kn_79719202,
+        oc:kn_8a1c0a29,
+        oc:kn_97e511f7 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:ReactComponentExists ;
-    oc:resolvesIntent "eliminate redundant state and effects for derived values",
-        "fix state drift caused by syncing props to state in effects",
-        "optimize React component rendering" ;
+    oc:requiresState oc:ReactComponentWritten ;
+    oc:resolvesIntent "avoid redundant re-renders from effects",
+        "eliminate unnecessary useEffect for computed values",
+        "optimize derived state in React components" ;
     oc:yieldsState oc:DerivedStateOptimized .
 
-oc:kn_1bacfd7d a oc:Constraint,
+oc:kn_070132b4 a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When writing useEffect hooks in React components" ;
-    oc:directiveContent "Do not use useEffect to synchronize state that is purely derived from props or other state variables." ;
-    oc:hasRationale "Effects run after render, causing a second render cycle. For derived state, this is both unnecessary and introduces a window where state is inconsistent." ;
+    oc:appliesToContext "When writing React components with computed values" ;
+    oc:directiveContent "Compute derived values directly during render as plain variables or using useMemo, not via useState + useEffect." ;
+    oc:hasRationale "Deriving during render is synchronous, avoids extra render cycles, and guarantees consistency with source state" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_596f75dc a oc:Heuristic,
+oc:kn_3eef081e a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When designing React component state architecture" ;
-    oc:directiveContent "If a value can be computed from current props or state, derive it directly in the render body as a plain variable assignment." ;
-    oc:hasRationale "Deriving during render is synchronous, avoids extra render cycles, and guarantees the derived value is always consistent with its inputs." ;
-    oc:severityLevel "MEDIUM" .
+    oc:appliesToContext "When deriving any value from existing state or props" ;
+    oc:codeLanguage "tsx" ;
+    oc:directiveContent "const derivedValue = compute(sourceState, sourceProps) // inside component body, no useState/useEffect needed" ;
+    oc:hasRationale "Direct computation during render is the canonical React pattern for derived state" .
 
-oc:kn_b0240a86 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When a value is a pure function of existing props/state" ;
-    oc:directiveContent "Never store values in state or update them in useEffect when they can be computed directly from existing props or state during render." ;
-    oc:hasRationale "Storing derived values in state creates redundant re-renders (the effect triggers a second render) and can cause state drift where the derived value is temporarily out of sync with its source data." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_edd2a2f5 a oc:KnowledgeNode,
+oc:kn_79719202 a oc:KnowledgeNode,
         oc:SideEffect ;
-    oc:appliesToContext "When evaluating the performance cost of derived state patterns" ;
-    oc:directiveContent "Using useEffect to sync derived state causes an extra render cycle per source state change: first the source change renders, then the effect fires and sets state, triggering a second render." ;
-    oc:hasRationale "Each redundant render has a real performance cost, especially in complex component trees. Eliminating these is a low-effort, high-impact optimization." ;
+    oc:appliesToContext "When evaluating performance implications of effect-based state synchronization" ;
+    oc:directiveContent "Using useEffect to set derived state causes an extra render cycle per source state change (render → effect → re-render)." ;
+    oc:hasRationale "Understanding the render cost helps developers recognize the severity of this anti-pattern" ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_ee47280c a oc:DesignPrinciple,
+oc:kn_8a1c0a29 a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When props change and component state needs to reflect those changes" ;
-    oc:directiveContent "Prefer derived values or keyed resets over setting state in effects solely in response to prop changes." ;
-    oc:hasRationale "Derived values are always in sync with props by definition. Keyed resets (changing the key to remount) are a React-idiomatic way to reset state when props change fundamentally." ;
+    oc:appliesToContext "When a value is a pure function of existing state or props" ;
+    oc:directiveContent "Never store values in state that can be computed from existing props or state. Never use useEffect to synchronize derived state." ;
+    oc:hasRationale "Storing derived values in state causes redundant renders (state update triggers re-render) and state drift (derived value may lag behind source values)" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_97e511f7 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When props change and component needs to update internal representations" ;
+    oc:directiveContent "Do not use effects to set state in response to prop changes. Prefer derived values or keyed resets instead." ;
+    oc:hasRationale "Effects run after render, creating a cascading render cycle that wastes performance and can cause visual flicker" ;
     oc:severityLevel "MEDIUM" .
 

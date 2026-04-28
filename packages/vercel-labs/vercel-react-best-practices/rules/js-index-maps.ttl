@@ -7,69 +7,112 @@
 oc:skill_vercel_labs_vercel_react_best_practices_js_index_maps a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "js-index-maps" ;
-    skos:broader "Performance optimization pattern" ;
+    skos:broader "Performance optimization technique" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "5df1bdc2cfabb2c98abd55d26762e5c18189535c2e686184f426082e62920391" ;
-    oc:differentia "replaces repeated O(n) Array.find() calls with O(1) Map lookups by pre-building an index map" ;
-    oc:extends oc:skill_vercel_labs_vercel_react_best_practices,
-        oc:skill_vercel_react_best_practices ;
-    oc:hasArgumentHint "code with repeated .find() calls on arrays" ;
+    oc:differentia "replaces repeated O(n) lookups with O(1) Map-based index lookups in JavaScript" ;
+    oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
+    oc:hasArgumentHint "array data with repeated lookups by key" ;
     oc:hasCategory "development" ;
-    oc:hasRequirement oc:req_8e8338aa,
-        oc:req_ac6cbfed ;
-    oc:impartsKnowledge oc:kn_0c654bb3,
-        oc:kn_74390329,
-        oc:kn_978fd226,
-        oc:kn_d664cae6,
-        oc:kn_f53da489 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Multiple `.find()` calls by the same key should use a Map." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "**Correct (O(1) per lookup):**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function processOrders(orders: Order[], users: User[]) {
+  return orders.map(order => ({
+    ...order,
+    user: users.find(u => u.id === order.userId)
+  }))
+}
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-21" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Incorrect (O(n) per lookup):**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function processOrders(orders: Order[], users: User[]) {
+  const userById = new Map(users.map(u => [u.id, u]))
+
+  return orders.map(order => ({
+    ...order,
+    user: userById.get(order.userId)
+  }))
+}
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 5 ;
+                    oc:sourceLocation "lines 25-34" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 6 ;
+                    oc:textContent """Build map once (O(n)), then all lookups are O(1).
+For 1000 orders × 1000 users: 1M ops → 2K ops.""" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Build Index Maps for Repeated Lookups" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Build Index Maps for Repeated Lookups
+impact: LOW-MEDIUM
+impactDescription: 1M ops to 2K ops
+tags: javascript, map, indexing, optimization, performance
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:impartsKnowledge oc:kn_41072a0a,
+        oc:kn_5ee80633,
+        oc:kn_aa9b7a07,
+        oc:kn_e51484be,
+        oc:kn_ea975c2c ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:EnvironmentReady ;
-    oc:resolvesIntent "convert array find to map lookup",
+    oc:resolvesIntent "build index maps from arrays",
         "optimize repeated array lookups",
-        "reduce algorithmic complexity in data joins" ;
-    oc:yieldsState oc:CodeOptimized .
+        "reduce time complexity of find operations" .
 
-oc:kn_0c654bb3 a oc:AntiPattern,
+oc:kn_41072a0a a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When writing data transformation or join logic in JavaScript/TypeScript" ;
-    oc:directiveContent "Never use Array.find() inside a loop or .map() callback when the lookup key is consistent across iterations — this creates O(n×m) complexity." ;
-    oc:hasRationale "Each .find() iterates the entire array linearly; nesting it inside another iteration multiplies the cost quadratically." ;
+    oc:appliesToContext "When processing arrays that require cross-referencing by ID or key" ;
+    oc:directiveContent "Never use Array.find() inside a loop or .map() when looking up by the same key repeatedly — this creates O(n²) complexity." ;
+    oc:hasRationale "Each .find() is O(n), so nested inside an O(n) loop the total becomes O(n×m), which scales poorly" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_74390329 a oc:DesignPrinciple,
+oc:kn_5ee80633 a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When designing data processing pipelines or data-joining logic" ;
-    oc:directiveContent "Prefer pre-computing index structures (Map, Object lookup) over performing repeated linear searches, especially when the data size or iteration count is non-trivial." ;
-    oc:hasRationale "Index structures trade a small upfront O(n) cost for O(1) per-lookup, yielding better overall algorithmic performance." ;
-    oc:severityLevel "MEDIUM" .
+    oc:appliesToContext "When evaluating whether to optimize array lookups" ;
+    oc:directiveContent "If you call .find() more than once by the same key across iterations, build a Map instead." ;
+    oc:hasRationale "The crossover point is very low — even 2+ lookups benefit from indexing" .
 
-oc:kn_978fd226 a oc:KnowledgeNode,
+oc:kn_aa9b7a07 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing data processing pipelines" ;
+    oc:directiveContent "Pre-compute index structures once, then use constant-time lookups. Separate the indexing phase from the lookup phase." ;
+    oc:hasRationale "This single-pass indexing pattern is fundamental to efficient data transformation" .
+
+oc:kn_e51484be a oc:KnowledgeNode,
         oc:PerformanceProfile ;
-    oc:appliesToContext "When evaluating whether to adopt this pattern for a given dataset size" ;
-    oc:directiveContent "Building a Map from an array is O(n) one-time; subsequent .get() calls are O(1). For N items looked up against M items, total cost drops from O(N×M) to O(N+M)." ;
-    oc:hasRationale "The crossover point where Map indexing beats repeated .find() is at very small N and M; for most real-world datasets the improvement is significant." ;
-    oc:severityLevel "LOW" .
+    oc:appliesToContext "When estimating performance impact of index map conversion" ;
+    oc:directiveContent "Building a Map from an array of n items is O(n). Each subsequent Map.get() lookup is O(1). For 1000 orders × 1000 users: reduces from 1M operations to 2K operations." ;
+    oc:hasRationale "The cost of building the map is amortized across all subsequent O(1) lookups" .
 
-oc:kn_d664cae6 a oc:Constraint,
+oc:kn_ea975c2c a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When building an index Map from an array of objects" ;
-    oc:directiveContent "The Map index approach assumes the lookup key is unique in the target array. Duplicate keys will silently overwrite earlier entries." ;
-    oc:hasRationale "Map.set() replaces existing entries for the same key, so data loss can occur if keys are not unique." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_f53da489 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When processing or joining two arrays where one is repeatedly searched by a key" ;
-    oc:directiveContent "When you have multiple .find() calls by the same key on an array, build a Map index once and use .get() for O(1) lookups instead of O(n) scans." ;
-    oc:hasRationale "Converting repeated O(n) lookups to a single O(n) index build plus O(1) lookups reduces total operations dramatically — e.g., 1000 orders × 1000 users drops from 1M ops to 2K ops." ;
-    oc:severityLevel "HIGH" .
-
-oc:req_8e8338aa a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "JavaScript/TypeScript Map API" .
-
-oc:req_ac6cbfed a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "Big-O time complexity basics" .
+    oc:appliesToContext "When building an index for repeated lookups from an array" ;
+    oc:codeLanguage "typescript" ;
+    oc:directiveContent "const lookupMap = new Map(array.map(item => [item.key, item])); // O(1) lookups via lookupMap.get(key)" ;
+    oc:hasRationale "Map construction is O(n) once, then every .get() is O(1), reducing total from O(n×m) to O(n+m)" .
 

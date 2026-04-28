@@ -7,49 +7,120 @@
 oc:skill_vercel_labs_vercel_react_best_practices_rerender_dependencies a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "rerender-dependencies" ;
-    skos:broader "Performance optimization pattern" ;
+    skos:broader "React optimization pattern" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "17eb5830956fb56486fd3cfc7431f5849d39751730c05ad9e77dd4f0c27169c5" ;
-    oc:dependsOnSkill oc:skill_vercel_react_best_practices ;
-    oc:differentia "narrows useEffect dependency arrays to primitive values instead of object references to minimize unnecessary effect re-runs" ;
+    oc:differentia "narrows useEffect dependency arrays to primitives and derived booleans to minimize unnecessary effect re-runs" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
-    oc:hasArgumentHint "React component code with useEffect hooks" ;
+    oc:handlesFailure oc:StaleClosureDetected ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_8ae208fd,
-        oc:kn_8ca919bf,
-        oc:kn_a8da96ec,
-        oc:kn_dd634af4 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """useEffect(() => {
+  console.log(user.id)
+}, [user.id])
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 5 ;
+                    oc:sourceLocation "lines 22-26" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "**Correct (re-runs only when id changes):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Incorrect (re-runs on any user field change):**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """useEffect(() => {
+  console.log(user.id)
+}, [user])
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-18" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 6 ;
+                    oc:textContent "**For derived state, compute outside effect:**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """// Incorrect: runs on width=767, 766, 765...
+useEffect(() => {
+  if (width < 768) {
+    enableMobileMode()
+  }
+}, [width])
+
+// Correct: runs only on boolean transition
+const isMobile = width < 768
+useEffect(() => {
+  if (isMobile) {
+    enableMobileMode()
+  }
+}, [isMobile])
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 7 ;
+                    oc:sourceLocation "lines 30-45" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Specify primitive dependencies instead of objects to minimize effect re-runs." ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Narrow Effect Dependencies" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Narrow Effect Dependencies
+impact: LOW
+impactDescription: minimizes effect re-runs
+tags: rerender, useEffect, dependencies, optimization
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:impartsKnowledge oc:kn_10836a73,
+        oc:kn_4068825e,
+        oc:kn_789658a6,
+        oc:kn_a167d69a ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:resolvesIntent "minimize useEffect re-runs",
-        "optimize effect dependencies",
-        "reduce unnecessary re-renders in React components" .
+    oc:requiresState oc:ReactComponentWithEffects ;
+    oc:resolvesIntent "fix unnecessary re-renders in React effects",
+        "minimize effect re-runs",
+        "optimize useEffect dependencies" ;
+    oc:yieldsState oc:EffectDependenciesOptimized .
 
-oc:kn_8ae208fd a oc:AntiPattern,
+oc:kn_10836a73 a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When writing useEffect dependency arrays in React components" ;
-    oc:directiveContent "Never pass entire objects (e.g., `user`) as useEffect dependencies when the effect only uses a single primitive property (e.g., `user.id`). Object references change on every render, causing the effect to re-run unnecessarily." ;
-    oc:hasRationale "Object references are compared by identity, not value — a new object is created on each render even if the data is identical, triggering spurious effect executions." ;
+    oc:appliesToContext "When an effect uses only a single property of an object" ;
+    oc:directiveContent "Specify the exact primitive property you need: `[user.id]` instead of `[user]`, `[item.name]` instead of `[item]`." ;
+    oc:hasRationale "Primitive comparison (===) is more precise than reference comparison, triggering re-runs only when the actual value changes." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_8ca919bf a oc:DesignPrinciple,
+oc:kn_4068825e a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When an effect depends on a condition derived from a frequently changing value (e.g., window width, scroll position)" ;
-    oc:directiveContent "Compute derived state (e.g., boolean thresholds) outside the useEffect, then use the derived primitive as the dependency instead of the raw source value." ;
-    oc:hasRationale "Computing derived state outside the effect narrows the dependency to a less frequently changing value. For example, a boolean `isMobile` only transitions twice, while raw `width` changes on every pixel resize." ;
+    oc:appliesToContext "Always when declaring useEffect dependencies" ;
+    oc:directiveContent "Each value in a useEffect dependency array should be the most specific value that the effect actually consumes — a primitive or a computed boolean, never a parent object." ;
+    oc:hasRationale "Overly broad dependencies violate the React hooks contract by triggering more executions than semantically necessary." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_a8da96ec a oc:KnowledgeNode,
-        oc:PerformanceProfile ;
-    oc:appliesToContext "When evaluating React component performance" ;
-    oc:directiveContent "Using object dependencies in useEffect can cause effects to fire on every render, leading to cascading re-renders, unnecessary network requests, or repeated computations." ;
-    oc:hasRationale "Unnecessary effect re-runs are a common source of performance degradation and bugs in React applications, especially when effects trigger state updates." ;
-    oc:severityLevel "LOW" .
-
-oc:kn_dd634af4 a oc:Heuristic,
+oc:kn_789658a6 a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When defining useEffect dependencies for any React component" ;
-    oc:directiveContent "Prefer primitive values (strings, numbers, booleans) over object references in useEffect dependency arrays. Extract only the specific properties the effect actually uses." ;
-    oc:hasRationale "Primitive values are compared by value, so effects only re-run when the actual data changes, not when a parent re-renders with a new object reference." ;
+    oc:appliesToContext "When writing useEffect dependency arrays" ;
+    oc:directiveContent "Never pass entire objects (like `user`) as useEffect dependencies when the effect only reads a single primitive property (like `user.id`)." ;
+    oc:hasRationale "Objects are compared by reference — any property change creates a new object reference, causing the effect to re-run even when the specific value used inside hasn't changed." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_a167d69a a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When an effect contains conditional logic based on a threshold or transformation" ;
+    oc:directiveContent "For derived/conditional logic in effects, compute the derived value outside the effect and add the computed value to the dependency array instead of the raw input." ;
+    oc:hasRationale "A boolean like `isMobile = width < 768` only changes on transition boundaries, preventing redundant effect runs on every intermediate pixel change." ;
     oc:severityLevel "MEDIUM" .
 

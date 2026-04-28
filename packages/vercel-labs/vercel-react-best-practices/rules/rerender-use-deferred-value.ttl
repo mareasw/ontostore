@@ -10,58 +10,151 @@ oc:skill_vercel_labs_vercel_react_best_practices_rerender_use_deferred_value a o
     skos:broader "React rendering optimization pattern" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "8c3579576a61a949884167745dcfaf1d5426ba305cc61fd0a79602d70fda4909" ;
-    oc:differentia "uses useDeferredValue to keep user input responsive during expensive derived computations by deferring the heavy render until the browser is idle" ;
+    oc:differentia "uses useDeferredValue to keep input responsive during expensive derived computations" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
-    oc:handlesFailure oc:RenderStutterDetected,
-        oc:UnmemoizedComputationFound ;
+    oc:handlesFailure oc:ExpensiveRenderWithoutUseMemo,
+        oc:InputLagDetected ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_290fe9b9,
-        oc:kn_570333db,
-        oc:kn_b9400540,
-        oc:kn_ded92286,
-        oc:kn_e567bf76 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Incorrect (input feels laggy while filtering):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "**Correct (input stays snappy, results render when ready):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 8 ;
+                    oc:textContent "**Note:** Wrap the expensive computation in `useMemo` with the deferred value as a dependency, otherwise it still runs on every render." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 9 ;
+                    oc:textContent "Reference: [React useDeferredValue](https://react.dev/reference/react/useDeferredValue)" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 6 ;
+                    oc:textContent "**When to use:**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function Search({ items }: { items: Item[] }) {
+  const [query, setQuery] = useState('')
+  const deferredQuery = useDeferredValue(query)
+  const filtered = useMemo(
+    () => items.filter(item => fuzzyMatch(item, deferredQuery)),
+    [items, deferredQuery]
+  )
+  const isStale = query !== deferredQuery
+
+  return (
+    <>
+      <input value={query} onChange={e => setQuery(e.target.value)} />
+      <div style={{ opacity: isStale ? 0.7 : 1 }}>
+        <ResultsList results={filtered} />
+      </div>
+    </>
+  )
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 5 ;
+                    oc:sourceLocation "lines 30-49" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function Search({ items }: { items: Item[] }) {
+  const [query, setQuery] = useState('')
+  const filtered = items.filter(item => fuzzyMatch(item, query))
+
+  return (
+    <>
+      <input value={query} onChange={e => setQuery(e.target.value)} />
+      <ResultsList results={filtered} />
+    </>
+  )
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-26" ],
+                [ a oc:BulletList ;
+                    oc:blockType "bullet_list" ;
+                    oc:contentOrder 7 ;
+                    oc:hasItem [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 2 ;
+                            oc:itemText "Expensive visualizations (charts, graphs) reacting to input" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 3 ;
+                            oc:itemText "Any derived state that causes noticeable render delays" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 1 ;
+                            oc:itemText "Filtering/searching large lists" ] ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "When user input triggers expensive computations or renders, use `useDeferredValue` to keep the input responsive. The deferred value lags behind, allowing React to prioritize the input update and render the expensive result when idle." ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Use useDeferredValue for Expensive Derived Renders" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Use useDeferredValue for Expensive Derived Renders
+impact: MEDIUM
+impactDescription: keeps input responsive during heavy computation
+tags: rerender, useDeferredValue, optimization, concurrent
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:impartsKnowledge oc:kn_0a2d2048,
+        oc:kn_5b0845a4,
+        oc:kn_7a33e190,
+        oc:kn_88e09ce3,
+        oc:kn_df18a906 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:ExpensiveDerivationIdentified,
-        oc:ReactComponentMounted ;
-    oc:resolvesIntent "defer heavy computations in React components",
-        "optimize search filtering responsiveness",
-        "prevent input lag during expensive renders" ;
-    oc:yieldsState oc:DeferredRenderOptimized,
-        oc:InputResponsivenessPreserved .
+    oc:requiresState oc:ReactComponentWithExpensiveDerivedState ;
+    oc:resolvesIntent "defer expensive derived state computation in React components",
+        "keep input responsive during heavy filtering or search",
+        "optimize expensive renders triggered by user input" ;
+    oc:yieldsState oc:ResponsiveInputWithDeferredRendering .
 
-oc:kn_290fe9b9 a oc:Heuristic,
+oc:kn_0a2d2048 a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When evaluating whether a component needs deferred value optimization" ;
-    oc:directiveContent "Apply useDeferredValue when filtering/searching large lists, rendering expensive visualizations, or any derived state causing noticeable render delays." ;
-    oc:hasRationale "useDeferredValue is specifically designed for concurrent rendering scenarios where input responsiveness must be preserved despite heavy downstream computation." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_570333db a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When rendering deferred results alongside live user input" ;
-    oc:directiveContent "Use a visual staleness indicator (e.g., reduced opacity) when the deferred value lags behind the actual input to communicate state to the user." ;
-    oc:hasRationale "Users need feedback that the displayed results are stale and will update shortly, preventing confusion about mismatched results." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_b9400540 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When user input triggers filtering, searching, or visualization of large datasets" ;
-    oc:directiveContent "Never run expensive derived computations directly on user input state without deferral — the input will feel laggy and unresponsive." ;
-    oc:hasRationale "Synchronous expensive computation blocks the main thread, making the input field feel frozen until the computation completes." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_ded92286 a oc:KnowledgeNode,
-        oc:SideEffect ;
-    oc:appliesToContext "Always, when useDeferredValue is in use" ;
-    oc:directiveContent "useDeferredValue introduces a deliberate temporal mismatch between input state and rendered results — the deferred value lags behind the actual value." ;
-    oc:hasRationale "This lag is intentional and enables concurrent rendering, but components must be designed to handle the intermediate stale state gracefully." ;
-    oc:severityLevel "LOW" .
-
-oc:kn_e567bf76 a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "When implementing useDeferredValue for any derived state computation" ;
-    oc:directiveContent "Always wrap the expensive computation in useMemo with the deferred value as a dependency, not the original value." ;
-    oc:hasRationale "Without useMemo, the expensive computation still runs on every render, negating the benefit of deferring the value." ;
+    oc:appliesToContext "When wrapping expensive computations that react to user input" ;
+    oc:codeLanguage "tsx" ;
+    oc:directiveContent "Combine useDeferredValue with useMemo: pass the deferred value into useMemo as a dependency so the expensive computation only runs when React schedules it." ;
+    oc:hasRationale "Without useMemo, the expensive computation still runs on every render even with useDeferredValue, negating the optimization" ;
     oc:severityLevel "CRITICAL" .
+
+oc:kn_5b0845a4 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When deciding whether to use useDeferredValue" ;
+    oc:directiveContent "Apply useDeferredValue when: filtering/searching large lists, rendering expensive visualizations reacting to input, or any derived state causing noticeable render delays." ;
+    oc:hasRationale "Not all derived state needs deferral — only apply it when computation is expensive enough to cause perceptible lag" .
+
+oc:kn_7a33e190 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When rendering deferred results alongside live input" ;
+    oc:directiveContent "Use visual feedback (e.g., reduced opacity) to indicate stale results when the deferred value hasn't caught up to the current input." ;
+    oc:hasRationale "Users need to know the displayed results may not yet reflect their latest input" .
+
+oc:kn_88e09ce3 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Before using useDeferredValue" ;
+    oc:directiveContent "useDeferredValue requires React 18+ with concurrent features enabled." ;
+    oc:hasRationale "This hook relies on React's concurrent rendering scheduler which is only available in React 18+" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_df18a906 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When filtering, searching, or computing expensive derived state from user input" ;
+    oc:directiveContent "Never run expensive derived computations directly on user input state without deferral — it blocks the input from updating responsively." ;
+    oc:hasRationale "Synchronous computation on every keystroke creates perceptible input lag, degrading user experience" ;
+    oc:severityLevel "HIGH" .
 

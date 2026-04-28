@@ -7,104 +7,1031 @@
 oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_cocoapods_spm_migration_common_pods_mapping a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "common-pods-mapping" ;
-    skos:broader "Dependency mapping guide" ;
+    skos:broader "Reference mapping table" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/kotlin/kotlin-agent-skills/kotlin-tooling-cocoapods-spm-migration" ;
     oc:contentHash "fe29a0c9c983435b4fb8f7cc2c26e1bf9e3d5fc173d69fcdd6b9d35b5240ceff" ;
-    oc:differentia "Translates popular CocoaPods pod declarations to SwiftPM package declarations for KMP projects, with per-product cinterop notes, importedClangModules overrides, and bundled-klib compatibility guidance" ;
+    oc:differentia "Translates popular CocoaPods pod declarations to SwiftPM product declarations for KMP migration, including Firebase, Google Maps, Google Sign-In, and bundled cinterop klib handling" ;
     oc:extends oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_cocoapods_spm_migration ;
-    oc:handlesFailure oc:ModuleNotFound,
-        oc:SymbolConflictDetected,
-        oc:VersionMismatch ;
-    oc:hasArgumentHint "pod-name or library-name (e.g., \"FirebaseAuth\", \"GoogleMaps\")" ;
+    oc:hasArgumentHint "pod-name or library-name to look up mapping for" ;
     oc:hasCategory "development" ;
-    oc:hasRequirement oc:req_53378b1e,
-        oc:req_934d0305,
-        oc:req_c3fa2aa4 ;
-    oc:impartsKnowledge oc:kn_092c4f61,
-        oc:kn_17bfdda3,
-        oc:kn_56322405,
-        oc:kn_66e5cd29,
-        oc:kn_bb4c9648,
-        oc:kn_c00c44af,
-        oc:kn_ce161467,
-        oc:kn_e2d62b26 ;
-    oc:isUserInvocable true ;
-    oc:nature "Reference" ;
-    oc:requiresState oc:CocoaPodsDependenciesIdentified,
-        oc:SPMConfigurationInProgress ;
-    oc:resolvesIntent "find correct importedClangModules for Firebase products",
-        "handle bundled cinterop klibs when migrating to SwiftPM",
-        "map CocoaPods dependencies to SwiftPM equivalents",
-        "migrate Firebase pods to Swift Package Manager in KMP",
-        "resolve version constraint differences between CocoaPods and SPM" ;
-    oc:yieldsState oc:ImportedClangModulesIdentified,
-        oc:PodsMappedToSwiftPM .
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Reference for migrating popular CocoaPods dependencies to SwiftPM." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 1 ;
+                            oc:rowCount 19 ;
+                            oc:tableCaption "## Quick Reference Table" ;
+                            oc:tableMarkdown """| Pod Name | SPM Product | SPM Repository | Version Type | Platform | Notes |
+|----------|-------------|----------------|--------------|----------|-------|
+| FirebaseAnalytics | FirebaseAnalytics | firebase/firebase-ios-sdk.git | from() | All | |
+| FirebaseAuth | FirebaseAuth | firebase/firebase-ios-sdk.git | from() | All | |
+| FirebaseCore | FirebaseCore | firebase/firebase-ios-sdk.git | from() | All | |
+| FirebaseCrashlytics | FirebaseCrashlytics | firebase/firebase-ios-sdk.git | from() | All | Needs dSYM upload script |
+| FirebaseDatabase | FirebaseDatabase | firebase/firebase-ios-sdk.git | from() | All | importedClangModules: FirebaseDatabaseInternal |
+| FirebaseFirestore | FirebaseFirestore | firebase/firebase-ios-sdk.git | from() | All | importedClangModules: FirebaseFirestoreInternal |
+| FirebaseFunctions | FirebaseFunctions | firebase/firebase-ios-sdk.git | from() | All | |
+| FirebaseMessaging | FirebaseMessaging | firebase/firebase-ios-sdk.git | from() | All | |
+| FirebaseRemoteConfig | FirebaseRemoteConfig | firebase/firebase-ios-sdk.git | from() | All | importedClangModules: FirebaseRemoteConfigInternal |
+| FirebaseStorage | FirebaseStorage | firebase/firebase-ios-sdk.git | from() | All | |
+| FirebasePerformance | FirebasePerformance | firebase/firebase-ios-sdk.git | from() | iOS/tvOS | |
+| FirebaseInAppMessaging | FirebaseInAppMessaging-Beta | firebase/firebase-ios-sdk.git | from() | iOS/tvOS | `-Beta` suffix, importedClangModules: FirebaseInAppMessagingInternal |
+| FirebaseAppDistribution | FirebaseAppDistribution-Beta | firebase/firebase-ios-sdk.git | from() | iOS only | `-Beta` suffix |
+| FirebaseABTesting | *(none)* | firebase/firebase-ios-sdk.git | — | All | Module-only, importedClangModules only |
+| FirebaseAILogic | FirebaseAI | firebase/firebase-ios-sdk.git | from() | All | Renamed, Swift-only |
+| GoogleMaps | GoogleMaps | googlemaps/ios-maps-sdk.git | exact() | iOS 16+ only | Requires platform constraint |
+| GoogleSignIn | GoogleSignIn | google/GoogleSignIn-iOS.git | from() | iOS 12+, macOS 10.15+ | |
+| GoogleSignInSwiftSupport | GoogleSignInSwift | google/GoogleSignIn-iOS.git | from() | iOS 12+, macOS 10.15+ | SwiftUI support |
+| LoremIpsum | LoremIpsum | lukaskubanek/LoremIpsum.git | from() | All | |
+""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Quick Reference Table" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BlockQuote ;
+                            oc:blockType "blockquote" ;
+                            oc:contentOrder 4 ;
+                            oc:quoteContent "**WARNING: Do not mix Firebase across CocoaPods and SPM.** All Firebase products share a single repository and common transitive dependencies (gRPC, abseil, leveldb, BoringSSL, nanopb, etc.). If some Firebase pods remain in CocoaPods while others are added via SPM, the shared transitive dependencies get linked twice with conflicting symbols, causing **dyld crashes at runtime** (e.g., `Symbol not found: _OBJC_CLASS_$_FIRFirestore`). When migrating Firebase, move **all** Firebase pods to SPM at once — including Swift-only pods (FirebaseAI, FirebaseFunctions, FirebaseMLModelDownloader) that Kotlin cannot use directly. Add Swift-only pods as `products` entries without `importedClangModules`. After adding new products, re-run `integrateLinkagePackage` to regenerate the linkage Swift package." ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 3 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Exception: Beta products have a `-Beta` suffix in SPM (e.g., `FirebaseAppDistribution-Beta`)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "**Platform requirements**: iOS 15+, macOS 10.15+, tvOS 15+, watchOS 7+" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "SPM product names match CocoaPods pod names (e.g., pod `FirebaseAuth` → product `FirebaseAuth`)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "The CocoaPods umbrella pod `Firebase` does not exist in SPM — import specific products" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "**Xcode**: 16.2+" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Key facts:**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "All Firebase products come from a single repository: `https://github.com/firebase/firebase-ios-sdk.git`" ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """swiftPMDependencies {
+    discoverModulesImplicitly = false
 
-oc:kn_092c4f61 a oc:KnowledgeNode,
+    swiftPackage(
+        url = url("https://github.com/firebase/firebase-ios-sdk.git"),
+        version = from("12.6.0"),
+        products = listOf(
+            product("FirebaseAnalytics"),
+            product("FirebaseAuth"),
+            product("FirebaseDatabase"),
+            product("FirebaseFirestore"),
+            product("FirebaseCrashlytics"),
+            product("FirebaseMessaging"),
+            product("FirebaseRemoteConfig"),
+            // Swift-only pods (products only, no importedClangModules):
+            product("FirebaseAI"),
+            product("FirebaseFunctions"),
+        ),
+        importedClangModules = listOf(
+            "FirebaseAnalytics",
+            "FirebaseAuth",
+            "FirebaseCore",
+            "FirebaseCrashlytics",
+            "FirebaseDatabaseInternal",      // Not "FirebaseDatabase"
+            "FirebaseFirestoreInternal",     // Not "FirebaseFirestore"
+            "FirebaseMessaging",
+            "FirebaseRemoteConfigInternal",  // Not "FirebaseRemoteConfig"
+            "FirebaseABTesting",             // Module-only, no product
+        ),
+    )
+}
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 164-196" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "When using multiple Firebase products, declare them in a single package. **Set `discoverModulesImplicitly = false`** — Firebase's transitive C++ dependencies (gRPC, abseil, leveldb, BoringSSL) contain Clang modules that fail cinterop. Explicitly list only the modules you need." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 7 ;
+                            oc:sectionTitle "Combined Firebase Example" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 1 ;
+                                    oc:rowCount 18 ;
+                                    oc:tableCaption "### Firebase SPM Products Reference" ;
+                                    oc:tableMarkdown """| CocoaPods Pod | SPM Product | Platform | KMP Notes |
+|---------------|-------------|----------|-----------|
+| FirebaseAnalytics | FirebaseAnalytics | All | ObjC classes: `FIRAnalytics`, `FIRApp` |
+| FirebaseAuth | FirebaseAuth | All (partial on macOS/tvOS/watchOS) | ObjC classes: `FIRAuth`, `FIRUser` |
+| FirebaseCore | FirebaseCore | All | ObjC class: `FIRApp` |
+| FirebaseCrashlytics | FirebaseCrashlytics | All | ObjC class: `FIRCrashlytics` |
+| FirebaseDatabase | FirebaseDatabase | All | **importedClangModules: `FirebaseDatabaseInternal`** — ObjC classes: `FIRDatabase`, `FIRDatabaseReference` |
+| FirebaseFirestore | FirebaseFirestore | All | **Special case** — see below |
+| FirebaseFunctions | FirebaseFunctions | All | ObjC class: `FIRFunctions` |
+| FirebaseMessaging | FirebaseMessaging | All | ObjC classes: `FIRMessaging` |
+| FirebaseRemoteConfig | FirebaseRemoteConfig | All | **importedClangModules: `FirebaseRemoteConfigInternal`** — ObjC class: `FIRRemoteConfig` |
+| FirebaseStorage | FirebaseStorage | All | ObjC class: `FIRStorage` |
+| FirebaseAppCheck | FirebaseAppCheck | All (watchOS 9+) | ObjC class: `FIRAppCheck` |
+| FirebasePerformance | FirebasePerformance | iOS/tvOS only | ObjC class: `FIRPerformance` |
+| FirebaseInAppMessaging | FirebaseInAppMessaging-Beta | iOS/tvOS only | `-Beta` suffix in SPM, **importedClangModules: `FirebaseInAppMessagingInternal`** |
+| FirebaseAppDistribution | FirebaseAppDistribution-Beta | iOS only | Note `-Beta` suffix in SPM |
+| FirebaseInstallations | FirebaseInstallations | All | ObjC class: `FIRInstallations` |
+| FirebaseABTesting | *(no SPM product)* | All | **Module-only**: pulled transitively by RemoteConfig. List in `importedClangModules` only |
+| FirebaseAILogic | FirebaseAI | All | **Renamed in SPM**. Swift-only — no `importedClangModules` entry needed |
+| FirebaseMLModelDownloader | FirebaseMLModelDownloader | All | Swift-only — no `importedClangModules` entry needed |
+""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Firebase SPM Products Reference" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """import swiftPMImport.<group>.<module>.FIRDatabase
+import swiftPMImport.<group>.<module>.FIRDatabaseReference
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 4 ;
+                                    oc:sourceLocation "lines 99-102" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Kotlin import:**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """// CocoaPods
+pod("FirebaseDatabase") { version = "12.5.0" }
+
+// SwiftPM - Note the importedClangModules parameter
+swiftPackage(
+    url = url("https://github.com/firebase/firebase-ios-sdk.git"),
+    version = from("12.6.0"),
+    products = listOf(product("FirebaseDatabase")),
+    importedClangModules = listOf("FirebaseDatabaseInternal"),
+)
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 85-96" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Database's Clang module name differs from its SPM product name. You **must** specify `importedClangModules`." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "FirebaseDatabase" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Ensure `GoogleService-Info.plist` is included in the iOS app target. In the app's entry point:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """import Firebase
+FirebaseApp.configure()  // Must be called before using any Firebase service
+""" ;
+                                    oc:codeLanguage "swift" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 229-232" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 9 ;
+                            oc:sectionTitle "Firebase Initialization" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """import swiftPMImport.<group>.<module>.FIRAnalytics
+import swiftPMImport.<group>.<module>.FIRApp
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 3 ;
+                                    oc:sourceLocation "lines 56-59" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Kotlin import:**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """// CocoaPods
+pod("FirebaseAnalytics") { version = "12.5.0" }
+
+// SwiftPM
+swiftPackage(
+    url = url("https://github.com/firebase/firebase-ios-sdk.git"),
+    version = from("12.6.0"),
+    products = listOf(product("FirebaseAnalytics")),
+)
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 43-53" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "FirebaseAnalytics" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**iOS project requirement:** Crashlytics needs a dSYM upload run script in the Xcode build phases. After migration, add a \"Run Script\" phase at the END of build phases:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """// CocoaPods
+pod("FirebaseCrashlytics") { version = "12.5.0" }
+
+// SwiftPM
+swiftPackage(
+    url = url("https://github.com/firebase/firebase-ios-sdk.git"),
+    version = from("12.6.0"),
+    products = listOf(product("FirebaseCrashlytics")),
+)
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 131-141" ],
+                                [ a oc:Template ;
+                                    oc:blockType "template" ;
+                                    oc:contentOrder 5 ;
+                                    oc:templateContent """${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}
+${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${PRODUCT_NAME}
+${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Info.plist
+$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/GoogleService-Info.plist
+$(TARGET_BUILD_DIR)/$(EXECUTABLE_PATH)
+""" ;
+                                    oc:templateVariables "DWARF_DSYM_FILE_NAME",
+                                        "DWARF_DSYM_FOLDER_PATH",
+                                        "PRODUCT_NAME" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent "With input files:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run"
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 3 ;
+                                    oc:sourceLocation "lines 145-147" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 6 ;
+                                    oc:textContent "Also set **Debug Information Format** to `DWARF with dSYM File` for all build configurations." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 6 ;
+                            oc:sectionTitle "FirebaseCrashlytics" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Firestore's Clang module name differs from its SPM product name. You **must** specify `importedClangModules`." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Kotlin import:**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """import swiftPMImport.<group>.<module>.FIRFirestore
+import swiftPMImport.<group>.<module>.FIRDocumentReference
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 4 ;
+                                    oc:sourceLocation "lines 122-125" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """// CocoaPods
+pod("FirebaseFirestore") { version = "12.5.0" }
+
+// SwiftPM - Note the importedClangModules parameter
+swiftPackage(
+    url = url("https://github.com/firebase/firebase-ios-sdk.git"),
+    version = from("12.6.0"),
+    products = listOf(product("FirebaseFirestore")),
+    importedClangModules = listOf("FirebaseFirestoreInternal"),
+)
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 108-119" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent "**Why is this needed?** Firestore distributes as a binary xcframework. The internal Clang module exposed to Objective-C is named `FirebaseFirestoreInternal`, not `FirebaseFirestore`. Without `importedClangModules`, the KMP compiler cannot discover the Objective-C headers." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 5 ;
+                            oc:sectionTitle "FirebaseFirestore (Special Case)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 2 ;
+                                    oc:rowCount 18 ;
+                                    oc:tableCaption "Several Firebase products expose ObjC headers through Clang modules whose names differ from the SPM product name" ;
+                                    oc:tableMarkdown """| SPM Product | Clang Module (importedClangModules) | Notes |
+|---|---|---|
+| FirebaseAnalytics | FirebaseAnalytics | Same name |
+| FirebaseAuth | FirebaseAuth | Same name |
+| FirebaseCore | FirebaseCore | Same name |
+| FirebaseCrashlytics | FirebaseCrashlytics | Same name |
+| FirebaseDatabase | **FirebaseDatabaseInternal** | Different |
+| FirebaseFirestore | **FirebaseFirestoreInternal** | Different |
+| FirebaseInAppMessaging-Beta | **FirebaseInAppMessagingInternal** | Different |
+| FirebaseRemoteConfig | **FirebaseRemoteConfigInternal** | Different |
+| FirebaseInstallations | FirebaseInstallations | Same name |
+| FirebaseMessaging | FirebaseMessaging | Same name |
+| FirebasePerformance | FirebasePerformance | Same name |
+| FirebaseStorage | FirebaseStorage | Same name |
+| FirebaseAppCheck | FirebaseAppCheck | Same name |
+| FirebaseAppDistribution-Beta | FirebaseAppDistribution | Same name (no `-Beta`) |
+| *(transitive)* | **FirebaseABTesting** | Module-only, no product |
+| FirebaseAI | *(none)* | Swift-only, no cinterop |
+| FirebaseFunctions | *(none)* | Swift-only, no cinterop |
+| FirebaseMLModelDownloader | *(none)* | Swift-only, no cinterop |
+""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Note:** When `discoverModulesImplicitly = false` (recommended for Firebase), you must list every Clang module you import in `importedClangModules`. When `true` (default), `importedClangModules` is ignored — but this will fail for Firebase due to C++ transitive dependencies." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Several Firebase products expose ObjC headers through Clang modules whose names differ from the SPM product name:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 8 ;
+                            oc:sectionTitle "Firebase importedClangModules Reference" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """// CocoaPods
+pod("FirebaseAuth") { version = "12.5.0" }
+
+// SwiftPM
+swiftPackage(
+    url = url("https://github.com/firebase/firebase-ios-sdk.git"),
+    version = from("12.6.0"),
+    products = listOf(product("FirebaseAuth")),
+)
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 63-73" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """import swiftPMImport.<group>.<module>.FIRAuth
+import swiftPMImport.<group>.<module>.FIRUser
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 3 ;
+                                    oc:sourceLocation "lines 76-79" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Kotlin import:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "FirebaseAuth" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Firebase Suite" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 3 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Must use `exact()` version — `from()` will fail to resolve" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Single SPM product: `GoogleMaps`" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "Requires a Google Maps Platform API key configured in the iOS app" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "**Xcode 16.0+** required" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 6 ;
+                                    oc:itemText "Uses semantic versioning; check [releases](https://github.com/googlemaps/ios-maps-sdk/releases) for available versions (latest: 10.8.0)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "**iOS 16+ only** — no macOS, tvOS, or watchOS support" ] ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """import GoogleMaps
+GMSServices.provideAPIKey("YOUR_API_KEY")
+""" ;
+                            oc:codeLanguage "swift" ;
+                            oc:contentOrder 8 ;
+                            oc:sourceLocation "lines 272-275" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """import swiftPMImport.<group>.<module>.GMSMapView
+import swiftPMImport.<group>.<module>.GMSCameraPosition
+import swiftPMImport.<group>.<module>.GMSMarker
+import swiftPMImport.<group>.<module>.GMSServices
+""" ;
+                            oc:codeLanguage "kotlin" ;
+                            oc:contentOrder 6 ;
+                            oc:sourceLocation "lines 263-268" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 7 ;
+                            oc:textContent "**iOS project requirement:** The API key must be set in the app delegate or SwiftUI app entry point:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent "**Kotlin import:**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Repository: `https://github.com/googlemaps/ios-maps-sdk.git`" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Key facts:**" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// CocoaPods
+pod("GoogleMaps") { version = "10.3.0" }
+
+// SwiftPM
+swiftPackage(
+    url = url("https://github.com/googlemaps/ios-maps-sdk.git"),
+    version = exact("10.6.0"),  // Must use exact(), not from()
+    products = listOf(
+        product("GoogleMaps", platforms = setOf(iOS()))  // iOS-only platform constraint required
+    ),
+)
+""" ;
+                            oc:codeLanguage "kotlin" ;
+                            oc:contentOrder 4 ;
+                            oc:sourceLocation "lines 248-260" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Google Maps" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "For pods not listed here:" ],
+                        _:ref_b6118b52f8a6702d ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 4 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "The library's documentation mentions CocoaPods integration or cinterop" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "The library provides Kotlin APIs for an iOS SDK (Firebase, Maps, etc.)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "The project has `linkOnly = true` pod declarations for the same native SDK" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "Indicators that a library may bundle cinterop klibs:" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "If you suspect a KMP library bundles its own cinterop klibs (common for libraries wrapping iOS SDKs), use the `klib` tool to inspect them ([docs](https://kotlinlang.org/docs/native-libraries.html#using-kotlin-native-compiler)):" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# Find klibs from a specific library in Gradle caches
+find ~/.gradle/caches -name "*.klib" -path "*libraryName*"
+
+# Dump API signatures to see what namespaces and classes are provided
+klib dump-metadata-signatures /path/to/library.klib | grep "cocoapods\\."
+
+# If output shows cocoapods.* entries, the library bundles cinterop klibs
+# Those cocoapods.* imports must be preserved after migration
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 452-461" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Identifying Bundled Cinterop Klibs in Unknown Libraries" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "If you're unsure of the correct Clang module name:" ],
+                                _:ref_5f62291c45f511b1 ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Finding the Clang Module Name" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "SPM versions may differ from CocoaPods versions. Always:" ],
+                                _:ref_da5b47727fdbf408 ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Version Compatibility" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 7 ;
+                    oc:sectionTitle "Researching Other Pods" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Key facts:**" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 3 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "CocoaPods pods: `GoogleSignIn` and `GoogleSignInSwiftSupport`" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "**iOS 12+, macOS 10.15+** — broad platform support" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Two SPM products: `GoogleSignIn` (core) and `GoogleSignInSwift` (SwiftUI support)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Uses `from()` versioning (latest: 9.1.0)" ] ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """import swiftPMImport.<group>.<module>.GIDSignIn
+import swiftPMImport.<group>.<module>.GIDSignInButton
+""" ;
+                            oc:codeLanguage "kotlin" ;
+                            oc:contentOrder 6 ;
+                            oc:sourceLocation "lines 302-305" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 7 ;
+                            oc:textContent "**iOS project requirement:** Add `GIDClientID` to `Info.plist` and configure the URL scheme for OAuth redirect. See [Google Sign-In iOS docs](https://developers.google.com/identity/sign-in/ios/start-integrating)." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent "**Kotlin import:**" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// CocoaPods
+pod("GoogleSignIn") { version = "8.0.0" }
+
+// SwiftPM
+swiftPackage(
+    url = url("https://github.com/google/GoogleSignIn-iOS.git"),
+    version = from("8.0.0"),
+    products = listOf(product("GoogleSignIn")),
+)
+""" ;
+                            oc:codeLanguage "kotlin" ;
+                            oc:contentOrder 4 ;
+                            oc:sourceLocation "lines 289-299" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Repository: `https://github.com/google/GoogleSignIn-iOS.git`" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Google Sign-In" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Some KMP libraries that wrap iOS SDKs ship pre-built cinterop klibs using the `cocoapods.*` package namespace. After migrating to SwiftPM, these `cocoapods.*` imports **must be preserved** — they resolve to the library's bundled klib, not to actual CocoaPods infrastructure." ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**What it provides:** Kotlin-first Firebase APIs for KMP. Unlike KMPNotifier, dev.gitlive libraries provide **high-level Kotlin APIs** — you typically don't use `cocoapods.*` imports directly. Instead, the Firebase pods were declared with `linkOnly = true` in CocoaPods to provide native linking only." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Impact on migration:**" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent """Repository: [https://github.com/GitLiveApp/firebase-kotlin-sdk](https://github.com/GitLiveApp/firebase-kotlin-sdk)
+Maven: `dev.gitlive:firebase-auth`, `dev.gitlive:firebase-firestore`, `dev.gitlive:firebase-storage`, etc.""" ],
+                                _:ref_ce1fb80d634e106a ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "dev.gitlive/firebase-kotlin-sdk" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent "**Verifying bundled klib contents:** Use `klib dump-metadata-signatures` to inspect what a library's klib provides ([docs](https://kotlinlang.org/docs/native-libraries.html#using-kotlin-native-compiler)):" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """// IOSDelegate.kt — after migration
+import cocoapods.FirebaseMessaging.FIRMessaging           // KEEP — from kmpnotifier klib
+import cocoapods.FirebaseMessaging.FIRMessagingAPNSTokenType  // KEEP — from kmpnotifier klib
+import swiftPMImport.com.example.app.GIDSignIn            // REPLACE — direct cinterop
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 8 ;
+                                    oc:sourceLocation "lines 385-390" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 4 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "When `swiftPMDependencies` generates cinterop bindings, it detects that `FirebaseMessaging` bindings already exist in KMPNotifier's klib and **skips generating new bindings** for that Clang module" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "`import cocoapods.FirebaseMessaging.FIRMessaging` must remain unchanged — do NOT replace with `swiftPMImport.*`" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "`FirebaseMessaging` should still be listed in `products` and `importedClangModules` for SPM linking, even though cinterop bindings won't be generated for it" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Impact on migration:**" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 7 ;
+                                    oc:textContent "**Example — project using both KMPNotifier and GoogleSignIn:**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """find ~/.gradle/caches -name "*.klib" -path "*kmpnotifier*" | head -1
+klib dump-metadata-signatures /path/to/cinterop.klib | grep "FIRMessaging"
+# Shows: cocoapods.FirebaseMessaging/FIRMessaging → confirms bundled klib
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 6 ;
+                                    oc:sourceLocation "lines 378-382" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**What it provides:** A KMP push notification library that wraps Firebase Cloud Messaging on iOS. The library bundles its own cinterop klib with namespace `cocoapods.FirebaseMessaging`, providing Kotlin bindings for `FIRMessaging`, `FIRMessagingAPNSTokenType`, and related classes." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent """Repository: [https://github.com/mirzemehdi/KMPNotifier](https://github.com/mirzemehdi/KMPNotifier)
+Maven: `io.github.mirzemehdi:kmpnotifier`""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "KMPNotifier" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "KMP Wrapper Libraries with Bundled Cinterop Klibs" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Kotlin import:**" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """import swiftPMImport.<group>.<module>.LoremIpsum
+""" ;
+                            oc:codeLanguage "kotlin" ;
+                            oc:contentOrder 4 ;
+                            oc:sourceLocation "lines 328-330" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// CocoaPods
+pod("LoremIpsum") { version = "2.0.1" }
+
+// SwiftPM
+swiftPackage(
+    url = url("https://github.com/lukaskubanek/LoremIpsum.git"),
+    version = from("2.0.1"),
+    products = listOf(product("LoremIpsum")),
+)
+""" ;
+                            oc:codeLanguage "kotlin" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 315-325" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Simple text generation library with direct mapping." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "LoremIpsum" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Common Pods to SwiftPM Mapping" ] ;
+    oc:hasWorkflow _:ref_5f62291c45f511b1,
+        _:ref_b6118b52f8a6702d,
+        _:ref_ce1fb80d634e106a,
+        _:ref_da5b47727fdbf408 ;
+    oc:impartsKnowledge oc:kn_01138574,
+        oc:kn_04db31dc,
+        oc:kn_077c53eb,
+        oc:kn_18594ad6,
+        oc:kn_5a0b73c9,
+        oc:kn_614b3e02,
+        oc:kn_7ed861f0,
+        oc:kn_9185236f,
+        oc:kn_99caabdf,
+        oc:kn_b9d8a573,
+        oc:kn_bd6bc42d,
+        oc:kn_d6d87433,
+        oc:kn_df606384,
+        oc:kn_e6bb4ea1 ;
+    oc:isUserInvocable true ;
+    oc:nature "Tool" ;
+    oc:requiresState oc:CocoaPodsDeclared,
+        oc:ProjectAnalyzed ;
+    oc:resolvesIntent "configure Firebase SPM products with correct importedClangModules",
+        "find Clang module names and version constraints for SPM migration",
+        "handle bundled cinterop klibs from KMP wrapper libraries during migration",
+        "map CocoaPods dependencies to SwiftPM equivalents" ;
+    oc:yieldsState oc:ImportedClangModulesIdentified,
+        oc:SwiftPMMappingsResolved .
+
+oc:kn_01138574 a oc:KnowledgeNode,
         oc:RecoveryTactic ;
-    oc:appliesToContext "When a project uses dev.gitlive Firebase KMP libraries and migrates from CocoaPods to SPM" ;
-    oc:directiveContent "For dev.gitlive/firebase-kotlin-sdk, add per-product -F linkerOpts pointing to $BUILT_PRODUCTS_DIR/<product> for each Firebase framework, and set isStatic = true for the Kotlin/Native framework." ;
-    oc:hasRationale "dev.gitlive klibs have CocoaPods-era linker flags baked in. With SPM, Firebase frameworks land in per-product subdirectories that the K/N linker doesn't search. isStatic = true avoids dyld 'Library not loaded' crashes since SPM Firebase products are static libraries." ;
+    oc:appliesToContext "When migrating a pod not covered by this reference" ;
+    oc:directiveContent "To find the correct Clang module name for an unknown pod: (1) keep `discoverModulesImplicitly = true`, (2) run `./gradlew build`, (3) check build errors for available class names, or inspect the library's `module.modulemap` file." ;
+    oc:hasRationale "Build errors from implicit discovery reveal which Clang modules are available, providing the correct module names for explicit configuration." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_17bfdda3 a oc:Constraint,
+oc:kn_04db31dc a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When migrating any Firebase pod from CocoaPods to SwiftPM" ;
-    oc:directiveContent "Never mix Firebase products across CocoaPods and SPM. All Firebase pods must be migrated to SPM at once to avoid dyld crashes from duplicate transitive dependencies (gRPC, abseil, leveldb, BoringSSL, nanopb)." ;
-    oc:hasRationale "Firebase products share a single repository and common transitive C++ dependencies. Partial migration causes these dependencies to be linked twice with conflicting symbols, causing runtime crashes like 'Symbol not found: _OBJC_CLASS_$_FIRFirestore'." ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_56322405 a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When configuring swiftPMDependencies for Firebase products with binary xcframework distributions" ;
-    oc:directiveContent "Several Firebase products require importedClangModules that differ from their SPM product name: FirebaseDatabase→FirebaseDatabaseInternal, FirebaseFirestore→FirebaseFirestoreInternal, FirebaseRemoteConfig→FirebaseRemoteConfigInternal, FirebaseInAppMessaging-Beta→FirebaseInAppMessagingInternal." ;
-    oc:hasRationale "These Firebase products distribute as binary xcframeworks where the internal Clang module exposed to Objective-C has a different name than the SPM product. Without the correct importedClangModules, the KMP cinterop compiler cannot discover the Objective-C headers." ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_66e5cd29 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When a KMP wrapper library (like KMPNotifier or dev.gitlive) bundles pre-built cinterop klibs using the cocoapods.* package namespace" ;
-    oc:directiveContent "Do not replace cocoapods.* imports with swiftPMImport.* for libraries that bundle their own cinterop klibs (e.g., KMPNotifier's cocoapods.FirebaseMessaging namespace). These imports resolve to the library's bundled klib, not actual CocoaPods infrastructure." ;
-    oc:hasRationale "The bundled klib provides Kotlin bindings for the native SDK. Replacing these imports would break the dependency on the library's pre-built bindings, causing compilation errors." ;
+    oc:appliesToContext "When configuring importedClangModules for Firebase products" ;
+    oc:directiveContent "Several Firebase SPM products have Clang module names that differ from the product name: FirebaseDatabase → FirebaseDatabaseInternal, FirebaseFirestore → FirebaseFirestoreInternal, FirebaseRemoteConfig → FirebaseRemoteConfigInternal, FirebaseInAppMessaging-Beta → FirebaseInAppMessagingInternal. Use the Clang module name in `importedClangModules`, NOT the product name." ;
+    oc:hasRationale "Some Firebase products ship as binary xcframeworks where the internal Clang module exposed to Objective-C has a different name than the SPM product. Without the correct module name, the KMP compiler cannot discover the ObjC headers." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_bb4c9648 a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "After migrating FirebaseCrashlytics from CocoaPods to SwiftPM" ;
-    oc:directiveContent "For Firebase Crashlytics, ensure a dSYM upload run script phase is added at the END of Xcode build phases pointing to the SPM checkout path, and set Debug Information Format to 'DWARF with dSYM File' for all configurations." ;
-    oc:hasRationale "Crashlytics requires dSYM uploads to function. The run script path changes from the CocoaPods checkout location to the SPM SourcePackages checkout location." ;
+oc:kn_077c53eb a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When declaring a Firebase SPM product in build.gradle.kts" ;
+    oc:codeLanguage "kotlin" ;
+    oc:directiveContent """swiftPackage(
+    url = url("https://github.com/firebase/firebase-ios-sdk.git"),
+    version = from("12.6.0"),
+    products = listOf(product("FirebaseAuth")),
+    importedClangModules = listOf("FirebaseAuth"),
+)""" .
+
+oc:kn_18594ad6 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When declaring Google Maps SPM dependency" ;
+    oc:codeLanguage "kotlin" ;
+    oc:directiveContent """swiftPackage(
+    url = url("https://github.com/googlemaps/ios-maps-sdk.git"),
+    version = exact("10.6.0"),
+    products = listOf(
+        product("GoogleMaps", platforms = setOf(iOS()))
+    ),
+)""" .
+
+oc:kn_5a0b73c9 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When converting any pod version constraint to SPM" ;
+    oc:directiveContent "Preserve version constraint semantics from the CocoaPods block: `version = \"X.Y.Z\"` (without `~>`) is an exact pin → use `exact(\"X.Y.Z\")` in SPM. Only use `from()` when the CocoaPods spec used optimistic versioning (`~>`)." ;
+    oc:hasRationale "Using `from()` for an exact pin can resolve to a newer version that breaks cinterop APIs if symbols were removed or renamed." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_c00c44af a oc:DesignPrinciple,
+oc:kn_614b3e02 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When migrating any Firebase pod from CocoaPods to SPM" ;
+    oc:directiveContent "Never mix Firebase products across CocoaPods and SPM — all Firebase pods must migrate to SPM at once. Shared transitive dependencies (gRPC, abseil, leveldb, BoringSSL, nanopb) get linked twice otherwise, causing dyld crashes like `Symbol not found: _OBJC_CLASS_$_FIRFirestore`." ;
+    oc:hasRationale "Firebase products share a single repository and common transitive C/C++ dependencies; partial migration causes duplicate symbol linking with conflicting versions." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_7ed861f0 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When migrating projects that use KMP wrapper libraries with bundled cinterop" ;
+    oc:directiveContent "When a KMP wrapper library (e.g., KMPNotifier, dev.gitlive) bundles pre-built cinterop klibs with `cocoapods.*` namespace, those imports must be preserved after migration. Do NOT replace `cocoapods.*` imports with `swiftPMImport.*` for those libraries." ;
+    oc:hasRationale "Bundled klibs provide their own cinterop bindings. swiftPMDependencies detects existing bindings and skips regeneration, so the original `cocoapods.*` import paths remain valid and required." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_9185236f a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When identifying bundled cinterop klibs in unknown KMP libraries" ;
+    oc:directiveContent "1. Find klibs: `find ~/.gradle/caches -name \"*.klib\" -path \"*libraryName*\"`. 2. Dump signatures: `klib dump-metadata-signatures /path/to/library.klib | grep \"cocoapods\\.\"`. 3. If output shows cocoapods.* entries, preserve those imports after migration." ;
+    oc:stepOrder 1 .
+
+oc:kn_99caabdf a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When declaring GoogleMaps SwiftPM dependency" ;
+    oc:directiveContent "Google Maps SPM requires `exact()` versioning, not `from()`. Using `from()` will fail to resolve the package." ;
+    oc:hasRationale "The Google Maps SDK repository does not support semantic version range resolution via SPM." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_b9d8a573 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When researching a pod not covered by this reference" ;
+    oc:directiveContent "1. Check GitHub repository for Package.swift file. 2. Check CocoaPods spec `source` field for Git URL. 3. Search Swift Package Index (swiftpackageindex.com). 4. Check library documentation for SPM installation instructions." ;
+    oc:stepOrder 1 .
+
+oc:kn_bd6bc42d a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When migrating Firebase from CocoaPods to SPM" ;
+    oc:directiveContent "1. List all Firebase pods currently in the project. 2. Map each to its SPM product name (note `-Beta` suffixes and renames). 3. Declare all products in a single swiftPackage block. 4. Set `discoverModulesImplicitly = false`. 5. List all needed Clang modules in `importedClangModules` (using internal names where applicable). 6. Include Swift-only pods as products without importedClangModules. 7. Re-run `integrateLinkagePackage`." ;
+    oc:stepOrder 1 .
+
+oc:kn_d6d87433 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When the project uses dev.gitlive Firebase KMP libraries and migrates to SPM" ;
+    oc:directiveContent "For dev.gitlive firebase-kotlin-sdk consumers, add per-product `-F` linkerOpts pointing to `$BUILT_PRODUCTS_DIR/<ProductName>` for each Firebase framework, and set `isStatic = true` on the framework to avoid dyld runtime crashes from missing dynamic framework loads." ;
+    oc:hasRationale "dev.gitlive klibs have linker flags baked in from the CocoaPods era. SPM places Firebase frameworks in per-product subdirectories the K/N linker doesn't search. Dynamic linking fails because SPM Firebase products are static libraries not embedded in the app bundle." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_df606384 a oc:Constraint,
         oc:KnowledgeNode ;
     oc:appliesToContext "When declaring Firebase SwiftPM dependencies in build.gradle.kts" ;
-    oc:directiveContent "Set discoverModulesImplicitly = false for Firebase and explicitly list only the Clang modules you need in importedClangModules." ;
-    oc:hasRationale "Firebase's transitive C++ dependencies (gRPC, abseil, leveldb, BoringSSL) contain Clang modules that fail cinterop. Implicit discovery would attempt to process all of them and break the build." ;
-    oc:severityLevel "HIGH" .
+    oc:directiveContent "Use `discoverModulesImplicitly = false` for Firebase — its transitive C++ dependencies (gRPC, abseil, leveldb, BoringSSL) contain Clang modules that fail cinterop. Explicitly list only needed modules in `importedClangModules`." ;
+    oc:hasRationale "Implicit discovery pulls in C++ modules that the Kotlin cinterop tool cannot process, causing build failures." ;
+    oc:severityLevel "CRITICAL" .
 
-oc:kn_ce161467 a oc:KnowledgeNode,
-        oc:KnownIssue ;
-    oc:appliesToContext "When migrating GoogleMaps pod to SwiftPM" ;
-    oc:directiveContent "GoogleMaps SPM package requires exact() versioning — from() will fail to resolve. Also requires iOS-only platform constraint (setOf(iOS()))." ;
-    oc:hasRationale "The Google Maps SPM package does not support semantic version ranges and only resolves with exact version pins." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_e2d62b26 a oc:Heuristic,
+oc:kn_e6bb4ea1 a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When converting any pod version declaration to SwiftPM version syntax" ;
-    oc:directiveContent "Preserve version constraint semantics from the CocoaPods block: exact pins (version = 'X.Y.Z' without ~>) must use exact() in SPM; optimistic constraints (~>) should use from()." ;
-    oc:hasRationale "Using from() for an exact CocoaPods pin can resolve to a newer version with removed or renamed symbols, breaking cinterop API compatibility." ;
-    oc:severityLevel "HIGH" .
+    oc:appliesToContext "When declaring Firebase products with mismatched Clang module names" ;
+    oc:codeLanguage "kotlin" ;
+    oc:directiveContent """swiftPackage(
+    url = url("https://github.com/firebase/firebase-ios-sdk.git"),
+    version = from("12.6.0"),
+    products = listOf(product("FirebaseFirestore")),
+    importedClangModules = listOf("FirebaseFirestoreInternal"),
+)""" .
 
-oc:req_53378b1e a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "CocoaPods to SPM migration patterns" .
+_:ref_1e69a80f5c5303fb a oc:CodeExample ;
+    oc:blockType "code_block" ;
+    oc:codeContent """tasks.matching {
+    (it.name.contains("Ios") || it.name.contains("ios")) &&
+        (it.name.contains("Test") || it.name.contains("test"))
+}.configureEach { enabled = false }
+""" ;
+    oc:codeLanguage "kotlin" ;
+    oc:contentOrder 1 ;
+    oc:sourceLocation "lines 421-426" .
 
-oc:req_934d0305 a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "KMP swiftPMDependencies DSL syntax" .
+_:ref_35fa5ae88216d413 a oc:WorkflowStep ;
+    dcterms:description "**Check GitHub repository** - Look for a `Package.swift` file in the repo" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
 
-oc:req_c3fa2aa4 a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "Kotlin/Native cinterop and Clang module system" .
+_:ref_3ce470fc8143f6ea a oc:WorkflowStep ;
+    dcterms:description "**iOS test tasks may fail.** The K/N test runner cannot find Firebase frameworks outside of Xcode context. You may need to disable iOS test tasks:" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild _:ref_1e69a80f5c5303fb ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_41624a88364dddda a oc:WorkflowStep ;
+    dcterms:description "**Check CocoaPods spec** - The `source` field often points to the Git URL" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_5bdd526c4494a759 a oc:WorkflowStep ;
+    dcterms:description "**Linker flags baked into published klibs.** The dev.gitlive klibs contain `-framework FirebaseCore`, `-framework FirebaseAuth`, etc. from the CocoaPods era. These persist when the consuming project switches to SPM. With SPM, Firebase frameworks land in per-product subdirectories (`$BUILT_PRODUCTS_DIR/FirebaseCore/FirebaseCore.framework`) that the K/N linker doesn't search automatically." ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild [ a oc:Paragraph ;
+            oc:blockType "paragraph" ;
+            oc:contentOrder 1 ;
+            oc:textContent "**Fix:** Add per-product `-F` linkerOpts to `build.gradle.kts`:" ],
+        [ a oc:Paragraph ;
+            oc:blockType "paragraph" ;
+            oc:contentOrder 3 ;
+            oc:textContent "Also add matching `FRAMEWORK_SEARCH_PATHS` in the Xcode project for both Debug and Release." ],
+        [ a oc:CodeExample ;
+            oc:blockType "code_block" ;
+            oc:codeContent """val builtProductsDir = System.getenv("BUILT_PRODUCTS_DIR")
+if (builtProductsDir != null) {
+    listOf("FirebaseCore", "FirebaseAuth", "FirebaseCoreExtension",
+           "FirebaseCoreInternal", "FirebaseCrashlytics", "FirebaseFirestore",
+           "FirebaseFirestoreInternal", "FirebaseInstallations", "FirebaseMessaging",
+           "FirebaseStorage", "GoogleDataTransport", "GoogleUtilities",
+           "GTMSessionFetcher", "AppCheckCore", /* ... */).forEach { product ->
+        linkerOpts("-F", "$builtProductsDir/$product")
+    }
+}
+""" ;
+            oc:codeLanguage "kotlin" ;
+            oc:contentOrder 2 ;
+            oc:sourceLocation "lines 404-415" ] ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_8250aede009f5d68 a oc:WorkflowStep ;
+    dcterms:description "Check build errors for available class names" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_82e5acffcb22ea19 a oc:WorkflowStep ;
+    dcterms:description "Test thoroughly after migration" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_883d46d1f9aa2374 a oc:WorkflowStep ;
+    dcterms:description "Run `./gradlew build`" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_8e8ced280e4b15f7 a oc:WorkflowStep ;
+    dcterms:description "Or check the library's `module.modulemap` file in its source" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_ac827894dae6a486 a oc:WorkflowStep ;
+    dcterms:description "Keep `discoverModulesImplicitly = true` (default)" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_b7d0b1300b893c4a a oc:WorkflowStep ;
+    dcterms:description "**Search Swift Package Index** - https://swiftpackageindex.com/" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_c1a011ff1271874a a oc:WorkflowStep ;
+    dcterms:description "**Must use `isStatic = true`.** With a dynamic framework, the K/N linker creates `@rpath/FirebaseCore.framework/FirebaseCore` load instructions. Firebase SPM products are static libraries — their `.framework` bundles are not embedded in the app bundle. At runtime, `dyld` crashes with `Library not loaded`. Switching to `isStatic = true` embeds all symbols and defers unresolved framework flags to the final Xcode link." ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_cfdf2760dec5df8a a oc:WorkflowStep ;
+    dcterms:description "Check the GitHub releases page for SPM-compatible versions" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_d3b6dc26284d2f2f a oc:WorkflowStep ;
+    dcterms:description "**Preserve version constraint semantics from the `cocoapods {}` block.** CocoaPods `version = \"X.Y.Z\"` (without `~>`) is an exact pin — use `exact(\"X.Y.Z\")` in SPM, not `from()`. Using `from()` for an exact version can resolve to a newer version that breaks cinterop APIs if symbols were removed or renamed. Only use `from()` when the CocoaPods spec used optimistic versioning (`~>`)." ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_f51b2496d13b8d75 a oc:WorkflowStep ;
+    dcterms:description "**Check library documentation** - Many libraries document SPM installation" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_5f62291c45f511b1 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 2 ;
+    oc:hasStep _:ref_8250aede009f5d68,
+        _:ref_883d46d1f9aa2374,
+        _:ref_8e8ced280e4b15f7,
+        _:ref_ac827894dae6a486 ;
+    oc:workflowId "procedure_2" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_b6118b52f8a6702d a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 2 ;
+    oc:hasStep _:ref_35fa5ae88216d413,
+        _:ref_41624a88364dddda,
+        _:ref_b7d0b1300b893c4a,
+        _:ref_f51b2496d13b8d75 ;
+    oc:workflowId "procedure_2" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_ce1fb80d634e106a a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 4 ;
+    oc:hasStep _:ref_3ce470fc8143f6ea,
+        _:ref_5bdd526c4494a759,
+        _:ref_c1a011ff1271874a ;
+    oc:workflowId "procedure_4" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_da5b47727fdbf408 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 2 ;
+    oc:hasStep _:ref_82e5acffcb22ea19,
+        _:ref_cfdf2760dec5df8a,
+        _:ref_d3b6dc26284d2f2f ;
+    oc:workflowId "procedure_2" ;
+    oc:workflowName "Ordered Procedure" .
 

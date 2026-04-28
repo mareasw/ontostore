@@ -10,59 +10,200 @@ oc:skill_remotion_dev_skills_remotion_best_practices_can_decode a oc:Declarative
     skos:broader "Validation utility" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/remotion-dev/skills/remotion-best-practices" ;
     oc:contentHash "d2323cc4f2a884a09d167f31a4fcb36bd94adf1002de88b99bd9af1a2bc5ed71" ;
-    oc:dependsOnSkill oc:skill_remotion_best_practices ;
-    oc:differentia "Checks browser decode compatibility for video/audio media using Mediabunny before playback is attempted" ;
+    oc:differentia "checks if media can be decoded by the browser using Mediabunny" ;
     oc:extends oc:skill_remotion_dev_skills_remotion_best_practices ;
-    oc:handlesFailure oc:MediaNotDecodable,
+    oc:handlesFailure oc:InvalidInput,
         oc:NetworkTimeout ;
     oc:hasAllowedTool "Bash" ;
-    oc:hasArgumentHint "src: string (URL) or Blob" ;
+    oc:hasArgumentHint "src (URL string or Blob)" ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_12447f65,
-        oc:kn_4b5db199,
-        oc:kn_6801b8e2,
-        oc:kn_984217e7,
-        oc:kn_ce4b5311 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Use Mediabunny to check if a video can be decoded by the browser before attempting to play it." ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """npx remotion add mediabunny
+""" ;
+                    oc:codeLanguage "bash" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-16" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "First, install the right version of Mediabunny:" ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """const src = "https://remotion.media/video.mp4";
+const isDecodable = await canDecode(src);
+
+if (isDecodable) {
+  console.log("Video can be decoded");
+} else {
+  console.log("Video cannot be decoded by this browser");
+}
+""" ;
+                            oc:codeLanguage "tsx" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 55-64" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Usage" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "This function can be copy-pasted into any project." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """import { Input, ALL_FORMATS, UrlSource } from "mediabunny";
+
+export const canDecode = async (src: string) => {
+  const input = new Input({
+    formats: ALL_FORMATS,
+    source: new UrlSource(src, {
+      getRetryDelay: () => null,
+    }),
+  });
+
+  try {
+    await input.getFormat();
+  } catch {
+    return false;
+  }
+
+  const videoTrack = await input.getPrimaryVideoTrack();
+  if (videoTrack && !(await videoTrack.canDecode())) {
+    return false;
+  }
+
+  const audioTrack = await input.getPrimaryAudioTrack();
+  if (audioTrack && !(await audioTrack.canDecode())) {
+    return false;
+  }
+
+  return true;
+};
+""" ;
+                            oc:codeLanguage "tsx" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 22-51" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "The `canDecode()` function" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "For file uploads or drag-and-drop, use `BlobSource`:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """import { Input, ALL_FORMATS, BlobSource } from "mediabunny";
+
+export const canDecodeBlob = async (blob: Blob) => {
+  const input = new Input({
+    formats: ALL_FORMATS,
+    source: new BlobSource(blob),
+  });
+
+  // Same validation logic as above
+};
+""" ;
+                            oc:codeLanguage "tsx" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 70-81" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Using with Blob" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Checking if a video can be decoded" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """name: can-decode
+description: Check if a video can be decoded by the browser using Mediabunny
+metadata:
+  tags: decode, validation, video, audio, compatibility, browser
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "Validate whether a media source can be decoded by the browser" ;
+            oc:hasStep _:ref_6c76cb1fc64f3936,
+                _:ref_a2b38fc639908626,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Check primaryVideoTrack.canDecode() and primaryAudioTrack.canDecode() individually" ;
+                    oc:expectedOutcome "Boolean result for each track's decode capability" ;
+                    oc:stepDependsOn _:ref_6c76cb1fc64f3936 ;
+                    oc:stepId "check-tracks" ],
+                _:ref_fd4e67c91ef8f1bd ;
+            oc:workflowId "can-decode-workflow" ;
+            oc:workflowName "Check media decode compatibility" ] ;
+    oc:impartsKnowledge oc:kn_08fed568,
+        oc:kn_7648e0ab,
+        oc:kn_c838fb99,
+        oc:kn_c87063b0,
+        oc:kn_ed3cbecf ;
     oc:isUserInvocable true ;
     oc:nature "Tool" ;
-    oc:requiresState oc:NetworkAvailable ;
-    oc:resolvesIntent "check if a video can be decoded by the browser",
-        "test audio and video codec support",
-        "validate media compatibility before playback",
-        "verify uploaded file decode support" ;
+    oc:requiresState oc:NetworkAvailable,
+        oc:ToolInstalled ;
+    oc:resolvesIntent "check audio/video decode support before playback",
+        "check if video can be decoded",
+        "validate browser media compatibility" ;
     oc:yieldsState oc:MediaDecodeChecked .
 
-oc:kn_12447f65 a oc:KnowledgeNode,
+oc:kn_08fed568 a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When probing media format metadata" ;
+    oc:directiveContent "Wrap getFormat() in try/catch and return false on failure — this gracefully handles network errors, missing files, and unsupported formats." ;
+    oc:hasRationale "getFormat() can fail for multiple reasons beyond codec support; catching and returning false provides a safe fallback." .
+
+oc:kn_7648e0ab a oc:KnowledgeNode,
         oc:PreFlightCheck ;
-    oc:appliesToContext "When running canDecode() validation on any media file" ;
-    oc:directiveContent "Verify both video and audio tracks independently using getPrimaryVideoTrack() and getPrimaryAudioTrack() — a media file may have a decodable video track but an unsupported audio track (or vice versa)." ;
-    oc:hasRationale "Partial decode support (e.g., video yes, audio no) still results in a broken playback experience. Both tracks must be validated." ;
+    oc:appliesToContext "Before playing any video or audio in the browser" ;
+    oc:directiveContent "Check media decode capability before attempting playback to avoid silent failures or browser errors." ;
+    oc:hasRationale "Browsers have varying codec support; decoding failures can cause poor UX if not caught early." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_c838fb99 a oc:KnowledgeNode,
+        oc:Prerequisite ;
+    oc:appliesToContext "Before using canDecode functionality" ;
+    oc:directiveContent "Mediabunny must be installed: run `npx remotion add mediabunny`" ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_4b5db199 a oc:Constraint,
+oc:kn_c87063b0 a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "Before using canDecode() or any Mediabunny API" ;
-    oc:directiveContent "The correct version of Mediabunny must be installed via `npx remotion add mediabunny` — do not install independently." ;
-    oc:hasRationale "Remotion manages the compatible version of Mediabunny; independent installation may introduce version mismatches." ;
-    oc:severityLevel "HIGH" .
+    oc:appliesToContext "When implementing media decode validation" ;
+    oc:codeLanguage "tsx" ;
+    oc:directiveContent "Use Input with ALL_FORMATS and UrlSource/BlobSource → call getFormat() to probe → then check videoTrack.canDecode() and audioTrack.canDecode() individually." ;
+    oc:hasRationale "Both the container format and individual track codecs must be verified for full compatibility." .
 
-oc:kn_6801b8e2 a oc:Heuristic,
+oc:kn_ed3cbecf a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When constructing the Input object for canDecode()" ;
-    oc:directiveContent "Use UrlSource with getRetryDelay: () => null for decode checks to fail fast without retry delays. Use BlobSource for file upload/drag-and-drop scenarios." ;
-    oc:hasRationale "Disabling retries on URL sources makes the compatibility check responsive. BlobSource is necessary for local file data that has no URL." ;
-    oc:severityLevel "MEDIUM" .
+    oc:appliesToContext "When validating media compatibility" ;
+    oc:directiveContent "Check both video and audio tracks independently — a format may be decodable while individual tracks are not." ;
+    oc:hasRationale "Partial decode support (video works but audio doesn't) can still cause playback failures." .
 
-oc:kn_984217e7 a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "Before playing or processing any video/audio in a browser context" ;
-    oc:directiveContent "Always check media decode compatibility before attempting playback — use canDecode() to validate both video and audio tracks." ;
-    oc:hasRationale "Prevents runtime errors and degraded user experience from attempting to play unsupported codecs or container formats." ;
-    oc:severityLevel "HIGH" .
+_:ref_6c76cb1fc64f3936 a oc:WorkflowStep ;
+    dcterms:description "Call input.getFormat() inside try/catch to verify container format support" ;
+    oc:expectedOutcome "Format metadata retrieved or false returned on failure" ;
+    oc:stepDependsOn _:ref_a2b38fc639908626 ;
+    oc:stepId "probe-format" .
 
-oc:kn_ce4b5311 a oc:Idempotency,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "Always — this function performs only read/probe operations" ;
-    oc:directiveContent "canDecode() is a read-only, side-effect-free function that can be called multiple times safely without modifying any state." ;
-    oc:hasRationale "Safe to use in React effects, render loops, or retry logic without concern for state corruption." .
+_:ref_a2b38fc639908626 a oc:WorkflowStep ;
+    dcterms:description "Create an Input instance with ALL_FORMATS and appropriate source (UrlSource or BlobSource)" ;
+    oc:expectedOutcome "Input object configured for probing" ;
+    oc:stepDependsOn _:ref_fd4e67c91ef8f1bd ;
+    oc:stepId "create-input" .
+
+_:ref_fd4e67c91ef8f1bd a oc:WorkflowStep ;
+    dcterms:description "Install Mediabunny via `npx remotion add mediabunny`" ;
+    oc:expectedOutcome "Mediabunny package available in the project" ;
+    oc:stepId "install-mediabunny" .
 

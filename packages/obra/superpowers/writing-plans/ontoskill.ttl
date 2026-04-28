@@ -7,78 +7,467 @@
 oc:skill_obra_superpowers_writing_plans a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "writing-plans" ;
-    skos:broader "Implementation planning methodology" ;
-    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/obra/superpowers/writing-plans" ;
+    skos:broader "Implementation plan generator" ;
+    prov:wasDerivedFrom "../.agents/skills/obra/superpowers/writing-plans" ;
     oc:contentHash "19850ceb4d50770ed99535e818f13c2669e15e64d4b6069aedca7ec2c42c5e28" ;
-    oc:dependsOnSkill oc:skill_brainstorming ;
-    oc:differentia "decomposes specs into bite-sized, TDD-oriented tasks with complete code, exact file paths, and zero placeholders for agentic execution" ;
-    oc:handlesFailure oc:InvalidInput ;
-    oc:hasArgumentHint "spec or requirements document path" ;
+    oc:dependsOnSkill oc:skill_ontoskills_brainstorming ;
+    oc:differentia "that decomposes specs into bite-sized, TDD-structured tasks with complete code and exact file paths for agentic execution" ;
+    oc:handlesFailure oc:PlaceholderDetected,
+        oc:ScopeTooBroad,
+        oc:TypeInconsistency ;
+    oc:hasAllowedTool "Bash",
+        "Glob",
+        "Grep",
+        "Read",
+        "Write" ;
+    oc:hasArgumentHint "spec or requirements document for a multi-step task" ;
     oc:hasCategory "development" ;
     oc:hasDescription "Use when you have a spec or requirements for a multi-step task, before touching code" ;
     oc:hasName "writing-plans" ;
-    oc:impartsKnowledge oc:kn_0adafba1,
-        oc:kn_291f5978,
-        oc:kn_378e3abf,
-        oc:kn_3f61bce4,
-        oc:kn_a8b0f9ba,
-        oc:kn_ab6ddcd0,
-        oc:kn_d30743ed ;
-    oc:isUserInvocable true ;
-    oc:nature "Concept" ;
-    oc:requiresState oc:DirectoryWritable ;
-    oc:resolvesIntent "create implementation plan from spec",
-        "decompose requirements into executable tasks",
-        "hand off plan for subagent or inline execution",
-        "write TDD-oriented plan document" ;
-    oc:yieldsState oc:DocumentCreated .
+    oc:hasSection [ a oc:Section ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "If the spec covers multiple independent subsystems, it should have been broken into sub-project specs during brainstorming. If it wasn't, suggest breaking this into separate plans — one per subsystem. Each plan should produce working, testable software on its own." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Scope Check" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """### Task N: [Component Name]
 
-oc:kn_0adafba1 a oc:AntiPattern,
+**Files:**
+- Create: `exact/path/to/file.py`
+- Modify: `exact/path/to/existing.py:123-145`
+- Test: `tests/exact/path/to/test.py`
+
+- [ ] **Step 1: Write the failing test**
+
+```python
+def test_specific_behavior():
+    result = function(input)
+    assert result == expected
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `pytest tests/path/test.py::test_name -v`
+Expected: FAIL with "function not defined"
+
+- [ ] **Step 3: Write minimal implementation**
+
+```python
+def function(input):
+    return expected
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `pytest tests/path/test.py::test_name -v`
+Expected: PASS
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add tests/path/test.py src/path/file.py
+git commit -m "feat: add specific feature"
+```
+""" ;
+                            oc:codeLanguage "markdown" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 65-104" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Task Structure" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "This structure informs the task decomposition. Each task should produce self-contained changes that make sense independently." ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Design units with clear boundaries and well-defined interfaces. Each file should have one clear responsibility." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "In existing codebases, follow established patterns. If the codebase uses large files, don't unilaterally restructure - but if a file you're modifying has grown unwieldy, including a split in the plan is reasonable." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Files that change together should live together. Split by responsibility, not by technical layer." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "You reason best about code you can hold in context at once, and your edits are more reliable when files are focused. Prefer smaller, focused files over large ones that do too much." ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Before defining tasks, map out which files will be created or modified and what each one is responsible for. This is where decomposition decisions get locked in." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "File Structure" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "\"Run the tests and make sure they pass\" - step" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "\"Write the failing test\" - step" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "\"Implement the minimal code to make the test pass\" - step" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "\"Commit\" - step" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "\"Run it to make sure it fails\" - step" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**Each step is one action (2-5 minutes):**" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Bite-Sized Task Granularity" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent "**Which approach?\"**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 6 ;
+                            oc:textContent "**If Subagent-Driven chosen:**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "After saving the plan, offer execution choice:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 8 ;
+                            oc:textContent "**If Inline Execution chosen:**" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 7 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Fresh subagent per task + two-stage review" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "**REQUIRED SUB-SKILL:** Use superpowers:subagent-driven-development" ] ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 9 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "**REQUIRED SUB-SKILL:** Use superpowers:executing-plans" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Batch execution with checkpoints for review" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**1. Subagent-Driven (recommended)** - I dispatch a fresh subagent per task, review between tasks, fast iteration" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**\"Plan complete and saved to `docs/superpowers/plans/<filename>.md`. Two execution options:**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "**2. Inline Execution** - Execute tasks in this session using executing-plans, batch execution with checkpoints" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 10 ;
+                    oc:sectionTitle "Execution Handoff" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# [Feature Name] Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** [One sentence describing what this builds]
+
+**Architecture:** [2-3 sentences about approach]
+
+**Tech Stack:** [Key technologies/libraries]
+
+---
+""" ;
+                            oc:codeLanguage "markdown" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 49-61" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**Every plan MUST start with this header:**" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Plan Document Header" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "**Context:** This should be run in a dedicated worktree (created by brainstorming skill)." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent "**Save plans to:** `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md`" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Announce at start:** \"I'm using the writing-plans skill to create the implementation plan.\"" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Write comprehensive implementation plans assuming the engineer has zero context for our codebase and questionable taste. Document everything they need to know: which files to touch for each task, code, testing, docs they might need to check, how to test it. Give them the whole plan as bite-sized tasks. DRY. YAGNI. TDD. Frequent commits." ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 6 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "(User preferences for plan location override this default)" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "Assume they are a skilled developer, but know almost nothing about our toolset or problem domain. Assume they don't know good test design very well." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Overview" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "DRY, YAGNI, TDD, frequent commits" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Exact commands with expected output" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Complete code in every step — if a step changes code, show the code" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Exact file paths always" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 8 ;
+                    oc:sectionTitle "Remember" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent "If you find issues, fix them inline. No need to re-review — just fix and move on. If you find a spec requirement with no task, add the task." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**1. Spec coverage:** Skim each section/requirement in the spec. Can you point to a task that implements it? List any gaps." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "**3. Type consistency:** Do the types, method signatures, and property names you used in later tasks match what you defined in earlier tasks? A function called `clearLayers()` in Task 3 but `clearFullLayers()` in Task 7 is a bug." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "After writing the complete plan, look at the spec with fresh eyes and check the plan against it. This is a checklist you run yourself — not a subagent dispatch." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**2. Placeholder scan:** Search your plan for red flags — any of the patterns from the \"No Placeholders\" section above. Fix them." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 9 ;
+                    oc:sectionTitle "Self-Review" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "\"Add appropriate error handling\" / \"add validation\" / \"handle edge cases\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 6 ;
+                                    oc:itemText "References to types, functions, or methods not defined in any task" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "\"Write tests for the above\" (without actual test code)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "\"Similar to Task N\" (repeat the code — the engineer may be reading tasks out of order)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "\"TBD\", \"TODO\", \"implement later\", \"fill in details\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "Steps that describe what to do without showing how (code blocks required for code steps)" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Every step must contain the actual content an engineer needs. These are **plan failures** — never write them:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 7 ;
+                    oc:sectionTitle "No Placeholders" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Writing Plans" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """name: writing-plans
+description: Use when you have a spec or requirements for a multi-step task, before touching code
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "End-to-end workflow for decomposing a spec into a complete, reviewable implementation plan" ;
+            oc:hasStep _:ref_3dffa021be08cd68,
+                _:ref_3e0a2a6dabb0e015,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Offer execution choice: subagent-driven-development or executing-plans. Route to chosen skill." ;
+                    oc:expectedOutcome "Execution mode selected and appropriate skill invoked" ;
+                    oc:stepDependsOn _:ref_b9452b4933b1eac7 ;
+                    oc:stepId "execution-handoff" ],
+                _:ref_828a694b2cbbc1b2,
+                _:ref_b53eb8fa0a787955,
+                _:ref_b9452b4933b1eac7,
+                _:ref_cc49546552e1b78f ;
+            oc:workflowId "plan-creation" ;
+            oc:workflowName "Create Implementation Plan" ] ;
+    oc:impartsKnowledge oc:kn_05b3b59e,
+        oc:kn_0e2f7cab,
+        oc:kn_55ce1366,
+        oc:kn_73de6516,
+        oc:kn_80ad7f7b,
+        oc:kn_978c1611,
+        oc:kn_c45ee209,
+        oc:kn_ded60fd3 ;
+    oc:isUserInvocable true ;
+    oc:nature "Work" ;
+    oc:requiresState oc:SpecReady,
+        oc:WorktreeCreated ;
+    oc:resolvesIntent "break down requirements into executable steps",
+        "create implementation plan",
+        "decompose spec into tasks",
+        "write TDD-structured plan" ;
+    oc:yieldsState oc:PlanDocumentCreated .
+
+oc:kn_05b3b59e a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When writing any plan task or step" ;
-    oc:directiveContent "Never include placeholders like 'TBD', 'TODO', 'implement later', 'add appropriate error handling', or 'write tests for the above' without actual code. Every step must contain the exact content an engineer needs." ;
-    oc:hasRationale "Placeholders defeat the purpose of a plan — they shift the design burden to execution time, causing context switches and poor decisions under pressure." ;
+    oc:appliesToContext "During self-review type consistency check" ;
+    oc:directiveContent "Never reference types, functions, or methods not defined in any prior task. A function called clearLayers() in Task 3 but clearFullLayers() in Task 7 is a plan bug." ;
+    oc:hasRationale "Type and naming inconsistencies between tasks cause implementation failures that are hard to diagnose because each task is implemented independently" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_0e2f7cab a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing any step in a plan document" ;
+    oc:directiveContent "Never include placeholders like 'TBD', 'TODO', 'implement later', 'add appropriate error handling', or 'Write tests for the above' without actual test code. Every step must contain the actual content an engineer needs." ;
+    oc:hasRationale "Placeholders force the implementer to make design decisions they lack context for, defeating the purpose of a comprehensive plan" ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_291f5978 a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "Before writing task definitions in the plan" ;
-    oc:directiveContent "Map file structure before defining tasks. Each file should have one clear responsibility. Files that change together should live together. Split by responsibility, not by technical layer." ;
-    oc:hasRationale "File structure locks in decomposition decisions and ensures each task produces self-contained changes that make sense independently." ;
+oc:kn_55ce1366 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When evaluating scope before writing a plan" ;
+    oc:directiveContent "If a spec covers multiple independent subsystems, it should have been broken into sub-project specs during brainstorming. If it wasn't, suggest breaking into separate plans — one per subsystem." ;
+    oc:hasRationale "Monolithic plans for independent subsystems create unnecessary coupling and prevent parallel execution" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_378e3abf a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "At the start of plan creation, before task decomposition" ;
-    oc:directiveContent "Before writing the plan, check if the spec covers multiple independent subsystems. If so, suggest breaking it into separate plans — one per subsystem — each producing working, testable software on its own." ;
-    oc:hasRationale "A single plan spanning independent subsystems creates unnecessary coupling and prevents parallel execution." ;
+oc:kn_73de6516 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "After writing the complete plan, before saving" ;
+    oc:directiveContent "Run a three-part self-review after writing the complete plan: (1) spec coverage — can you point to a task for each requirement, (2) placeholder scan — search for red-flag patterns, (3) type consistency — do signatures and names match across tasks." ;
+    oc:hasRationale "Self-review catches gaps between spec and plan that are invisible during writing because of focused attention on individual tasks" ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_3f61bce4 a oc:Constraint,
+oc:kn_80ad7f7b a oc:KnowledgeNode,
+        oc:SecurityImplication ;
+    oc:appliesToContext "When writing any task step that resembles a previous task" ;
+    oc:directiveContent "Never say 'Similar to Task N' — always repeat the code. The engineer (or subagent) may be reading tasks out of order." ;
+    oc:hasRationale "Out-of-order task execution is common in agentic workflows; implicit references create ambiguity and incorrect implementations" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_978c1611 a oc:KnowledgeNode,
+        oc:PostFlightValidation ;
+    oc:appliesToContext "After plan document is saved" ;
+    oc:directiveContent "After saving the plan, offer two execution choices: subagent-driven (fresh subagent per task with review) or inline execution (batch with checkpoints). Route to the appropriate execution skill." ;
+    oc:hasRationale "Explicit handoff ensures the plan is actually executed rather than abandoned, and matching execution mode to situation improves reliability" .
+
+oc:kn_c45ee209 a oc:Constraint,
         oc:KnowledgeNode ;
     oc:appliesToContext "When decomposing tasks into steps" ;
-    oc:directiveContent "Each step must be one atomic action taking 2-5 minutes: write failing test, run test, implement minimal code, run test, commit — as separate steps, never combined." ;
-    oc:hasRationale "Fine granularity ensures deterministic execution, clear progress tracking, and safe rollback points at every commit." ;
+    oc:directiveContent "Each step must be one atomic action taking 2-5 minutes: write test, run test, implement minimal code, run test, commit. Never combine multiple actions into one step." ;
+    oc:hasRationale "Fine granularity enables precise progress tracking, easier debugging, and frequent commits that create reliable rollback points" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_a8b0f9ba a oc:KnowledgeNode,
-        oc:RollbackProcedure ;
-    oc:appliesToContext "At the end of every task in the plan" ;
-    oc:directiveContent "Each task must end with a git commit step using conventional commit messages, creating safe rollback points throughout the plan." ;
-    oc:hasRationale "Frequent commits provide granular rollback capability and clear progress markers during execution." ;
+oc:kn_ded60fd3 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When mapping out file structure before task decomposition" ;
+    oc:directiveContent "Files that change together should live together. Split by responsibility, not by technical layer. Each file should have one clear responsibility with well-defined interfaces." ;
+    oc:hasRationale "Smaller focused files are more reliable to edit and easier to hold in context simultaneously" ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_ab6ddcd0 a oc:KnowledgeNode,
-        oc:WorkflowStrategy ;
-    oc:appliesToContext "When writing any task step that involves code, commands, or tests" ;
-    oc:directiveContent "Assume the plan executor is a skilled developer with zero codebase context and limited test design knowledge. Provide complete code, exact file paths, exact commands with expected output, and explicit test code in every relevant step." ;
-    oc:hasRationale "Agentic executors may lack project-specific context. Complete, self-contained instructions prevent wrong assumptions and reduce the need for clarifications." ;
-    oc:severityLevel "HIGH" .
+_:ref_3dffa021be08cd68 a oc:WorkflowStep ;
+    dcterms:description "Write the mandatory plan document header with goal, architecture, and tech stack" ;
+    oc:expectedOutcome "Plan document created with proper header" ;
+    oc:stepDependsOn _:ref_3e0a2a6dabb0e015 ;
+    oc:stepId "write-plan-header" .
 
-oc:kn_d30743ed a oc:KnowledgeNode,
-        oc:PostFlightValidation ;
-    oc:appliesToContext "After completing all plan tasks, before saving" ;
-    oc:directiveContent "After writing the complete plan, run three self-review checks: (1) spec coverage — every requirement maps to a task, (2) placeholder scan — no red-flag patterns exist, (3) type consistency — function names and signatures match across all tasks." ;
-    oc:hasRationale "Plans written in one pass inevitably contain inconsistencies. Self-review catches name mismatches, missing requirements, and placeholder drift before execution." ;
-    oc:severityLevel "HIGH" .
+_:ref_3e0a2a6dabb0e015 a oc:WorkflowStep ;
+    dcterms:description "Map out which files will be created or modified, define clear responsibilities for each file, lock in decomposition decisions" ;
+    oc:expectedOutcome "Complete file structure with exact paths and responsibilities" ;
+    oc:stepDependsOn _:ref_828a694b2cbbc1b2 ;
+    oc:stepId "map-file-structure" .
+
+_:ref_828a694b2cbbc1b2 a oc:WorkflowStep ;
+    dcterms:description "Evaluate spec scope — if it covers multiple independent subsystems, suggest splitting into separate plans" ;
+    oc:expectedOutcome "Confirmed single-subsystem scope or decision to split" ;
+    oc:stepId "scope-check" .
+
+_:ref_b53eb8fa0a787955 a oc:WorkflowStep ;
+    dcterms:description "Break work into bite-sized tasks (2-5 min steps) following TDD cycle: failing test → run → implement → run → commit. Include complete code in every step." ;
+    oc:expectedOutcome "All tasks written with exact file paths, complete code blocks, and exact commands" ;
+    oc:stepDependsOn _:ref_3dffa021be08cd68 ;
+    oc:stepId "decompose-tasks" .
+
+_:ref_b9452b4933b1eac7 a oc:WorkflowStep ;
+    dcterms:description "Save plan to docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md (or user-preferred location)" ;
+    oc:expectedOutcome "Plan file saved to disk" ;
+    oc:stepDependsOn _:ref_cc49546552e1b78f ;
+    oc:stepId "save-plan" .
+
+_:ref_cc49546552e1b78f a oc:WorkflowStep ;
+    dcterms:description "Run three-part self-review: (1) spec coverage check, (2) placeholder scan, (3) type consistency check. Fix any issues inline." ;
+    oc:expectedOutcome "Plan verified against spec with no placeholders or type inconsistencies" ;
+    oc:stepDependsOn _:ref_b53eb8fa0a787955 ;
+    oc:stepId "self-review" .
 

@@ -7,52 +7,246 @@
 oc:skill_vercel_labs_vercel_react_best_practices_async_suspense_boundaries a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "async-suspense-boundaries" ;
-    skos:broader "React rendering pattern" ;
+    skos:broader "Performance optimization pattern" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "de05fedac2eb7ae563b887b5a424464ec3dfaf84e5b7797467ebe2a796ac8afc" ;
-    oc:differentia "uses Suspense boundaries to stream data into components independently, allowing wrapper UI to paint immediately while async data loads in isolated regions" ;
+    oc:differentia "uses React Suspense boundaries to stream data into components without blocking the entire page layout" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
+    oc:handlesFailure oc:LayoutShiftDetected,
+        oc:SEOContentMissing ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_341d133d,
-        oc:kn_3b2a46ad,
-        oc:kn_3c0096e2,
-        oc:kn_bf75aa3a,
-        oc:kn_f1908506 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Strategic Suspense Boundaries
+impact: HIGH
+impactDescription: faster initial paint
+tags: async, suspense, streaming, layout-shift
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Incorrect (wrapper blocked by data fetching):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 11 ;
+                    oc:textContent "**When NOT to use this pattern:**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 10 ;
+                    oc:textContent "Both components share the same promise, so only one fetch occurs. Layout renders immediately while both components wait together." ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """async function Page() {
+  const data = await fetchData() // Blocks entire page
+  
+  return (
+    <div>
+      <div>Sidebar</div>
+      <div>Header</div>
+      <div>
+        <DataDisplay data={data} />
+      </div>
+      <div>Footer</div>
+    </div>
+  )
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-29" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 8 ;
+                    oc:textContent "**Alternative (share promise across components):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "The entire layout waits for data even though only the middle section needs it." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 5 ;
+                    oc:textContent "**Correct (wrapper shows immediately, data streams in):**" ],
+                [ a oc:BulletList ;
+                    oc:blockType "bullet_list" ;
+                    oc:contentOrder 12 ;
+                    oc:hasItem [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 1 ;
+                            oc:itemText "Critical data needed for layout decisions (affects positioning)" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 2 ;
+                            oc:itemText "SEO-critical content above the fold" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 3 ;
+                            oc:itemText "Small, fast queries where suspense overhead isn't worth it" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 4 ;
+                            oc:itemText "When you want to avoid layout shift (loading → content jump)" ] ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function Page() {
+  return (
+    <div>
+      <div>Sidebar</div>
+      <div>Header</div>
+      <div>
+        <Suspense fallback={<Skeleton />}>
+          <DataDisplay />
+        </Suspense>
+      </div>
+      <div>Footer</div>
+    </div>
+  )
+}
+
+async function DataDisplay() {
+  const data = await fetchData() // Only blocks this component
+  return <div>{data.content}</div>
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 6 ;
+                    oc:sourceLocation "lines 35-55" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function Page() {
+  // Start fetch immediately, but don't await
+  const dataPromise = fetchData()
+  
+  return (
+    <div>
+      <div>Sidebar</div>
+      <div>Header</div>
+      <Suspense fallback={<Skeleton />}>
+        <DataDisplay dataPromise={dataPromise} />
+        <DataSummary dataPromise={dataPromise} />
+      </Suspense>
+      <div>Footer</div>
+    </div>
+  )
+}
+
+function DataDisplay({ dataPromise }: { dataPromise: Promise<Data> }) {
+  const data = use(dataPromise) // Unwraps the promise
+  return <div>{data.content}</div>
+}
+
+function DataSummary({ dataPromise }: { dataPromise: Promise<Data> }) {
+  const data = use(dataPromise) // Reuses the same promise
+  return <div>{data.summary}</div>
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 9 ;
+                    oc:sourceLocation "lines 61-88" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Instead of awaiting data in async components before returning JSX, use Suspense boundaries to show the wrapper UI faster while data loads." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 7 ;
+                    oc:textContent "Sidebar, Header, and Footer render immediately. Only DataDisplay waits for data." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 13 ;
+                    oc:textContent "**Trade-off:** Faster initial paint vs potential layout shift. Choose based on your UX priorities." ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Strategic Suspense Boundaries" ] ;
+    oc:impartsKnowledge oc:kn_44fdd0c0,
+        oc:kn_6ae168a2,
+        oc:kn_93acc73b,
+        oc:kn_a1e6a381,
+        oc:kn_e5485231,
+        oc:kn_e92f9c32,
+        oc:kn_ea74441d ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:resolvesIntent "optimize initial page paint with suspense boundaries",
-        "share promises across multiple React components with use()",
-        "stream async data into React components without blocking layout" .
+    oc:requiresState oc:ReactServerComponentsEnabled ;
+    oc:resolvesIntent "avoid blocking layout with data fetching",
+        "optimize initial page paint with suspense boundaries",
+        "share promises across multiple components",
+        "stream async data into React components" ;
+    oc:yieldsState oc:StreamingRenderOptimized .
 
-oc:kn_341d133d a oc:Constraint,
+oc:kn_44fdd0c0 a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When deciding whether to apply Suspense streaming vs traditional await" ;
-    oc:directiveContent "Do not use Suspense boundaries for async data when the data is critical for layout decisions, SEO-critical above-the-fold content, small fast queries, or when layout shift from loading→content transitions is unacceptable." ;
-    oc:hasRationale "The trade-off is faster initial paint vs potential layout shift and deferred critical content — each use case has different priorities." ;
+    oc:appliesToContext "When structuring page layouts with async data" ;
+    oc:directiveContent "Push Suspense boundaries as close to the data-dependent leaf components as possible. Static layout elements (sidebar, header, footer) should render immediately." ;
+    oc:hasRationale "Smaller suspense boundaries mean more of the UI is visible sooner, improving perceived performance." .
+
+oc:kn_6ae168a2 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When implementing the basic strategic suspense boundary pattern" ;
+    oc:codeLanguage "tsx" ;
+    oc:directiveContent """function Page() {
+  return (
+    <div>
+      <StaticShell />
+      <Suspense fallback={<Skeleton />}>
+        <AsyncLeafComponent />
+      </Suspense>
+    </div>
+  )
+}
+
+async function AsyncLeafComponent() {
+  const data = await fetchData()
+  return <div>{data.content}</div>
+}""" .
+
+oc:kn_93acc73b a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When sharing a promise across multiple components with deduplication" ;
+    oc:codeLanguage "tsx" ;
+    oc:directiveContent """function Page() {
+  const dataPromise = fetchData()
+  return (
+    <Suspense fallback={<Skeleton />}>
+      <ComponentA dataPromise={dataPromise} />
+      <ComponentB dataPromise={dataPromise} />
+    </Suspense>
+  )
+}
+
+function ComponentA({ dataPromise }) {
+  const data = use(dataPromise)
+  ...
+}""" .
+
+oc:kn_a1e6a381 a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "When implementing streaming with Suspense fallbacks" ;
+    oc:directiveContent "Using Suspense boundaries introduces potential layout shift: a skeleton fallback is shown, then replaced with actual content that may differ in size." ;
+    oc:hasRationale "Layout shift degrades user experience; weigh faster initial paint against content jump stability." .
+
+oc:kn_e5485231 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing async React Server Components that mix static and data-dependent UI" ;
+    oc:directiveContent "Never await data at the top of an async page/layout component if only a subset of the JSX needs that data. It blocks the entire wrapper from rendering." ;
+    oc:hasRationale "Blocking the full layout negates the streaming benefits of React Server Components and delays initial paint." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_3b2a46ad a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When designing component trees with async data dependencies" ;
-    oc:directiveContent "Push async data fetching as deep into the component tree as possible, wrapping only the data-dependent component in a Suspense boundary." ;
-    oc:hasRationale "This isolates loading state to the smallest possible subtree, allowing all surrounding UI to render immediately." .
+oc:kn_e92f9c32 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When multiple sibling or cousin components share the same async data source" ;
+    oc:directiveContent "When multiple components need the same data, create the promise at the page level and pass it down as a prop. Each child uses React.use(promise) to unwrap it. This deduplicates fetches while maintaining streaming." ;
+    oc:hasRationale "Sharing the promise ensures a single network request while still allowing Suspense to coordinate the loading state." .
 
-oc:kn_3c0096e2 a oc:Heuristic,
+oc:kn_ea74441d a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When multiple components in the same Suspense boundary need the same fetch result" ;
-    oc:directiveContent "Use React.use() with a shared promise object passed as a prop when multiple sibling components need the same async data." ;
-    oc:hasRationale "Sharing the promise via props ensures only one network request occurs and both components suspend and resolve together." .
-
-oc:kn_bf75aa3a a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When writing async React Server Components or Next.js pages" ;
-    oc:directiveContent "Never await data at the top of an async page component that wraps layout elements (sidebar, header, footer) that don't depend on that data." ;
-    oc:hasRationale "Awaiting data at the page level blocks the entire page render including unrelated static layout elements, dramatically slowing initial paint." ;
+    oc:appliesToContext "When deciding whether to apply streaming suspense" ;
+    oc:directiveContent "Do NOT use Suspense boundaries when: data affects layout positioning, content is SEO-critical above the fold, the query is so fast that Suspense overhead isn't justified, or layout shift from loading→content is unacceptable." ;
+    oc:hasRationale "These cases either break functionality (SEO, layout) or the trade-off is net negative (fast queries, layout shift)." ;
     oc:severityLevel "CRITICAL" .
-
-oc:kn_f1908506 a oc:KnowledgeNode,
-        oc:SideEffect ;
-    oc:appliesToContext "When implementing Suspense-based streaming patterns" ;
-    oc:directiveContent "Using Suspense boundaries for async data introduces a trade-off: faster initial paint at the cost of potential layout shift when skeleton/placeholder content is replaced by actual data." ;
-    oc:hasRationale "Layout shift from loading fallback to real content can degrade perceived UX even if Time-to-First-Paint improves. Choose based on UX priorities." .
 

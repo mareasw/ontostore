@@ -7,15 +7,13 @@
 oc:skill_n8n_io_n8n_linear_issue a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "linear-issue" ;
-    skos:broader "issue analysis workflow" ;
-    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/n8n-io/n8n/linear-issue" ;
+    skos:broader "Context-gathering workflow" ;
+    prov:wasDerivedFrom "../.agents/skills/n8n-io/n8n/linear-issue" ;
     oc:contentHash "6d0fbc01ada68b3ce22071d2c796945720153a521662caf70c1a9c3dffb68a02" ;
-    oc:dependsOnSkill oc:skill_loom_transcript ;
-    oc:differentia "fetches and synthesizes comprehensive context from Linear issues including attachments, related resources, node popularity, and effort estimation for the n8n platform" ;
-    oc:extends oc:skill_n8n_conventions ;
+    oc:dependsOnSkill oc:skill_ontoskills_loom_transcript ;
+    oc:differentia "Fetches and analyzes Linear issues with all related media, linked resources, node popularity, and effort estimation for the n8n project" ;
     oc:handlesFailure oc:NetworkTimeout,
-        oc:PermissionDenied,
-        oc:ResourceNotFound ;
+        oc:PermissionDenied ;
     oc:hasAllowedTool "Grep",
         "Read",
         "curl",
@@ -27,97 +25,751 @@ oc:skill_n8n_io_n8n_linear_issue a oc:DeclarativeSkill,
     oc:hasCategory "development" ;
     oc:hasDescription "Fetch and analyze Linear issue with all related context. Use when starting work on a Linear ticket, analyzing issues, or gathering context about a Linear issue." ;
     oc:hasName "linear-issue" ;
-    oc:hasRequirement oc:req_4f4e07e2,
-        oc:req_7aef040e,
-        oc:req_81ee6f2b,
-        oc:req_a86664a0,
-        oc:req_d71f6c59 ;
-    oc:impartsKnowledge oc:kn_099d9d57,
-        oc:kn_4f78395e,
-        oc:kn_978bcaeb,
-        oc:kn_dcaea3d9,
-        oc:kn_e55a033a,
-        oc:kn_f29ba119,
-        oc:kn_f4ce8c10 ;
+    oc:hasRequirement oc:req_697f5a17,
+        oc:req_87529583,
+        oc:req_8c9d9228,
+        oc:req_94c18500,
+        oc:req_a3363eab ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """name: linear-issue
+description: Fetch and analyze Linear issue with all related context. Use when starting work on a Linear ticket, analyzing issues, or gathering context about a Linear issue.
+disable-model-invocation: true
+argument-hint: "[issue-id]"
+compatibility:
+  requires:
+    - mcp: linear
+      description: Core dependency — used to fetch issue details, relations, and comments
+    - cli: gh
+      description: GitHub CLI — used to fetch linked PRs and issues. Must be authenticated (gh auth login)
+  optional:
+    - mcp: notion
+      description: Used to fetch linked Notion documents. Skip Notion steps if unavailable.
+    - skill: loom-transcript
+      description: Used to fetch Loom video transcripts. Skip Loom steps if unavailable.
+    - cli: curl
+      description: Used to download images/attachments. Typically pre-installed.
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Start work on Linear issue **$ARGUMENTS**" ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Follow these steps to gather comprehensive context about the issue:" ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Determine whether this issue is specific to a particular n8n node (e.g. a trigger, action, or tool node). Look for clues in:" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "If the issue is node-specific:" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 2 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "The issue title (e.g. \"Linear trigger\", \"Slack node\", \"HTTP Request\")" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "The issue description and comments mentioning node names" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Labels or tags on the issue (e.g. `node:linear`, `node:slack`)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "Screenshots showing a specific node's configuration or error" ] ],
+                                _:ref_c18d044825249ea5 ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 8 ;
+                            oc:sectionTitle "5. Identify Affected Node (if applicable)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 2 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "[ ] Fetched ALL linked GitHub issues/PRs via `gh` CLI" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "[ ] Fetched transcripts for ALL Loom videos in the description AND comments" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 6 ;
+                                            oc:itemText "[ ] Assessed effort/complexity with T-shirt size" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 5 ;
+                                            oc:itemText "[ ] Checked whether the issue is node-specific and looked up popularity if so" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "[ ] Listed all comments on the issue" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "[ ] Downloaded and viewed ALL images in the description AND comments" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "After gathering all context, present a comprehensive summary including:" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Before presenting, verify you have completed:**" ],
+                                _:ref_d7367a4f0c6cec27 ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 10 ;
+                            oc:sectionTitle "7. Present Summary" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "After gathering all context, assess the effort required to fix/implement the issue. Use the following T-shirt sizes:" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 4 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "**Scope of changes**: How many files/packages need to be modified? Is it a single node fix or a cross-cutting change?" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 5 ;
+                                            oc:itemText "**Dependencies**: Are there external API changes, new packages, or cross-team coordination needed?" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "**Risk**: Could this break existing functionality? Does it need backward compatibility?" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "**Complexity**: Is it a straightforward parameter change, a new API integration, a new credential type, or an architectural change?" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "**Testing**: How much test coverage is needed? Are E2E tests required?" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 6 ;
+                                            oc:itemText "**Documentation**: Does this require docs updates, migration guides, or changelog entries?" ] ],
+                                [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 2 ;
+                                    oc:rowCount 5 ;
+                                    oc:tableCaption "After gathering all context, assess the effort required to fix/implement the issue. Use the following T-shirt sizes" ;
+                                    oc:tableMarkdown """| Size | Approximate effort |
+|------|--------------------|
+| XS   | ≤ 1 hour           |
+| S    | ≤ 1 day            |
+| M    | 2-3 days           |
+| L    | 3-5 days           |
+| XL   | ≥ 6 days           |
+""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "To make this assessment, consider:" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent "Provide the T-shirt size along with a brief justification explaining the key factors that drove the estimate." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 9 ;
+                            oc:sectionTitle "6. Assess Effort/Complexity" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 6 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "If Notion links are present, use `mcp__notion__notion-fetch` with the Notion URL or page ID to retrieve document content" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Summarize relevant documentation" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Related Linear Issues:**" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**GitHub PRs and Issues:**" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 4 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Download images attached to issues: `curl -H \"Authorization: token $(gh auth token)\" -L <image-url> -o image.png`" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:hasChild [ a oc:BulletList ;
+                                                    oc:blockType "bullet_list" ;
+                                                    oc:contentOrder 1 ;
+                                                    oc:hasItem [ a oc:BulletItem ;
+                                                            oc:blockType "bullet_item" ;
+                                                            oc:itemOrder 2 ;
+                                                            oc:itemText "`gh issue view <number>` for issues" ],
+                                                        [ a oc:BulletItem ;
+                                                            oc:blockType "bullet_item" ;
+                                                            oc:itemOrder 1 ;
+                                                            oc:itemText "`gh pr view <number>` for pull requests" ] ] ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "If GitHub links are mentioned, use `gh` CLI to fetch PR/issue details:" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent "**Notion Documents:**" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 2 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Use `mcp__linear__get_issue` for any issues mentioned in relations (blocking, blocked by, related, duplicates)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Summarize how they relate to the main issue" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 6 ;
+                            oc:sectionTitle "3. Fetch Related Context" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent "**Loom Videos (ALWAYS fetch transcript):**" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**IMPORTANT:** This step is NOT optional. You MUST scan and fetch all visual content from BOTH the issue description AND all comments." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Screenshots/Images (ALWAYS fetch):**" ],
+                                _:ref_b0935983aff2158d,
+                                _:ref_f0fb20b99d235560 ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 5 ;
+                            oc:sectionTitle "2. Analyze Attachments and Media (MANDATORY)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 2 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Any attachments or media linked in comments (process in Step 2)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Additional context and discussion history" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Clarifications or updates to the original issue description" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Comments were already fetched in Step 1. Review them for:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 7 ;
+                            oc:sectionTitle "4. Review Comments" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "Both calls should be made together in the same step to gather the complete context upfront." ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 2 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "**Immediately after**, use `mcp__linear__list_comments` with the issue ID to fetch all comments" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Use `mcp__linear__get_issue` with the issue ID to get full details including attachments" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Include relations to see blocking/related/duplicate issues" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Use the Linear MCP tools to fetch the issue details and comments together:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "1. Fetch the Issue and Comments from Linear" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Instructions" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "If no issue ID is provided, ask the user for one" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "The issue ID can be provided in formats like: `AI-1975`, `node-1975`, or just `1975` (will search)" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 11 ;
+                    oc:sectionTitle "Notes" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 3 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "**GitHub CLI** (`gh`): Must be installed and authenticated. Run `gh auth status` to verify. Used to fetch linked PRs and issues." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "**Linear MCP** (`mcp__linear`): Must be connected. Without it the skill cannot function at all." ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 6 ;
+                            oc:textContent "If a required tool is missing, stop and tell the user what needs to be set up before continuing." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "This skill depends on external tools. Before proceeding, verify availability:" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 5 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "**curl**: Used to download images. Almost always available; if missing, skip image downloads and note it." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "**Notion MCP** (`mcp__notion`): Needed only if the issue links to Notion docs. If unavailable, note the Notion links in the summary and tell the user to check them manually." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "**Loom transcript skill** (`/loom-transcript`): Needed only if the issue contains Loom videos. If unavailable, note the Loom links in the summary for the user to watch." ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Required:**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "**Optional (graceful degradation):**" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Prerequisites" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Linear Issue Analysis" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "Sub-workflow for identifying and classifying an affected n8n node." ;
+            oc:hasStep _:ref_2241149caf1c520b,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Include node name, type ID, popularity score with level in the summary. Note if not found (community/new node)." ;
+                    oc:expectedOutcome "Node information integrated into final summary." ;
+                    oc:stepDependsOn _:ref_db72b7326c448f21 ;
+                    oc:stepId "report-node" ],
+                _:ref_db72b7326c448f21 ;
+            oc:workflowId "linear-issue-node-lookup" ;
+            oc:workflowName "Node Popularity Lookup" ],
+        [ a oc:Workflow ;
+            dcterms:description "Complete workflow for fetching, analyzing, and summarizing a Linear issue with all related context." ;
+            oc:hasStep [ a oc:WorkflowStep ;
+                    dcterms:description "Present comprehensive summary: issue overview, description, visual context, affected node, related issues, technical context, effort estimate, and next steps." ;
+                    oc:expectedOutcome "Full structured summary delivered to user." ;
+                    oc:stepDependsOn _:ref_62455dab472f2e9d ;
+                    oc:stepId "present-summary" ],
+                _:ref_2456700bfefd175a,
+                _:ref_37ea44f57ef497a7,
+                _:ref_62455dab472f2e9d,
+                _:ref_6add4f657b4a47ec,
+                _:ref_a31f91b0a2d9fc83,
+                _:ref_c25f14d5ba58fe07 ;
+            oc:workflowId "linear-issue-analysis" ;
+            oc:workflowName "Linear Issue Full Analysis" ],
+        _:ref_b0935983aff2158d,
+        _:ref_c18d044825249ea5,
+        _:ref_d7367a4f0c6cec27,
+        _:ref_f0fb20b99d235560 ;
+    oc:impartsKnowledge oc:kn_044b43f0,
+        oc:kn_0f73ba13,
+        oc:kn_5632b4b5,
+        oc:kn_7bda16c3,
+        oc:kn_84923d38,
+        oc:kn_e60849ad,
+        oc:kn_ec07be83 ;
     oc:isUserInvocable true ;
-    oc:nature "work" ;
-    oc:requiresState oc:NetworkAvailable,
-        oc:SystemAuthenticated ;
+    oc:nature "Concept" ;
+    oc:requiresState oc:APIKeySet,
+        oc:ToolInstalled ;
     oc:resolvesIntent "analyze linear issue",
-        "estimate effort for linear ticket",
-        "fetch linear ticket context",
-        "gather issue details for development work",
-        "identify affected n8n node from issue",
-        "summarize linear issue with related context" ;
-    oc:yieldsState oc:ContextGathered,
-        oc:IssueAnalyzed .
+        "assess effort for linear issue",
+        "fetch issue context",
+        "gather issue details and related context",
+        "start work on a linear ticket" ;
+    oc:yieldsState oc:DocumentCreated .
 
-oc:kn_099d9d57 a oc:KnowledgeNode,
-        oc:PerformanceProfile ;
-    oc:appliesToContext "When assessing effort after all context is gathered" ;
-    oc:directiveContent "Effort estimation uses T-shirt sizes (XS: ≤1hr, S: ≤1day, M: 2-3 days, L: 3-5 days, XL: ≥6 days) based on scope, complexity, testing needs, risk, dependencies, and documentation requirements." ;
-    oc:hasRationale "Standardized sizing provides consistent estimates that the team can use for sprint planning and resource allocation." ;
+oc:kn_044b43f0 a oc:FallbackStrategy,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When optional tools are missing" ;
+    oc:directiveContent "If Notion MCP or loom-transcript skill is unavailable, gracefully degrade by noting the links in the summary and telling the user to check them manually." ;
+    oc:hasRationale "Partial context is better than failing entirely. The user can manually review unavailable resources." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_0f73ba13 a oc:Idempotency,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Always" ;
+    oc:directiveContent "This skill is read-only and idempotent. It only fetches and analyzes data, making no changes to Linear, GitHub, or any external system." ;
+    oc:hasRationale "Safe to re-run multiple times without side effects." ;
     oc:severityLevel "LOW" .
 
-oc:kn_4f78395e a oc:DesignPrinciple,
+oc:kn_5632b4b5 a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When analyzing any Linear issue, scanning attachments is mandatory" ;
-    oc:directiveContent "Images and Loom videos in both the issue description AND all comments must be fetched and analyzed — they often contain critical context like error messages, UI states, or reproduction steps that text alone cannot convey." ;
-    oc:hasRationale "Skipping visual content leads to incomplete understanding and misestimated effort, since screenshots and videos frequently contain the most actionable debugging information." ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_978bcaeb a oc:FallbackStrategy,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When an optional dependency is missing during execution" ;
-    oc:directiveContent "When optional tools (Notion MCP, Loom transcript skill, curl) are unavailable, gracefully degrade by noting the links in the summary and telling the user to check them manually." ;
-    oc:hasRationale "Graceful degradation ensures the analysis still provides value without blocking on non-essential resources." ;
+    oc:appliesToContext "When analyzing attachments and media (Step 2)" ;
+    oc:directiveContent "Never skip downloading and viewing images or fetching Loom transcripts from BOTH the issue description AND comments. Visual content often contains critical context like error messages, UI states, or reproduction steps." ;
+    oc:hasRationale "Images and videos frequently contain the most important context that text alone cannot convey." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_dcaea3d9 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When the issue is identified as node-specific" ;
-    oc:directiveContent "Use the node-popularity.json file to classify affected nodes as High (≥0.8), Medium (0.4–0.8), or Low (<0.4) popularity, and include the raw score in the summary." ;
-    oc:hasRationale "Popularity classification helps prioritize work and assess risk — changes to high-popularity nodes require more careful testing." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_e55a033a a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "At the start of issue analysis workflow" ;
-    oc:directiveContent "Fetch the issue details and comments together in the same step to gather complete context upfront before proceeding to deeper analysis." ;
-    oc:hasRationale "Batch-fetching avoids context gaps early and prevents the agent from making assumptions based on incomplete data." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_f29ba119 a oc:KnowledgeNode,
-        oc:PostFlightValidation ;
-    oc:appliesToContext "At the end of the analysis workflow, before presenting results" ;
-    oc:directiveContent "Before presenting the summary, verify a checklist: all images downloaded/viewed, all Loom transcripts fetched, all GitHub links resolved, comments listed, node-specificity checked, and effort estimated." ;
-    oc:hasRationale "The checklist ensures no critical context was missed and provides a complete, reliable summary to the user." ;
+oc:kn_7bda16c3 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before presenting summary in Step 7" ;
+    oc:directiveContent "Before presenting the final summary, verify: all images downloaded/viewed, all Loom transcripts fetched, all GitHub links fetched via gh, all comments listed, node-specificity checked, and effort assessed." ;
+    oc:hasRationale "Ensures no critical context is missed before the agent presents results to the user." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_f4ce8c10 a oc:Constraint,
+oc:kn_84923d38 a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "Before beginning any issue analysis" ;
-    oc:directiveContent "If a required tool (Linear MCP or GitHub CLI) is missing or unauthenticated, stop immediately and tell the user what needs to be set up before continuing." ;
-    oc:hasRationale "Without required tools, the skill cannot function and proceeding would produce misleading or incomplete results." ;
+    oc:appliesToContext "When identifying affected n8n nodes in Step 5" ;
+    oc:directiveContent "Node type IDs follow naming patterns: core nodes are `n8n-nodes-base.<camelCaseName>`, triggers are `<name>Trigger`, tools are `<name>Tool`, LangChain nodes are `@n8n/n8n-nodes-langchain.<camelCaseName>`." ;
+    oc:hasRationale "Knowing the naming patterns allows quick lookup without guessing the exact type ID." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_e60849ad a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When fetching initial issue data (Step 1)" ;
+    oc:directiveContent "Fetch issue details and comments together in the same step to gather complete context upfront before proceeding to deeper analysis." ;
+    oc:hasRationale "Batching the initial fetch avoids repeated context-switching and ensures all text is available for media scanning." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_ec07be83 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Before starting any issue analysis" ;
+    oc:directiveContent "Linear MCP and GitHub CLI are required hard dependencies. If either is missing, stop execution and inform the user what needs setup." ;
+    oc:hasRationale "The skill cannot fetch issue details without Linear MCP or linked GitHub context without gh CLI." ;
     oc:severityLevel "CRITICAL" .
 
-oc:req_4f4e07e2 a oc:RequirementAPI ;
-    oc:isOptional true ;
-    oc:requirementValue "mcp__notion" .
-
-oc:req_7aef040e a oc:RequirementKnowledge ;
-    oc:isOptional true ;
-    oc:requirementValue "loom-transcript skill" .
-
-oc:req_81ee6f2b a oc:RequirementTool ;
+oc:req_697f5a17 a oc:RequirementTool ;
     oc:isOptional false ;
-    oc:requirementValue "gh" .
+    oc:requirementValue "cli:gh" .
 
-oc:req_a86664a0 a oc:RequirementAPI ;
-    oc:isOptional false ;
-    oc:requirementValue "mcp__linear" .
-
-oc:req_d71f6c59 a oc:RequirementTool ;
+oc:req_87529583 a oc:RequirementKnowledge ;
     oc:isOptional true ;
-    oc:requirementValue "curl" .
+    oc:requirementValue "skill:loom-transcript" .
+
+oc:req_8c9d9228 a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "mcp:linear" .
+
+oc:req_94c18500 a oc:RequirementTool ;
+    oc:isOptional true ;
+    oc:requirementValue "mcp:notion" .
+
+oc:req_a3363eab a oc:RequirementTool ;
+    oc:isOptional true ;
+    oc:requirementValue "cli:curl" .
+
+_:ref_050f898e2398a180 a oc:WorkflowStep ;
+    dcterms:description "**Effort Estimate**: T-shirt size (XS/S/M/L/XL) with justification" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_7" ;
+    oc:stepOrder 7 .
+
+_:ref_06c38237dcbbd753 a oc:WorkflowStep ;
+    dcterms:description "Scan the issue description AND all comments for ALL image URLs:" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild [ a oc:BulletList ;
+            oc:blockType "bullet_list" ;
+            oc:contentOrder 1 ;
+            oc:hasItem [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 2 ;
+                    oc:itemText "Markdown images `![](url)`" ],
+                [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 1 ;
+                    oc:itemText "`<img>` tags" ],
+                [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 3 ;
+                    oc:itemText "Raw URLs (github.com/user-attachments, imgur.com, etc.)" ] ] ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_21494057c6625324 a oc:BulletList ;
+    oc:blockType "bullet_list" ;
+    oc:contentOrder 1 ;
+    oc:hasItem [ a oc:BulletItem ;
+            oc:blockType "bullet_item" ;
+            oc:itemOrder 2 ;
+            oc:itemText "Use the `Read` tool on the downloaded file to view it" ],
+        [ a oc:BulletItem ;
+            oc:blockType "bullet_item" ;
+            oc:itemOrder 3 ;
+            oc:itemText "Describe what you see in detail" ],
+        [ a oc:BulletItem ;
+            oc:blockType "bullet_item" ;
+            oc:itemOrder 1 ;
+            oc:itemText "Download using `curl -sL \"url\" -o /path/to/image.png` (GitHub URLs require following redirects) OR the linear mcp" ] .
+
+_:ref_3eb0a8fa868f0d96 a oc:BulletItem ;
+    oc:blockType "bullet_item" ;
+    oc:itemOrder 3 ;
+    oc:itemText "Tool variants: `n8n-nodes-base.<name>Tool` (e.g. \"Google Sheets Tool\" → `n8n-nodes-base.googleSheetsTool`)" .
+
+_:ref_414464ec24772912 a oc:WorkflowStep ;
+    dcterms:description "Loom videos often contain crucial reproduction steps and context that text alone cannot convey" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_4ba2dc226ce519cb a oc:WorkflowStep ;
+    dcterms:description "**Related Issues**: How this connects to other work" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_5" ;
+    oc:stepOrder 5 .
+
+_:ref_5f13d50cf4e7025b a oc:BulletItem ;
+    oc:blockType "bullet_item" ;
+    oc:itemOrder 1 ;
+    oc:itemText "Use the `/loom-transcript` skill to fetch the FULL transcript" .
+
+_:ref_608158fea434275b a oc:BulletItem ;
+    oc:blockType "bullet_item" ;
+    oc:itemOrder 4 ;
+    oc:itemText "LangChain/AI nodes: `@n8n/n8n-nodes-langchain.<camelCaseName>` (e.g. \"OpenAI Chat Model\" → `@n8n/n8n-nodes-langchain.lmChatOpenAi`)" .
+
+_:ref_638f6502382b2171 a oc:WorkflowStep ;
+    dcterms:description "**Look up the node's popularity score** from `packages/frontend/editor-ui/data/node-popularity.json`. Use `Grep` to search for the node ID in that file. The popularity score is a log-scale value between 0 and 1. Use these thresholds to classify:" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild [ a oc:Paragraph ;
+            oc:blockType "paragraph" ;
+            oc:contentOrder 1 ;
+            oc:textContent "Include the raw score and the level (high/medium/low) in the summary." ] ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_66087929066ef6ed a oc:WorkflowStep ;
+    dcterms:description "**Visual Context**: Summary of screenshots/videos (what you observed in each)" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_67fb12487be56110 a oc:WorkflowStep ;
+    dcterms:description "For EACH image found (in description or comments):" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild _:ref_21494057c6625324 ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_6fb25425c1ed4cf3 a oc:BulletItem ;
+    oc:blockType "bullet_item" ;
+    oc:itemOrder 2 ;
+    oc:itemText "Trigger variants: `n8n-nodes-base.<name>Trigger` (e.g. \"Gmail Trigger\" → `n8n-nodes-base.gmailTrigger`)" .
+
+_:ref_8fb34c68ee2a68de a oc:WorkflowStep ;
+    dcterms:description "**Next Steps**: Suggested approach based on all gathered context" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_8" ;
+    oc:stepOrder 8 .
+
+_:ref_97d2dc285e306331 a oc:WorkflowStep ;
+    dcterms:description "**Affected Node** (if applicable): Node name, node type ID (`n8n-nodes-base.xxx`), popularity score with level (e.g. `0.64 — medium popularity`)" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_a00a14c016e890bc a oc:WorkflowStep ;
+    dcterms:description "**Description**: Full issue description with any clarifications from comments" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_a8259564a32b2cc4 a oc:WorkflowStep ;
+    dcterms:description "Scan the issue description AND all comments for Loom URLs (loom.com/share/...)" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_b0fa43a94d45e4a7 a oc:WorkflowStep ;
+    dcterms:description "Do NOT skip images - they often contain critical context like error messages, UI states, or configuration" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_b25bc14a1444ded2 a oc:WorkflowStep ;
+    dcterms:description "**Issue Overview**: Title, status, priority, assignee, labels" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_b911f4263d9706c0 a oc:WorkflowStep ;
+    dcterms:description "If the node is **not found** in the popularity file, note that it may be a community node or a very new/niche node." ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_bc81685f35e86186 a oc:BulletList ;
+    oc:blockType "bullet_list" ;
+    oc:contentOrder 1 ;
+    oc:hasItem _:ref_5f13d50cf4e7025b,
+        [ a oc:BulletItem ;
+            oc:blockType "bullet_item" ;
+            oc:itemOrder 2 ;
+            oc:itemText "Summarize key points, timestamps, and any demonstrated issues" ] .
+
+_:ref_be9fe1b6cef6e72b a oc:WorkflowStep ;
+    dcterms:description "**Find the node type ID.** Use `Grep` to search for the node's display name (or keywords from it) in `packages/frontend/editor-ui/data/node-popularity.json` to find the exact node type ID. For reference, common ID patterns are:" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild [ a oc:BulletList ;
+            oc:blockType "bullet_list" ;
+            oc:contentOrder 1 ;
+            oc:hasItem _:ref_3eb0a8fa868f0d96,
+                _:ref_608158fea434275b,
+                _:ref_6fb25425c1ed4cf3,
+                [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 1 ;
+                    oc:itemText "Core nodes: `n8n-nodes-base.<camelCaseName>` (e.g. \"HTTP Request\" → `n8n-nodes-base.httpRequest`)" ] ] ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_dae94b6c6cf67510 a oc:WorkflowStep ;
+    dcterms:description "For EACH Loom video found (in description or comments):" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild _:ref_bc81685f35e86186 ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_f4f2f5c2ed5b4aaf a oc:WorkflowStep ;
+    dcterms:description "**Technical Context**: Any PRs, code references, or documentation" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_6" ;
+    oc:stepOrder 6 .
+
+_:ref_2241149caf1c520b a oc:WorkflowStep ;
+    dcterms:description "Use Grep to search for node display name in packages/frontend/editor-ui/data/node-popularity.json to find exact node type ID." ;
+    oc:expectedOutcome "Node type ID found (e.g. n8n-nodes-base.httpRequest)." ;
+    oc:stepId "find-node-id" .
+
+_:ref_2456700bfefd175a a oc:WorkflowStep ;
+    dcterms:description "Scan description AND comments for all image URLs and Loom URLs. Download each image via curl, view with Read tool. Fetch each Loom transcript via loom-transcript skill." ;
+    oc:expectedOutcome "All images downloaded, viewed, and described. All Loom transcripts fetched and summarized." ;
+    oc:stepDependsOn _:ref_c25f14d5ba58fe07 ;
+    oc:stepId "analyze-media" .
+
+_:ref_37ea44f57ef497a7 a oc:WorkflowStep ;
+    dcterms:description "Review already-fetched comments for additional context, attachments, clarifications, and updates to the original description." ;
+    oc:expectedOutcome "Key discussion points and clarifications extracted from comments." ;
+    oc:stepDependsOn _:ref_c25f14d5ba58fe07 ;
+    oc:stepId "review-comments" .
+
+_:ref_62455dab472f2e9d a oc:WorkflowStep ;
+    dcterms:description "Assess T-shirt size (XS/S/M/L/XL) based on scope, complexity, testing, risk, dependencies, and documentation needs." ;
+    oc:expectedOutcome "Effort estimate with size and justification." ;
+    oc:stepDependsOn _:ref_37ea44f57ef497a7,
+        _:ref_6add4f657b4a47ec,
+        _:ref_a31f91b0a2d9fc83 ;
+    oc:stepId "assess-effort" .
+
+_:ref_6add4f657b4a47ec a oc:WorkflowStep ;
+    dcterms:description "Fetch related Linear issues via mcp__linear__get_issue, linked GitHub PRs/issues via gh CLI, and Notion docs via mcp__notion__notion-fetch." ;
+    oc:expectedOutcome "All cross-referenced resources fetched and summarized." ;
+    oc:stepDependsOn _:ref_c25f14d5ba58fe07 ;
+    oc:stepId "fetch-related-context" .
+
+_:ref_a31f91b0a2d9fc83 a oc:WorkflowStep ;
+    dcterms:description "Determine if issue is node-specific using title, description, labels, screenshots. If yes, grep node-popularity.json for node type ID and popularity score." ;
+    oc:expectedOutcome "Node type ID and popularity level (high/medium/low) identified, or noted as not node-specific." ;
+    oc:stepDependsOn _:ref_2456700bfefd175a,
+        _:ref_c25f14d5ba58fe07 ;
+    oc:stepId "identify-node" .
+
+_:ref_b0935983aff2158d a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 5 ;
+    oc:hasStep _:ref_414464ec24772912,
+        _:ref_a8259564a32b2cc4,
+        _:ref_dae94b6c6cf67510 ;
+    oc:workflowId "procedure_5" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_c18d044825249ea5 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 4 ;
+    oc:hasStep _:ref_638f6502382b2171,
+        _:ref_b911f4263d9706c0,
+        _:ref_be9fe1b6cef6e72b ;
+    oc:workflowId "procedure_4" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_d7367a4f0c6cec27 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 4 ;
+    oc:hasStep _:ref_050f898e2398a180,
+        _:ref_4ba2dc226ce519cb,
+        _:ref_66087929066ef6ed,
+        _:ref_8fb34c68ee2a68de,
+        _:ref_97d2dc285e306331,
+        _:ref_a00a14c016e890bc,
+        _:ref_b25bc14a1444ded2,
+        _:ref_f4f2f5c2ed5b4aaf ;
+    oc:workflowId "procedure_4" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_db72b7326c448f21 a oc:WorkflowStep ;
+    dcterms:description "Extract popularity score from node-popularity.json. Classify: High (≥0.8), Medium (0.4-0.8), Low (<0.4)." ;
+    oc:expectedOutcome "Raw popularity score and classification level." ;
+    oc:stepDependsOn _:ref_2241149caf1c520b ;
+    oc:stepId "lookup-popularity" .
+
+_:ref_f0fb20b99d235560 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 3 ;
+    oc:hasStep _:ref_06c38237dcbbd753,
+        _:ref_67fb12487be56110,
+        _:ref_b0fa43a94d45e4a7 ;
+    oc:workflowId "procedure_3" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_c25f14d5ba58fe07 a oc:WorkflowStep ;
+    dcterms:description "Fetch issue details (mcp__linear__get_issue) and comments (mcp__linear__list_comments) together using the issue ID." ;
+    oc:expectedOutcome "Full issue object with relations, attachments, and all comments retrieved." ;
+    oc:stepId "fetch-issue" .
 

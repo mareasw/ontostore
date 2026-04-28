@@ -7,62 +7,177 @@
 oc:skill_obra_superpowers_writing_plans_plan_document_reviewer_prompt a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "plan-document-reviewer-prompt" ;
-    skos:broader "review template" ;
+    skos:broader "Prompt template" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/obra/superpowers/writing-plans" ;
     oc:contentHash "6fce2aa83c63715697e9dd86050c820716100b91efbd9f12bab8477ecc060256" ;
-    oc:dependsOnSkill oc:skill_writing_plans ;
-    oc:differentia "that dispatches a subagent to verify plan completeness, spec alignment, and buildability before implementation" ;
+    oc:dependsOnSkill oc:skill_ontoskills_writing_plans ;
+    oc:differentia "dispatches a subagent to verify plan completeness, spec alignment, task decomposition, and buildability before implementation" ;
     oc:extends oc:skill_obra_superpowers_writing_plans ;
-    oc:handlesFailure oc:PlanIncomplete,
-        oc:PlanSpecMismatch ;
+    oc:handlesFailure oc:InvalidInput,
+        oc:PlanIncomplete ;
     oc:hasArgumentHint "PLAN_FILE_PATH and SPEC_FILE_PATH" ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_07d364cf,
-        oc:kn_0ea276f1,
-        oc:kn_3b5d01cd,
-        oc:kn_8602584a,
-        oc:kn_d8e0ae01 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Use this template when dispatching a plan document reviewer subagent." ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """Task tool (general-purpose):
+  description: "Review plan document"
+  prompt: |
+    You are a plan document reviewer. Verify this plan is complete and ready for implementation.
+
+    **Plan to review:** [PLAN_FILE_PATH]
+    **Spec for reference:** [SPEC_FILE_PATH]
+
+    ## What to Check
+
+    | Category | What to Look For |
+    |----------|------------------|
+    | Completeness | TODOs, placeholders, incomplete tasks, missing steps |
+    | Spec Alignment | Plan covers spec requirements, no major scope creep |
+    | Task Decomposition | Tasks have clear boundaries, steps are actionable |
+    | Buildability | Could an engineer follow this plan without getting stuck? |
+
+    ## Calibration
+
+    **Only flag issues that would cause real problems during implementation.**
+    An implementer building the wrong thing or getting stuck is an issue.
+    Minor wording, stylistic preferences, and "nice to have" suggestions are not.
+
+    Approve unless there are serious gaps — missing requirements from the spec,
+    contradictory steps, placeholder content, or tasks so vague they can't be acted on.
+
+    ## Output Format
+
+    ## Plan Review
+
+    **Status:** Approved | Issues Found
+
+    **Issues (if any):**
+    - [Task X, Step Y]: [specific issue] - [why it matters for implementation]
+
+    **Recommendations (advisory, do not block approval):**
+    - [suggestions for improvement]
+""" ;
+                    oc:codeLanguage "" ;
+                    oc:contentOrder 4 ;
+                    oc:sourceLocation "lines 9-47" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Purpose:** Verify the plan is complete, matches the spec, and has proper task decomposition." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 3 ;
+                    oc:textContent "**Dispatch after:** The complete plan is written." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 5 ;
+                    oc:textContent "**Reviewer returns:** Status, Issues (if any), Recommendations" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Plan Document Reviewer Prompt Template" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "Dispatch a reviewer subagent to verify plan completeness and readiness for implementation" ;
+            oc:hasStep _:ref_1b2584eac737efb9,
+                _:ref_1dbac5c90febae38,
+                _:ref_35d0b95935bb07ba,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Reviewer returns status (Approved/Issues Found), specific issues with task/step references, and advisory recommendations" ;
+                    oc:expectedOutcome "Structured review output with clear disposition" ;
+                    oc:stepDependsOn _:ref_1b2584eac737efb9,
+                        _:ref_1dbac5c90febae38,
+                        _:ref_35d0b95935bb07ba,
+                        _:ref_e1cf05f3562ea5eb ;
+                    oc:stepId "report-results" ],
+                _:ref_73676156e825ab19,
+                _:ref_e1cf05f3562ea5eb ;
+            oc:workflowId "plan-review" ;
+            oc:workflowName "Plan Document Review" ] ;
+    oc:impartsKnowledge oc:kn_39d5d1ae,
+        oc:kn_78c99fd8,
+        oc:kn_7e88e351,
+        oc:kn_b9b6da5a,
+        oc:kn_cafd4d25 ;
     oc:isUserInvocable false ;
-    oc:nature "prompt" ;
-    oc:requiresState oc:PlanDocumentWritten ;
-    oc:resolvesIntent "check plan-spec alignment",
+    oc:nature "Tool" ;
+    oc:requiresState oc:DocumentCreated ;
+    oc:resolvesIntent "check plan buildability",
         "review plan document",
-        "validate task decomposition",
+        "validate plan against spec",
         "verify plan completeness" ;
     oc:yieldsState oc:PlanReviewed .
 
-oc:kn_07d364cf a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "Before invoking the plan reviewer subagent" ;
-    oc:directiveContent "Before dispatching the reviewer, ensure both the complete plan file and the source spec file are available as inputs." ;
-    oc:hasRationale "The reviewer needs both documents to assess spec alignment and completeness; missing either document makes the review ineffective." ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_0ea276f1 a oc:AntiPattern,
+oc:kn_39d5d1ae a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When determining plan review status" ;
-    oc:directiveContent "Do not block approval for minor wording, stylistic preferences, or 'nice to have' suggestions." ;
-    oc:hasRationale "Blocking on trivial issues creates unnecessary delays; only serious gaps (missing requirements, contradictions, placeholders, vague tasks) should block." ;
+    oc:appliesToContext "When making approval decision on a plan" ;
+    oc:directiveContent "Approve unless there are serious gaps: missing requirements from the spec, contradictory steps, placeholder content, or tasks so vague they can't be acted on." ;
+    oc:hasRationale "Plans should not be blocked on minor issues; only structural problems that prevent implementation warrant rejection" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_3b5d01cd a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When reviewing a plan document for approval" ;
-    oc:directiveContent "Only flag issues that would cause real problems during implementation — an implementer building the wrong thing or getting stuck is an issue." ;
-    oc:hasRationale "Over-flagging minor stylistic or wording issues dilutes review value and slows down the planning-to-implementation cycle." ;
-    oc:severityLevel "MEDIUM" .
+oc:kn_78c99fd8 a oc:KnowledgeNode,
+        oc:OutputFormat ;
+    oc:appliesToContext "When outputting review results" ;
+    oc:directiveContent """## Plan Review
 
-oc:kn_8602584a a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When making the final approval decision" ;
-    oc:directiveContent "Approve the plan unless there are serious gaps — missing spec requirements, contradictory steps, placeholder content, or unactionable tasks." ;
-    oc:hasRationale "A bias toward approval keeps the workflow moving; the bar for rejection should be clear, actionable problems that would impede implementation." ;
-    oc:severityLevel "MEDIUM" .
+**Status:** Approved | Issues Found
 
-oc:kn_d8e0ae01 a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When performing plan document review" ;
-    oc:directiveContent "The reviewer must evaluate four categories: Completeness, Spec Alignment, Task Decomposition, and Buildability." ;
-    oc:hasRationale "These four categories cover the essential quality dimensions that determine whether a plan can be successfully implemented." ;
+**Issues (if any):**
+- [Task X, Step Y]: [specific issue] - [why it matters for implementation]
+
+**Recommendations (advisory, do not block approval):**
+- [suggestions for improvement]""" ;
+    oc:templateVariables "Issues",
+        "Recommendations",
+        "Status" .
+
+oc:kn_7e88e351 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When reviewing plan documents" ;
+    oc:directiveContent "Only flag issues that would cause real problems during implementation — an implementer building the wrong thing or getting stuck. Minor wording, stylistic preferences, and nice-to-have suggestions are not issues." ;
+    oc:hasRationale "Over-flagging trivial issues wastes time and dilutes focus from genuine blockers" ;
     oc:severityLevel "HIGH" .
+
+oc:kn_b9b6da5a a oc:KnowledgeNode,
+        oc:Prerequisite ;
+    oc:appliesToContext "Before dispatching reviewer subagent" ;
+    oc:directiveContent "Requires a completed plan document (PLAN_FILE_PATH) and a spec document (SPEC_FILE_PATH) for reference" .
+
+oc:kn_cafd4d25 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Always when reviewing a plan document" ;
+    oc:directiveContent "Review across four categories: Completeness (TODOs, placeholders), Spec Alignment (coverage, scope creep), Task Decomposition (clear boundaries, actionable steps), Buildability (engineer can follow without getting stuck)." ;
+    oc:hasRationale "These four dimensions cover the critical failure modes of implementation plans" .
+
+_:ref_1b2584eac737efb9 a oc:WorkflowStep ;
+    dcterms:description "Reviewer verifies tasks have clear boundaries and steps are actionable" ;
+    oc:expectedOutcome "Task decomposition assessment complete" ;
+    oc:stepDependsOn _:ref_73676156e825ab19 ;
+    oc:stepId "evaluate-task-decomposition" .
+
+_:ref_1dbac5c90febae38 a oc:WorkflowStep ;
+    dcterms:description "Reviewer checks for TODOs, placeholders, incomplete tasks, and missing steps" ;
+    oc:expectedOutcome "Completeness assessment complete" ;
+    oc:stepDependsOn _:ref_73676156e825ab19 ;
+    oc:stepId "evaluate-completeness" .
+
+_:ref_35d0b95935bb07ba a oc:WorkflowStep ;
+    dcterms:description "Reviewer confirms an engineer could follow the plan without getting stuck" ;
+    oc:expectedOutcome "Buildability assessment complete" ;
+    oc:stepDependsOn _:ref_73676156e825ab19 ;
+    oc:stepId "evaluate-buildability" .
+
+_:ref_e1cf05f3562ea5eb a oc:WorkflowStep ;
+    dcterms:description "Reviewer verifies plan covers spec requirements with no major scope creep" ;
+    oc:expectedOutcome "Spec alignment assessment complete" ;
+    oc:stepDependsOn _:ref_73676156e825ab19 ;
+    oc:stepId "evaluate-spec-alignment" .
+
+_:ref_73676156e825ab19 a oc:WorkflowStep ;
+    dcterms:description "Dispatch Task tool with the reviewer prompt, providing PLAN_FILE_PATH and SPEC_FILE_PATH" ;
+    oc:expectedOutcome "Reviewer subagent is running with correct file references" ;
+    oc:stepId "dispatch-reviewer" .
 

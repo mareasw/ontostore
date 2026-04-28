@@ -7,51 +7,118 @@
 oc:skill_vercel_labs_vercel_react_best_practices_rendering_content_visibility a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "rendering-content-visibility" ;
-    skos:broader "CSS rendering optimization technique" ;
+    skos:broader "CSS rendering optimization" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "64eee6d5b916fe74df33363994b27fc7f71bea3bcedc7ee04bda23107ca3e6e4" ;
-    oc:differentia "uses content-visibility: auto to defer off-screen rendering of long list items for faster initial paint" ;
+    oc:differentia "uses content-visibility: auto to skip layout/paint for off-screen items in long lists" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
-    oc:handlesFailure oc:InvalidInput ;
-    oc:hasArgumentHint "CSS class or component with long scrollable list" ;
+    oc:handlesFailure oc:InvalidCSSProperty ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_09fe74a8,
-        oc:kn_1c9b6ab2,
-        oc:kn_4aa1c770,
-        oc:kn_6e74494b ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 6 ;
+                    oc:textContent "For 1000 messages, browser skips layout/paint for ~990 off-screen items (10× faster initial render)." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Apply `content-visibility: auto` to defer off-screen rendering." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "**Example:**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**CSS:**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function MessageList({ messages }: { messages: Message[] }) {
+  return (
+    <div className="overflow-y-auto h-screen">
+      {messages.map(msg => (
+        <div key={msg.id} className="message-item">
+          <Avatar user={msg.author} />
+          <div>{msg.content}</div>
+        </div>
+      ))}
+    </div>
+  )
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 5 ;
+                    oc:sourceLocation "lines 23-36" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """.message-item {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 80px;
+}
+""" ;
+                    oc:codeLanguage "css" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-19" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "CSS content-visibility for Long Lists" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: CSS content-visibility for Long Lists
+impact: HIGH
+impactDescription: faster initial render
+tags: rendering, css, content-visibility, long-lists
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:impartsKnowledge oc:kn_05dbe007,
+        oc:kn_0fcdb577,
+        oc:kn_26d1b1f0,
+        oc:kn_a041f3ce,
+        oc:kn_d37cc2f3 ;
     oc:isUserInvocable true ;
-    oc:nature "Concept" ;
+    oc:nature "Technique" ;
     oc:requiresState oc:EnvironmentReady ;
     oc:resolvesIntent "defer off-screen content rendering",
-        "improve initial page load performance",
+        "improve initial render performance",
         "optimize rendering of long lists" ;
-    oc:yieldsState oc:ContentVisibilityApplied .
+    oc:yieldsState oc:RenderingOptimized .
 
-oc:kn_09fe74a8 a oc:Heuristic,
+oc:kn_05dbe007 a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When evaluating whether to apply content-visibility to a component" ;
-    oc:directiveContent "content-visibility is most impactful when off-screen items outnumber visible items by a large ratio (e.g., 990 out of 1000 items off-screen)." ;
-    oc:hasRationale "The performance gain is proportional to the number of skipped items; small lists with most items visible see negligible benefit." ;
+    oc:appliesToContext "When using content-visibility on any element" ;
+    oc:directiveContent "Always pair content-visibility: auto with contain-intrinsic-size to provide an estimated dimensions hint" ;
+    oc:hasRationale "Without contain-intrinsic-size, the browser has no size estimate and scrollbar behavior will be erratic as off-screen items are rendered" .
+
+oc:kn_0fcdb577 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When setting contain-intrinsic-size" ;
+    oc:directiveContent "contain-intrinsic-size value should approximate the actual rendered height of each item to avoid scrollbar jitter" ;
+    oc:hasRationale "Inaccurate size estimates cause visible layout shifts and poor scroll experience" ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_1c9b6ab2 a oc:KnowledgeNode,
+oc:kn_26d1b1f0 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When applying content-visibility to list items" ;
+    oc:codeLanguage "css" ;
+    oc:directiveContent """.message-item {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 80px;
+}""" ;
+    oc:hasRationale "content-visibility: auto defers rendering of off-screen elements; contain-intrinsic-size provides an estimated size to prevent layout shift during scroll" .
+
+oc:kn_a041f3ce a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When rendering long scrollable lists (message feeds, data tables, infinite scroll)" ;
+    oc:directiveContent "Apply content-visibility: auto to items in lists with 100+ elements for significant initial render speedups (~10× faster for 1000 items)" ;
+    oc:hasRationale "Browser skips layout/paint for off-screen items, reducing initial render workload dramatically" .
+
+oc:kn_d37cc2f3 a oc:KnowledgeNode,
         oc:PerformanceProfile ;
-    oc:appliesToContext "When measuring or estimating rendering performance improvements" ;
-    oc:directiveContent "For a list of 1000 messages, applying content-visibility: auto can yield approximately 10× faster initial render by skipping layout/paint on ~990 off-screen items." ;
-    oc:hasRationale "This provides a concrete benchmark for expecting ~10× improvement in initial render speed for long scrollable lists." ;
-    oc:severityLevel "LOW" .
-
-oc:kn_4aa1c770 a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When rendering scrollable lists with many items (e.g., 100+ messages, rows, cards)" ;
-    oc:directiveContent "Apply `content-visibility: auto` combined with `contain-intrinsic-size` to long list items to skip layout/paint for off-screen elements." ;
-    oc:hasRationale "The browser can skip layout, style, and paint for off-screen items, yielding up to 10× faster initial render for lists of 1000+ items." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_6e74494b a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When applying content-visibility to any scrollable container element" ;
-    oc:directiveContent "Always pair `content-visibility: auto` with `contain-intrinsic-size` to provide an estimated size for hidden elements." ;
-    oc:hasRationale "Without contain-intrinsic-size, the browser cannot estimate the scroll area, causing scrollbar jitter and incorrect scroll positions." ;
-    oc:severityLevel "CRITICAL" .
+    oc:appliesToContext "Long virtualized lists with uniform item heights" ;
+    oc:directiveContent "For 1000 messages, browser skips layout/paint for ~990 off-screen items, yielding approximately 10× faster initial render" ;
+    oc:hasRationale "Quantified impact helps decide when to apply this optimization" .
 

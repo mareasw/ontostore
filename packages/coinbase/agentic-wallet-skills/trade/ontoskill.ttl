@@ -7,95 +7,360 @@
 oc:skill_coinbase_agentic_wallet_skills_trade a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "trade" ;
-    skos:broader "Token swap command" ;
-    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/coinbase/agentic-wallet-skills/trade" ;
+    skos:broader "Token swap utility" ;
+    prov:wasDerivedFrom "../.agents/skills/coinbase/agentic-wallet-skills/trade" ;
     oc:contentHash "e4b3b168ab54d0ba12ce378eb64775ecc7a0ae8e5a8fae08b9ca697328a58d7d" ;
-    oc:dependsOnSkill oc:skill_authenticate_wallet ;
-    oc:differentia "executes atomic token trades on Base network via CDP Swap API using the awal CLI" ;
+    oc:dependsOnSkill oc:skill_ontoskills_authenticate_wallet ;
+    oc:differentia "executes token trades on Base network via CDP Swap API using the awal CLI" ;
     oc:handlesFailure oc:InsufficientBalance,
-        oc:InvalidInput,
-        oc:LiquidityUnavailable,
-        oc:NetworkTimeout ;
+        oc:InvalidToken,
+        oc:NoLiquidity,
+        oc:NotAuthenticated,
+        oc:SwapFailed ;
     oc:hasAllowedTool "Bash(npx awal@2.0.3 balance*)",
         "Bash(npx awal@2.0.3 status*)",
         "Bash(npx awal@2.0.3 trade *)" ;
-    oc:hasArgumentHint "amount from to [options] — e.g. '$1' usdc eth" ;
+    oc:hasArgumentHint "<amount> <from> <to> [options]" ;
     oc:hasCategory "finance" ;
     oc:hasDescription "Swap or trade tokens on Base network. Use when you or the user want to trade, swap, exchange, buy, sell, or convert between tokens like USDC, ETH, and WETH. Covers phrases like \"buy ETH\", \"sell ETH for USDC\", \"convert USDC to ETH\", \"get some ETH\"." ;
     oc:hasName "trade" ;
-    oc:impartsKnowledge oc:kn_03516e18,
-        oc:kn_46338747,
-        oc:kn_4d25ff2f,
-        oc:kn_72b3f302,
-        oc:kn_86d052c5,
-        oc:kn_aea3e36b,
-        oc:kn_ca2feef7,
-        oc:kn_d5543705 ;
+    oc:hasRequirement oc:req_a61e7e7b,
+        oc:req_c5c2561a,
+        oc:req_f1b4a555 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """name: trade
+description: Swap or trade tokens on Base network. Use when you or the user want to trade, swap, exchange, buy, sell, or convert between tokens like USDC, ETH, and WETH. Covers phrases like "buy ETH", "sell ETH for USDC", "convert USDC to ETH", "get some ETH".
+user-invocable: true
+disable-model-invocation: false
+allowed-tools: ["Bash(npx awal@2.0.3 status*)", "Bash(npx awal@2.0.3 trade *)", "Bash(npx awal@2.0.3 balance*)"]
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Use the `npx awal@2.0.3 trade` command to swap tokens on Base network via the CDP Swap API. You must be authenticated to trade." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """npx awal@2.0.3 trade <amount> <from> <to> [options]
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 23-25" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Command Syntax" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Before constructing the command, validate all user-provided values to prevent shell injection:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "Do not pass unvalidated user input into the command." ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "**amount**: Must match `^\\$?[\\d.]+$` (digits, optional decimal point, optional `$` prefix). Reject if it contains spaces, semicolons, pipes, backticks, or other shell metacharacters." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "**from / to**: Must be a known alias (`usdc`, `eth`, `weth`) or a valid `0x` hex address (`^0x[0-9a-fA-F]{40}$`). Reject any other value." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "**slippage**: Must be a positive integer (`^\\d+$`)." ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 7 ;
+                    oc:sectionTitle "Input Validation" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# Swap $1 USDC for ETH (dollar prefix — note the single quotes)
+npx awal@2.0.3 trade '$1' usdc eth
+
+# Swap 0.50 USDC for ETH (decimal format)
+npx awal@2.0.3 trade 0.50 usdc eth
+
+# Swap 500000 atomic units of USDC for ETH
+npx awal@2.0.3 trade 500000 usdc eth
+
+# Swap 0.01 ETH for USDC
+npx awal@2.0.3 trade 0.01 eth usdc
+
+# Swap with custom slippage (2%)
+npx awal@2.0.3 trade '$5' usdc eth --slippage 200
+
+# Swap using contract addresses (decimals read from chain)
+npx awal@2.0.3 trade 100 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913 0x4200000000000000000000000000000000000006
+
+# Get JSON output
+npx awal@2.0.3 trade '$1' usdc eth --json
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 80-101" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 8 ;
+                    oc:sectionTitle "Examples" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 1 ;
+                            oc:rowCount 3 ;
+                            oc:tableCaption "## Options" ;
+                            oc:tableMarkdown """| Option               | Description                                   |
+| -------------------- | --------------------------------------------- |
+| `-c, --chain <name>` | Blockchain network (default: base)            |
+| `-s, --slippage <n>` | Slippage tolerance in basis points (100 = 1%) |
+| `--json`             | Output result as JSON                         |
+""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Options" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 1 ;
+                            oc:rowCount 3 ;
+                            oc:tableCaption "## Token Aliases" ;
+                            oc:tableMarkdown """| Alias | Token | Decimals | Address                                    |
+| ----- | ----- | -------- | ------------------------------------------ |
+| usdc  | USDC  | 6        | 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913 |
+| eth   | ETH   | 18       | 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE |
+| weth  | WETH  | 18       | 0x4200000000000000000000000000000000000006 |
+""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**IMPORTANT**: Always single-quote amounts that use `$` to prevent bash variable expansion (e.g. `'$1.00'` not `$1.00`)." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Token Aliases" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """npx awal@2.0.3 status
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 15-17" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "If the wallet is not authenticated, refer to the `authenticate-wallet` skill." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Confirm wallet is initialized and authed" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 1 ;
+                            oc:rowCount 3 ;
+                            oc:tableCaption "## Arguments" ;
+                            oc:tableMarkdown """| Argument | Description                                                            |
+| -------- | ---------------------------------------------------------------------- |
+| `amount` | Amount to swap (see Amount Formats below)                              |
+| `from`   | Source token: alias (usdc, eth, weth) or contract address (0x...)      |
+| `to`     | Destination token: alias (usdc, eth, weth) or contract address (0x...) |
+""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Arguments" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Must be authenticated (`awal status` to check)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Wallet must have sufficient balance of the source token" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 9 ;
+                    oc:sectionTitle "Prerequisites" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "**Decimals**: For known tokens (usdc=6, eth=18, weth=18), decimals are automatic. For arbitrary contract addresses, decimals are read from the token contract." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "The amount can be specified in multiple formats:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Auto-detection**: Large integers without a decimal point are treated as atomic units. For example, `500000` for USDC (6 decimals) = $0.50." ],
+                        [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 2 ;
+                            oc:rowCount 4 ;
+                            oc:tableCaption "The amount can be specified in multiple formats" ;
+                            oc:tableMarkdown """| Format        | Example                | Description                            |
+| ------------- | ---------------------- | -------------------------------------- |
+| Dollar prefix | `'$1.00'`, `'$0.50'`  | USD notation (decimals based on token) |
+| Decimal       | `1.0`, `0.50`, `0.001` | Human-readable with decimal point      |
+| Whole number  | `5`, `100`             | Interpreted as whole tokens            |
+| Atomic units  | `500000`               | Large integers treated as atomic units |
+""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Amount Formats" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "\"Invalid token\" - Use a valid alias (usdc, eth, weth) or 0x address" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "\"Swap failed: TRANSFER_FROM_FAILED\" - Insufficient balance or approval issue" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "\"Cannot swap a token to itself\" - From and to must be different" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "\"Not authenticated\" - Run `awal auth login <email>` first" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 6 ;
+                                    oc:itemText "\"Amount has X decimals but token only supports Y\" - Too many decimal places" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "\"No liquidity\" - Try a smaller amount or different token pair" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Common errors:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 10 ;
+                    oc:sectionTitle "Error Handling" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Trading Tokens" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "Complete workflow for swapping tokens on Base network" ;
+            oc:hasStep _:ref_4d06a9b3a8872bf9,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Run `npx awal@2.0.3 trade <amount> <from> <to> [options]` with validated inputs" ;
+                    oc:expectedOutcome "Token swap completes successfully with transaction details returned" ;
+                    oc:stepDependsOn _:ref_4d06a9b3a8872bf9,
+                        _:ref_feb8c17548a7a3b6 ;
+                    oc:stepId "execute-trade" ],
+                _:ref_feb8c17548a7a3b6 ;
+            oc:workflowId "trade-tokens" ;
+            oc:workflowName "Execute Token Swap" ] ;
+    oc:impartsKnowledge oc:kn_01212bc5,
+        oc:kn_1b9da56c,
+        oc:kn_26b28553,
+        oc:kn_63d3867b,
+        oc:kn_7433c4e9,
+        oc:kn_7abc067d,
+        oc:kn_819f9d3f,
+        oc:kn_ff6db97b ;
     oc:isUserInvocable true ;
     oc:nature "Tool" ;
-    oc:requiresState oc:SystemAuthenticated,
-        oc:WalletFunded ;
-    oc:resolvesIntent "buy tokens with USDC",
-        "convert between tokens like ETH and USDC",
-        "exchange tokens on Base network",
-        "sell tokens for USDC",
+    oc:requiresState oc:SystemAuthenticated ;
+    oc:resolvesIntent "buy tokens",
+        "convert between tokens",
+        "exchange ETH for USDC",
+        "exchange USDC for ETH",
+        "sell tokens",
         "swap tokens on Base",
-        "trade one token for another" ;
+        "trade tokens" ;
     oc:yieldsState oc:TokenSwapCompleted .
 
-oc:kn_03516e18 a oc:KnowledgeNode,
-        oc:SuccessIndicator ;
-    oc:appliesToContext "After executing a trade command" ;
-    oc:directiveContent "A successful trade returns swap details including the amount received. Use --json flag for machine-readable output to programmatically confirm the trade completed." ;
-    oc:hasRationale "Confirming the actual received amount ensures the trade executed at an acceptable rate and completed fully." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_46338747 a oc:AntiPattern,
+oc:kn_01212bc5 a oc:Command,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When validating trade parameters before execution" ;
-    oc:directiveContent "Never attempt to swap a token to itself (e.g. usdc to usdc). The from and to tokens must always be different." ;
-    oc:hasRationale "Same-token swaps are rejected by the API and indicate a user error in specifying the trade." ;
+    oc:appliesToContext "When checking if wallet is authenticated before trading" ;
+    oc:directiveContent "npx awal@2.0.3 status" .
+
+oc:kn_1b9da56c a oc:KnowledgeNode,
+        oc:Prerequisite ;
+    oc:appliesToContext "Before executing any trade" ;
+    oc:directiveContent "Wallet must have sufficient balance of the source token before initiating a swap" ;
+    oc:hasRationale "Insufficient balance causes TRANSFER_FROM_FAILED errors" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_4d25ff2f a oc:KnowledgeNode,
-        oc:SecurityImplication ;
-    oc:appliesToContext "When constructing any trade command" ;
-    oc:directiveContent "Always single-quote amounts that use '$' to prevent bash variable expansion (e.g. '$1.00' not $1.00). Validate all user input against strict regex patterns before passing to the shell command." ;
-    oc:hasRationale "Unvalidated user input passed to shell commands enables injection attacks; unquoted $ signs get interpreted as bash variables causing incorrect amounts." ;
-    oc:severityLevel "CRITICAL" .
+oc:kn_26b28553 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When a trade command returns an error" ;
+    oc:directiveContent "Common failures: 'TRANSFER_FROM_FAILED' indicates insufficient balance or approval issues; 'No liquidity' means try smaller amount or different pair; 'Cannot swap a token to itself' means from and to must differ." ;
+    oc:hasRationale "Helps diagnose and recover from swap failures without user confusion" ;
+    oc:severityLevel "MEDIUM" .
 
-oc:kn_72b3f302 a oc:KnowledgeNode,
+oc:kn_63d3867b a oc:Command,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When executing a token swap on Base" ;
+    oc:directiveContent "npx awal@2.0.3 trade '<amount>' <from> <to> [--slippage <bps>] [--chain <name>] [--json]" .
+
+oc:kn_7433c4e9 a oc:KnowledgeNode,
         oc:PreFlightCheck ;
-    oc:appliesToContext "Before executing any trade command" ;
-    oc:directiveContent "Run 'npx awal@2.0.3 status' before trading to confirm wallet is authenticated and initialized. If not authenticated, refer to the authenticate-wallet skill first." ;
-    oc:hasRationale "Trading requires a valid authenticated wallet session; attempting to trade without authentication will fail." ;
+    oc:appliesToContext "Before executing any trade" ;
+    oc:directiveContent "Run `npx awal@2.0.3 status` before trading to confirm wallet is authenticated. If not authenticated, invoke the authenticate-wallet skill first." ;
+    oc:hasRationale "Trading requires authentication; attempting without it will fail" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_86d052c5 a oc:KnowledgeNode,
-        oc:SideEffect ;
-    oc:appliesToContext "Always — every trade execution" ;
-    oc:directiveContent "Executing a trade permanently transfers tokens from the wallet on Base network. The operation is irreversible once the swap is confirmed on-chain." ;
-    oc:hasRationale "On-chain transactions cannot be reversed; users must be certain before executing trades, especially large ones." ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_aea3e36b a oc:KnowledgeNode,
-        oc:RecoveryTactic ;
-    oc:appliesToContext "When trade command returns an error" ;
-    oc:directiveContent "If 'No liquidity' error occurs, try a smaller amount or a different token pair. If 'TRANSFER_FROM_FAILED' occurs, check wallet balance and token approval status." ;
-    oc:hasRationale "Liquidity constraints and approval issues are common DeFi failures with straightforward remediation paths." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_ca2feef7 a oc:Heuristic,
+oc:kn_7abc067d a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When specifying or interpreting trade amounts" ;
-    oc:directiveContent "For known tokens (usdc=6, eth=18, weth=18), decimal handling is automatic. Large integers without a decimal point are auto-detected as atomic units. For arbitrary contract addresses, decimals are read from the token contract on-chain." ;
-    oc:hasRationale "Incorrect decimal interpretation leads to trades that are orders of magnitude wrong — e.g. 500000 as 500,000 USDC instead of $0.50." ;
+    oc:appliesToContext "When using dollar-prefix amount format" ;
+    oc:directiveContent "Never use unquoted dollar-sign amounts. Always single-quote amounts with $ (e.g. '$1.00' not $1.00) to prevent bash variable expansion." ;
+    oc:hasRationale "Bash will interpret $1.00 as a variable and substitute an empty string, causing the trade to fail or use wrong amount" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_d5543705 a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "Before constructing any npx awal trade command" ;
-    oc:directiveContent "Amount must match ^\\$?[\\d.]+$, token identifiers must be a known alias (usdc, eth, weth) or a valid 0x hex address, and slippage must be a positive integer. Reject input containing shell metacharacters (spaces, semicolons, pipes, backticks)." ;
-    oc:hasRationale "Strict input validation prevents shell injection and ensures the swap API receives well-formed parameters." ;
+oc:kn_819f9d3f a oc:KnowledgeNode,
+        oc:SecurityImplication ;
+    oc:appliesToContext "Always before constructing any trade command" ;
+    oc:directiveContent "All user-provided values must be validated before constructing the trade command. Amount must match ^\\$?[\\d.]+$, from/to must be a known alias or 0x hex address, slippage must be a positive integer. Reject values containing shell metacharacters." ;
+    oc:hasRationale "Prevents shell injection attacks when passing user input to npx commands" ;
     oc:severityLevel "CRITICAL" .
+
+oc:kn_ff6db97b a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When specifying trade amounts" ;
+    oc:directiveContent "Known tokens have fixed decimals: USDC=6, ETH=18, WETH=18. For arbitrary contract addresses, decimals are read from the token contract automatically. Large integers without a decimal point are treated as atomic units." ;
+    oc:hasRationale "Incorrect decimal handling leads to orders of magnitude errors in trade amounts" ;
+    oc:severityLevel "HIGH" .
+
+oc:req_a61e7e7b a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "npx awal@2.0.3" .
+
+oc:req_c5c2561a a oc:RequirementAPI ;
+    oc:isOptional false ;
+    oc:requirementValue "CDP Swap API" .
+
+oc:req_f1b4a555 a oc:RequirementKnowledge ;
+    oc:isOptional true ;
+    oc:requirementValue "Base network token addresses and decimals" .
+
+_:ref_4d06a9b3a8872bf9 a oc:WorkflowStep ;
+    dcterms:description "Run `npx awal@2.0.3 status` to verify wallet is authenticated" ;
+    oc:expectedOutcome "Wallet shows as authenticated and initialized" ;
+    oc:stepId "check-auth" .
+
+_:ref_feb8c17548a7a3b6 a oc:WorkflowStep ;
+    dcterms:description "Validate user-provided amount, from/to tokens, and optional slippage against security rules" ;
+    oc:expectedOutcome "All inputs pass regex validation, no shell metacharacters present" ;
+    oc:stepId "validate-input" .
 

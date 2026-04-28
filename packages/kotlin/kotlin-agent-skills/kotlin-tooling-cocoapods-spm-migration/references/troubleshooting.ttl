@@ -7,131 +7,1584 @@
 oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_cocoapods_spm_migration_troubleshooting a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "troubleshooting" ;
-    skos:broader "Diagnostic reference" ;
+    skos:broader "Troubleshooting reference" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/kotlin/kotlin-agent-skills/kotlin-tooling-cocoapods-spm-migration" ;
     oc:contentHash "623103542d82a94f63810e8e99ed195b207b6320f9f1aef58e9c86a2882713eb" ;
-    oc:differentia "catalogs symptoms, root causes, and solutions for common failures during KMP CocoaPods-to-SwiftPM migration, including Gradle errors, linker issues, build phase problems, Firebase-specific edge cases, and rollback procedures" ;
+    oc:differentia "diagnoses and resolves CocoaPods-to-SwiftPM migration failures including Gradle, linker, build phase, Firebase, and third-party klib issues" ;
     oc:extends oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_cocoapods_spm_migration ;
-    oc:handlesFailure oc:DyldCrash,
-        oc:GradleSyncFailed,
-        oc:ImportNotFound,
-        oc:LinkerError,
-        oc:SandboxingError,
-        oc:XcodeBuildPhaseError ;
-    oc:hasArgumentHint "error symptom or error log excerpt" ;
     oc:hasCategory "development" ;
-    oc:hasRequirement oc:req_0c311b87,
-        oc:req_0c96571e,
-        oc:req_a95f9b0f ;
-    oc:impartsKnowledge oc:kn_3b52976e,
-        oc:kn_3f871977,
-        oc:kn_41ffee7e,
-        oc:kn_52afae3b,
-        oc:kn_7b9945c9,
-        oc:kn_8ce30144,
-        oc:kn_9e82bc51,
-        oc:kn_ad160ddf,
-        oc:kn_c56a7b28,
-        oc:kn_c8f5c735,
-        oc:kn_d57e3930 ;
-    oc:isUserInvocable true ;
-    oc:nature "Concept" ;
-    oc:requiresState oc:MigrationInProgress ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Common issues and solutions when migrating from CocoaPods to SwiftPM." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Symptom:** SPM can't resolve GoogleMaps package" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """swiftPackage(
+    url = url("https://github.com/googlemaps/ios-maps-sdk.git"),
+    version = exact("10.6.0"),  // Must use exact(), not from()
+    products = listOf(
+        product("GoogleMaps", platforms = setOf(iOS()))
+    ),
+)
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 3 ;
+                                    oc:sourceLocation "lines 450-458" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent "Check [releases page](https://github.com/googlemaps/ios-maps-sdk/releases) for valid versions." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Solution:** GoogleMaps requires exact version matching:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "GoogleMaps Version Not Found" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 8 ;
+                    oc:sectionTitle "Google Maps Issues" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Cause:** A third-party KMP library (e.g., [KMPNotifier](https://github.com/mirzemehdi/KMPNotifier) — `io.github.mirzemehdi:kmpnotifier`) bundles its own pre-built cinterop klib with the `cocoapods.FirebaseMessaging` namespace. The swiftPMDependencies cinterop generator detects these existing bindings and **deliberately skips** generating new bindings for that Clang module to avoid duplicate symbols. The `swiftPMImport.*` bindings for that module simply don't exist." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent "The `cocoapods` prefix here is just a package namespace embedded in the library's published artifact — no CocoaPods infrastructure is needed at runtime." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 9 ;
+                                    oc:textContent "You can also compare before/after migration by dumping the swiftPMImport klib:" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 7 ;
+                                    oc:textContent "**Inspecting klib contents:** Use `klib dump-metadata-signatures` to verify which classes a klib provides ([docs](https://kotlinlang.org/docs/native-libraries.html#using-kotlin-native-compiler)):" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """// These resolve to the third-party library's bundled klib, NOT actual CocoaPods
+import cocoapods.FirebaseMessaging.FIRMessaging
+import cocoapods.FirebaseMessaging.FIRMessagingAPNSTokenType
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 4 ;
+                                    oc:sourceLocation "lines 193-197" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# After build, find the swiftPMImport klib
+find . -name "*.klib" -path "*swiftPMImport*" | head -1
+
+# Verify which classes are available
+klib dump-metadata-signatures /path/to/swiftPMImport.klib | grep "FIRMessaging"
+# Empty output = class NOT in swiftPMImport (must use cocoapods.* import)
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 10 ;
+                                    oc:sourceLocation "lines 215-222" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Symptom:** After replacing `import cocoapods.FirebaseMessaging.FIRMessaging` with `import swiftPMImport.<group>.<module>.FIRMessaging`, the build fails with `Unresolved reference 'FIRMessaging'`. Other swiftPMImport classes (e.g., `GIDSignIn`) resolve fine." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Solution:** Revert the affected imports back to `cocoapods.*`:" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 6 ;
+                                    oc:textContent "**How to identify bundled klibs in advance:** Check if the project depends on KMP libraries that wrap iOS SDKs. Known libraries: [KMPNotifier](https://github.com/mirzemehdi/KMPNotifier) (bundles `cocoapods.FirebaseMessaging`). Also check for `linkOnly = true` pod declarations — this indicates the pod was only needed for linking while a KMP library provided the actual bindings." ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# Find the klib
+find ~/.gradle/caches -name "*.klib" -path "*kmpnotifier*" | head -1
+
+# Dump and search for the class in question
+klib dump-metadata-signatures /path/to/cinterop.klib | grep "FIRMessaging"
+# Output shows: cocoapods.FirebaseMessaging.FIRMessaging → confirms bundled klib
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 8 ;
+                                    oc:sourceLocation "lines 205-212" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "`cocoapods.*` Class Not Found After Converting to `swiftPMImport.*`" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Third-Party KMP Libraries with Bundled Klibs" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent _:ref_0b81a5be4d7bc5fa,
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Symptom:** Xcode can't find the Kotlin module" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Solution:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "\"No such module\" in Xcode" ],
+                        [ a oc:Section ;
+                            oc:hasContent _:ref_0996c0c676cf47bd,
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Symptom:** `Undefined symbols for architecture` errors" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Solutions:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Missing Symbols / Linker Errors" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Linker Issues" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "or similar errors for `FirebaseAuth`, `FirebaseFirestore`, etc. The Gradle compilation succeeds but the link step fails." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 10 ;
+                                    oc:textContent "Add matching entries in `project.pbxproj` for both Debug and Release `buildSettings`:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """FRAMEWORK_SEARCH_PATHS = (
+    "$(inherited)",
+    "$(BUILT_PRODUCTS_DIR)/FirebaseCore",
+    "$(BUILT_PRODUCTS_DIR)/FirebaseAuth",
+    "$(BUILT_PRODUCTS_DIR)/FirebaseCoreExtension",
+    // ... same list as Part A ...
+);
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 11 ;
+                                    oc:sourceLocation "lines 263-271" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """iosTarget.binaries.framework {
+    val builtProductsDir = System.getenv("BUILT_PRODUCTS_DIR")
+    if (builtProductsDir != null) {
+        listOf(
+            "FirebaseCore", "FirebaseAuth", "FirebaseCoreExtension",
+            "FirebaseCoreInternal", "FirebaseCrashlytics", "FirebaseFirestore",
+            "FirebaseFirestoreInternal", "FirebaseInstallations", "FirebaseMessaging",
+            "FirebaseStorage", "GoogleDataTransport", "GoogleUtilities",
+            "GTMSessionFetcher", "AppCheckCore", "AppAuth", "GTMAppAuth",
+        ).forEach { product ->
+            linkerOpts("-F", "$builtProductsDir/$product")
+        }
+    }
+}
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 7 ;
+                                    oc:sourceLocation "lines 241-256" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 8 ;
+                                    oc:textContent "The `if (builtProductsDir != null)` guard ensures `./gradlew :moduleName:compileKotlinIosSimulatorArm64` works without Xcode (compilation doesn't link)." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Symptom:** Kotlin/Native linker fails with:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """ld: framework 'FirebaseCore' not found
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 231-233" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent "**Cause:** [firebase-kotlin-sdk](https://github.com/GitLiveApp/firebase-kotlin-sdk) (`dev.gitlive:firebase-*`) was published with CocoaPods-era cinterop klibs. These klibs have `-framework FirebaseCore`, `-framework FirebaseAuth`, etc. baked into their linker metadata. With CocoaPods, those frameworks were in `Pods/` on the search path. With SPM, they land in per-product subdirectories (`$BUILT_PRODUCTS_DIR/FirebaseCore/FirebaseCore.framework`) that the K/N linker doesn't search." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 9 ;
+                                    oc:textContent "**Part B — Xcode FRAMEWORK_SEARCH_PATHS:**" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent "**Solution (two-part):**" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 6 ;
+                                    oc:textContent "**Part A — Gradle linkerOpts:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "`framework 'FirebaseCore' not found` (K/N Linker)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Symptom:** The Gradle build and Xcode compilation both succeed, but the app crashes at launch with:" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 6 ;
+                                    oc:textContent "With a static framework, all symbols are embedded in the `.a` archive. No `LC_LOAD_DYLIB` entries are created. Unresolved `-framework` flags from dev.gitlive klibs are deferred to the final Xcode app link, where `_internal_linkage_SwiftPMImport` provides them." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 7 ;
+                                    oc:textContent "**After switching to static, also:**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """dyld: Library not loaded: @rpath/FirebaseCore.framework/FirebaseCore
+  Referenced from: .../ComposeApp.framework/ComposeApp
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 278-281" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """iosTarget.binaries.framework {
+    baseName = "Shared"
+    isStatic = true  // Required when using dev.gitlive:firebase-* with SPM
+}
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 5 ;
+                                    oc:sourceLocation "lines 287-292" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Cause:** The KMP framework is **dynamic** (`isStatic = false` or default). The K/N linker creates `LC_LOAD_DYLIB` entries (`@rpath/FirebaseCore.framework/FirebaseCore`). Firebase SPM products are **static** libraries — their `.framework` bundles exist in `$BUILT_PRODUCTS_DIR` during build but are NOT embedded in the app bundle. At runtime, `dyld` searches `@rpath` and finds nothing." ],
+                                _:ref_eb8ffbe82ebf30fc,
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent "**Solution:** Switch to a static framework:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "`dyld: Library not loaded: @rpath/FirebaseCore.framework/FirebaseCore` (Runtime Crash)" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "dev.gitlive/firebase-kotlin-sdk Issues" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """// If group = "org.jetbrains.kotlin.firebase-sample" and module = "kotlin-library"
+// Import becomes:
+import swiftPMImport.org.jetbrains.kotlin.firebase.sample.kotlin.library.FIRAnalytics
+//                    ^                          ^      ^
+//                    dashes become dots --------+------+
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 7 ;
+                                    oc:sourceLocation "lines 43-49" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Symptom:** `Unresolved reference` errors for classes that worked with CocoaPods" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """swiftPMImport.<group>.<module>.<ClassName>
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 3 ;
+                                    oc:sourceLocation "lines 33-35" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent "**Steps to fix:**" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Solution:** The import namespace follows a specific pattern:" ],
+                                _:ref_ebb4e1f3c27fcd28,
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 6 ;
+                                    oc:textContent "**Example:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Import Not Found After Migration" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Symptom:** Unresolved reference to `swiftPMDependencies` in build.gradle.kts" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 5 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Kotlin version matches the version recorded in Phase 1.0a in libs.versions.toml" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Custom Maven repo (if needed) is in settings.gradle.kts" ] ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """buildscript {
+    dependencies.constraints {
+        "classpath"("org.jetbrains.kotlin:kotlin-gradle-plugin:<kotlin-version>!!")
+    }
+}
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 3 ;
+                                    oc:sourceLocation "lines 13-19" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent "Also verify:" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Solution:** Add buildscript constraint to root build.gradle.kts:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "\"swiftPMDependencies not found\"" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Symptom:** IDE fails to sync project after adding swiftPMDependencies" ],
+                                _:ref_0f25659f7139460a,
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Solution:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Gradle Sync Fails" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Gradle Issues" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "If `pod deintegrate` is not available, manually remove these CocoaPods references from `project.pbxproj`:" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "`[CP] Check Pods Manifest.lock` shell script build phase" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 6 ;
+                                    oc:itemText "`baseConfigurationReference` lines pointing to Pods xcconfig files" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "`Pods_<target>.framework` build file and file reference" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "`Pods` group and `Frameworks` group (if it only contained the Pods framework)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "`[CP] Embed Pods Frameworks` shell script build phase" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "`Pods-<target>.debug.xcconfig` / `Pods-<target>.release.xcconfig` file references" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 11 ;
+                    oc:sectionTitle "Manual CocoaPods Deintegration from pbxproj" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent _:ref_0a986f78286bef1e,
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent "**Cause:** Xcode 16+ enables User Script Sandboxing by default. The Gradle build phase needs to write to the project directory, which sandboxing prevents." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Symptom:** Gradle task `checkSandboxAndWriteProtection` fails during Xcode build:" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "Or build scripts can't access files or run Gradle." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent "**Solution:**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """Execution failed for task ':moduleName:checkSandboxAndWriteProtection'.
+> User Script Sandboxing Enabled in Xcode Project
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 119-122" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Script Sandboxing Errors" ],
+                        [ a oc:Section ;
+                            oc:hasContent _:ref_8e57b9a5267740a2,
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Symptom:** Swift compilation fails because Kotlin framework isn't ready" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Solution:** Ensure \"Compile Kotlin\" runs BEFORE \"Compile Sources\":" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Build Phase Order Problems" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Build Phase Issues" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**Do NOT revert the migration as a first response.** Instead:" ],
+                        _:ref_2bd98a69b7c002ea ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 13 ;
+                    oc:sectionTitle "When Build Fails After Migration" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent "This was a CocoaPods-era workaround that inadvertently disables `integrateEmbedAndSign`." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Symptom:** Running `integrateEmbedAndSign` completes without errors but the Xcode project is not modified. The `embedAndSignAppleFrameworkForXcode` build phase is not added or remains commented out." ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """// In root or module build.gradle.kts
+project.gradle.taskGraph.whenReady {
+    allTasks.filter { it::class.simpleName?.contains("EmbedAndSign") == true }.forEach {
+        it.enabled = false
+    }
+}
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 3 ;
+                                    oc:sourceLocation "lines 153-160" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent "**Solution:** Remove the disabler code from `build.gradle.kts`, then re-run the integration command." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Cause:** The project has code that disables `EmbedAndSign` tasks. Common patterns:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "`integrateEmbedAndSign` Skipped or Does Nothing" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """-#./gradlew :moduleName:embedAndSignAppleFrameworkForXcode
++./gradlew :moduleName:embedAndSignAppleFrameworkForXcode
+""" ;
+                                    oc:codeLanguage "diff" ;
+                                    oc:contentOrder 4 ;
+                                    oc:sourceLocation "lines 176-179" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Symptom:** Xcode build succeeds but produces no Kotlin framework. The app crashes at runtime with missing module errors." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Cause:** The Gradle invocation in the Xcode build phase script was commented out (prefixed with `#`) — possibly a pre-existing state from before migration." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Solution:** Open `project.pbxproj` and uncomment the Gradle invocation:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "`embedAndSignAppleFrameworkForXcode` Commented Out in Build Phase" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Integration Task Issues" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Symptom:** `FirebaseInAppMessaging` or `FirebaseAppDistribution` not found as SPM product" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 4 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "`FirebaseAppDistribution` → `FirebaseAppDistribution-Beta`" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "`FirebaseInAppMessaging` → `FirebaseInAppMessaging-Beta`" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Cause:** Beta products have a `-Beta` suffix in SPM." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Solution:** Use the correct SPM product name:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 5 ;
+                            oc:sectionTitle "Firebase Beta Products: SPM Name Differs" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 4 ;
+                                    oc:rowCount 4 ;
+                                    oc:tableCaption "**Solution:** Use the correct internal Clang module names" ;
+                                    oc:tableMarkdown """| SPM Product | Correct importedClangModules entry |
+|---|---|
+| FirebaseDatabase | `FirebaseDatabaseInternal` |
+| FirebaseFirestore | `FirebaseFirestoreInternal` |
+| FirebaseInAppMessaging-Beta | `FirebaseInAppMessagingInternal` |
+| FirebaseRemoteConfig | `FirebaseRemoteConfigInternal` |
+""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Solution:** Use the correct internal Clang module names:" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Symptom:** `Unresolved reference` for Firebase classes like `FIRDatabase`, `FIRRemoteConfig`, `FIRFirestore`, `FIRInAppMessaging` even though the product is listed." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Cause:** Several Firebase products expose ObjC headers through Clang modules whose names differ from the SPM product name. Using the product name in `importedClangModules` won't find the headers." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Firebase Classes Not Found (Wrong Clang Module Name)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent "See [common-pods-mapping.md](common-pods-mapping.md) for the full importedClangModules reference." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Solution:** Set `discoverModulesImplicitly = false` and explicitly list only the Firebase Clang modules you need:" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Symptom:** Build fails with cinterop errors on modules like `grpc`, `absl`, `leveldb`, `openssl_grpc`, or other C++ transitive dependencies of Firebase." ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """swiftPMDependencies {
+    discoverModulesImplicitly = false
+
+    swiftPackage(
+        url = url("https://github.com/firebase/firebase-ios-sdk.git"),
+        version = from("12.6.0"),
+        products = listOf(product("FirebaseAnalytics"), /* ... */),
+        importedClangModules = listOf("FirebaseAnalytics", "FirebaseCore", /* ... */),
+    )
+}
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 4 ;
+                                    oc:sourceLocation "lines 313-324" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Cause:** `discoverModulesImplicitly = true` (the default) makes Kotlin attempt cinterop on every Clang module in the dependency graph, including C++ modules that are not compatible." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "cinterop Failures on C++ Modules (gRPC, abseil, leveldb, BoringSSL)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Cause:** Firestore's Clang module name differs from product name. The internal Clang module exposed to Objective-C is `FirebaseFirestoreInternal`, not `FirebaseFirestore`." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Solution:** Add explicit importedClangModules:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """swiftPackage(
+    url = url("https://github.com/firebase/firebase-ios-sdk.git"),
+    version = from("12.6.0"),
+    products = listOf(product("FirebaseFirestore")),
+    importedClangModules = listOf("FirebaseFirestoreInternal"),  // Required
+)
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 4 ;
+                                    oc:sourceLocation "lines 355-362" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Symptom:** Can't import FIRFirestore classes" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "FirebaseFirestore Import Errors" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "or similar `_OBJC_CLASS_$_FIR*` symbol-not-found errors. The Gradle build and Xcode compilation both succeed, but the app crashes at runtime." ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """products = listOf(
+    // ObjC pods used by Kotlin:
+    product("FirebaseAnalytics"),
+    product("FirebaseAuth"),
+    // ...
+    // Swift-only pods (no importedClangModules needed):
+    product("FirebaseAI"),
+    product("FirebaseFunctions"),
+),
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 6 ;
+                                    oc:sourceLocation "lines 415-425" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent "**Cause:** Some Firebase pods were migrated to SPM while others remained in CocoaPods. All Firebase products share transitive dependencies (gRPC, abseil, leveldb, BoringSSL, nanopb). Having both package managers link these transitive dependencies causes duplicate/conflicting symbols that the dynamic linker cannot resolve." ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """Symbol not found: _OBJC_CLASS_$_FIRFirestore
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 406-408" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent "**Solution:** Migrate **all** Firebase pods to SPM at once. This includes Swift-only pods (FirebaseAI, FirebaseFunctions, FirebaseMLModelDownloader) that Kotlin cannot use directly — add them as `products` entries without `importedClangModules`:" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 7 ;
+                                    oc:textContent "After adding new products, re-run `integrateLinkagePackage` to regenerate the linkage Swift package." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Symptom:** App crashes at launch with a dyld error like:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 6 ;
+                            oc:sectionTitle "dyld Crash When Mixing Firebase Across CocoaPods and SPM" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent "With input files:" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Symptom:** Crash reports don't appear in Firebase Console after migrating to SPM. Or the build phase fails with \"No such file\" errors referencing `${PODS_ROOT}/FirebaseCrashlytics/upload-symbols`." ],
+                                [ a oc:Template ;
+                                    oc:blockType "template" ;
+                                    oc:contentOrder 6 ;
+                                    oc:templateContent """${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}
+${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${PRODUCT_NAME}
+${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Info.plist
+$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/GoogleService-Info.plist
+$(TARGET_BUILD_DIR)/$(EXECUTABLE_PATH)
+""" ;
+                                    oc:templateVariables "DWARF_DSYM_FILE_NAME",
+                                        "DWARF_DSYM_FOLDER_PATH",
+                                        "PRODUCT_NAME" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Cause:** The CocoaPods-era dSYM upload script references `${PODS_ROOT}` which no longer exists. The SPM equivalent is at a different path." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Solution:** Update the existing \"Run Script\" build phase (or add one at the END if none exists):" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run"
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 4 ;
+                                    oc:sourceLocation "lines 374-376" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 7 ;
+                                    oc:textContent "Also set **Debug Information Format** to `DWARF with dSYM File` for all build configurations in Build Settings." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "Firebase Crashlytics: dSYM Upload Script Broken After Migration" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "**Symptom:** App crashes on Firebase initialization" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Solution:**" ],
+                                _:ref_fdffd7ff270a2b4b ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 7 ;
+                            oc:sectionTitle "Firebase Initialization Fails at Runtime" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 7 ;
+                    oc:sectionTitle "Firebase-Specific Issues" ],
+                [ a oc:Section ;
+                    oc:hasContent _:ref_bc585759d6485d68,
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "If the automatic `integrateEmbedAndSign` / `integrateLinkagePackage` tasks fail, set up the Xcode project manually:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 12 ;
+                    oc:sectionTitle "Manual Xcode Integration Steps" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "If issues persist:" ],
+                        _:ref_896f5aa9a5a3bff8 ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 15 ;
+                    oc:sectionTitle "Getting Help" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "If KSP does fail (unlikely), the issue is unrelated to the CocoaPods-to-SwiftPM migration itself. Present the error to the user and let them decide how to handle it separately." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "KSP should generally work with the target Kotlin version without any changes. Do NOT update KSP as part of the migration — it is out of scope." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "KSP after updating Kotlin version" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 9 ;
+                    oc:sectionTitle "KSP (Kotlin Symbol Processing) Compatibility" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Only revert if analysis above does not resolve the issue:" ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Change all imports back:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """// FROM:
+import swiftPMImport.group.module.ClassName
+
+// TO:
+import cocoapods.PodName.ClassName
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 576-582" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Step 3: Restore Kotlin Imports" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# Restore CocoaPods files (adjust path if iOS project is not in iosApp/)
+git checkout -- "**/Podfile" "**/Podfile.lock"
+git checkout -- *.podspec
+git checkout -- **/build.gradle.kts
+git checkout -- **/src/**/*.kt
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 550-556" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Step 1: Restore Git Files" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Open `*.xcworkspace` (not .xcodeproj) from the iOS project directory in Xcode." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 5 ;
+                            oc:sectionTitle "Step 5: Open Workspace" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# Navigate to directory containing Podfile (adjust path as needed)
+cd <ios-project-directory>  # e.g., iosApp/, ios/, or project root
+pod install
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 586-590" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "Step 4: Reinstall CocoaPods" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """plugins {
+    kotlin("native.cocoapods")  // Re-add
+}
+
+kotlin {
+    cocoapods {
+        // Restore original configuration
+    }
+    // Remove swiftPMDependencies block
+}
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 560-571" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Step 2: Restore CocoaPods in build.gradle.kts" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 14 ;
+                    oc:sectionTitle "Rollback Instructions (Last Resort)" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "If the xcodebuild approach in Phase 5.1 fails, discover paths manually and run integration tasks directly:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# Find iOS project directory (contains Podfile)
+IOS_DIR=$(dirname "$(find . -name "Podfile" -type f | head -1)")
+
+# Find .xcodeproj (exclude Pods.xcodeproj) - use realpath for absolute path
+XCODEPROJ=$(realpath "$(find "$IOS_DIR" -maxdepth 1 -name "*.xcodeproj" -type d | grep -v Pods | head -1)")
+
+# Find KMP module with swiftPMDependencies (module directory name)
+KMP_MODULE=$(grep -rl "swiftPMDependencies" --include="build.gradle.kts" . | head -1 | xargs dirname | xargs basename)
+
+XCODEPROJ_PATH="$XCODEPROJ" \\
+GRADLE_PROJECT_PATH=":$KMP_MODULE" \\
+./gradlew ":$KMP_MODULE:integrateEmbedAndSign" ":$KMP_MODULE:integrateLinkagePackage"
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 478-491" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 10 ;
+                    oc:sectionTitle "Manual Integration Command Discovery" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Troubleshooting Guide" ] ;
+    oc:hasWorkflow _:ref_0996c0c676cf47bd,
+        _:ref_0a986f78286bef1e,
+        _:ref_0b81a5be4d7bc5fa,
+        _:ref_0f25659f7139460a,
+        _:ref_2bd98a69b7c002ea,
+        [ a oc:Workflow ;
+            dcterms:description "Systematic approach to diagnosing and fixing build failures after CocoaPods-to-SwiftPM migration" ;
+            oc:hasStep [ a oc:WorkflowStep ;
+                    dcterms:description "If fix resolves the error, rebuild. If unsure, present options to the user with diagnosis details. Only revert as absolute last resort." ;
+                    oc:expectedOutcome "Build succeeds or user makes informed decision" ;
+                    oc:stepDependsOn _:ref_7b31e4aa703d3c7b ;
+                    oc:stepId "iterate-or-escalate" ],
+                _:ref_20f1c2b2b194a191,
+                _:ref_534468e6d518761a,
+                _:ref_7b31e4aa703d3c7b ;
+            oc:workflowId "diagnose-build-failure" ;
+            oc:workflowName "Diagnose Migration Build Failure" ],
+        [ a oc:Workflow ;
+            dcterms:description "Fallback manual setup when automatic integrateEmbedAndSign/integrateLinkagePackage tasks fail" ;
+            oc:hasStep _:ref_34cbac641659147c,
+                _:ref_cc00f4c36a9e8545,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Add local package dependency: ../moduleName/_internal_linkage_SwiftPMImport" ;
+                    oc:expectedOutcome "Linkage Swift package added to Xcode project" ;
+                    oc:stepDependsOn _:ref_cc00f4c36a9e8545 ;
+                    oc:stepId "add-linkage-package" ],
+                _:ref_df2f0e783eb43d11 ;
+            oc:workflowId "manual-xcode-integration" ;
+            oc:workflowName "Manual Xcode Integration" ],
+        _:ref_896f5aa9a5a3bff8,
+        _:ref_8e57b9a5267740a2,
+        _:ref_bc585759d6485d68,
+        _:ref_eb8ffbe82ebf30fc,
+        _:ref_ebb4e1f3c27fcd28,
+        _:ref_fdffd7ff270a2b4b ;
+    oc:impartsKnowledge oc:kn_02685a5e,
+        oc:kn_0e5a5e6b,
+        oc:kn_0f63dacd,
+        oc:kn_13fcb9a9,
+        oc:kn_285fa89f,
+        oc:kn_2bb2b0a2,
+        oc:kn_2c3930e3,
+        oc:kn_87b2cbe2,
+        oc:kn_a8e62da3,
+        oc:kn_b34ee62d,
+        oc:kn_b86b97ff,
+        oc:kn_b990303b,
+        oc:kn_c120646a,
+        oc:kn_d1979533,
+        oc:kn_dd0aa463,
+        oc:kn_efbcf14f ;
+    oc:isUserInvocable false ;
+    oc:nature "Tool" ;
     oc:resolvesIntent "diagnose migration build failure",
-        "fix linker errors after CocoaPods to SwiftPM migration",
-        "perform rollback from failed SwiftPM migration",
-        "resolve Firebase-specific SPM migration issues",
-        "resolve import not found errors after migration",
-        "troubleshoot Xcode build phase problems in migrated KMP project" ;
-    oc:yieldsState oc:BuildErrorDiagnosed,
-        oc:MigrationRecovered .
+        "fix Xcode build phase issues",
+        "fix unresolved reference after migration",
+        "handle Firebase-specific migration issues",
+        "resolve linker errors in SPM migration",
+        "revert failed migration" .
 
-oc:kn_3b52976e a oc:KnowledgeNode,
-        oc:RollbackProcedure ;
-    oc:appliesToContext "When all troubleshooting approaches have been exhausted and the migration cannot be completed" ;
-    oc:directiveContent "Rollback is a last resort only after exhausting all diagnostic approaches. Steps: (1) git checkout all modified files, (2) restore cocoapods plugin and block in build.gradle.kts, (3) revert all imports from swiftPMImport.* back to cocoapods.*, (4) run pod install, (5) open .xcworkspace in Xcode." ;
-    oc:hasRationale "Rollback restores the project to a known-working CocoaPods state, but should be avoided because it discards all migration progress" ;
+oc:kn_02685a5e a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When dev.gitlive:firebase-* causes 'framework not found' linker errors — add Gradle linkerOpts for Firebase SPM framework search paths" ;
+    oc:codeLanguage "kotlin" ;
+    oc:directiveContent """iosTarget.binaries.framework {
+    val builtProductsDir = System.getenv("BUILT_PRODUCTS_DIR")
+    if (builtProductsDir != null) {
+        listOf("FirebaseCore", "FirebaseAuth", "FirebaseCoreExtension",
+            "FirebaseCoreInternal", "FirebaseCrashlytics", "FirebaseFirestore",
+            "FirebaseFirestoreInternal", "FirebaseInstallations", "FirebaseMessaging",
+            "FirebaseStorage", "GoogleDataTransport", "GoogleUtilities",
+            "GTMSessionFetcher", "AppCheckCore", "AppAuth", "GTMAppAuth",
+        ).forEach { product ->
+            linkerOpts("-F", "$builtProductsDir/$product")
+        }
+    }
+}""" .
+
+oc:kn_0e5a5e6b a oc:Command,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When checkSandboxAndWriteProtection fails — disable sandboxing via CLI" ;
+    oc:directiveContent "sed -i '' 's/ENABLE_USER_SCRIPT_SANDBOXING = YES/ENABLE_USER_SCRIPT_SANDBOXING = NO/g' /path/to/iosApp/*.xcodeproj/project.pbxproj" .
+
+oc:kn_0f63dacd a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When migrating Firebase dependencies" ;
+    oc:directiveContent "All Firebase products must be migrated to SPM at once — do not split Firebase across CocoaPods and SPM. Shared transitive dependencies (gRPC, abseil, leveldb, BoringSSL) cause duplicate/conflicting symbols when both package managers link them." ;
+    oc:hasRationale "All Firebase products share transitive dependencies that conflict when linked by both package managers, causing dyld symbol-not-found crashes." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_3f871977 a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "When modifying ENABLE_USER_SCRIPT_SANDBOXING in the Xcode project" ;
-    oc:directiveContent "After disabling User Script Sandboxing in Xcode (required for Gradle build phases), always run ./gradlew --stop to restart the Gradle daemon. The daemon caches environment state that may be stale after the pbxproj change." ;
-    oc:hasRationale "The Gradle daemon may retain cached state from before the sandboxing change, causing checkSandboxAndWriteProtection failures" ;
+oc:kn_13fcb9a9 a oc:KnowledgeNode,
+        oc:Prerequisite ;
+    oc:directiveContent "klib tool must be available (part of Kotlin/Native compiler distribution) for inspecting klib contents" .
+
+oc:kn_285fa89f a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When troubleshooting Unresolved reference errors for migrated imports" ;
+    oc:directiveContent "The swiftPMImport namespace follows the pattern: swiftPMImport.<group>.<module>.<ClassName>, where dashes in both group and module names become dots. Run ./gradlew build to see available classes in error messages if unsure of the exact path." ;
+    oc:hasRationale "Correct import construction requires understanding the dash-to-dot transformation rule." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_41ffee7e a oc:KnowledgeNode,
-        oc:RecoveryTactic ;
-    oc:appliesToContext "When diagnosing unresolved reference errors and verifying whether classes exist in generated vs. bundled klibs" ;
-    oc:directiveContent "Use klib dump-metadata-signatures to inspect klib contents and verify which classes are available in swiftPMImport vs. bundled in third-party dependency klibs. Empty output for a class means it's not in that klib." ;
-    oc:hasRationale "The klib dump tool provides definitive evidence of which namespaces and classes a compiled klib exposes, resolving ambiguity about import paths" ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_52afae3b a oc:KnowledgeNode,
-        oc:RecoveryTactic ;
-    oc:appliesToContext "When integrateEmbedAndSign appears to succeed but the Xcode project is unchanged" ;
-    oc:directiveContent "If integrateEmbedAndSign completes without modifying the Xcode project, search build.gradle.kts for EmbedAndSign disabler code (taskGraph.whenReady filters, tasks.matching blocks) and remove it before re-running." ;
-    oc:hasRationale "CocoaPods-era workarounds that disabled EmbedAndSign tasks to avoid conflicts inadvertently disable the SwiftPM integration tasks too" ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_7b9945c9 a oc:Constraint,
+oc:kn_2bb2b0a2 a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When deciding which Firebase pods to migrate in Phase 3" ;
-    oc:directiveContent "All Firebase products must be migrated to SPM at once — never split Firebase dependencies across CocoaPods and SPM. Shared transitive dependencies (gRPC, abseil, leveldb, BoringSSL) cause duplicate/conflicting symbols and dyld crashes when linked by both package managers." ;
-    oc:hasRationale "Firebase products share transitive C++ dependencies; mixing package managers for the same suite causes Symbol not found and _OBJC_CLASS_$ errors at runtime" ;
+    oc:appliesToContext "When using dev.gitlive:firebase-kotlin-sdk with SPM" ;
+    oc:directiveContent "dev.gitlive:firebase-* requires isStatic = true for the KMP framework when using SwiftPM. Dynamic frameworks cause dyld runtime crashes because Firebase SPM products are static libraries whose .framework bundles are not embedded in the app." ;
+    oc:hasRationale "Dynamic frameworks create LC_LOAD_DYLIB entries that dyld cannot resolve at runtime for static SPM products." ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_8ce30144 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When configuring importedClangModules for Firebase Swift packages" ;
-    oc:directiveContent "Several Firebase products have SPM product names that differ from their internal Clang module names (e.g., FirebaseDatabase → FirebaseDatabaseInternal, FirebaseFirestore → FirebaseFirestoreInternal). Use the internal module names in importedClangModules." ;
-    oc:hasRationale "Firebase exposes ObjC headers through Clang modules with 'Internal' suffixes that differ from the public SPM product names; using product names causes Unresolved Reference errors" ;
-    oc:severityLevel "HIGH" .
+oc:kn_2c3930e3 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When build fails after migration" ;
+    oc:directiveContent "1. Read full error log and identify failure type (Gradle resolution / import not found / linker / Xcode build phase) 2. Re-check Phases 2-6 for common mistakes (missing repo, wrong import namespace, incomplete CocoaPods removal, wrong xcodeproj, missing isStatic, unrun integrateLinkagePackage, EmbedAndSign disabler, commented build phase, incorrectly replaced bundled klib imports) 3. Consult specific troubleshooting section for the error pattern 4. If unsure, present options to user" ;
+    oc:stepOrder 1 .
 
-oc:kn_9e82bc51 a oc:KnowledgeNode,
-        oc:SideEffect ;
-    oc:appliesToContext "When changing isStatic from false to true in framework configuration" ;
-    oc:directiveContent "Switching from dynamic to static framework (isStatic = true) requires three follow-up actions: (1) re-run integrateLinkagePackage to regenerate Package.swift with type: .none, (2) remove any 'Embed Frameworks' copy phase for the KMP framework, (3) add linker flags (e.g., -framework Accelerate, -weak_framework CoreML) to OTHER_LDFLAGS in the Xcode project." ;
-    oc:hasRationale "Static frameworks are archived into .a files and must not be embedded as dynamic frameworks; the K/N linker no longer resolves system framework flags that the dynamic linker previously handled" ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_ad160ddf a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When configuring framework binaries for projects using dev.gitlive:firebase-kotlin-sdk or similar CocoaPods-era wrapper klibs" ;
-    oc:directiveContent "When using dev.gitlive:firebase-* with SPM, isStatic = true is mandatory. Dynamic frameworks cause dyld runtime crashes because Firebase SPM products are static libraries not embedded in the app bundle." ;
-    oc:hasRationale "The K/N linker creates LC_LOAD_DYLIB entries for dynamic frameworks, but Firebase SPM static frameworks are not in the runtime @rpath, causing dyld: Library not loaded crashes at app launch" ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_c56a7b28 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When any build failure occurs after migrating from CocoaPods to SwiftPM" ;
-    oc:directiveContent "Do NOT revert the migration as a first response to build failures. Instead, read the full error log, identify the failure type, re-check migration phases, and apply targeted fixes." ;
-    oc:hasRationale "Premature rollback wastes the completed migration work; most failures are caused by missed steps or misconfigurations that have targeted fixes" ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_c8f5c735 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When cinterop errors mention grpc, absl, leveldb, openssl_grpc, or other C++ modules from Firebase's dependency graph" ;
-    oc:directiveContent "For Firebase cinterop failures on C++ modules (gRPC, abseil, leveldb, BoringSSL), set discoverModulesImplicitly = false and explicitly list only needed Clang modules to prevent Kotlin from attempting cinterop on incompatible C++ transitive dependencies." ;
-    oc:hasRationale "The default discoverModulesImplicitly = true attempts cinterop on every Clang module including C++ ones that are incompatible, causing build failures" ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_d57e3930 a oc:KnowledgeNode,
+oc:kn_87b2cbe2 a oc:KnowledgeNode,
         oc:KnownIssue ;
-    oc:appliesToContext "When transforming import statements in Phase 4 and when diagnosing 'Unresolved reference' errors after migration" ;
-    oc:directiveContent "Some third-party KMP libraries (e.g., KMPNotifier) bundle pre-built cinterop klibs with cocoapods.* namespaces. The swiftPMDependencies generator skips these to avoid duplicates, so cocoapods.* imports for those classes must be preserved, not converted to swiftPMImport.*" ;
-    oc:hasRationale "Converting bundled-klib imports to swiftPMImport.* causes Unresolved Reference errors because those bindings are deliberately not generated by the cinterop generator" ;
+    oc:appliesToContext "When integrateEmbedAndSign completes but Xcode project is not modified" ;
+    oc:directiveContent "CocoaPods-era code that disables EmbedAndSign tasks (e.g., taskGraph.whenReady filters) inadvertently disables integrateEmbedAndSign. This code must be removed before running integration tasks. Also check if embedAndSignAppleFrameworkForXcode is commented out (prefixed with #) in project.pbxproj." ;
+    oc:hasRationale "The disabler code was a CocoaPods workaround that breaks the new SPM integration tasks." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_a8e62da3 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When build fails after migration" ;
+    oc:directiveContent "Do NOT revert the migration as a first response to build failures. Instead, read the full error log, identify the failure type, re-check Phases 2-6, and consult specific error patterns in the troubleshooting guide." ;
+    oc:hasRationale "Blind reversion wastes the migration work already completed; most failures are fixable with targeted diagnosis." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_b34ee62d a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When checkSandboxAndWriteProtection task fails during Xcode build" ;
+    oc:directiveContent "Xcode 16+ enables User Script Sandboxing (ENABLE_USER_SCRIPT_SANDBOXING = YES) by default, which prevents the Gradle build phase from writing to the project directory. Must be set to NO and followed by ./gradlew --stop to restart the daemon." ;
+    oc:hasRationale "The Gradle build phase script needs write access to the project directory, which sandboxing blocks." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_b86b97ff a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When all troubleshooting has failed and migration must be reverted" ;
+    oc:directiveContent "Rollback is a last resort only if targeted fixes fail. Steps: 1) git checkout Podfile/Podfile.lock/podspec/build.gradle.kts/Kotlin sources, 2) Re-add kotlin(\"native.cocoapods\") plugin and cocoapods block, 3) Restore cocoapods.* imports, 4) Run pod install, 5) Open .xcworkspace in Xcode." ;
+    oc:hasRationale "Provides a structured rollback path using git to restore pre-migration state." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_b990303b a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When cinterop fails on C++ transitive dependencies" ;
+    oc:directiveContent "For Firebase cinterop failures on C++ modules (gRPC, abseil, leveldb, BoringSSL), set discoverModulesImplicitly = false and explicitly list only the needed Firebase Clang modules in importedClangModules. Several Firebase products use internal Clang module names that differ from SPM product names (e.g., FirebaseFirestore → FirebaseFirestoreInternal)." ;
+    oc:hasRationale "The default discoverModulesImplicitly=true attempts cinterop on every Clang module including incompatible C++ modules; explicit listing avoids this." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_c120646a a oc:Command,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When missing symbols/linker errors occur — run this one-time task to generate the linkage Swift package" ;
+    oc:directiveContent "./gradlew :moduleName:integrateLinkagePackage" .
+
+oc:kn_d1979533 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When cocoapods.* imports fail after conversion to swiftPMImport.*" ;
+    oc:directiveContent "Third-party KMP libraries (e.g., KMPNotifier) bundle pre-built cinterop klibs with cocoapods.* namespaces. The swiftPMDependencies cinterop generator skips generating bindings for those modules. Their cocoapods.* imports MUST be preserved — replacing them with swiftPMImport.* causes Unresolved reference errors." ;
+    oc:hasRationale "The generator deliberately skips modules already provided by dependency klibs to avoid duplicate symbols, so swiftPMImport.* bindings for those classes simply don't exist." ;
     oc:severityLevel "CRITICAL" .
 
-oc:req_0c311b87 a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "Swift Package Manager and Xcode project structure" .
+oc:kn_dd0aa463 a oc:Command,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When verifying which classes are available in a klib (swiftPMImport vs bundled third-party klib)" ;
+    oc:directiveContent "klib dump-metadata-signatures /path/to/library.klib | grep \"ClassName\"" .
 
-oc:req_0c96571e a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "CocoaPods integration patterns in KMP projects" .
+oc:kn_efbcf14f a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When automatic integrateEmbedAndSign/integrateLinkagePackage fails" ;
+    oc:directiveContent "1. Open .xcodeproj (or .xcworkspace if non-KMP CocoaPods remain) 2. Add 'Compile Kotlin' run script phase BEFORE 'Compile Sources': cd \"$SRCROOT/..\" && ./gradlew :moduleName:embedAndSignAppleFrameworkForXcode 3. Set ENABLE_USER_SCRIPT_SANDBOXING = NO 4. Run ./gradlew --stop 5. Add local package: ../moduleName/_internal_linkage_SwiftPMImport" ;
+    oc:stepOrder 2 .
 
-oc:req_a95f9b0f a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "Kotlin Multiplatform build system and Gradle configuration" .
+_:ref_01e0880f9181d116 a oc:WorkflowStep ;
+    dcterms:description "Open `.xcodeproj` (or `.xcworkspace` if non-KMP CocoaPods remain)" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_0489b0e1141282c5 a oc:WorkflowStep ;
+    dcterms:description "**If unsure, present options to the user** — describe what the logs show, list possible causes, and let the user decide" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_0e145859947b1d14 a oc:WorkflowStep ;
+    dcterms:description "Or disable in Xcode: select app target → Build Settings → Build Options → set \"User Script Sandboxing\" to NO" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_108698059e197ae8 a oc:WorkflowStep ;
+    dcterms:description "Run `./gradlew build` to see available classes in error messages" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_11523042c93a7940 a oc:BulletList ;
+    oc:blockType "bullet_list" ;
+    oc:contentOrder 1 ;
+    oc:hasItem [ a oc:BulletItem ;
+            oc:blockType "bullet_item" ;
+            oc:itemOrder 2 ;
+            oc:itemText "[kmp-with-cocoapods-firebase-sample (spm_import branch)](https://github.com/Kotlin/kmp-with-cocoapods-firebase-sample/tree/spm_import)" ],
+        [ a oc:BulletItem ;
+            oc:blockType "bullet_item" ;
+            oc:itemOrder 1 ;
+            oc:itemText "[kmp-with-cocoapods-compose-sample (spm_import branch)](https://github.com/Kotlin/kmp-with-cocoapods-compose-sample/tree/spm_import)" ] .
+
+_:ref_14619c8f830d8e97 a oc:Paragraph ;
+    oc:blockType "paragraph" ;
+    oc:contentOrder 2 ;
+    oc:textContent "If the setting is not present in the `.pbxproj` (Xcode defaults to YES without an explicit entry), open the project in Xcode instead." .
+
+_:ref_174661e5d43b93e7 a oc:BulletItem ;
+    oc:blockType "bullet_item" ;
+    oc:itemOrder 1 ;
+    oc:itemText "Missing JetBrains Maven repo in `settings.gradle.kts`" .
+
+_:ref_1c72aec87303131d a oc:BulletItem ;
+    oc:blockType "bullet_item" ;
+    oc:itemOrder 7 ;
+    oc:itemText "EmbedAndSign disabler code not removed (prevents `integrateEmbedAndSign`)" .
+
+_:ref_1ce03ffc415c3841 a oc:WorkflowStep ;
+    dcterms:description "Check `group` property in build.gradle.kts" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_1ecfc7d2ff6c5092 a oc:WorkflowStep ;
+    dcterms:description "**Important:** After changing the setting, stop the Gradle daemon:" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild [ a oc:CodeExample ;
+            oc:blockType "code_block" ;
+            oc:codeContent """./gradlew --stop
+""" ;
+            oc:codeLanguage "bash" ;
+            oc:contentOrder 1 ;
+            oc:sourceLocation "lines 139-141" ] ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_206d07fcadf10b6c a oc:WorkflowStep ;
+    dcterms:description "Restart Xcode completely" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_2169437ca3a37ffc a oc:BulletItem ;
+    oc:blockType "bullet_item" ;
+    oc:itemOrder 4 ;
+    oc:itemText "Wrong Xcode project file opened (`.xcodeproj` when non-KMP CocoaPods remain and `.xcworkspace` is needed, or vice versa)" .
+
+_:ref_270eca4557c431e5 a oc:CodeExample ;
+    oc:blockType "code_block" ;
+    oc:codeContent """./gradlew build --info
+""" ;
+    oc:codeLanguage "bash" ;
+    oc:contentOrder 1 ;
+    oc:sourceLocation "lines 607-609" .
+
+_:ref_2b31b533646abf31 a oc:WorkflowStep ;
+    dcterms:description "Replace `-` with `.` in both group and module names" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_2ec48c7ff0ce6fcc a oc:WorkflowStep ;
+    dcterms:description "**Re-check each migration phase** — walk through Phases 2-6 and verify each step was applied. Common mistakes:" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild [ a oc:BulletList ;
+            oc:blockType "bullet_list" ;
+            oc:contentOrder 1 ;
+            oc:hasItem _:ref_174661e5d43b93e7,
+                _:ref_1c72aec87303131d,
+                _:ref_2169437ca3a37ffc,
+                [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 6 ;
+                    oc:itemText "`integrateLinkagePackage` not run" ],
+                [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 3 ;
+                    oc:itemText "`cocoapods {}` block or plugin not fully removed (Phase 6)" ],
+                [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 8 ;
+                    oc:itemText "`embedAndSignAppleFrameworkForXcode` commented out in Xcode build phase" ],
+                [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 9 ;
+                    oc:itemText "`cocoapods.*` imports replaced that should have been preserved (bundled klib from third-party library)" ],
+                [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 5 ;
+                    oc:itemText "`isStatic = true` missing from framework config (required with dev.gitlive or similar CocoaPods-era wrapper klibs)" ],
+                [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 2 ;
+                    oc:itemText "Wrong `group` or module name in import namespace (dashes not converted to dots)" ] ] ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_3025ecad60532e66 a oc:WorkflowStep ;
+    dcterms:description "Re-run `integrateLinkagePackage` — regenerates `Package.swift` with `type: .none` (static)" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_3362805523d2d19b a oc:BulletItem ;
+    oc:blockType "bullet_item" ;
+    oc:itemOrder 2 ;
+    oc:itemText "Check Package Dependencies section" .
+
+_:ref_3371e077743bc299 a oc:WorkflowStep ;
+    dcterms:description "**Check generated files:**" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild [ a oc:BulletList ;
+            oc:blockType "bullet_list" ;
+            oc:contentOrder 1 ;
+            oc:hasItem [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 1 ;
+                    oc:itemText "Look in `moduleName/_internal_linkage_SwiftPMImport/` for Package.swift" ] ] ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_350db0a665a5e74a a oc:WorkflowStep ;
+    dcterms:description "Select app target > Build Phases" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_3eb9fb68f38f71f2 a oc:WorkflowStep ;
+    dcterms:description "Clean Xcode build folder: Shift+Cmd+K" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_43c8b17d073171b9 a oc:Paragraph ;
+    oc:blockType "paragraph" ;
+    oc:contentOrder 2 ;
+    oc:textContent "This is particularly useful for verifying which classes are available in the swiftPMImport klib vs. bundled in third-party dependency klibs." .
+
+_:ref_47c6d1d103cc326f a oc:WorkflowStep ;
+    dcterms:description "Re-run integration:" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild [ a oc:CodeExample ;
+            oc:blockType "code_block" ;
+            oc:codeContent """./gradlew :moduleName:integrateLinkagePackage
+""" ;
+            oc:codeLanguage "bash" ;
+            oc:contentOrder 1 ;
+            oc:sourceLocation "lines 93-95" ] ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_53d8cc858c34429a a oc:BulletItem ;
+    oc:blockType "bullet_item" ;
+    oc:itemOrder 3 ;
+    oc:itemText "Ensure `_internal_linkage_SwiftPMImport` is present" .
+
+_:ref_578eca6bb70ae47e a oc:CodeExample ;
+    oc:blockType "code_block" ;
+    oc:codeContent """# Dump all API signatures from a klib
+klib dump-metadata-signatures /path/to/library.klib
+
+# Search for specific classes
+klib dump-metadata-signatures /path/to/library.klib | grep "ClassName"
+
+# Compare before/after — find klibs in build output
+find . -name "*.klib" -path "*swiftPMImport*"     # new swiftPMImport klibs
+find ~/.gradle/caches -name "*.klib" -path "*libraryName*"  # third-party klibs
+""" ;
+    oc:codeLanguage "bash" ;
+    oc:contentOrder 1 ;
+    oc:sourceLocation "lines 615-625" .
+
+_:ref_5e39a74cedee06cb a oc:WorkflowStep ;
+    dcterms:description "Run `./gradlew --stop` to restart the Gradle daemon after changing sandboxing" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_6d5e252090ed7b17 a oc:WorkflowStep ;
+    dcterms:description "**Check sample projects:**" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild _:ref_11523042c93a7940 ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_76b4df1d2ed3b1f7 a oc:WorkflowStep ;
+    dcterms:description "**Inspect klib contents** using the `klib` tool ([docs](https://kotlinlang.org/docs/native-libraries.html#using-kotlin-native-compiler)):" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild _:ref_43c8b17d073171b9,
+        _:ref_578eca6bb70ae47e ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_78f7e1d78203c79b a oc:WorkflowStep ;
+    dcterms:description "Check all repository declarations include JetBrains Maven" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_a0bd8748d6d30d79 a oc:WorkflowStep ;
+    dcterms:description "Call `FIRApp.configure()` before using any Firebase service" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_a18d8ce0a41bed6c a oc:WorkflowStep ;
+    dcterms:description "Disable via command line:" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild _:ref_14619c8f830d8e97,
+        [ a oc:CodeExample ;
+            oc:blockType "code_block" ;
+            oc:codeContent """sed -i '' 's/ENABLE_USER_SCRIPT_SANDBOXING = YES/ENABLE_USER_SCRIPT_SANDBOXING = NO/g' /path/to/iosApp/*.xcodeproj/project.pbxproj
+""" ;
+            oc:codeLanguage "bash" ;
+            oc:contentOrder 1 ;
+            oc:sourceLocation "lines 131-133" ] ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_ab203c1fd76b105a a oc:WorkflowStep ;
+    dcterms:description "Add linker flags previously resolved by the K/N linker (e.g., `-framework Accelerate`, `-weak_framework CoreML`) to `OTHER_LDFLAGS` in the Xcode project" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_ab46a9690cde74a8 a oc:WorkflowStep ;
+    dcterms:description "Remove any \"Embed Frameworks\" copy phase for the KMP framework — static frameworks must NOT be embedded" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_ae64cb246986483e a oc:CodeExample ;
+    oc:blockType "code_block" ;
+    oc:codeContent """cd "$SRCROOT/.."
+./gradlew :moduleName:embedAndSignAppleFrameworkForXcode
+""" ;
+    oc:codeLanguage "bash" ;
+    oc:contentOrder 1 ;
+    oc:sourceLocation "lines 514-517" .
+
+_:ref_b7f3be8e61b56d0c a oc:WorkflowStep ;
+    dcterms:description "Add \"Compile Kotlin\" run script phase BEFORE \"Compile Sources\":" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild _:ref_ae64cb246986483e ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_b8753c1e360a32ab a oc:BulletList ;
+    oc:blockType "bullet_list" ;
+    oc:contentOrder 1 ;
+    oc:hasItem _:ref_3362805523d2d19b,
+        _:ref_53d8cc858c34429a,
+        [ a oc:BulletItem ;
+            oc:blockType "bullet_item" ;
+            oc:itemOrder 1 ;
+            oc:itemText "Open project in Xcode" ] .
+
+_:ref_ba315ba145bbdf7e a oc:WorkflowStep ;
+    dcterms:description "Set `ENABLE_USER_SCRIPT_SANDBOXING = NO` (Build Settings → Build Options → User Script Sandboxing)" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_bafd120864b8fd34 a oc:WorkflowStep ;
+    dcterms:description "**Check framework configuration** — `isStatic = true` is recommended. While `isStatic = false` can work, dynamic frameworks have known edge cases with SwiftPM import (linker errors, dyld crashes, duplicate class warnings). It is required with `dev.gitlive:firebase-*` — see below." ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_c3943f338f0a17bf a oc:WorkflowStep ;
+    dcterms:description "**Read the full error log** — identify the actual failure type (Gradle resolution, import not found, linker error, Xcode build phase)" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_c6622639f89f581c a oc:WorkflowStep ;
+    dcterms:description "**Run the linkage integration task** (one-time, not a build phase):" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild [ a oc:CodeExample ;
+            oc:blockType "code_block" ;
+            oc:codeContent """./gradlew :moduleName:integrateLinkagePackage
+""" ;
+            oc:codeLanguage "bash" ;
+            oc:contentOrder 1 ;
+            oc:sourceLocation "lines 73-75" ] ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_cbd79cccbfacbecf a oc:WorkflowStep ;
+    dcterms:description "Check Firebase console for configuration issues" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_cc49cb23b4fc20a4 a oc:WorkflowStep ;
+    dcterms:description "**Verify SPM package is linked in Xcode:**" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild _:ref_b8753c1e360a32ab ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_cf9600eb0686b9d5 a oc:WorkflowStep ;
+    dcterms:description "Re-open the correct Xcode project file (`.xcodeproj` if all CocoaPods were removed, `.xcworkspace` if non-KMP CocoaPods remain)" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_d013e2c276fc343e a oc:WorkflowStep ;
+    dcterms:description "Add local package: `../moduleName/_internal_linkage_SwiftPMImport`" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_5" ;
+    oc:stepOrder 5 .
+
+_:ref_e10fbc78f8c2c7bf a oc:WorkflowStep ;
+    dcterms:description "Open Xcode project" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_e14530d03e90b1fa a oc:WorkflowStep ;
+    dcterms:description "Run `./gradlew --refresh-dependencies`" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_ead78209179b31ad a oc:WorkflowStep ;
+    dcterms:description "Invalidate caches: File > Invalidate Caches > Invalidate and Restart" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_eaffa4237459308e a oc:WorkflowStep ;
+    dcterms:description "**Consult the sections above** for specific error patterns" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_f2680dcae8aacda4 a oc:WorkflowStep ;
+    dcterms:description "Drag \"Compile Kotlin\" phase above \"Compile Sources\"" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_f34708a9c18b76f7 a oc:WorkflowStep ;
+    dcterms:description "Ensure `GoogleService-Info.plist` is in iOS app target" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_f72b030c21587b87 a oc:WorkflowStep ;
+    dcterms:description "**Run verbose build:**" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild _:ref_270eca4557c431e5 ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_0996c0c676cf47bd a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 3 ;
+    oc:hasStep _:ref_bafd120864b8fd34,
+        _:ref_c6622639f89f581c,
+        _:ref_cc49cb23b4fc20a4 ;
+    oc:workflowId "procedure_3" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_0a986f78286bef1e a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 6 ;
+    oc:hasStep _:ref_0e145859947b1d14,
+        _:ref_1ecfc7d2ff6c5092,
+        _:ref_a18d8ce0a41bed6c ;
+    oc:workflowId "procedure_6" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_0b81a5be4d7bc5fa a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 3 ;
+    oc:hasStep _:ref_206d07fcadf10b6c,
+        _:ref_3eb9fb68f38f71f2,
+        _:ref_47c6d1d103cc326f,
+        _:ref_cf9600eb0686b9d5 ;
+    oc:workflowId "procedure_3" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_0f25659f7139460a a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 3 ;
+    oc:hasStep _:ref_78f7e1d78203c79b,
+        _:ref_e14530d03e90b1fa,
+        _:ref_ead78209179b31ad ;
+    oc:workflowId "procedure_3" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_20f1c2b2b194a191 a oc:WorkflowStep ;
+    dcterms:description "Re-check Phases 2-6 for common mistakes: missing repo, wrong import namespace, incomplete CocoaPods removal, wrong xcodeproj opened, missing isStatic, unrun integrateLinkagePackage, EmbedAndSign disabler, commented build phase, incorrectly replaced bundled klib imports" ;
+    oc:expectedOutcome "Specific missed step identified or ruled out" ;
+    oc:stepDependsOn _:ref_534468e6d518761a ;
+    oc:stepId "recheck-phases" .
+
+_:ref_2bd98a69b7c002ea a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 2 ;
+    oc:hasStep _:ref_0489b0e1141282c5,
+        _:ref_2ec48c7ff0ce6fcc,
+        _:ref_c3943f338f0a17bf,
+        _:ref_eaffa4237459308e ;
+    oc:workflowId "procedure_2" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_34cbac641659147c a oc:WorkflowStep ;
+    dcterms:description "Add 'Compile Kotlin' run script phase BEFORE 'Compile Sources' with: cd \"$SRCROOT/..\" && ./gradlew :moduleName:embedAndSignAppleFrameworkForXcode" ;
+    oc:expectedOutcome "Build phase added in correct position" ;
+    oc:stepDependsOn _:ref_df2f0e783eb43d11 ;
+    oc:stepId "add-build-phase" .
+
+_:ref_534468e6d518761a a oc:WorkflowStep ;
+    dcterms:description "Read the full error log and identify the failure type: Gradle resolution, import not found, linker error, or Xcode build phase" ;
+    oc:expectedOutcome "Failure type categorized" ;
+    oc:stepId "read-error" .
+
+_:ref_7b31e4aa703d3c7b a oc:WorkflowStep ;
+    dcterms:description "Consult the specific troubleshooting section matching the error pattern for targeted fix" ;
+    oc:expectedOutcome "Solution applied for the identified error pattern" ;
+    oc:stepDependsOn _:ref_20f1c2b2b194a191 ;
+    oc:stepId "consult-sections" .
+
+_:ref_896f5aa9a5a3bff8 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 2 ;
+    oc:hasStep _:ref_3371e077743bc299,
+        _:ref_6d5e252090ed7b17,
+        _:ref_76b4df1d2ed3b1f7,
+        _:ref_f72b030c21587b87 ;
+    oc:workflowId "procedure_2" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_8e57b9a5267740a2 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 3 ;
+    oc:hasStep _:ref_350db0a665a5e74a,
+        _:ref_e10fbc78f8c2c7bf,
+        _:ref_f2680dcae8aacda4 ;
+    oc:workflowId "procedure_3" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_bc585759d6485d68 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 2 ;
+    oc:hasStep _:ref_01e0880f9181d116,
+        _:ref_5e39a74cedee06cb,
+        _:ref_b7f3be8e61b56d0c,
+        _:ref_ba315ba145bbdf7e,
+        _:ref_d013e2c276fc343e ;
+    oc:workflowId "procedure_2" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_cc00f4c36a9e8545 a oc:WorkflowStep ;
+    dcterms:description "Set ENABLE_USER_SCRIPT_SANDBOXING = NO in Build Settings, then run ./gradlew --stop" ;
+    oc:expectedOutcome "Script sandboxing disabled and Gradle daemon restarted" ;
+    oc:stepDependsOn _:ref_34cbac641659147c ;
+    oc:stepId "disable-sandboxing" .
+
+_:ref_df2f0e783eb43d11 a oc:WorkflowStep ;
+    dcterms:description "Open .xcodeproj (or .xcworkspace if non-KMP CocoaPods remain)" ;
+    oc:expectedOutcome "Xcode project open and ready for configuration" ;
+    oc:stepId "open-xcodeproj" .
+
+_:ref_eb8ffbe82ebf30fc a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 8 ;
+    oc:hasStep _:ref_3025ecad60532e66,
+        _:ref_ab203c1fd76b105a,
+        _:ref_ab46a9690cde74a8 ;
+    oc:workflowId "procedure_8" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_ebb4e1f3c27fcd28 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 5 ;
+    oc:hasStep _:ref_108698059e197ae8,
+        _:ref_1ce03ffc415c3841,
+        _:ref_2b31b533646abf31 ;
+    oc:workflowId "procedure_5" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_fdffd7ff270a2b4b a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 3 ;
+    oc:hasStep _:ref_a0bd8748d6d30d79,
+        _:ref_cbd79cccbfacbecf,
+        _:ref_f34708a9c18b76f7 ;
+    oc:workflowId "procedure_3" ;
+    oc:workflowName "Ordered Procedure" .
 

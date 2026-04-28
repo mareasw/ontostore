@@ -10,54 +10,174 @@ oc:skill_vercel_labs_vercel_react_best_practices_js_min_max_loop a oc:Declarativ
     skos:broader "Performance optimization pattern" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "87dfb67e2f39df6ad8bcfb5b78c5fb364d3c07554ad188a202408d99f3763421" ;
-    oc:differentia "uses O(n) single-pass loop instead of O(n log n) sort to find min/max values in arrays" ;
+    oc:differentia "replaces O(n log n) sort-based min/max with O(n) single-pass loop for array extremes" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
+    oc:handlesFailure oc:InvalidInput ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_21dbe2ef,
-        oc:kn_24bf4ae2,
-        oc:kn_ac86c2f3,
-        oc:kn_b9ed4ad1,
-        oc:kn_dd213f93 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 11 ;
+                    oc:textContent "**Alternative (Math.min/Math.max for small arrays):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 5 ;
+                    oc:textContent "**Incorrect (O(n log n) - sort for oldest and newest):**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """const numbers = [5, 2, 8, 1, 9]
+const min = Math.min(...numbers)
+const max = Math.max(...numbers)
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 12 ;
+                    oc:sourceLocation "lines 76-80" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 8 ;
+                    oc:textContent "**Correct (O(n) - single loop):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "Sorts the entire array just to find the maximum value." ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function getLatestProject(projects: Project[]) {
+  if (projects.length === 0) return null
+  
+  let latest = projects[0]
+  
+  for (let i = 1; i < projects.length; i++) {
+    if (projects[i].updatedAt > latest.updatedAt) {
+      latest = projects[i]
+    }
+  }
+  
+  return latest
+}
+
+function getOldestAndNewest(projects: Project[]) {
+  if (projects.length === 0) return { oldest: null, newest: null }
+  
+  let oldest = projects[0]
+  let newest = projects[0]
+  
+  for (let i = 1; i < projects.length; i++) {
+    if (projects[i].updatedAt < oldest.updatedAt) oldest = projects[i]
+    if (projects[i].updatedAt > newest.updatedAt) newest = projects[i]
+  }
+  
+  return { oldest, newest }
+}
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 9 ;
+                    oc:sourceLocation "lines 42-70" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 7 ;
+                    oc:textContent "Still sorts unnecessarily when only min/max are needed." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Finding the smallest or largest element only requires a single pass through the array. Sorting is wasteful and slower." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 10 ;
+                    oc:textContent "Single pass through the array, no copying, no sorting." ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """interface Project {
+  id: string
+  name: string
+  updatedAt: number
+}
+
+function getLatestProject(projects: Project[]) {
+  const sorted = [...projects].sort((a, b) => b.updatedAt - a.updatedAt)
+  return sorted[0]
+}
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-25" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Incorrect (O(n log n) - sort to find latest):**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function getOldestAndNewest(projects: Project[]) {
+  const sorted = [...projects].sort((a, b) => a.updatedAt - b.updatedAt)
+  return { oldest: sorted[0], newest: sorted[sorted.length - 1] }
+}
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 6 ;
+                    oc:sourceLocation "lines 31-36" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 13 ;
+                    oc:textContent "This works for small arrays, but can be slower or just throw an error for very large arrays due to spread operator limitations. Maximal array length is approximately 124000 in Chrome 143 and 638000 in Safari 18; exact numbers may vary - see [the fiddle](https://jsfiddle.net/qw1jabsx/4/). Use the loop approach for reliability." ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Use Loop for Min/Max Instead of Sort" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Use Loop for Min/Max Instead of Sort
+impact: LOW
+impactDescription: O(n) instead of O(n log n)
+tags: javascript, arrays, performance, sorting, algorithms
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:impartsKnowledge oc:kn_014e9a10,
+        oc:kn_4406b4f3,
+        oc:kn_6c71913e,
+        oc:kn_b90024a3,
+        oc:kn_e78b5170 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
     oc:requiresState oc:EnvironmentReady ;
-    oc:resolvesIntent "avoid unnecessary sorting when finding extremal values",
-        "find minimum or maximum value in array efficiently",
-        "optimize min/max array operations" ;
+    oc:resolvesIntent "avoid sorting to find largest or smallest value",
+        "find min or max element in array",
+        "optimize array min/max lookup" ;
     oc:yieldsState oc:CodeOptimized .
 
-oc:kn_21dbe2ef a oc:Constraint,
+oc:kn_014e9a10 a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When using Math.min/Math.max with spread operator on arrays of unknown or large size" ;
-    oc:directiveContent "Do not use Math.min(...array) or Math.max(...array) with spread operator on large arrays. Chrome limits spread to ~124,000 elements and Safari to ~638,000; exceeding these throws an error." ;
-    oc:hasRationale "The spread operator passes each element as an argument to the function, and JavaScript engines impose maximum argument limits that vary by browser." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_24bf4ae2 a oc:KnowledgeNode,
-        oc:PerformanceProfile ;
-    oc:appliesToContext "When choosing between loop and sort approaches for min/max extraction" ;
-    oc:directiveContent "Loop-based min/max is O(n) time and O(1) space. Sort-based min/max is O(n log n) time and O(n) space if array is copied before sorting." ;
-    oc:hasRationale "The asymptotic difference becomes significant on large arrays: for 1M elements, sort is roughly 20x slower than a single pass." ;
-    oc:severityLevel "LOW" .
-
-oc:kn_ac86c2f3 a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "Before executing a min/max loop on any array" ;
-    oc:directiveContent "Always handle the empty array case before iterating. Return null or a sensible default when the input array has length 0." ;
-    oc:hasRationale "Accessing index 0 on an empty array returns undefined, which propagates NaN or errors through comparisons and downstream code." ;
+    oc:appliesToContext "When finding min/max/extreme values in arrays" ;
+    oc:directiveContent "Never use .sort() to find the minimum or maximum element in an array. Sorting is O(n log n) when a single-pass loop is O(n)." ;
+    oc:hasRationale "Sorting the entire array to extract one element wastes CPU cycles and memory, especially on large datasets." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_b9ed4ad1 a oc:AntiPattern,
+oc:kn_4406b4f3 a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When finding min or max values in JavaScript/TypeScript arrays" ;
-    oc:directiveContent "Never use Array.sort() to find the minimum or maximum element in an array. Sorting is O(n log n) when a single-pass loop is O(n)." ;
-    oc:hasRationale "Sorting performs unnecessary work by ordering all elements when only the extremal value is needed, wasting CPU cycles and potentially memory if the array is copied before sorting." ;
+    oc:appliesToContext "When using Math.min/Math.max with spread on large arrays" ;
+    oc:directiveContent "Math.min(...arr) / Math.max(...arr) with spread operator will throw or be slower for very large arrays (~124k elements in Chrome 143, ~638k in Safari 18). Use loop approach for reliability." ;
+    oc:hasRationale "Spread operator passes each element as a function argument, hitting engine-specific call-stack or argument-count limits." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_dd213f93 a oc:DesignPrinciple,
+oc:kn_6c71913e a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When extracting minimum, maximum, or both from an array of objects or primitives" ;
-    oc:directiveContent "Use a single-pass loop to find min/max values, comparing each element against tracked extremal values in one iteration." ;
-    oc:hasRationale "A single loop is O(n) with no extra memory allocation for copies or sorting overhead, making it optimal for this specific task." ;
+    oc:appliesToContext "When implementing min/max loop over arrays" ;
+    oc:directiveContent "Always guard against empty arrays before computing min/max — return null or a sentinel value to avoid index-out-of-bounds errors." ;
+    oc:hasRationale "An empty array has no valid min or max, and accessing index 0 on an empty array returns undefined, leading to downstream bugs." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_b90024a3 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing array processing logic" ;
+    oc:directiveContent "Prefer algorithms with complexity matching the actual requirement. Finding one extreme element needs only O(n), not full sort." ;
+    oc:hasRationale "Right-sizing algorithmic complexity to the problem avoids unnecessary work and improves performance at scale." .
+
+oc:kn_e78b5170 a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "When choosing algorithm for finding array extremes" ;
+    oc:directiveContent "Loop-based min/max runs in O(n) time and O(1) space vs O(n log n) time and O(n) space for sort-based approaches (which also copy the array)." ;
+    oc:hasRationale "Single-pass loop avoids unnecessary sorting overhead and array copying." ;
     oc:severityLevel "MEDIUM" .
 

@@ -7,62 +7,167 @@
 oc:skill_obra_superpowers_subagent_driven_development_spec_reviewer_prompt a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "spec-reviewer-prompt" ;
-    skos:broader "Prompt template" ;
+    skos:broader "prompt template" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/obra/superpowers/subagent-driven-development" ;
     oc:contentHash "631980e472eec5394de8b89b69d432e54fd3f7f523ecf9afa7eb4cda0c9b2baf" ;
-    oc:differentia "that instructs a subagent to verify implementation against specification by reading actual code rather than trusting implementer reports" ;
+    oc:dependsOnSkill oc:skill_ontoskills_subagent_driven_development ;
+    oc:differentia "dispatches a spec compliance reviewer subagent that independently verifies implementation against specification by reading actual code rather than trusting implementer reports" ;
     oc:extends oc:skill_obra_superpowers_subagent_driven_development ;
-    oc:handlesFailure oc:ExtraWorkDetected,
-        oc:MissingRequirements,
-        oc:SpecViolationDetected ;
-    oc:hasArgumentHint "task requirements and implementer report" ;
+    oc:handlesFailure oc:ImplementationMissing,
+        oc:SpecNonCompliant ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_0bd2466e,
-        oc:kn_2c251266,
-        oc:kn_4bc79102,
-        oc:kn_ae5b34ec,
-        oc:kn_b1b11d40 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Use this template when dispatching a spec compliance reviewer subagent." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Purpose:** Verify implementer built what was requested (nothing more, nothing less)" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """Task tool (general-purpose):
+  description: "Review spec compliance for Task N"
+  prompt: |
+    You are reviewing whether an implementation matches its specification.
+
+    ## What Was Requested
+
+    [FULL TEXT of task requirements]
+
+    ## What Implementer Claims They Built
+
+    [From implementer's report]
+
+    ## CRITICAL: Do Not Trust the Report
+
+    The implementer finished suspiciously quickly. Their report may be incomplete,
+    inaccurate, or optimistic. You MUST verify everything independently.
+
+    **DO NOT:**
+    - Take their word for what they implemented
+    - Trust their claims about completeness
+    - Accept their interpretation of requirements
+
+    **DO:**
+    - Read the actual code they wrote
+    - Compare actual implementation to requirements line by line
+    - Check for missing pieces they claimed to implement
+    - Look for extra features they didn't mention
+
+    ## Your Job
+
+    Read the implementation code and verify:
+
+    **Missing requirements:**
+    - Did they implement everything that was requested?
+    - Are there requirements they skipped or missed?
+    - Did they claim something works but didn't actually implement it?
+
+    **Extra/unneeded work:**
+    - Did they build things that weren't requested?
+    - Did they over-engineer or add unnecessary features?
+    - Did they add "nice to haves" that weren't in spec?
+
+    **Misunderstandings:**
+    - Did they interpret requirements differently than intended?
+    - Did they solve the wrong problem?
+    - Did they implement the right feature but wrong way?
+
+    **Verify by reading code, not by trusting report.**
+
+    Report:
+    - ✅ Spec compliant (if everything matches after code inspection)
+    - ❌ Issues found: [list specifically what's missing or extra, with file:line references]
+""" ;
+                    oc:codeLanguage "" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 7-61" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Spec Compliance Reviewer Prompt Template" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "Review an implementation against its specification by independently reading code and comparing to requirements" ;
+            oc:hasStep [ a oc:WorkflowStep ;
+                    dcterms:description "Supply the full task requirements text and the implementer's self-report to the reviewer" ;
+                    oc:expectedOutcome "Reviewer has both the specification and implementer claims" ;
+                    oc:stepId "provide-context" ],
+                _:ref_110b63e5c7bfa173,
+                _:ref_260fca50d726133c,
+                _:ref_4a05be6442efe2dc,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Read the actual implementation code written by the implementer, ignoring their report claims" ;
+                    oc:expectedOutcome "Reviewer has ground truth of what was actually implemented" ;
+                    oc:stepId "read-actual-code" ],
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Report ✅ Spec compliant or ❌ Issues found with specific file:line references" ;
+                    oc:expectedOutcome "Clear binary verdict with actionable evidence" ;
+                    oc:stepDependsOn _:ref_110b63e5c7bfa173,
+                        _:ref_260fca50d726133c,
+                        _:ref_4a05be6442efe2dc ;
+                    oc:stepId "report-findings" ] ;
+            oc:workflowId "spec-compliance-review" ;
+            oc:workflowName "Spec Compliance Review" ] ;
+    oc:impartsKnowledge oc:kn_4057ba02,
+        oc:kn_c931f1dd,
+        oc:kn_db4269ba,
+        oc:kn_dd127586,
+        oc:kn_e0a6c74f ;
     oc:isUserInvocable false ;
-    oc:nature "Work" ;
+    oc:nature "Concept" ;
     oc:requiresState oc:ImplementationComplete ;
-    oc:resolvesIntent "audit code against specification",
-        "detect missing or extra work in implementation",
-        "review spec compliance",
-        "verify implementation matches requirements" ;
+    oc:resolvesIntent "audit subagent work for completeness and correctness",
+        "review implementation against requirements",
+        "verify spec compliance" ;
     oc:yieldsState oc:SpecComplianceVerified .
 
-oc:kn_0bd2466e a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When evaluating whether implementation matches specification" ;
-    oc:directiveContent "Check for both missing requirements AND extra unrequested work. Spec compliance means nothing more, nothing less." ;
-    oc:hasRationale "Over-engineering or adding unrequested features introduces risk, scope creep, and maintenance burden just as much as missing requirements." ;
-    oc:severityLevel "HIGH" .
+oc:kn_4057ba02 a oc:KnowledgeNode,
+        oc:OutputFormat ;
+    oc:appliesToContext "When completing a spec compliance review" ;
+    oc:directiveContent "Report must end with either ✅ Spec compliant or ❌ Issues found: [list with file:line references]" ;
+    oc:hasRationale "Binary outcome with evidence allows the orchestrating agent to make clear decisions about next steps" ;
+    oc:severityLevel "MEDIUM" .
 
-oc:kn_2c251266 a oc:Heuristic,
+oc:kn_c931f1dd a oc:Constraint,
         oc:KnowledgeNode ;
     oc:appliesToContext "When performing spec compliance review" ;
-    oc:directiveContent "Compare actual implementation to requirements line by line, verifying each requirement has corresponding code and each code section maps to a requirement." ;
-    oc:hasRationale "Line-by-line comparison catches subtle misunderstandings, partial implementations, and features that solve the wrong problem." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_4bc79102 a oc:KnowledgeNode,
-        oc:KnownIssue ;
-    oc:appliesToContext "When discrepancies exist between spec and implementation" ;
-    oc:directiveContent "Implementers may interpret requirements differently than intended, solving the wrong problem or implementing the right feature the wrong way." ;
-    oc:hasRationale "Ambiguous requirements lead to divergent interpretations; the reviewer must detect when the implementer's understanding drifted from intent." ;
+    oc:directiveContent "Check for three failure modes: missing requirements, extra/unneeded work, and misunderstandings of the spec" ;
+    oc:hasRationale "These are the primary ways implementations diverge from specifications" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_ae5b34ec a oc:KnowledgeNode,
-        oc:PostFlightValidation ;
-    oc:appliesToContext "When producing the final spec compliance review report" ;
-    oc:directiveContent "Report must include specific file:line references for any issues found, and a clear ✅ or ❌ verdict based on code inspection, not report claims." ;
-    oc:hasRationale "Specific references make issues actionable and prevent vague feedback that requires additional review cycles." ;
-    oc:severityLevel "MEDIUM" .
+oc:kn_db4269ba a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "When structuring a spec compliance review" ;
+    oc:directiveContent "Review scope covers: missing requirements (skipped, claimed but unimplemented), extra/unneeded work (over-engineering, unspec'd features), and misunderstandings (wrong problem, right feature wrong way)" ;
+    oc:hasRationale "A structured review taxonomy ensures systematic coverage of all divergence modes" .
 
-oc:kn_b1b11d40 a oc:AntiPattern,
+oc:kn_dd127586 a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When reviewing any implementation for spec compliance" ;
-    oc:directiveContent "Never trust the implementer's self-report about what was built. Always verify by reading the actual code independently." ;
-    oc:hasRationale "Implementers may finish quickly and produce reports that are incomplete, inaccurate, or optimistic about what was actually implemented." ;
+    oc:appliesToContext "When reviewing any subagent's implementation work" ;
+    oc:directiveContent "Never trust an implementer's self-report about what they built — always verify by reading the actual code independently" ;
+    oc:hasRationale "Implementers may finish quickly and produce reports that are incomplete, inaccurate, or optimistic" ;
     oc:severityLevel "CRITICAL" .
+
+oc:kn_e0a6c74f a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When reporting spec compliance findings" ;
+    oc:directiveContent "Compare actual implementation to requirements line by line, providing file:line references for any issues found" ;
+    oc:hasRationale "Line-level specificity ensures issues are actionable and verifiable" ;
+    oc:severityLevel "HIGH" .
+
+_:ref_110b63e5c7bfa173 a oc:WorkflowStep ;
+    dcterms:description "Compare implementation against each requirement to find anything skipped, missed, or claimed-but-unimplemented" ;
+    oc:expectedOutcome "Complete list of missing requirements identified" ;
+    oc:stepId "check-missing" .
+
+_:ref_260fca50d726133c a oc:WorkflowStep ;
+    dcterms:description "Verify requirements were interpreted correctly and the right problem was solved in the right way" ;
+    oc:expectedOutcome "Any misinterpretations of requirements identified" ;
+    oc:stepId "check-misunderstandings" .
+
+_:ref_4a05be6442efe2dc a oc:WorkflowStep ;
+    dcterms:description "Identify any built features, over-engineering, or nice-to-haves that were not in the specification" ;
+    oc:expectedOutcome "Complete list of extra/unneeded work identified" ;
+    oc:stepId "check-extra" .
 

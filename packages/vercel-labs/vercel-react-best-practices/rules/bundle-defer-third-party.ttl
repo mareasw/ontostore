@@ -7,54 +7,142 @@
 oc:skill_vercel_labs_vercel_react_best_practices_bundle_defer_third_party a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "bundle-defer-third-party" ;
-    skos:broader "Performance optimization technique" ;
+    skos:broader "Bundle optimization technique" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "3719fb47b191e8db4fe22686ec88448ad5af9e6838585425abbe103d0b642e37" ;
-    oc:differentia "defers non-critical third-party libraries like analytics and logging until after hydration using Next.js dynamic imports" ;
+    oc:differentia "defers non-critical third-party libraries (analytics, logging, error tracking) until after hydration using Next.js dynamic imports" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
-    oc:hasArgumentHint "component name or import path to defer" ;
+    oc:handlesFailure oc:HydrationBlocked ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_0bd0a991,
-        oc:kn_49825b22,
-        oc:kn_66bf083f,
-        oc:kn_909bdcb5,
-        oc:kn_b23719a8 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Defer Non-Critical Third-Party Libraries
+impact: MEDIUM
+impactDescription: loads after hydration
+tags: bundle, third-party, analytics, defer
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """import { Analytics } from '@vercel/analytics/react'
+
+export default function RootLayout({ children }) {
+  return (
+    <html>
+      <body>
+        {children}
+        <Analytics />
+      </body>
+    </html>
+  )
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-27" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "**Correct (loads after hydration):**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """import dynamic from 'next/dynamic'
+
+const Analytics = dynamic(
+  () => import('@vercel/analytics/react').then(m => m.Analytics),
+  { ssr: false }
+)
+
+export default function RootLayout({ children }) {
+  return (
+    <html>
+      <body>
+        {children}
+        <Analytics />
+      </body>
+    </html>
+  )
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 5 ;
+                    oc:sourceLocation "lines 31-49" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Analytics, logging, and error tracking don't block user interaction. Load them after hydration." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Incorrect (blocks initial bundle):**" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Defer Non-Critical Third-Party Libraries" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "Convert a statically imported third-party library into a dynamically loaded, post-hydration component." ;
+            oc:hasStep [ a oc:WorkflowStep ;
+                    dcterms:description "Verify the deferred component loads after hydration by checking network tab and bundle analyzer" ;
+                    oc:expectedOutcome "Third-party code is not in the initial bundle and loads asynchronously after page becomes interactive" ;
+                    oc:stepDependsOn _:ref_ca2065c0d9e0eef7 ;
+                    oc:stepId "verify-deferred-loading" ],
+                _:ref_b203629309345f1d,
+                _:ref_ca2065c0d9e0eef7 ;
+            oc:workflowId "defer-third-party-lib" ;
+            oc:workflowName "Defer Non-Critical Third-Party Library" ] ;
+    oc:impartsKnowledge oc:kn_0d9b0aaf,
+        oc:kn_3d496b3b,
+        oc:kn_c2d9014b,
+        oc:kn_fd23eae9 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:resolvesIntent "defer third-party script loading",
-        "improve hydration performance",
+    oc:requiresState oc:NextJsProjectReady ;
+    oc:resolvesIntent "defer third-party scripts",
         "lazy-load analytics libraries",
-        "optimize initial bundle size" .
+        "optimize initial bundle size",
+        "prevent third-party libraries from blocking hydration" ;
+    oc:yieldsState oc:BundleOptimized .
 
-oc:kn_0bd0a991 a oc:DesignPrinciple,
+oc:kn_0d9b0aaf a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When architecting the dependency loading strategy for a Next.js application" ;
-    oc:directiveContent "Classify all third-party dependencies as either critical (blocks interaction) or non-critical (observational) and apply deferred loading accordingly." ;
-    oc:hasRationale "A deliberate classification ensures consistent performance optimization without accidentally deferring essential functionality." .
-
-oc:kn_49825b22 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When integrating any third-party library that does not contribute to initial page render or user interaction" ;
-    oc:directiveContent "Use next/dynamic with { ssr: false } to defer non-critical third-party libraries so they load after hydration." ;
-    oc:hasRationale "Dynamic imports with SSR disabled ensure the library is only loaded client-side after the page is interactive, keeping the main bundle lean." .
-
-oc:kn_66bf083f a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When adding analytics, logging, or error tracking libraries to a Next.js layout or page" ;
-    oc:directiveContent "Never import non-critical third-party libraries (analytics, logging, error tracking) as static imports in the initial bundle, as they block hydration and delay Time to Interactive." ;
-    oc:hasRationale "Static imports force these libraries to be parsed and executed before the page becomes interactive, degrading user-perceived performance." ;
+    oc:appliesToContext "When deferring third-party React components in Next.js" ;
+    oc:directiveContent "Use next/dynamic with { ssr: false } to load non-critical third-party components after client-side hydration completes." ;
+    oc:hasRationale "The { ssr: false } option ensures the component is never server-rendered, and dynamic() code-splits it into a separate chunk loaded on demand." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_909bdcb5 a oc:Constraint,
+oc:kn_3d496b3b a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When deciding whether a third-party library should use dynamic imports" ;
-    oc:directiveContent "Libraries that affect rendering or user interaction must NOT be deferred — only defer libraries that are purely observational (analytics, logging, error tracking)." ;
-    oc:hasRationale "Deferring a library that provides visible UI or handles user input would break functionality or cause layout shifts." .
-
-oc:kn_b23719a8 a oc:KnowledgeNode,
-        oc:SideEffect ;
-    oc:appliesToContext "When relying on deferred analytics or tracking for early page events" ;
-    oc:directiveContent "Deferred libraries will not be available during server-side rendering and may briefly be absent on the client immediately after page load." ;
-    oc:hasRationale "Events that fire before the deferred library loads may be missed, so critical tracking may need an alternative capture mechanism." ;
+    oc:appliesToContext "When evaluating whether to defer any third-party dependency" ;
+    oc:directiveContent "If a third-party library does not contribute to initial render or user interaction, it should be deferred until after hydration." ;
+    oc:hasRationale "Deferring non-critical scripts separates the critical rendering path from background initialization, improving Core Web Vitals." ;
     oc:severityLevel "MEDIUM" .
+
+oc:kn_c2d9014b a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "When relying on deferred analytics or tracking" ;
+    oc:directiveContent "Deferring third-party libraries means their functionality (e.g., analytics events) will not be available until after the component dynamically loads post-hydration." ;
+    oc:hasRationale "Early user interactions may not be captured if the deferred library hasn't loaded yet — this is an acceptable trade-off for faster initial page load." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_fd23eae9 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When adding analytics, logging, or error tracking to a Next.js app" ;
+    oc:directiveContent "Never import non-critical third-party libraries (analytics, logging, error tracking) as static imports in the root layout — they will block the initial bundle and delay hydration." ;
+    oc:hasRationale "Static imports force these libraries into the initial JavaScript bundle, increasing time-to-interactive even though they serve no user-facing purpose during initial page load." ;
+    oc:severityLevel "HIGH" .
+
+_:ref_b203629309345f1d a oc:WorkflowStep ;
+    dcterms:description "Identify third-party imports in root layout that are non-critical (analytics, logging, error tracking)" ;
+    oc:expectedOutcome "List of imports that can be safely deferred" ;
+    oc:stepId "identify-non-critical" .
+
+_:ref_ca2065c0d9e0eef7 a oc:WorkflowStep ;
+    dcterms:description "Replace the static import with next/dynamic, using .then(m => m.NamedExport) and { ssr: false }" ;
+    oc:expectedOutcome "Component is code-split into a separate chunk loaded only on client" ;
+    oc:stepDependsOn _:ref_b203629309345f1d ;
+    oc:stepId "convert-to-dynamic" .
 

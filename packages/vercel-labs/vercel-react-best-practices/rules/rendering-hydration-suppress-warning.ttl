@@ -7,51 +7,104 @@
 oc:skill_vercel_labs_vercel_react_best_practices_rendering_hydration_suppress_warning a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "rendering-hydration-suppress-warning" ;
-    skos:broader "Hydration mismatch handling technique" ;
+    skos:broader "Rendering technique" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "915bacb934e2927d84b37a3f3d225a47b309ac8f9e494ed2bcb66ce07c5676a2" ;
-    oc:differentia "uses React's suppressHydrationWarning to silence expected SSR/client rendering differences without masking real bugs" ;
+    oc:differentia "that suppresses expected hydration mismatch warnings in SSR frameworks without hiding real bugs" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
-    oc:handlesFailure oc:InvalidInput ;
-    oc:hasArgumentHint "component with dynamic SSR/client content" ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_2d6194dc,
-        oc:kn_37b4b20b,
-        oc:kn_535964db,
-        oc:kn_cac02fd5 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function Timestamp() {
+  return <span>{new Date().toLocaleString()}</span>
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-18" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Incorrect (known mismatch warnings):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "In SSR frameworks (e.g., Next.js), some values are intentionally different on server vs client (random IDs, dates, locale/timezone formatting). For these *expected* mismatches, wrap the dynamic text in an element with `suppressHydrationWarning` to prevent noisy warnings. Do not use this to hide real bugs. Don’t overuse it." ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function Timestamp() {
+  return (
+    <span suppressHydrationWarning>
+      {new Date().toLocaleString()}
+    </span>
+  )
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 5 ;
+                    oc:sourceLocation "lines 22-30" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "**Correct (suppress expected mismatch only):**" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Suppress Expected Hydration Mismatches" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Suppress Expected Hydration Mismatches
+impact: LOW-MEDIUM
+impactDescription: avoids noisy hydration warnings for known differences
+tags: rendering, hydration, ssr, nextjs
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:impartsKnowledge oc:kn_0f7a7cb3,
+        oc:kn_46ac470f,
+        oc:kn_95fbce08,
+        oc:kn_aab6e52d,
+        oc:kn_cff1d8db ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:EnvironmentReady ;
-    oc:resolvesIntent "fix noisy hydration mismatch warnings in Next.js",
-        "handle expected SSR/client mismatches",
-        "suppress hydration warnings" ;
-    oc:yieldsState oc:HydrationWarningSuppressed .
+    oc:resolvesIntent "fix ssr hydration mismatch",
+        "handle server client differences in nextjs",
+        "suppress hydration warnings" .
 
-oc:kn_2d6194dc a oc:Constraint,
+oc:kn_0f7a7cb3 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When rendering dynamic content that differs between SSR and client in Next.js or other SSR frameworks" ;
+    oc:directiveContent "Use suppressHydrationWarning only on elements containing values that are intentionally different between server and client (random IDs, dates, locale/timezone formatting)." ;
+    oc:hasRationale "Expected mismatches like timestamps and random IDs are unavoidable and produce noisy warnings that obscure real issues." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_46ac470f a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When building SSR/SSG pages with dynamic time or locale-dependent content" ;
+    oc:directiveContent "SSR frameworks produce hydration mismatch warnings when server-rendered HTML contains values that differ on the client (e.g., Date.now(), Math.random(), Intl formatting)." ;
+    oc:hasRationale "These mismatches are inherent to SSR and expected — they are not bugs but generate console noise that can mask real problems." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_95fbce08 a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "When applying suppressHydrationWarning to elements" ;
+    oc:directiveContent "suppressHydrationWarning only suppresses warnings for the text content of the element it is placed on, not its children or attributes." ;
+    oc:hasRationale "Understanding the scope of suppression prevents accidental hiding of deeper hydration mismatches in child components." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_aab6e52d a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When adding suppressHydrationWarning to components" ;
-    oc:directiveContent "Do not overuse suppressHydrationWarning — apply it only to specific elements with known dynamic content." ;
-    oc:hasRationale "Over-suppression defeats the purpose of hydration warnings as a debugging tool and can hide regressions." ;
+    oc:appliesToContext "When rendering date/time, locale-formatted values, or random IDs in SSR components" ;
+    oc:codeLanguage "tsx" ;
+    oc:directiveContent "<span suppressHydrationWarning>{new Date().toLocaleString()}</span>" .
+
+oc:kn_cff1d8db a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When considering suppressHydrationWarning usage" ;
+    oc:directiveContent "Do not use suppressHydrationWarning to hide real bugs or overuse it across components." ;
+    oc:hasRationale "Suppressing warnings indiscriminately masks genuine hydration errors that indicate broken SSR/CSR consistency, making real bugs harder to detect." ;
     oc:severityLevel "HIGH" .
-
-oc:kn_37b4b20b a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When placing suppressHydrationWarning on elements" ;
-    oc:directiveContent "suppressHydrationWarning only needs to be applied to the innermost element containing the dynamic text, not to parent wrappers." ;
-    oc:hasRationale "Scoping suppression to the minimal element reduces the risk of hiding unrelated hydration issues in child components." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_535964db a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When rendering values that are known to differ between server and client in SSR frameworks like Next.js" ;
-    oc:directiveContent "Wrap intentionally dynamic values (random IDs, dates, locale/timezone formatting) in an element with suppressHydrationWarning to silence expected SSR/client mismatches." ;
-    oc:hasRationale "Expected mismatches are benign and produce noisy console warnings that obscure real issues." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_cac02fd5 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When considering adding suppressHydrationWarning to any component" ;
-    oc:directiveContent "Never use suppressHydrationWarning to hide real bugs or actual unintentional rendering mismatches." ;
-    oc:hasRationale "Suppressing real hydration bugs masks underlying logic errors and can lead to broken UI states that go undetected." ;
-    oc:severityLevel "CRITICAL" .
 

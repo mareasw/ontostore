@@ -10,54 +10,161 @@ oc:skill_obra_superpowers_subagent_driven_development_code_quality_reviewer_prom
     skos:broader "Prompt template" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/obra/superpowers/subagent-driven-development" ;
     oc:contentHash "06d1e7c2287e5a00bd1809bf39038abd5f413b4cf917c37d30f00c48f6293421" ;
-    oc:differentia "that dispatches a code quality reviewer subagent to verify implementation is clean, tested, and maintainable after spec compliance passes" ;
+    oc:differentia "that dispatches a code quality reviewer subagent to verify implementation cleanliness, testability, and maintainability after spec compliance passes" ;
     oc:extends oc:skill_obra_superpowers_subagent_driven_development ;
-    oc:handlesFailure oc:CriticalIssuesFound ;
-    oc:hasAllowedTool "Task" ;
+    oc:handlesFailure oc:CodeQualityIssuesFound ;
     oc:hasArgumentHint "WHAT_WAS_IMPLEMENTED, PLAN_OR_REQUIREMENTS, BASE_SHA, HEAD_SHA, DESCRIPTION" ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_1790d7bf,
-        oc:kn_3a2af6e5,
-        oc:kn_620471da,
-        oc:kn_90d51f78,
-        oc:kn_a96ae6d0 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 5 ;
+                    oc:textContent "**In addition to standard code quality concerns, the reviewer should check:**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 7 ;
+                    oc:textContent "**Code reviewer returns:** Strengths, Issues (Critical/Important/Minor), Assessment" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 3 ;
+                    oc:textContent "**Only dispatch after spec compliance review passes.**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Use this template when dispatching a code quality reviewer subagent." ],
+                [ a oc:BulletList ;
+                    oc:blockType "bullet_list" ;
+                    oc:contentOrder 6 ;
+                    oc:hasItem [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 4 ;
+                            oc:itemText "Did this implementation create new files that are already large, or significantly grow existing files? (Don't flag pre-existing file sizes — focus on what this change contributed.)" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 3 ;
+                            oc:itemText "Is the implementation following the file structure from the plan?" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 1 ;
+                            oc:itemText "Does each file have one clear responsibility with a well-defined interface?" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 2 ;
+                            oc:itemText "Are units decomposed so they can be understood and tested independently?" ] ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """Task tool (superpowers:code-reviewer):
+  Use template at requesting-code-review/code-reviewer.md
+
+  WHAT_WAS_IMPLEMENTED: [from implementer's report]
+  PLAN_OR_REQUIREMENTS: Task N from [plan-file]
+  BASE_SHA: [commit before task]
+  HEAD_SHA: [current commit]
+  DESCRIPTION: [task summary]
+""" ;
+                    oc:codeLanguage "" ;
+                    oc:contentOrder 4 ;
+                    oc:sourceLocation "lines 9-18" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Purpose:** Verify implementation is well-built (clean, tested, maintainable)" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Code Quality Reviewer Prompt Template" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "Dispatch code quality reviewer subagent and handle results after spec compliance is verified." ;
+            oc:hasStep [ a oc:WorkflowStep ;
+                    dcterms:description "If reviewer approves, mark task complete. If issues found, dispatch implementer to fix then re-dispatch reviewer." ;
+                    oc:expectedOutcome "Code quality is approved with no open issues" ;
+                    oc:stepDependsOn _:ref_e42422d41dd549c6 ;
+                    oc:stepId "handle-review-result" ],
+                _:ref_644660b26bd12b0b,
+                _:ref_90ca716363428bd3,
+                _:ref_e42422d41dd549c6 ;
+            oc:workflowId "code-quality-review" ;
+            oc:workflowName "Code Quality Review Dispatch" ] ;
+    oc:impartsKnowledge oc:kn_02f23a2a,
+        oc:kn_112092cf,
+        oc:kn_1790d7bf,
+        oc:kn_3cf9f45c,
+        oc:kn_6ad490be,
+        oc:kn_9cbafec3,
+        oc:kn_a7b55163 ;
     oc:isUserInvocable false ;
-    oc:nature "Concept" ;
-    oc:requiresState oc:SpecReviewPassed ;
+    oc:nature "Work" ;
+    oc:requiresState oc:SpecComplianceVerified ;
     oc:resolvesIntent "dispatch code quality reviewer subagent",
-        "review code quality of implemented tasks",
-        "verify implementation is clean tested and maintainable" ;
-    oc:yieldsState oc:CodeQualityReviewed .
+        "review code quality after spec compliance passes",
+        "verify implementation is clean and maintainable" ;
+    oc:yieldsState oc:CodeQualityApproved .
+
+oc:kn_02f23a2a a oc:KnowledgeNode,
+        oc:Prerequisite ;
+    oc:appliesToContext "Before dispatching code quality reviewer" ;
+    oc:directiveContent "Requires spec compliance review to have passed before dispatching. Requires BASE_SHA (commit before task) and HEAD_SHA (current commit) to identify the diff." .
+
+oc:kn_112092cf a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Before dispatching code quality reviewer" ;
+    oc:directiveContent "Code quality review must ONLY be dispatched after spec compliance review passes." ;
+    oc:hasRationale "Reviewing code quality on spec-noncompliant code wastes effort — structural changes from spec fixes may invalidate quality feedback." ;
+    oc:severityLevel "CRITICAL" .
 
 oc:kn_1790d7bf a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When reviewing file structure and module decomposition" ;
+    oc:appliesToContext "When reviewing file-level code quality" ;
     oc:directiveContent "Each file should have one clear responsibility with a well-defined interface, and units should be decomposed for independent understanding and testing." ;
-    oc:hasRationale "Single-responsibility files with clear interfaces enable maintainability, testability, and parallel development." .
+    oc:hasRationale "Single-responsibility files are easier to test, review, and maintain; independent units enable parallel development and reduce coupling." .
 
-oc:kn_3a2af6e5 a oc:KnowledgeNode,
-        oc:SuccessIndicator ;
-    oc:appliesToContext "When evaluating the reviewer's output" ;
-    oc:directiveContent "The code reviewer returns a structured report containing Strengths, Issues (categorized as Critical/Important/Minor), and an overall Assessment." ;
-    oc:hasRationale "Structured output with severity categorization enables the orchestrating agent to make informed decisions about whether to proceed or iterate." .
+oc:kn_3cf9f45c a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "Full code quality review cycle" ;
+    oc:directiveContent "1. Wait for spec compliance review to pass 2. Gather BASE_SHA and HEAD_SHA from git 3. Dispatch code quality reviewer subagent via Task tool with template from requesting-code-review 4. If issues found, dispatch implementer to fix then re-review 5. Repeat until approved" ;
+    oc:hasRationale "Structured loop ensures all quality issues are resolved before marking task complete." ;
+    oc:stepOrder 1 .
 
-oc:kn_620471da a oc:AntiPattern,
+oc:kn_6ad490be a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When evaluating file size concerns during review" ;
-    oc:directiveContent "Do not flag pre-existing file sizes — focus only on files that this change contributed to or created." ;
-    oc:hasRationale "Reviewing scope creep from pre-existing code wastes review time and dilutes focus on the actual change's impact." ;
-    oc:severityLevel "MEDIUM" .
+    oc:appliesToContext "During code quality review" ;
+    oc:directiveContent "Check four quality dimensions: single responsibility per file, independent testability of units, adherence to planned file structure, and file size growth from this change only." ;
+    oc:hasRationale "These four checks catch decomposition problems, scope creep, and hidden complexity that standard code review might miss." .
 
-oc:kn_90d51f78 a oc:Constraint,
+oc:kn_9cbafec3 a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "Before dispatching this subagent" ;
-    oc:directiveContent "Only dispatch the code quality reviewer after spec compliance review has passed." ;
-    oc:hasRationale "Code quality review is meaningless if the implementation doesn't meet the specification requirements first." ;
-    oc:severityLevel "CRITICAL" .
+    oc:appliesToContext "When reviewing file sizes" ;
+    oc:directiveContent "Do not flag pre-existing file sizes — only flag new files that are already large or significant growth to existing files contributed by this change." ;
+    oc:hasRationale "Flagging pre-existing issues creates noise and distracts from the quality of the current change under review." .
 
-oc:kn_a96ae6d0 a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "At the start of code quality review" ;
-    oc:directiveContent "Verify that the implementation follows the file structure defined in the plan before proceeding with deeper quality checks." ;
-    oc:hasRationale "Structural alignment with the plan ensures the implementation was built as designed, making deeper review meaningful." .
+oc:kn_a7b55163 a oc:KnowledgeNode,
+        oc:OutputFormat ;
+    oc:appliesToContext "Code quality reviewer return format" ;
+    oc:directiveContent """Strengths: [what's good]
+Issues:
+  Critical: [must fix]
+  Important: [should fix]
+  Minor: [nice to fix]
+Assessment: [approved/changes needed]""" ;
+    oc:templateVariables "Assessment",
+        "Critical",
+        "Important",
+        "Minor",
+        "Strengths" .
+
+_:ref_644660b26bd12b0b a oc:WorkflowStep ;
+    dcterms:description "Collect BASE_SHA (commit before task started) and HEAD_SHA (current commit) for the reviewer" ;
+    oc:expectedOutcome "Both SHAs are available for the diff" ;
+    oc:stepDependsOn _:ref_90ca716363428bd3 ;
+    oc:stepId "gather-git-shas" .
+
+_:ref_90ca716363428bd3 a oc:WorkflowStep ;
+    dcterms:description "Confirm spec compliance review has passed before proceeding" ;
+    oc:expectedOutcome "Spec compliance is verified as passing" ;
+    oc:stepId "verify-spec-passed" .
+
+_:ref_e42422d41dd549c6 a oc:WorkflowStep ;
+    dcterms:description "Dispatch code quality reviewer subagent using Task tool with template, providing WHAT_WAS_IMPLEMENTED, PLAN_OR_REQUIREMENTS, BASE_SHA, HEAD_SHA, and DESCRIPTION" ;
+    oc:expectedOutcome "Reviewer subagent analyzes the code change" ;
+    oc:stepDependsOn _:ref_644660b26bd12b0b ;
+    oc:stepId "dispatch-reviewer" .
 

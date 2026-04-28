@@ -10,93 +10,959 @@ oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_agp9_migration_migration_full
     skos:broader "Migration guide" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/kotlin/kotlin-agent-skills/kotlin-tooling-agp9-migration" ;
     oc:contentHash "3cb0f06dd7c213603b39b086fe33685fa00d56d14bfbd59c53569a5faa1e21ef" ;
-    oc:differentia "Extracts all platform entry points from a monolithic KMP module into per-platform application modules for AGP 9.0 compatibility" ;
+    oc:differentia "Extracts all platform entry points from a monolithic KMP module into dedicated per-platform application modules" ;
     oc:extends oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_agp9_migration ;
     oc:handlesFailure oc:BuildFailure,
-        oc:MissingEntryPoint,
-        oc:NamespaceCollision,
-        oc:XcodeBuildFailure ;
-    oc:hasArgumentHint "project directory path (root of KMP project)" ;
+        oc:CrossReferenceBroken,
+        oc:XcodeConfigError ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_046ecf45,
-        oc:kn_193f61bc,
-        oc:kn_3896c7d9,
-        oc:kn_a373a96a,
-        oc:kn_b34b3f59,
-        oc:kn_ba8088d8,
-        oc:kn_c460b4a1,
-        oc:kn_e4f981bf ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "This guide covers the complete extraction of platform-specific entry points from a monolithic `composeApp` module into dedicated per-platform application modules. This is the most thorough migration path and results in a clean architecture where `shared` contains only cross-platform code." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "For projects that include a Ktor/Spring server:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """shared/                     # KMP library (shared models, API contracts)
+androidApp/
+iosApp/
+server/                     # JVM server application
+  build.gradle.kts          # kotlin("jvm") + ktor/spring plugin
+  src/main/kotlin/
+""" ;
+                            oc:codeLanguage "" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 392-399" ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """plugins {
+    alias(libs.plugins.kotlinJvm)
+    alias(libs.plugins.ktor)         // or spring boot
+    application
+}
+
+application {
+    mainClass.set("com.example.server.ApplicationKt")
+}
+
+dependencies {
+    implementation(project(":shared"))
+    implementation(libs.ktor.server.core)
+    implementation(libs.ktor.server.netty)
+    implementation(libs.logback.classic)
+}
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 403-420" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 3 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "If shared was renamed, update the dependency path." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "If shared previously had a `jvm()` target that the server depended on, verify it still exists after restructuring." ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "The server module is a plain JVM module. It depends on `:shared` for common models and API contracts. It is unaffected by the AGP 9.0 migration except that:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 23 ;
+                            oc:sectionTitle "server/build.gradle.kts" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 22 ;
+                    oc:sectionTitle "Variant: Server (Backend Module)" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "For projects where each platform has its own native UI and only business logic is shared:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """sharedLogic/                # Pure KMP library (no Compose)
+  build.gradle.kts          # kotlin.multiplatform + com.android.kotlin.multiplatform.library
+  src/
+    commonMain/kotlin/      # ViewModels, repositories, models, networking
+    androidMain/kotlin/     # Android-specific implementations
+    iosMain/kotlin/         # iOS-specific implementations
+
+sharedUI/                   # Optional: Compose Multiplatform UI
+  build.gradle.kts          # kotlin.multiplatform + com.android.kotlin.multiplatform.library + compose
+  src/
+    commonMain/kotlin/      # Shared composables
+    androidMain/kotlin/     # Android-specific composables
+
+androidApp/                 # Native Android app
+  build.gradle.kts
+  src/main/                 # Android UI (Compose or XML), depends on sharedLogic (and optionally sharedUI)
+
+iosApp/                     # Native iOS app (SwiftUI/UIKit)
+  # Depends on sharedLogic framework
+""" ;
+                            oc:codeLanguage "" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 323-343" ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 3 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "iOS uses SwiftUI and does not want Compose Multiplatform" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Desktop is not a target" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "You want to minimize the shared surface area" ] ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """plugins {
+    alias(libs.plugins.kotlinMultiplatform)
+    alias(libs.plugins.androidKmpLibrary)
+}
+
+kotlin {
+    android {
+        namespace = "com.example.shared.logic"
+        compileSdk = 35
+        minSdk = 24
+    }
+
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
+
+    listOf(iosX64(), iosArm64(), iosSimulatorArm64()).forEach {
+        it.binaries.framework {
+            baseName = "SharedLogic"
+            isStatic = true
+        }
+    }
+
+    sourceSets {
+        commonMain.dependencies {
+            implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.ktor.client.core)
+            implementation(libs.kotlinx.serialization.json)
+        }
+    }
+}
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 347-379" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "This variant is useful when:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 21 ;
+                            oc:sectionTitle "sharedLogic/build.gradle.kts" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 20 ;
+                    oc:sectionTitle "Variant: Native UI (sharedLogic + sharedUI Split)" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Search all `build.gradle.kts` files for references to `:composeApp`:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """// Before
+implementation(project(":composeApp"))
+
+// After
+implementation(project(":shared"))
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 303-309" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 18 ;
+                            oc:sectionTitle "3. Update Cross-Module Dependencies" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 2 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Or manually update `.idea/modules.xml` and related files" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Delete `.idea/` and re-import" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "If using IntelliJ/Android Studio, the IDE may cache the old module name. Either:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 19 ;
+                            oc:sectionTitle "4. Update .idea / Workspace Files" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """// Before
+include(":composeApp")
+
+// After
+include(":shared")
+include(":androidApp")
+include(":desktopApp")
+include(":webApp")
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 288-297" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 17 ;
+                            oc:sectionTitle "2. Update settings.gradle.kts" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """mv composeApp shared
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 282-284" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 16 ;
+                            oc:sectionTitle "1. Rename the Directory" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 15 ;
+                    oc:sectionTitle "Module Rename: composeApp to shared" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """plugins {
+    alias(libs.plugins.kotlinJvm)
+    alias(libs.plugins.composeMultiplatform)
+    alias(libs.plugins.composeCompiler)
+}
+
+dependencies {
+    implementation(project(":shared"))
+    implementation(compose.desktop.currentOs)
+    implementation(compose.runtime)
+    implementation(compose.foundation)
+    implementation(compose.material3)
+}
+
+compose.desktop {
+    application {
+        mainClass = "com.example.app.MainKt"
+
+        nativeDistributions {
+            targetFormats(
+                org.jetbrains.compose.desktop.application.dsl.TargetFormat.Dmg,
+                org.jetbrains.compose.desktop.application.dsl.TargetFormat.Msi,
+                org.jetbrains.compose.desktop.application.dsl.TargetFormat.Deb
+            )
+            packageName = "com.example.app"
+            packageVersion = "1.0.0"
+
+            macOS {
+                iconFile.set(project.file("icons/icon.icns"))
+            }
+            windows {
+                iconFile.set(project.file("icons/icon.ico"))
+            }
+            linux {
+                iconFile.set(project.file("icons/icon.png"))
+            }
+        }
+    }
+}
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 39-79" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "Create desktopApp/build.gradle.kts" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 6 ;
+                                    oc:textContent "If you have shared JVM code that both Android and Desktop use, you have two options:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """kotlin {
+    jvm("desktop")
+    // ...
+    sourceSets {
+        val desktopMain by getting {
+            dependencies {
+                implementation(compose.desktop.currentOs)
+            }
+        }
+    }
+}
+compose.desktop {
+    application {
+        mainClass = "com.example.app.MainKt"
+        nativeDistributions { ... }
+    }
+}
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 3 ;
+                                    oc:sourceLocation "lines 113-131" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent "**After (in shared):**" ],
+                                _:ref_6c5b6592e49dbc75,
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "In `shared/build.gradle.kts`, remove the `jvm(\"desktop\")` target entirely. The desktop target only needs to exist in `desktopApp`." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Before (in composeApp):**" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """kotlin {
+    // jvm("desktop") -- REMOVED
+    // No desktop target in shared module
+    // No compose.desktop block
+}
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 5 ;
+                                    oc:sourceLocation "lines 134-140" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 6 ;
+                            oc:sectionTitle "Remove Desktop from shared" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "Update to call shared code:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """// desktopApp/src/main/kotlin/com/example/app/main.kt
+package com.example.app
+
+import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.application
+import com.example.shared.App
+
+fun main() = application {
+    Window(
+        onCloseRequest = ::exitApplication,
+        title = "My App"
+    ) {
+        App()
+    }
+}
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 3 ;
+                                    oc:sourceLocation "lines 90-106" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """composeApp/src/desktopMain/kotlin/com/example/app/main.kt
+  --> desktopApp/src/main/kotlin/com/example/app/main.kt
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 83-86" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 5 ;
+                            oc:sectionTitle "Move Desktop Entry Point" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Desktop Extraction" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "iOS is typically already a separate Xcode project. The main considerations during restructure:" ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """// shared/build.gradle.kts
+kotlin {
+    listOf(iosX64(), iosArm64(), iosSimulatorArm64()).forEach {
+        it.binaries.framework {
+            baseName = "Shared"  // Update if renamed from "ComposeApp"
+            isStatic = true
+        }
+    }
+}
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 235-245" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 13 ;
+                            oc:sectionTitle "Framework Export Stays in shared" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "If the module was renamed from `composeApp` to `shared`:" ],
+                                _:ref_5de00e5ff2cd55f0 ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 14 ;
+                            oc:sectionTitle "Update Xcode Project" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 12 ;
+                    oc:sectionTitle "iOS Handling" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """rootProject.name = "MyProject"
+
+pluginManagement {
+    repositories {
+        google {
+            content {
+                includeGroupByRegex("com\\\\.android.*")
+                includeGroupByRegex("com\\\\.google.*")
+                includeGroupByRegex("androidx.*")
+            }
+        }
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+include(":shared")
+include(":androidApp")
+include(":desktopApp")
+include(":webApp")
+// include(":server")    // if applicable
+""" ;
+                            oc:codeLanguage "kotlin" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 430-459" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 24 ;
+                    oc:sectionTitle "settings.gradle.kts -- Final State" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """shared/                    # KMP library (all shared code)
+  build.gradle.kts         # kotlin.multiplatform + com.android.kotlin.multiplatform.library
+  src/
+    commonMain/kotlin/     # Shared business logic + UI
+    androidMain/kotlin/    # Android expect/actual implementations
+    iosMain/kotlin/        # iOS expect/actual implementations
+
+androidApp/                # Android application entry point
+  build.gradle.kts         # com.android.application
+  src/main/
+
+desktopApp/                # Desktop (JVM) application entry point
+  build.gradle.kts         # org.jetbrains.compose + application {}
+  src/main/kotlin/
+
+webApp/                    # Wasm/JS web application entry point
+  build.gradle.kts         # kotlin.multiplatform + wasmJs target
+  src/wasmJsMain/kotlin/
+
+iosApp/                    # iOS application (Xcode project, usually already separate)
+  iosApp.xcodeproj/
+""" ;
+                            oc:codeLanguage "" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 9-31" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Target Architecture" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "[ ] Move `main()` functions from `composeApp/src/{platform}Main/` to respective app modules" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "[ ] Create `webApp/` with wasmJs target and `binaries.executable()`" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 12 ;
+                                    oc:itemText "[ ] Update Xcode project (framework name, Gradle task path, Swift imports)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 8 ;
+                                    oc:itemText "[ ] Convert shared to KMP library plugin (`com.android.kotlin.multiplatform.library`)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "[ ] Create `androidApp/` with pure Android application plugin (see MIGRATION-APP-SPLIT.md)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 7 ;
+                                    oc:itemText "[ ] Rename `composeApp` to `shared`" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 13 ;
+                                    oc:itemText "[ ] Verify each app module builds independently" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 9 ;
+                                    oc:itemText "[ ] Remove platform app targets from shared (keep only library targets)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 10 ;
+                                    oc:itemText "[ ] Update all `settings.gradle.kts` includes" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 14 ;
+                                    oc:itemText "[ ] Run all platform targets to confirm functionality" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 6 ;
+                                    oc:itemText "[ ] Move `wasmJs { browser {} }` config to `webApp`" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "[ ] Move `compose.desktop.application {}` config to `desktopApp`" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "[ ] Create `desktopApp/` with compose desktop plugin and `application {}` block" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 11 ;
+                                    oc:itemText "[ ] Update all `project(\":composeApp\")` references to `project(\":shared\")`" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 25 ;
+                    oc:sectionTitle "Quick Checklist" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """// webApp/src/wasmJsMain/kotlin/com/example/app/main.kt
+package com.example.app
+
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.window.CanvasBasedWindow
+import com.example.shared.App
+
+@OptIn(ExperimentalComposeUiApi::class)
+fun main() {
+    CanvasBasedWindow(canvasElementId = "ComposeTarget") {
+        App()
+    }
+}
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 3 ;
+                                    oc:sourceLocation "lines 190-204" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """composeApp/src/wasmJsMain/kotlin/com/example/app/main.kt
+  --> webApp/src/wasmJsMain/kotlin/com/example/app/main.kt
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 183-186" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "Update to call shared code:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 9 ;
+                            oc:sectionTitle "Move Web Entry Point" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """composeApp/src/wasmJsMain/resources/index.html
+  --> webApp/src/wasmJsMain/resources/index.html
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 208-211" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "Update `index.html` if the output JS filename changed." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 10 ;
+                            oc:sectionTitle "Move Web Resources" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "In `shared/build.gradle.kts`, remove the `wasmJs {}` target:" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "If you need shared Wasm-compatible code, keep `wasmJs()` in shared as a library target (no `binaries.executable()`, no `browser {}` config)." ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """kotlin {
+    // wasmJs { ... } -- REMOVED
+}
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 219-223" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 11 ;
+                            oc:sectionTitle "Remove WasmJS from shared" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """plugins {
+    alias(libs.plugins.kotlinMultiplatform)
+    alias(libs.plugins.composeMultiplatform)
+    alias(libs.plugins.composeCompiler)
+}
+
+kotlin {
+    wasmJs {
+        browser {
+            commonWebpackConfig {
+                outputFileName = "app.js"
+            }
+        }
+        binaries.executable()
+    }
+
+    sourceSets {
+        wasmJsMain.dependencies {
+            implementation(project(":shared"))
+            implementation(compose.runtime)
+            implementation(compose.foundation)
+            implementation(compose.material3)
+            implementation(compose.ui)
+        }
+    }
+}
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 152-179" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 8 ;
+                            oc:sectionTitle "Create webApp/build.gradle.kts" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 7 ;
+                    oc:sectionTitle "Web/WasmJS Extraction" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Full Restructure: Extracting All Platform Entry Points" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "Complete extraction of all platform entry points from monolithic composeApp into per-platform app modules, resulting in clean shared library architecture." ;
+            oc:hasStep _:ref_054a78417c8dfbf0,
+                _:ref_09ad8043c214db9c,
+                _:ref_3f636c6ef1eda942,
+                _:ref_411ce3b649e479c2,
+                _:ref_52e174fdab04b086,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Verify each app module builds independently and run all platform targets to confirm functionality" ;
+                    oc:expectedOutcome "All platforms build and run correctly after restructure" ;
+                    oc:stepDependsOn _:ref_3f636c6ef1eda942,
+                        _:ref_411ce3b649e479c2 ;
+                    oc:stepId "verify" ],
+                _:ref_843487a4df8c23a6,
+                _:ref_fa19ac2f46d5cb71 ;
+            oc:workflowId "full-restructure" ;
+            oc:workflowName "Full KMP Project Restructure" ],
+        _:ref_5de00e5ff2cd55f0,
+        _:ref_6c5b6592e49dbc75 ;
+    oc:impartsKnowledge oc:kn_23ddd862,
+        oc:kn_2512cac7,
+        oc:kn_25b7dce3,
+        oc:kn_a39e15c4,
+        oc:kn_af9830c4,
+        oc:kn_bc8a90e4,
+        oc:kn_d04a4b94,
+        oc:kn_d415e600,
+        oc:kn_dc7e1d36,
+        oc:kn_e5ff98b5,
+        oc:kn_f2ef628a,
+        oc:kn_f447016e ;
     oc:isUserInvocable true ;
     oc:nature "Work" ;
-    oc:requiresState oc:AGP9MigrationStarted,
-        oc:AndroidAppExtracted,
+    oc:requiresState oc:AndroidAppSplitComplete,
         oc:ProjectAnalyzed ;
-    oc:resolvesIntent "configure full multi-platform KMP project structure",
-        "extract desktop app module from monolithic KMP module",
-        "extract web/wasm app module from monolithic KMP module",
+    oc:resolvesIntent "extract desktop app module from monolithic KMP project",
+        "extract web/wasm app module from monolithic KMP project",
+        "migrate to JetBrains default KMP project structure",
         "rename composeApp to shared module",
-        "restructure KMP project into per-platform modules",
-        "update Xcode project after module rename" ;
+        "restructure KMP project into per-platform app modules" ;
     oc:yieldsState oc:DesktopAppExtracted,
-        oc:FullRestructureComplete,
         oc:ModuleRenamedToShared,
-        oc:SettingsGradleUpdated,
-        oc:WebAppExtracted,
-        oc:XcodeProjectUpdated .
+        oc:ProjectRestructured,
+        oc:WebAppExtracted .
 
-oc:kn_046ecf45 a oc:KnowledgeNode,
-        oc:WorkflowStrategy ;
-    oc:appliesToContext "When performing a full restructure of a monolithic KMP module" ;
-    oc:directiveContent "Apply Path B (Android app split) first before extracting desktop, web, or other platform modules. The Android split is mandatory; full restructure is layered on top." ;
-    oc:hasRationale "The Android split is a hard prerequisite for AGP 9.0 compliance. Platform extractions build on the resulting shared library module." ;
+oc:kn_23ddd862 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "After module rename" ;
+    oc:directiveContent "After renaming composeApp to shared, the IDE caches the old module name. Delete .idea/ and re-import, or manually update .idea/modules.xml and related files." ;
+    oc:hasRationale "IntelliJ/Android Studio caches module metadata and will show errors if the cache is stale." .
+
+oc:kn_2512cac7 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing the target architecture" ;
+    oc:directiveContent "The shared module should contain ONLY cross-platform library code. Each platform gets its own thin application module that depends on shared and provides only the platform entry point." ;
+    oc:hasRationale "This separation is the new JetBrains default and prevents AGP 9.0 incompatibility by keeping application plugins out of KMP library modules." .
+
+oc:kn_25b7dce3 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Creating webApp/build.gradle.kts" ;
+    oc:codeLanguage "kotlin" ;
+    oc:directiveContent """plugins {
+    alias(libs.plugins.kotlinMultiplatform)
+    alias(libs.plugins.composeMultiplatform)
+    alias(libs.plugins.composeCompiler)
+}
+kotlin {
+    wasmJs {
+        browser { commonWebpackConfig { outputFileName = "app.js" } }
+        binaries.executable()
+    }
+    sourceSets {
+        wasmJsMain.dependencies {
+            implementation(project(":shared"))
+            implementation(compose.runtime)
+            implementation(compose.foundation)
+            implementation(compose.material3)
+            implementation(compose.ui)
+        }
+    }
+}""" .
+
+oc:kn_a39e15c4 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "iOS Xcode project update" ;
+    oc:directiveContent "When updating Xcode after rename: 1. Change Swift imports from ComposeApp to Shared (must match baseName). 2. Update Gradle task path to :shared:embedAndSignAppleFrameworkForXcode. 3. Rename @main struct if named after old module. 4. Update framework search paths. 5. Update CocoaPods spec name if used." ;
+    oc:stepOrder 3 .
+
+oc:kn_af9830c4 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Configuring iOS framework export in shared module" ;
+    oc:codeLanguage "kotlin" ;
+    oc:directiveContent """// iOS framework export stays in shared/build.gradle.kts
+kotlin {
+    listOf(iosX64(), iosArm64(), iosSimulatorArm64()).forEach {
+        it.binaries.framework {
+            baseName = "Shared"
+            isStatic = true
+        }
+    }
+}""" .
+
+oc:kn_bc8a90e4 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Before starting desktop/web extraction" ;
+    oc:directiveContent "Path B (Android app split) must be applied first before extracting other platform modules. The full restructure builds on top of the mandatory Android extraction." ;
+    oc:hasRationale "The Android split is mandatory for AGP 9.0; other extractions are optional but recommended for clean architecture." ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_193f61bc a oc:AntiPattern,
+oc:kn_d04a4b94 a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When cleaning up the shared module after extracting platform app modules" ;
-    oc:directiveContent "Do NOT keep platform application targets (jvm('desktop') with application block, wasmJs with binaries.executable()) in the shared module after extraction. Remove them entirely or keep only as library targets without executable config." ;
-    oc:hasRationale "Leaving executable targets in shared conflicts with the library role and causes build errors with the com.android.kotlin.multiplatform.library plugin." ;
+    oc:appliesToContext "Native UI variant" ;
+    oc:directiveContent "For projects where iOS uses SwiftUI natively (not Compose), split shared into sharedLogic (pure KMP, no Compose) and sharedUI (optional Compose UI) to minimize the shared surface area." ;
+    oc:hasRationale "Reduces binary size and avoids pulling Compose dependencies into iOS when only business logic is needed." .
+
+oc:kn_d415e600 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Creating desktopApp/build.gradle.kts" ;
+    oc:codeLanguage "kotlin" ;
+    oc:directiveContent """plugins {
+    alias(libs.plugins.kotlinJvm)
+    alias(libs.plugins.composeMultiplatform)
+    alias(libs.plugins.composeCompiler)
+}
+dependencies {
+    implementation(project(":shared"))
+    implementation(compose.desktop.currentOs)
+    implementation(compose.runtime)
+    implementation(compose.foundation)
+    implementation(compose.material3)
+}
+compose.desktop {
+    application {
+        mainClass = "com.example.app.MainKt"
+        nativeDistributions { /* platform configs */ }
+    }
+}""" .
+
+oc:kn_dc7e1d36 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "Full restructure execution" ;
+    oc:directiveContent "1. Apply Path B (Android split) first. 2. Create desktopApp/ with compose desktop plugin + application block. 3. Create webApp/ with wasmJs target + binaries.executable(). 4. Move each platform's main() to its app module. 5. Move compose.desktop config to desktopApp. 6. Move wasmJs browser config to webApp. 7. Rename composeApp to shared. 8. Convert shared to KMP library plugin. 9. Remove platform app targets from shared. 10. Update settings.gradle.kts includes. 11. Update all project references. 12. Update Xcode project. 13. Verify each app module builds independently." ;
+    oc:stepOrder 1 .
+
+oc:kn_e5ff98b5 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "Module rename phase" ;
+    oc:directiveContent "When renaming composeApp to shared: 1. Rename directory (mv composeApp shared). 2. Update settings.gradle.kts includes. 3. Update all cross-module dependencies from :composeApp to :shared. 4. Delete .idea/ and re-import or update .idea/modules.xml." ;
+    oc:stepOrder 2 .
+
+oc:kn_f2ef628a a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When removing desktop/web targets from shared module" ;
+    oc:directiveContent "Never leave platform application targets (jvm(\"desktop\"), wasmJs with binaries.executable(), compose.desktop block) in the shared module after extraction. Only library targets belong in shared." ;
+    oc:hasRationale "Leaving application targets in shared defeats the purpose of the restructure and creates circular dependencies." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_3896c7d9 a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When not all platforms use Compose Multiplatform for UI" ;
-    oc:directiveContent "For projects where iOS uses native SwiftUI and does not want Compose Multiplatform, split shared into sharedLogic (no Compose) and sharedUI (optional Compose) to minimize the shared surface area." ;
-    oc:hasRationale "Forcing Compose dependencies on platforms that use native UI bloats binary size and introduces unnecessary dependencies." ;
-    oc:severityLevel "LOW" .
+oc:kn_f447016e a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When shared JVM code exists between Android and Desktop" ;
+    oc:directiveContent "If shared JVM code is needed by both Android and Desktop, either keep a jvm() target in shared (without application block) or put all shared code in commonMain and rely on JVM dependency from desktopApp." ;
+    oc:hasRationale "Removing the desktop target from shared may break shared JVM source sets; these options preserve the shared code without keeping the application config." .
 
-oc:kn_a373a96a a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "Before beginning the full restructure process" ;
-    oc:directiveContent "Before starting full restructure, verify that all platform entry points (main functions) exist in the monolithic module and identify their exact locations (desktopMain, wasmJsMain, etc.)." ;
-    oc:hasRationale "Missing or misidentified entry points lead to incomplete extractions and runtime failures on affected platforms." ;
-    oc:severityLevel "MEDIUM" .
+_:ref_063e845f4fda3cd9 a oc:CodeExample ;
+    oc:blockType "code_block" ;
+    oc:codeContent """# In Xcode Build Phases > Run Script
+cd "$SRCROOT/.."
+./gradlew :shared:embedAndSignAppleFrameworkForXcode
+""" ;
+    oc:codeLanguage "bash" ;
+    oc:contentOrder 1 ;
+    oc:sourceLocation "lines 254-258" .
 
-oc:kn_b34b3f59 a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When restructuring iOS platform support" ;
-    oc:directiveContent "iOS framework export configuration (binaries.framework with baseName) MUST stay in the shared module, not move to iosApp. The iosApp module is typically an Xcode project that consumes the exported framework." ;
-    oc:hasRationale "The framework is built by the KMP Gradle build and consumed by Xcode. Moving it out of shared breaks the iOS build pipeline." ;
-    oc:severityLevel "HIGH" .
+_:ref_2e87f92d9ecd27b9 a oc:WorkflowStep ;
+    dcterms:description "Keep a `jvm()` target in shared (without the `application {}` block) and use intermediate source sets." ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
 
-oc:kn_ba8088d8 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "After completing all module extractions and before declaring migration done" ;
-    oc:directiveContent "After extraction, verify each app module builds independently before testing cross-module integration. Run ./gradlew :androidApp:assembleDebug, ./gradlew :desktopApp:run, ./gradlew :webApp:build separately." ;
-    oc:hasRationale "Isolating build failures to individual modules is far easier than debugging a full project build failure after multiple simultaneous changes." ;
-    oc:severityLevel "MEDIUM" .
+_:ref_44a4f7072c9d1815 a oc:WorkflowStep ;
+    dcterms:description "**Framework import:** Change `import ComposeApp` to `import Shared` in all `.swift` files (must match `baseName` in the framework config)." ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
 
-oc:kn_c460b4a1 a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When creating desktopApp, webApp, or any per-platform application module" ;
-    oc:directiveContent "Each platform-specific application module should only contain its entry point (main function), platform-specific configuration, and a dependency on the shared module. All business logic and shared UI stays in the shared module." ;
-    oc:hasRationale "Keeps the architecture clean and ensures shared code remains truly cross-platform. Violating this creates duplicated logic and maintenance burden." ;
-    oc:severityLevel "HIGH" .
+_:ref_46dd5a31f77d6130 a oc:WorkflowStep ;
+    dcterms:description "**Cocoapods (if used):** Update the pod spec name:" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild [ a oc:CodeExample ;
+            oc:blockType "code_block" ;
+            oc:codeContent """// shared/build.gradle.kts
+kotlin {
+    cocoapods {
+        name = "Shared"
+        summary = "Shared KMP module"
+        // ...
+    }
+}
+""" ;
+            oc:codeLanguage "kotlin" ;
+            oc:contentOrder 1 ;
+            oc:sourceLocation "lines 265-274" ] ;
+    oc:stepId "step_5" ;
+    oc:stepOrder 5 .
 
-oc:kn_e4f981bf a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "During the module rename step of full restructure" ;
-    oc:directiveContent "When renaming composeApp to shared, update ALL of: directory name, settings.gradle.kts include, cross-module dependency references (project(':composeApp') → project(':shared')), Xcode Run Script path, Swift import statements, framework baseName, and .idea workspace files." ;
-    oc:hasRationale "Incomplete rename causes build failures, broken imports, and stale IDE caches. The rename must be atomic across all configuration files." ;
-    oc:severityLevel "CRITICAL" .
+_:ref_5aa10c1ef5b46da0 a oc:WorkflowStep ;
+    dcterms:description "Put all shared code in `commonMain` and rely on the JVM dependency from `desktopApp`." ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_5eb445c7ca30db72 a oc:WorkflowStep ;
+    dcterms:description "**App struct name:** If the SwiftUI `@main` struct was named after the old module (e.g., `ComposeAppApp`), rename it to something appropriate for your project." ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_c3f3fd859a586a53 a oc:WorkflowStep ;
+    dcterms:description "**Framework search paths:** Update Build Settings if they reference the old module directory path." ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_d180da47fed055f0 a oc:WorkflowStep ;
+    dcterms:description "**Gradle task path:** Update the Run Script build phase in `project.pbxproj` (or via Xcode > Build Phases):" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild _:ref_063e845f4fda3cd9 ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_054a78417c8dfbf0 a oc:WorkflowStep ;
+    dcterms:description "Create webApp/ module with WasmJS target, move web main() and browser config, move web resources, remove wasmJs from shared" ;
+    oc:expectedOutcome "webApp builds independently, no wasmJs application target in shared" ;
+    oc:stepDependsOn _:ref_fa19ac2f46d5cb71 ;
+    oc:stepId "extract-web" .
+
+_:ref_09ad8043c214db9c a oc:WorkflowStep ;
+    dcterms:description "Verify iOS framework export config stays in shared, update Xcode project references if module renamed" ;
+    oc:expectedOutcome "iOS app builds with correct framework import and Gradle task path" ;
+    oc:stepDependsOn _:ref_fa19ac2f46d5cb71 ;
+    oc:stepId "handle-ios" .
+
+_:ref_3f636c6ef1eda942 a oc:WorkflowStep ;
+    dcterms:description "Delete .idea/ and re-import project, or manually update .idea/modules.xml" ;
+    oc:expectedOutcome "IDE recognizes new module structure without errors" ;
+    oc:stepDependsOn _:ref_52e174fdab04b086 ;
+    oc:stepId "update-ide" .
+
+_:ref_411ce3b649e479c2 a oc:WorkflowStep ;
+    dcterms:description "Convert shared to KMP library plugin (com.android.kotlin.multiplatform.library), remove all platform app targets, keep only library targets" ;
+    oc:expectedOutcome "shared module is a pure KMP library with no application config" ;
+    oc:stepDependsOn _:ref_52e174fdab04b086 ;
+    oc:stepId "cleanup-shared" .
+
+_:ref_5de00e5ff2cd55f0 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 2 ;
+    oc:hasStep _:ref_44a4f7072c9d1815,
+        _:ref_46dd5a31f77d6130,
+        _:ref_5eb445c7ca30db72,
+        _:ref_c3f3fd859a586a53,
+        _:ref_d180da47fed055f0 ;
+    oc:workflowId "procedure_2" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_6c5b6592e49dbc75 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 7 ;
+    oc:hasStep _:ref_2e87f92d9ecd27b9,
+        _:ref_5aa10c1ef5b46da0 ;
+    oc:workflowId "procedure_7" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_843487a4df8c23a6 a oc:WorkflowStep ;
+    dcterms:description "Create desktopApp/ module with Compose Desktop plugin, move desktop main() and compose.desktop config, remove jvm(\"desktop\") from shared" ;
+    oc:expectedOutcome "desktopApp builds and runs independently, no desktop target in shared" ;
+    oc:stepDependsOn _:ref_fa19ac2f46d5cb71 ;
+    oc:stepId "extract-desktop" .
+
+_:ref_52e174fdab04b086 a oc:WorkflowStep ;
+    dcterms:description "Rename composeApp directory to shared, update settings.gradle.kts includes, update all cross-module dependency references" ;
+    oc:expectedOutcome "All module references point to :shared, no stale :composeApp references" ;
+    oc:stepDependsOn _:ref_054a78417c8dfbf0,
+        _:ref_09ad8043c214db9c,
+        _:ref_843487a4df8c23a6 ;
+    oc:stepId "rename-module" .
+
+_:ref_fa19ac2f46d5cb71 a oc:WorkflowStep ;
+    dcterms:description "Apply Path B (Android app split) first — extract androidApp module from monolithic module" ;
+    oc:expectedOutcome "androidApp module created and building, shared module converted to library" ;
+    oc:stepId "apply-path-b" .
 

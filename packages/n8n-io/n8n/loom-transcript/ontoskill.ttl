@@ -7,10 +7,10 @@
 oc:skill_n8n_io_n8n_loom_transcript a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "loom-transcript" ;
-    skos:broader "API client" ;
-    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/n8n-io/n8n/loom-transcript" ;
+    skos:broader "Transcript fetcher" ;
+    prov:wasDerivedFrom "../.agents/skills/n8n-io/n8n/loom-transcript" ;
     oc:contentHash "97040f1ecccb11cdb7d14d43ff7eb1f3ae37615d8a91effdb9acbae10f616059" ;
-    oc:differentia "fetches and displays full transcripts from Loom video URLs using Loom's public GraphQL API" ;
+    oc:differentia "extracts and formats video transcripts from Loom's public GraphQL API" ;
     oc:handlesFailure oc:InvalidInput,
         oc:NetworkTimeout,
         oc:ResourceNotFound ;
@@ -20,52 +20,311 @@ oc:skill_n8n_io_n8n_loom_transcript a oc:DeclarativeSkill,
     oc:hasCategory "productivity" ;
     oc:hasDescription "Fetch and display the full transcript from a Loom video URL. Use when the user wants to get or read a Loom transcript." ;
     oc:hasName "loom-transcript" ;
-    oc:impartsKnowledge oc:kn_56ea105d,
-        oc:kn_8242b4ea,
-        oc:kn_ac7cf1fa,
-        oc:kn_b8cfdceb,
-        oc:kn_f2ebf3ca ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Fetch the transcript from a Loom video using Loom's GraphQL API." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Transcripts are auto-generated and may contain minor errors." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Only English transcripts are available through this API." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "No authentication or cookies are required — Loom's transcript API is publicly accessible." ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Notes" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Given the Loom URL: $ARGUMENTS" ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "The video ID is the 32-character hex string after `/share/` or `/embed/`." ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 2 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "`https://www.loom.com/share/<video-id>?sid=<session-id>`" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "`https://www.loom.com/share/<video-id>`" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "`https://www.loom.com/embed/<video-id>`" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Parse the Loom URL to extract the 32-character hex video ID. Supported URL formats:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "1. Extract the Video ID" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """curl -s 'https://www.loom.com/graphql' \\
+  -H 'Content-Type: application/json' \\
+  -H 'Accept: application/json' \\
+  -H 'x-loom-request-source: loom_web_45a5bd4' \\
+  -H 'apollographql-client-name: web' \\
+  -H 'apollographql-client-version: 45a5bd4' \\
+  -d '{
+    "operationName": "FetchVideoTranscript",
+    "variables": {"videoId": "<VIDEO_ID>", "password": null},
+    "query": "query FetchVideoTranscript($videoId: ID!, $password: String) { fetchVideoTranscript(videoId: $videoId, password: $password) { ... on VideoTranscriptDetails { id video_id source_url captions_source_url } ... on GenericError { message } } }"
+  }'
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 48-60" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Use curl via Bash to call the GraphQL API:" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 5 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "`captions_source_url` — VTT (WebVTT) captions URL" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "`source_url` — JSON transcript URL" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent "The response contains:" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "Replace `<VIDEO_ID>` with the actual video ID extracted in step 1." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "3. Fetch the Transcript URLs" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Fetch **both** URLs returned from step 3 (if available):" ],
+                                _:ref_bc10701f4a78ca6f,
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "Prefer the VTT captions as the primary source since they include proper timestamps. Fall back to the JSON transcript if VTT is unavailable." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "4. Download and Parse the Transcript" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent """**Video:** [Title from metadata]
+**Author:** [Owner name]
+**Date:** [Created date]""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Format and present the full transcript to the user:" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 5 ;
+                                    oc:textContent "(continue for all segments)" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**0:00** - First transcript segment text..." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent "**0:14** - Second transcript segment text..." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 5 ;
+                            oc:sectionTitle "5. Present the Transcript" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Use the `WebFetch` tool to POST to `https://www.loom.com/graphql` to get the video title and details." ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """curl -s 'https://www.loom.com/graphql' \\
+  -H 'Content-Type: application/json' \\
+  -H 'Accept: application/json' \\
+  -H 'x-loom-request-source: loom_web_45a5bd4' \\
+  -H 'apollographql-client-name: web' \\
+  -H 'apollographql-client-version: 45a5bd4' \\
+  -d '{
+    "operationName": "GetVideoSSR",
+    "variables": {"id": "<VIDEO_ID>", "password": null},
+    "query": "query GetVideoSSR($id: ID!, $password: String) { getVideo(id: $id, password: $password) { ... on RegularUserVideo { id name description createdAt owner { display_name } } } }"
+  }'
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 3 ;
+                                    oc:sourceLocation "lines 30-42" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "Use this curl command via Bash:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "2. Fetch Video Metadata" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Instructions" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "If the video URL is invalid or the ID cannot be extracted, ask the user for a valid Loom URL." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "If both `source_url` and `captions_source_url` are null/missing, tell the user that no transcript is available for this video." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "If the GraphQL response contains a `GenericError`, report the error message to the user." ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Error Handling" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Loom Transcript Fetcher" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """name: loom-transcript
+description: Fetch and display the full transcript from a Loom video URL. Use when the user wants to get or read a Loom transcript.
+argument-hint: [loom-url]
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:hasWorkflow _:ref_bc10701f4a78ca6f,
+        [ a oc:Workflow ;
+            dcterms:description "Extracts a full transcript from a Loom video URL using the public GraphQL API." ;
+            oc:hasStep [ a oc:WorkflowStep ;
+                    dcterms:description "Format and present the transcript with video metadata header and timestamped segments." ;
+                    oc:expectedOutcome "Formatted transcript output with Video title, Author, Date, and timestamped text." ;
+                    oc:stepDependsOn _:ref_32d320f5d468c30a,
+                        _:ref_6f46e136f25cecc5 ;
+                    oc:stepId "present-transcript" ],
+                _:ref_32d320f5d468c30a,
+                _:ref_4676f6bcd7c107cb,
+                _:ref_47a80d08c5be8e48,
+                _:ref_6f46e136f25cecc5 ;
+            oc:workflowId "loom-transcript-fetch" ;
+            oc:workflowName "Fetch Loom Video Transcript" ] ;
+    oc:impartsKnowledge oc:kn_07184a34,
+        oc:kn_314d3c02,
+        oc:kn_440ace75,
+        oc:kn_6e57d69d,
+        oc:kn_cbfd862f ;
     oc:isUserInvocable true ;
-    oc:nature "Tool" ;
+    oc:nature "Work" ;
     oc:requiresState oc:NetworkAvailable ;
     oc:resolvesIntent "extract text from loom video",
-        "fetch loom transcript",
-        "get loom video captions",
-        "read loom video transcript" ;
+        "fetch loom video transcript",
+        "read loom transcript" ;
     oc:yieldsState oc:TranscriptFetched .
 
-oc:kn_56ea105d a oc:KnowledgeNode,
-        oc:RecoveryTactic ;
-    oc:appliesToContext "On API error or missing transcript data" ;
-    oc:directiveContent "If GraphQL returns a GenericError, report the message to the user. If both source_url and captions_source_url are null, inform the user that no transcript is available. If the video ID cannot be extracted, ask for a valid Loom URL." ;
-    oc:hasRationale "Graceful error handling prevents confusion and guides the user toward resolution." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_8242b4ea a oc:Constraint,
+oc:kn_07184a34 a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "Always, when calling Loom GraphQL endpoints" ;
-    oc:directiveContent "No authentication or cookies are required — Loom's transcript API is publicly accessible for any shared video." ;
-    oc:hasRationale "Simplifies execution since no credential management or session handling is needed." ;
-    oc:severityLevel "LOW" .
+    oc:appliesToContext "always" ;
+    oc:directiveContent "No authentication or cookies are required — Loom's transcript API is publicly accessible." ;
+    oc:hasRationale "Simplifies execution but means this only works for public or unlisted Loom videos." .
 
-oc:kn_ac7cf1fa a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "Before executing any GraphQL requests" ;
-    oc:directiveContent "Validate that the input URL matches one of the supported Loom URL formats and extract the 32-character hex video ID before making any API calls." ;
-    oc:hasRationale "Prevents wasted API calls and provides immediate user feedback on malformed URLs." ;
+oc:kn_314d3c02 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When parsing the input Loom URL" ;
+    oc:directiveContent "The video ID is a 32-character hex string found after /share/ or /embed/ in the Loom URL. Supported formats: /share/<id>, /embed/<id>, /share/<id>?sid=<session-id>." ;
+    oc:hasRationale "Correct extraction of the video ID is essential for all subsequent API calls." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_b8cfdceb a oc:DesignPrinciple,
+oc:kn_440ace75 a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When downloading transcript data from Loom API" ;
-    oc:directiveContent "Prefer VTT captions as the primary transcript source since they include proper timestamps; fall back to JSON transcript only if VTT is unavailable." ;
-    oc:hasRationale "VTT format provides timestamp-aligned text which yields a better reading experience with time markers." ;
+    oc:appliesToContext "When downloading and parsing the transcript" ;
+    oc:directiveContent "Prefer VTT captions (captions_source_url) over JSON transcript (source_url) as the primary source since VTT includes proper timestamps. Fall back to JSON if VTT is unavailable." ;
+    oc:hasRationale "VTT format provides better timestamp alignment for presenting a readable transcript." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_f2ebf3ca a oc:Constraint,
+oc:kn_6e57d69d a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "on error" ;
+    oc:directiveContent "If GraphQL response contains GenericError, report the error message. If both source_url and captions_source_url are null/missing, tell the user no transcript is available. If video URL is invalid, ask for a valid Loom URL." ;
+    oc:hasRationale "Graceful error handling prevents confusion when videos lack transcripts or URLs are malformed." .
+
+oc:kn_cbfd862f a oc:Constraint,
         oc:KnowledgeNode ;
     oc:appliesToContext "When presenting transcript results to the user" ;
-    oc:directiveContent "Only English transcripts are available through the Loom GraphQL API. Transcripts are auto-generated and may contain minor errors." ;
-    oc:hasRationale "Sets correct expectations about transcript accuracy and language availability; non-English videos will likely fail or return empty results." ;
-    oc:severityLevel "MEDIUM" .
+    oc:directiveContent "Only English transcripts are available through this API. Transcripts are auto-generated and may contain minor errors." ;
+    oc:hasRationale "Sets user expectations about accuracy and language limitations." ;
+    oc:severityLevel "LOW" .
+
+_:ref_04321f28359d58c6 a oc:WorkflowStep ;
+    dcterms:description "**JSON transcript** (`source_url`): Download with `curl -sL \"<url>\"`. This is a JSON file with transcript segments." ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_e6d9d62377dacf16 a oc:WorkflowStep ;
+    dcterms:description "**VTT captions** (`captions_source_url`): Download with `curl -sL \"<url>\"`. This is a WebVTT file with timestamps and text." ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_32d320f5d468c30a a oc:WorkflowStep ;
+    dcterms:description "POST to Loom GraphQL API (GetVideoSSR) to fetch video title, author, and creation date." ;
+    oc:expectedOutcome "Video metadata object with name, description, createdAt, and owner display_name." ;
+    oc:stepDependsOn _:ref_47a80d08c5be8e48 ;
+    oc:stepId "fetch-metadata" .
+
+_:ref_4676f6bcd7c107cb a oc:WorkflowStep ;
+    dcterms:description "POST to Loom GraphQL API (FetchVideoTranscript) to get source_url (JSON) and captions_source_url (VTT)." ;
+    oc:expectedOutcome "Two URLs for downloading the transcript in JSON and VTT formats." ;
+    oc:stepDependsOn _:ref_47a80d08c5be8e48 ;
+    oc:stepId "fetch-transcript-urls" .
+
+_:ref_6f46e136f25cecc5 a oc:WorkflowStep ;
+    dcterms:description "Download both transcript URLs with curl. Prefer VTT captions over JSON transcript." ;
+    oc:expectedOutcome "Raw transcript data with timestamps and text segments." ;
+    oc:stepDependsOn _:ref_4676f6bcd7c107cb ;
+    oc:stepId "download-transcript" .
+
+_:ref_bc10701f4a78ca6f a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 2 ;
+    oc:hasStep _:ref_04321f28359d58c6,
+        _:ref_e6d9d62377dacf16 ;
+    oc:workflowId "procedure_2" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_47a80d08c5be8e48 a oc:WorkflowStep ;
+    dcterms:description "Parse the Loom URL to extract the 32-character hex video ID from /share/ or /embed/ path." ;
+    oc:expectedOutcome "A valid 32-character hex video ID string." ;
+    oc:stepId "extract-video-id" .
 

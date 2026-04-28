@@ -10,53 +10,112 @@ oc:skill_vercel_labs_vercel_react_best_practices_rerender_defer_reads a oc:Decla
     skos:broader "Performance optimization pattern" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "234050a77faf50cb306be10a9e15bd4421134ab5907e75f13e6d78e2bd262dc9" ;
-    oc:differentia "defers dynamic state subscriptions to usage point to avoid unnecessary re-renders" ;
+    oc:differentia "defers reactive state subscriptions to imperative read points in callbacks to prevent unnecessary re-renders" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
+    oc:handlesFailure oc:InvalidInput ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_358023b7,
-        oc:kn_386307d6,
-        oc:kn_870573a0,
-        oc:kn_8901ebb5,
-        oc:kn_ac70d685 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function ShareButton({ chatId }: { chatId: string }) {
+  const searchParams = useSearchParams()
+
+  const handleShare = () => {
+    const ref = searchParams.get('ref')
+    shareChat(chatId, { ref })
+  }
+
+  return <button onClick={handleShare}>Share</button>
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-25" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function ShareButton({ chatId }: { chatId: string }) {
+  const handleShare = () => {
+    const params = new URLSearchParams(window.location.search)
+    const ref = params.get('ref')
+    shareChat(chatId, { ref })
+  }
+
+  return <button onClick={handleShare}>Share</button>
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 5 ;
+                    oc:sourceLocation "lines 29-39" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Incorrect (subscribes to all searchParams changes):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Don't subscribe to dynamic state (searchParams, localStorage) if you only read it inside callbacks." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "**Correct (reads on demand, no subscription):**" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Defer State Reads to Usage Point" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Defer State Reads to Usage Point
+impact: MEDIUM
+impactDescription: avoids unnecessary subscriptions
+tags: rerender, searchParams, localStorage, optimization
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:impartsKnowledge oc:kn_15a056ba,
+        oc:kn_2487fd52,
+        oc:kn_332eb182,
+        oc:kn_3ca21a00,
+        oc:kn_85f72010 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:resolvesIntent "defer state reads",
-        "improve React component performance",
-        "optimize re-renders",
-        "reduce unnecessary subscriptions" .
+    oc:requiresState oc:ReactComponentExists ;
+    oc:resolvesIntent "optimize component re-renders",
+        "prevent rerender on searchParams or localStorage changes",
+        "reduce unnecessary state subscriptions" ;
+    oc:yieldsState oc:ComponentOptimized .
 
-oc:kn_358023b7 a oc:Heuristic,
+oc:kn_15a056ba a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When evaluating whether to use useSearchParams, useLocalStorage, or similar subscription-based hooks" ;
-    oc:directiveContent "If a state value is not used in the rendered JSX output but only inside callbacks, read it imperatively rather than through a reactive hook." ;
-    oc:hasRationale "This heuristic distinguishes between state that drives rendering (needs subscription) and state that is merely consumed on user action (can be read imperatively)." ;
-    oc:severityLevel "MEDIUM" .
+    oc:appliesToContext "When reading URL search parameters only inside event handlers" ;
+    oc:codeLanguage "tsx" ;
+    oc:directiveContent "Instead of `const searchParams = useSearchParams()` at the top level, read imperatively inside the callback: `const params = new URLSearchParams(window.location.search); const val = params.get('key')`" ;
+    oc:hasRationale "This avoids creating a subscription that triggers re-renders on any searchParams change." .
 
-oc:kn_386307d6 a oc:AntiPattern,
+oc:kn_2487fd52 a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When writing React components that use hooks like useSearchParams or read from localStorage" ;
-    oc:directiveContent "Do not subscribe to dynamic state (searchParams, localStorage) at the component top level if the value is only read inside event callbacks." ;
-    oc:hasRationale "Subscribing at the top level causes the component to re-render on every state change, even when the rendered output doesn't depend on that state." ;
+    oc:appliesToContext "When reviewing component code for unnecessary subscriptions" ;
+    oc:directiveContent "If a reactive state value (from hooks like useSearchParams, useLocalStorage, etc.) is only referenced inside callbacks and never in the render output, replace it with an imperative read at the usage point." ;
+    oc:hasRationale "This eliminates the re-render overhead while preserving the same runtime behavior when the callback fires." .
+
+oc:kn_332eb182 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When a hook value is only needed inside onClick, onSubmit, or other callback functions" ;
+    oc:directiveContent "Do not call useSearchParams(), useLocalStorage(), or similar reactive hooks at the component top level if the value is only consumed inside event handlers or callbacks." ;
+    oc:hasRationale "Subscribing at the top level causes the component to re-render on every change to that state, even though the render output never uses it." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_870573a0 a oc:Constraint,
+oc:kn_3ca21a00 a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When deferring reads to usage point in Next.js applications" ;
-    oc:directiveContent "Replacing useSearchParams with window.location.search reads bypasses React's context system and only works in client components with browser access." ;
-    oc:hasRationale "The imperative read approach (new URLSearchParams(window.location.search)) requires a browser environment and cannot be used during server-side rendering." ;
-    oc:severityLevel "LOW" .
+    oc:appliesToContext "When designing component state architecture" ;
+    oc:directiveContent "Subscribe to reactive state only at the scope where the value is actually consumed in rendering; defer reads to usage points when consumption is purely imperative." ;
+    oc:hasRationale "Minimizing subscriptions reduces the component's re-render surface area, improving overall render performance." .
 
-oc:kn_8901ebb5 a oc:KnowledgeNode,
-        oc:SideEffect ;
-    oc:appliesToContext "When using Next.js useSearchParams hook in any component" ;
-    oc:directiveContent "Using useSearchParams at component level subscribes to all searchParams changes, causing re-renders for any parameter change in the URL." ;
-    oc:hasRationale "Understanding the subscription behavior of hooks helps developers make informed decisions about where and how to read dynamic state." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_ac70d685 a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When a component only needs dynamic state values inside event handlers, not during rendering" ;
-    oc:directiveContent "Read dynamic state on-demand at the point of use (inside callbacks) rather than eagerly via hooks at render time." ;
-    oc:hasRationale "On-demand reads avoid creating reactive subscriptions that trigger unnecessary re-renders, improving component performance." ;
+oc:kn_85f72010 a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "Components that only read dynamic state inside callbacks" ;
+    oc:directiveContent "Replacing a top-level useSearchParams subscription with an imperative read eliminates O(n) re-renders where n is the number of searchParams changes, reducing render cost to zero." ;
+    oc:hasRationale "Each subscription triggers React's reconciliation on every state change; removing the subscription removes this cost entirely." ;
     oc:severityLevel "MEDIUM" .
 

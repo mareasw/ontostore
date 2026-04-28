@@ -7,60 +7,105 @@
 oc:skill_vercel_labs_vercel_react_best_practices_rendering_activity a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "rendering-activity" ;
-    skos:broader "React rendering optimization technique" ;
+    skos:broader "Rendering optimization technique" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "1e5e7eaf3555e61d6a2e900089c676527d26259501db5594f59544b6c664f85a" ;
-    oc:differentia "preserves component state and DOM nodes for expensive components that frequently toggle visibility using React's Activity component" ;
+    oc:differentia "uses React's Activity component to preserve state and DOM for components that toggle visibility frequently" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
-    oc:handlesFailure oc:APIUnavailable ;
-    oc:hasArgumentHint "component visibility toggle scenario" ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_67c5c50b,
-        oc:kn_a57bf120,
-        oc:kn_b096d046,
-        oc:kn_b54111f0,
-        oc:kn_c4685872 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "Avoids expensive re-renders and state loss." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Usage:**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """import { Activity } from 'react'
+
+function Dropdown({ isOpen }: Props) {
+  return (
+    <Activity mode={isOpen ? 'visible' : 'hidden'}>
+      <ExpensiveMenu />
+    </Activity>
+  )
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-24" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Use React's `<Activity>` to preserve state/DOM for expensive components that frequently toggle visibility." ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Use Activity Component for Show/Hide" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Use Activity Component for Show/Hide
+impact: MEDIUM
+impactDescription: preserves state/DOM
+tags: rendering, activity, visibility, state-preservation
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:impartsKnowledge oc:kn_14fd7e71,
+        oc:kn_9549c303,
+        oc:kn_b3cbeced,
+        oc:kn_eed71084,
+        oc:kn_f52aa4e2 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:ReactProjectInitialized ;
     oc:resolvesIntent "avoid expensive re-renders for toggled components",
-        "optimize show/hide rendering performance",
-        "preserve component state on visibility toggle",
-        "prevent state loss when hiding and showing components" ;
-    oc:yieldsState oc:VisibilityOptimized .
+        "optimize show/hide rendering",
+        "preserve component state during visibility toggling" .
 
-oc:kn_67c5c50b a oc:Constraint,
+oc:kn_14fd7e71 a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "When using Activity component in hidden mode" ;
+    oc:directiveContent "The <Activity> component keeps the DOM node mounted but hidden when mode is 'hidden', preserving all internal component state, refs, and scroll positions." ;
+    oc:hasRationale "Agents need to understand the memory trade-off: hidden components still consume memory vs being fully unmounted" ;
+    oc:severityLevel "LOW" .
+
+oc:kn_9549c303 a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "Before using the Activity component in any project." ;
-    oc:directiveContent "The <Activity> component is a React API — ensure the project uses a React version that supports it." ;
-    oc:hasRationale "Activity is a relatively new React API and may not be available in older React versions, requiring a minimum version check." ;
+    oc:appliesToContext "When wrapping components that need state-preserving visibility toggling" ;
+    oc:codeLanguage "tsx" ;
+    oc:directiveContent """import { Activity } from 'react'
+
+function Dropdown({ isOpen }: Props) {
+  return (
+    <Activity mode={isOpen ? 'visible' : 'hidden'}>
+      <ExpensiveMenu />
+    </Activity>
+  )
+}""" .
+
+oc:kn_b3cbeced a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When implementing show/hide patterns for expensive components like dropdowns, modals, or panels" ;
+    oc:directiveContent "Use React's <Activity> component with mode='visible'/'hidden' for expensive components that frequently toggle visibility, instead of conditional rendering (&&) or ternaries." ;
+    oc:hasRationale "Preserves both DOM and component state across visibility toggles, avoiding expensive re-renders and state loss" ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_a57bf120 a oc:KnowledgeNode,
+oc:kn_eed71084 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When toggling visibility of components with significant render cost or meaningful internal state" ;
+    oc:directiveContent "Avoid using conditional rendering (e.g., {isOpen && <Component />}) for expensive components that toggle visibility frequently, as it destroys and recreates both DOM and state each time." ;
+    oc:hasRationale "Destruction and recreation cycles cause unnecessary performance overhead and lose user state (scroll position, form inputs, etc.)" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_f52aa4e2 a oc:KnowledgeNode,
         oc:PerformanceProfile ;
-    oc:appliesToContext "When deciding whether to use Activity vs conditional rendering for a given component." ;
-    oc:directiveContent "Using Activity mode='hidden' keeps the component's DOM in memory but offscreen, trading memory usage for faster re-show performance." ;
-    oc:hasRationale "The memory tradeoff is beneficial for components with expensive render cycles or critical user state, but should not be overused for trivial components." ;
+    oc:appliesToContext "When evaluating whether to use Activity vs standard conditional rendering" ;
+    oc:directiveContent "Activity has MEDIUM impact — it preserves state/DOM for expensive components, trading memory for faster re-activation. Best suited for components with high render cost that toggle frequently." ;
+    oc:hasRationale "For cheap components that rarely toggle, the memory overhead of keeping them in the DOM outweighs the re-render savings" ;
     oc:severityLevel "LOW" .
-
-oc:kn_b096d046 a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "When implementing show/hide toggles for expensive React components such as dropdowns, modals, or panels." ;
-    oc:directiveContent "Use React's <Activity> component with mode='visible' or mode='hidden' to preserve state and DOM for expensive components that frequently toggle visibility." ;
-    oc:hasRationale "Preserving the DOM subtree avoids costly unmount/remount cycles and prevents loss of internal component state (form inputs, scroll position, etc.)." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_b54111f0 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When evaluating which components to wrap with Activity." ;
-    oc:directiveContent "Apply Activity only to components that are both expensive to render and frequently toggled; simple or one-time toggle components don't benefit." ;
-    oc:hasRationale "Unnecessary use of Activity increases memory footprint without meaningful performance gain, so reserve it for genuinely expensive, frequently toggled components." ;
-    oc:severityLevel "LOW" .
-
-oc:kn_c4685872 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When toggling visibility of components with significant initialization cost or user state." ;
-    oc:directiveContent "Do not conditionally render (unmount) expensive components that will be re-shown, as this destroys their DOM tree and internal state." ;
-    oc:hasRationale "Unmounting and re-mounting expensive components causes unnecessary re-renders, layout recalculations, and state loss, degrading perceived performance." ;
-    oc:severityLevel "HIGH" .
 

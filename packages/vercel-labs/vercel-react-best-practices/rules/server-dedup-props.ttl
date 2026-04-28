@@ -10,56 +10,171 @@ oc:skill_vercel_labs_vercel_react_best_practices_server_dedup_props a oc:Declara
     skos:broader "Performance optimization pattern" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "c2747424cdac46be62f835f245a0aa887b0090b416d28e2ac8676702645eeb37" ;
-    oc:differentia "avoids duplicate RSC→client prop serialization by deferring transformations to the client" ;
+    oc:differentia "avoids duplicate RSC→client serialization by deferring array/object transformations to the client side" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
-    oc:handlesFailure oc:DuplicateSerializationDetected ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_0d1e3a7d,
-        oc:kn_6231c933,
-        oc:kn_b80de01e,
-        oc:kn_c81267ca,
-        oc:kn_d8ec657a ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 13 ;
+                    oc:textContent "**More examples:**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """// RSC: send once
+<ClientList usernames={usernames} />
+
+// Client: transform there
+'use client'
+const sorted = useMemo(() => [...usernames].sort(), [usernames])
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 6 ;
+                    oc:sourceLocation "lines 23-30" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 15 ;
+                    oc:textContent "**Exception:** Pass derived data when transformation is expensive or client doesn't need original." ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """// ❌ Bad
+<C users={users} active={users.filter(u => u.active)} />
+<C product={product} productName={product.name} />
+
+// ✅ Good
+<C users={users} />
+<C product={product} />
+// Do filtering/destructuring in client
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 14 ;
+                    oc:sourceLocation "lines 54-63" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """// string[] - duplicates everything
+usernames={['a','b']} sorted={usernames.toSorted()} // sends 4 strings
+
+// object[] - duplicates array structure only
+users={[{id:1},{id:2}]} sorted={users.toSorted()} // sends 2 arrays + 2 unique objects (not 4)
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 10 ;
+                    oc:sourceLocation "lines 39-45" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 11 ;
+                    oc:textContent "**Operations breaking deduplication (create new references):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 5 ;
+                    oc:textContent "**Correct (sends 3 strings):**" ],
+                [ a oc:BulletList ;
+                    oc:blockType "bullet_list" ;
+                    oc:contentOrder 9 ;
+                    oc:hasItem [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 2 ;
+                            oc:itemText "`object[]`: **LOW impact** - array duplicated, but nested objects deduplicated by reference" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 1 ;
+                            oc:itemText "`string[]`, `number[]`, `boolean[]`: **HIGH impact** - array + all primitives fully duplicated" ] ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 8 ;
+                    oc:textContent "Deduplication works recursively. Impact varies by data type:" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 7 ;
+                    oc:textContent "**Nested deduplication behavior:**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """// RSC: sends 6 strings (2 arrays × 3 items)
+<ClientList usernames={usernames} usernamesOrdered={usernames.toSorted()} />
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 4 ;
+                    oc:sourceLocation "lines 16-19" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "**Impact: LOW (reduces network payload by avoiding duplicate serialization)**" ],
+                [ a oc:BulletList ;
+                    oc:blockType "bullet_list" ;
+                    oc:contentOrder 12 ;
+                    oc:hasItem [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 1 ;
+                            oc:itemText "Arrays: `.toSorted()`, `.filter()`, `.map()`, `.slice()`, `[...arr]`" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 2 ;
+                            oc:itemText "Objects: `{...obj}`, `Object.assign()`, `structuredClone()`, `JSON.parse(JSON.stringify())`" ] ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "RSC→client serialization deduplicates by object reference, not value. Same reference = serialized once; new reference = serialized again. Do transformations (`.toSorted()`, `.filter()`, `.map()`) in client, not server." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 3 ;
+                    oc:textContent "**Incorrect (duplicates array):**" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Avoid Duplicate Serialization in RSC Props" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Avoid Duplicate Serialization in RSC Props
+impact: LOW
+impactDescription: reduces network payload by avoiding duplicate serialization
+tags: server, rsc, serialization, props, client-components
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:impartsKnowledge oc:kn_08fc4975,
+        oc:kn_48367e99,
+        oc:kn_73219286,
+        oc:kn_d78b4f95,
+        oc:kn_e7065991 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:RSCPropsBeingSerialized ;
-    oc:resolvesIntent "avoid duplicate data sent to client components",
-        "improve RSC data transfer efficiency",
-        "optimize RSC prop serialization",
-        "reduce network payload in React Server Components" ;
-    oc:yieldsState oc:OptimizedNetworkPayload .
+    oc:resolvesIntent "avoid duplicate data in client component props",
+        "optimize server component props serialization",
+        "reduce network payload in RSC applications" .
 
-oc:kn_0d1e3a7d a oc:Heuristic,
+oc:kn_08fc4975 a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When evaluating whether duplicate serialization is worth fixing" ;
-    oc:directiveContent "Primitive arrays (string[], number[], boolean[]) have HIGH deduplication impact when duplicated — both the array and all primitives are re-serialized. Object arrays have LOW impact — only the array structure duplicates, nested objects are deduplicated by reference." ;
-    oc:hasRationale "Understanding the data type helps prioritize optimization efforts. Primitive arrays are more costly to duplicate than object arrays." ;
+    oc:appliesToContext "When assessing whether duplicate serialization is worth fixing" ;
+    oc:directiveContent "Impact of duplicate serialization is HIGH for primitive arrays (string[], number[], boolean[]) since both the array and all contained primitives are duplicated. Impact is LOW for object arrays since only the array structure duplicates; nested objects deduplicate by reference." ;
+    oc:hasRationale "Helps prioritize optimization efforts based on data type composition." ;
     oc:severityLevel "LOW" .
 
-oc:kn_6231c933 a oc:DesignPrinciple,
+oc:kn_48367e99 a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When deciding whether to transform on server vs client" ;
-    oc:directiveContent "Pass derived/transformed data from RSC only when the transformation is computationally expensive or the client does not need access to the original data." ;
-    oc:hasRationale "There is a legitimate trade-off: sometimes server-side transformation is justified despite the serialization cost, particularly for expensive computations or when the original data is not needed client-side." ;
-    oc:severityLevel "LOW" .
+    oc:appliesToContext "When reasoning about RSC prop serialization behavior" ;
+    oc:directiveContent "Serialization deduplication works by object reference identity, not by value equality. Two arrays with identical contents but different references will both be fully serialized." ;
+    oc:hasRationale "Understanding reference-based deduplication is essential for predicting when duplicate serialization occurs." ;
+    oc:severityLevel "HIGH" .
 
-oc:kn_b80de01e a oc:AntiPattern,
+oc:kn_73219286 a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When designing RSC→client prop interfaces" ;
-    oc:directiveContent "Never pass both original and transformed versions of the same data as separate props from RSC to client (e.g., users and users.filter(...)). Also avoid passing both an object and its destructured properties (e.g., product and product.name)." ;
-    oc:hasRationale "Each new reference causes a full re-serialization. Passing users + filtered users duplicates the array structure; passing product + product.name duplicates the string." ;
+    oc:appliesToContext "When designing RSC-to-client component interfaces" ;
+    oc:directiveContent "Never pass both original and derived/transformed data as separate props from a server component (e.g., users + active users, product + product.name). Pass the original and derive in the client." ;
+    oc:hasRationale "Each new reference created by a transformation is serialized independently, inflating the network payload." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_c81267ca a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When transforming data in Server Components before passing to Client Components" ;
-    oc:directiveContent "Operations that break deduplication by creating new references include: .toSorted(), .filter(), .map(), .slice(), spread [...arr], Object.assign(), structuredClone(), and JSON.parse(JSON.stringify())." ;
-    oc:hasRationale "These operations all create new object references, which prevents the RSC serializer from recognizing them as duplicates of existing data." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_d8ec657a a oc:KnowledgeNode,
+oc:kn_d78b4f95 a oc:KnowledgeNode,
         oc:Standard ;
-    oc:appliesToContext "When passing props from Server Components to Client Components" ;
-    oc:directiveContent "Defer data transformations like .toSorted(), .filter(), .map(), and .slice() to the client component rather than performing them in the RSC and passing derived results as additional props." ;
-    oc:hasRationale "RSC→client serialization deduplicates by object reference, not value. Transformations create new references, causing the same data to be serialized multiple times and increasing network payload." ;
+    oc:appliesToContext "When passing props from RSC to client components" ;
+    oc:directiveContent "Defer array/object transformations (.toSorted(), .filter(), .map(), .slice(), spread) to client components rather than performing them in server components and passing both original and transformed data as props." ;
+    oc:hasRationale "RSC→client serialization deduplicates by object reference, not value. Transformations create new references, causing the same data to be serialized multiple times." ;
     oc:severityLevel "MEDIUM" .
+
+oc:kn_e7065991 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When deciding server vs client transformation boundary" ;
+    oc:directiveContent "Exception: pass derived data from the server when the transformation is computationally expensive or the client does not need the original data." ;
+    oc:hasRationale "The rule about deferring transformations is a heuristic, not absolute—expensive computations or data-hiding concerns may justify server-side derivation." ;
+    oc:severityLevel "LOW" .
 

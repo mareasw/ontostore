@@ -7,57 +7,188 @@
 oc:skill_vercel_labs_vercel_react_best_practices_rerender_split_combined_hooks a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "rerender-split-combined-hooks" ;
-    skos:broader "React performance optimization pattern" ;
+    skos:broader "React optimization pattern" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "6f45d703343484ef9acef9388397f3642966ae6a5a258899a0cf1f9977cfbf6c" ;
-    oc:differentia "splits combined hook computations with independent dependencies into separate hooks to avoid unnecessary recomputation" ;
+    oc:differentia "splits combined hook computations with independent dependencies to avoid unnecessary recomputation" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_4459d8a4,
-        oc:kn_49334fe4,
-        oc:kn_c2ee26ab,
-        oc:kn_e3ebcdde,
-        oc:kn_e5f4afa6 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "When a hook contains multiple independent tasks with different dependencies, split them into separate hooks. A combined hook reruns all tasks when any dependency changes, even if some tasks don't use the changed value." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Incorrect (changing `sortOrder` recomputes filtering):**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """const filteredProducts = useMemo(
+  () => products.filter((p) => p.category === category),
+  [products, category]
+)
+
+const sortedProducts = useMemo(
+  () =>
+    filteredProducts.toSorted((a, b) =>
+      sortOrder === "asc" ? a.price - b.price : b.price - a.price
+    ),
+  [filteredProducts, sortOrder]
+)
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 5 ;
+                    oc:sourceLocation "lines 26-39" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 11 ;
+                    oc:textContent "**Note:** If your project has [React Compiler](https://react.dev/learn/react-compiler) enabled, it automatically optimizes dependency tracking and may handle some of these cases for you." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "**Correct (filtering only recomputes when products or category change):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 9 ;
+                    oc:textContent "**Correct (effects run independently):**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """useEffect(() => {
+  analytics.trackPageView(pathname)
+  document.title = `${pageTitle} | My App`
+}, [pathname, pageTitle])
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 8 ;
+                    oc:sourceLocation "lines 45-50" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """const sortedProducts = useMemo(() => {
+  const filtered = products.filter((p) => p.category === category)
+  const sorted = filtered.toSorted((a, b) =>
+    sortOrder === "asc" ? a.price - b.price : b.price - a.price
+  )
+  return sorted
+}, [products, category, sortOrder])
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-22" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 6 ;
+                    oc:textContent "This pattern also applies to `useEffect` when combining unrelated side effects:" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """useEffect(() => {
+  analytics.trackPageView(pathname)
+}, [pathname])
+
+useEffect(() => {
+  document.title = `${pageTitle} | My App`
+}, [pageTitle])
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 10 ;
+                    oc:sourceLocation "lines 54-62" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 7 ;
+                    oc:textContent "**Incorrect (both effects run when either dependency changes):**" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Split Combined Hook Computations" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Split Combined Hook Computations
+impact: MEDIUM
+impactDescription: avoids recomputing independent steps
+tags: rerender, useMemo, useEffect, dependencies, optimization
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:impartsKnowledge oc:kn_161ee727,
+        oc:kn_309d0703,
+        oc:kn_3c2b0826,
+        oc:kn_47eda92e,
+        oc:kn_9d138373,
+        oc:kn_bdddac2a,
+        oc:kn_e7a44c83,
+        oc:kn_f534bc4d ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:EnvironmentReady ;
-    oc:resolvesIntent "optimize React rerender performance",
-        "reduce unnecessary recomputation in React hooks",
-        "split combined useEffect side effects",
-        "split combined useMemo computations" .
+    oc:resolvesIntent "improve React render performance",
+        "optimize React hook dependencies",
+        "reduce unnecessary recomputation in useMemo",
+        "reduce unnecessary side effects in useEffect" .
 
-oc:kn_4459d8a4 a oc:DesignPrinciple,
+oc:kn_161ee727 a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When a hook contains multiple independent tasks with different dependencies" ;
-    oc:directiveContent "Split combined hook computations into separate hooks, each with its own minimal dependency array" ;
-    oc:hasRationale "Separate hooks allow React to skip recomputation for tasks whose dependencies haven't changed, improving render performance" ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_49334fe4 a oc:KnowledgeNode,
-        oc:PerformanceProfile ;
-    oc:appliesToContext "When evaluating whether to refactor combined hooks" ;
-    oc:directiveContent "Splitting combined hooks has MEDIUM impact — it avoids recomputing independent steps but the performance gain depends on the computational cost of the tasks involved" ;
-    oc:hasRationale "The benefit is proportional to the cost of the recomputed tasks and the frequency of dependency changes that don't affect all tasks" ;
+    oc:appliesToContext "When writing useMemo or useEffect with multiple logically independent operations" ;
+    oc:directiveContent "Never combine multiple independent computations in a single useMemo or useEffect with merged dependencies. Changing any single dependency triggers recomputation of all tasks, even unrelated ones." ;
+    oc:hasRationale "Merged dependency arrays cause cascading recomputation — a change in sortOrder unnecessarily re-runs filtering logic, wasting CPU cycles on each render." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_c2ee26ab a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When reviewing or writing useMemo or useEffect calls" ;
-    oc:directiveContent "If two computations or side effects depend on different values, they should be in different hooks" ;
-    oc:hasRationale "Dependency array mismatch is a strong signal that the hook is doing too much and can be split for better performance" ;
-    oc:severityLevel "MEDIUM" .
+oc:kn_309d0703 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When optimizing React components for render performance" ;
+    oc:directiveContent "1. Identify a useMemo or useEffect with multiple independent operations. 2. Determine which dependencies each operation actually uses. 3. Split into separate hooks, each with its own minimal dependency array. 4. Verify each hook only recomputes when its own dependencies change." ;
+    oc:stepOrder 1 .
 
-oc:kn_e3ebcdde a oc:KnowledgeNode,
-        oc:KnownIssue ;
-    oc:appliesToContext "When the project has React Compiler enabled" ;
-    oc:directiveContent "React Compiler can automatically optimize dependency tracking and may handle some combined hook cases, making manual splitting unnecessary" ;
-    oc:hasRationale "React Compiler performs automatic memoization and dependency optimization, reducing the need for manual hook splitting" ;
+oc:kn_3c2b0826 a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "When splitting combined useEffect into separate effects" ;
+    oc:directiveContent "Splitting useEffect calls means each effect runs and cleans up independently. This changes cleanup timing and execution order compared to a single combined effect." ;
+    oc:hasRationale "Independent effects have independent lifecycles — understanding this is essential for correctly reasoning about side effect behavior." ;
     oc:severityLevel "LOW" .
 
-oc:kn_e5f4afa6 a oc:AntiPattern,
+oc:kn_47eda92e a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When writing React hooks that perform multiple tasks" ;
-    oc:directiveContent "Never combine independent computations or side effects in a single useMemo or useEffect when they have different dependencies" ;
-    oc:hasRationale "Combined hooks rerun all tasks when any dependency changes, causing unnecessary recomputation for tasks unrelated to the changed value" ;
+    oc:appliesToContext "When splitting unrelated side effects that were combined in a single useEffect" ;
+    oc:codeLanguage "tsx" ;
+    oc:directiveContent """useEffect(() => {
+  analytics.trackPageView(pathname)
+}, [pathname])
+
+useEffect(() => {
+  document.title = `${pageTitle} | My App`
+}, [pageTitle])""" .
+
+oc:kn_9d138373 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When refactoring combined useMemo computations" ;
+    oc:directiveContent "If a useMemo callback contains multiple sequential operations where earlier results feed into later ones, split into chained useMemos — each with its own dependency array." ;
+    oc:hasRationale "Chained hooks allow intermediate results to be memoized independently, so upstream changes don't force downstream recomputation if the upstream output is stable." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_bdddac2a a oc:AssumptionBoundary,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Before applying manual hook splitting optimizations" ;
+    oc:directiveContent "If the project has React Compiler enabled, it automatically optimizes dependency tracking and may handle some combined hook cases without manual splitting." ;
+    oc:hasRationale "React Compiler performs automatic memoization, making some manual optimizations redundant. Check compiler availability before optimizing." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_e7a44c83 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When splitting a combined filter+sort useMemo into independent memoized steps" ;
+    oc:codeLanguage "tsx" ;
+    oc:directiveContent """const filteredProducts = useMemo(
+  () => products.filter((p) => p.category === category),
+  [products, category]
+)
+const sortedProducts = useMemo(
+  () => filteredProducts.toSorted(/* ... */),
+  [filteredProducts, sortOrder]
+)""" .
+
+oc:kn_f534bc4d a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When a hook contains tasks with non-overlapping dependency sets" ;
+    oc:directiveContent "Split combined hook computations into separate hooks, each with only the dependencies it actually uses. One hook per independent concern." ;
+    oc:hasRationale "Independent hooks with minimal dependency arrays ensure each computation only reruns when its own inputs change, yielding optimal render performance." ;
     oc:severityLevel "HIGH" .
 

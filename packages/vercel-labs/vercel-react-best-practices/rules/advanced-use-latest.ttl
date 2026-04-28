@@ -7,76 +7,108 @@
 oc:skill_vercel_labs_vercel_react_best_practices_advanced_use_latest a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "advanced-use-latest" ;
-    skos:broader "React optimization pattern" ;
+    skos:broader "React Hook Pattern" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "8a3f64dfe5a77d1564248faf17fe662ae75b55d497a243cb30b38eb07ccbbf9a" ;
-    oc:dependsOnSkill oc:skill_vercel_react_best_practices ;
-    oc:differentia "uses useEffectEvent to access latest values in callbacks without adding them to dependency arrays, preventing unnecessary effect re-runs" ;
+    oc:differentia "uses useEffectEvent to access latest values in callbacks without adding them to dependency arrays, preventing effect re-runs" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
-    oc:handlesFailure oc:APIUnavailable ;
-    oc:hasArgumentHint "React component or hook using useEffect with callback dependencies" ;
     oc:hasCategory "development" ;
-    oc:hasRequirement oc:req_12339de8,
-        oc:req_504d435c,
-        oc:req_8092d633 ;
-    oc:impartsKnowledge oc:kn_314571ae,
-        oc:kn_330588bb,
-        oc:kn_7258e410,
-        oc:kn_a985e938,
-        oc:kn_d1f22663 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: useEffectEvent for Stable Callback Refs
+impact: LOW
+impactDescription: prevents effect re-runs
+tags: advanced, hooks, useEffectEvent, refs, optimization
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """import { useEffectEvent } from 'react';
+
+function SearchInput({ onSearch }: { onSearch: (q: string) => void }) {
+  const [query, setQuery] = useState('')
+  const onSearchEvent = useEffectEvent(onSearch)
+
+  useEffect(() => {
+    const timeout = setTimeout(() => onSearchEvent(query), 300)
+    return () => clearTimeout(timeout)
+  }, [query])
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 5 ;
+                    oc:sourceLocation "lines 27-39" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "**Correct (using React's useEffectEvent):**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function SearchInput({ onSearch }: { onSearch: (q: string) => void }) {
+  const [query, setQuery] = useState('')
+
+  useEffect(() => {
+    const timeout = setTimeout(() => onSearch(query), 300)
+    return () => clearTimeout(timeout)
+  }, [query, onSearch])
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-23" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Access latest values in callbacks without adding them to dependency arrays. Prevents effect re-runs while avoiding stale closures." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Incorrect (effect re-runs on every callback change):**" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "useEffectEvent for Stable Callback Refs" ] ;
+    oc:impartsKnowledge oc:kn_24bcea68,
+        oc:kn_2e2087c9,
+        oc:kn_5844e203,
+        oc:kn_7acf2b80 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:ReactComponentDefined ;
-    oc:resolvesIntent "optimize react effects",
-        "prevent stale closures in react callbacks",
-        "reduce unnecessary effect re-runs",
-        "stable callback refs in react effects" ;
-    oc:yieldsState oc:EffectOptimized .
+    oc:resolvesIntent "avoid stale closures in React effects",
+        "optimize React effects with stable callbacks",
+        "prevent unnecessary effect re-runs from callback dependency changes" .
 
-oc:kn_314571ae a oc:Heuristic,
+oc:kn_24bcea68 a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When a useEffect needs to call a callback prop that may change between renders but should not trigger the effect itself" ;
-    oc:directiveContent "Use useEffectEvent to wrap callback props before referencing them inside useEffect, so the effect reads the latest value without requiring it in the dependency array." ;
-    oc:hasRationale "useEffectEvent provides a stable reference that always delegates to the latest callback implementation, breaking the coupling between callback identity and effect execution." ;
+    oc:appliesToContext "When writing useEffect hooks that use callback props" ;
+    oc:codeLanguage "tsx" ;
+    oc:directiveContent "Never add callback props (like onSearch) directly to useEffect dependency arrays — it causes effect re-runs every time the parent re-renders." ;
+    oc:hasRationale "Parent re-renders create new function references, triggering the effect unnecessarily and potentially causing infinite loops or performance degradation." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_330588bb a oc:KnowledgeNode,
-        oc:KnownIssue ;
-    oc:appliesToContext "When writing effects that reference external callbacks without useEffectEvent" ;
-    oc:directiveContent "Without useEffectEvent, developers face a false choice: either include the callback in dependencies (causing unwanted re-runs) or omit it (creating a stale closure that captures an outdated callback)." ;
-    oc:hasRationale "This is a fundamental tension in React's dependency model that useEffectEvent specifically resolves." ;
-    oc:severityLevel "LOW" .
-
-oc:kn_7258e410 a oc:DesignPrinciple,
+oc:kn_2e2087c9 a oc:DesignPrinciple,
         oc:KnowledgeNode ;
     oc:appliesToContext "When designing useEffect dependency arrays" ;
-    oc:directiveContent "Only include values in the dependency array that should actually trigger the effect to re-run; callbacks that merely need to be invoked with current state should use useEffectEvent instead." ;
-    oc:hasRationale "Over-populating dependency arrays with values that shouldn't trigger re-execution leads to performance degradation and potential infinite loops." ;
+    oc:directiveContent "Separate reactive dependencies (values that should trigger re-runs) from non-reactive dependencies (callbacks that just need the latest version)." ;
+    oc:hasRationale "This separation prevents over-subscription where effects fire too often, while still avoiding stale closure bugs." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_a985e938 a oc:Constraint,
+oc:kn_5844e203 a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "Before adopting useEffectEvent in a project" ;
-    oc:directiveContent "useEffectEvent is a React experimental/internal API — verify it is available in your React version before using it in production code." ;
-    oc:hasRationale "The API may not be stable or available in all React versions; using unavailable APIs causes runtime errors." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_d1f22663 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When writing useEffect hooks that reference callback props" ;
-    oc:directiveContent "Do not add callback props (like onSearch, onChange) directly to useEffect dependency arrays — this causes the effect to re-run whenever the parent re-renders and creates a new callback instance." ;
-    oc:hasRationale "Callback props are typically recreated on every parent render, so including them in dependency arrays defeats the purpose of memoization and causes cascading re-renders and effect re-executions." ;
+    oc:appliesToContext "When a useEffect needs to call a prop callback without subscribing to its changes" ;
+    oc:codeLanguage "tsx" ;
+    oc:directiveContent "Use useEffectEvent(callback) to wrap callback props, then use the returned stable reference inside effects instead of the original callback." ;
+    oc:hasRationale "useEffectEvent always reads the latest value without being a reactive dependency, so the effect only re-runs when truly reactive values change." ;
     oc:severityLevel "HIGH" .
 
-oc:req_12339de8 a oc:RequirementTool ;
-    oc:isOptional false ;
-    oc:requirementValue "React (version supporting useEffectEvent)" .
-
-oc:req_504d435c a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "React useEffectEvent API" .
-
-oc:req_8092d633 a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "React hooks (useState, useEffect)" .
+oc:kn_7acf2b80 a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "Understanding what useEffectEvent produces" ;
+    oc:directiveContent "useEffectEvent returns a stable function identity that always calls the latest version of the wrapped callback." ;
+    oc:hasRationale "This is the core mechanic — the returned function never changes identity, so it never triggers re-subscription, but always forwards to the current callback." ;
+    oc:severityLevel "LOW" .
 

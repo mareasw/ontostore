@@ -7,66 +7,294 @@
 oc:skill_vercel_labs_vercel_react_best_practices_js_request_idle_callback a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "js-request-idle-callback" ;
-    skos:broader "Performance optimization technique" ;
+    skos:broader "Performance optimization pattern" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "ee08f83905b4011abbc33d594033157d77561b5bbd9b36b04f0f409581ffec32" ;
-    oc:differentia "defers non-critical JavaScript work to browser idle periods using requestIdleCallback to keep the main thread responsive" ;
+    oc:differentia "defers non-critical browser work to idle periods using requestIdleCallback to keep the main thread responsive" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
-    oc:handlesFailure oc:BrowserUnsupported ;
-    oc:hasArgumentHint "non-critical task function" ;
+    oc:handlesFailure oc:BrowserBusyTimeout ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_07f8b7db,
-        oc:kn_1b696552,
-        oc:kn_38d89800,
-        oc:kn_6c8d8010,
-        oc:kn_82b75817,
-        oc:kn_ebc641b8 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 15 ;
+                    oc:textContent "**When NOT to use:**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 11 ;
+                    oc:textContent "**With fallback for unsupported browsers:**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 3 ;
+                    oc:textContent "**Incorrect (blocks main thread during user interaction):**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function handleSearch(query: string) {
+  const results = searchItems(query)
+  setResults(results)
+
+  // These block the main thread immediately
+  analytics.track('search', { query })
+  saveToRecentSearches(query)
+  prefetchTopResults(results.slice(0, 3))
+}
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 4 ;
+                    oc:sourceLocation "lines 16-26" ],
+                [ a oc:BulletList ;
+                    oc:blockType "bullet_list" ;
+                    oc:contentOrder 14 ;
+                    oc:hasItem [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 5 ;
+                            oc:itemText "Lazy initialization of non-critical features" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 1 ;
+                            oc:itemText "Analytics and telemetry" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 4 ;
+                            oc:itemText "Processing non-urgent data transformations" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 2 ;
+                            oc:itemText "Saving state to localStorage/IndexedDB" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 3 ;
+                            oc:itemText "Prefetching resources for likely next actions" ] ],
+                [ a oc:BulletList ;
+                    oc:blockType "bullet_list" ;
+                    oc:contentOrder 16 ;
+                    oc:hasItem [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 2 ;
+                            oc:itemText "Rendering updates the user is waiting for" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 1 ;
+                            oc:itemText "User-initiated actions that need immediate feedback" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 3 ;
+                            oc:itemText "Time-sensitive operations" ] ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 5 ;
+                    oc:textContent "**Correct (defers non-critical work to idle time):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "**Impact: MEDIUM (keeps UI responsive during background tasks)**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "Use `requestIdleCallback()` to schedule non-critical work during browser idle periods. This keeps the main thread free for user interactions and animations, reducing jank and improving perceived performance." ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function handleSearch(query: string) {
+  const results = searchItems(query)
+  setResults(results)
+
+  // Defer non-critical work to idle periods
+  requestIdleCallback(() => {
+    analytics.track('search', { query })
+  })
+
+  requestIdleCallback(() => {
+    saveToRecentSearches(query)
+  })
+
+  requestIdleCallback(() => {
+    prefetchTopResults(results.slice(0, 3))
+  })
+}
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 6 ;
+                    oc:sourceLocation "lines 30-48" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """// Ensure analytics fires within 2 seconds even if browser stays busy
+requestIdleCallback(
+  () => analytics.track('page_view', { path: location.pathname }),
+  { timeout: 2000 }
+)
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 8 ;
+                    oc:sourceLocation "lines 52-58" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 7 ;
+                    oc:textContent "**With timeout for required work:**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function processLargeDataset(items: Item[]) {
+  let index = 0
+
+  function processChunk(deadline: IdleDeadline) {
+    // Process items while we have idle time (aim for <50ms chunks)
+    while (index < items.length && deadline.timeRemaining() > 0) {
+      processItem(items[index])
+      index++
+    }
+
+    // Schedule next chunk if more items remain
+    if (index < items.length) {
+      requestIdleCallback(processChunk)
+    }
+  }
+
+  requestIdleCallback(processChunk)
+}
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 10 ;
+                    oc:sourceLocation "lines 62-81" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 13 ;
+                    oc:textContent "**When to use:**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """const scheduleIdleWork = window.requestIdleCallback ?? ((cb: () => void) => setTimeout(cb, 1))
+
+scheduleIdleWork(() => {
+  // Non-critical work
+})
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 12 ;
+                    oc:sourceLocation "lines 85-91" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 9 ;
+                    oc:textContent "**Chunking large tasks:**" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Defer Non-Critical Work with requestIdleCallback" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Defer Non-Critical Work with requestIdleCallback
+impact: MEDIUM
+impactDescription: keeps UI responsive during background tasks
+tags: javascript, performance, idle, scheduling, analytics
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:impartsKnowledge oc:kn_1880b876,
+        oc:kn_2c81298a,
+        oc:kn_46ec64c1,
+        oc:kn_664ed6ff,
+        oc:kn_6809d2f5,
+        oc:kn_6b68f8f4,
+        oc:kn_820f7b61,
+        oc:kn_82c49630,
+        oc:kn_a81ae981,
+        oc:kn_ccb98c70,
+        oc:kn_da654cd1,
+        oc:kn_fd4974ad ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
     oc:requiresState oc:BrowserEnvironment ;
     oc:resolvesIntent "chunk large data processing tasks",
-        "defer non-critical work",
+        "defer non-critical javascript work",
         "keep UI responsive during background tasks",
-        "optimize main thread usage",
-        "schedule analytics and telemetry" ;
-    oc:yieldsState oc:MainThreadResponsive,
-        oc:NonCriticalWorkScheduled .
+        "schedule idle-period work in browser" ;
+    oc:yieldsState oc:NonCriticalWorkDeferred .
 
-oc:kn_07f8b7db a oc:AntiPattern,
+oc:kn_1880b876 a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When handling events like search, navigation, or form submissions" ;
-    oc:directiveContent "Do not run analytics tracking, state persistence, or prefetching synchronously on the main thread during user interactions." ;
-    oc:hasRationale "Running non-critical work synchronously blocks the main thread, causing jank and reducing perceived performance during user interactions." ;
-    oc:severityLevel "MEDIUM" .
+    oc:appliesToContext "When setting up cross-browser idle scheduling" ;
+    oc:codeLanguage "typescript" ;
+    oc:directiveContent """const scheduleIdleWork = window.requestIdleCallback ?? ((cb: () => void) => setTimeout(cb, 1))
 
-oc:kn_1b696552 a oc:Heuristic,
+scheduleIdleWork(() => {
+  // Non-critical work
+})""" .
+
+oc:kn_2c81298a a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When categorizing work as critical vs. non-critical for scheduling" ;
-    oc:directiveContent "Use requestIdleCallback for analytics/telemetry, saving state to localStorage/IndexedDB, prefetching resources, processing non-urgent data, and lazy initialization of non-critical features." ;
-    oc:hasRationale "These tasks don't block user perception of responsiveness and can safely run during idle periods without degrading UX." .
-
-oc:kn_38d89800 a oc:KnowledgeNode,
-        oc:PerformanceProfile ;
-    oc:appliesToContext "When processing large datasets or batch operations via requestIdleCallback" ;
-    oc:directiveContent "When chunking large tasks with requestIdleCallback, aim for sub-50ms chunks by checking deadline.timeRemaining() to stay within idle periods." ;
-    oc:hasRationale "Chunks exceeding 50ms risk encroaching on the next frame budget (16ms) and causing visible jank, defeating the purpose of idle scheduling." .
-
-oc:kn_6c8d8010 a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When deciding whether to defer work with requestIdleCallback" ;
-    oc:directiveContent "Never use requestIdleCallback for user-initiated actions that need immediate feedback, rendering updates the user is waiting for, or time-sensitive operations." ;
-    oc:hasRationale "Deferring critical work would introduce unacceptable latency for user-facing interactions and defeat the purpose of responsive UI." ;
+    oc:appliesToContext "When handling user interactions like search, navigation, or form submission" ;
+    oc:directiveContent "Never execute analytics, localStorage writes, or prefetching synchronously during user-initiated event handlers — they block the main thread and cause jank." ;
+    oc:hasRationale "Synchronous non-critical work during interactions degrades perceived performance and causes frame drops." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_82b75817 a oc:FallbackStrategy,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When implementing requestIdleCallback in production code" ;
-    oc:directiveContent "Provide a fallback using setTimeout(cb, 1) for browsers that do not support requestIdleCallback." ;
-    oc:hasRationale "requestIdleCallback is not supported in all browsers (notably Safari lacked support for a long time); a setTimeout fallback ensures the work still gets done." .
+oc:kn_46ec64c1 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When optimizing any event handler with mixed critical and non-critical work" ;
+    oc:directiveContent "1. Identify critical vs non-critical work in event handlers. 2. Execute critical work synchronously (rendering, state updates). 3. Wrap each non-critical task in its own requestIdleCallback. 4. For time-sensitive deferred work, add { timeout: N }. 5. For large tasks, implement chunked processing using deadline.timeRemaining(). 6. Add setTimeout fallback for unsupported browsers." ;
+    oc:stepOrder 1 .
 
-oc:kn_ebc641b8 a oc:DesignPrinciple,
+oc:kn_664ed6ff a oc:FallbackStrategy,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When scheduling work that must eventually run but isn't immediately critical" ;
-    oc:directiveContent "Use the timeout option (e.g., { timeout: 2000 }) to guarantee that important deferred work like analytics still fires within a reasonable window even if the browser stays busy." ;
-    oc:hasRationale "Without a timeout, requestIdleCallback may be starved indefinitely if the browser never enters an idle state, causing important work to never execute." .
+    oc:appliesToContext "When targeting browsers without native requestIdleCallback support" ;
+    oc:directiveContent "Use a setTimeout(cb, 1) fallback when requestIdleCallback is not supported by the browser." ;
+    oc:hasRationale "setTimeout fallback ensures the code still works, just with less optimal scheduling." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_6809d2f5 a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "When processing large datasets or long-running tasks in idle callbacks" ;
+    oc:directiveContent "Keep idle callback work chunks under 50ms by using deadline.timeRemaining() to check available idle time within the callback." ;
+    oc:hasRationale "Exceeding 50ms in a single chunk risks dropping frames and causing visible jank, defeating the purpose of idle scheduling." .
+
+oc:kn_6b68f8f4 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When deferring multiple non-critical operations" ;
+    oc:directiveContent "Split non-critical tasks into separate requestIdleCallback calls rather than batching them into one, so the browser can interleave them with higher-priority work." ;
+    oc:hasRationale "Separate callbacks give the browser finer-grained scheduling control and prevent one deferred task from monopolizing idle time." .
+
+oc:kn_820f7b61 a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When deferred work must eventually run (e.g., analytics)" ;
+    oc:directiveContent "Use the { timeout: N } option to guarantee deferred work executes within N milliseconds, even if the browser stays busy." ;
+    oc:hasRationale "Without a timeout, requestIdleCallback may never fire if the browser stays persistently busy." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_82c49630 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When deferred work must execute within a guaranteed timeframe" ;
+    oc:codeLanguage "typescript" ;
+    oc:directiveContent """requestIdleCallback(
+  () => analytics.track('page_view', { path: location.pathname }),
+  { timeout: 2000 }
+)""" .
+
+oc:kn_a81ae981 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When chunking large dataset processing into idle-period-safe pieces" ;
+    oc:codeLanguage "typescript" ;
+    oc:directiveContent """function processChunk(deadline: IdleDeadline) {
+  while (index < items.length && deadline.timeRemaining() > 0) {
+    processItem(items[index])
+    index++
+  }
+  if (index < items.length) {
+    requestIdleCallback(processChunk)
+  }
+}""" .
+
+oc:kn_ccb98c70 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When categorizing work as deferrable vs. immediate" ;
+    oc:directiveContent "Use requestIdleCallback for: analytics/telemetry, saving state to localStorage/IndexedDB, prefetching resources, processing non-urgent data, lazy initialization of non-critical features." ;
+    oc:hasRationale "These tasks don't affect the current user interaction and can safely execute during idle periods." .
+
+oc:kn_da654cd1 a oc:KnowledgeNode,
+        oc:Prerequisite ;
+    oc:directiveContent "Requires browser environment with window object; requestIdleCallback is available in modern browsers (Chrome, Firefox, Edge) with Safari support added in 15.4." .
+
+oc:kn_fd4974ad a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When deciding whether to defer work" ;
+    oc:directiveContent "Do NOT use requestIdleCallback for user-initiated actions requiring immediate feedback, rendering updates the user is waiting for, or time-sensitive operations." ;
+    oc:hasRationale "Deferred work may execute much later or not at all, breaking expected UI responsiveness for critical paths." ;
+    oc:severityLevel "CRITICAL" .
 

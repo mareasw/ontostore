@@ -7,58 +7,140 @@
 oc:skill_vercel_labs_vercel_react_best_practices_bundle_dynamic_imports a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "bundle-dynamic-imports" ;
-    skos:broader "Code-splitting pattern" ;
+    skos:broader "Code-splitting technique" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "401817a7369f315fc5a68a1095742ff7d53d0461906880dc9d64a41495ee1986" ;
-    oc:differentia "uses next/dynamic to lazy-load heavy components not required on initial render, reducing bundle size and improving TTI/LCP" ;
+    oc:differentia "uses next/dynamic to lazy-load heavy components not needed on initial render, reducing bundle size and improving TTI/LCP" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
-    oc:handlesFailure oc:InvalidInput ;
+    oc:handlesFailure oc:RuntimeImportError ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_4b7a234f,
-        oc:kn_8690d899,
-        oc:kn_8b7979a5,
-        oc:kn_9b8a903a,
-        oc:kn_e1129166 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Use `next/dynamic` to lazy-load large components not needed on initial render." ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """import { MonacoEditor } from './monaco-editor'
+
+function CodePanel({ code }: { code: string }) {
+  return <MonacoEditor value={code} />
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-20" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Incorrect (Monaco bundles with main chunk ~300KB):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "**Correct (Monaco loads on demand):**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """import dynamic from 'next/dynamic'
+
+const MonacoEditor = dynamic(
+  () => import('./monaco-editor').then(m => m.MonacoEditor),
+  { ssr: false }
+)
+
+function CodePanel({ code }: { code: string }) {
+  return <MonacoEditor value={code} />
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 5 ;
+                    oc:sourceLocation "lines 24-35" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Dynamic Imports for Heavy Components" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Dynamic Imports for Heavy Components
+impact: CRITICAL
+impactDescription: directly affects TTI and LCP
+tags: bundle, dynamic-import, code-splitting, next-dynamic
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:impartsKnowledge oc:kn_1896d140,
+        oc:kn_3f173259,
+        oc:kn_4a53f177,
+        oc:kn_54ded76d,
+        oc:kn_575199e6,
+        oc:kn_6688c525,
+        oc:kn_914c4101,
+        oc:kn_e0ba7552 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:EnvironmentReady ;
-    oc:resolvesIntent "implement code-splitting for Next.js applications",
-        "optimize Time to Interactive (TTI) and Largest Contentful Paint (LCP)",
-        "reduce initial bundle size by lazy-loading heavy components" ;
+    oc:requiresState oc:NextProjectReady ;
+    oc:resolvesIntent "improve largest contentful paint",
+        "lazy-load heavy components",
+        "optimize time to interactive",
+        "reduce bundle size" ;
     oc:yieldsState oc:BundleOptimized .
 
-oc:kn_4b7a234f a oc:KnowledgeNode,
-        oc:PerformanceProfile ;
-    oc:appliesToContext "When measuring Core Web Vitals for Next.js pages using heavy components" ;
-    oc:directiveContent "Dynamic imports have a direct positive impact on TTI and LCP by deferring heavy JavaScript execution until the component is actually needed." ;
-    oc:hasRationale "The main bundle shrinks significantly, enabling faster parse/execute times for the initial page load." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_8690d899 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When importing large UI libraries or editors in Next.js components" ;
-    oc:directiveContent "Never statically import heavy components (like Monaco Editor) that are not needed on initial render, as this bloats the main chunk (e.g., ~300KB added)." ;
-    oc:hasRationale "Static imports force heavy dependencies into the main bundle, directly degrading TTI and LCP metrics." ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_8b7979a5 a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "When a component is large and not required during initial page render" ;
-    oc:directiveContent "Use `next/dynamic` to wrap heavy component imports with `dynamic(() => import(...), { ssr: false })` so they load on demand." ;
-    oc:hasRationale "Dynamic imports separate heavy code into its own chunk loaded only when needed, keeping the initial bundle small." ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_9b8a903a a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When dynamically importing browser-dependent or non-SSR-compatible components" ;
-    oc:directiveContent "Set `ssr: false` on dynamic imports for components that are client-only (e.g., code editors, charting libraries) to avoid server-side rendering errors and unnecessary SSR overhead." ;
-    oc:hasRationale "Client-only components may reference browser APIs (window, document) that don't exist during SSR, causing runtime errors." ;
+oc:kn_1896d140 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before converting a static import to a dynamic import" ;
+    oc:directiveContent "Check if the component is needed on initial render — if yes, do NOT dynamically import it" ;
+    oc:hasRationale "Dynamic importing above-the-fold components can worsen LCP by delaying their render" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_e1129166 a oc:Heuristic,
+oc:kn_3f173259 a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When evaluating which components to code-split" ;
-    oc:directiveContent "Apply dynamic imports to any component whose library adds more than ~30-50KB to the bundle and is not visible or interactive on initial page load." ;
-    oc:hasRationale "The overhead of an additional network request is justified when the deferred chunk is large enough to meaningfully slow initial render." ;
-    oc:severityLevel "LOW" .
+    oc:appliesToContext "When lazy-loading a named export from a heavy component module" ;
+    oc:codeLanguage "tsx" ;
+    oc:directiveContent """import dynamic from 'next/dynamic'
+
+const HeavyComponent = dynamic(
+  () => import('./heavy-component').then(m => m.HeavyComponent),
+  { ssr: false }
+)""" .
+
+oc:kn_4a53f177 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When dynamically importing client-side-only components" ;
+    oc:directiveContent "Use { ssr: false } option for components that depend on browser-only APIs (window, document, Monaco, etc.)" ;
+    oc:hasRationale "Server-side rendering will fail for components that access browser globals; ssr: false prevents SSR for that component" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_54ded76d a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When evaluating which components should be dynamically imported" ;
+    oc:directiveContent "Apply dynamic imports to components over ~50KB or any component using heavy libraries (editors, charts, maps, video players)" ;
+    oc:hasRationale "The overhead of a separate chunk request is negligible compared to the cost of shipping large unused code in the initial bundle" .
+
+oc:kn_575199e6 a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "When using next/dynamic for any component" ;
+    oc:directiveContent "Dynamic imports create separate chunks loaded on demand; this adds a network request when the component first renders" ;
+    oc:hasRationale "Agents should understand there is a loading state and network latency trade-off — use loading spinners or skeletons to handle it" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_6688c525 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When importing large third-party or custom components in Next.js pages" ;
+    oc:directiveContent "Never statically import heavy components (like Monaco Editor) that are not needed on initial render — they will bundle with the main chunk and add ~300KB+" ;
+    oc:hasRationale "Static imports force heavy dependencies into the main bundle, directly degrading TTI and LCP metrics" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_914c4101 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When architecting component imports in Next.js applications" ;
+    oc:directiveContent "Use next/dynamic to lazy-load components that are below the fold or only needed after user interaction" ;
+    oc:hasRationale "Code-splitting via dynamic imports ensures only the JavaScript needed for initial render is loaded, improving core web vitals" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_e0ba7552 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When implementing dynamic imports for heavy components" ;
+    oc:directiveContent "1. Identify heavy components not needed on initial render 2. Replace static import with next/dynamic(() => import('path')) 3. Add { ssr: false } if component uses browser APIs 4. Add a loading placeholder via loading option if needed 5. Verify bundle size reduction in build output" ;
+    oc:stepOrder 1 .
 

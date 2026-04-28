@@ -10,56 +10,183 @@ oc:skill_vercel_labs_vercel_react_best_practices_server_after_nonblocking a oc:D
     skos:broader "Performance optimization pattern" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "d0b8d24a3db9f0f65f9e2bddbf230b0e03a5f60e1229d93a4a18f5e7a991c7c2" ;
-    oc:differentia "uses Next.js after() to schedule non-blocking post-response side effects like logging, analytics, and notifications" ;
+    oc:differentia "that schedules non-blocking side effects after response delivery in Next.js server code" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
-    oc:handlesFailure oc:AfterCallbackError ;
+    oc:handlesFailure oc:InvalidInput ;
+    oc:hasArgumentHint "server function code to refactor" ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_94ad3145,
-        oc:kn_ec1e822c,
-        oc:kn_ed3c3ca4,
-        oc:kn_f383b287,
-        oc:kn_ff13c6e6 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Use after() for Non-Blocking Operations
+impact: MEDIUM
+impactDescription: faster response times
+tags: server, async, logging, analytics, side-effects
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Use Next.js's `after()` to schedule work that should execute after a response is sent. This prevents logging, analytics, and other side effects from blocking the response." ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """import { logUserAction } from '@/app/utils'
+
+export async function POST(request: Request) {
+  // Perform mutation
+  await updateDatabase(request)
+  
+  // Logging blocks the response
+  const userAgent = request.headers.get('user-agent') || 'unknown'
+  await logUserAction({ userAgent })
+  
+  return new Response(JSON.stringify({ status: 'success' }), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' }
+  })
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-30" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 11 ;
+                    oc:textContent "Reference: [https://nextjs.org/docs/app/api-reference/functions/after](https://nextjs.org/docs/app/api-reference/functions/after)" ],
+                [ a oc:BulletList ;
+                    oc:blockType "bullet_list" ;
+                    oc:contentOrder 8 ;
+                    oc:hasItem [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 4 ;
+                            oc:itemText "Cache invalidation" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 3 ;
+                            oc:itemText "Sending notifications" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 5 ;
+                            oc:itemText "Cleanup tasks" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 2 ;
+                            oc:itemText "Audit logging" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 1 ;
+                            oc:itemText "Analytics tracking" ] ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 7 ;
+                    oc:textContent "**Common use cases:**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Incorrect (blocks response):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "**Correct (non-blocking):**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """import { after } from 'next/server'
+import { headers, cookies } from 'next/headers'
+import { logUserAction } from '@/app/utils'
+
+export async function POST(request: Request) {
+  // Perform mutation
+  await updateDatabase(request)
+  
+  // Log after response is sent
+  after(async () => {
+    const userAgent = (await headers()).get('user-agent') || 'unknown'
+    const sessionCookie = (await cookies()).get('session-id')?.value || 'anonymous'
+    
+    logUserAction({ sessionCookie, userAgent })
+  })
+  
+  return new Response(JSON.stringify({ status: 'success' }), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' }
+  })
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 5 ;
+                    oc:sourceLocation "lines 34-56" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 6 ;
+                    oc:textContent "The response is sent immediately while logging happens in the background." ],
+                [ a oc:BulletList ;
+                    oc:blockType "bullet_list" ;
+                    oc:contentOrder 10 ;
+                    oc:hasItem [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 1 ;
+                            oc:itemText "`after()` runs even if the response fails or redirects" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 2 ;
+                            oc:itemText "Works in Server Actions, Route Handlers, and Server Components" ] ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 9 ;
+                    oc:textContent "**Important notes:**" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Use after() for Non-Blocking Operations" ] ;
+    oc:impartsKnowledge oc:kn_09b602ac,
+        oc:kn_3ded54a0,
+        oc:kn_49447c05,
+        oc:kn_4b6ff28f,
+        oc:kn_a527d219 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
     oc:requiresState oc:EnvironmentReady ;
-    oc:resolvesIntent "defer logging and analytics after response",
-        "implement background tasks in Next.js server routes",
-        "optimize server response times",
-        "schedule non-blocking side effects" ;
-    oc:yieldsState oc:NonBlockingSideEffectsConfigured .
+    oc:resolvesIntent "implement background logging analytics in Next.js",
+        "optimize server response times with after()",
+        "prevent side effects from blocking server responses",
+        "schedule non-blocking operations after response" ;
+    oc:yieldsState oc:ResponseOptimized .
 
-oc:kn_94ad3145 a oc:AntiPattern,
+oc:kn_09b602ac a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When writing Next.js Route Handlers, Server Actions, or Server Components that perform non-critical side effects" ;
-    oc:directiveContent "Never await side-effect operations like logging, analytics, or notifications before returning a server response — they block the response and degrade perceived performance." ;
-    oc:hasRationale "Awaiting side effects before responding adds unnecessary latency to the user-facing response, making the server feel slower." ;
+    oc:appliesToContext "Whenever a server function performs mutations followed by side-effect operations" ;
+    oc:directiveContent "Use next/server's after() to schedule non-essential work (logging, analytics, cache invalidation, notifications) to run after the response is sent." ;
+    oc:hasRationale "Decoupling side effects from the response path improves perceived and actual performance." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_ec1e822c a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "When a server route or action needs to perform side effects that don't affect the response payload" ;
-    oc:directiveContent "Use next/server's after() function to schedule non-critical work (logging, analytics, notifications, cache invalidation, cleanup) that should execute after the response is sent." ;
-    oc:hasRationale "after() ensures the response is sent immediately while background work proceeds without blocking, improving response times." ;
+oc:kn_3ded54a0 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When accessing request context inside after() callbacks" ;
+    oc:directiveContent "Inside after() callbacks, use next/headers helpers (headers(), cookies()) with await since the request context is still available but must be accessed asynchronously." ;
+    oc:hasRationale "The dynamic request context is preserved for after() but requires explicit await in the async callback pattern." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_49447c05 a oc:Idempotency,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When using after() for critical operations like audit logging" ;
+    oc:directiveContent "after() is fire-and-forget — there is no built-in guarantee that the scheduled work completes or retry mechanism if it fails." ;
+    oc:hasRationale "Operations that require guaranteed delivery should not rely solely on after() without additional reliability measures." ;
+    oc:severityLevel "LOW" .
+
+oc:kn_4b6ff28f a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing Route Handlers, Server Actions, or Server Components with side effects" ;
+    oc:directiveContent "Never await side-effect operations (logging, analytics, notifications) before returning a server response — they block the response unnecessarily." ;
+    oc:hasRationale "Awaiting non-essential work before returning increases response latency for the client with no user benefit." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_ed3c3ca4 a oc:KnowledgeNode,
+oc:kn_a527d219 a oc:KnowledgeNode,
         oc:KnownIssue ;
-    oc:appliesToContext "When using after() to schedule post-response work" ;
-    oc:directiveContent "after() callbacks run even if the response fails or redirects — do not assume the response was successful inside the after() block." ;
-    oc:hasRationale "This behavior means any state checks or conditional logic inside after() must not assume the preceding response succeeded." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_f383b287 a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When designing server route handlers and server actions" ;
-    oc:directiveContent "Classify operations into critical path (mutations, data fetches that affect the response) vs. non-critical side effects (logging, analytics, notifications) — only critical path operations should block the response." ;
-    oc:hasRationale "Clear separation of critical vs. non-critical work enables targeted optimization where side effects are deferred via after() without risking response integrity." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_ff13c6e6 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When accessing request context inside after() in Next.js" ;
-    oc:directiveContent "Within after() callbacks, use dynamic request helpers like headers() and cookies() by awaiting them (e.g., (await headers()).get(...)) rather than referencing the outer request object." ;
-    oc:hasRationale "The original request object may not be available in the after() scope; Next.js dynamic APIs (headers, cookies) are the correct way to access request-scoped data inside after()." ;
+    oc:appliesToContext "When using after() for operations that depend on response success" ;
+    oc:directiveContent "after() runs even if the response fails or redirects — code inside after() cannot assume the response succeeded." ;
+    oc:hasRationale "Developers may incorrectly assume after()-scheduled code only runs on success, leading to stale or incorrect analytics/logging." ;
     oc:severityLevel "MEDIUM" .
 

@@ -7,58 +7,233 @@
 oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_cocoapods_spm_migration_migration_report_template a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "migration-report-template" ;
-    skos:broader "report template" ;
+    skos:broader "Migration documentation artifact" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/kotlin/kotlin-agent-skills/kotlin-tooling-cocoapods-spm-migration" ;
     oc:contentHash "a728c8c9b79ad8fecde3902af6d1810dae2e142b50b486fd9c49e129b3bead70" ;
-    oc:differentia "that documents a CocoaPods-to-SwiftPM migration with structured sections for each phase, errors, decisions, and file changes" ;
+    oc:differentia "Structured report template for recording CocoaPods-to-SwiftPM migration outcomes with machine-parseable sections for errors, decisions, and file changes" ;
     oc:extends oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_cocoapods_spm_migration ;
-    oc:handlesFailure oc:ReportGenerationFailed ;
+    oc:hasArgumentHint "project root path for writing MIGRATION_REPORT.md" ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_30b4bd3b,
-        oc:kn_7886b17e,
-        oc:kn_9c72ba83,
-        oc:kn_f8612f39,
-        oc:kn_fcd70570 ;
-    oc:isUserInvocable false ;
-    oc:nature "Work" ;
-    oc:requiresState oc:MigrationCompleted ;
-    oc:resolvesIntent "create structured migration summary",
-        "document migration outcome",
-        "generate migration report" ;
-    oc:yieldsState oc:MigrationReportCreated .
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "After migration (whether successful or not), write a comprehensive `MIGRATION_REPORT.md` in the project root. This document serves both as human-readable documentation and as structured input for AI agents analyzing the migration." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "**Show before/after.** For non-trivial changes, include code snippets of what was changed and why." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "**Explain the \"why.\"** Every error and non-trivial decision should include root cause analysis, not just the fix." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "**Mark preserved `cocoapods.*` imports clearly.** These are the most confusing aspect of the migration for future readers — explain exactly why each one was kept and which library provides the bundled klib." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "**Be specific.** Include actual file paths, class names, error messages. Avoid vague statements like \"updated the config.\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 6 ;
+                                    oc:itemText "**Keep it machine-parseable.** Use consistent markdown headings, tables, and the `Error #N` format so AI agents can extract structured data." ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "**Flag generalizable issues.** Mark errors that are likely to affect other projects so this report can improve the migration tooling." ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Writing Guidelines" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# Migration Report: CocoaPods to SwiftPM Import
 
-oc:kn_30b4bd3b a oc:Heuristic,
+**Project:** <project name>
+**Module migrated:** <module name>
+**Date:** <YYYY-MM-DD>
+**Kotlin version:** <old version> → <new version>
+**Status:** <Completed successfully | Completed with workarounds | Failed — see Errors>
+
+---
+
+## Pre-Migration State
+
+### CocoaPods Dependencies
+
+| Pod | Version | Mode | Notes |
+|-----|---------|------|-------|
+| <PodName> | <version> | Regular / linkOnly | <e.g., cinterop used in Kotlin code> |
+
+### Framework Configuration
+
+- **baseName:** <name>
+- **isStatic:** <true/false> → <true/false after migration>
+- **Deployment target:** <version>
+
+### Kotlin Files Using `cocoapods.*` Imports
+
+| File | Imports |
+|------|---------|
+| <path> | `cocoapods.<Module>.<Class>`, ... |
+
+### Non-KMP CocoaPods
+
+<List any pods in Podfile not managed by KMP, or "None">
+
+### Atypical Project Configuration
+
+<Document anything unusual found in Phase 1 that required special handling:
+EmbedAndSign disablers, commented-out build phases, custom Gradle tasks
+hooking into CocoaPods, non-standard framework configs, missing `group`
+property, etc. If nothing unusual, write "Standard configuration.">
+
+---
+
+## Migration Steps
+
+### Phase 2: Gradle Configuration
+
+<List exact changes made to settings.gradle.kts, libs.versions.toml,
+root build.gradle.kts, gradle.properties. Include before/after snippets
+for non-trivial changes.>
+
+### Phase 3: swiftPMDependencies
+
+<Show the complete `swiftPMDependencies {}` block added.
+Document decisions: why `discoverModulesImplicitly = false`,
+which `importedClangModules` were chosen and why, framework search
+paths added, static/dynamic choice, etc.>
+
+### Phase 4: Import Transformations
+
+<Table of import changes. Clearly mark any preserved `cocoapods.*` imports.>
+
+| File | Before | After | Source |
+|------|--------|-------|--------|
+| <path> | `cocoapods.<Mod>.<Cls>` | `swiftPMImport.<grp>.<mod>.<Cls>` | swiftPMImport cinterop |
+| <path> | `cocoapods.<Mod>.<Cls>` | `cocoapods.<Mod>.<Cls>` (unchanged) | <library> bundled klib |
+
+### Phase 5: iOS Project Reconfiguration
+
+<Document: Option A or B, integration commands run, sandboxing fix,
+Crashlytics dSYM script update, any manual pbxproj edits.>
+
+### Phase 6: CocoaPods Removal
+
+<List everything removed: plugin, cocoapods block, gradle.properties
+entries, custom tasks, podspec files, Podfile changes.>
+
+### Phase 7: Verification
+
+<Build commands run and their outcomes. Include the final successful
+build command or note that verification was deferred to the user.>
+
+---
+
+## Errors Encountered
+
+<For each error, use this structure:>
+
+### Error #N: <Short title>
+
+**Phase:** <which phase>
+**Symptom:** <exact error message or behavior>
+**Root cause:** <why it happened>
+**Fix:** <what was done to resolve it>
+**Generalizable:** <Yes/No — is this likely to affect other projects?>
+
+---
+
+## Non-Trivial Decisions
+
+<Document decisions that required judgment, not just following the guide:
+- Why a specific `importedClangModules` list was chosen
+- Why `isStatic` was changed (or kept)
+- Why certain `cocoapods.*` imports were preserved
+- Framework search paths added and how the product list was determined
+- Any trade-offs made (e.g., disabling iOS tests)>
+
+---
+
+## Files Changed
+
+<Complete list of files modified, created, or deleted during migration.
+Group by type: Gradle files, Kotlin sources, Xcode project files, other.>
+
+### Gradle Files
+- <path> — <brief description of change>
+
+### Kotlin Sources
+- <path> — <brief description of change>
+
+### Xcode Project Files
+- <path> — <brief description of change>
+
+### Created
+- <path> — <what it is>
+
+### Deleted
+- <path> — <what it was>
+""" ;
+                            oc:codeLanguage "markdown" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 7-136" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Template" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Migration Report Template" ] ;
+    oc:impartsKnowledge oc:kn_082ee1e1,
+        oc:kn_4ec78556,
+        oc:kn_a0d49318,
+        oc:kn_e6845260,
+        oc:kn_e9451ff6 ;
+    oc:isUserInvocable true ;
+    oc:nature "Template" ;
+    oc:resolvesIntent "document migration outcome",
+        "generate migration report",
+        "record migration errors and decisions" .
+
+oc:kn_082ee1e1 a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When documenting errors in the Errors Encountered section" ;
-    oc:directiveContent "Flag every error encountered as generalizable (Yes/No) to indicate whether it is likely to affect other projects." ;
-    oc:hasRationale "Generalizable error patterns feed back into migration tooling improvements and help other projects anticipate the same issues." ;
+    oc:appliesToContext "when writing any section of the migration report" ;
+    oc:directiveContent "Use consistent markdown headings, tables, and Error #N format so AI agents can extract structured data from the report." ;
+    oc:hasRationale "Machine-parseable formatting enables tooling to aggregate migration reports across projects and improve the migration process." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_7886b17e a oc:DesignPrinciple,
+oc:kn_4ec78556 a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When structuring the entire migration report" ;
-    oc:directiveContent "Use consistent markdown headings, tables, and the Error #N format so the report is machine-parseable by AI agents." ;
-    oc:hasRationale "Structured formatting enables automated extraction of migration patterns, common errors, and decision rationales for improving tooling." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_9c72ba83 a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When writing any section of the migration report" ;
-    oc:directiveContent "Every migration report must include actual file paths, class names, error messages, and before/after code snippets rather than vague descriptions." ;
-    oc:hasRationale "Specific artifacts allow future readers and AI agents to trace exactly what changed and why, enabling reproducibility and debugging." ;
+    oc:appliesToContext "always, after migration completes or fails" ;
+    oc:directiveContent "Write MIGRATION_REPORT.md after every migration attempt — successful or failed — as both human-readable documentation and structured input for AI agents." ;
+    oc:hasRationale "The report captures institutional knowledge about the migration that would otherwise be lost, and its structured format enables automated analysis." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_f8612f39 a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "When deciding whether to write the report" ;
-    oc:directiveContent "The report must be written regardless of migration success or failure — it documents the full journey including errors and incomplete states." ;
-    oc:hasRationale "Failed migrations contain valuable diagnostic information; skipping the report on failure loses critical debugging context for humans and agents." ;
-    oc:severityLevel "CRITICAL" .
+oc:kn_a0d49318 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "when documenting each error in the Errors Encountered section" ;
+    oc:directiveContent "Flag every error as generalizable (Yes/No) to indicate whether it is likely to affect other projects and improve migration tooling." ;
+    oc:hasRationale "Generalizable error patterns feed back into migration guide improvements and proactive detection." ;
+    oc:severityLevel "MEDIUM" .
 
-oc:kn_fcd70570 a oc:KnowledgeNode,
+oc:kn_e6845260 a oc:KnowledgeNode,
         oc:Standard ;
-    oc:appliesToContext "When documenting Phase 4 import transformations" ;
-    oc:directiveContent "Preserved cocoapods.* imports must be explicitly marked and explained with the library name that provides the bundled klib." ;
-    oc:hasRationale "Preserved cocoapods imports are the most confusing aspect of the migration; explicit annotation prevents misinterpretation and regressions." ;
+    oc:appliesToContext "when documenting migration steps, errors, and file changes" ;
+    oc:directiveContent "Include actual file paths, class names, and error messages. Avoid vague statements. Show before/after code snippets for non-trivial changes." ;
+    oc:hasRationale "Specific artifacts enable future readers and agents to reproduce or understand the exact transformations performed." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_e9451ff6 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "when documenting import transformations in Phase 4" ;
+    oc:directiveContent "Clearly mark preserved cocoapods.* imports and explain why each was kept and which library provides the bundled klib." ;
+    oc:hasRationale "Preserved cocoapods imports are the most confusing aspect for future readers — explicit rationale prevents misdiagnosis." ;
     oc:severityLevel "HIGH" .
 

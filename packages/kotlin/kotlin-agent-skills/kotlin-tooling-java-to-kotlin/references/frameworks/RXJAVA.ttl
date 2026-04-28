@@ -7,89 +7,328 @@
 oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_java_to_kotlin_rxjava a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "rxjava" ;
-    skos:broader "Conversion guide" ;
+    skos:broader "Framework conversion guide" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/kotlin/kotlin-agent-skills/kotlin-tooling-java-to-kotlin" ;
     oc:contentHash "87cad42db77a79c9c2a8bc24d051f0526300fb0682de239e30bbd88748608b82" ;
-    oc:differentia "Maps RxJava reactive types (Observable, Single, Completable) to Kotlin coroutines and Flow with operator equivalents and threading model translation" ;
+    oc:dependsOnSkill oc:skill_ontoskills_kotlin_tooling_java_to_kotlin ;
+    oc:differentia "maps RxJava reactive types and operators to Kotlin coroutines and Flow during Java-to-Kotlin migration" ;
     oc:extends oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_java_to_kotlin ;
-    oc:handlesFailure oc:InvalidInput,
-        oc:MissingDependency ;
-    oc:hasArgumentHint "Java source file containing RxJava imports (io.reactivex.* or rx.*)" ;
+    oc:handlesFailure oc:MissingCoroutinesDependency ;
     oc:hasCategory "development" ;
-    oc:hasRequirement oc:req_36d9d903,
-        oc:req_7e6a744d,
-        oc:req_e233eef2,
-        oc:req_e30e2afe ;
-    oc:impartsKnowledge oc:kn_39ac9e0f,
-        oc:kn_62b7682e,
-        oc:kn_89e7e845,
-        oc:kn_d035c0b7,
-        oc:kn_e3dc7af0,
-        oc:kn_f95edfaf ;
-    oc:isUserInvocable true ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 1 ;
+                                    oc:rowCount 7 ;
+                                    oc:tableCaption "### 2. Type mapping" ;
+                                    oc:tableMarkdown """| RxJava | Kotlin |
+|---|---|
+| `Observable<T>` | `Flow<T>` |
+| `Flowable<T>` | `Flow<T>` (backpressure is built-in) |
+| `Single<T>` | `suspend fun`: T |
+| `Maybe<T>` | `suspend fun`: T? |
+| `Completable` | `suspend fun` returning `Unit` |
+| `Disposable` | `Job` (from coroutines) |
+| `CompositeDisposable` | `CoroutineScope` (structured concurrency) |
+""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "2. Type mapping" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent """Flow has built-in backpressure via suspension. There is no need for a separate
+`Flowable` type — all `Flow` instances support backpressure by default.""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 5 ;
+                            oc:sectionTitle "5. Backpressure" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 1 ;
+                                    oc:rowCount 11 ;
+                                    oc:tableCaption "### 3. Operator mapping" ;
+                                    oc:tableMarkdown """| RxJava | Kotlin Flow |
+|---|---|
+| `subscribeOn(Schedulers.io())` | `flowOn(Dispatchers.IO)` |
+| `observeOn(AndroidSchedulers.mainThread())` | `flowOn(Dispatchers.Main)` or collect on Main |
+| `flatMap` | `flatMapMerge` or `flatMapConcat` |
+| `map` | `map` (same) |
+| `filter` | `filter` (same) |
+| `zip` | `combine` or `zip` |
+| `merge` | `merge` |
+| `concat` | `flatMapConcat` |
+| `onErrorReturn` | `catch { emit(default) }` |
+| `doOnNext` | `onEach` |
+| `subscribe()` | `collect {}` in a coroutine scope |
+""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "3. Operator mapping" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent """`flowOn` changes the upstream dispatcher (analogous to `subscribeOn`). Collection
+always happens on the caller's dispatcher. To collect on a specific dispatcher,
+launch the collecting coroutine in the desired scope.""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 6 ;
+                            oc:sectionTitle "6. Threading" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent """RxJava's `Disposable` / `CompositeDisposable` pattern is replaced by structured
+concurrency. Cancelling a `CoroutineScope` cancels all child coroutines and flow
+collections automatically.""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 7 ;
+                            oc:sectionTitle "7. Lifecycle and cancellation" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent """Add `kotlinx-coroutines-core` and `kotlinx-coroutines-rx3` (or `kotlinx-coroutines-rx2`)
+as dependencies if performing a gradual migration. The bridge library provides extension
+functions like `asFlow()` and `asObservable()` for interop at module boundaries.""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "1. Dependency setup" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent """RxJava's `onError` callback maps to Flow's `catch` operator or a try-catch block
+wrapping the `collect` call. In suspend functions (replacing `Single`/`Completable`),
+use standard try-catch.""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "4. Error handling" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Key Rules" ],
+                [ a oc:Section ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """package com.acme.data;
+
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
+
+/**
+ * Repository that streams user data from a remote source.
+ */
+public class UserRepository {
+
+    private final UserApi api;
+    private final CompositeDisposable disposables = new CompositeDisposable();
+
+    public UserRepository(UserApi api) {
+        this.api = api;
+    }
+
+    public Observable<List<User>> getActiveUsers() {
+        return api.getAllUsers()
+                .subscribeOn(Schedulers.io())
+                .map(users -> filterActive(users))
+                .doOnNext(users -> logCount(users))
+                .onErrorReturn(throwable -> Collections.emptyList());
+    }
+
+    public void observeUsers(UserCallback callback) {
+        disposables.add(
+            getActiveUsers()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                    users -> callback.onUsers(users),
+                    error -> callback.onError(error)
+                )
+        );
+    }
+
+    public void clear() {
+        disposables.clear();
+    }
+
+    private List<User> filterActive(List<User> users) {
+        return users.stream().filter(User::isActive).collect(Collectors.toList());
+    }
+
+    private void logCount(List<User> users) {
+        System.out.println("Active users: " + users.size());
+    }
+}
+""" ;
+                                    oc:codeLanguage "java" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 73-124" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Java Input" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 3 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 7 ;
+                                            oc:itemText "Java streams (`filter` + `collect`) become Kotlin's `filter` directly on the list." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 6 ;
+                                            oc:itemText """`observeOn(AndroidSchedulers.mainThread())` is unnecessary because `scope` already
+uses `Dispatchers.Main`, and `collect` runs on the collector's dispatcher.""" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText """`subscribeOn(Schedulers.io())` becomes `flowOn(Dispatchers.IO)` at the end of the
+chain (it affects all upstream operators).""" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 5 ;
+                                            oc:itemText "`onErrorReturn` becomes `catch { emit(emptyList()) }`." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText """`CompositeDisposable` is replaced by a `CoroutineScope` with `SupervisorJob`.
+Calling `scope.cancel()` cancels all active collections.""" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "`doOnNext` becomes `onEach`." ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "`Observable<List<User>>` becomes `Flow<List<User>>`." ] ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """package com.acme.data
+
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+
+/**
+ * Repository that streams user data from a remote source.
+ */
+class UserRepository(
+    private val api: UserApi
+) {
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+
+    fun getActiveUsers(): Flow<List<User>> =
+        api.getAllUsers()
+            .map { users -> users.filter { it.isActive } }
+            .onEach { users -> println("Active users: ${users.size}") }
+            .catch { emit(emptyList()) }
+            .flowOn(Dispatchers.IO)
+
+    fun observeUsers(callback: UserCallback) {
+        scope.launch {
+            getActiveUsers().collect { users ->
+                callback.onUsers(users)
+            }
+        }
+    }
+
+    fun clear() {
+        scope.cancel()
+    }
+}
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 128-169" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Key points:**" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Kotlin Output" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Example: Converting an Observable Chain to Flow" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent """Detected when imports match `io.reactivex.*` or `rx.*`. This is a significant paradigm
+shift — RxJava reactive types map to Kotlin coroutines and Flow.""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "When This Applies" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "RxJava to Coroutines/Flow Conversion Guide" ] ;
+    oc:impartsKnowledge oc:kn_27c7c4fd,
+        oc:kn_2fdeecda,
+        oc:kn_3ad73314,
+        oc:kn_65c2107f,
+        oc:kn_6d120915,
+        oc:kn_d5f7cf7f ;
+    oc:isUserInvocable false ;
     oc:nature "Concept" ;
     oc:requiresState oc:RxJavaImportsDetected ;
-    oc:resolvesIntent "convert rxjava to kotlin coroutines",
-        "migrate rxjava to kotlin coroutines",
-        "replace rxjava operators with flow operators",
-        "translate rxjava observable to flow" ;
-    oc:yieldsState oc:RxJavaToFlowConverted .
+    oc:resolvesIntent "convert RxJava Observable chains to Kotlin Flow",
+        "map RxJava types to coroutines equivalents",
+        "migrate RxJava error handling to Flow catch",
+        "replace CompositeDisposable with structured concurrency" ;
+    oc:yieldsState oc:RxJavaConvertedToCoroutines .
 
-oc:kn_39ac9e0f a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "When planning a gradual RxJava-to-coroutines migration" ;
-    oc:directiveContent "Use kotlinx-coroutines-rx2 or kotlinx-coroutines-rx3 bridge libraries with asFlow()/asObservable() for gradual migration at module boundaries rather than converting everything at once." ;
-    oc:hasRationale "Module-boundary interop allows incremental migration without breaking the build, reducing risk in large codebases" ;
+oc:kn_27c7c4fd a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When performing gradual RxJava-to-coroutines migration" ;
+    oc:directiveContent "Add kotlinx-coroutines-core and kotlinx-coroutines-rx3 (or rx2) as dependencies for gradual migration; bridge library provides asFlow() and asObservable() for interop at module boundaries." ;
+    oc:hasRationale "Without bridge libraries, module boundaries between RxJava and coroutines code cannot interoperate during incremental migration." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_2fdeecda a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting subscribeOn/observeOn threading operators" ;
+    oc:directiveContent "Place flowOn() at the end of the chain (it affects all upstream operators); it is analogous to subscribeOn, not observeOn. Collection always runs on the caller's dispatcher." ;
+    oc:hasRationale "Misplacing flowOn() breaks threading semantics — it only affects upstream, not downstream collection." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_3ad73314 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting RxJava Flowable types" ;
+    oc:directiveContent "Do not use a separate type for backpressure handling — Flow has built-in backpressure via suspension, so Flowable is unnecessary; all Flow instances support backpressure by default." ;
+    oc:hasRationale "Retaining a separate backpressure-aware type would undermine the simplicity advantage of Flow's suspension-based model." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_62b7682e a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When translating RxJava lifecycle management to Kotlin" ;
-    oc:directiveContent "Replace CompositeDisposable/Disposable patterns with CoroutineScope + structured concurrency. Cancelling the scope cancels all child coroutines and flow collections automatically." ;
-    oc:hasRationale "Structured concurrency is Kotlin's idiomatic replacement for manual disposable management and provides stronger guarantees about resource cleanup" ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_89e7e845 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When translating subscribeOn/observeOn threading to Flow" ;
-    oc:directiveContent "Place flowOn(Dispatchers.IO) at the end of the Flow chain, not the beginning — it affects all upstream operators, analogous to RxJava's subscribeOn." ;
-    oc:hasRationale "Flow's flowOn is an upstream-only operator; placing it correctly ensures the entire pipeline runs on the desired dispatcher without redundancy" ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_d035c0b7 a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When converting RxJava type signatures to Kotlin" ;
-    oc:directiveContent "RxJava Observable/Flowable map to Flow<T>, Single maps to suspend fun returning T, Maybe maps to suspend fun returning T?, and Completable maps to suspend fun returning Unit. There is no 1:1 Flow equivalent — use the suspend function directly." ;
-    oc:hasRationale "Each RxJava type carries specific semantic guarantees (single value, optional value, no value, stream) that must be preserved in the Kotlin coroutine model" ;
+oc:kn_65c2107f a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When converting any RxJava reactive type declaration" ;
+    oc:directiveContent "Map RxJava types: Observable/Flowable → Flow<T>, Single → suspend fun returning T, Maybe → suspend fun returning T?, Completable → suspend fun returning Unit, Disposable → Job, CompositeDisposable → CoroutineScope." ;
+    oc:hasRationale "These are the canonical type mappings that preserve reactive semantics while adopting Kotlin idioms." ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_e3dc7af0 a oc:AntiPattern,
+oc:kn_6d120915 a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When converting RxJava types that involve backpressure concerns" ;
-    oc:directiveContent "Do not introduce a separate Flowable-like type for backpressure handling — Flow has built-in backpressure via suspension. Map both Observable and Flowable directly to Flow." ;
-    oc:hasRationale "Kotlin Flow's suspend-based model inherently handles backpressure, making a separate type unnecessary and adding one would be unidiomatic" ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_f95edfaf a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When translating RxJava operators to Kotlin Flow operators" ;
-    oc:directiveContent "Map RxJava's onErrorReturn to Flow's catch { emit(default) }, flatMap to flatMapMerge or flatMapConcat depending on concurrency needs, and doOnNext to onEach." ;
-    oc:hasRationale "Operator semantics differ slightly between RxJava and Flow; choosing the correct equivalent preserves the original program's behavior" ;
+    oc:appliesToContext "When converting classes that manage multiple RxJava subscriptions" ;
+    oc:directiveContent "Replace CompositeDisposable with CoroutineScope(SupervisorJob() + Dispatcher) for lifecycle management; scope.cancel() cancels all child coroutines and flow collections automatically." ;
+    oc:hasRationale "Structured concurrency provides automatic cleanup and prevents leaks without manual disposable tracking." ;
     oc:severityLevel "HIGH" .
 
-oc:req_36d9d903 a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "RxJava reactive types and operators" .
-
-oc:req_7e6a744d a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "Kotlin coroutines and Flow API" .
-
-oc:req_e233eef2 a oc:RequirementTool ;
-    oc:isOptional true ;
-    oc:requirementValue "kotlinx-coroutines-rx2 or kotlinx-coroutines-rx3" .
-
-oc:req_e30e2afe a oc:RequirementTool ;
-    oc:isOptional true ;
-    oc:requirementValue "kotlinx-coroutines-core" .
+oc:kn_d5f7cf7f a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When converting RxJava error handling patterns" ;
+    oc:directiveContent "Map onErrorReturn to Flow's catch { emit(default) } operator; for suspend functions replacing Single/Completable, use standard try-catch wrapping the collect call." ;
+    oc:hasRationale "Flow's catch operator is contextually different from RxJava's onError — it only catches upstream exceptions, so understanding its placement is critical." ;
+    oc:severityLevel "MEDIUM" .
 

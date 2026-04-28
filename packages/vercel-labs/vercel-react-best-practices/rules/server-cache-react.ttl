@@ -7,76 +7,193 @@
 oc:skill_vercel_labs_vercel_react_best_practices_server_cache_react a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "server-cache-react" ;
-    skos:broader "React server-side optimization technique" ;
+    skos:broader "React performance pattern" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "fddeea6c870bb3da4134b61d54b7d09b83d2603f929b7547cd3dc1dc269edd5c" ;
-    oc:differentia "uses React.cache() to deduplicate async operations within a single request, preventing redundant database queries, auth checks, and computations" ;
+    oc:differentia "uses React.cache() for per-request server-side deduplication of async operations" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
-    oc:handlesFailure oc:CacheMiss,
-        oc:InvalidInput ;
-    oc:hasArgumentHint "async function to wrap with cache" ;
+    oc:handlesFailure oc:CacheMiss ;
     oc:hasCategory "development" ;
-    oc:hasRequirement oc:req_687a50ae,
-        oc:req_7461731c,
-        oc:req_a0b2d589 ;
-    oc:impartsKnowledge oc:kn_0baa1d52,
-        oc:kn_44f272a0,
-        oc:kn_6e2ceed2,
-        oc:kn_b2d9d1e2,
-        oc:kn_c69b3779 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Per-Request Deduplication with React.cache()
+impact: MEDIUM
+impactDescription: deduplicates within request
+tags: server, cache, react-cache, deduplication
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Use `React.cache()` for server-side request deduplication. Authentication and database queries benefit most." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 9 ;
+                    oc:textContent "**Correct (cache hit):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 13 ;
+                    oc:textContent "**Next.js-Specific Note:**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 16 ;
+                    oc:textContent "Use `React.cache()` to deduplicate these operations across your component tree." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 17 ;
+                    oc:textContent "Reference: [React.cache documentation](https://react.dev/reference/react/cache)" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 5 ;
+                    oc:textContent "**Avoid inline objects as arguments:**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 14 ;
+                    oc:textContent "In Next.js, the `fetch` API is automatically extended with request memoization. Requests with the same URL and options are automatically deduplicated within a single request, so you don't need `React.cache()` for `fetch` calls. However, `React.cache()` is still essential for other async tasks:" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """const getUser = cache(async (params: { uid: number }) => {
+  return await db.user.findUnique({ where: { id: params.uid } })
+})
+
+// Each call creates new object, never hits cache
+getUser({ uid: 1 })
+getUser({ uid: 1 })  // Cache miss, runs query again
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 8 ;
+                    oc:sourceLocation "lines 34-42" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """import { cache } from 'react'
+
+export const getCurrentUser = cache(async () => {
+  const session = await auth()
+  if (!session?.user?.id) return null
+  return await db.user.findUnique({
+    where: { id: session.user.id }
+  })
+})
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-24" ],
+                [ a oc:BulletList ;
+                    oc:blockType "bullet_list" ;
+                    oc:contentOrder 15 ;
+                    oc:hasItem [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 4 ;
+                            oc:itemText "File system operations" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 1 ;
+                            oc:itemText "Database queries (Prisma, Drizzle, etc.)" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 5 ;
+                            oc:itemText "Any non-fetch async work" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 2 ;
+                            oc:itemText "Heavy computations" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 3 ;
+                            oc:itemText "Authentication checks" ] ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 7 ;
+                    oc:textContent "**Incorrect (always cache miss):**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """const getUser = cache(async (uid: number) => {
+  return await db.user.findUnique({ where: { id: uid } })
+})
+
+// Primitive args use value equality
+getUser(1)
+getUser(1)  // Cache hit, returns cached result
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 10 ;
+                    oc:sourceLocation "lines 46-54" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Usage:**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 11 ;
+                    oc:textContent "If you must pass objects, pass the same reference:" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 6 ;
+                    oc:textContent "`React.cache()` uses shallow equality (`Object.is`) to determine cache hits. Inline objects create new references each call, preventing cache hits." ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """const params = { uid: 1 }
+getUser(params)  // Query runs
+getUser(params)  // Cache hit (same reference)
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 12 ;
+                    oc:sourceLocation "lines 58-62" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "Within a single request, multiple calls to `getCurrentUser()` execute the query only once." ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Per-Request Deduplication with React.cache()" ] ;
+    oc:impartsKnowledge oc:kn_245ae172,
+        oc:kn_63e5912e,
+        oc:kn_6b795870,
+        oc:kn_c22194e3,
+        oc:kn_def024cf ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
     oc:requiresState oc:EnvironmentReady ;
-    oc:resolvesIntent "cache authentication and database queries per request",
-        "deduplicate server-side requests with React.cache()",
-        "optimize React server component queries",
-        "prevent redundant async operations in server components" ;
-    oc:yieldsState oc:RequestDeduplicated .
+    oc:resolvesIntent "avoid duplicate database queries or auth checks in server rendering",
+        "deduplicate server-side async calls within a single request",
+        "optimize React server components with request memoization" ;
+    oc:yieldsState oc:ServerRequestOptimized .
 
-oc:kn_0baa1d52 a oc:DesignPrinciple,
+oc:kn_245ae172 a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When designing the signature of cache-wrapped async functions" ;
-    oc:directiveContent "Use primitive arguments (strings, numbers, booleans) for React.cache()-wrapped functions instead of object parameters to ensure reliable cache hits via value equality." ;
-    oc:hasRationale "Primitives use value equality in Object.is, guaranteeing that identical primitive values always produce cache hits regardless of call site." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_44f272a0 a oc:KnowledgeNode,
-        oc:SideEffect ;
-    oc:appliesToContext "Always — when using React.cache() in any context" ;
-    oc:directiveContent "React.cache() deduplicates within a single server request only. Cached results do not persist across different requests or between different users." ;
-    oc:hasRationale "This is per-request deduplication, not a persistent cache. Understanding the scope prevents incorrect assumptions about cross-request caching behavior." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_6e2ceed2 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When deciding whether to wrap an async operation with React.cache()" ;
-    oc:directiveContent "Use React.cache() primarily for database queries (Prisma, Drizzle), authentication checks, heavy computations, and file system operations — not for fetch calls in Next.js." ;
-    oc:hasRationale "Next.js automatically memoizes fetch requests with the same URL and options. React.cache() provides no additional benefit for fetch but is essential for non-fetch async work." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_b2d9d1e2 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When defining cache-wrapped functions that accept parameters" ;
-    oc:directiveContent "Never pass inline objects as arguments to React.cache()-wrapped functions. Inline objects create new references each call, causing shallow equality (Object.is) to always miss the cache." ;
-    oc:hasRationale "React.cache() uses Object.is for shallow equality comparison. Two structurally identical but referentially distinct objects will never match, defeating deduplication entirely." ;
+    oc:appliesToContext "Always, when using React.cache()" ;
+    oc:directiveContent "React.cache() deduplicates only within a single server request — it does NOT cache across requests." ;
+    oc:hasRationale "The cache scope is per-request; each incoming request gets its own cache context. For cross-request caching, use other mechanisms." ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_c69b3779 a oc:KnowledgeNode,
-        oc:KnownIssue ;
-    oc:appliesToContext "When cache-wrapped functions must accept object arguments due to API constraints" ;
-    oc:directiveContent "If object parameters are unavoidable, the same object reference must be reused across calls to achieve cache hits. Store the object in a variable and pass that variable." ;
-    oc:hasRationale "Reference equality is the only way for objects to pass the Object.is check. Reusing a variable reference preserves identity across calls." ;
+oc:kn_63e5912e a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When building React server components that call shared async operations from multiple places in the component tree" ;
+    oc:directiveContent "Use React.cache() to wrap expensive server-side async operations (DB queries, auth checks, heavy computations) so that multiple calls within a single request execute only once." ;
+    oc:hasRationale "Server components may call the same data-fetching logic from different branches; deduplication avoids redundant queries and computation." .
+
+oc:kn_6b795870 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When deciding whether to use React.cache() in a Next.js application" ;
+    oc:directiveContent "In Next.js, fetch() calls are automatically deduplicated by the framework. Reserve React.cache() for non-fetch async work: database queries (Prisma, Drizzle), authentication checks, heavy computations, and file system operations." ;
+    oc:hasRationale "Next.js extends fetch with built-in request memoization. Using React.cache() for fetch would be redundant; it fills the gap for all other async patterns." .
+
+oc:kn_c22194e3 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When defining parameters for cached async functions" ;
+    oc:directiveContent "Prefer primitive arguments (strings, numbers, booleans) for React.cache()-wrapped functions. If objects are necessary, ensure the same reference is passed across calls." ;
+    oc:hasRationale "Primitives use value equality in Object.is comparison, guaranteeing cache hits for identical values. Object identity requires reference stability." ;
     oc:severityLevel "MEDIUM" .
 
-oc:req_687a50ae a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "Next.js request memoization behavior for fetch" .
-
-oc:req_7461731c a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "Difference between primitive and object reference equality in JavaScript" .
-
-oc:req_a0b2d589 a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "React.cache() API and shallow equality semantics" .
+oc:kn_def024cf a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When using React.cache() with parameterized functions" ;
+    oc:directiveContent "Never pass inline object literals as arguments to React.cache()-wrapped functions; each call creates a new reference causing Object.is comparison to fail and preventing cache hits." ;
+    oc:hasRationale "React.cache() uses shallow equality (Object.is) for cache key comparison. Inline objects always produce unique references." ;
+    oc:severityLevel "HIGH" .
 

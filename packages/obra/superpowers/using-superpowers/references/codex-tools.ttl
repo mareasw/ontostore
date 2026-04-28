@@ -7,70 +7,290 @@
 oc:skill_obra_superpowers_using_superpowers_codex_tools a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "codex-tools" ;
-    skos:broader "tool mapping" ;
+    skos:broader "Tool Mapping Reference" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/obra/superpowers/using-superpowers" ;
     oc:contentHash "9014e6746c9a6d3af9eeb9608f1ad637ee334e5a12d178747e3042937fc3da2b" ;
-    oc:dependsOnSkill oc:skill_using_superpowers ;
-    oc:differentia "translates Claude Code tool names and patterns to OpenAI Codex platform equivalents, enabling cross-platform skill execution" ;
+    oc:dependsOnSkill oc:skill_ontoskills_using_superpowers ;
+    oc:differentia "Translates Claude Code tool names and patterns to Codex platform equivalents for cross-platform skill execution" ;
     oc:extends oc:skill_obra_superpowers_using_superpowers ;
-    oc:handlesFailure oc:FeatureNotEnabled,
+    oc:handlesFailure oc:InvalidConfiguration,
         oc:PermissionDenied ;
-    oc:hasAllowedTool "Bash",
-        "Edit",
-        "Read",
-        "Write",
-        "close_agent",
-        "spawn_agent",
-        "update_plan",
-        "wait" ;
+    oc:hasArgumentHint "platform-context (implicit — used when agent detects Codex environment)" ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_462054ff,
-        oc:kn_4a5427cf,
-        oc:kn_aea0bc85,
-        oc:kn_f26df223,
-        oc:kn_fd802b99 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Table ;
+                    oc:blockType "table" ;
+                    oc:contentOrder 2 ;
+                    oc:rowCount 8 ;
+                    oc:tableCaption "Skills use Claude Code tool names. When you encounter these in a skill, use your platform equivalent" ;
+                    oc:tableMarkdown """| Skill references | Codex equivalent |
+|-----------------|------------------|
+| `Task` tool (dispatch subagent) | `spawn_agent` (see [Named agent dispatch](#named-agent-dispatch)) |
+| Multiple `Task` calls (parallel) | Multiple `spawn_agent` calls |
+| Task returns result | `wait` |
+| Task completes automatically | `close_agent` to free slot |
+| `TodoWrite` (task tracking) | `update_plan` |
+| `Skill` tool (invoke a skill) | Skills load natively — just follow the instructions |
+| `Read`, `Write`, `Edit` (files) | Use your native file tools |
+| `Bash` (run commands) | Use your native shell tools |
+""" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Skills use Claude Code tool names. When you encounter these in a skill, use your platform equivalent:" ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "When a skill says to dispatch a named agent type:" ],
+                        [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 4 ;
+                            oc:rowCount 2 ;
+                            oc:tableCaption "4. Spawn a `worker` agent with the filled content as the `message`" ;
+                            oc:tableMarkdown """| Skill instruction | Codex equivalent |
+|-------------------|------------------|
+| `Task tool (superpowers:code-reviewer)` | `spawn_agent(agent_type="worker", message=...)` with `code-reviewer.md` content |
+| `Task tool (general-purpose)` with inline prompt | `spawn_agent(message=...)` with the same prompt |
+""" ],
+                        _:ref_4fb508b68ec941da,
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent """Claude Code skills reference named agent types like `superpowers:code-reviewer`.
+Codex does not have a named agent registry — `spawn_agent` creates generic agents
+from built-in roles (`default`, `explorer`, `worker`).""" ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 3 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "End with an explicit execution directive to prevent summarization of the instructions" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Wrap instructions in XML tags — the model treats tagged blocks as authoritative" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Use task-delegation framing (\"Your task is...\") rather than persona framing (\"You are...\")" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent """The `message` parameter is user-level input, not a system prompt. Structure it
+for maximum instruction adherence:""" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """Your task is to perform the following. Follow the instructions below exactly.
+
+<agent-instructions>
+[filled prompt content from the agent's .md file]
+</agent-instructions>
+
+Execute this now. Output ONLY the structured response following the format
+specified in the instructions above.
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 51-60" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Message framing" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent """This approach compensates for Codex's plugin system not yet supporting an `agents`
+field in `plugin.json`. When `RawPluginManifest` gains an `agents` field, the
+plugin can symlink to `agents/` (mirroring the existing `skills/` symlink) and
+skills can dispatch named agent types directly.""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "When this workaround can be removed" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Named agent dispatch" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent """When the sandbox blocks branch/push operations (detached HEAD in an
+externally managed worktree), the agent commits all work and informs
+the user to use the App's native controls:""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent """The agent can still run tests, stage files, and output suggested branch
+names, commit messages, and PR descriptions for the user to copy.""" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "**\"Create branch\"** — names the branch, then commit/push/PR via App UI" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "**\"Hand off to local\"** — transfers work to the user's local checkout" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Codex App Finishing" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 3 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "`BRANCH` empty → detached HEAD (cannot branch/push/PR from sandbox)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "`GIT_DIR != GIT_COMMON` → already in a linked worktree (skip creation)" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent """Skills that create worktrees or finish branches should detect their
+environment with read-only git commands before proceeding:""" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """GIT_DIR=$(cd "$(git rev-parse --git-dir)" 2>/dev/null && pwd -P)
+GIT_COMMON=$(cd "$(git rev-parse --git-common-dir)" 2>/dev/null && pwd -P)
+BRANCH=$(git branch --show-current)
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 78-82" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent """See `using-git-worktrees` Step 0 and `finishing-a-development-branch`
+Step 1 for how each skill uses these signals.""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Environment Detection" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """[features]
+multi_agent = true
+""" ;
+                            oc:codeLanguage "toml" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 20-23" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Add to your Codex config (`~/.codex/config.toml`):" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "This enables `spawn_agent`, `wait`, and `close_agent` for skills like `dispatching-parallel-agents` and `subagent-driven-development`." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Subagent dispatch requires multi-agent support" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Codex Tool Mapping" ] ;
+    oc:hasWorkflow _:ref_4fb508b68ec941da ;
+    oc:impartsKnowledge oc:kn_039e7368,
+        oc:kn_12b950b6,
+        oc:kn_2ca0d859,
+        oc:kn_2ced461f,
+        oc:kn_4e0fdff0,
+        oc:kn_5928eafc,
+        oc:kn_8c32cf57 ;
     oc:isUserInvocable false ;
-    oc:nature "reference" ;
-    oc:requiresState oc:EnvironmentReady,
-        oc:ToolInstalled ;
-    oc:resolvesIntent "detect execution environment for git operations",
-        "dispatch subagents on Codex platform",
-        "handle sandbox-limited git operations in Codex App",
-        "translate tool references between agent platforms" ;
-    oc:yieldsState oc:ToolMappingResolved .
+    oc:nature "Concept" ;
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "detect environment for git operations",
+        "dispatch subagents on Codex",
+        "finish branches in sandboxed environments",
+        "translate tool references between platforms" ;
+    oc:yieldsState oc:ToolMappingsLoaded .
 
-oc:kn_462054ff a oc:KnowledgeNode,
-        oc:WorkflowStrategy ;
-    oc:appliesToContext "When translating named agent dispatch from Claude Code skills to Codex" ;
-    oc:directiveContent "When a skill references a named agent type (e.g., superpowers:code-reviewer), find and read the agent's prompt file, fill template placeholders, then spawn a 'worker' agent with the filled content as the message parameter." ;
-    oc:hasRationale "Codex lacks a named agent registry, so named dispatch must be manually resolved to generic worker agents with the appropriate prompt content injected via message." ;
-    oc:severityLevel "HIGH" .
+oc:kn_039e7368 a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When git operations fail due to sandbox restrictions" ;
+    oc:directiveContent "When sandbox blocks branch/push (detached HEAD), commit all work and inform user to use App's native 'Create branch' or 'Hand off to local' controls. Agent can still run tests, stage files, and output suggested branch names/commit messages/PR descriptions." ;
+    oc:hasRationale "Codex App sandboxes are externally managed worktrees where git push/PR creation is blocked; the agent must hand off gracefully" .
 
-oc:kn_4a5427cf a oc:DesignPrinciple,
+oc:kn_12b950b6 a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When dispatching any subagent via spawn_agent on Codex" ;
-    oc:directiveContent "Use task-delegation framing ('Your task is...') rather than persona framing ('You are...') when composing spawn_agent messages, and wrap instructions in XML tags for authoritative treatment by the model." ;
-    oc:hasRationale "Codex's spawn_agent message parameter is user-level input, not a system prompt, so structured framing maximizes instruction adherence and prevents the agent from summarizing instead of executing." ;
-    oc:severityLevel "HIGH" .
+    oc:appliesToContext "When configuring Codex for subagent dispatch (spawn_agent, wait, close_agent)" ;
+    oc:codeLanguage "toml" ;
+    oc:directiveContent """[features]
+multi_agent = true""" ;
+    oc:hasRationale "Without this config flag, skills like dispatching-parallel-agents and subagent-driven-development cannot spawn subagents" .
 
-oc:kn_aea0bc85 a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "Before executing using-git-worktrees or finishing-a-development-branch skills" ;
-    oc:directiveContent "Before skills that create worktrees or finish branches, run read-only git commands to detect environment: check if GIT_DIR != GIT_COMMON (already in worktree) or if BRANCH is empty (detached HEAD)." ;
-    oc:hasRationale "Environment detection prevents redundant worktree creation and informs the agent whether git operations are possible in the current context." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_f26df223 a oc:KnowledgeNode,
-        oc:KnownIssue ;
-    oc:appliesToContext "During finishing-a-development-branch or git operations in Codex App sandbox" ;
-    oc:directiveContent "When the Codex sandbox has a detached HEAD (externally managed worktree), the agent cannot branch, push, or create PRs. Instead, commit all work and inform the user to use the App's native controls for branch creation, push, and PR." ;
-    oc:hasRationale "Externally managed worktrees block write git operations; the agent must hand off to the user rather than attempting blocked commands." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_fd802b99 a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "Before executing any skill that dispatches parallel or sub-agents" ;
-    oc:directiveContent "Multi-agent features (spawn_agent, wait, close_agent) require [features] multi_agent = true in ~/.codex/config.toml before skills like dispatching-parallel-agents or subagent-driven-development can be used." ;
-    oc:hasRationale "Without this config flag, spawn_agent is unavailable and any skill depending on multi-agent dispatch will fail at runtime." ;
+oc:kn_2ca0d859 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "Always when executing skills on the Codex platform" ;
+    oc:directiveContent "Map Claude Code tool names to Codex equivalents: Task→spawn_agent, TodoWrite→update_plan, Skill→native loading, Read/Write/Edit→native file tools, Bash→native shell tools" ;
+    oc:hasRationale "Skills are authored against Claude Code tool names; without correct mapping, tool invocations will fail" ;
     oc:severityLevel "CRITICAL" .
+
+oc:kn_2ced461f a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When constructing the message parameter for spawn_agent" ;
+    oc:directiveContent "Use task-delegation framing ('Your task is...') not persona framing ('You are...'). Wrap instructions in XML tags. End with explicit execution directive." ;
+    oc:hasRationale "The message parameter is user-level input, not a system prompt. Task-delegation framing with XML-tagged blocks ensures the model treats instructions as authoritative" .
+
+oc:kn_4e0fdff0 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When skills create worktrees or finish branches, before proceeding" ;
+    oc:directiveContent "Detect environment with: GIT_DIR vs GIT_COMMON comparison and BRANCH check. GIT_DIR != GIT_COMMON → already in worktree. Empty BRANCH → detached HEAD." ;
+    oc:hasRationale "Prevents attempting operations that will fail in worktree or detached HEAD states, especially in sandboxed Codex environments" .
+
+oc:kn_5928eafc a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When evaluating whether named agent dispatch workaround is still needed" ;
+    oc:directiveContent "This tool mapping is a temporary workaround until Codex's plugin system supports an 'agents' field in plugin.json (RawPluginManifest)" ;
+    oc:hasRationale "Once the agents field is supported, the plugin can symlink to agents/ directly and skills can dispatch named agents natively" ;
+    oc:severityLevel "LOW" .
+
+oc:kn_8c32cf57 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When a skill references a named agent type like superpowers:code-reviewer" ;
+    oc:directiveContent "1. Find agent prompt file (agents/name.md or skill-local template) 2. Read prompt content 3. Fill template placeholders ({BASE_SHA}, {WHAT_WAS_IMPLEMENTED}, etc.) 4. Spawn worker agent with filled content as message" ;
+    oc:hasRationale "Codex has no named agent registry; this procedure bridges the gap by manually loading and injecting prompts" ;
+    oc:stepOrder 1 .
+
+_:ref_08592fb450c90607 a oc:WorkflowStep ;
+    dcterms:description "Fill any template placeholders (`{BASE_SHA}`, `{WHAT_WAS_IMPLEMENTED}`, etc.)" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_3af13f07dbc83cb3 a oc:WorkflowStep ;
+    dcterms:description "Read the prompt content" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_3c9f6587424e1b10 a oc:WorkflowStep ;
+    dcterms:description """Find the agent's prompt file (e.g., `agents/code-reviewer.md` or the skill's
+local prompt template like `code-quality-reviewer-prompt.md`)""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_89ebbf9e69f9215e a oc:WorkflowStep ;
+    dcterms:description "Spawn a `worker` agent with the filled content as the `message`" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_4fb508b68ec941da a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 3 ;
+    oc:hasStep _:ref_08592fb450c90607,
+        _:ref_3af13f07dbc83cb3,
+        _:ref_3c9f6587424e1b10,
+        _:ref_89ebbf9e69f9215e ;
+    oc:workflowId "procedure_3" ;
+    oc:workflowName "Ordered Procedure" .
 

@@ -7,123 +7,1624 @@
 oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_agp9_migration a oc:ExecutableSkill,
         oc:Skill ;
     dcterms:identifier "kotlin-tooling-agp9-migration" ;
-    skos:broader "Migration procedure" ;
-    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/kotlin/kotlin-agent-skills/kotlin-tooling-agp9-migration" ;
+    skos:broader "Migration guide" ;
+    prov:wasDerivedFrom "../.agents/skills/kotlin/kotlin-agent-skills/kotlin-tooling-agp9-migration" ;
     oc:contentHash "5a39061984c31d74367740ad17a570d880c55287e7e505827ec2326c732c8a47" ;
-    oc:differentia "guides KMP projects from AGP 8.x to AGP 9.0+, handling plugin replacement, module splitting, DSL migration, built-in Kotlin support, and the new default project structure" ;
+    oc:differentia "that migrates Kotlin Multiplatform projects to Android Gradle Plugin 9.0+, handling plugin replacement, module splitting, DSL changes, and built-in Kotlin migration" ;
     oc:handlesFailure oc:BuildFailure,
-        oc:PluginIncompatible,
-        oc:VersionMismatch ;
+        oc:DSLMigrationError,
+        oc:PluginIncompatible ;
     oc:hasAllowedTool "Bash",
         "Edit",
         "Glob",
         "Grep",
         "Read",
         "Write" ;
-    oc:hasArgumentHint "project-root-directory" ;
+    oc:hasArgumentHint "project-root directory path" ;
     oc:hasCategory "development" ;
     oc:hasDescription """Migrates Kotlin Multiplatform (KMP) projects to Android Gradle Plugin 9.0+. Handles plugin replacement (com.android.kotlin.multiplatform.library), module splitting, DSL migration, and the new default project structure. Use when upgrading AGP, when build fails due to KMP+AGP incompatibility, or when the user mentions AGP 9.0, android multiplatform plugin, KMP migration, or com.android.kotlin.multiplatform.library.
 """ ;
     oc:hasName "kotlin-tooling-agp9-migration" ;
-    oc:hasPackageName "kotlin" ;
     oc:hasPayload oc:payload_5a39061984c31d74 ;
-    oc:impartsKnowledge oc:kn_22eb68a3,
-        oc:kn_23e4121a,
-        oc:kn_2f4e3aa7,
-        oc:kn_315dac66,
-        oc:kn_3a312c20,
-        oc:kn_7825691f,
-        oc:kn_894b2f49,
-        oc:kn_8a611014,
-        oc:kn_a9b0fcaf,
-        oc:kn_bf2f3386 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """name: kotlin-tooling-agp9-migration
+description: >
+  Migrates Kotlin Multiplatform (KMP) projects to Android Gradle Plugin 9.0+.
+  Handles plugin replacement (com.android.kotlin.multiplatform.library), module
+  splitting, DSL migration, and the new default project structure. Use when
+  upgrading AGP, when build fails due to KMP+AGP incompatibility, or when the
+  user mentions AGP 9.0, android multiplatform plugin, KMP migration, or
+  com.android.kotlin.multiplatform.library.
+license: Apache-2.0
+metadata:
+  author: JetBrains
+  version: "1.0.0"
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent """Android Gradle Plugin 9.0 makes the Android application and library plugins incompatible
+with the Kotlin Multiplatform plugin in the same module. This skill guides you through the
+migration.""" ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "Summary:" ],
+                        _:ref_3da1ce47a3633b80,
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "See [references/MIGRATION-APP-SPLIT.md](references/MIGRATION-APP-SPLIT.md) for full guide." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Use this when a module applies `kotlin.multiplatform` + `com.android.application`. This is **mandatory** for AGP 9.0 compatibility." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Path B: Android App + Shared Module Split" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 2 ;
+                            oc:rowCount 12 ;
+                            oc:tableCaption "Key changes" ;
+                            oc:tableMarkdown """| Property                                             | Old Default | New Default | Action                                            |
+|------------------------------------------------------|-------------|-------------|---------------------------------------------------|
+| `android.uniquePackageNames`                         | `false`     | `true`      | Ensure each library has a unique namespace        |
+| `android.enableAppCompileTimeRClass`                 | `false`     | `true`      | Refactor `switch` on R fields to `if/else`        |
+| `android.defaults.buildfeatures.resvalues`           | `true`      | `false`     | Enable `resValues = true` where needed            |
+| `android.defaults.buildfeatures.shaders`             | `true`      | `false`     | Enable shaders where needed                       |
+| `android.r8.optimizedResourceShrinking`              | `false`     | `true`      | Review R8 keep rules                              |
+| `android.r8.strictFullModeForKeepRules`              | `false`     | `true`      | Update keep rules to be explicit                  |
+| `android.proguard.failOnMissingFiles`                | `false`     | `true`      | Remove invalid ProGuard file references           |
+| `android.r8.proguardAndroidTxt.disallowed`           | `false`     | `true`      | Use `proguard-android-optimize.txt` only          |
+| `android.r8.globalOptionsInConsumerRules.disallowed` | `false`     | `true`      | Remove global options from library consumer rules |
+| `android.sourceset.disallowProvider`                 | `false`     | `true`      | Use `Sources` API on androidComponents            |
+| `android.sdk.defaultTargetSdkToCompileSdkIfUnset`    | `false`     | `true`      | Specify `targetSdk` explicitly                    |
+| `android.onlyEnableUnitTestForTheTestedBuildType`    | `false`     | `true`      | Only if testing non-default build types           |
+""" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 4 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "`android.r8.integratedResourceShrinking` — removed, always on" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "`android.enableNewResourceShrinker.preciseShrinking` — removed, always on" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent """AGP 9.0 changes the defaults for many Gradle properties. Check `gradle.properties` for any explicitly set values that may now conflict. 
+Key changes:""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "Check for and remove properties that now cause errors:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 22 ;
+                    oc:sectionTitle "Gradle Properties Default Changes" ],
+                [ a oc:Section ;
+                    oc:hasContent _:ref_51a241e4a3d2091d,
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "These are required regardless of migration path:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 12 ;
+                    oc:sectionTitle "Version Updates" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "**Java default changed** from Java 8 to Java 11 — ensure `compileOptions` reflects this" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "**Review new DSL interfaces** — `BaseExtension` is removed; use `CommonExtension` or specific extension types" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent """For non-KMP Android modules upgrading to AGP 9.0, follow the "Built-in Kotlin Migration" steps above,
+then review the "Gradle Properties Default Changes" table. Additional changes:""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 23 ;
+                    oc:sectionTitle "Pure Android Tips" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "See [references/KNOWN-ISSUES.md](references/KNOWN-ISSUES.md) for details. Key gotchas:" ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 1 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "**BaseExtension removed** — convention plugins using old DSL types need rewriting to use `CommonExtension`" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "**Convention plugins** need refactoring — old `android {}` extension helpers are obsolete" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "**Variant APIs removed** — `applicationVariants`, `libraryVariants`, `variantFilter` replaced by `androidComponents`" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 27 ;
+                            oc:sectionTitle "AGP 9.0 General Issues" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 1 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 6 ;
+                                            oc:itemText "**KSP** requires version 2.3.1+ for AGP 9.0 compatibility" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "**No build variants** — single variant architecture; compile-time constants can use BuildKonfig/gradle-buildconfig-plugin flavors, but variant-specific dependencies/resources/signing must move to app module" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "**BuildConfig unavailable** in library modules — use DI/`AppConfiguration` interface, or use [BuildKonfig](https://github.com/yshrsmz/BuildKonfig) or [gradle-buildconfig-plugin](https://github.com/gmazzo/gradle-buildconfig-plugin) for compile-time constants" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 5 ;
+                                            oc:itemText "**Consumer ProGuard rules silently dropped** if not migrated to `consumerProguardFiles.add(file(...))` in new DSL" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "**NDK/JNI unsupported** in new plugin — extract to separate `com.android.library` module" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 4 ;
+                                            oc:itemText "**Compose resources crash** without `androidResources { enable = true }`" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 26 ;
+                            oc:sectionTitle "KMP Library Plugin Issues" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 25 ;
+                    oc:sectionTitle "Common Issues" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "[Plugin Compatibility](references/PLUGIN-COMPATIBILITY.md) — third-party plugin status and workarounds" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "[DSL Reference](references/DSL-REFERENCE.md) — side-by-side old→new DSL mapping" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "[Version Matrix](references/VERSION-MATRIX.md) — AGP/Gradle/KGP/Compose/IDE compatibility" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 28 ;
+                    oc:sectionTitle "Reference Files" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "See [references/MIGRATION-FULL-RESTRUCTURE.md](references/MIGRATION-FULL-RESTRUCTURE.md) for full guide." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent """Use this when the project has a monolithic module (typically `composeApp`) containing entry
+points for multiple platforms. This is optional but aligns with the new JetBrains default.""" ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 2 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "`sharedUI` — Compose Multiplatform UI consumed only by platforms using shared UI" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "`sharedLogic` — business logic consumed by ALL platforms" ] ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "If some platforms use native UI (e.g., SwiftUI for iOS), split `shared` into:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 10 ;
+                            oc:sectionTitle "Variant: Native UI" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """project/
+├── shared/              ← KMP library (was composeApp), pure shared code
+├── androidApp/          ← Android entry point only
+├── desktopApp/          ← Desktop entry point only (if desktop target exists)
+├── webApp/              ← Wasm/JS entry point only (if web target exists)
+├── iosApp/              ← iOS Xcode project (usually already separate)
+└── ...
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 210-218" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 8 ;
+                            oc:sectionTitle "Target Structure" ],
+                        [ a oc:Section ;
+                            oc:hasContent _:ref_f15df7063b975622 ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 9 ;
+                            oc:sectionTitle "Steps" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "If the project includes a server target:" ],
+                                [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 2 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "Add `server` module at the root" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "Add `core` module for code shared between server and client (models, validation)" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText "Move all client modules under an `app/` directory" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 11 ;
+                            oc:sectionTitle "Variant: Server" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 7 ;
+                    oc:sectionTitle "Path C: Full Restructure (Recommended)" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent """**Important:** Built-in Kotlin does NOT replace KMP support. KMP library modules still need
+`org.jetbrains.kotlin.multiplatform` + `com.android.kotlin.multiplatform.library`.""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent """AGP 9.0 enables built-in Kotlin support by default for all `com.android.application` and `com.android.library`
+modules. The `org.jetbrains.kotlin.android` plugin is no longer needed and will conflict if applied.""" ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent """For pure Android modules (non-KMP), migrate `android.kotlinOptions {}` to the top-level
+`kotlin.compilerOptions {}`:""" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """// Old
+android {
+    kotlinOptions {
+        jvmTarget = "11"
+        languageVersion = "2.0"
+        freeCompilerArgs += listOf("-Xopt-in=kotlin.RequiresOptIn")
+    }
+}
+
+// New
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+        languageVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_0)
+        optIn.add("kotlin.RequiresOptIn")
+    }
+}
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 345-363" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Note:** With built-in Kotlin, `jvmTarget` defaults to `android.compileOptions.targetCompatibility`, so it may be optional if you already set `compileOptions`." ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 16 ;
+                            oc:sectionTitle "Step 3: Migrate kotlinOptions to compilerOptions" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "The `org.jetbrains.kotlin.kapt` plugin is **incompatible** with built-in Kotlin." ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent "**Preferred: Migrate to KSP** — see the KSP migration guide for each annotation processor." ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# gradle/libs.versions.toml
+[plugins]
+legacy-kapt = { id = "com.android.legacy-kapt", version.ref = "agp" }
+""" ;
+                                    oc:codeLanguage "toml" ;
+                                    oc:contentOrder 4 ;
+                                    oc:sourceLocation "lines 328-332" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """// Module build.gradle.kts — replace kotlin-kapt with legacy-kapt
+plugins {
+    // REMOVE: alias(libs.plugins.kotlin.kapt)
+    alias(libs.plugins.legacy.kapt)
+}
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 5 ;
+                                    oc:sourceLocation "lines 333-339" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Fallback: Use `com.android.legacy-kapt`** (same version as AGP):" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 15 ;
+                            oc:sectionTitle "Step 2: Migrate kapt to KSP or legacy-kapt" ],
+                        [ a oc:Section ;
+                            oc:hasContent _:ref_4f1b4cc5337a8a7e,
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "For large projects, migrate module-by-module:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 18 ;
+                            oc:sectionTitle "Per-Module Migration Strategy" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """android {
+    enableKotlin = false
+}
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 406-410" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "For modules that contain **no Kotlin sources**, disable built-in Kotlin to save build time:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 19 ;
+                            oc:sectionTitle "Optional: Disable Kotlin for Non-Kotlin Modules" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """[plugins]
+# REMOVE: kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+""" ;
+                                    oc:codeLanguage "toml" ;
+                                    oc:contentOrder 4 ;
+                                    oc:sourceLocation "lines 316-319" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """// Remove from module build.gradle.kts
+plugins {
+    // REMOVE: alias(libs.plugins.kotlin.android)
+    // REMOVE: id("org.jetbrains.kotlin.android")
+}
+
+// Remove from root build.gradle.kts
+plugins {
+    // REMOVE: alias(libs.plugins.kotlin.android) apply false
+}
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 302-313" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "Remove from version catalog (`gradle/libs.versions.toml`):" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Remove from **all** module-level and root-level build files:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 14 ;
+                            oc:sectionTitle "Step 1: Remove kotlin-android Plugin" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "**Warning:** Ask the user if they want to opt out, and if so, remind them this is a temporary measure." ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """# gradle.properties
+android.builtInKotlin=false
+android.newDsl=false  # also required if using new DSL opt-out
+""" ;
+                                    oc:codeLanguage "properties" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 415-419" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "If blocked by plugin incompatibilities, opt out temporarily:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 20 ;
+                            oc:sectionTitle "Opt-Out (Temporary)" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "With built-in Kotlin, only `android.sourceSets {}` with the `kotlin` set is supported:" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 3 ;
+                                    oc:textContent "For generated sources, use the Variant API:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """androidComponents.onVariants { variant ->
+    variant.sources.kotlin!!.addStaticSourceDirectory("additionalSourceDirectory/kotlin")
+}
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 4 ;
+                                    oc:sourceLocation "lines 383-387" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """// NOT SUPPORTED with built-in Kotlin:
+kotlin.sourceSets.named("main") {
+    kotlin.srcDir("additionalSourceDirectory/kotlin")
+}
+
+// Correct:
+android.sourceSets.named("main") {
+    kotlin.directories += "additionalSourceDirectory/kotlin"
+}
+""" ;
+                                    oc:codeLanguage "kotlin" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 370-380" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 17 ;
+                            oc:sectionTitle "Step 4: Migrate kotlin.sourceSets to android.sourceSets" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 13 ;
+                    oc:sectionTitle "Built-in Kotlin Migration" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "After migration, verify with the [checklist](assets/checklist.md). Key checks:" ],
+                        _:ref_fbcabe9a2d7547a7 ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 24 ;
+                    oc:sectionTitle "Verification" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Before migrating**, inventory all plugins in the project and check each against that table. If any plugin is broken without workaround, inform the user. If plugins need opt-out flags, add them to`gradle.properties` and note them as temporary workarounds." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "See [references/PLUGIN-COMPATIBILITY.md](references/PLUGIN-COMPATIBILITY.md) for the full compatibility table with known compatible versions, opt-out flag workarounds, and broken plugins." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 21 ;
+                    oc:sectionTitle "Plugin Compatibility" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Use this when a module applies `kotlin.multiplatform` + `com.android.library`." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "See [references/MIGRATION-LIBRARY.md](references/MIGRATION-LIBRARY.md) for full before/after code." ],
+                        _:ref_e2ff1c16888a4a69,
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "Summary:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Path A: Library Module Migration" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "If Bash is available, run `scripts/analyze-project.sh` from this skill's directory to get a structured summary." ],
+                        _:ref_56702204801e4ab4,
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Before making any changes, understand the project structure:" ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:BulletList ;
+                                    oc:blockType "bullet_list" ;
+                                    oc:contentOrder 1 ;
+                                    oc:hasItem [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 2 ;
+                                            oc:itemText """**Path C is recommended** when the project has a monolithic `composeApp` (or similar) module
+containing entry points for multiple platforms (Android, Desktop, Web). This aligns with the
+new JetBrains default project structure where each platform gets its own app module.""" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 1 ;
+                                            oc:itemText "**Path B is mandatory** for any module combining KMP + Android application plugin" ],
+                                        [ a oc:BulletItem ;
+                                            oc:blockType "bullet_item" ;
+                                            oc:itemOrder 3 ;
+                                            oc:itemText "**Ask the user** whether they want Path B only (minimum required) or Path C (recommended full restructure)" ] ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "Determine Scope" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 2 ;
+                                    oc:rowCount 4 ;
+                                    oc:tableCaption "For each module, determine its type" ;
+                                    oc:tableMarkdown """| Current plugins                                                          | Migration path                              |
+|--------------------------------------------------------------------------|---------------------------------------------|
+| `kotlin.multiplatform` + `com.android.library`                           | **Path A** — Library plugin swap            |
+| `kotlin.multiplatform` + `com.android.application`                       | **Path B** — Mandatory Android split        |
+| `kotlin.multiplatform` with multiple platform entry points in one module | **Path C** — Full restructure (recommended) |
+| `com.android.application` or `com.android.library` (no KMP)              | See "Pure Android Tips" below               |
+""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "For each module, determine its type:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Classify Each Module" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Step 0: Analyze the Project" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "KMP AGP 9.0 Migration" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "Migrate a single KMP library module from com.android.library to com.android.kotlin.multiplatform.library" ;
+            oc:hasStep [ a oc:WorkflowStep ;
+                    dcterms:description "Rename source directories if using classic Android layout: src/main→androidMain, src/test→androidHostTest, src/androidTest→androidDeviceTest." ;
+                    oc:expectedOutcome "Source directories use KMP naming convention" ;
+                    oc:stepDependsOn _:ref_7879cdf7c9811309 ;
+                    oc:stepId "rename-sources" ],
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Enable androidResources, withJava, withHostTest, withDeviceTest as needed. Migrate consumerProguardFiles. Configure localDependencySelection if consuming multi-variant deps." ;
+                    oc:expectedOutcome "All optional features explicitly configured" ;
+                    oc:stepDependsOn _:ref_3a8fe74a42a83150,
+                        _:ref_d145b3b7c7fbf225 ;
+                    oc:stepId "enable-features" ],
+                _:ref_3a8fe74a42a83150,
+                _:ref_7879cdf7c9811309,
+                _:ref_d145b3b7c7fbf225 ;
+            oc:workflowId "agp9-path-a-library" ;
+            oc:workflowName "Path A: Library Module Migration" ],
+        _:ref_3da1ce47a3633b80,
+        _:ref_4f1b4cc5337a8a7e,
+        _:ref_51a241e4a3d2091d,
+        _:ref_56702204801e4ab4,
+        _:ref_e2ff1c16888a4a69,
+        [ a oc:Workflow ;
+            dcterms:description "Complete workflow for migrating a KMP project to AGP 9.0, from analysis through verification" ;
+            oc:hasStep _:ref_0f224bc5afea3e66,
+                _:ref_2a36023e1567e256,
+                _:ref_48186b81ac4505f3,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Run full build verification: ./gradlew build, platform-specific builds, all tests. Check no deprecated plugins remain, correct source set names, no deprecation warnings." ;
+                    oc:expectedOutcome "Clean build with no errors across all platforms" ;
+                    oc:stepDependsOn _:ref_0f224bc5afea3e66,
+                        _:ref_2a36023e1567e256,
+                        _:ref_5cdf17602c4d347f ;
+                    oc:stepId "verify" ],
+                _:ref_5cdf17602c4d347f,
+                _:ref_628e7e47e0c047cb,
+                _:ref_7ca2fa30f3772857,
+                _:ref_f354be1b8fc34893 ;
+            oc:workflowId "agp9-full-migration" ;
+            oc:workflowName "AGP 9.0 Full Migration" ],
+        _:ref_f15df7063b975622,
+        _:ref_fbcabe9a2d7547a7 ;
+    oc:impartsKnowledge oc:kn_0ff3da3c,
+        oc:kn_111169a9,
+        oc:kn_2ca31511,
+        oc:kn_342a7a86,
+        oc:kn_4f121d4c,
+        oc:kn_58b330b1,
+        oc:kn_6622e900,
+        oc:kn_7344a83e,
+        oc:kn_8194a60c,
+        oc:kn_87a53073,
+        oc:kn_b1a47db4,
+        oc:kn_b7dbe2d7,
+        oc:kn_c2870b84,
+        oc:kn_c8e13047,
+        oc:kn_d39d574a,
+        oc:kn_dcd35960,
+        oc:kn_de0e794b,
+        oc:kn_e0584bdb,
+        oc:kn_fd7be75e ;
     oc:isUserInvocable true ;
     oc:nature "Work" ;
-    oc:requiresState oc:FileExists,
-        oc:ToolInstalled ;
-    oc:resolvesIntent "fix build failures from KMP+AGP incompatibility",
+    oc:requiresState oc:DirectoryWritable,
+        oc:ProjectHasGradleBuild ;
+    oc:resolvesIntent "fix KMP+AGP build incompatibility",
         "migrate KMP project to AGP 9.0",
-        "migrate kapt to KSP or legacy-kapt",
-        "remove kotlin-android plugin for built-in Kotlin support",
+        "migrate kapt to KSP for AGP 9.0",
+        "migrate kotlin-android plugin to built-in Kotlin support",
         "replace com.android.library with com.android.kotlin.multiplatform.library",
-        "restructure multi-platform KMP project for AGP 9.0",
-        "split monolithic composeApp into per-platform modules",
-        "update Gradle and AGP versions for KMP compatibility" ;
-    oc:yieldsState oc:BuildConfigurationMigrated,
-        oc:ProjectRestructured .
+        "split monolithic KMP app module into platform-specific modules",
+        "update Gradle properties for AGP 9.0 defaults" ;
+    oc:yieldsState oc:AGP9MigrationComplete,
+        oc:BuildSucceeds .
 
-oc:kn_22eb68a3 a oc:DesignPrinciple,
+oc:kn_0ff3da3c a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When splitting KMP modules into shared library + platform app modules" ;
-    oc:directiveContent "Use distinct namespaces for each module (e.g., com.example.shared vs com.example.app). The KMP library plugin produces a single variant — move all build-type, flavor, and application-specific configuration to the application module." ;
-    oc:hasRationale "Duplicate namespaces cause R class collisions. Single-variant architecture means the library module cannot support build types, product flavors, signing configs, or minification" ;
+    oc:appliesToContext "Migrating kotlinOptions to compilerOptions in pure Android (non-KMP) modules" ;
+    oc:codeLanguage "kotlin" ;
+    oc:directiveContent """// Old (AGP 8.x)
+android {
+    kotlinOptions {
+        jvmTarget = "11"
+        languageVersion = "2.0"
+        freeCompilerArgs += listOf("-Xopt-in=kotlin.RequiresOptIn")
+    }
+}
+// New (AGP 9.0)
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+        languageVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_0)
+        optIn.add("kotlin.RequiresOptIn")
+    }
+}""" .
+
+oc:kn_111169a9 a oc:Command,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When Bash is available, run to get structured project analysis before migration" ;
+    oc:directiveContent "bash scripts/analyze-project.sh [PROJECT_ROOT]" .
+
+oc:kn_2ca31511 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When migrating library modules that used build variants, flavors, or BuildConfig" ;
+    oc:directiveContent "The KMP library plugin produces a single build variant. There are no build types or product flavors. BuildConfig is unavailable. Use localDependencySelection for dependency variant resolution." ;
+    oc:hasRationale "This is a fundamental architectural change in the KMP library plugin" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_23e4121a a oc:Constraint,
+oc:kn_342a7a86 a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When a module applies both kotlin.multiplatform and com.android.application" ;
-    oc:directiveContent "AGP 9.0 does not support com.android.application combined with org.jetbrains.kotlin.multiplatform in the same module. Splitting KMP+app modules is mandatory, not optional." ;
-    oc:hasRationale "This is a hard breaking change in AGP 9.0 — the combination will fail at build time" ;
-    oc:severityLevel "CRITICAL" .
+    oc:appliesToContext "Before starting any migration changes" ;
+    oc:directiveContent "Always classify each module into one of four migration paths (A: library swap, B: Android app split, C: full restructure, or pure Android) before making changes. Path B is mandatory for KMP+app modules; Path C is recommended for monolithic multiplatform modules." ;
+    oc:hasRationale "Correct path selection prevents unnecessary work and ensures the minimum required changes are made" .
 
-oc:kn_2f4e3aa7 a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When updating version numbers during migration" ;
-    oc:directiveContent "AGP 9.0 requires Gradle 9.1.0+, JDK 17+, SDK Build Tools 36.0.0, and KGP 2.0.0+ (2.3.0+ recommended). KSP requires 2.3.1+ for AGP 9.0 compatibility." ;
-    oc:hasRationale "Version mismatches cause cryptic errors. These are hard minimum requirements, not recommendations" ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_315dac66 a oc:KnowledgeNode,
-        oc:RecoveryTactic ;
-    oc:appliesToContext "When third-party plugins cause build failures with AGP 9.0" ;
-    oc:directiveContent "If blocked by plugin incompatibilities during migration, temporarily set android.builtInKotlin=false and/or android.newDsl=false in gradle.properties. Always ask the user before opting out and remind them these are temporary measures." ;
-    oc:hasRationale "Opt-out flags unblock progress while waiting for plugin updates, but they will be removed in future AGP versions and mask the need for proper migration" ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_3a312c20 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When the project has many modules and a big-bang migration is too risky" ;
-    oc:directiveContent "For large multi-module projects, migrate module-by-module: set android.builtInKotlin=false globally, apply com.android.built-in-kotlin per migrated module, and remove the global opt-out once all modules are migrated." ;
-    oc:hasRationale "Incremental migration limits blast radius of errors and allows validating each module independently" ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_7825691f a oc:KnowledgeNode,
-        oc:PostFlightValidation ;
-    oc:appliesToContext "After completing all migration steps" ;
-    oc:directiveContent "After migration, verify: ./gradlew build succeeds, all platform targets build, tests pass, no com.android.library or org.jetbrains.kotlin.android remain in KMP modules, source sets use correct names (androidMain, androidHostTest, androidDeviceTest), and no deprecation warnings." ;
-    oc:hasRationale "Many migration issues are silent until a specific build path is exercised. Full validation catches issues before they reach production" ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_894b2f49 a oc:KnowledgeNode,
+oc:kn_4f121d4c a oc:KnowledgeNode,
         oc:KnownIssue ;
-    oc:appliesToContext "When migrating any KMP library module that uses Android resources or publishes consumer ProGuard rules" ;
-    oc:directiveContent "Android resources are NOT processed by default with com.android.kotlin.multiplatform.library. You must explicitly enable them with androidResources { enable = true } or resource references will silently fail. Consumer ProGuard rules are silently dropped if not migrated to the new DSL location consumerProguardFiles.add(file(...))." ;
-    oc:hasRationale "Both issues fail silently — no build error, but runtime crashes or incorrect behavior in release builds. This is a very common migration pitfall" ;
+    oc:appliesToContext "When migrating KMP library modules that use Android or Compose resources" ;
+    oc:directiveContent "Compose resources crash without explicit androidResources { enable = true } in the KMP library plugin. Android resources are NOT processed by default." ;
+    oc:hasRationale "Silent failure — resources are simply ignored without error until referenced, causing runtime crashes" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_8a611014 a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "Before starting any migration on a real project" ;
-    oc:directiveContent "Before migrating, inventory all third-party plugins and check against PLUGIN-COMPATIBILITY.md. Some plugins (detekt <2.0, ktlint, SQLDelight, Paparazzi, protobuf) require opt-out flags. New Relic and Huawei AGConnect have no workaround." ;
-    oc:hasRationale "Incompatible plugins can completely block the migration. Knowing which flags are needed upfront avoids cryptic build failures midway through" ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_a9b0fcaf a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "Before starting any AGP 9.0 migration" ;
-    oc:directiveContent "Always run scripts/analyze-project.sh or manually inventory all plugins, modules, and versions before making any migration changes. Classify each module into Path A (library swap), Path B (app split), or Path C (full restructure) before proceeding." ;
-    oc:hasRationale "Premature changes without understanding the project structure can cause cascading build failures and make rollback difficult" ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_bf2f3386 a oc:AntiPattern,
+oc:kn_58b330b1 a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When editing build.gradle.kts files for any module targeting AGP 9.0" ;
-    oc:directiveContent "Do not apply org.jetbrains.kotlin.android or org.jetbrains.kotlin.kapt in AGP 9.0 modules. AGP 9.0 has built-in Kotlin support; these plugins conflict. Migrate kapt to KSP or com.android.legacy-kapt." ;
-    oc:hasRationale "Applying kotlin-android causes build failure due to conflicting Kotlin compilation. kapt is incompatible with built-in Kotlin and will error" ;
+    oc:appliesToContext "When KMP library module depends on Android libraries with multiple build types or flavors" ;
+    oc:codeLanguage "kotlin" ;
+    oc:directiveContent """kotlin {
+    android {
+        localDependencySelection {
+            selectBuildTypeFrom.set(listOf("debug", "release"))
+            productFlavorDimension("tier") {
+                selectFrom.set(listOf("free"))
+            }
+        }
+    }
+}""" .
+
+oc:kn_6622e900 a oc:KnowledgeNode,
+        oc:PreFlightCheck ;
+    oc:appliesToContext "Before any AGP 9.0 migration" ;
+    oc:directiveContent "Before migrating: (1) inventory all plugins and check compatibility with PLUGIN-COMPATIBILITY.md, (2) verify Gradle 9.1+, JDK 17+, SDK Build Tools 36.0.0, (3) read settings.gradle.kts, all build.gradle.kts files, gradle.properties, and gradle-wrapper.properties." ;
+    oc:hasRationale "Missing prerequisites or incompatible plugins can completely block migration" .
+
+oc:kn_7344a83e a oc:KnowledgeNode,
+        oc:PostFlightValidation ;
+    oc:appliesToContext "After completing migration changes" ;
+    oc:directiveContent "After migration: run ./gradlew build, verify all platform targets build, run ./gradlew :shared:allTests and Android unit tests, confirm no com.android.library/com.android.application in KMP modules, no org.jetbrains.kotlin.android in AGP 9.0 modules, correct source set names." ;
+    oc:hasRationale "Comprehensive verification catches silent migration failures like dropped ProGuard rules or misconfigured source sets" .
+
+oc:kn_8194a60c a oc:FallbackStrategy,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When third-party plugins conflict with AGP 9.0 built-in Kotlin or new DSL" ;
+    oc:directiveContent "If blocked by plugin incompatibilities, temporarily set android.builtInKotlin=false and/or android.newDsl=false in gradle.properties. Always ask the user before opting out and note these are temporary." ;
+    oc:hasRationale "These flags will be removed in future AGP versions; they buy time but are not a solution" .
+
+oc:kn_87a53073 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "Full migration workflow" ;
+    oc:directiveContent "1. Analyze project structure (settings.gradle.kts, build files, gradle.properties, wrapper props) 2. Classify each module (Path A/B/C/pure Android) 3. Ask user minimum (Path B) vs recommended (Path C) 4. Update versions (Gradle 9.1+, AGP 9.0.1+, JDK 17+, Build Tools 36.0.0) 5. Migrate each module per its path 6. Remove kotlin-android plugin globally 7. Migrate kapt to KSP/legacy-kapt 8. Update gradle.properties defaults 9. Verify build succeeds across all platforms" ;
+    oc:stepOrder 1 .
+
+oc:kn_b1a47db4 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When a module uses annotation processing" ;
+    oc:directiveContent "Do not apply org.jetbrains.kotlin.kapt with AGP 9.0 built-in Kotlin. Migrate to KSP (preferred) or use com.android.legacy-kapt as fallback." ;
+    oc:hasRationale "kapt is incompatible with AGP 9.0's built-in Kotlin and will cause build failures" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_b7dbe2d7 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When module uses kotlin.multiplatform + com.android.application" ;
+    oc:directiveContent "Path B (App Split): 1. Create androidApp module with com.android.application 2. Move Android entry point code (Activity, Manifest, resources) to androidApp 3. Add :androidApp to settings.gradle.kts 4. Add plugin declarations to root build 5. Convert original module via Path A 6. Ensure distinct namespaces 7. Remove applicationId/targetSdk/versionCode from shared 8. Update IDE run configurations" ;
+    oc:stepOrder 3 .
+
+oc:kn_c2870b84 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Minimal KMP library module build.gradle.kts after AGP 9.0 migration" ;
+    oc:codeLanguage "kotlin" ;
+    oc:directiveContent """plugins {
+    alias(libs.plugins.kotlinMultiplatform)
+    alias(libs.plugins.androidKmpLibrary)
+}
+kotlin {
+    android {
+        namespace = "com.example.lib"
+        compileSdk = 35
+        minSdk = 24
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+        }
+    }
+}""" .
+
+oc:kn_c8e13047 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When a library module had consumerProguardFiles in old android { defaultConfig {} } block" ;
+    oc:directiveContent "Consumer ProGuard rules are silently dropped if not migrated to consumerProguardFiles.add(file(...)) in the new DSL. No warning is emitted." ;
+    oc:hasRationale "Can cause runtime crashes in release builds of consuming applications due to missing ProGuard rules" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_d39d574a a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When module uses kotlin.multiplatform + com.android.library" ;
+    oc:directiveContent "Path A (Library): 1. Replace com.android.library → com.android.kotlin.multiplatform.library 2. Remove kotlin-android 3. Move android {} into kotlin { android {} } 4. Rename src/main→androidMain, src/test→androidHostTest, src/androidTest→androidDeviceTest 5. Move deps to sourceSets 6. Enable androidResources { enable = true } if needed 7. Add withJava() for .java sources 8. Configure withHostTest/withDeviceTest 9. Migrate debugImplementation→androidRuntimeClasspath 10. Migrate consumerProguardFiles" ;
+    oc:stepOrder 2 .
+
+oc:kn_dcd35960 a oc:KnowledgeNode,
+        oc:OutputFormat ;
+    oc:directiveContent """Project Analysis:
+- Gradle version: {gradle_version}
+- AGP version: {agp_version}
+- Kotlin version: {kgp_version}
+- Modules:
+  - {module_name}: {plugins} → Path {A|B|C|none}
+- Legacy flags: {flags}
+- Status: {needs_migration|already_migrated}""" ;
+    oc:templateVariables "agp_version",
+        "flags",
+        "gradle_version",
+        "kgp_version",
+        "module_name",
+        "needs_migration",
+        "plugins" .
+
+oc:kn_de0e794b a oc:KnowledgeNode,
+        oc:Prerequisite ;
+    oc:appliesToContext "Version requirements before starting AGP 9.0 migration" ;
+    oc:directiveContent "Gradle 9.1.0+, JDK 17+, Android SDK Build Tools 36.0.0, AGP 9.0.1+, KGP 2.0.0+ (2.3.0+ recommended), KSP 2.3.1+ if used" .
+
+oc:kn_e0584bdb a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "All modules using com.android.application or com.android.library with AGP 9.0" ;
+    oc:directiveContent "Never apply org.jetbrains.kotlin.android plugin in AGP 9.0 modules. AGP 9.0 has built-in Kotlin support and the plugin will conflict." ;
+    oc:hasRationale "The kotlin-android plugin conflicts with AGP 9.0's built-in Kotlin compilation, causing build failures" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_fd7be75e a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When any module combines KMP with Android application plugin" ;
+    oc:directiveContent "AGP 9.0 makes com.android.application and com.android.library incompatible with org.jetbrains.kotlin.multiplatform in the same module. KMP+Android app modules MUST be split into separate modules." ;
+    oc:hasRationale "This is the fundamental breaking change in AGP 9.0 that necessitates all migration paths" ;
     oc:severityLevel "CRITICAL" .
 
 oc:payload_5a39061984c31d74 a oc:ExecutionPayload ;
-    oc:code "bash scripts/analyze-project.sh {project_root}" ;
+    oc:code "bash scripts/analyze-project.sh [PROJECT_ROOT]" ;
     oc:executor "shell" ;
-    oc:timeout 30000 .
+    oc:timeout 60000 .
+
+_:ref_044b0d986ebedcad a oc:BulletItem ;
+    oc:blockType "bullet_item" ;
+    oc:itemOrder 3 ;
+    oc:itemText "Move `compose.desktop { application { ... } }` config to `desktopApp/build.gradle.kts`" .
+
+_:ref_046cbd4085744d03 a oc:WorkflowStep ;
+    dcterms:description """Check if the project uses a Gradle version catalog (`gradle/libs.versions.toml`). If it exists,
+read it for current AGP/Gradle/Kotlin versions. If not, find versions directly in `build.gradle.kts`
+files (typically in the root `buildscript {}` or `plugins {}` block). **Adapt all examples in this
+guide accordingly** — version catalog examples use `alias(libs.plugins.xxx)` while direct usage
+uses `id("plugin.id") version "x.y.z"`""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_05ec3bbdd425223c a oc:BulletItem ;
+    oc:blockType "bullet_item" ;
+    oc:itemOrder 4 ;
+    oc:itemText "Add dependency on `shared` module" .
+
+_:ref_0a29b336b95f6e6e a oc:WorkflowStep ;
+    dcterms:description "**JDK** — ensure JDK 17+ is used (required by AGP 9.0)" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_1a2c3d05c90bea12 a oc:WorkflowStep ;
+    dcterms:description "**Enable Java** compilation if module has `.java` source files:" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild [ a oc:CodeExample ;
+            oc:blockType "code_block" ;
+            oc:codeContent """kotlin {
+    android {
+        withJava()
+    }
+}
+""" ;
+            oc:codeLanguage "kotlin" ;
+            oc:contentOrder 1 ;
+            oc:sourceLocation "lines 103-109" ] ;
+    oc:stepId "step_7" ;
+    oc:stepOrder 7 .
+
+_:ref_1c45767e405428fc a oc:WorkflowStep ;
+    dcterms:description "**Add to root `build.gradle.kts`**: plugin declarations with `apply false`" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_1f45d08a1be4ceb1 a oc:WorkflowStep ;
+    dcterms:description "No deprecation warnings about variant API or DSL" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_7" ;
+    oc:stepOrder 7 .
+
+_:ref_1fbdd537b0fa4c0d a oc:WorkflowStep ;
+    dcterms:description "`./gradlew :shared:allTests` and Android unit tests pass" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_24dde46118d97419 a oc:BulletItem ;
+    oc:blockType "bullet_item" ;
+    oc:itemOrder 2 ;
+    oc:itemText "Xcode project references the correct framework path" .
+
+_:ref_251b180a79df66ea a oc:WorkflowStep ;
+    dcterms:description "**Replace plugin**: `com.android.library` → `com.android.kotlin.multiplatform.library`" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_26fd6f107202e02a a oc:BulletItem ;
+    oc:blockType "bullet_item" ;
+    oc:itemOrder 1 ;
+    oc:itemText "Create module with appropriate Kotlin/JS or Kotlin/Wasm configuration" .
+
+_:ref_274063b883549306 a oc:BulletItem ;
+    oc:blockType "bullet_item" ;
+    oc:itemOrder 3 ;
+    oc:itemText "`src/androidTest` → `src/androidDeviceTest`" .
+
+_:ref_2782ae8fbef200eb a oc:BulletList ;
+    oc:blockType "bullet_list" ;
+    oc:contentOrder 1 ;
+    oc:hasItem _:ref_044b0d986ebedcad,
+        _:ref_05ec3bbdd425223c,
+        [ a oc:BulletItem ;
+            oc:blockType "bullet_item" ;
+            oc:itemOrder 1 ;
+            oc:itemText "Create module with `org.jetbrains.compose` and `application {}` plugin" ],
+        [ a oc:BulletItem ;
+            oc:blockType "bullet_item" ;
+            oc:itemOrder 2 ;
+            oc:itemText "Move `main()` function from `desktopMain` to `desktopApp/src/main/kotlin/`" ] .
+
+_:ref_2850a76c606cd2da a oc:BulletItem ;
+    oc:blockType "bullet_item" ;
+    oc:itemOrder 2 ;
+    oc:itemText "`AndroidManifest.xml` (app-level manifest with `<application>` and launcher `<activity>`) — verify `android:name` on `<activity>` uses the fully qualified class name in its new location" .
+
+_:ref_2c26543a211d0316 a oc:WorkflowStep ;
+    dcterms:description "No `com.android.library` or `com.android.application` in KMP modules" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_2c9c13f68adafcd0 a oc:CodeExample ;
+    oc:blockType "code_block" ;
+    oc:codeContent """kotlin {
+    android {
+        namespace = "com.example.lib"
+        compileSdk = 35
+        minSdk = 24
+    }
+}
+""" ;
+    oc:codeLanguage "kotlin" ;
+    oc:contentOrder 1 ;
+    oc:sourceLocation "lines 70-78" .
+
+_:ref_2f0edca65065602d a oc:BulletItem ;
+    oc:blockType "bullet_item" ;
+    oc:itemOrder 1 ;
+    oc:itemText "`MainActivity.kt` (and any other Activities/Fragments)" .
+
+_:ref_332a82a405da8f7f a oc:BulletItem ;
+    oc:blockType "bullet_item" ;
+    oc:itemOrder 1 ;
+    oc:itemText "Rename directory" .
+
+_:ref_3331eb8ab6c01846 a oc:WorkflowStep ;
+    dcterms:description "**Extract `webApp`** (if wasmJs/js target exists):" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild [ a oc:BulletList ;
+            oc:blockType "bullet_list" ;
+            oc:contentOrder 1 ;
+            oc:hasItem _:ref_26fd6f107202e02a,
+                [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 3 ;
+                    oc:itemText "Move browser/distribution config to `webApp/build.gradle.kts`" ],
+                [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 2 ;
+                    oc:itemText "Move web entry point from `wasmJsMain`/`jsMain` to `webApp/src/wasmJsMain/kotlin/`" ],
+                [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 4 ;
+                    oc:itemText "Add dependency on `shared` module" ] ] ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_3fe1c8410d9542e2 a oc:BulletItem ;
+    oc:blockType "bullet_item" ;
+    oc:itemOrder 4 ;
+    oc:itemText "App-level resources (launcher icons, theme, etc.)" .
+
+_:ref_4564b6835e3cc05a a oc:WorkflowStep ;
+    dcterms:description "**Review gradle.properties** — remove error-causing properties and review changed defaults (see \"Gradle Properties Default Changes\" section)" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_5" ;
+    oc:stepOrder 5 .
+
+_:ref_47aee6b84ec77bba a oc:WorkflowStep ;
+    dcterms:description "**Add to `settings.gradle.kts`**: `include(\":androidApp\")`" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_4ccc2af4c3b21738 a oc:WorkflowStep ;
+    dcterms:description "Check `gradle.properties` for any existing workarounds (`android.enableLegacyVariantApi`)" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_5" ;
+    oc:stepOrder 5 .
+
+_:ref_4f336b39df71d6a7 a oc:WorkflowStep ;
+    dcterms:description "Read `gradle/wrapper/gradle-wrapper.properties` for the Gradle version" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_52aac7882c812ac4 a oc:WorkflowStep ;
+    dcterms:description "**AGP version** — update to 9.0.0+ and add the KMP library plugin." ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild [ a oc:CodeExample ;
+            oc:blockType "code_block" ;
+            oc:codeContent """plugins {
+    id("com.android.application") version "9.0.1" apply false
+    id("com.android.kotlin.multiplatform.library") version "9.0.1" apply false
+}
+""" ;
+            oc:codeLanguage "kotlin" ;
+            oc:contentOrder 4 ;
+            oc:sourceLocation "lines 277-282" ],
+        [ a oc:Paragraph ;
+            oc:blockType "paragraph" ;
+            oc:contentOrder 1 ;
+            oc:textContent "With version catalog (`gradle/libs.versions.toml`):" ],
+        [ a oc:Paragraph ;
+            oc:blockType "paragraph" ;
+            oc:contentOrder 3 ;
+            oc:textContent "Without version catalog — update `com.android.*` plugin versions and add in root `build.gradle.kts`:" ],
+        [ a oc:CodeExample ;
+            oc:blockType "code_block" ;
+            oc:codeContent """[versions]
+agp = "9.0.1"
+
+[plugins]
+android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
+""" ;
+            oc:codeLanguage "toml" ;
+            oc:contentOrder 2 ;
+            oc:sourceLocation "lines 268-274" ] ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_550324aa725bc1a2 a oc:WorkflowStep ;
+    dcterms:description "Check for third-party plugins that may be incompatible with AGP 9.0 (see \"Plugin Compatibility\" section below)" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_8" ;
+    oc:stepOrder 8 .
+
+_:ref_5d031e3a59c1ee70 a oc:WorkflowStep ;
+    dcterms:description "`./gradlew build` succeeds with no errors" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_5e9e500e93687178 a oc:CodeExample ;
+    oc:blockType "code_block" ;
+    oc:codeContent """Install via SDK Manager or configure in android { buildToolsVersion = "36.0.0" }
+""" ;
+    oc:codeLanguage "" ;
+    oc:contentOrder 1 ;
+    oc:sourceLocation "lines 285-287" .
+
+_:ref_603aec93266e6ac1 a oc:WorkflowStep ;
+    dcterms:description "Disable globally: `android.builtInKotlin=false` in `gradle.properties`" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_6114f536d142edf1 a oc:BulletItem ;
+    oc:blockType "bullet_item" ;
+    oc:itemOrder 2 ;
+    oc:itemText "`src/test` → `src/androidHostTest`" .
+
+_:ref_6af855b205be187a a oc:WorkflowStep ;
+    dcterms:description "**Gradle wrapper** — update to 9.1.0+:" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild [ a oc:CodeExample ;
+            oc:blockType "code_block" ;
+            oc:codeContent """# gradle/wrapper/gradle-wrapper.properties
+distributionUrl=https\\://services.gradle.org/distributions/gradle-9.1.0-bin.zip
+""" ;
+            oc:codeLanguage "properties" ;
+            oc:contentOrder 1 ;
+            oc:sourceLocation "lines 261-264" ] ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_6be7959aeb215b4b a oc:CodeExample ;
+    oc:blockType "code_block" ;
+    oc:codeContent """kotlin {
+    android {
+        localDependencySelection {
+            // Determine which build type to consume from Android library dependencies, in order of preference
+            selectBuildTypeFrom.set(listOf("debug", "release"))
+            
+            // If the dependency has a 'tier' dimension, select the 'free' flavor
+            productFlavorDimension("tier") {
+                selectFrom.set(listOf("free"))
+            }
+        }
+    }
+}
+""" ;
+    oc:codeLanguage "kotlin" ;
+    oc:contentOrder 1 ;
+    oc:sourceLocation "lines 138-152" .
+
+_:ref_6bf4b003cc1cd881 a oc:BulletItem ;
+    oc:blockType "bullet_item" ;
+    oc:itemOrder 2 ;
+    oc:itemText "Update `settings.gradle.kts` include" .
+
+_:ref_7c5a2ddd315042e6 a oc:WorkflowStep ;
+    dcterms:description "**Update Compose tooling dependency**:" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild [ a oc:CodeExample ;
+            oc:blockType "code_block" ;
+            oc:codeContent """// Old: 
+debugImplementation(libs.androidx.compose.ui.tooling)
+// New:
+androidRuntimeClasspath(libs.androidx.compose.ui.tooling)
+""" ;
+            oc:codeLanguage "kotlin" ;
+            oc:contentOrder 1 ;
+            oc:sourceLocation "lines 122-127" ] ;
+    oc:stepId "step_9" ;
+    oc:stepOrder 9 .
+
+_:ref_7db3de1c673ec006 a oc:WorkflowStep ;
+    dcterms:description """**Resolve Sub-dependency Variants (Product Flavors / Build Types)**:
+Because the new KMP Android library plugin enforces a single-variant architecture, it does not natively understand how to resolve dependencies that publish multiple variants (like `debug`/`release` build types, or product flavors like `free`/`paid`). Configure fallback behaviors using `localDependencySelection`:""" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild _:ref_6be7959aeb215b4b ;
+    oc:stepId "step_11" ;
+    oc:stepOrder 11 .
+
+_:ref_87fc8c5dc571e209 a oc:WorkflowStep ;
+    dcterms:description "**Update IDE run configurations**: change the module from the old module to `androidApp`" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_8" ;
+    oc:stepOrder 8 .
+
+_:ref_888ea046ed1e11d5 a oc:WorkflowStep ;
+    dcterms:description "Follow Steps 1-4 for that module" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_90c5e737a5a52622 a oc:WorkflowStep ;
+    dcterms:description "For each module, read its `build.gradle.kts` to identify which plugins are applied" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_93cdce7355cd777d a oc:WorkflowStep ;
+    dcterms:description "**Migrate DSL**: Move config from top-level `android {}` block into `kotlin { android {} }`:" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild _:ref_2c9c13f68adafcd0 ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_9400c15eeb89bf28 a oc:WorkflowStep ;
+    dcterms:description "Read `settings.gradle.kts` (or `.gradle`) to find all modules" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_9560363dc0b9e0d5 a oc:WorkflowStep ;
+    dcterms:description "Source sets use correct names (`androidMain`, `androidHostTest`, `androidDeviceTest`)" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_6" ;
+    oc:stepOrder 6 .
+
+_:ref_a076bf4c7b34df2c a oc:WorkflowStep ;
+    dcterms:description "**Rename source directories** (only if the module uses classic Android layout instead of KMP layout):" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild [ a oc:BulletList ;
+            oc:blockType "bullet_list" ;
+            oc:contentOrder 1 ;
+            oc:hasItem _:ref_274063b883549306,
+                _:ref_6114f536d142edf1,
+                [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 1 ;
+                    oc:itemText "`src/main` → `src/androidMain`" ],
+                [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 4 ;
+                    oc:itemText "If the module already uses `src/androidMain/`, no directory renames are needed" ] ] ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_a1547ae3f9ce9c76 a oc:CodeExample ;
+    oc:blockType "code_block" ;
+    oc:codeContent """kotlin {
+    sourceSets {
+        androidMain.dependencies {
+            implementation("androidx.appcompat:appcompat:1.7.0")
+        }
+    }
+}
+""" ;
+    oc:codeLanguage "kotlin" ;
+    oc:contentOrder 1 ;
+    oc:sourceLocation "lines 85-93" .
+
+_:ref_a38f5cd6a0ea723e a oc:BulletItem ;
+    oc:blockType "bullet_item" ;
+    oc:itemOrder 1 ;
+    oc:itemText "Framework export config (`binaries.framework`) stays in `shared` module" .
+
+_:ref_a4cf5318dbb4e8a5 a oc:WorkflowStep ;
+    dcterms:description "**Apply Path B first** — extract `androidApp` (mandatory for AGP 9.0)" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_a5386ac47d148e30 a oc:WorkflowStep ;
+    dcterms:description "**iOS** — typically already in a separate `iosApp` directory. Verify:" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild [ a oc:BulletList ;
+            oc:blockType "bullet_list" ;
+            oc:contentOrder 1 ;
+            oc:hasItem _:ref_24dde46118d97419,
+                _:ref_a38f5cd6a0ea723e ] ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_ab63bd7b63f4113c a oc:WorkflowStep ;
+    dcterms:description "No `org.jetbrains.kotlin.android` in AGP 9.0 modules" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_5" ;
+    oc:stepOrder 5 .
+
+_:ref_aca16b99e01cad9c a oc:WorkflowStep ;
+    dcterms:description "**Move Android entry point code** from `src/androidMain/` to `androidApp/src/main/`:" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild [ a oc:BulletList ;
+            oc:blockType "bullet_list" ;
+            oc:contentOrder 1 ;
+            oc:hasItem _:ref_2850a76c606cd2da,
+                _:ref_2f0edca65065602d,
+                _:ref_3fe1c8410d9542e2,
+                [ a oc:BulletItem ;
+                    oc:blockType "bullet_item" ;
+                    oc:itemOrder 3 ;
+                    oc:itemText "Android Application class if present" ] ] ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_af3a6cd8776be395 a oc:WorkflowStep ;
+    dcterms:description "All platform targets build successfully (Android, iOS via `xcodebuild`, Desktop, JS/Wasm)" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_af65acd1b6415f36 a oc:WorkflowStep ;
+    dcterms:description "**Ensure different namespaces**: app module and library module must have distinct namespaces" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_6" ;
+    oc:stepOrder 6 .
+
+_:ref_b0d40c211c886627 a oc:WorkflowStep ;
+    dcterms:description "Check for `org.jetbrains.kotlin.android` plugin usage — AGP 9.0 has built-in Kotlin and this plugin must be removed" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_6" ;
+    oc:stepOrder 6 .
+
+_:ref_b9ba47fba9f4c383 a oc:WorkflowStep ;
+    dcterms:description "Check for `org.jetbrains.kotlin.kapt` plugin usage — incompatible with built-in Kotlin, must migrate to KSP or `com.android.legacy-kapt`" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_7" ;
+    oc:stepOrder 7 .
+
+_:ref_babe02d58588f7dc a oc:CodeExample ;
+    oc:blockType "code_block" ;
+    oc:codeContent """plugins {
+    alias(libs.plugins.androidApplication)
+    // Do NOT apply kotlin-android — AGP 9.0 includes Kotlin support
+    alias(libs.plugins.composeMultiplatform)  // if using Compose
+    alias(libs.plugins.composeCompiler)       // if using Compose
+}
+
+android {
+    namespace = "com.example.app"
+    compileSdk = 35
+    defaultConfig {
+        applicationId = "com.example.app"
+        minSdk = 24
+        targetSdk = 35
+        versionCode = 1
+        versionName = "1.0"
+    }
+    buildFeatures { compose = true }
+}
+
+dependencies {
+    implementation(projects.shared)  // or whatever the shared module is named
+    implementation(libs.androidx.activity.compose)
+}
+""" ;
+    oc:codeLanguage "kotlin" ;
+    oc:contentOrder 1 ;
+    oc:sourceLocation "lines 163-188" .
+
+_:ref_bc4d52f8f0567859 a oc:WorkflowStep ;
+    dcterms:description "**Move dependencies** from top-level `dependencies {}` into `sourceSets`:" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild _:ref_a1547ae3f9ce9c76 ;
+    oc:stepId "step_5" ;
+    oc:stepOrder 5 .
+
+_:ref_c4749a2c57f1565a a oc:BulletList ;
+    oc:blockType "bullet_list" ;
+    oc:contentOrder 1 ;
+    oc:hasItem _:ref_332a82a405da8f7f,
+        _:ref_6bf4b003cc1cd881,
+        [ a oc:BulletItem ;
+            oc:blockType "bullet_item" ;
+            oc:itemOrder 3 ;
+            oc:itemText "Update all dependency references across modules" ] .
+
+_:ref_c6bf2ced27b28aed a oc:WorkflowStep ;
+    dcterms:description "**SDK Build Tools** — update to 36.0.0:" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild _:ref_5e9e500e93687178 ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_c7fd8f72859430cd a oc:CodeExample ;
+    oc:blockType "code_block" ;
+    oc:codeContent """kotlin {
+    android {
+        androidResources { enable = true }
+    }
+}
+""" ;
+    oc:codeLanguage "kotlin" ;
+    oc:contentOrder 1 ;
+    oc:sourceLocation "lines 95-101" .
+
+_:ref_cc370c099178aa9b a oc:WorkflowStep ;
+    dcterms:description "Once all modules are migrated, remove `android.builtInKotlin=false` and all `com.android.built-in-kotlin` plugins" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_cca81dd7cd7135ca a oc:CodeExample ;
+    oc:blockType "code_block" ;
+    oc:codeContent """kotlin {
+    android {
+        withHostTest { isIncludeAndroidResources = true }
+        withDeviceTest {
+            instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        }
+    }
+}
+""" ;
+    oc:codeLanguage "kotlin" ;
+    oc:contentOrder 1 ;
+    oc:sourceLocation "lines 111-120" .
+
+_:ref_cdd7edd21f451ce2 a oc:WorkflowStep ;
+    dcterms:description "**Remove from shared module**: `applicationId`, `targetSdk`, `versionCode`, `versionName`" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_7" ;
+    oc:stepOrder 7 .
+
+_:ref_d2d4b1e4d57ea174 a oc:WorkflowStep ;
+    dcterms:description "**Extract `desktopApp`** (if desktop target exists):" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild _:ref_2782ae8fbef200eb ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_d42127e8053384e9 a oc:WorkflowStep ;
+    dcterms:description "**Rename module** from `composeApp` to `shared`:" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild _:ref_c4749a2c57f1565a ;
+    oc:stepId "step_5" ;
+    oc:stepOrder 5 .
+
+_:ref_e304426ac019553d a oc:CodeExample ;
+    oc:blockType "code_block" ;
+    oc:codeContent """plugins {
+    id("com.android.built-in-kotlin") version "AGP_VERSION"
+}
+""" ;
+    oc:codeLanguage "kotlin" ;
+    oc:contentOrder 1 ;
+    oc:sourceLocation "lines 395-399" .
+
+_:ref_e5958fda92c965c6 a oc:WorkflowStep ;
+    dcterms:description "**Convert original module** from application to library using Path A steps" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_5" ;
+    oc:stepOrder 5 .
+
+_:ref_e59e662cc00193b5 a oc:WorkflowStep ;
+    dcterms:description "**Enable resources** explicitly if the module uses Android or Compose Multiplatform resources:" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild _:ref_c7fd8f72859430cd ;
+    oc:stepId "step_6" ;
+    oc:stepOrder 6 .
+
+_:ref_e7937f819acb721f a oc:WorkflowStep ;
+    dcterms:description """**Clean up shared module**: remove all platform entry point code and app-specific config
+that was moved to the platform app modules""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_6" ;
+    oc:stepOrder 6 .
+
+_:ref_ebd7307c84d02b2d a oc:CodeExample ;
+    oc:blockType "code_block" ;
+    oc:codeContent """kotlin {
+    android {
+        consumerProguardFiles.add(file("consumer-rules.pro"))
+    }
+}
+""" ;
+    oc:codeLanguage "kotlin" ;
+    oc:contentOrder 1 ;
+    oc:sourceLocation "lines 129-135" .
+
+_:ref_ee875f207cd6db7c a oc:WorkflowStep ;
+    dcterms:description "**Create `androidApp` module** with its own `build.gradle.kts`:" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild _:ref_babe02d58588f7dc ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_f445a1bdb59c7d84 a oc:WorkflowStep ;
+    dcterms:description "**Enable tests** explicitly if the module has unit or instrumented tests:" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild _:ref_cca81dd7cd7135ca ;
+    oc:stepId "step_8" ;
+    oc:stepOrder 8 .
+
+_:ref_fc1f1200a4907bdb a oc:WorkflowStep ;
+    dcterms:description "Enable per migrated module by applying the opt-in plugin:" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild _:ref_e304426ac019553d ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_fdcc801cc9f2134a a oc:WorkflowStep ;
+    dcterms:description "**Remove `org.jetbrains.kotlin.android`** plugin if present (AGP 9.0 has built-in Kotlin support)" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_fdf6dd4b4b4697af a oc:WorkflowStep ;
+    dcterms:description "**Publish consumer ProGuard rules** explicitly if applicable:" ;
+    oc:blockType "workflow_step" ;
+    oc:hasChild _:ref_ebd7307c84d02b2d ;
+    oc:stepId "step_10" ;
+    oc:stepOrder 10 .
+
+_:ref_0f224bc5afea3e66 a oc:WorkflowStep ;
+    dcterms:description "Remove org.jetbrains.kotlin.android from all modules. Migrate kapt to KSP or legacy-kapt. Migrate kotlinOptions to compilerOptions. Migrate kotlin.sourceSets to android.sourceSets." ;
+    oc:expectedOutcome "Built-in Kotlin migration complete, no conflicting plugins" ;
+    oc:stepDependsOn _:ref_2a36023e1567e256 ;
+    oc:stepId "built-in-kotlin" .
+
+_:ref_3a8fe74a42a83150 a oc:WorkflowStep ;
+    dcterms:description "Move dependencies from top-level dependencies {} into kotlin { sourceSets { androidMain.dependencies {} } }. Migrate debugImplementation→androidRuntimeClasspath." ;
+    oc:expectedOutcome "All dependencies in source set blocks" ;
+    oc:stepDependsOn _:ref_d145b3b7c7fbf225 ;
+    oc:stepId "migrate-deps" .
+
+_:ref_3da1ce47a3633b80 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 4 ;
+    oc:hasStep _:ref_1c45767e405428fc,
+        _:ref_47aee6b84ec77bba,
+        _:ref_87fc8c5dc571e209,
+        _:ref_aca16b99e01cad9c,
+        _:ref_af65acd1b6415f36,
+        _:ref_cdd7edd21f451ce2,
+        _:ref_e5958fda92c965c6,
+        _:ref_ee875f207cd6db7c ;
+    oc:workflowId "procedure_4" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_4f1b4cc5337a8a7e a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 2 ;
+    oc:hasStep _:ref_603aec93266e6ac1,
+        _:ref_888ea046ed1e11d5,
+        _:ref_cc370c099178aa9b,
+        _:ref_fc1f1200a4907bdb ;
+    oc:workflowId "procedure_2" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_51a241e4a3d2091d a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 2 ;
+    oc:hasStep _:ref_0a29b336b95f6e6e,
+        _:ref_4564b6835e3cc05a,
+        _:ref_52aac7882c812ac4,
+        _:ref_6af855b205be187a,
+        _:ref_c6bf2ced27b28aed ;
+    oc:workflowId "procedure_2" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_56702204801e4ab4 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 2 ;
+    oc:hasStep _:ref_046cbd4085744d03,
+        _:ref_4ccc2af4c3b21738,
+        _:ref_4f336b39df71d6a7,
+        _:ref_550324aa725bc1a2,
+        _:ref_90c5e737a5a52622,
+        _:ref_9400c15eeb89bf28,
+        _:ref_b0d40c211c886627,
+        _:ref_b9ba47fba9f4c383 ;
+    oc:workflowId "procedure_2" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_5cdf17602c4d347f a oc:WorkflowStep ;
+    dcterms:description "Review gradle.properties for changed defaults, remove obsolete properties (enableLegacyVariantApi, enableJetifier), add opt-out flags if needed for third-party plugins." ;
+    oc:expectedOutcome "gradle.properties cleaned up with no conflicting entries" ;
+    oc:stepDependsOn _:ref_48186b81ac4505f3,
+        _:ref_628e7e47e0c047cb ;
+    oc:stepId "update-properties" .
+
+_:ref_7ca2fa30f3772857 a oc:WorkflowStep ;
+    dcterms:description "Classify each module into migration path (A: library swap, B: app split, C: full restructure, pure Android). Ask user about scope (minimum vs recommended)." ;
+    oc:expectedOutcome "Migration path assigned to each module with user confirmation" ;
+    oc:stepDependsOn _:ref_f354be1b8fc34893 ;
+    oc:stepId "classify" .
+
+_:ref_e2ff1c16888a4a69 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 4 ;
+    oc:hasStep _:ref_1a2c3d05c90bea12,
+        _:ref_251b180a79df66ea,
+        _:ref_7c5a2ddd315042e6,
+        _:ref_7db3de1c673ec006,
+        _:ref_93cdce7355cd777d,
+        _:ref_a076bf4c7b34df2c,
+        _:ref_bc4d52f8f0567859,
+        _:ref_e59e662cc00193b5,
+        _:ref_f445a1bdb59c7d84,
+        _:ref_fdcc801cc9f2134a,
+        _:ref_fdf6dd4b4b4697af ;
+    oc:workflowId "procedure_4" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_f15df7063b975622 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 1 ;
+    oc:hasStep _:ref_3331eb8ab6c01846,
+        _:ref_a4cf5318dbb4e8a5,
+        _:ref_a5386ac47d148e30,
+        _:ref_d2d4b1e4d57ea174,
+        _:ref_d42127e8053384e9,
+        _:ref_e7937f819acb721f ;
+    oc:workflowId "procedure_1" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_fbcabe9a2d7547a7 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 2 ;
+    oc:hasStep _:ref_1f45d08a1be4ceb1,
+        _:ref_1fbdd537b0fa4c0d,
+        _:ref_2c26543a211d0316,
+        _:ref_5d031e3a59c1ee70,
+        _:ref_9560363dc0b9e0d5,
+        _:ref_ab63bd7b63f4113c,
+        _:ref_af3a6cd8776be395 ;
+    oc:workflowId "procedure_2" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_2a36023e1567e256 a oc:WorkflowStep ;
+    dcterms:description "Migrate each module per its classified path. For Path A: plugin swap + DSL migration. For Path B: split app + apply Path A. For Path C: full restructure." ;
+    oc:expectedOutcome "All modules migrated to new plugin and DSL structure" ;
+    oc:stepDependsOn _:ref_628e7e47e0c047cb,
+        _:ref_7ca2fa30f3772857 ;
+    oc:stepId "migrate-modules" .
+
+_:ref_48186b81ac4505f3 a oc:WorkflowStep ;
+    dcterms:description "Inventory all third-party plugins and check against PLUGIN-COMPATIBILITY.md. Flag broken plugins and note required opt-out flags." ;
+    oc:expectedOutcome "List of compatible, opt-out-needed, and broken plugins" ;
+    oc:stepDependsOn _:ref_f354be1b8fc34893 ;
+    oc:stepId "check-plugins" .
+
+_:ref_628e7e47e0c047cb a oc:WorkflowStep ;
+    dcterms:description "Update Gradle wrapper to 9.1.0+, AGP to 9.0.1+, verify JDK 17+, update SDK Build Tools to 36.0.0, add KMP library plugin to version catalog." ;
+    oc:expectedOutcome "All version prerequisites met" ;
+    oc:stepDependsOn _:ref_48186b81ac4505f3 ;
+    oc:stepId "update-versions" .
+
+_:ref_7879cdf7c9811309 a oc:WorkflowStep ;
+    dcterms:description "Replace com.android.library with com.android.kotlin.multiplatform.library in module build.gradle.kts. Remove org.jetbrains.kotlin.android if present." ;
+    oc:expectedOutcome "Correct plugins applied" ;
+    oc:stepId "replace-plugin" .
+
+_:ref_d145b3b7c7fbf225 a oc:WorkflowStep ;
+    dcterms:description "Move config from top-level android {} block into kotlin { android {} }. Update namespace, compileSdk, minSdk." ;
+    oc:stepDependsOn _:ref_7879cdf7c9811309 ;
+    oc:stepId "migrate-dsl" .
+
+_:ref_f354be1b8fc34893 a oc:WorkflowStep ;
+    dcterms:description "Analyze project structure: read settings.gradle.kts, all build.gradle.kts, gradle.properties, wrapper properties. Run analyze-project.sh if available." ;
+    oc:expectedOutcome "Complete inventory of modules, plugins, versions, and current configuration" ;
+    oc:stepId "analyze" .
 

@@ -10,76 +10,689 @@ oc:skill_obra_superpowers_test_driven_development_testing_anti_patterns a oc:Dec
     skos:broader "Reference guide" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/obra/superpowers/test-driven-development" ;
     oc:contentHash "bde453bc258f06543987477c837939afaa774ea2acbd9f308d702fc452bc4283" ;
-    oc:differentia "catalogs common testing anti-patterns and their corrections, emphasizing that tests must verify real behavior not mock behavior" ;
-    oc:extends oc:skill_obra_superpowers_test_driven_development,
-        oc:skill_test_driven_development ;
-    oc:handlesFailure oc:IncompleteMockDetected,
-        oc:MockBehaviorTested,
-        oc:TestOnlyMethodAdded ;
-    oc:hasArgumentHint "context of the test being written or reviewed" ;
+    oc:differentia "identifies and corrects common testing anti-patterns related to mocking, test-only production code, and incomplete test coverage" ;
+    oc:extends oc:skill_obra_superpowers_test_driven_development ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_03eec3e7,
-        oc:kn_07ba2ba3,
-        oc:kn_59ffac2e,
-        oc:kn_7f6b120c,
-        oc:kn_c56ca3d4,
-        oc:kn_f00a8414,
-        oc:kn_ff0a9bd1 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "**Load this reference when:** writing or changing tests, adding mocks, or tempted to add test-only methods to production code." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**Mocks are tools to isolate, not things to test.**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "Fix: Test real behavior or question why you're mocking at all." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "If TDD reveals you're testing mock behavior, you've gone wrong." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 12 ;
+                    oc:sectionTitle "The Bottom Line" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent "**The Iron Rule:** Mock the COMPLETE data structure as it exists in reality, not just fields your immediate test uses." ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 4 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "**Downstream code may depend on fields you didn't include** - Silent failures" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "**Tests pass but integration fails** - Mock incomplete, real API complete" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "**Partial mocks hide structural assumptions** - You only mocked fields you know about" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "**False confidence** - Test proves nothing about real behavior" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Why this is wrong:**" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// ❌ BAD: Partial mock - only fields you think you need
+const mockResponse = {
+  status: 'success',
+  data: { userId: '123', name: 'Alice' }
+  // Missing: metadata that downstream code uses
+};
+
+// Later: breaks when code accesses response.metadata.requestId
+""" ;
+                            oc:codeLanguage "typescript" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 180-189" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// ✅ GOOD: Mirror real API completeness
+const mockResponse = {
+  status: 'success',
+  data: { userId: '123', name: 'Alice' },
+  metadata: { requestId: 'req-789', timestamp: 1234567890 }
+  // All fields real API returns
+};
+""" ;
+                            oc:codeLanguage "typescript" ;
+                            oc:contentOrder 7 ;
+                            oc:sourceLocation "lines 200-208" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 6 ;
+                            oc:textContent "**The fix:**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**The violation:**" ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """BEFORE creating mock responses:
+  Check: "What fields does the real API response contain?"
+
+  Actions:
+    1. Examine actual API response from docs/examples
+    2. Include ALL fields system might consume downstream
+    3. Verify mock matches real response schema completely
+
+  Critical:
+    If you're creating a mock, you must understand the ENTIRE structure
+    Partial mocks fail silently when code depends on omitted fields
+
+  If uncertain: Include all documented fields
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 212-226" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Gate Function" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Anti-Pattern 4: Incomplete Mocks" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """1. NEVER test mock behavior
+2. NEVER add test-only methods to production classes
+3. NEVER mock without understanding dependencies
+""" ;
+                            oc:codeLanguage "" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 15-19" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "The Iron Laws" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**The violation:**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Why this is wrong:**" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// ❌ BAD: destroy() only used in tests
+class Session {
+  async destroy() {  // Looks like production API!
+    await this._workspaceManager?.destroyWorkspace(this.id);
+    // ... cleanup
+  }
+}
+
+// In tests
+afterEach(() => session.destroy());
+""" ;
+                            oc:codeLanguage "typescript" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 66-77" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 4 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Confuses object lifecycle with entity lifecycle" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Violates YAGNI and separation of concerns" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Production class polluted with test-only code" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Dangerous if accidentally called in production" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent "**The fix:**" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// ✅ GOOD: Test utilities handle test cleanup
+// Session has no destroy() - it's stateless in production
+
+// In test-utils/
+export async function cleanupSession(session: Session) {
+  const workspace = session.getWorkspaceInfo();
+  if (workspace) {
+    await workspaceManager.destroyWorkspace(workspace.id);
+  }
+}
+
+// In tests
+afterEach(() => cleanupSession(session));
+""" ;
+                            oc:codeLanguage "typescript" ;
+                            oc:contentOrder 6 ;
+                            oc:sourceLocation "lines 86-100" ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """BEFORE adding any method to production class:
+  Ask: "Is this only used by tests?"
+
+  IF yes:
+    STOP - Don't add it
+    Put it in test utilities instead
+
+  Ask: "Does this class own this resource's lifecycle?"
+
+  IF no:
+    STOP - Wrong class for this method
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 104-116" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Gate Function" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Anti-Pattern 2: Test-Only Methods in Production" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Following strict TDD prevents these anti-patterns.**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Tests must verify real behavior, not mock behavior. Mocks are a means to isolate, not the thing being tested." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Core principle:** Test what the code does, not what the mocks do." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Overview" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// ✅ GOOD: Mock at correct level
+test('detects duplicate server', () => {
+  // Mock the slow part, preserve behavior test needs
+  vi.mock('MCPServerManager'); // Just mock slow server startup
+
+  await addServer(config);  // Config written
+  await addServer(config);  // Duplicate detected ✓
+});
+""" ;
+                            oc:codeLanguage "typescript" ;
+                            oc:contentOrder 6 ;
+                            oc:sourceLocation "lines 140-149" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// ❌ BAD: Mock breaks test logic
+test('detects duplicate server', () => {
+  // Mock prevents config write that test depends on!
+  vi.mock('ToolCatalog', () => ({
+    discoverAndCacheTools: vi.fn().mockResolvedValue(undefined)
+  }));
+
+  await addServer(config);
+  await addServer(config);  // Should throw - but won't!
+});
+""" ;
+                            oc:codeLanguage "typescript" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 121-132" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Why this is wrong:**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**The violation:**" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 4 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Test passes for wrong reason or fails mysteriously" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Over-mocking to \"be safe\" breaks actual behavior" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Mocked method had side effect test depended on (writing config)" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent "**The fix:**" ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """BEFORE mocking any method:
+  STOP - Don't mock yet
+
+  1. Ask: "What side effects does the real method have?"
+  2. Ask: "Does this test depend on any of those side effects?"
+  3. Ask: "Do I fully understand what this test needs?"
+
+  IF depends on side effects:
+    Mock at lower level (the actual slow/external operation)
+    OR use test doubles that preserve necessary behavior
+    NOT the high-level method the test depends on
+
+  IF unsure what test depends on:
+    Run test with real implementation FIRST
+    Observe what actually needs to happen
+    THEN add minimal mocking at the right level
+
+  Red flags:
+    - "I'll mock this to be safe"
+    - "This might be slow, better mock it"
+    - Mocking without understanding the dependency chain
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 153-175" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Gate Function" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Anti-Pattern 3: Mocking Without Understanding" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 4 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Testing is part of implementation, not optional follow-up" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Can't claim complete without tests" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "TDD would have caught this" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Why this is wrong:**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent "**The fix:**" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """✅ Implementation complete
+❌ No tests written
+"Ready for testing"
+""" ;
+                            oc:codeLanguage "" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 231-235" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**The violation:**" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """TDD cycle:
+1. Write failing test
+2. Implement to pass
+3. Refactor
+4. THEN claim complete
+""" ;
+                            oc:codeLanguage "" ;
+                            oc:contentOrder 6 ;
+                            oc:sourceLocation "lines 243-249" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 7 ;
+                    oc:sectionTitle "Anti-Pattern 5: Integration Tests as Afterthought" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 1 ;
+                            oc:rowCount 6 ;
+                            oc:tableCaption "## Quick Reference" ;
+                            oc:tableMarkdown """| Anti-Pattern | Fix |
+|--------------|-----|
+| Assert on mock elements | Test real component or unmock it |
+| Test-only methods in production | Move to test utilities |
+| Mock without understanding | Understand dependencies first, mock minimally |
+| Incomplete mocks | Mirror real API completely |
+| Tests as afterthought | TDD - tests first |
+| Over-complex mocks | Consider integration tests |
+""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 10 ;
+                    oc:sectionTitle "Quick Reference" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "Can't explain why mock is needed" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Methods only called in test files" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 6 ;
+                                    oc:itemText "Mocking \"just to be safe\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Mock setup is >50% of test" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Test fails when you remove mock" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Assertion checks for `*-mock` test IDs" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 11 ;
+                    oc:sectionTitle "Red Flags" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**Warning signs:**" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Mocking everything to make test pass" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Test breaks when mock changes" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Mocks missing methods real components have" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Mock setup longer than test logic" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**your human partner's question:** \"Do we need to be using a mock here?\"" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "**Consider:** Integration tests with real components often simpler than complex mocks" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 8 ;
+                    oc:sectionTitle "When Mocks Become Too Complex" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// ❌ BAD: Testing that the mock exists
+test('renders sidebar', () => {
+  render(<Page />);
+  expect(screen.getByTestId('sidebar-mock')).toBeInTheDocument();
+});
+""" ;
+                            oc:codeLanguage "typescript" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 24-30" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent "**your human partner's correction:** \"Are we testing the behavior of a mock?\"" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 6 ;
+                            oc:textContent "**The fix:**" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// ✅ GOOD: Test real component or don't mock it
+test('renders sidebar', () => {
+  render(<Page />);  // Don't mock sidebar
+  expect(screen.getByRole('navigation')).toBeInTheDocument();
+});
+
+// OR if sidebar must be mocked for isolation:
+// Don't assert on the mock - test Page's behavior with sidebar present
+""" ;
+                            oc:codeLanguage "typescript" ;
+                            oc:contentOrder 7 ;
+                            oc:sourceLocation "lines 40-49" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**The violation:**" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Why this is wrong:**" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 4 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "You're verifying the mock works, not that the component works" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Tells you nothing about real behavior" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Test passes when mock is present, fails when it's not" ] ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """BEFORE asserting on any mock element:
+  Ask: "Am I testing real component behavior or just mock existence?"
+
+  IF testing mock existence:
+    STOP - Delete the assertion or unmock the component
+
+  Test real behavior instead
+""" ;
+                                    oc:codeLanguage "" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 53-61" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Gate Function" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Anti-Pattern 1: Testing Mock Behavior" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**Why TDD helps:**" ],
+                        _:ref_1bd127407c59169f,
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**If you're testing mock behavior, you violated TDD** - you added mocks without watching test fail against real code first." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 9 ;
+                    oc:sectionTitle "TDD Prevents These Anti-Patterns" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Testing Anti-Patterns" ] ;
+    oc:hasWorkflow _:ref_1bd127407c59169f,
+        [ a oc:Workflow ;
+            dcterms:description "The standard TDD cycle that prevents all documented anti-patterns by ensuring tests verify real behavior" ;
+            oc:hasStep [ a oc:WorkflowStep ;
+                    dcterms:description "Only now claim the feature is complete" ;
+                    oc:expectedOutcome "Feature fully tested with real behavior verification" ;
+                    oc:stepDependsOn _:ref_89b4d7c804f2ff9f ;
+                    oc:stepId "claim-complete" ],
+                _:ref_89b4d7c804f2ff9f,
+                _:ref_b09f0391e7e1cb77,
+                _:ref_ddd1aa7b9b5f33bc ;
+            oc:workflowId "tdd-cycle" ;
+            oc:workflowName "TDD Cycle" ] ;
+    oc:impartsKnowledge oc:kn_03a12f6f,
+        oc:kn_31c2eb0f,
+        oc:kn_5c6131aa,
+        oc:kn_914ad6be,
+        oc:kn_a987a19a,
+        oc:kn_cb2094df,
+        oc:kn_d50c0113,
+        oc:kn_ed0d1031 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:TestBeingWritten ;
-    oc:resolvesIntent "avoid testing anti-patterns",
-        "fix existing test anti-patterns",
-        "identify bad test practices",
-        "write correct mocks" ;
-    oc:yieldsState oc:AntiPatternAvoided .
+    oc:resolvesIntent "avoid testing mock behavior",
+        "identify testing anti-patterns",
+        "improve test quality by avoiding common mistakes",
+        "write correct unit tests with mocks" .
 
-oc:kn_03eec3e7 a oc:AntiPattern,
+oc:kn_03a12f6f a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "Before adding any mock to a test" ;
-    oc:directiveContent "Never mock a dependency without understanding its side effects and what the test actually depends on. Mock at the lowest level needed, preserving behavior the test relies on." ;
-    oc:hasRationale "Over-mocking or mocking at the wrong level can suppress side effects the test depends on, causing tests to pass for the wrong reasons or fail mysteriously." ;
+    oc:appliesToContext "When creating any mock response or test double" ;
+    oc:directiveContent "Mock the COMPLETE data structure as it exists in reality, not just the fields your immediate test uses. Partial mocks hide structural assumptions and cause silent downstream failures." ;
+    oc:hasRationale "Downstream code may depend on fields you didn't include in the partial mock; tests pass but integration fails, creating false confidence" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_07ba2ba3 a oc:Heuristic,
+oc:kn_31c2eb0f a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When mock complexity grows — long setup, many mocked methods, or mocking 'just to be safe'" ;
-    oc:directiveContent "If mock setup exceeds 50% of the test, or you can't explain why the mock is needed, consider replacing mocks with integration tests using real components." ;
-    oc:hasRationale "Over-complex mocks indicate the test is fighting the design; integration tests with real components are often simpler and more trustworthy." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_59ffac2e a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "As a gate check before writing or modifying any test" ;
-    oc:directiveContent "Before asserting on any mock: ask 'Am I testing real behavior or mock existence?' Before adding any production method: ask 'Is this only used by tests?' Before mocking: ask 'What side effects does the real method have, and does this test depend on them?'" ;
-    oc:hasRationale "These three gate questions catch the most common and damaging testing anti-patterns before they enter the codebase." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_7f6b120c a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "Always — TDD is the preventive discipline that eliminates testing anti-patterns at the root" ;
-    oc:directiveContent "Following strict TDD prevents all these anti-patterns: write the test first, watch it fail against real code, then add minimal mocks only as needed." ;
-    oc:hasRationale "TDD forces you to think about what you're testing before you mock, confirms tests verify real behavior by watching them fail, and prevents test-only methods from creeping into production code." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_c56ca3d4 a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When creating mock response objects or test data" ;
-    oc:directiveContent "Mock data structures must mirror the complete real API response schema, including all fields that downstream code may consume — not just the fields the immediate test uses." ;
-    oc:hasRationale "Partial mocks hide structural assumptions, cause silent failures when code accesses omitted fields, and create false confidence where tests pass but integration fails." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_f00a8414 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When writing any test assertion involving mocked components" ;
-    oc:directiveContent "Never assert on mock elements or test mock existence. Tests must verify real component behavior, not that a mock is present." ;
-    oc:hasRationale "Testing mock behavior gives false confidence — the test passes when the mock is present but tells you nothing about real runtime behavior." ;
+    oc:appliesToContext "When writing any assertion that references mock elements, test IDs with '-mock', or mock-specific selectors" ;
+    oc:directiveContent "NEVER test mock behavior — asserting that a mock element exists verifies nothing about real component behavior. Test real components or don't mock them." ;
+    oc:hasRationale "Tests that verify mock presence pass when the mock is present but prove nothing about actual production behavior, creating false confidence" ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_ff0a9bd1 a oc:AntiPattern,
+oc:kn_5c6131aa a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "Gate check before every test assertion, production method addition, or mock creation" ;
+    oc:directiveContent "Before asserting on a mock: ask 'Am I testing real behavior or mock existence?' If mock existence → stop, delete assertion or unmock component. Before adding a production method: ask 'Is this only used by tests?' If yes → put in test utilities. Before mocking: ask 'What side effects does the real method have? Does this test depend on them?' If depends → mock at lower level." ;
+    oc:hasRationale "These gate functions catch anti-patterns at the moment of creation rather than during review" ;
+    oc:stepOrder 1 .
+
+oc:kn_914ad6be a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When considering adding any method to a production class for test cleanup or setup" ;
-    oc:directiveContent "Never add methods to production classes that are only used by tests. Put test-only logic in test utility files instead." ;
-    oc:hasRationale "Test-only methods pollute production code, create confusion about object lifecycle, violate YAGNI, and can be dangerous if accidentally called in production." ;
+    oc:appliesToContext "Before adding any method to a production class" ;
+    oc:directiveContent "NEVER add test-only methods to production classes. If a method is only called in test files, it belongs in test utilities, not production code." ;
+    oc:hasRationale "Test-only methods pollute production APIs, violate YAGNI, risk accidental production calls, and confuse object lifecycle with entity lifecycle" ;
     oc:severityLevel "CRITICAL" .
+
+oc:kn_a987a19a a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When mock complexity exceeds test complexity" ;
+    oc:directiveContent "If mock setup is longer than test logic, or you're mocking everything to make a test pass, consider using integration tests with real components instead." ;
+    oc:hasRationale "Over-complex mocks indicate the test is fighting the architecture; integration tests with real components are often simpler and more trustworthy" .
+
+oc:kn_cb2094df a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Always — these are non-negotiable rules for all testing" ;
+    oc:directiveContent "The three Iron Laws: (1) NEVER test mock behavior, (2) NEVER add test-only methods to production classes, (3) NEVER mock without understanding dependencies." ;
+    oc:hasRationale "Violating any of these laws produces tests that give false confidence and hide real defects" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_d50c0113 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing any test or implementation" ;
+    oc:directiveContent "Following strict TDD prevents all these anti-patterns: write test first, watch it fail, implement minimally, then refactor. If you're testing mock behavior, you violated TDD." ;
+    oc:hasRationale "TDD forces you to think about what you're testing before adding mocks, ensures tests verify real behavior, and prevents test-only code from creeping into production" .
+
+oc:kn_ed0d1031 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Before mocking any method or dependency" ;
+    oc:directiveContent "NEVER mock a dependency without understanding its side effects. The real method may have side effects your test depends on, and mocking it will silently break test logic." ;
+    oc:hasRationale "Blind mocking can suppress side effects the test relies on, causing tests to pass for wrong reasons or fail mysteriously" ;
+    oc:severityLevel "CRITICAL" .
+
+_:ref_2d8b60e4c9601d03 a oc:WorkflowStep ;
+    dcterms:description "**Watch it fail** → Confirms test tests real behavior, not mocks" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_4b97b44777a4a924 a oc:WorkflowStep ;
+    dcterms:description "**Minimal implementation** → No test-only methods creep in" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_8b114b99842cb74c a oc:WorkflowStep ;
+    dcterms:description "**Write test first** → Forces you to think about what you're actually testing" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_c705dafd34276957 a oc:WorkflowStep ;
+    dcterms:description "**Real dependencies** → You see what the test actually needs before mocking" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_1bd127407c59169f a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 2 ;
+    oc:hasStep _:ref_2d8b60e4c9601d03,
+        _:ref_4b97b44777a4a924,
+        _:ref_8b114b99842cb74c,
+        _:ref_c705dafd34276957 ;
+    oc:workflowId "procedure_2" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_89b4d7c804f2ff9f a oc:WorkflowStep ;
+    dcterms:description "Refactor while keeping tests green" ;
+    oc:expectedOutcome "Clean code with no test-only pollution" ;
+    oc:stepDependsOn _:ref_b09f0391e7e1cb77 ;
+    oc:stepId "refactor" .
+
+_:ref_b09f0391e7e1cb77 a oc:WorkflowStep ;
+    dcterms:description "Write minimal implementation to make the test pass" ;
+    oc:expectedOutcome "Test passes with real code, no test-only methods needed" ;
+    oc:stepDependsOn _:ref_ddd1aa7b9b5f33bc ;
+    oc:stepId "implement" .
+
+_:ref_ddd1aa7b9b5f33bc a oc:WorkflowStep ;
+    dcterms:description "Write a failing test for the desired behavior" ;
+    oc:expectedOutcome "Test fails, confirming it tests real behavior not mocks" ;
+    oc:stepId "write-test" .
 

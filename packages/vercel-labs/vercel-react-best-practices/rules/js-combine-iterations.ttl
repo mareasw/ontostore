@@ -7,65 +7,104 @@
 oc:skill_vercel_labs_vercel_react_best_practices_js_combine_iterations a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "js-combine-iterations" ;
-    skos:broader "Performance optimization technique" ;
+    skos:broader "Performance optimization pattern" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "71add08aeeb43091d4ff4c0b2842cce8b4bdef8ad3e732cc034bb5a84827e746" ;
-    oc:differentia "combines multiple array iteration operations (filter/map) into a single loop to reduce unnecessary passes over data" ;
+    oc:differentia "Combines multiple array filter/map operations into a single iteration to reduce loop overhead" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
     oc:hasCategory "development" ;
-    oc:hasRequirement oc:req_3e74a056,
-        oc:req_d16d3697 ;
-    oc:impartsKnowledge oc:kn_033d0496,
-        oc:kn_2b2c8e4e,
-        oc:kn_3ea4cf98,
-        oc:kn_43d4f9eb,
-        oc:kn_7b1fdda2 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Multiple `.filter()` or `.map()` calls iterate the array multiple times. Combine into one loop." ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """const admins: User[] = []
+const testers: User[] = []
+const inactive: User[] = []
+
+for (const user of users) {
+  if (user.isAdmin) admins.push(user)
+  if (user.isTester) testers.push(user)
+  if (!user.isActive) inactive.push(user)
+}
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 5 ;
+                    oc:sourceLocation "lines 22-32" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """const admins = users.filter(u => u.isAdmin)
+const testers = users.filter(u => u.isTester)
+const inactive = users.filter(u => !u.isActive)
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-18" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Incorrect (3 iterations):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "**Correct (1 iteration):**" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Combine Multiple Array Iterations" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Combine Multiple Array Iterations
+impact: LOW-MEDIUM
+impactDescription: reduces iterations
+tags: javascript, arrays, loops, performance
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:impartsKnowledge oc:kn_3bc6d433,
+        oc:kn_46ecb003,
+        oc:kn_7a0be2b8,
+        oc:kn_a09fa515 ;
     oc:isUserInvocable true ;
-    oc:nature "Concept" ;
-    oc:resolvesIntent "improve array processing performance",
+    oc:nature "Technique" ;
+    oc:resolvesIntent "combine multiple filter calls",
         "optimize array iterations",
-        "reduce loop overhead in JavaScript",
-        "refactor multiple filter/map calls into one pass" ;
-    oc:yieldsState oc:ArrayIterationsOptimized .
+        "reduce loop overhead in JavaScript" ;
+    oc:yieldsState oc:CodeOptimized .
 
-oc:kn_033d0496 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "During code review or refactoring of array-heavy JavaScript/TypeScript modules." ;
-    oc:directiveContent "Consider combining iterations when you have 2 or more filter/map calls on the same source array, especially if the array is large or the code runs in a hot path." ;
-    oc:hasRationale "For small arrays or non-critical paths, the readability of chained methods may outweigh the minor performance gain. This heuristic helps decide when the optimization is worthwhile." .
-
-oc:kn_2b2c8e4e a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When writing JavaScript/TypeScript code that filters or maps the same array multiple times to produce different subsets or transformations." ;
-    oc:directiveContent "Avoid chaining multiple .filter() or .map() calls that each iterate the entire array independently when they can be combined into a single pass." ;
-    oc:hasRationale "Each chained iteration method creates a full pass over the array, multiplying time complexity by the number of iterations. For large arrays this becomes a measurable performance bottleneck." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_3ea4cf98 a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When refactoring from functional style (filter/map) to imperative style (for loop)." ;
-    oc:directiveContent "The combined iteration pattern requires pre-declaring result arrays and manually managing push logic, which increases code verbosity compared to functional chaining." ;
-    oc:hasRationale "The tradeoff is readability vs performance. Teams should establish consistent patterns to avoid mixing styles incoherently across a codebase." ;
-    oc:severityLevel "LOW" .
-
-oc:kn_43d4f9eb a oc:KnowledgeNode,
+oc:kn_3bc6d433 a oc:KnowledgeNode,
         oc:PerformanceProfile ;
-    oc:appliesToContext "Always, when evaluating performance of array processing code." ;
-    oc:directiveContent "Multiple filter/map calls on the same array multiply iteration count linearly. Three .filter() calls = three full passes. A combined for loop = one pass regardless of how many categories are extracted." ;
-    oc:hasRationale "Understanding the iteration cost helps developers make informed tradeoffs between readability (chained methods) and performance (combined loop)." ;
+    oc:appliesToContext "When evaluating performance impact of array operations" ;
+    oc:directiveContent "Multiple .filter() calls on the same array cost O(k * n) where k is the number of filters; combining into one loop costs O(n)." ;
+    oc:hasRationale "For large arrays, reducing iterations from k to 1 provides a linear speedup factor of k." ;
     oc:severityLevel "LOW" .
 
-oc:kn_7b1fdda2 a oc:DesignPrinciple,
+oc:kn_46ecb003 a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When extracting multiple non-mutually-exclusive subsets from the same source array." ;
-    oc:directiveContent "Prefer a single for...of loop with conditional push operations when you need to categorize array elements into multiple buckets." ;
-    oc:hasRationale "A single iteration reduces time from O(n*k) where k is the number of filters to O(n), while maintaining readable and maintainable code." .
+    oc:appliesToContext "When combining multiple independent array filters into a single pass" ;
+    oc:codeLanguage "typescript" ;
+    oc:directiveContent """const results: TypeA[] = []
+const resultsB: TypeB[] = []
+for (const item of items) {
+  if (conditionA) results.push(item)
+  if (conditionB) resultsB.push(item)
+}""" ;
+    oc:hasRationale "A single for-of loop with conditional pushes collects all derived arrays in one traversal." .
 
-oc:req_3e74a056 a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "TypeScript or JavaScript syntax" .
+oc:kn_7a0be2b8 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing array filtering/mapping logic in JavaScript or TypeScript" ;
+    oc:directiveContent "When you need to produce 2+ independent derived arrays from the same source, combine into a single for loop with multiple conditional pushes." ;
+    oc:hasRationale "Single-pass iteration reduces total work and improves cache locality." .
 
-oc:req_d16d3697 a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "JavaScript array methods (filter, map, reduce)" .
+oc:kn_a09fa515 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When filtering or mapping the same array multiple times" ;
+    oc:directiveContent "Avoid chaining multiple .filter() or .map() calls on the same array when results are independent — each call creates a separate iteration." ;
+    oc:hasRationale "Each chained iteration traverses the entire array again, multiplying time complexity by the number of operations." ;
+    oc:severityLevel "MEDIUM" .
 

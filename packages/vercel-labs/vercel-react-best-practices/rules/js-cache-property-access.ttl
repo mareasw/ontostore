@@ -10,54 +10,103 @@ oc:skill_vercel_labs_vercel_react_best_practices_js_cache_property_access a oc:D
     skos:broader "Performance optimization technique" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "73e47431e74878a927061bf0ddc7cd91a7556cb35d2573f3421e82300d9ae311" ;
-    oc:differentia "caches deeply nested property access and array length lookups outside of hot loops to eliminate redundant traversals" ;
+    oc:differentia "caches deeply nested property lookups outside of hot loops to eliminate redundant traversal" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_1e935818,
-        oc:kn_4e3a02a9,
-        oc:kn_94497988,
-        oc:kn_a192d5bb,
-        oc:kn_a3fecc42 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Cache object property lookups in hot paths." ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """const value = obj.config.settings.value
+const len = arr.length
+for (let i = 0; i < len; i++) {
+  process(value)
+}
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 5 ;
+                    oc:sourceLocation "lines 22-28" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Incorrect (3 lookups × N iterations):**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """for (let i = 0; i < arr.length; i++) {
+  process(obj.config.settings.value)
+}
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-18" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "**Correct (1 lookup total):**" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Cache Property Access in Loops" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Cache Property Access in Loops
+impact: LOW-MEDIUM
+impactDescription: reduces lookups
+tags: javascript, loops, optimization, caching
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:impartsKnowledge oc:kn_31f7dd8a,
+        oc:kn_4f1e8bfb,
+        oc:kn_a920d5df,
+        oc:kn_dbab02b9,
+        oc:kn_e16e8b46 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:CodeUnderTest ;
-    oc:resolvesIntent "improve JavaScript loop performance",
-        "optimize property access in loops",
-        "reduce redundant lookups in hot paths" ;
-    oc:yieldsState oc:LoopOptimized .
+    oc:resolvesIntent "optimize loop performance",
+        "reduce property lookup overhead",
+        "refactor hot paths" .
 
-oc:kn_1e935818 a oc:KnowledgeNode,
+oc:kn_31f7dd8a a oc:KnowledgeNode,
         oc:PerformanceProfile ;
-    oc:appliesToContext "When evaluating which optimizations to prioritize in a codebase" ;
-    oc:directiveContent "Impact is LOW-MEDIUM: reduces per-iteration overhead but is unlikely to be the dominant bottleneck unless the loop body is otherwise very lightweight and iterations are very high." ;
-    oc:hasRationale "Property caching is a micro-optimization; it should be applied in hot paths but should not displace higher-impact architectural optimizations." ;
+    oc:appliesToContext "When evaluating whether a loop is worth optimizing" ;
+    oc:directiveContent "Impact is LOW-MEDIUM: reduces repeated lookups proportionally to nesting depth × iteration count. Most impactful when nesting depth ≥ 2 and iterations ≥ 1000." ;
+    oc:hasRationale "Modern JS engines inline-cache some patterns, but deep chains and dynamic access patterns can still deopt." ;
     oc:severityLevel "LOW" .
 
-oc:kn_4e3a02a9 a oc:Constraint,
+oc:kn_4f1e8bfb a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "Before applying property caching in a loop" ;
-    oc:directiveContent "This optimization only applies when the cached value is guaranteed to remain constant across all loop iterations." ;
-    oc:hasRationale "If the property value or array length could change during iteration, caching would produce incorrect results by reading a stale snapshot." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_94497988 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When authoring any loop in JavaScript or TypeScript" ;
-    oc:directiveContent "Never place deeply nested property chains (e.g., obj.a.b.c.d) inside a loop body when the value does not change across iterations." ;
-    oc:hasRationale "Repeated nested lookups multiply the cost of the traversal by the number of iterations, creating an avoidable O(N × depth) overhead that can be reduced to O(depth)." ;
+    oc:appliesToContext "When writing loops that run many iterations or access deeply nested object paths" ;
+    oc:directiveContent "Never access deeply nested properties (e.g., obj.config.settings.value) or computed properties (e.g., arr.length) inside loop bodies when the value does not change across iterations." ;
+    oc:hasRationale "Each iteration re-traverses the prototype chain and property chain, multiplying O(depth) lookups by N iterations unnecessarily." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_a192d5bb a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When writing index-based for-loops over arrays in performance-sensitive code" ;
-    oc:directiveContent "Cache array .length in a local variable when using a classic for-loop, rather than re-accessing the property on every iteration." ;
-    oc:hasRationale "Although modern JS engines often optimize .length access, explicitly caching it is a low-cost, deterministic micro-optimization that eliminates any ambiguity in hot paths." ;
-    oc:severityLevel "LOW" .
+oc:kn_a920d5df a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When refactoring loops for performance" ;
+    oc:directiveContent "1. Identify loop-invariant property accesses inside the loop body 2. Extract each invariant to a const before the loop 3. Replace inner references with the cached variable" ;
+    oc:hasRationale "Systematic extraction ensures no invariant is missed and the loop body remains clean." ;
+    oc:stepOrder 1 .
 
-oc:kn_a3fecc42 a oc:Heuristic,
+oc:kn_dbab02b9 a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When writing loops that reference object properties, especially nested ones, inside the loop body" ;
-    oc:directiveContent "Cache deeply nested property access (e.g., obj.config.settings.value) in a local constant before entering a loop, rather than performing the traversal on every iteration." ;
-    oc:hasRationale "Each property lookup in a hot loop is multiplied by N iterations; caching reduces N lookups to 1, lowering instruction count and improving throughput." ;
+    oc:appliesToContext "When caching property access before any hot loop" ;
+    oc:codeLanguage "typescript" ;
+    oc:directiveContent """const cachedValue = obj.deep.nested.path;
+const len = arr.length;
+for (let i = 0; i < len; i++) {
+  process(cachedValue);
+}""" .
+
+oc:kn_e16e8b46 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When optimizing hot paths and tight loops" ;
+    oc:directiveContent "Cache any property lookup that is invariant across loop iterations by assigning it to a local variable before the loop." ;
+    oc:hasRationale "Local variable access is a register-level operation; property access requires prototype chain traversal. Caching converts N×O(depth) lookups to O(depth)+N register reads." ;
     oc:severityLevel "MEDIUM" .
 

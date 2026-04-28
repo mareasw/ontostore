@@ -7,11 +7,12 @@
 oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_java_to_kotlin a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "kotlin-tooling-java-to-kotlin" ;
-    skos:broader "Code conversion skill" ;
-    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/kotlin/kotlin-agent-skills/kotlin-tooling-java-to-kotlin" ;
+    skos:broader "Source code converter" ;
+    prov:wasDerivedFrom "../.agents/skills/kotlin/kotlin-agent-skills/kotlin-tooling-java-to-kotlin" ;
     oc:contentHash "759a0c552791ec0d6d0e095706bf2ea633a41a00f589faea16a7c3bb66e88906" ;
-    oc:differentia "converts Java source files to idiomatic Kotlin using a disciplined 4-step methodology with 5 invariants, supporting framework-aware conversion for Spring, Lombok, Hibernate, Jackson, Micronaut, Quarkus, Dagger/Hilt, RxJava, JUnit, Guice, Retrofit, and Mockito" ;
+    oc:differentia "that transforms Java files into idiomatic Kotlin via a 4-step methodology with invariant checks, framework-aware guidance, and git history preservation" ;
     oc:handlesFailure oc:CompilationError,
+        oc:InvariantViolation,
         oc:TestFailure ;
     oc:hasAllowedTool "Bash",
         "Edit",
@@ -19,99 +20,539 @@ oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_java_to_kotlin a oc:Declarati
         "Grep",
         "Read",
         "Write" ;
-    oc:hasArgumentHint "file-path or directory-path of .java files to convert" ;
+    oc:hasArgumentHint "Java file path(s) or package/directory to convert" ;
     oc:hasCategory "development" ;
     oc:hasDescription """Use when converting Java source files to idiomatic Kotlin, when user mentions "java to kotlin", "j2k", "convert java", "migrate java to kotlin", or when working with .java files that need to become .kt files. Handles framework-aware conversion for Spring, Lombok, Hibernate, Jackson, Micronaut, Quarkus, Dagger/Hilt, RxJava, JUnit, Guice, Retrofit, and Mockito.
 """ ;
     oc:hasName "kotlin-tooling-java-to-kotlin" ;
-    oc:impartsKnowledge oc:kn_024518aa,
-        oc:kn_22cf0eb5,
-        oc:kn_451ecd6b,
-        oc:kn_8bc8981b,
-        oc:kn_91e4c8d0,
-        oc:kn_9ba37aab,
-        oc:kn_a36d0ae5,
-        oc:kn_aa0e6c9a,
-        oc:kn_ac90491e,
-        oc:kn_df8cf1d6 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent """Convert Java source files to idiomatic Kotlin using a disciplined 4-step conversion
+methodology with 5 invariants checked at each step. Supports framework-aware conversion
+that handles annotation site targets, library idioms, and API preservation.""" ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "`@JvmStatic` / `@JvmField` / `@JvmOverloads` usage" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Kotlin keyword conflicts (`when`, `in`, `is`, `object`)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Platform types from Java interop" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 6 ;
+                                    oc:itemText "Wildcard generics → Kotlin variance" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "Checked exceptions and `@Throws`" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "SAM conversion ambiguity" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "See [KNOWN-ISSUES.md](references/KNOWN-ISSUES.md) for:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 8 ;
+                    oc:sectionTitle "Common Pitfalls" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "After conversion, verify using [checklist.md](assets/checklist.md):" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Confirm no behavioral changes" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Run existing tests" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Attempt to compile the converted file" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Check annotation site targets" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Step 4: Verify" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Flowchart ;
+                            oc:blockType "flowchart" ;
+                            oc:contentOrder 1 ;
+                            oc:flowchartSource """digraph j2k_workflow {
+  rankdir=TB;
+  "User specifies files" -> "Step 0: Scan & Detect";
+  "Step 0: Scan & Detect" -> "Load framework guides";
+  "Load framework guides" -> "Step 1: Convert";
+  "Step 1: Convert" -> "Step 2: Write .kt";
+  "Step 2: Write .kt" -> "Step 3: Git rename";
+  "Step 3: Git rename" -> "Step 4: Verify";
+  "Step 4: Verify" -> "Next file?" [label="pass"];
+  "Step 4: Verify" -> "Fix issues" [label="fail"];
+  "Fix issues" -> "Step 1: Convert";
+  "Next file?" -> "Step 0: Scan & Detect" [label="batch: yes"];
+  "Next file?" -> "Done" [label="no more files"];
+}
+""" ;
+                            oc:flowchartType "graphviz" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Workflow" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent """Write the converted Kotlin code to a `.kt` file with the same name as the original
+Java file, in the same directory.""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Step 2: Write Output" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent "Apply any loaded framework-specific guidance during step 4 (idiomatic transformations)." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Apply the conversion methodology from [CONVERSION-METHODOLOGY.md](references/CONVERSION-METHODOLOGY.md)." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent """Five invariants are checked after each step. If any invariant is violated, revert
+to the previous step and redo.""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "This is a 4-step chain-of-thought process:" ],
+                        _:ref_c426768117eed1b4 ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Step 1: Convert" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "When converting multiple files (a directory or package):" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "For large batches, consider converting in packages (bottom-up from leaf packages)." ],
+                        _:ref_9a824e5d8b79adbb ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 7 ;
+                    oc:sectionTitle "Batch Conversion" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "To preserve `git blame` history, use a two-phase approach:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent "If the project does not use Git, simply write the `.kt` file and delete the `.java` file." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """# Phase 1: Rename (creates rename tracking)
+git mv src/main/java/com/example/Foo.java src/main/kotlin/com/example/Foo.kt
+git commit -m "Rename Foo.java to Foo.kt"
+
+# Phase 2: Replace content (tracked as modification, not new file)
+# Write the converted Kotlin content to Foo.kt
+git commit -m "Convert Foo from Java to Kotlin"
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 89-97" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """git mv src/main/java/com/example/Foo.java src/main/java/com/example/Foo.kt
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 4 ;
+                            oc:sourceLocation "lines 102-104" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent """If the project keeps Java and Kotlin in the same source root (e.g., `src/main/java/`),
+rename in place:""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Step 3: Preserve Git History" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent """Before converting, scan the Java file's import statements to detect which frameworks
+are in use. Load ONLY the matching framework reference files to keep context focused.""" ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 2 ;
+                                    oc:textContent """If `javax.inject.*` is detected, check for Dagger/Hilt vs Guice by looking for other
+imports from those frameworks. If ambiguous, load both guides.""" ],
+                                [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 1 ;
+                                    oc:rowCount 12 ;
+                                    oc:tableCaption "### Framework Detection Table" ;
+                                    oc:tableMarkdown """| Import prefix | Framework guide |
+|---|---|
+| `org.springframework.*` | [SPRING.md](references/frameworks/SPRING.md) |
+| `lombok.*` | [LOMBOK.md](references/frameworks/LOMBOK.md) |
+| `javax.persistence.*`, `jakarta.persistence.*`, `org.hibernate.*` | [HIBERNATE.md](references/frameworks/HIBERNATE.md) |
+| `com.fasterxml.jackson.*` | [JACKSON.md](references/frameworks/JACKSON.md) |
+| `io.micronaut.*` | [MICRONAUT.md](references/frameworks/MICRONAUT.md) |
+| `io.quarkus.*`, `javax.enterprise.*`, `jakarta.enterprise.*` | [QUARKUS.md](references/frameworks/QUARKUS.md) |
+| `dagger.*`, `dagger.hilt.*` | [DAGGER-HILT.md](references/frameworks/DAGGER-HILT.md) |
+| `io.reactivex.*`, `rx.*` | [RXJAVA.md](references/frameworks/RXJAVA.md) |
+| `org.junit.*`, `org.testng.*` | [JUNIT.md](references/frameworks/JUNIT.md) |
+| `com.google.inject.*` | [GUICE.md](references/frameworks/GUICE.md) |
+| `retrofit2.*`, `okhttp3.*` | [RETROFIT.md](references/frameworks/RETROFIT.md) |
+| `org.mockito.*` | [MOCKITO.md](references/frameworks/MOCKITO.md) |
+""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Framework Detection Table" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Step 0: Scan & Detect Frameworks" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Java to Kotlin Conversion" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """name: kotlin-tooling-java-to-kotlin
+description: >
+  Use when converting Java source files to idiomatic Kotlin, when user mentions
+  "java to kotlin", "j2k", "convert java", "migrate java to kotlin", or when
+  working with .java files that need to become .kt files. Handles framework-aware
+  conversion for Spring, Lombok, Hibernate, Jackson, Micronaut, Quarkus, Dagger/Hilt,
+  RxJava, JUnit, Guice, Retrofit, and Mockito.
+license: Apache-2.0
+metadata:
+  author: JetBrains
+  version: "1.0.0"
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:hasWorkflow _:ref_9a824e5d8b79adbb,
+        [ a oc:Workflow ;
+            dcterms:description "Complete workflow for converting one .java file to idiomatic .kt with framework detection, invariant-checked conversion, git history preservation, and verification." ;
+            oc:hasStep _:ref_8ecba60a66cece83,
+                _:ref_c8d1963d241b784d,
+                _:ref_d7d9fade7cb7616c,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Run the post-conversion verification checklist: compile the file, run tests, check annotation site targets, confirm no behavioral changes." ;
+                    oc:expectedOutcome "File compiles, tests pass, no behavioral regressions" ;
+                    oc:stepDependsOn _:ref_8ecba60a66cece83 ;
+                    oc:stepId "verify" ],
+                _:ref_fb9829a0dc1078aa ;
+            oc:workflowId "j2k-single-file" ;
+            oc:workflowName "Convert a single Java file to Kotlin" ],
+        [ a oc:Workflow ;
+            dcterms:description "Convert a directory or package of Java files to Kotlin, processing files in dependency order with cross-reference handling." ;
+            oc:hasStep _:ref_50da22580d66ac36,
+                _:ref_670557d45a4077ac,
+                _:ref_80ce563ead90329e,
+                _:ref_93d1d9664e177334,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "Check if more files remain. If yes, go to convert-next. If no, report completion." ;
+                    oc:expectedOutcome "All files converted or batch halted on unrecoverable error" ;
+                    oc:stepDependsOn _:ref_80ce563ead90329e ;
+                    oc:stepId "repeat-or-done" ] ;
+            oc:workflowId "j2k-batch" ;
+            oc:workflowName "Batch convert multiple Java files to Kotlin" ],
+        _:ref_c426768117eed1b4 ;
+    oc:impartsKnowledge oc:kn_17e02520,
+        oc:kn_230de1c5,
+        oc:kn_2c1ece3b,
+        oc:kn_326a8d5d,
+        oc:kn_41fbcc31,
+        oc:kn_48ff9aa2,
+        oc:kn_4b417ef2,
+        oc:kn_53b74bcb,
+        oc:kn_56eb537e,
+        oc:kn_62409a97,
+        oc:kn_654bffbb,
+        oc:kn_87e921a0,
+        oc:kn_c046e6a4,
+        oc:kn_d3ac97f6,
+        oc:kn_da226bd4,
+        oc:kn_e3a97732 ;
     oc:isUserInvocable true ;
-    oc:nature "Tool" ;
-    oc:requiresState oc:FileExists ;
-    oc:resolvesIntent "batch convert Java package to Kotlin",
-        "convert Java to Kotlin",
-        "convert Java with framework annotations to Kotlin",
+    oc:nature "Work" ;
+    oc:requiresState oc:EnvironmentReady,
+        oc:FileExists ;
+    oc:resolvesIntent "convert Java to Kotlin",
+        "framework-aware Java-to-Kotlin conversion",
         "migrate Java files to idiomatic Kotlin",
         "translate Java source code to Kotlin" ;
     oc:yieldsState oc:FileConverted,
         oc:TestsPassing .
 
-oc:kn_024518aa a oc:Heuristic,
+oc:kn_17e02520 a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When converting multiple Java files or an entire package to Kotlin" ;
-    oc:directiveContent "When batch converting, sort files by dependency order and convert leaf dependencies first (files that don't import other files in the conversion set), then work upward. This prevents broken references during incremental conversion." ;
-    oc:hasRationale "Converting dependencies before dependents ensures that each converted file can compile against already-Kotlin code, reducing cascading compilation errors." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_22cf0eb5 a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "When converting files in a Git-tracked project" ;
-    oc:directiveContent "Preserve git blame history by using a two-phase commit strategy: first `git mv` to rename the .java file to .kt, commit; then replace the content with converted Kotlin code, commit again." ;
-    oc:hasRationale "A delete + create pattern destroys git blame history. The rename-then-modify pattern allows git to track the file across the rename, preserving line-level attribution." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_451ecd6b a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When converting Java classes annotated with @Entity, @Table, or using Hibernate/JPA imports" ;
-    oc:directiveContent "Never use Kotlin data classes for JPA/Hibernate entities. Data classes generate equals/hashCode based on all properties, which breaks Hibernate's identity semantics and proxy creation. Use regular open classes instead." ;
-    oc:hasRationale "Hibernate creates CGLIB proxies via subclassing and relies on identity-based equality. Data class equals/hashCode breaks lazy loading and session management." ;
+    oc:appliesToContext "When converting any annotated field, especially Jackson, JPA, and Spring annotations" ;
+    oc:directiveContent "When converting Java annotations that target fields, use Kotlin annotation site targets (@field:, @get:, @set:, @param:) to preserve the exact annotation target. When a Java annotation appears on both field and getter, apply both @field: and @get: site targets." ;
+    oc:hasRationale "Kotlin properties unify field+getter+setter, but annotations default to targeting the property (not the backing field), which breaks reflection-based frameworks." ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_8bc8981b a oc:KnowledgeNode,
-        oc:RecoveryTactic ;
-    oc:appliesToContext "When Java method names or fields collide with Kotlin reserved keywords" ;
-    oc:directiveContent "When a Kotlin keyword conflicts with a Java identifier (when, in, is, object, fun, val, var), backtick-escape the identifier in Kotlin. For internal APIs, prefer renaming to a non-keyword alternative." ;
-    oc:hasRationale "Keyword conflicts cause compilation errors. Backtick escaping preserves API compatibility while renaming is cleaner for non-public APIs." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_91e4c8d0 a oc:KnowledgeNode,
-        oc:PostFlightValidation ;
-    oc:appliesToContext "After converting each Java file (Step 4 verification)" ;
-    oc:directiveContent "After conversion, verify: (1) the .kt file compiles without errors, (2) all existing tests pass, (3) no new compiler warnings, (4) all annotations preserved with correct site targets, (5) no behavioral changes, (6) Javadoc converted to KDoc." ;
-    oc:hasRationale "Post-conversion verification catches semantic drift, dropped annotations, and broken framework integration before moving to the next file." ;
+oc:kn_230de1c5 a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "Always — this is a destructive file transformation" ;
+    oc:directiveContent "Conversion deletes the original .java file (after git mv or manual deletion) and creates a new .kt file. Other Java files referencing the converted class may need import updates." ;
+    oc:hasRationale "The agent must be aware that the original Java source is removed and downstream references may break during batch conversion." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_9ba37aab a oc:AntiPattern,
+oc:kn_2c1ece3b a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When converting methods or fields whose names clash with Kotlin keywords" ;
+    oc:directiveContent "Java identifiers that are Kotlin keywords (when, in, is, object, fun, val, var, typealias, as) cause compilation errors. Backtick-escape them. For internal APIs, prefer renaming to non-keyword alternatives." ;
+    oc:hasRationale "Kotlin's keyword set differs from Java's; unescaped keyword identifiers will fail to compile." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_326a8d5d a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When encountering Java types without nullability annotations in converted code" ;
-    oc:directiveContent "Never leave Java platform types (T!) in converted Kotlin code. Always add explicit type declarations with correct nullability (T or T?) based on analysis of the Java source, documentation, and call sites." ;
-    oc:hasRationale "Platform types bypass Kotlin's null-safety system, deferring null checks to runtime and negating one of the primary benefits of Kotlin migration." ;
+    oc:appliesToContext "When converting a directory or package of multiple Java files" ;
+    oc:directiveContent "For batch conversions, sort files by dependency order: convert leaf dependencies first (files that don't import other files in the conversion set), then work upward. Convert one file at a time through the full workflow." ;
+    oc:hasRationale "Converting dependencies before dependents prevents broken references and allows cross-file import updates to propagate cleanly." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_a36d0ae5 a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "At the start of every Java-to-Kotlin conversion (Step 0)" ;
-    oc:directiveContent "Before conversion, scan the Java file's import statements to detect which frameworks are in use. Load ONLY the matching framework reference files to keep context focused and avoid polluting the conversion with irrelevant rules." ;
-    oc:hasRationale "Framework-specific conversion rules (annotation targets, class openness, DI patterns) are critical for correctness but loading all guides at once wastes context and increases hallucination risk." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_aa0e6c9a a oc:Constraint,
+oc:kn_41fbcc31 a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When converting Java classes with framework annotations (Jackson, JPA, validation, DI qualifiers)" ;
-    oc:directiveContent "Annotation site targets must be explicitly specified when converting Java annotations that target fields: use @field: for field-targeted annotations, @get: for getter-targeted, @set: for setter-targeted, @param: for constructor parameter-targeted. When Java annotates both field and getter, apply both @field: and @get: in Kotlin." ;
-    oc:hasRationale "Kotlin properties have multiple annotation targets (field, getter, setter, param). Without explicit site targets, annotations may be applied to the wrong element, causing silent runtime failures in serialization, persistence, or dependency injection." ;
+    oc:appliesToContext "During Step 1 conversion (the 4-step chain-of-thought process)" ;
+    oc:directiveContent "After each of the 4 conversion steps, check 5 invariants: (1) no new side-effects, (2) all annotations and targets preserved exactly, (3) package declaration and all imports carried forward, (4) Javadoc converted to KDoc, (5) output is valid Kotlin. If any invariant is violated, revert to the previous step and redo." ;
+    oc:hasRationale "These invariants guarantee behavioral equivalence between the Java source and the Kotlin output across every intermediate transformation." ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_ac90491e a oc:Idempotency,
+oc:kn_48ff9aa2 a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When batch converting or retrying failed conversions" ;
-    oc:directiveContent "Re-running conversion on an already-converted .kt file should detect it and skip or offer to re-convert from the original .java source if still available." ;
-    oc:hasRationale "Avoids overwriting hand-tweaked Kotlin code or creating double-converted files with corrupted semantics." ;
+    oc:appliesToContext "When converting classes with javax.persistence.* or jakarta.persistence.* imports" ;
+    oc:directiveContent "Never use data classes for JPA/Hibernate entities. Data classes generate equals/hashCode based on all properties, which breaks Hibernate's identity semantics and proxy creation." ;
+    oc:hasRationale "Hibernate creates proxies via subclassing and uses identity-based equality. Data classes violate both requirements." ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_4b417ef2 a oc:KnowledgeNode,
+        oc:WorkflowStrategy ;
+    oc:appliesToContext "Step 3: after writing the converted .kt file" ;
+    oc:directiveContent "Use git mv in two phases: Phase 1 rename (.java to .kt with commit), Phase 2 replace content (write Kotlin code with commit). This preserves git blame history by tracking the rename separately from the content change." ;
+    oc:hasRationale "A simple delete + create loses git history. git mv establishes rename tracking, then content replacement is tracked as a modification." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_df8cf1d6 a oc:DesignPrinciple,
+oc:kn_53b74bcb a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "Full conversion workflow for each Java file" ;
+    oc:directiveContent "1. Scan imports → detect frameworks → load matching guides. 2. Faithful 1:1 translation (preserve exact semantics, open classes, Javadoc→KDoc). 3. Nullability/mutability audit (val vs var, nullable types). 4. Collection type conversion (Java mutable → Kotlin MutableList etc.). 5. Idiomatic transformations (properties, string templates, lambdas, framework guidance). 6. Write .kt file. 7. Git rename via git mv in two commits. 8. Verify compilation, tests, annotations, no behavioral changes." ;
+    oc:stepOrder 1 .
+
+oc:kn_56eb537e a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When converting any Java file to Kotlin" ;
-    oc:directiveContent "Always follow the 4-step conversion process: (1) faithful 1:1 translation preserving exact Java semantics, (2) nullability & mutability audit (val/var, nullable types), (3) collection type conversion (Java mutable → Kotlin types), (4) idiomatic transformations (properties, string templates, lambdas). After each step, check 5 invariants; if any is violated, revert and redo." ;
-    oc:hasRationale "The 4-step process prevents semantic drift by ensuring faithfulness before idiomatization. The 5 invariants guarantee behavioral equivalence at every stage." ;
+    oc:appliesToContext "During Step 1 faithful 1:1 translation" ;
+    oc:directiveContent "Java classes that are implicitly open MUST be converted as Kotlin classes that are explicitly `open`. Kotlin classes are final by default, but Java classes are open by default." ;
+    oc:hasRationale "Preserving the open/final semantics is essential for framework proxying (Spring, Hibernate) and subclassing correctness." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_62409a97 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Step 3: preserving git history during file rename" ;
+    oc:codeLanguage "bash" ;
+    oc:directiveContent """git mv src/main/java/com/example/Foo.java src/main/kotlin/com/example/Foo.kt
+git commit -m "Rename Foo.java to Foo.kt"
+# Write converted Kotlin content to Foo.kt
+git commit -m "Convert Foo from Java to Kotlin\"""" .
+
+oc:kn_654bffbb a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When converting code that calls unannotated Java APIs or uses Java types without nullability annotations" ;
+    oc:directiveContent "Java platform types (T!) from unannotated Java APIs bypass Kotlin's null-safety. Always add explicit type declarations with explicit nullability (T or T?) based on code analysis rather than relying on platform type inference." ;
+    oc:hasRationale "Platform types defer null checks to runtime, defeating Kotlin's compile-time null safety guarantees." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_87e921a0 a oc:KnowledgeNode,
+        oc:Prerequisite ;
+    oc:directiveContent "Kotlin compiler (kotlinc) must be available in the project. The project should have Kotlin support configured (build.gradle.kts or pom.xml with kotlin plugin)." .
+
+oc:kn_c046e6a4 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Step 0: before beginning conversion of each file" ;
+    oc:directiveContent "Scan Java file imports before conversion and load ONLY matching framework reference guides. This keeps context focused and avoids polluting the conversion with irrelevant framework rules." ;
+    oc:hasRationale "Loading all 12 framework guides wastes context and may introduce conflicting rules for unrelated frameworks." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_d3ac97f6 a oc:KnowledgeNode,
+        oc:RollbackProcedure ;
+    oc:appliesToContext "Step 4 verification failure" ;
+    oc:directiveContent "If verification fails (compilation error or test failure): 1. Identify which of the 5 invariants was violated. 2. Revert to the last passing conversion step. 3. Re-apply the transformation with the fix. 4. Re-verify." .
+
+oc:kn_da226bd4 a oc:KnowledgeNode,
+        oc:OutputFormat ;
+    oc:directiveContent """## Conversion Report
+- **Files converted**: {count} / {total}
+- **Current file**: {filename}
+- **Frameworks detected**: {frameworks}
+- **Invariants status**: {all_pass|violations}
+- **Compilation**: {pass|fail}
+- **Tests**: {pass|fail}
+- **Remaining**: {remaining_files}""" ;
+    oc:templateVariables "all_pass",
+        "count",
+        "fail",
+        "filename",
+        "frameworks",
+        "pass",
+        "remaining_files",
+        "total" .
+
+oc:kn_e3a97732 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting classes with lombok.* imports" ;
+    oc:directiveContent "Never keep Lombok annotations in converted Kotlin code. Remove ALL Lombok annotations and replace with idiomatic Kotlin equivalents (@Data → data class, @Getter/@Setter → val/var, @Builder → default params, @Slf4j → companion object logger)." ;
+    oc:hasRationale "Lombok has no place in Kotlin — the language provides native equivalents for all Lombok features." ;
     oc:severityLevel "CRITICAL" .
+
+_:ref_434bec7d08b350e0 a oc:WorkflowStep ;
+    dcterms:description "**Faithful 1:1 translation** — exact semantics preserved" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_6fcf27dc5a431f23 a oc:WorkflowStep ;
+    dcterms:description "**Convert one file at a time** — apply the full workflow (steps 0-4) for each" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_73372dc89756f242 a oc:WorkflowStep ;
+    dcterms:description """**Handle cross-references** — after converting a file, update imports in other Java
+files if needed (e.g., if a class moved packages)""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_5" ;
+    oc:stepOrder 5 .
+
+_:ref_75c91b90a86c34e7 a oc:WorkflowStep ;
+    dcterms:description "**Track progress** — report which files are done, which remain" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_a97d0d3d6d1a839d a oc:WorkflowStep ;
+    dcterms:description "**List all `.java` files** in the target scope" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_b0cfd0d49c6c24e7 a oc:WorkflowStep ;
+    dcterms:description "**Idiomatic transformations** — properties, string templates, lambdas" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_b4bcb9c82a651421 a oc:WorkflowStep ;
+    dcterms:description "**Nullability & mutability audit** — val/var, nullable types" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_c1cab0580d90a8fa a oc:WorkflowStep ;
+    dcterms:description "**Collection type conversion** — Java mutable → Kotlin types" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_f2c9f54e5b517ebe a oc:WorkflowStep ;
+    dcterms:description """**Sort by dependency order** — convert leaf dependencies first (files that don't
+import other files in the conversion set), then work up to files that depend on them""" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_50da22580d66ac36 a oc:WorkflowStep ;
+    dcterms:description "List all .java files in the target scope (directory or package)." ;
+    oc:expectedOutcome "Complete list of files to convert" ;
+    oc:stepId "list-files" .
+
+_:ref_670557d45a4077ac a oc:WorkflowStep ;
+    dcterms:description "Apply the full single-file workflow (scan, convert, write, git-rename, verify) to the next file in the sorted queue." ;
+    oc:expectedOutcome "One file successfully converted and verified" ;
+    oc:stepDependsOn _:ref_93d1d9664e177334 ;
+    oc:stepId "convert-next" .
+
+_:ref_80ce563ead90329e a oc:WorkflowStep ;
+    dcterms:description "After converting a file, update imports in other Java files if needed (e.g., class moved packages or changed name)." ;
+    oc:expectedOutcome "Cross-references updated in remaining Java files" ;
+    oc:stepDependsOn _:ref_670557d45a4077ac ;
+    oc:stepId "update-references" .
+
+_:ref_8ecba60a66cece83 a oc:WorkflowStep ;
+    dcterms:description "Preserve git blame history: git mv the .java to .kt (commit), then write Kotlin content (commit). For non-git projects, just write .kt and delete .java." ;
+    oc:expectedOutcome "Git history preserved via rename tracking" ;
+    oc:stepDependsOn _:ref_fb9829a0dc1078aa ;
+    oc:stepId "git-rename" .
+
+_:ref_93d1d9664e177334 a oc:WorkflowStep ;
+    dcterms:description "Sort files by dependency order — leaf dependencies first (files that don't import others in the set), then upward." ;
+    oc:expectedOutcome "Ordered conversion queue" ;
+    oc:stepDependsOn _:ref_50da22580d66ac36 ;
+    oc:stepId "sort-deps" .
+
+_:ref_9a824e5d8b79adbb a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 2 ;
+    oc:hasStep _:ref_6fcf27dc5a431f23,
+        _:ref_73372dc89756f242,
+        _:ref_75c91b90a86c34e7,
+        _:ref_a97d0d3d6d1a839d,
+        _:ref_f2c9f54e5b517ebe ;
+    oc:workflowId "procedure_2" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_c426768117eed1b4 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 3 ;
+    oc:hasStep _:ref_434bec7d08b350e0,
+        _:ref_b0cfd0d49c6c24e7,
+        _:ref_b4bcb9c82a651421,
+        _:ref_c1cab0580d90a8fa ;
+    oc:workflowId "procedure_3" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_c8d1963d241b784d a oc:WorkflowStep ;
+    dcterms:description "Scan the Java file's import statements to detect which frameworks are in use. Load ONLY matching framework reference files." ;
+    oc:expectedOutcome "Framework guides loaded, ready for conversion" ;
+    oc:stepId "scan-detect" .
+
+_:ref_d7d9fade7cb7616c a oc:WorkflowStep ;
+    dcterms:description "Apply the 4-step conversion methodology: (1) faithful 1:1 translation, (2) nullability/mutability audit, (3) collection type conversion, (4) idiomatic transformations with framework guidance. Check 5 invariants after each step; revert if any are violated." ;
+    oc:expectedOutcome "Idiomatic Kotlin code that passes all 5 invariants" ;
+    oc:stepDependsOn _:ref_c8d1963d241b784d ;
+    oc:stepId "convert" .
+
+_:ref_fb9829a0dc1078aa a oc:WorkflowStep ;
+    dcterms:description "Write the converted Kotlin code to a .kt file with the same base name in the same directory." ;
+    oc:expectedOutcome ".kt file written to disk" ;
+    oc:stepDependsOn _:ref_d7d9fade7cb7616c ;
+    oc:stepId "write-kt" .
 

@@ -10,48 +10,143 @@ oc:skill_vercel_labs_vercel_react_best_practices_async_dependencies a oc:Declara
     skos:broader "Async parallelization pattern" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "16ef469f877e30c6b8e1e1b4bc3e527312fa3c6318cb785a4eca186ea236131a" ;
-    oc:differentia "maximizes concurrency by resolving task dependencies automatically so each operation starts at the earliest possible moment" ;
+    oc:differentia "maximizes concurrency by resolving dependency-based task scheduling so independent operations run simultaneously" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
-    oc:handlesFailure oc:DependencyResolutionFailed ;
-    oc:hasArgumentHint "async operations with inter-task dependencies" ;
+    oc:handlesFailure oc:AsyncOperationTimeout,
+        oc:DependencyResolutionFailed ;
+    oc:hasArgumentHint "async operations with interdependencies" ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_963b94f6,
-        oc:kn_ae88324e,
-        oc:kn_f2669d25,
-        oc:kn_fb0c4b0c ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "**Correct (config and profile run in parallel):**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """const userPromise = fetchUser()
+const profilePromise = userPromise.then(user => fetchProfile(user.id))
+
+const [user, config, profile] = await Promise.all([
+  userPromise,
+  fetchConfig(),
+  profilePromise
+])
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 8 ;
+                    oc:sourceLocation "lines 40-49" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "For operations with partial dependencies, use `better-all` to maximize parallelism. It automatically starts each task at the earliest possible moment." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Incorrect (profile waits for config unnecessarily):**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """import { all } from 'better-all'
+
+const { user, config, profile } = await all({
+  async user() { return fetchUser() },
+  async config() { return fetchConfig() },
+  async profile() {
+    return fetchProfile((await this.$.user).id)
+  }
+})
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 5 ;
+                    oc:sourceLocation "lines 24-34" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 9 ;
+                    oc:textContent "Reference: [https://github.com/shuding/better-all](https://github.com/shuding/better-all)" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 6 ;
+                    oc:textContent "**Alternative without extra dependencies:**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """const [user, config] = await Promise.all([
+  fetchUser(),
+  fetchConfig()
+])
+const profile = await fetchProfile(user.id)
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-20" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 7 ;
+                    oc:textContent "We can also create all the promises first, and do `Promise.all()` at the end." ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Dependency-Based Parallelization" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Dependency-Based Parallelization
+impact: CRITICAL
+impactDescription: 2-10× improvement
+tags: async, parallelization, dependencies, better-all
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:impartsKnowledge oc:kn_09e6cce8,
+        oc:kn_11eb289f,
+        oc:kn_3b163f9d,
+        oc:kn_8a75150b,
+        oc:kn_b7c67f40 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
     oc:requiresState oc:EnvironmentReady ;
-    oc:resolvesIntent "eliminate unnecessary sequential awaits",
-        "optimize data fetching concurrency",
+    oc:resolvesIntent "eliminate unnecessary sequential waits in async code",
+        "optimize data fetching with partial dependencies",
         "parallelize async operations with dependencies" ;
-    oc:yieldsState oc:AsyncOperationsOptimized .
+    oc:yieldsState oc:AsyncOperationsParallelized .
 
-oc:kn_963b94f6 a oc:KnowledgeNode,
-        oc:PerformanceProfile ;
-    oc:appliesToContext "When evaluating whether to refactor async data fetching" ;
-    oc:directiveContent "Dependency-based parallelization yields 2-10× improvement over naive sequential+parallel patterns when tasks have partial dependencies." ;
-    oc:hasRationale "The performance gain comes from eliminating unnecessary serialization points where independent operations are blocked waiting for unrelated tasks." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_ae88324e a oc:AntiPattern,
+oc:kn_09e6cce8 a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When fetching multiple resources where some depend on results of others" ;
-    oc:directiveContent "Never use Promise.all() for operations where some tasks depend on others — it forces unnecessary sequential waiting when a dependency chain exists after the parallel barrier." ;
-    oc:hasRationale "Sequential awaits after Promise.all() block independent tasks that could have started earlier, losing 2-10× potential performance improvement." ;
+    oc:appliesToContext "When multiple async calls have partial dependencies (some depend on others, some don't)" ;
+    oc:directiveContent "Never use Promise.all for independent operations followed by a dependent await — this forces sequential waits where operations could overlap." ;
+    oc:hasRationale "Promise.all blocks all subsequent operations until all promises resolve, even when some results are already available for dependent chains to begin." ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_f2669d25 a oc:Heuristic,
+oc:kn_11eb289f a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When choosing between dependency-based parallelization approaches" ;
-    oc:directiveContent "Use `better-all` library for complex dependency graphs between async operations; use manual promise chaining with Promise.all() when avoiding extra dependencies." ;
-    oc:hasRationale "`better-all` provides a declarative API for expressing inter-task dependencies via `this.$.taskName`, while manual promise chaining is a zero-dependency alternative with equivalent semantics." ;
-    oc:severityLevel "MEDIUM" .
+    oc:appliesToContext "When using the better-all library for dependency-based parallelization" ;
+    oc:codeLanguage "typescript" ;
+    oc:directiveContent """import { all } from 'better-all'
+const { user, config, profile } = await all({
+  async user() { return fetchUser() },
+  async config() { return fetchConfig() },
+  async profile() {
+    return fetchProfile((await this.$.user).id)
+  }
+})""" .
 
-oc:kn_fb0c4b0c a oc:DesignPrinciple,
+oc:kn_3b163f9d a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When structuring async data fetching with partial dependencies" ;
-    oc:directiveContent "Create all promises upfront and chain dependencies via .then() before awaiting, so dependent tasks begin as soon as their prerequisite resolves rather than waiting for a global barrier." ;
-    oc:hasRationale "Starting each task at the earliest possible moment maximizes parallelism and minimizes total latency." ;
+    oc:appliesToContext "When dependency-based parallelization is needed without adding better-all as a dependency" ;
+    oc:codeLanguage "typescript" ;
+    oc:directiveContent """const userPromise = fetchUser()
+const profilePromise = userPromise.then(user => fetchProfile(user.id))
+const [user, config, profile] = await Promise.all([userPromise, fetchConfig(), profilePromise])""" .
+
+oc:kn_8a75150b a oc:KnowledgeNode,
+        oc:PerformanceProfile ;
+    oc:appliesToContext "When replacing sequential await chains or naive Promise.all with dependency-aware scheduling" ;
+    oc:directiveContent "Dependency-based parallelization yields 2-10× improvement over naive sequential or Promise.all patterns when operations have partial dependencies." ;
+    oc:hasRationale "Independent operations overlap instead of waiting; dependent chains begin as soon as their specific prerequisite resolves rather than after all parallel operations complete." .
+
+oc:kn_b7c67f40 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When optimizing async data fetching with mixed dependency graphs" ;
+    oc:directiveContent "Create all promises upfront and chain dependencies via .then() before awaiting the final Promise.all — this starts independent work immediately and chains dependent work as soon as prerequisites resolve." ;
+    oc:hasRationale "Starting promises at creation time (not await time) maximizes concurrency; Promise.all at the end collects all results without blocking intermediate chains." ;
     oc:severityLevel "HIGH" .
 

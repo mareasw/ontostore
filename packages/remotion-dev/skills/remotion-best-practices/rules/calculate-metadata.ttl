@@ -7,84 +7,309 @@
 oc:skill_remotion_dev_skills_remotion_best_practices_calculate_metadata a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "calculate-metadata" ;
-    skos:broader "Remotion composition configuration function" ;
+    skos:broader "Remotion configuration pattern" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/remotion-dev/skills/remotion-best-practices" ;
     oc:contentHash "fc7c3f411a38020686e1295078fdf0ac9e1b889296192b5c7d4a4871edb2b662" ;
-    oc:dependsOnSkill oc:skill_remotion_best_practices ;
-    oc:differentia "dynamically sets duration, dimensions, props, and output settings before rendering by resolving metadata from external resources like videos and APIs" ;
+    oc:differentia "dynamically computes composition metadata (duration, dimensions, props, output settings) before rendering begins" ;
     oc:extends oc:skill_remotion_dev_skills_remotion_best_practices ;
-    oc:handlesFailure oc:InvalidInput,
-        oc:NetworkTimeout ;
-    oc:hasArgumentHint "CalculateMetadataFunction<Props> with props containing videoSrc or other resource references" ;
+    oc:handlesFailure oc:FetchError,
+        oc:InvalidMetadata,
+        oc:VideoDurationUnavailable ;
+    oc:hasArgumentHint "Composition props (videoSrc, dataUrl, etc.)" ;
     oc:hasCategory "development" ;
-    oc:hasRequirement oc:req_03938ee0,
-        oc:req_5faf15eb,
-        oc:req_b79743b9,
-        oc:req_e529d240 ;
-    oc:impartsKnowledge oc:kn_3e3282a4,
-        oc:kn_613728ad,
-        oc:kn_a780d54b,
-        oc:kn_c2766754,
-        oc:kn_dce9c075 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Use `calculateMetadata` on a `<Composition>` to dynamically set duration, dimensions, and transform props before rendering." ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """<Composition
+  id="MyComp"
+  component={MyComponent}
+  durationInFrames={300}
+  fps={30}
+  width={1920}
+  height={1080}
+  defaultProps={{ videoSrc: "https://remotion.media/video.mp4" }}
+  calculateMetadata={calculateMetadata}
+/>
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 2 ;
+                    oc:sourceLocation "lines 12-23" ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Fetch data or transform props before rendering:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """const calculateMetadata: CalculateMetadataFunction<Props> = async ({
+  props,
+  abortSignal,
+}) => {
+  const response = await fetch(props.dataUrl, { signal: abortSignal });
+  const data = await response.json();
+
+  return {
+    props: {
+      ...props,
+      fetchedData: data,
+    },
+  };
+};
+""" ;
+                            oc:codeLanguage "tsx" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 105-120" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "The `abortSignal` cancels stale requests when props change in the Studio." ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Transforming props" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Use the [`getVideoDuration`](./get-video-duration.md) and [`getVideoDimensions`](./get-video-dimensions.md) skills to get the video duration and dimensions:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """import { CalculateMetadataFunction } from "remotion";
+import { getVideoDuration } from "./get-video-duration";
+
+const calculateMetadata: CalculateMetadataFunction<Props> = async ({
+  props,
+}) => {
+  const durationInSeconds = await getVideoDuration(props.videoSrc);
+
+  return {
+    durationInFrames: Math.ceil(durationInSeconds * 30),
+  };
+};
+""" ;
+                            oc:codeLanguage "tsx" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 29-42" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Setting duration based on a video" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """import { CalculateMetadataFunction } from "remotion";
+import { getVideoDuration } from "./get-video-duration";
+import { getVideoDimensions } from "./get-video-dimensions";
+
+const calculateMetadata: CalculateMetadataFunction<Props> = async ({
+  props,
+}) => {
+  const dimensions = await getVideoDimensions(props.videoSrc);
+
+  return {
+    width: dimensions.width,
+    height: dimensions.height,
+  };
+};
+""" ;
+                            oc:codeLanguage "tsx" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 48-63" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Use the [`getVideoDimensions`](./get-video-dimensions.md) skill to get the video dimensions:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Matching dimensions of a video" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """const calculateMetadata: CalculateMetadataFunction<Props> = async ({
+  props,
+}) => {
+  const metadataPromises = props.videos.map((video) =>
+    getVideoDuration(video.src),
+  );
+  const allMetadata = await Promise.all(metadataPromises);
+
+  const totalDuration = allMetadata.reduce(
+    (sum, durationInSeconds) => sum + durationInSeconds,
+    0,
+  );
+
+  return {
+    durationInFrames: Math.ceil(totalDuration * 30),
+  };
+};
+""" ;
+                            oc:codeLanguage "tsx" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 67-85" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Setting duration based on multiple videos" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """const calculateMetadata: CalculateMetadataFunction<Props> = async ({
+  props,
+}) => {
+  return {
+    defaultOutName: `video-${props.id}.mp4`,
+  };
+};
+""" ;
+                            oc:codeLanguage "tsx" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 91-99" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Set the default output filename based on props:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Setting a default outName" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "All fields are optional. Returned values override the `<Composition>` props:" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "`durationInFrames`: Number of frames" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 6 ;
+                                    oc:itemText "`defaultOutName`: Default output filename" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 7 ;
+                                    oc:itemText "`defaultCodec`: Default codec for rendering" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "`width`: Composition width in pixels" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "`fps`: Frames per second" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "`props`: Transformed props passed to the component" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "`height`: Composition height in pixels" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Return value" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Using calculateMetadata" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """name: calculate-metadata
+description: Dynamically set composition duration, dimensions, and props
+metadata:
+  tags: calculateMetadata, duration, dimensions, props, dynamic
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:impartsKnowledge oc:kn_18b7b281,
+        oc:kn_30449f7a,
+        oc:kn_4af16b93,
+        oc:kn_938d0731,
+        oc:kn_9ceaff2a,
+        oc:kn_abb21c24,
+        oc:kn_e6833170 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
     oc:requiresState oc:CompositionDefined,
-        oc:NetworkAvailable ;
-    oc:resolvesIntent "calculate metadata for multiple video compositions",
-        "match composition dimensions to video dimensions",
+        oc:VideoSourceAvailable ;
+    oc:resolvesIntent "fetch data before rendering",
+        "match composition dimensions to source video",
         "set composition duration dynamically based on video length",
-        "set default output filename based on composition props",
-        "transform props by fetching external data before rendering" ;
-    oc:yieldsState oc:CompositionMetadataResolved .
+        "set default output filename from props",
+        "transform props before rendering" ;
+    oc:yieldsState oc:CompositionMetadataCalculated,
+        oc:CompositionPropsTransformed .
 
-oc:kn_3e3282a4 a oc:AntiPattern,
+oc:kn_18b7b281 a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When composition duration must match video playback length" ;
-    oc:directiveContent "Do not hardcode durationInFrames on the <Composition> when it should depend on a video's actual length. Use calculateMetadata instead." ;
-    oc:hasRationale "Hardcoded durations cause either truncated or padded output that mismatches the actual media content." ;
-    oc:severityLevel "HIGH" .
+    oc:appliesToContext "Defining a calculateMetadata callback for a Composition" ;
+    oc:codeLanguage "tsx" ;
+    oc:directiveContent """const calculateMetadata: CalculateMetadataFunction<Props> = async ({ props, abortSignal }) => {
+  // compute metadata from props
+  return { durationInFrames, width, height, fps, props, defaultOutName, defaultCodec };
+};""" ;
+    oc:hasRationale "Type-safe async callback pattern is the standard way to dynamically set composition metadata in Remotion" .
 
-oc:kn_613728ad a oc:Heuristic,
+oc:kn_30449f7a a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When a composition uses multiple sequential video sources" ;
-    oc:directiveContent "Calculate total duration from multiple videos by mapping getVideoDuration over each, using Promise.all, then reducing to a sum before converting to frames." ;
-    oc:hasRationale "Sequential video compositions require summing all durations rather than using a single video's length, which is a common source of incorrect frame counts." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_a780d54b a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When fetching external data inside calculateMetadata" ;
-    oc:directiveContent "Always pass abortSignal to fetch calls inside calculateMetadata so stale requests are cancelled when props change in Studio." ;
-    oc:hasRationale "Without abortSignal, changing props in Studio triggers overlapping requests that waste resources and may resolve with stale data." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_c2766754 a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When implementing calculateMetadata functions" ;
-    oc:directiveContent "All fields in the calculateMetadata return value are optional. Returned values override the corresponding <Composition> props." ;
-    oc:hasRationale "Developers must understand that calculateMetadata is a partial override — unreturned fields retain their Composition-level defaults." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_dce9c075 a oc:KnowledgeNode,
-        oc:SideEffect ;
-    oc:appliesToContext "Always — calculateMetadata is a pre-render phase with I/O side effects" ;
-    oc:directiveContent "calculateMetadata runs asynchronously before rendering begins and can trigger network requests to external APIs or video file reads." ;
-    oc:hasRationale "Agents must account for latency and potential failure of external calls when designing calculateMetadata logic." ;
+    oc:appliesToContext "When converting video duration to frames" ;
+    oc:directiveContent "Use Math.ceil(durationInSeconds * fps) to convert seconds to frames, ensuring the composition is never shorter than the source video." ;
+    oc:hasRationale "Floor or truncation could cut off the last frame; ceiling ensures full coverage" ;
     oc:severityLevel "LOW" .
 
-oc:req_03938ee0 a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "Remotion Composition API" .
+oc:kn_4af16b93 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Setting duration based on multiple videos in sequence" ;
+    oc:codeLanguage "tsx" ;
+    oc:directiveContent """const metadataPromises = props.videos.map((video) => getVideoDuration(video.src));
+const allMetadata = await Promise.all(metadataPromises);
+const totalDuration = allMetadata.reduce((sum, dur) => sum + dur, 0);
+return { durationInFrames: Math.ceil(totalDuration * fps) };""" ;
+    oc:hasRationale "Promise.all enables parallel fetching of multiple video durations for efficiency, and reduce sums them for sequential playback" .
 
-oc:req_5faf15eb a oc:RequirementAPI ;
-    oc:isOptional false ;
-    oc:requirementValue "remotion" .
+oc:kn_938d0731 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "Always when using calculateMetadata" ;
+    oc:directiveContent "1. Define calculateMetadata function with CalculateMetadataFunction<Props> type 2. Destructure { props, abortSignal } from callback argument 3. Fetch/compute needed metadata (video duration, dimensions, API data) 4. Return object with any combination: durationInFrames, width, height, fps, props, defaultOutName, defaultCodec 5. Attach to <Composition calculateMetadata={fn} />" ;
+    oc:hasRationale "Structured approach ensures all metadata overrides are correctly applied before rendering begins" ;
+    oc:stepOrder 1 .
 
-oc:req_b79743b9 a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "getVideoDimensions utility" .
+oc:kn_9ceaff2a a oc:KnowledgeNode,
+        oc:OutputFormat ;
+    oc:appliesToContext "Return value of calculateMetadata callback" ;
+    oc:directiveContent """{
+  durationInFrames?: number;
+  width?: number;
+  height?: number;
+  fps?: number;
+  props?: Props;
+  defaultOutName?: string;
+  defaultCodec?: string;
+}""" ;
+    oc:templateVariables "defaultCodec",
+        "defaultOutName",
+        "durationInFrames",
+        "fps",
+        "height",
+        "props",
+        "width" .
 
-oc:req_e529d240 a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "getVideoDuration utility" .
+oc:kn_abb21c24 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When defining calculateMetadata return type" ;
+    oc:directiveContent "All fields in the calculateMetadata return value are optional. Returned values override the static props on the <Composition> element." ;
+    oc:hasRationale "Understanding the override semantics prevents confusion about which values take priority" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_e6833170 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When fetching external data inside calculateMetadata" ;
+    oc:directiveContent "Use abortSignal in fetch calls within calculateMetadata so stale requests are cancelled when props change in the Studio." ;
+    oc:hasRationale "Without abortSignal, rapid prop changes in Studio can cause race conditions and unnecessary network traffic" ;
+    oc:severityLevel "MEDIUM" .
 

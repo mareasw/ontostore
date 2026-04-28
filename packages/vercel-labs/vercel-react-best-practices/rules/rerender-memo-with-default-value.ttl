@@ -10,55 +10,113 @@ oc:skill_vercel_labs_vercel_react_best_practices_rerender_memo_with_default_valu
     skos:broader "React performance optimization pattern" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "81c47476564ad8a79fc68fc442734255ca7d6829424359464503fda0a9f9a0dd" ;
-    oc:differentia "that fixes broken memoization caused by non-primitive default parameter values in memoized components by extracting them to module-level constants" ;
+    oc:differentia "extracts non-primitive default parameter values from memoized components into stable constants to preserve memoization" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
-    oc:handlesFailure oc:PerformanceDegradationDetected ;
-    oc:hasArgumentHint "React component with memo and optional non-primitive props" ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_0982e5be,
-        oc:kn_6e187462,
-        oc:kn_70cb3e43,
-        oc:kn_ac2407ff,
-        oc:kn_c03fc7d6 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 3 ;
+                    oc:textContent "**Incorrect (`onClick` has different values on every rerender):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "When memoized component has a default value for some non-primitive optional parameter, such as an array, function, or object, calling the component without that parameter results in broken memoization. This is because new value instances are created on every rerender, and they do not pass strict equality comparison in `memo()`." ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """const NOOP = () => {};
+
+const UserAvatar = memo(function UserAvatar({ onClick = NOOP }: { onClick?: () => void }) {
+  // ...
+})
+
+// Used without optional onClick
+<UserAvatar />
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 6 ;
+                    oc:sourceLocation "lines 29-38" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """const UserAvatar = memo(function UserAvatar({ onClick = () => {} }: { onClick?: () => void }) {
+  // ...
+})
+
+// Used without optional onClick
+<UserAvatar />
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 4 ;
+                    oc:sourceLocation "lines 18-25" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "To address this issue, extract the default value into a constant." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 5 ;
+                    oc:textContent "**Correct (stable default value):**" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Extract Default Non-primitive Parameter Value from Memoized Component to Constant" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """
+title: Extract Default Non-primitive Parameter Value from Memoized Component to Constant
+impact: MEDIUM
+impactDescription: restores memoization by using a constant for default value
+tags: rerender, memo, optimization
+
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:impartsKnowledge oc:kn_1c0e195c,
+        oc:kn_79576f8b,
+        oc:kn_7c9f5e2d,
+        oc:kn_ac35ab47,
+        oc:kn_efff380e ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
     oc:resolvesIntent "fix broken memoization in React components",
-        "optimize React component rerender performance",
-        "prevent unnecessary rerenders from default parameter values" ;
-    oc:yieldsState oc:MemoizationFixed .
+        "optimize React component rerenders",
+        "prevent unnecessary rerenders caused by default parameter values" .
 
-oc:kn_0982e5be a oc:KnowledgeNode,
-        oc:PerformanceProfile ;
-    oc:appliesToContext "When auditing React component rendering performance" ;
-    oc:directiveContent "Non-primitive defaults in memoized components silently negate the memoization benefit, causing child components to rerender on every parent rerender even when no props were explicitly passed." ;
-    oc:hasRationale "This is a subtle but common source of performance degradation because the component appears memoized but effectively isn't — the memo() wrapper always detects 'changed' props due to new default value instances." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_6e187462 a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "When adding React.memo() to a component or reviewing memoized component definitions" ;
-    oc:directiveContent "Before marking a component as memoized, verify that all optional non-primitive props have their default values defined as module-level constants, not inline literals." ;
-    oc:hasRationale "Proactive verification prevents the silent memoization breakage that would otherwise go undetected until performance profiling reveals excessive rerenders." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_70cb3e43 a oc:AntiPattern,
+oc:kn_1c0e195c a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When defining default values for optional props in React.memo components" ;
-    oc:directiveContent "Never use inline non-primitive default values (arrays, functions, objects) in memoized component parameters, as they create new instances on every rerender and break memo() strict equality checks." ;
-    oc:hasRationale "New object/function/array instances are created on each render cycle, failing the strict equality comparison inside React.memo(), causing unnecessary rerenders even when the parent re-renders without prop changes." ;
+    oc:appliesToContext "When reviewing or auditing React components wrapped in React.memo()" ;
+    oc:directiveContent "Any time you see a memoized component with an optional non-primitive parameter that has an inline default value, suspect broken memoization." ;
+    oc:hasRationale "This is a common and subtle source of memoization failure that is easy to overlook during code review." .
+
+oc:kn_79576f8b a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When evaluating whether a default parameter value needs extraction" ;
+    oc:directiveContent "This pattern only applies to non-primitive types (arrays, functions, objects). Primitive defaults (strings, numbers, booleans) do not need extraction since they compare by value." ;
+    oc:hasRationale "Primitives pass strict equality by value, so inline primitive defaults do not break memoization." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_7c9f5e2d a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When defining default parameter values in React.memo() wrapped components" ;
+    oc:directiveContent "Never use inline non-primitive default values (arrays, functions, objects) in memoized component parameters, as they create new instances on every rerender and break memoization." ;
+    oc:hasRationale "Each rerender creates a new instance of the default value, which fails strict equality comparison (===) inside memo(), causing unnecessary rerenders despite memoization." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_ac2407ff a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When writing or reviewing React.memo component signatures" ;
-    oc:directiveContent "Any optional prop typed as a function, array, or object in a memoized component should use a constant default rather than an inline literal." ;
-    oc:hasRationale "Primitive types (string, number, boolean, null, undefined) pass strict equality by value, so inline defaults are safe for primitives. Only non-primitives need constant extraction." ;
-    oc:severityLevel "MEDIUM" .
+oc:kn_ac35ab47 a oc:KnowledgeNode,
+        oc:SuccessIndicator ;
+    oc:appliesToContext "When verifying the fix works correctly" ;
+    oc:directiveContent "After extracting the default to a constant, the memoized component will skip rerenders when its parent rerenders and no props have actually changed." ;
+    oc:hasRationale "The stable reference ensures memo's shallow comparison returns true, preventing the unnecessary rerender." .
 
-oc:kn_c03fc7d6 a oc:DesignPrinciple,
+oc:kn_efff380e a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When a memoized component has optional props with non-primitive defaults (arrays, objects, functions)" ;
-    oc:directiveContent "Extract non-primitive default parameter values to module-level constants outside the component definition to ensure referential stability across renders." ;
-    oc:hasRationale "Module-level constants maintain the same reference across all render cycles, allowing memo() to correctly determine that props have not changed and skip unnecessary rerenders." ;
-    oc:severityLevel "HIGH" .
+    oc:appliesToContext "When fixing broken memoization caused by non-primitive default parameter values" ;
+    oc:codeLanguage "tsx" ;
+    oc:directiveContent """const NOOP = () => {};
+const Component = memo(function Component({ onClick = NOOP }: { onClick?: () => void }) {
+  // ...
+})""" ;
+    oc:hasRationale "Extracting the default value to a module-level constant ensures the same reference is reused across renders, passing memo's strict equality check." .
 

@@ -7,101 +7,641 @@
 oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_java_to_kotlin_known_issues a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "known-issues" ;
-    skos:broader "Troubleshooting catalog" ;
+    skos:broader "Reference guide" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/kotlin/kotlin-agent-skills/kotlin-tooling-java-to-kotlin" ;
     oc:contentHash "581cce6cb0b8c353c2f573435c9b2ba36a0f3768aee755680c652dd4067e5e34" ;
-    oc:differentia "documents Java-to-Kotlin conversion pitfalls with concrete solutions and idiomatic mappings" ;
+    oc:differentia "cataloging Java-to-Kotlin conversion pitfalls with idiomatic solutions" ;
     oc:extends oc:skill_kotlin_kotlin_agent_skills_kotlin_tooling_java_to_kotlin ;
-    oc:handlesFailure oc:KeywordConflictDetected,
-        oc:PlatformTypeDetected,
-        oc:SAMAmbiguityDetected ;
     oc:hasCategory "development" ;
-    oc:hasRequirement oc:req_22067045,
-        oc:req_38fba323,
-        oc:req_d655cb0b ;
-    oc:impartsKnowledge oc:kn_031134f6,
-        oc:kn_466f4037,
-        oc:kn_517527ad,
-        oc:kn_57176522,
-        oc:kn_7ffae8c1,
-        oc:kn_b9446212,
-        oc:kn_f07a5c66,
-        oc:kn_ffb58e6b ;
-    oc:isUserInvocable false ;
-    oc:nature "Reference" ;
-    oc:requiresState oc:JavaSourceConverted ;
-    oc:resolvesIntent "avoid common pitfalls during Java-to-Kotlin migration",
-        "find idiomatic Kotlin equivalents for Java constructs",
-        "handle Kotlin keyword conflicts in converted code",
-        "resolve Java-to-Kotlin compilation errors after conversion" ;
-    oc:yieldsState oc:IdiomaticKotlinVerified,
-        oc:KotlinCompilationIssuesResolved .
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "A reference of common issues encountered during Java-to-Kotlin conversion, with solutions." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// Kotlin
+BufferedReader(FileReader(path)).use { reader ->
+    val line = reader.readLine()
+    process(line)
+}
+""" ;
+                            oc:codeLanguage "kotlin" ;
+                            oc:contentOrder 3 ;
+                            oc:sourceLocation "lines 350-356" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "The `.use {}` function works on any `Closeable` or `AutoCloseable` instance and guarantees the resource is closed even if an exception is thrown." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// Java
+try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
+    String line = reader.readLine();
+    process(line);
+}
+""" ;
+                            oc:codeLanguage "java" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 342-348" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Java's try-with-resources maps to Kotlin's `.use {}` extension function:" ] ;
+                    oc:sectionLevel 3 ;
+                    oc:sectionOrder 14 ;
+                    oc:sectionTitle "try-with-resources" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Java wildcard types map to Kotlin's variance annotations:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent "For raw types, analyze the code to determine the most specific type parameter rather than defaulting to `Any?`." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// Java
+public void process(List<? extends Number> numbers) { ... }
+public void addAll(List<? super Integer> target) { ... }
+public void legacy(List items) { ... }  // raw type
+""" ;
+                            oc:codeLanguage "java" ;
+                            oc:contentOrder 3 ;
+                            oc:sourceLocation "lines 149-154" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// Kotlin
+fun process(numbers: List<out Number>) { ... }
+fun addAll(target: MutableList<in Int>) { ... }
+fun legacy(items: List<Any?>) { ... }  // explicit type parameter
+""" ;
+                            oc:codeLanguage "kotlin" ;
+                            oc:contentOrder 4 ;
+                            oc:sourceLocation "lines 156-161" ],
+                        [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 2 ;
+                            oc:rowCount 3 ;
+                            oc:tableCaption "Java wildcard types map to Kotlin's variance annotations" ;
+                            oc:tableMarkdown """| Java | Kotlin | Description |
+|------|--------|-------------|
+| `? extends T` | `out T` | Covariance (producer) |
+| `? super T` | `in T` | Contravariance (consumer) |
+| Raw type `List` | `List<Any?>` | Add explicit type parameter |
+""" ] ;
+                    oc:sectionLevel 3 ;
+                    oc:sectionOrder 7 ;
+                    oc:sectionTitle "Wildcard Generics" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Solution:** Backtick-escape them in Kotlin:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Java identifiers that are reserved keywords in Kotlin will cause compilation errors after conversion." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// Java
+public void when(String event) { ... }
+public boolean in(List<String> items) { ... }
+""" ;
+                            oc:codeLanguage "java" ;
+                            oc:contentOrder 4 ;
+                            oc:sourceLocation "lines 13-17" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// Kotlin — backtick-escaped
+fun `when`(event: String) { ... }
+fun `in`(items: List<String>): Boolean { ... }
+""" ;
+                            oc:codeLanguage "kotlin" ;
+                            oc:contentOrder 5 ;
+                            oc:sourceLocation "lines 19-23" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 6 ;
+                            oc:textContent "When the API is internal (not exposed to other modules), prefer renaming the identifier to a non-keyword alternative instead of using backticks. For example, rename `when` to `onEvent` or `in` to `contains`." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Affected keywords:** `when`, `in`, `is`, `object`, `fun`, `val`, `var`, `typealias`, `as`" ] ;
+                    oc:sectionLevel 3 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Kotlin Keyword Conflicts" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "Add `@Throws` to every Kotlin function that throws checked exceptions and is called from Java code." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Kotlin does not have checked exceptions. When Kotlin code is called from Java, the Java compiler will not know about thrown exceptions unless annotated with `@Throws`:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// Without @Throws, Java callers cannot catch IOException in a catch block
+// (the Java compiler will say "exception is never thrown in the corresponding try block")
 
-oc:kn_031134f6 a oc:KnowledgeNode,
-        oc:RecoveryTactic ;
-    oc:appliesToContext "When converting Java methods with generic wildcard or raw-type parameters" ;
-    oc:directiveContent "Map Java wildcards to Kotlin variance: ? extends T becomes out T (covariance/producer), ? super T becomes in T (contravariance/consumer). For raw types, analyze code to determine the most specific type parameter rather than defaulting to Any?." ;
-    oc:hasRationale "Incorrect variance mapping leads to type mismatch errors or loss of type safety; raw types defaulting to Any? discard valuable type information." ;
+@Throws(IOException::class)
+fun readFile(path: String): String {
+    return File(path).readText()
+}
+""" ;
+                            oc:codeLanguage "kotlin" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 127-135" ] ;
+                    oc:sectionLevel 3 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Checked Exceptions" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// Kotlin
+view.addListener(object : ViewListener {
+    override fun onOpen() { ... }
+    override fun onClose() { ... }
+})
+""" ;
+                            oc:codeLanguage "kotlin" ;
+                            oc:contentOrder 6 ;
+                            oc:sourceLocation "lines 279-285" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// Java
+view.addListener(new ViewListener() {
+    @Override
+    public void onOpen() { ... }
+    @Override
+    public void onClose() { ... }
+});
+""" ;
+                            oc:codeLanguage "java" ;
+                            oc:contentOrder 5 ;
+                            oc:sourceLocation "lines 269-277" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "**Single Abstract Method (SAM) interfaces** — Convert to lambda syntax:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// Java
+executor.submit(new Runnable() {
+    @Override
+    public void run() {
+        doWork();
+    }
+});
+""" ;
+                            oc:codeLanguage "java" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 252-260" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "**Multiple methods or abstract classes** — Use `object` expression:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// Kotlin
+executor.submit(Runnable { doWork() })
+""" ;
+                            oc:codeLanguage "kotlin" ;
+                            oc:contentOrder 3 ;
+                            oc:sourceLocation "lines 262-265" ] ;
+                    oc:sectionLevel 3 ;
+                    oc:sectionOrder 10 ;
+                    oc:sectionTitle "Anonymous Inner Classes" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Kotlin has no ternary operator. Use `if`/`else` as an expression:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// Java
+String label = (count > 0) ? "Items: " + count : "Empty";
+""" ;
+                            oc:codeLanguage "java" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 309-312" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// Kotlin
+val label = if (count > 0) "Items: $count" else "Empty"
+""" ;
+                            oc:codeLanguage "kotlin" ;
+                            oc:contentOrder 3 ;
+                            oc:sourceLocation "lines 314-317" ] ;
+                    oc:sectionLevel 3 ;
+                    oc:sectionOrder 12 ;
+                    oc:sectionTitle "Ternary Operator" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """class HttpStatus {
+    companion object {
+        const val OK = 200                        // primitive — const val
+        const val NOT_FOUND_MESSAGE = "Not Found" // String — const val
+        val DEFAULT_HEADERS = mapOf("Accept" to "application/json") // object — val
+    }
+}
+""" ;
+                            oc:codeLanguage "kotlin" ;
+                            oc:contentOrder 6 ;
+                            oc:sourceLocation "lines 192-200" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Java's `static` keyword has no direct equivalent in Kotlin. Use the following mappings:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Static methods** — Use companion object functions, or top-level functions if they don't need class state:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 7 ;
+                            oc:textContent "**Static initializers** — Use companion object `init {}` block or top-level code:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// Java
+public class StringUtils {
+    public static String capitalize(String s) { ... }
+}
+""" ;
+                            oc:codeLanguage "java" ;
+                            oc:contentOrder 3 ;
+                            oc:sourceLocation "lines 171-176" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """class Registry {
+    companion object {
+        private val handlers = mutableMapOf<String, Handler>()
+        init {
+            handlers["default"] = DefaultHandler()
+        }
+    }
+}
+""" ;
+                            oc:codeLanguage "kotlin" ;
+                            oc:contentOrder 8 ;
+                            oc:sourceLocation "lines 204-213" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// Kotlin — top-level function (preferred when no class state needed)
+fun capitalize(s: String): String { ... }
+
+// Kotlin — companion object (when logically tied to the class)
+class StringUtils {
+    companion object {
+        fun capitalize(s: String): String { ... }
+    }
+}
+""" ;
+                            oc:codeLanguage "kotlin" ;
+                            oc:contentOrder 4 ;
+                            oc:sourceLocation "lines 178-188" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent "**Static constants** — Use `const val` for compile-time constants (primitives and String), `val` for object constants:" ] ;
+                    oc:sectionLevel 3 ;
+                    oc:sectionOrder 8 ;
+                    oc:sectionTitle "Static Members" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """@JvmOverloads
+fun connect(host: String, port: Int = 443, secure: Boolean = true) { ... }
+""" ;
+                            oc:codeLanguage "kotlin" ;
+                            oc:contentOrder 9 ;
+                            oc:sourceLocation "lines 111-114" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "When converted Kotlin code is still called from Java, use JVM interop annotations to maintain a clean Java API:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// Java callers can use: Constants.DEFAULT_TIMEOUT
+// Without @JvmField they would need: Constants.Companion.getDEFAULT_TIMEOUT()
+""" ;
+                            oc:codeLanguage "java" ;
+                            oc:contentOrder 7 ;
+                            oc:sourceLocation "lines 104-107" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent "**`@JvmField`** — Exposes a property as a direct field rather than through getter/setter:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 8 ;
+                            oc:textContent "**`@JvmOverloads`** — Generates Java overloads for functions with default parameters:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """class Config {
+    companion object {
+        @JvmStatic
+        fun getInstance(): Config = ...
+    }
+}
+""" ;
+                            oc:codeLanguage "kotlin" ;
+                            oc:contentOrder 3 ;
+                            oc:sourceLocation "lines 79-86" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// Java sees three overloads:
+// connect(String host)
+// connect(String host, int port)
+// connect(String host, int port, boolean secure)
+""" ;
+                            oc:codeLanguage "java" ;
+                            oc:contentOrder 10 ;
+                            oc:sourceLocation "lines 116-121" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// Java callers can use: Config.getInstance()
+// Without @JvmStatic they would need: Config.Companion.getInstance()
+""" ;
+                            oc:codeLanguage "java" ;
+                            oc:contentOrder 4 ;
+                            oc:sourceLocation "lines 88-91" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """class Constants {
+    companion object {
+        @JvmField
+        val DEFAULT_TIMEOUT = 30_000L
+    }
+}
+""" ;
+                            oc:codeLanguage "kotlin" ;
+                            oc:contentOrder 6 ;
+                            oc:sourceLocation "lines 95-102" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**`@JvmStatic`** — Makes companion object functions accessible as static methods from Java:" ] ;
+                    oc:sectionLevel 3 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "@JvmStatic / @JvmField / @JvmOverloads" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Java's `instanceof` maps to Kotlin's `is` keyword. Kotlin supports smart casting, so an explicit cast after an `is` check is unnecessary:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// Kotlin — smart cast, no explicit cast needed
+if (shape is Circle) {
+    val area = shape.area  // shape is automatically cast to Circle
+}
+""" ;
+                            oc:codeLanguage "kotlin" ;
+                            oc:contentOrder 3 ;
+                            oc:sourceLocation "lines 331-336" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// Java
+if (shape instanceof Circle) {
+    Circle circle = (Circle) shape;
+    double area = circle.getArea();
+}
+""" ;
+                            oc:codeLanguage "java" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 323-329" ] ;
+                    oc:sectionLevel 3 ;
+                    oc:sectionOrder 13 ;
+                    oc:sectionTitle "instanceof" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "Always add explicit type declarations to eliminate platform types. Analyze the Java source code, documentation, and call sites to determine the correct nullability." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// Java — no nullability annotations
+public String getName() { return name; }
+public List<String> getItems() { return items; }
+""" ;
+                            oc:codeLanguage "java" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 54-58" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// Kotlin — BAD: platform types left in converted code
+val name = obj.name       // inferred as String! — unsafe
+val items = obj.items     // inferred as List<String!>! — unsafe
+
+// Kotlin — GOOD: explicit nullability based on code analysis
+val name: String = obj.name              // if provably non-null
+val name: String? = obj.name             // if could be null
+val items: List<String> = obj.items      // if neither list nor elements are null
+""" ;
+                            oc:codeLanguage "kotlin" ;
+                            oc:contentOrder 3 ;
+                            oc:sourceLocation "lines 60-69" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Java types without nullability annotations (`@Nullable`, `@NotNull`, `@NonNull`) become \"platform types\" (`T!`) in Kotlin. Platform types bypass Kotlin's null-safety system — they are neither nullable nor non-null, and null checks are deferred to runtime." ] ;
+                    oc:sectionLevel 3 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Platform Types" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "Using `Array<Int>` instead of `IntArray` causes boxing overhead — always use the specialized primitive array types." ],
+                        [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 2 ;
+                            oc:rowCount 9 ;
+                            oc:tableCaption "Java arrays map to Kotlin types as follows" ;
+                            oc:tableMarkdown """| Java | Kotlin | Notes |
+|------|--------|-------|
+| `String[]` | `Array<String>` | Reference type arrays |
+| `int[]` | `IntArray` | Primitive array (not `Array<Int>`) |
+| `long[]` | `LongArray` | Primitive array |
+| `double[]` | `DoubleArray` | Primitive array |
+| `boolean[]` | `BooleanArray` | Primitive array |
+| `Object[]` | `Array<Any?>` | |
+| `new int[10]` | `IntArray(10)` | Array creation |
+| `new String[10]` | `arrayOfNulls<String>(10)` | Nullable element array |
+| `String... args` | `vararg args: String` | Varargs parameter |
+""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Java arrays map to Kotlin types as follows:" ] ;
+                    oc:sectionLevel 3 ;
+                    oc:sectionOrder 11 ;
+                    oc:sectionTitle "Array Handling" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// Java — overloaded method accepting different SAM types
+public class TaskExecutor {
+    void submit(Runnable task) { ... }
+    void submit(Callable<String> task) { ... }
+}
+""" ;
+                            oc:codeLanguage "java" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 31-37" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "When a Java method has overloads that each accept a different SAM (Single Abstract Method) interface, Kotlin's trailing lambda syntax becomes ambiguous. The compiler cannot determine which SAM interface the lambda should implement." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 4 ;
+                            oc:textContent "Use explicit SAM constructor calls whenever there are overloaded methods accepting different functional interfaces." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// Kotlin — WRONG: ambiguous, won't compile
+executor.submit { doWork() }
+
+// Kotlin — CORRECT: explicit SAM constructor
+executor.submit(Runnable { doWork() })
+executor.submit(Callable { computeResult() })
+""" ;
+                            oc:codeLanguage "kotlin" ;
+                            oc:contentOrder 3 ;
+                            oc:sourceLocation "lines 39-46" ] ;
+                    oc:sectionLevel 3 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "SAM Conversion Ambiguity" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// Java
+public synchronized void update() { ... }
+""" ;
+                            oc:codeLanguage "java" ;
+                            oc:contentOrder 6 ;
+                            oc:sourceLocation "lines 237-240" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// Kotlin
+@Synchronized
+fun update() { ... }
+""" ;
+                            oc:codeLanguage "kotlin" ;
+                            oc:contentOrder 7 ;
+                            oc:sourceLocation "lines 242-246" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// Java
+synchronized (lock) {
+    sharedState.update();
+}
+""" ;
+                            oc:codeLanguage "java" ;
+                            oc:contentOrder 3 ;
+                            oc:sourceLocation "lines 221-226" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """// Kotlin
+synchronized(lock) {
+    sharedState.update()
+}
+""" ;
+                            oc:codeLanguage "kotlin" ;
+                            oc:contentOrder 4 ;
+                            oc:sourceLocation "lines 228-233" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "**Synchronized blocks** — Use Kotlin's `synchronized()` function:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 5 ;
+                            oc:textContent "**Synchronized methods** — Use the `@Synchronized` annotation:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Java's `synchronized` constructs map to Kotlin as follows:" ] ;
+                    oc:sectionLevel 3 ;
+                    oc:sectionOrder 9 ;
+                    oc:sectionTitle "Synchronized Blocks" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Known Issues and Common Pitfalls" ] ;
+    oc:impartsKnowledge oc:kn_0402a8b8,
+        oc:kn_3b277814,
+        oc:kn_4c9fba50,
+        oc:kn_5bdec4cd,
+        oc:kn_7c70104a,
+        oc:kn_8d85c7cc,
+        oc:kn_91c5086f,
+        oc:kn_999465c1 ;
+    oc:isUserInvocable true ;
+    oc:nature "Tool" ;
+    oc:resolvesIntent "apply jvm interop annotations for java-to-kotlin migration",
+        "fix platform type null-safety issues in converted kotlin code",
+        "handle kotlin keyword conflicts from java identifiers",
+        "map java constructs to idiomatic kotlin equivalents",
+        "resolve kotlin compilation errors after java conversion" .
+
+oc:kn_0402a8b8 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When converting Java methods using wildcard or raw generic types" ;
+    oc:directiveContent "For wildcard generics: map ? extends T to out T (covariance), ? super T to in T (contravariance), and raw types to the most specific explicit type parameter (not defaulting to Any?)." ;
+    oc:hasRationale "Correct variance annotations preserve type safety; raw types defaulting to Any? lose all type information and enable unsafe casts." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_466f4037 a oc:Heuristic,
+oc:kn_3b277814 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When calling overloaded Java methods that accept different functional interface types" ;
+    oc:directiveContent "Never use trailing lambda syntax with overloaded Java methods accepting different SAM interfaces — the compiler cannot resolve the ambiguity. Always use explicit SAM constructor calls like Runnable { } or Callable { }." ;
+    oc:hasRationale "Kotlin's SAM conversion heuristic picks one overload arbitrarily or fails to compile when multiple SAM-typed overloads exist." ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_4c9fba50 a oc:Heuristic,
         oc:KnowledgeNode ;
     oc:appliesToContext "When converting Java primitive arrays (int[], long[], double[], boolean[]) to Kotlin" ;
-    oc:directiveContent "Use specialized primitive array types (IntArray, LongArray, DoubleArray, BooleanArray) instead of generic Array<T> for Java primitive arrays to avoid boxing overhead." ;
-    oc:hasRationale "Using Array<Int> instead of IntArray causes per-element boxing overhead, which can significantly degrade performance in array-heavy code." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_517527ad a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When converted Kotlin code must maintain a clean Java-callable API" ;
-    oc:directiveContent "Add @Throws annotations to Kotlin functions that throw checked exceptions whenever they are called from Java code. Add @JvmStatic for companion object methods, @JvmField for constants, and @JvmOverloads for functions with default parameters." ;
-    oc:hasRationale "Kotlin lacks checked exceptions and has different access patterns for companion object members; without JVM interop annotations, Java callers face awkward API shapes and cannot properly handle exceptions." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_57176522 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When converting Java static methods and constants to Kotlin" ;
-    oc:directiveContent "Prefer top-level functions for stateless utility methods (Java static methods without class coupling), companion object functions when logically tied to a class, and const val for compile-time constants (primitives and String)." ;
-    oc:hasRationale "Top-level functions are more idiomatic Kotlin than unnecessary companion objects; const val enables compile-time inlining for true constants." ;
+    oc:directiveContent "Use specialized primitive array types (IntArray, LongArray, DoubleArray, BooleanArray) instead of boxed Array<Int>, Array<Long>, etc. to avoid boxing overhead." ;
+    oc:hasRationale "Using Array<Int> wraps each element in a java.lang.Integer object, causing significant memory and performance overhead for large arrays." ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_7ffae8c1 a oc:KnowledgeNode,
+oc:kn_5bdec4cd a oc:KnowledgeNode,
+        oc:RecoveryTactic ;
+    oc:appliesToContext "When converting Java static methods, constants, and static initializer blocks" ;
+    oc:directiveContent "Map Java statics to Kotlin: top-level functions for stateless utility methods, companion object for class-tied methods, const val for compile-time primitives, val for object constants, and companion object init {} for static initializers." ;
+    oc:hasRationale "Kotlin has no static keyword; choosing the wrong idiom leads to unnecessary object allocation or inaccessible methods from Java." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_7c70104a a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When converting common Java constructs to idiomatic Kotlin" ;
+    oc:directiveContent "Convert Java try-with-resources to Kotlin .use {} extension: BufferedReader(FileReader(path)).use { reader -> ... }. Convert synchronized blocks to synchronized(lock) { } and synchronized methods to @Synchronized fun. Convert instanceof checks to is with smart casting. Convert ternary to if/else expressions." ;
+    oc:hasRationale "These mappings produce idiomatic Kotlin that leverages the language's features (smart casts, expression-oriented, extension functions) rather than literal translations." ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_8d85c7cc a oc:KnowledgeNode,
         oc:KnownIssue ;
-    oc:appliesToContext "When converting Java methods or fields whose names collide with Kotlin keywords" ;
-    oc:directiveContent "Java identifiers that are Kotlin reserved keywords (when, in, is, object, fun, val, var, typealias, as) will cause compilation errors after conversion. Use backtick-escaping or rename the identifier entirely." ;
-    oc:hasRationale "Kotlin's keyword set overlaps with common Java identifier names, and unescaped usage produces immediate compilation failures that block the migration." ;
+    oc:appliesToContext "When converting Java methods/fields whose names clash with Kotlin keywords" ;
+    oc:directiveContent "Java identifiers that are Kotlin reserved keywords (when, in, is, object, fun, val, var, typealias, as) cause compilation errors after conversion. Backtick-escape them or rename to non-keyword alternatives for internal APIs." ;
+    oc:hasRationale "Kotlin's keyword set is larger than Java's, so valid Java identifiers become syntax errors in Kotlin without escaping or renaming." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_b9446212 a oc:Constraint,
+oc:kn_91c5086f a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "Whenever Java code without @Nullable/@NotNull annotations is referenced from Kotlin" ;
-    oc:directiveContent "Always add explicit type declarations with nullability annotations to eliminate Java platform types (T!). Analyze the Java source, documentation, and call sites to determine correct nullability." ;
-    oc:hasRationale "Platform types bypass Kotlin's null-safety system, deferring null checks to runtime and defeating one of the primary benefits of Kotlin migration." ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_f07a5c66 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When calling overloaded Java methods from converted Kotlin code" ;
-    oc:directiveContent "Never use trailing lambda syntax when calling overloaded Java methods that accept different SAM interfaces — use explicit SAM constructor calls like Runnable { } or Callable { } instead." ;
-    oc:hasRationale "Trailing lambda syntax is ambiguous when multiple SAM overloads exist; the compiler cannot infer which interface the lambda should implement." ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_ffb58e6b a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "After any Java-to-Kotlin conversion, before declaring it complete" ;
-    oc:directiveContent "Before marking a Java-to-Kotlin conversion as complete, verify: keyword conflicts are resolved, platform types are eliminated, SAM ambiguities are fixed, JVM interop annotations are applied where needed, and primitive arrays use specialized types." ;
-    oc:hasRationale "These are the most common and impactful issues that silently degrade code quality or cause runtime failures after conversion." ;
+    oc:appliesToContext "When converted Kotlin code must maintain a clean Java-callable API" ;
+    oc:directiveContent "Use @JvmStatic for companion object methods, @JvmField for companion object properties, @JvmOverloads for functions with default parameters, and @Throws for functions throwing checked exceptions — whenever the Kotlin code is called from Java." ;
+    oc:hasRationale "Without these annotations, Java callers face awkward Companion.getInstance() calls, missing overloads, and uncatchable checked exceptions." ;
     oc:severityLevel "HIGH" .
 
-oc:req_22067045 a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "JVM interop annotations (@JvmStatic, @JvmField, @JvmOverloads, @Throws)" .
-
-oc:req_38fba323 a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "Java language features and constructs" .
-
-oc:req_d655cb0b a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "Kotlin syntax and type system" .
+oc:kn_999465c1 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Whenever consuming Java APIs without @Nullable/@NotNull annotations in converted Kotlin code" ;
+    oc:directiveContent "Platform types (T!) from unannotated Java code bypass Kotlin's null-safety. Always add explicit type declarations (nullable or non-null) based on analysis of the Java source, documentation, and call sites." ;
+    oc:hasRationale "Leaving platform types unchecked defers null errors to runtime, negating Kotlin's primary safety advantage." ;
+    oc:severityLevel "CRITICAL" .
 

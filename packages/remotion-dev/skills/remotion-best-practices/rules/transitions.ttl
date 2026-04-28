@@ -7,65 +7,430 @@
 oc:skill_remotion_dev_skills_remotion_best_practices_transitions a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "transitions" ;
-    skos:broader "Remotion video composition pattern" ;
+    skos:broader "Video composition technique" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/remotion-dev/skills/remotion-best-practices" ;
     oc:contentHash "f6b0ca21322d68ab516345e8d57a2039c48654c98604b673913382c854e79d86" ;
-    oc:differentia "uses TransitionSeries to add scene transitions (fade, slide, wipe) and overlays between video segments with controlled timing" ;
+    oc:differentia "that applies scene transitions and overlays between sequences using Remotion's TransitionSeries component" ;
     oc:extends oc:skill_remotion_dev_skills_remotion_best_practices ;
-    oc:handlesFailure oc:DurationMismatch,
-        oc:InvalidTransitionPlacement ;
-    oc:hasAllowedTool "Bash" ;
-    oc:hasArgumentHint "scene components and transition configuration" ;
+    oc:handlesFailure oc:InvalidInput ;
+    oc:hasArgumentHint "scene components and transition/overlay configuration" ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_4899f4d0,
-        oc:kn_6cb2973d,
-        oc:kn_786eeb0a,
-        oc:kn_7fe23d77,
-        oc:kn_d0f45e1c ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """import { TransitionSeries, linearTiming } from "@remotion/transitions";
+import { fade } from "@remotion/transitions/fade";
+
+<TransitionSeries>
+  <TransitionSeries.Sequence durationInFrames={60}>
+    <SceneA />
+  </TransitionSeries.Sequence>
+  <TransitionSeries.Transition
+    presentation={fade()}
+    timing={linearTiming({ durationInFrames: 15 })}
+  />
+  <TransitionSeries.Sequence durationInFrames={60}>
+    <SceneB />
+  </TransitionSeries.Sequence>
+</TransitionSeries>;
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 1 ;
+                    oc:sourceLocation "lines 25-41" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 3 ;
+            oc:sectionTitle "Transition example" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "For example, with two 60-frame sequences and a 15-frame transition:" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "Adding an overlay between two other sequences does not change the total." ],
+                [ a oc:BulletList ;
+                    oc:blockType "bullet_list" ;
+                    oc:contentOrder 3 ;
+                    oc:hasItem [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 2 ;
+                            oc:itemText "With transition: `60 + 60 - 15 = 105` frames" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 1 ;
+                            oc:itemText "Without transitions: `60 + 60 = 120` frames" ] ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Transitions overlap adjacent scenes, so the total composition length is **shorter** than the sum of all sequence durations. Overlays do **not** affect the total duration." ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "For `springTiming` without an explicit `durationInFrames`, the duration depends on `fps` because it calculates when the spring animation settles." ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """import { linearTiming, springTiming } from "@remotion/transitions";
+
+const linearDuration = linearTiming({
+  durationInFrames: 20,
+}).getDurationInFrames({ fps: 30 });
+// Returns 20
+
+const springDuration = springTiming({
+  config: { damping: 200 },
+}).getDurationInFrames({ fps: 30 });
+// Returns calculated duration based on spring physics
+""" ;
+                            oc:codeLanguage "tsx" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 159-171" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Use the `getDurationInFrames()` method on the timing object:" ] ;
+                    oc:sectionLevel 3 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Getting the duration of a transition" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """import { linearTiming } from "@remotion/transitions";
+
+const scene1Duration = 60;
+const scene2Duration = 60;
+const scene3Duration = 60;
+
+const timing1 = linearTiming({ durationInFrames: 15 });
+const timing2 = linearTiming({ durationInFrames: 20 });
+
+const transition1Duration = timing1.getDurationInFrames({ fps: 30 });
+const transition2Duration = timing2.getDurationInFrames({ fps: 30 });
+
+const totalDuration =
+  scene1Duration +
+  scene2Duration +
+  scene3Duration -
+  transition1Duration -
+  transition2Duration;
+// 60 + 60 + 60 - 15 - 20 = 145 frames
+""" ;
+                            oc:codeLanguage "tsx" ;
+                            oc:contentOrder 1 ;
+                            oc:sourceLocation "lines 177-197" ] ;
+                    oc:sectionLevel 3 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Calculating total composition duration" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 11 ;
+            oc:sectionTitle "Duration calculation" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Import transitions from their respective modules:" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """import { fade } from "@remotion/transitions/fade";
+import { slide } from "@remotion/transitions/slide";
+import { wipe } from "@remotion/transitions/wipe";
+import { flip } from "@remotion/transitions/flip";
+import { clockWipe } from "@remotion/transitions/clock-wipe";
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 2 ;
+                    oc:sourceLocation "lines 111-117" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 8 ;
+            oc:sectionTitle "Available transition types" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Transitions and overlays can coexist in the same `<TransitionSeries>`, but an overlay cannot be adjacent to a transition or another overlay." ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """import { TransitionSeries, linearTiming } from "@remotion/transitions";
+import { fade } from "@remotion/transitions/fade";
+import { LightLeak } from "@remotion/light-leaks";
+
+<TransitionSeries>
+  <TransitionSeries.Sequence durationInFrames={60}>
+    <SceneA />
+  </TransitionSeries.Sequence>
+  <TransitionSeries.Overlay durationInFrames={30}>
+    <LightLeak />
+  </TransitionSeries.Overlay>
+  <TransitionSeries.Sequence durationInFrames={60}>
+    <SceneB />
+  </TransitionSeries.Sequence>
+  <TransitionSeries.Transition
+    presentation={fade()}
+    timing={linearTiming({ durationInFrames: 15 })}
+  />
+  <TransitionSeries.Sequence durationInFrames={60}>
+    <SceneC />
+  </TransitionSeries.Sequence>
+</TransitionSeries>;
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 2 ;
+                    oc:sourceLocation "lines 68-91" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 5 ;
+            oc:sectionTitle "Mixing transitions and overlays" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """name: transitions
+description: Scene transitions and overlays for Remotion using TransitionSeries.
+metadata:
+  tags: transitions, overlays, fade, slide, wipe, scenes
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """npx remotion add @remotion/transitions
+""" ;
+                    oc:codeLanguage "bash" ;
+                    oc:contentOrder 1 ;
+                    oc:sourceLocation "lines 19-21" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 2 ;
+            oc:sectionTitle "Prerequisites" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """import { linearTiming, springTiming } from "@remotion/transitions";
+
+// Linear timing - constant speed
+linearTiming({ durationInFrames: 20 });
+
+// Spring timing - organic motion
+springTiming({ config: { damping: 200 }, durationInFrames: 25 });
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 1 ;
+                    oc:sourceLocation "lines 134-142" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 10 ;
+            oc:sectionTitle "Timing options" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "`<TransitionSeries.Transition>` requires:" ],
+                [ a oc:BulletList ;
+                    oc:blockType "bullet_list" ;
+                    oc:contentOrder 2 ;
+                    oc:hasItem [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 2 ;
+                            oc:itemText "`timing` — controls speed and easing (e.g. `linearTiming()`, `springTiming()`)." ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 1 ;
+                            oc:itemText "`presentation` — the visual effect (e.g. `fade()`, `slide()`, `wipe()`)." ] ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 6 ;
+            oc:sectionTitle "Transition props" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "`<TransitionSeries.Overlay>` accepts:" ],
+                [ a oc:BulletList ;
+                    oc:blockType "bullet_list" ;
+                    oc:contentOrder 2 ;
+                    oc:hasItem [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 2 ;
+                            oc:itemText "`offset?` — shifts the overlay relative to the cut point center. Positive = later, negative = earlier. Default: `0`." ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 1 ;
+                            oc:itemText "`durationInFrames` — how long the overlay is visible (positive integer)." ] ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 7 ;
+            oc:sectionTitle "Overlay props" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "`<TransitionSeries>` arranges scenes and supports two ways to enhance the cut point between them:" ],
+                [ a oc:BulletList ;
+                    oc:blockType "bullet_list" ;
+                    oc:contentOrder 2 ;
+                    oc:hasItem [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 1 ;
+                            oc:itemText "**Transitions** (`<TransitionSeries.Transition>`) — crossfade, slide, wipe, etc. between two scenes. Shortens the timeline because both scenes play simultaneously during the transition." ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 2 ;
+                            oc:itemText "**Overlays** (`<TransitionSeries.Overlay>`) — render an effect (e.g. a light leak) on top of the cut point without shortening the timeline." ] ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 3 ;
+                    oc:textContent "Children are absolutely positioned." ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "TransitionSeries" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Any React component can be used as an overlay. For a ready-made effect, see the **light-leaks** rule." ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """import { TransitionSeries } from "@remotion/transitions";
+import { LightLeak } from "@remotion/light-leaks";
+
+<TransitionSeries>
+  <TransitionSeries.Sequence durationInFrames={60}>
+    <SceneA />
+  </TransitionSeries.Sequence>
+  <TransitionSeries.Overlay durationInFrames={20}>
+    <LightLeak />
+  </TransitionSeries.Overlay>
+  <TransitionSeries.Sequence durationInFrames={60}>
+    <SceneB />
+  </TransitionSeries.Sequence>
+</TransitionSeries>;
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 2 ;
+                    oc:sourceLocation "lines 47-62" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 4 ;
+            oc:sectionTitle "Overlay example" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """import { slide } from "@remotion/transitions/slide";
+
+<TransitionSeries.Transition
+  presentation={slide({ direction: "from-left" })}
+  timing={linearTiming({ durationInFrames: 20 })}
+/>;
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 1 ;
+                    oc:sourceLocation "lines 121-128" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "Directions: `\"from-left\"`, `\"from-right\"`, `\"from-top\"`, `\"from-bottom\"`" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 9 ;
+            oc:sectionTitle "Slide transition with direction" ] ;
+    oc:impartsKnowledge oc:kn_06e8f5a6,
+        oc:kn_26a4bff2,
+        oc:kn_87049bd5,
+        oc:kn_98fcb151,
+        oc:kn_a717d1b0,
+        oc:kn_b3737f84,
+        oc:kn_b71b1969,
+        oc:kn_d435ced7,
+        oc:kn_fc65880c,
+        oc:kn_ff723301 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:RemotionProjectInitialized,
-        oc:RemotionTransitionsInstalled ;
-    oc:resolvesIntent "add overlays to video cut points",
+    oc:requiresState oc:ToolInstalled ;
+    oc:resolvesIntent "add overlays at scene cut points",
         "add transitions between video scenes",
         "calculate composition duration with transitions",
-        "configure transition timing and presentation",
-        "create scene transitions in Remotion" ;
-    oc:yieldsState oc:CompositionDurationCalculated,
-        oc:TransitionsConfigured .
+        "mix transitions and overlays in a video composition" ;
+    oc:yieldsState oc:VideoTransitionConfigured .
 
-oc:kn_4899f4d0 a oc:Constraint,
+oc:kn_06e8f5a6 a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When mixing transitions and overlays in the same TransitionSeries" ;
-    oc:directiveContent "An overlay cannot be adjacent to a transition or another overlay within a TransitionSeries. Overlays must be surrounded by Sequences." ;
-    oc:hasRationale "Adjacency constraints prevent conflicting rendering behaviors at the same cut point, ensuring predictable compositing results." ;
-    oc:severityLevel "CRITICAL" .
+    oc:appliesToContext "When choosing timing options for transitions" ;
+    oc:directiveContent "Use springTiming for organic, natural-feeling motion and linearTiming for constant-speed, predictable transitions." ;
+    oc:hasRationale "Spring timing uses physics-based animation that feels more natural; linear timing offers precise control" ;
+    oc:severityLevel "LOW" .
 
-oc:kn_6cb2973d a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When choosing and configuring transition timing" ;
-    oc:directiveContent "Use springTiming for organic, natural-feeling motion and linearTiming for consistent, predictable speed. Spring timing without explicit durationInFrames requires fps to calculate settled duration." ;
-    oc:hasRationale "The timing function controls the perceptual quality of transitions; matching timing to the desired feel (organic vs mechanical) produces better results." ;
+oc:kn_26a4bff2 a oc:KnowledgeNode,
+        oc:Standard ;
+    oc:appliesToContext "When using TransitionSeries.Overlay" ;
+    oc:directiveContent "Overlays do NOT affect total composition duration — they render on top of the cut point without shortening the timeline." ;
+    oc:hasRationale "Overlays are purely visual effects layered on top; they don't consume timeline frames" ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_786eeb0a a oc:DesignPrinciple,
+oc:kn_87049bd5 a oc:KnowledgeNode,
+        oc:Prerequisite ;
+    oc:appliesToContext "Before any transition or overlay code" ;
+    oc:directiveContent "Run `npx remotion add @remotion/transitions` before using TransitionSeries, transition presentations, or timing utilities." ;
+    oc:hasRationale "The @remotion/transitions package is a separate dependency from core Remotion" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_98fcb151 a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When calculating total composition duration with transitions and overlays" ;
-    oc:directiveContent "Transitions overlap adjacent scenes, shortening the total timeline by the transition duration. Overlays do NOT affect total duration." ;
-    oc:hasRationale "Accurate duration calculation is essential for frame-precise video output. Failing to account for transition overlap will produce compositions of incorrect length." ;
+    oc:appliesToContext "When adding a basic fade transition between two scenes" ;
+    oc:codeLanguage "tsx" ;
+    oc:directiveContent """import { TransitionSeries, linearTiming } from "@remotion/transitions";
+import { fade } from "@remotion/transitions/fade";
+
+<TransitionSeries>
+  <TransitionSeries.Sequence durationInFrames={60}>
+    <SceneA />
+  </TransitionSeries.Sequence>
+  <TransitionSeries.Transition
+    presentation={fade()}
+    timing={linearTiming({ durationInFrames: 15 })}
+  />
+  <TransitionSeries.Sequence durationInFrames={60}>
+    <SceneB />
+  </TransitionSeries.Sequence>
+</TransitionSeries>""" .
+
+oc:kn_a717d1b0 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When using springTiming" ;
+    oc:directiveContent "For springTiming without explicit durationInFrames, the duration depends on fps because it calculates when the spring animation settles." ;
+    oc:hasRationale "Spring physics are frame-rate dependent; the settling time varies with fps" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_b3737f84 a oc:KnowledgeNode,
+        oc:OutputFormat ;
+    oc:directiveContent """TransitionSeries composition structure:
+[Sequence durationInFrames=N] → [Transition presentation={effect} timing={timing}] → [Sequence durationInFrames=N] → [Overlay durationInFrames=N] → [Sequence durationInFrames=N]
+
+Available presentations: fade(), slide({direction}), wipe(), flip(), clockWipe()
+Timing: linearTiming({durationInFrames}), springTiming({config, durationInFrames?})""" ;
+    oc:templateVariables "N",
+        "direction",
+        "effect",
+        "timing" .
+
+oc:kn_b71b1969 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When calculating total composition duration" ;
+    oc:directiveContent "Transitions shorten the total composition duration because both scenes play simultaneously during the transition overlap." ;
+    oc:hasRationale "Each transition's durationInFrames is subtracted from the sum of all sequence durations" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_7fe23d77 a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "Before adding any transitions or overlays to a Remotion project" ;
-    oc:directiveContent "Install the @remotion/transitions package before using TransitionSeries: `npx remotion add @remotion/transitions`." ;
-    oc:hasRationale "TransitionSeries and related APIs are not included in the core Remotion package and must be installed separately." ;
+oc:kn_d435ced7 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When building a video with scene transitions" ;
+    oc:directiveContent "1. Install @remotion/transitions 2. Import TransitionSeries and desired transition (fade, slide, wipe, flip, clockWipe) 3. Wrap scenes in TransitionSeries.Sequence with durationInFrames 4. Insert TransitionSeries.Transition between sequences with presentation and timing props 5. Optionally add TransitionSeries.Overlay between sequences (not adjacent to transitions) 6. Calculate total duration: sum of sequence durations minus transition durations" ;
+    oc:stepOrder 1 .
+
+oc:kn_fc65880c a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When mixing transitions and overlays in the same TransitionSeries" ;
+    oc:directiveContent "An overlay cannot be adjacent to a transition or another overlay within a TransitionSeries." ;
+    oc:hasRationale "Adjacent overlays/transitions create conflicting render orders and undefined behavior" ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_d0f45e1c a oc:KnowledgeNode,
-        oc:SideEffect ;
-    oc:appliesToContext "When styling and positioning content inside TransitionSeries.Sequence children" ;
-    oc:directiveContent "TransitionSeries children are absolutely positioned. This affects layout behavior of scene content." ;
-    oc:hasRationale "Absolute positioning means child elements will not flow relative to each other; developers must use explicit positioning or flex/grid layouts within scenes." ;
-    oc:severityLevel "MEDIUM" .
+oc:kn_ff723301 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When calculating total composition duration with multiple transitions" ;
+    oc:codeLanguage "tsx" ;
+    oc:directiveContent "const totalDuration = scene1Duration + scene2Duration + scene3Duration - transition1Duration - transition2Duration;" .
 

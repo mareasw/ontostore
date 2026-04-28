@@ -7,70 +7,188 @@
 oc:skill_remotion_dev_skills_remotion_best_practices_lottie a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "lottie" ;
-    skos:broader "Animation integration guide" ;
+    skos:broader "Animation integration skill" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/remotion-dev/skills/remotion-best-practices" ;
     oc:contentHash "6dd0a845f5cea9c0f3d2465b5678a16076f5778ad1a628abbf387dba0b929cbb" ;
-    oc:dependsOnSkill oc:skill_remotion_best_practices ;
-    oc:differentia "enables embedding Lottie JSON animations in Remotion React components using @remotion/lottie with proper async loading patterns" ;
-    oc:extends oc:skill_remotion_dev_skills_remotion_best_practices ;
-    oc:handlesFailure oc:AssetLoadFailed,
-        oc:PackageNotInstalled ;
-    oc:hasArgumentHint "lottie JSON URL or file path" ;
-    oc:hasCategory "development" ;
-    oc:hasRequirement oc:req_51719b42,
-        oc:req_66276a66,
-        oc:req_8092d633 ;
-    oc:impartsKnowledge oc:kn_472a37da,
-        oc:kn_874abeb6,
-        oc:kn_a77d05a4,
-        oc:kn_e2064aec,
-        oc:kn_e485e646 ;
+    oc:differentia "Embeds Lottie animations into Remotion video compositions using @remotion/lottie" ;
+    oc:extends oc:skill_ontoskills_remotion_best_practices,
+        oc:skill_remotion_dev_skills_remotion_best_practices ;
+    oc:handlesFailure oc:InvalidInput,
+        oc:NetworkTimeout ;
+    oc:hasArgumentHint "lottie-animation-url-or-file" ;
+    oc:hasCategory "Animation" ;
+    oc:hasRequirement oc:req_66276a66,
+        oc:req_8092d633,
+        oc:req_96723c48 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Lottie supports the `style` prop to allow styles and animations:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """return (
+  <Lottie animationData={animationData} style={{ width: 400, height: 400 }} />
+);
+""" ;
+                            oc:codeLanguage "tsx" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 66-70" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Styling and animating" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """npx remotion add @remotion/lottie # If project uses npm
+bunx remotion add @remotion/lottie # If project uses bun
+yarn remotion add @remotion/lottie # If project uses yarn
+pnpm exec remotion add @remotion/lottie # If project uses pnpm
+""" ;
+                            oc:codeLanguage "bash" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 15-20" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent """First, the @remotion/lottie package needs to be installed.  
+If it is not, use the following command:""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Prerequisites" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "To import a Lottie animation:" ],
+                        [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """import { Lottie, LottieAnimationData } from "@remotion/lottie";
+import { useEffect, useState } from "react";
+import { cancelRender, continueRender, delayRender } from "remotion";
+
+export const MyAnimation = () => {
+  const [handle] = useState(() => delayRender("Loading Lottie animation"));
+
+  const [animationData, setAnimationData] =
+    useState<LottieAnimationData | null>(null);
+
+  useEffect(() => {
+    fetch("https://assets4.lottiefiles.com/packages/lf20_zyquagfl.json")
+      .then((data) => data.json())
+      .then((json) => {
+        setAnimationData(json);
+        continueRender(handle);
+      })
+      .catch((err) => {
+        cancelRender(err);
+      });
+  }, [handle]);
+
+  if (!animationData) {
+    return null;
+  }
+
+  return <Lottie animationData={animationData} />;
+};
+""" ;
+                            oc:codeLanguage "tsx" ;
+                            oc:contentOrder 3 ;
+                            oc:sourceLocation "lines 31-60" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Fetch the Lottie asset" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Wrap the loading process in `delayRender()` and `continueRender()`" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Render the Lottie animation using the `Lottie` component from the `@remotion/lottie` package" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Save the animation data in a state" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Displaying a Lottie file" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Using Lottie Animations in Remotion" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """name: lottie
+description: Embedding Lottie animations in Remotion.
+metadata:
+  category: Animation
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:impartsKnowledge oc:kn_079821c5,
+        oc:kn_184b8f06,
+        oc:kn_5d3121de,
+        oc:kn_7c2c4dc0,
+        oc:kn_931db441,
+        oc:kn_e726c137 ;
     oc:isUserInvocable true ;
-    oc:nature "Concept" ;
+    oc:nature "Tool" ;
     oc:requiresState oc:EnvironmentReady ;
-    oc:resolvesIntent "display lottie file in video",
-        "embed lottie animation in remotion",
-        "style lottie animation in remotion" ;
-    oc:yieldsState oc:LottieAnimationEmbedded .
+    oc:resolvesIntent "display lottie files in remotion compositions",
+        "embed lottie animation in remotion video",
+        "style lottie animations in remotion" ;
+    oc:yieldsState oc:LottieAnimationInstalled,
+        oc:LottieAnimationRendered .
 
-oc:kn_472a37da a oc:Constraint,
+oc:kn_079821c5 a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "Before the async fetch resolves and animationData state is populated" ;
-    oc:directiveContent "Always return null (or a placeholder) while animationData is null to avoid passing undefined data to the Lottie component." ;
-    oc:hasRationale "Passing null/undefined animationData to the Lottie component will cause a runtime crash." ;
-    oc:severityLevel "HIGH" .
+    oc:appliesToContext "When sizing or positioning Lottie animations" ;
+    oc:directiveContent "Use the `style` prop on <Lottie> to control width, height, and CSS transforms rather than wrapping in extra divs" ;
+    oc:hasRationale "The Lottie component natively supports style passthrough, avoiding unnecessary DOM nesting" .
 
-oc:kn_874abeb6 a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "When sizing or positioning Lottie animations within a Remotion composition" ;
-    oc:directiveContent "Use the style prop on the Lottie component to control dimensions and layout (e.g., style={{ width: 400, height: 400 }})." ;
-    oc:hasRationale "Lottie animations may not have intrinsic dimensions that match the video frame; explicit sizing ensures correct visual output." ;
-    oc:severityLevel "MEDIUM" .
+oc:kn_184b8f06 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When adding a Lottie animation to a Remotion composition" ;
+    oc:directiveContent "1. Install @remotion/lottie via `npx remotion add @remotion/lottie` 2. Fetch the Lottie JSON asset 3. Wrap loading in delayRender()/continueRender() to prevent premature render 4. Store animation data in state 5. Render using <Lottie animationData={data} />" ;
+    oc:hasRationale "Lottie animations are loaded asynchronously; delayRender ensures Remotion waits for the asset before rendering frames" ;
+    oc:stepOrder 1 .
 
-oc:kn_a77d05a4 a oc:DesignPrinciple,
+oc:kn_5d3121de a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "When using remote Lottie URLs" ;
+    oc:directiveContent "Fetching Lottie animations triggers network requests; delayRender() blocks the render pipeline until data loads or fails" ;
+    oc:hasRationale "Network-dependent assets introduce non-deterministic load times and potential failure modes" .
+
+oc:kn_7c2c4dc0 a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "Whenever loading Lottie animations asynchronously via fetch or dynamic import" ;
-    oc:directiveContent "Always wrap async Lottie asset fetching with delayRender() and continueRender() to prevent Remotion from rendering before the animation data is loaded." ;
-    oc:hasRationale "Remotion renders frames synchronously; without delayRender, it will render a blank frame before the Lottie JSON has finished loading, producing incomplete output." ;
+    oc:appliesToContext "When implementing the Lottie component" ;
+    oc:directiveContent "Do not render the <Lottie> component before animationData is available; return null until data is loaded" ;
+    oc:hasRationale "Passing null/undefined as animationData will cause a runtime error; guard with a null check" .
+
+oc:kn_931db441 a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Whenever fetching external Lottie JSON assets" ;
+    oc:directiveContent "Always wrap Lottie asset fetching with delayRender() and continueRender(); call cancelRender() on fetch failure" ;
+    oc:hasRationale "Without delayRender, Remotion may render frames before the animation data is loaded, producing blank or broken output" ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_e2064aec a oc:KnowledgeNode,
-        oc:RecoveryTactic ;
-    oc:appliesToContext "When fetching external Lottie JSON assets that may fail due to network errors or invalid URLs" ;
-    oc:directiveContent "Use cancelRender(err) in the fetch .catch() handler to gracefully fail the entire render if the Lottie asset cannot be loaded." ;
-    oc:hasRationale "Silently swallowing fetch errors would produce a render with missing animation content; cancelRender ensures the failure is surfaced immediately." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_e485e646 a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "Before adding any Lottie animation to a Remotion project" ;
-    oc:directiveContent "Ensure @remotion/lottie is installed before attempting to import or use Lottie components. Install via 'npx remotion add @remotion/lottie' (or equivalent for your package manager)." ;
-    oc:hasRationale "Without the package installed, imports will fail at compile time, blocking the entire composition." ;
-    oc:severityLevel "CRITICAL" .
-
-oc:req_51719b42 a oc:RequirementTool ;
-    oc:isOptional false ;
-    oc:requirementValue "@remotion/lottie" .
+oc:kn_e726c137 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When fetching and rendering any async Lottie asset in Remotion" ;
+    oc:codeLanguage "tsx" ;
+    oc:directiveContent """const [handle] = useState(() => delayRender("Loading Lottie animation"));
+const [animationData, setAnimationData] = useState<LottieAnimationData | null>(null);
+useEffect(() => {
+  fetch(url).then(r => r.json()).then(json => { setAnimationData(json); continueRender(handle); }).catch(err => cancelRender(err));
+}, [handle]);""" .
 
 oc:req_66276a66 a oc:RequirementKnowledge ;
     oc:isOptional false ;
@@ -79,4 +197,8 @@ oc:req_66276a66 a oc:RequirementKnowledge ;
 oc:req_8092d633 a oc:RequirementKnowledge ;
     oc:isOptional false ;
     oc:requirementValue "React hooks (useState, useEffect)" .
+
+oc:req_96723c48 a oc:RequirementTool ;
+    oc:isOptional false ;
+    oc:requirementValue "@remotion/lottie package" .
 

@@ -7,60 +7,206 @@
 oc:skill_vercel_labs_vercel_react_best_practices_rerender_no_inline_components a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "rerender-no-inline-components" ;
-    skos:broader "React performance anti-pattern guide" ;
+    skos:broader "React performance pattern" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "1cc32907a770272524ba682eef9e7efdd8ad4533b6f89b718a1fcd7d1d0eb6a3" ;
-    oc:differentia "identifies inline component definitions as a cause of full remounting on every render and prescribes extracting components with explicit props" ;
+    oc:differentia "that prevents component remounting by ensuring child components are defined outside their parent" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
-    oc:handlesFailure oc:EffectsReRunUnexpectedly,
-        oc:InputLosesFocus ;
     oc:hasCategory "development" ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "**Incorrect (remounts on every render):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 9 ;
+                    oc:textContent "**Symptoms of this bug:**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 6 ;
+                    oc:textContent "Every time `UserProfile` renders, `Avatar` and `Stats` are new component types. React unmounts the old instances and mounts new ones, losing any internal state, running effects again, and recreating DOM nodes." ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function Avatar({ src, theme }: { src: string; theme: string }) {
+  return (
+    <img
+      src={src}
+      className={theme === 'dark' ? 'avatar-dark' : 'avatar-light'}
+    />
+  )
+}
+
+function Stats({ followers, posts }: { followers: number; posts: number }) {
+  return (
+    <div>
+      <span>{followers} followers</span>
+      <span>{posts} posts</span>
+    </div>
+  )
+}
+
+function UserProfile({ user, theme }) {
+  return (
+    <div>
+      <Avatar src={user.avatarUrl} theme={theme} />
+      <Stats followers={user.followers} posts={user.posts} />
+    </div>
+  )
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 8 ;
+                    oc:sourceLocation "lines 49-76" ],
+                [ a oc:BulletList ;
+                    oc:blockType "bullet_list" ;
+                    oc:contentOrder 10 ;
+                    oc:hasItem [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 1 ;
+                            oc:itemText "Input fields lose focus on every keystroke" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 3 ;
+                            oc:itemText "`useEffect` cleanup/setup runs on every parent render" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 2 ;
+                            oc:itemText "Animations restart unexpectedly" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 4 ;
+                            oc:itemText "Scroll position resets inside the component" ] ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "Defining a component inside another component creates a new component type on every render. React sees a different component each time and fully remounts it, destroying all state and DOM." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 7 ;
+                    oc:textContent "**Correct (pass props instead):**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function UserProfile({ user, theme }) {
+  // Defined inside to access `theme` - BAD
+  const Avatar = () => (
+    <img
+      src={user.avatarUrl}
+      className={theme === 'dark' ? 'avatar-dark' : 'avatar-light'}
+    />
+  )
+
+  // Defined inside to access `user` - BAD
+  const Stats = () => (
+    <div>
+      <span>{user.followers} followers</span>
+      <span>{user.posts} posts</span>
+    </div>
+  )
+
+  return (
+    <div>
+      <Avatar />
+      <Stats />
+    </div>
+  )
+}
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 5 ;
+                    oc:sourceLocation "lines 18-43" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "**Impact: HIGH (prevents remount on every render)**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 3 ;
+                    oc:textContent "A common reason developers do this is to access parent variables without passing props. Always pass props instead." ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Don't Define Components Inside Components" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Don't Define Components Inside Components
+impact: HIGH
+impactDescription: prevents remount on every render
+tags: rerender, components, remount, performance
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "Refactor inline component definitions to be defined outside the parent with props" ;
+            oc:hasStep [ a oc:WorkflowStep ;
+                    dcterms:description "Verify inputs no longer lose focus, effects don't re-run unnecessarily, and state is preserved across renders" ;
+                    oc:expectedOutcome "No remounting symptoms remain" ;
+                    oc:stepDependsOn _:ref_81604fb77dd68514 ;
+                    oc:stepId "verify" ],
+                _:ref_63453b7c3e7640e0,
+                _:ref_81604fb77dd68514,
+                _:ref_c944eac3a90b597f ;
+            oc:workflowId "fix-inline-components" ;
+            oc:workflowName "Fix Inline Component Definitions" ] ;
     oc:impartsKnowledge oc:kn_0b55d4d9,
-        oc:kn_626277fb,
-        oc:kn_cd28f4b5,
-        oc:kn_e2ebc876,
-        oc:kn_f99dfd52 ;
+        oc:kn_9abc4827,
+        oc:kn_a1bf4962,
+        oc:kn_d12b458b,
+        oc:kn_ebc33ca0 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:ReactComponentWritten ;
-    oc:resolvesIntent "fix component remounting on every render",
-        "identify and resolve inline component anti-pattern",
-        "optimize React component rendering performance",
-        "prevent input fields from losing focus on keystroke" ;
-    oc:yieldsState oc:ComponentsExtractedToModuleScope .
+    oc:resolvesIntent "fix input focus loss in React components",
+        "optimize React component definition for performance",
+        "prevent component remounting on every render" .
 
 oc:kn_0b55d4d9 a oc:KnowledgeNode,
         oc:KnownIssue ;
-    oc:appliesToContext "When diagnosing mysterious state loss or UI flickering in React applications" ;
+    oc:appliesToContext "When debugging unexpected React component behavior" ;
     oc:directiveContent "Symptoms of inline component definitions include: input fields losing focus on every keystroke, animations restarting unexpectedly, useEffect cleanup/setup running on every parent render, and scroll position resetting inside the component." ;
-    oc:hasRationale "These symptoms are the observable consequences of React destroying and recreating the full component subtree on each parent render cycle." ;
+    oc:hasRationale "These symptoms are the observable consequences of full remounting — React destroys and recreates the entire subtree." ;
     oc:severityLevel "HIGH" .
 
-oc:kn_626277fb a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "During code review or performance audit of React applications" ;
-    oc:directiveContent "Audit codebases for component definitions nested inside other component function bodies as a high-priority performance review item." ;
-    oc:hasRationale "This anti-pattern is common when developers want to avoid prop drilling, but the performance cost of remounting is severe and easily avoidable." ;
-    oc:severityLevel "MEDIUM" .
+oc:kn_9abc4827 a oc:Idempotency,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When evaluating React render performance" ;
+    oc:directiveContent "Defining components outside their parent ensures renders are idempotent: the same inputs produce the same component tree structure without destructive side effects." ;
+    oc:hasRationale "Remounting destroys internal state, runs effect cleanups, and recreates DOM nodes — none of which should happen during a normal re-render." .
 
-oc:kn_cd28f4b5 a oc:KnowledgeNode,
-        oc:SideEffect ;
-    oc:appliesToContext "When evaluating the performance impact of component structure decisions" ;
-    oc:directiveContent "Inline component definitions cause full DOM recreation, state destruction, effect re-execution, and loss of internal component state on every parent render." ;
-    oc:hasRationale "This is not just a re-render cost — it is a full unmount/mount cycle which is significantly more expensive than a reconciliation pass." ;
+oc:kn_a1bf4962 a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When a child component needs access to parent-scope data" ;
+    oc:directiveContent "Always define child components outside the parent component and pass needed data via props instead of closing over parent variables." ;
+    oc:hasRationale "Props-based data flow preserves component identity across renders while keeping data flow explicit and traceable." .
+
+oc:kn_d12b458b a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing React components that reference parent scope variables" ;
+    oc:directiveContent "Never define a component inside another component's function body. Each render creates a new component type, causing React to fully unmount and remount, destroying state and DOM." ;
+    oc:hasRationale "React identifies components by their reference identity. A new function definition on every render is a new identity, triggering full remount." ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_e2ebc876 a oc:DesignPrinciple,
+oc:kn_ebc33ca0 a oc:Heuristic,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When a child component needs data from its parent" ;
-    oc:directiveContent "Always extract nested components to module scope and pass needed data via props instead of closing over parent variables." ;
-    oc:hasRationale "Props make data flow explicit, keep component references stable across renders, and preserve child component state and DOM nodes." ;
-    oc:severityLevel "HIGH" .
+    oc:appliesToContext "When tempted to use closure over parent scope in a child component definition" ;
+    oc:directiveContent "If you find yourself defining a component inside another just to access a variable, stop and pass it as a prop instead." ;
+    oc:hasRationale "The convenience of closure access comes at the cost of complete remounting on every render, which is a severe performance and correctness bug." .
 
-oc:kn_f99dfd52 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When writing React components that need access to parent scope variables" ;
-    oc:directiveContent "Never define a component inside another component's function body. Each render creates a new component type, causing React to fully unmount and remount it, destroying all state and DOM." ;
-    oc:hasRationale "React identifies components by reference identity. A new function definition on every render is a new identity, triggering full remount instead of reconciliation." ;
-    oc:severityLevel "CRITICAL" .
+_:ref_63453b7c3e7640e0 a oc:WorkflowStep ;
+    dcterms:description "Move each inline component definition outside the parent component" ;
+    oc:expectedOutcome "Component definitions moved to module scope" ;
+    oc:stepDependsOn _:ref_c944eac3a90b597f ;
+    oc:stepId "extract" .
+
+_:ref_81604fb77dd68514 a oc:WorkflowStep ;
+    dcterms:description "Replace parent-scope variable closures with explicit props on the extracted components" ;
+    oc:expectedOutcome "Components accept all needed data via props interface" ;
+    oc:stepDependsOn _:ref_63453b7c3e7640e0 ;
+    oc:stepId "add-props" .
+
+_:ref_c944eac3a90b597f a oc:WorkflowStep ;
+    dcterms:description "Identify any component defined inside another component's function body" ;
+    oc:expectedOutcome "List of all inline component definitions found" ;
+    oc:stepId "identify" .
 

@@ -7,96 +7,585 @@
 oc:skill_n8n_io_n8n_reproduce_bug a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "reproduce-bug" ;
-    skos:broader "Bug reproduction framework" ;
-    prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/n8n-io/n8n/reproduce-bug" ;
+    skos:broader "Bug reproduction workflow" ;
+    prov:wasDerivedFrom "../.agents/skills/n8n-io/n8n/reproduce-bug" ;
     oc:contentHash "48412abee6332b9181c968c11848e05f8ea731d98cf93541c73d900b23c44773" ;
-    oc:dependsOnSkill oc:skill_linear_issue ;
-    oc:differentia "Systematically reproduces bugs from Linear ticket context by writing failing regression tests with confidence scoring" ;
-    oc:handlesFailure oc:BailoutTriggered,
-        oc:TestPassedUnexpectedly,
-        oc:UnconfirmedBug ;
+    oc:dependsOnSkill oc:skill_ontoskills_linear_issue,
+        oc:skill_ontoskills_n8n_conventions ;
+    oc:differentia "Systematically reproduces bugs from Linear ticket context as failing regression tests using n8n's monorepo test infrastructure" ;
+    oc:handlesFailure oc:BugAlreadyFixed,
+        oc:BugUnconfirmed,
+        oc:ReproductionSkipped ;
     oc:hasAllowedTool "Bash",
-        "Edit",
         "Glob",
         "Grep",
         "Read",
         "Write" ;
-    oc:hasArgumentHint "Linear ticket context (title, description, comments) as input" ;
+    oc:hasArgumentHint "Linear ticket context (title, description, comments)" ;
     oc:hasCategory "development" ;
     oc:hasDescription "Reproduce a bug from a Linear ticket with a failing test. Expects the full ticket context (title, description, comments) to be provided as input." ;
     oc:hasName "reproduce-bug" ;
-    oc:impartsKnowledge oc:kn_1fbdd759,
-        oc:kn_61d735c4,
-        oc:kn_80d1d762,
-        oc:kn_9f144991,
-        oc:kn_b4cb89a5,
-        oc:kn_d8de1f73,
-        oc:kn_e60f282d,
-        oc:kn_eb01c05e ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent """Given a Linear ticket context ($ARGUMENTS), systematically reproduce the bug
+with a failing regression test.""" ] ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Run the test from the package directory (e.g., `cd packages/nodes-base && pnpm test <file>`)." ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent "Classify the result:" ],
+                        [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 3 ;
+                            oc:rowCount 5 ;
+                            oc:tableCaption "Classify the result" ;
+                            oc:tableMarkdown """| Confidence | Criteria | Output |
+|------------|----------|--------|
+| **CONFIRMED** | Test fails consistently, failure matches hypothesis | Reproduction Report |
+| **LIKELY** | Test fails but failure mode differs slightly | Report + caveat |
+| **UNCONFIRMED** | Cannot trigger the failure | Report: what was tried |
+| **SKIPPED** | Hit a hard bailout trigger | Report: why skipped |
+| **ALREADY_FIXED** | Bug no longer reproduces on current code | Report: when fixed |
+""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 8 ;
+                    oc:sectionTitle "Step 8: Run and Score" ],
+                [ a oc:Section ;
+                    oc:hasContent _:ref_96adc84bd8866be0,
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Find the source code for the affected area:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Step 3: Locate Source Files" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Based on the affected area, pick the test layer and pattern:" ],
+                        [ a oc:Table ;
+                            oc:blockType "table" ;
+                            oc:contentOrder 2 ;
+                            oc:rowCount 9 ;
+                            oc:tableCaption "Based on the affected area, pick the test layer and pattern" ;
+                            oc:tableMarkdown """| Area | Test Layer | Pattern | Key Location |
+|------|-----------|---------|--------------|
+| Node operation | Jest unit | NodeTestHarness + nock | `packages/nodes-base/nodes/*/test/` |
+| Node credential | Jest unit | jest-mock-extended | `packages/nodes-base/nodes/*/test/` |
+| Trigger webhook | Jest unit | mock IHookFunctions + jest.mock GenericFunctions | `packages/nodes-base/nodes/*/test/` |
+| Binary data | Jest unit | NodeTestHarness assertBinaryData | `packages/core/nodes-testing/` |
+| Execution engine | Jest integration | WorkflowRunner + DI container | `packages/cli/src/__tests__/` |
+| CLI / API | Jest integration | setupTestServer + supertest | `packages/cli/test/integration/` |
+| Config | Jest unit | GlobalConfig + Container | `packages/@n8n/config/src/__tests__/` |
+| Editor UI | Vitest | Vue Test Utils + Pinia | `packages/frontend/editor-ui/src/**/__tests__/` |
+| E2E / Canvas | Playwright | Test containers + composables | `packages/testing/playwright/` |
+""" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Step 2: Route to Test Strategy" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "**Affected area** (node, execution engine, editor, API, config, etc.)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "**Reproduction steps** (if provided)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "**Error message / stack trace** (if provided)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "**Version where it broke / last working version**" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "**Workflow JSON** (if attached)" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Extract the following from the provided ticket context:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Step 1: Parse Signals" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "\"When [input/condition], the code does [wrong thing] because [root cause]\"" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Predict what the test output will show" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Identify the exact line(s) that need to change" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "State a clear, testable hypothesis:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 5 ;
+                    oc:sectionTitle "Step 5: Form Hypothesis" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 1 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "**Run tests from the package directory** (e.g., `pushd packages/nodes-base && pnpm test <file> && popd`)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "**Always redirect build output**: `pnpm build > build.log 2>&1`" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "**DO NOT look at existing fix PRs** — the goal is to reproduce from signals alone" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "**DO NOT fix the bug** — only reproduce it with a failing test" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "**Leave test files in place** as evidence (don't commit unless asked)" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 11 ;
+                    oc:sectionTitle "Important" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Try a different test approach or layer" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Maximum 3 attempts before declaring UNCONFIRMED" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Revisit hypothesis — re-read the code path" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "If UNCONFIRMED after first attempt:" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 3 ;
+                            oc:textContent "**Hard bailout triggers** (stop immediately):" ],
+                        [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 4 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Race condition / timing-dependent" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Requires specific cloud/enterprise infrastructure" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Requires real third-party API credentials" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Requires manual UI interaction that can't be scripted" ] ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 9 ;
+                    oc:sectionTitle "Step 9: Iterate or Bail" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 2 ;
+                            oc:textContent """**Ticket:** [ID] — [title]
+**Confidence:** [CONFIRMED | LIKELY | UNCONFIRMED | SKIPPED | ALREADY_FIXED]""" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Present findings in this format:" ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent _:ref_ba7fff65e097e6e5,
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "`path/to/test/file.test.ts` — X/Y tests fail:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Failing Test" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "[1-2 sentences explaining the bug mechanism]" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Root Cause" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Table ;
+                                    oc:blockType "table" ;
+                                    oc:contentOrder 1 ;
+                                    oc:rowCount 1 ;
+                                    oc:tableCaption "### Location" ;
+                                    oc:tableMarkdown """| File | Lines | Issue |
+|------|-------|-------|
+| `path/to/file.ts` | XX-YY | Description of the problem |
+""" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Location" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "[Pseudocode or description of the fix approach]" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "Fix Hint" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 10 ;
+                    oc:sectionTitle "Output: Reproduction Report" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 5 ;
+                                    oc:itemText "Also includes a \"happy path\" test to prove the setup works" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Includes a comment referencing the ticket ID" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 4 ;
+                                    oc:itemText "Asserts the CORRECT behavior (test will fail on current code)" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Targets the specific hypothesis from Step 5" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Uses the patterns found in Step 6" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Write a regression test that:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 7 ;
+                    oc:sectionTitle "Step 7: Write Failing Test" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Look for existing tests in the same area:" ],
+                        _:ref_9e650994d68083a6 ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 6 ;
+                    oc:sectionTitle "Step 6: Find Test Patterns" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:BulletList ;
+                            oc:blockType "bullet_list" ;
+                            oc:contentOrder 2 ;
+                            oc:hasItem [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 2 ;
+                                    oc:itemText "Identify the specific line(s) where the bug manifests" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 3 ;
+                                    oc:itemText "Note any error handling (or lack thereof) around the bug" ],
+                                [ a oc:BulletItem ;
+                                    oc:blockType "bullet_item" ;
+                                    oc:itemOrder 1 ;
+                                    oc:itemText "Follow the call chain from entry point to the failure" ] ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Read the source code and trace the execution path that triggers the bug:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 4 ;
+                    oc:sectionTitle "Step 4: Trace the Code Path" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Bug Reproduction Framework" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """name: reproduce-bug
+description: Reproduce a bug from a Linear ticket with a failing test. Expects the full ticket context (title, description, comments) to be provided as input.
+user_invocable: true
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:hasWorkflow [ a oc:Workflow ;
+            dcterms:description "Systematic 9-step process to reproduce a bug from a Linear ticket as a failing regression test" ;
+            oc:hasStep _:ref_088f701def329db9,
+                _:ref_1c739f66ef510829,
+                _:ref_252ec218cef5e813,
+                _:ref_42b26e94b53f9fa2,
+                _:ref_4812c8838913ae4f,
+                [ a oc:WorkflowStep ;
+                    dcterms:description "If UNCONFIRMED, revisit hypothesis and try different approach (max 3 attempts). If bailout triggers hit, declare SKIPPED." ;
+                    oc:expectedOutcome "Final confidence determination and reproduction report" ;
+                    oc:stepDependsOn _:ref_7a864fc5d5a3b859 ;
+                    oc:stepId "iterate-bail" ],
+                _:ref_7a864fc5d5a3b859,
+                _:ref_83e79e282a0f0bc6,
+                _:ref_ad3a9169f8d60078 ;
+            oc:workflowId "bug-reproduction" ;
+            oc:workflowName "Bug Reproduction from Linear Ticket" ],
+        _:ref_96adc84bd8866be0,
+        _:ref_9e650994d68083a6,
+        _:ref_ba7fff65e097e6e5 ;
+    oc:impartsKnowledge oc:kn_1fa2f891,
+        oc:kn_35e85fcf,
+        oc:kn_56c47b11,
+        oc:kn_5f6874d8,
+        oc:kn_6b1d7531,
+        oc:kn_7293e81c,
+        oc:kn_98e27361,
+        oc:kn_d662d00e,
+        oc:kn_dfc4f4c9 ;
     oc:isUserInvocable true ;
     oc:nature "Work" ;
-    oc:requiresState oc:EnvironmentReady ;
-    oc:resolvesIntent "analyze bug from ticket context",
-        "create test that confirms or denies bug hypothesis",
+    oc:requiresState oc:NetworkAvailable,
+        oc:TicketContextProvided ;
+    oc:resolvesIntent "analyze bug reports and trace root causes",
+        "identify correct test strategy for n8n codebase areas",
         "reproduce a bug from a Linear ticket",
-        "trace code path to identify root cause",
-        "write a failing regression test for a bug" ;
+        "write a failing regression test for a reported bug" ;
     oc:yieldsState oc:BugReproduced,
         oc:FailingTestWritten .
 
-oc:kn_1fbdd759 a oc:KnowledgeNode,
-        oc:SuccessIndicator ;
-    oc:appliesToContext "When scoring the reproduction result (Step 8)" ;
-    oc:directiveContent "A CONFIRMED result requires the test to fail consistently and the failure mode to match the stated hypothesis. Classify as LIKELY if failure differs slightly." ;
-    oc:hasRationale "Rigorous confidence classification ensures downstream consumers know how much trust to place in the reproduction." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_61d735c4 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When selecting where and how to write the reproduction test (Step 2)" ;
-    oc:directiveContent "Route the test strategy based on the affected area (node operation, credential, trigger, binary data, execution engine, CLI/API, config, editor UI, E2E) to select the correct test layer and pattern." ;
-    oc:hasRationale "n8n has a monorepo with distinct test infrastructures per area. Using the wrong test layer wastes time and may not reach the buggy code path." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_80d1d762 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When researching the bug, never search for or reference existing fix PRs" ;
-    oc:directiveContent "Do not look at existing fix PRs — the goal is to reproduce from signals alone." ;
-    oc:hasRationale "Looking at fix PRs biases the reproduction and defeats the purpose of independent bug confirmation." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_9f144991 a oc:Constraint,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When encountering any of these conditions during reproduction attempts" ;
-    oc:directiveContent "Hard bailout triggers require immediate stop: real third-party API credentials needed, race condition/timing-dependent, specific cloud/enterprise infrastructure, or manual UI interaction that can't be scripted." ;
-    oc:hasRationale "These conditions make automated reproduction infeasible and further attempts will waste time without reliable results." ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_b4cb89a5 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When initial reproduction attempt does not trigger the failure" ;
-    oc:directiveContent "Maximum 3 attempts before declaring UNCONFIRMED. On each failed attempt, revisit the hypothesis and try a different test approach or layer." ;
-    oc:hasRationale "Diminishing returns set in quickly; capping attempts prevents infinite loops and forces a decision." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_d8de1f73 a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "Always, throughout the entire reproduction process" ;
-    oc:directiveContent "Never fix the bug — only reproduce it with a failing regression test. The goal is to confirm the bug exists, not to resolve it." ;
-    oc:hasRationale "Separating reproduction from fixing keeps the workflow focused and produces clear evidence for whoever will implement the fix." ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_e60f282d a oc:KnowledgeNode,
+oc:kn_1fa2f891 a oc:KnowledgeNode,
         oc:PreFlightCheck ;
-    oc:appliesToContext "Before and during test execution (Step 8)" ;
-    oc:directiveContent "Run tests from the package directory (e.g., pushd packages/nodes-base && pnpm test <file> && popd). Always redirect build output with pnpm build > build.log 2>&1." ;
-    oc:hasRationale "Running tests from the wrong directory fails due to monorepo workspace resolution. Redirecting build output keeps the terminal clean for test results." ;
+    oc:appliesToContext "Before running tests, ensure build is current" ;
+    oc:directiveContent "Always redirect build output: pnpm build > build.log 2>&1. Check recent git history on affected files with git log --oneline -10 -- <path>." .
+
+oc:kn_35e85fcf a oc:KnowledgeNode,
+        oc:OutputFormat ;
+    oc:directiveContent """**Ticket:** [{ID}] — [{title}]
+**Confidence:** [CONFIRMED | LIKELY | UNCONFIRMED | SKIPPED | ALREADY_FIXED]
+
+### Root Cause
+[{1-2 sentences}]
+
+### Location
+| File | Lines | Issue |
+| `path/to/file.ts` | XX-YY | Description |
+
+### Failing Test
+`path/to/test/file.test.ts` — X/Y tests fail:
+1. `test name` — [failure description]
+
+### Fix Hint
+[{pseudocode or description}]""" ;
+    oc:templateVariables "Confidence",
+        "Failing Test",
+        "File",
+        "Fix Hint",
+        "ID",
+        "Issue",
+        "Lines",
+        "Root Cause",
+        "title" .
+
+oc:kn_56c47b11 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Running tests — always run from the package directory" ;
+    oc:codeLanguage "bash" ;
+    oc:directiveContent "pushd packages/nodes-base && pnpm test <file> && popd" .
+
+oc:kn_5f6874d8 a oc:KnowledgeNode,
+        oc:PostFlightValidation ;
+    oc:appliesToContext "After running the regression test" ;
+    oc:directiveContent "Classify confidence as CONFIRMED (consistent failure matching hypothesis), LIKELY (failure mode differs slightly), UNCONFIRMED (cannot trigger failure), SKIPPED (hit bailout trigger), or ALREADY_FIXED (no longer reproduces)." .
+
+oc:kn_6b1d7531 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:directiveContent "1. Parse signals from ticket → 2. Route to test strategy by affected area → 3. Locate source files → 4. Trace code path → 5. Form hypothesis → 6. Find test patterns → 7. Write failing test → 8. Run and score confidence → 9. Iterate or bail" ;
+    oc:stepOrder 1 .
+
+oc:kn_7293e81c a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "After writing regression tests" ;
+    oc:directiveContent "Leaves test files in place as evidence — do not commit unless explicitly asked." ;
+    oc:hasRationale "Test files serve as reproduction evidence for the team to review before a fix is attempted" .
+
+oc:kn_98e27361 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Before attempting test writing, evaluate bailout triggers" ;
+    oc:directiveContent "Do not attempt reproduction when the bug requires real third-party API credentials, involves race conditions/timing dependencies, requires specific cloud/enterprise infrastructure, or requires manual UI interaction that cannot be scripted." ;
+    oc:hasRationale "These scenarios cannot be reliably reproduced in automated tests and waste time; declare SKIPPED instead" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_eb01c05e a oc:KnowledgeNode,
-        oc:SideEffect ;
-    oc:appliesToContext "After writing the failing regression test (Step 7 onward)" ;
-    oc:directiveContent "Leave test files in place as evidence but do not commit unless asked. Test files are artifacts of reproduction, not deliverables for the main branch." ;
-    oc:hasRationale "Test files serve as reproducible evidence of the bug but should not be committed without explicit request to avoid polluting the codebase." ;
-    oc:severityLevel "MEDIUM" .
+oc:kn_d662d00e a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Always, throughout entire reproduction process" ;
+    oc:directiveContent "DO NOT fix the bug — only reproduce it with a failing regression test. DO NOT look at existing fix PRs." ;
+    oc:hasRationale "The goal is independent reproduction from ticket signals alone; fixing or peeking at fixes defeats the purpose of confirming the bug independently" ;
+    oc:severityLevel "CRITICAL" .
+
+oc:kn_dfc4f4c9 a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "After first test run fails to reproduce the bug" ;
+    oc:directiveContent "When UNCONFIRMED, revisit the hypothesis and re-read the code path, try a different test approach or layer. Maximum 3 attempts before declaring UNCONFIRMED." ;
+    oc:hasRationale "Balances thoroughness with time investment; after 3 attempts the signal is likely insufficient" .
+
+_:ref_10322490b9152704 a oc:WorkflowStep ;
+    dcterms:description "Check `test/` directories near the affected code" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_42c3147f35b2f2c1 a oc:WorkflowStep ;
+    dcterms:description "Use the same patterns for consistency" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_609c48a6cb6d4801 a oc:WorkflowStep ;
+    dcterms:description "`test name` — [failure description]" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_9fcdb37e4f031ab4 a oc:WorkflowStep ;
+    dcterms:description "Identify which mock/setup patterns they use" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_c3d75f7c4ee75754 a oc:WorkflowStep ;
+    dcterms:description "If no tests exist, find the closest similar node/service tests as a template" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_d6d6d12e02355a72 a oc:WorkflowStep ;
+    dcterms:description "Search for the node/service/component mentioned in the ticket" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_1" ;
+    oc:stepOrder 1 .
+
+_:ref_e8799a82e4e4e119 a oc:WorkflowStep ;
+    dcterms:description "Find the GenericFunctions file (common bug location for nodes)" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_2" ;
+    oc:stepOrder 2 .
+
+_:ref_ed501abab42e6d8a a oc:WorkflowStep ;
+    dcterms:description "Look at recent git history on affected files (`git log --oneline -10 -- <path>`)" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_4" ;
+    oc:stepOrder 4 .
+
+_:ref_f12d692e89517478 a oc:WorkflowStep ;
+    dcterms:description "Check for existing test files in the same area" ;
+    oc:blockType "workflow_step" ;
+    oc:stepId "step_3" ;
+    oc:stepOrder 3 .
+
+_:ref_088f701def329db9 a oc:WorkflowStep ;
+    dcterms:description "Extract error messages, reproduction steps, workflow JSON, affected area, and version info from ticket context" ;
+    oc:expectedOutcome "Structured understanding of the bug signals" ;
+    oc:stepId "parse-signals" .
+
+_:ref_252ec218cef5e813 a oc:WorkflowStep ;
+    dcterms:description "Find existing tests in the same area and identify mock/setup patterns to use for consistency" ;
+    oc:expectedOutcome "Test patterns and conventions identified for the target area" ;
+    oc:stepDependsOn _:ref_1c739f66ef510829 ;
+    oc:stepId "find-patterns" .
+
+_:ref_42b26e94b53f9fa2 a oc:WorkflowStep ;
+    dcterms:description "Read source code and trace the execution path from entry point to the failure point" ;
+    oc:expectedOutcome "Call chain mapped, bug manifestation lines identified" ;
+    oc:stepDependsOn _:ref_83e79e282a0f0bc6 ;
+    oc:stepId "trace-code" .
+
+_:ref_4812c8838913ae4f a oc:WorkflowStep ;
+    dcterms:description "State a testable hypothesis: when [condition], code does [wrong thing] because [root cause]" ;
+    oc:expectedOutcome "Clear, testable hypothesis with predicted test output" ;
+    oc:stepDependsOn _:ref_42b26e94b53f9fa2 ;
+    oc:stepId "form-hypothesis" .
+
+_:ref_7a864fc5d5a3b859 a oc:WorkflowStep ;
+    dcterms:description "Run the test from the package directory and classify confidence level (CONFIRMED/LIKELY/UNCONFIRMED/SKIPPED/ALREADY_FIXED)" ;
+    oc:expectedOutcome "Test executed and confidence level assigned" ;
+    oc:stepDependsOn _:ref_ad3a9169f8d60078 ;
+    oc:stepId "run-score" .
+
+_:ref_83e79e282a0f0bc6 a oc:WorkflowStep ;
+    dcterms:description "Find source files for the affected area, check GenericFunctions, existing tests, and recent git history" ;
+    oc:expectedOutcome "Source files and relevant code located" ;
+    oc:stepDependsOn _:ref_1c739f66ef510829 ;
+    oc:stepId "locate-source" .
+
+_:ref_96adc84bd8866be0 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 2 ;
+    oc:hasStep _:ref_d6d6d12e02355a72,
+        _:ref_e8799a82e4e4e119,
+        _:ref_ed501abab42e6d8a,
+        _:ref_f12d692e89517478 ;
+    oc:workflowId "procedure_2" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_9e650994d68083a6 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 2 ;
+    oc:hasStep _:ref_10322490b9152704,
+        _:ref_42c3147f35b2f2c1,
+        _:ref_9fcdb37e4f031ab4,
+        _:ref_c3d75f7c4ee75754 ;
+    oc:workflowId "procedure_2" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_ad3a9169f8d60078 a oc:WorkflowStep ;
+    dcterms:description "Write a failing regression test targeting the hypothesis, with ticket ID reference and a happy path test" ;
+    oc:expectedOutcome "Test file written that asserts correct behavior (will fail on current buggy code)" ;
+    oc:stepDependsOn _:ref_252ec218cef5e813,
+        _:ref_4812c8838913ae4f ;
+    oc:stepId "write-test" .
+
+_:ref_ba7fff65e097e6e5 a oc:Workflow ;
+    oc:blockType "ordered_procedure" ;
+    oc:contentOrder 2 ;
+    oc:hasStep _:ref_609c48a6cb6d4801 ;
+    oc:workflowId "procedure_2" ;
+    oc:workflowName "Ordered Procedure" .
+
+_:ref_1c739f66ef510829 a oc:WorkflowStep ;
+    dcterms:description "Based on affected area, select the appropriate test layer, pattern, and directory location" ;
+    oc:expectedOutcome "Test strategy selected with correct framework and location" ;
+    oc:stepDependsOn _:ref_088f701def329db9 ;
+    oc:stepId "route-strategy" .
 

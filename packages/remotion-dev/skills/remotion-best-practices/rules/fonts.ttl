@@ -7,86 +7,328 @@
 oc:skill_remotion_dev_skills_remotion_best_practices_fonts a oc:DeclarativeSkill,
         oc:Skill ;
     dcterms:identifier "fonts" ;
-    skos:broader "Font loading reference" ;
+    skos:broader "Font loading guide" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/remotion-dev/skills/remotion-best-practices" ;
     oc:contentHash "1749e4cf82e8b157d4b0a26f46721152d3ef9e5e9a1686753b8bb6a1be83ddbc" ;
-    oc:dependsOnSkill oc:skill_remotion_best_practices ;
-    oc:differentia "provides patterns for integrating Google Fonts and local fonts into Remotion video compositions with proper loading and rendering guarantees" ;
-    oc:extends oc:skill_remotion_dev_skills_remotion_best_practices ;
+    oc:differentia "provides type-safe Google Fonts and local font loading patterns for Remotion video projects" ;
+    oc:extends oc:skill_ontoskills_remotion_best_practices,
+        oc:skill_remotion_dev_skills_remotion_best_practices ;
     oc:handlesFailure oc:FileNotFound,
-        oc:NetworkTimeout ;
-    oc:hasAllowedTool "Bash" ;
-    oc:hasArgumentHint "font-family or font configuration" ;
+        oc:InvalidInput ;
+    oc:hasArgumentHint "font-name or font-file-path" ;
     oc:hasCategory "development" ;
-    oc:hasRequirement oc:req_1f77ec7c,
-        oc:req_3312e6a5,
-        oc:req_aad9bed4 ;
-    oc:impartsKnowledge oc:kn_29f820b4,
-        oc:kn_2ac06582,
-        oc:kn_a4a166d7,
-        oc:kn_b7a9fd34,
-        oc:kn_bab375cb,
-        oc:kn_c3b94957 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """name: fonts
+description: Loading Google Fonts and local fonts in Remotion
+metadata:
+  tags: fonts, google-fonts, typography, text
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasSubsection [ a oc:Section ;
+                    oc:hasContent [ a oc:CodeExample ;
+                            oc:blockType "code_block" ;
+                            oc:codeContent """import { loadFont } from "@remotion/google-fonts/Montserrat";
+
+const { fontFamily } = loadFont("normal", {
+  weights: ["400", "700"],
+  subsets: ["latin"],
+});
+
+export const Title: React.FC<{ text: string }> = ({ text }) => {
+  return (
+    <h1
+      style={{
+        fontFamily,
+        fontSize: 80,
+        fontWeight: "bold",
+      }}
+    >
+      {text}
+    </h1>
+  );
+};
+""" ;
+                            oc:codeLanguage "tsx" ;
+                            oc:contentOrder 2 ;
+                            oc:sourceLocation "lines 131-152" ],
+                        [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "Call `loadFont()` at the top level of your component or in a separate file that's imported early:" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 3 ;
+                    oc:sectionTitle "Using in components" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "The recommended way to use Google Fonts. It's type-safe and automatically blocks rendering until the font is ready." ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """npx remotion add @remotion/google-fonts # If project uses npm
+bunx remotion add @remotion/google-fonts # If project uses bun
+yarn remotion add @remotion/google-fonts # If project uses yarn
+pnpm exec remotion add @remotion/google-fonts # If project uses pnpm
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 19-24" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent """First, the @remotion/google-fonts package needs to be installed.
+If it is not installed, use the following command:""" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 4 ;
+                                    oc:textContent "Preferrably, specify only needed weights and subsets to reduce file size:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """import { loadFont } from "@remotion/google-fonts/Roboto";
+
+const { fontFamily } = loadFont("normal", {
+  weights: ["400", "700"],
+  subsets: ["latin"],
+});
+""" ;
+                                    oc:codeLanguage "tsx" ;
+                                    oc:contentOrder 5 ;
+                                    oc:sourceLocation "lines 38-45" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """import { loadFont } from "@remotion/google-fonts/Lobster";
+
+const { fontFamily } = loadFont();
+
+export const MyComposition = () => {
+  return <div style={{ fontFamily }}>Hello World</div>;
+};
+""" ;
+                                    oc:codeLanguage "tsx" ;
+                                    oc:contentOrder 3 ;
+                                    oc:sourceLocation "lines 26-34" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Prerequisites" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Use `waitUntilDone()` if you need to know when the font is ready:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """import { loadFont } from "@remotion/google-fonts/Lobster";
+
+const { fontFamily, waitUntilDone } = loadFont();
+
+await waitUntilDone();
+""" ;
+                                    oc:codeLanguage "tsx" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 51-57" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Waiting for font to load" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 1 ;
+                    oc:sectionTitle "Google Fonts with @remotion/google-fonts" ],
+                [ a oc:Section ;
+                    oc:hasContent [ a oc:Paragraph ;
+                            oc:blockType "paragraph" ;
+                            oc:contentOrder 1 ;
+                            oc:textContent "For local font files, use the `@remotion/fonts` package." ] ;
+                    oc:hasSubsection [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """loadFont({
+  family: "MyFont", // Required: name to use in CSS
+  url: staticFile("font.woff2"), // Required: font file URL
+  format: "woff2", // Optional: auto-detected from extension
+  weight: "400", // Optional: font weight
+  style: "normal", // Optional: normal or italic
+  display: "block", // Optional: font-display behavior
+});
+""" ;
+                                    oc:codeLanguage "tsx" ;
+                                    oc:contentOrder 1 ;
+                                    oc:sourceLocation "lines 116-125" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 4 ;
+                            oc:sectionTitle "Available options" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Place your font file in the `public/` folder and use `loadFont()`:" ],
+                                [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """import { loadFont } from "@remotion/fonts";
+import { staticFile } from "remotion";
+
+await loadFont({
+  family: "MyFont",
+  url: staticFile("MyFont-Regular.woff2"),
+});
+
+export const MyComposition = () => {
+  return <div style={{ fontFamily: "MyFont" }}>Hello World</div>;
+};
+""" ;
+                                    oc:codeLanguage "tsx" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 78-90" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 2 ;
+                            oc:sectionTitle "Loading a local font" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """npx remotion add @remotion/fonts # If project uses npm
+bunx remotion add @remotion/fonts # If project uses bun
+yarn remotion add @remotion/fonts # If project uses yarn
+pnpm exec remotion add @remotion/fonts # If project uses pnpm
+""" ;
+                                    oc:codeLanguage "bash" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 67-72" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "First, install @remotion/fonts:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 1 ;
+                            oc:sectionTitle "Prerequisites" ],
+                        [ a oc:Section ;
+                            oc:hasContent [ a oc:CodeExample ;
+                                    oc:blockType "code_block" ;
+                                    oc:codeContent """import { loadFont } from "@remotion/fonts";
+import { staticFile } from "remotion";
+
+await Promise.all([
+  loadFont({
+    family: "Inter",
+    url: staticFile("Inter-Regular.woff2"),
+    weight: "400",
+  }),
+  loadFont({
+    family: "Inter",
+    url: staticFile("Inter-Bold.woff2"),
+    weight: "700",
+  }),
+]);
+""" ;
+                                    oc:codeLanguage "tsx" ;
+                                    oc:contentOrder 2 ;
+                                    oc:sourceLocation "lines 96-112" ],
+                                [ a oc:Paragraph ;
+                                    oc:blockType "paragraph" ;
+                                    oc:contentOrder 1 ;
+                                    oc:textContent "Load each weight separately with the same family name:" ] ;
+                            oc:sectionLevel 3 ;
+                            oc:sectionOrder 3 ;
+                            oc:sectionTitle "Loading multiple weights" ] ;
+                    oc:sectionLevel 2 ;
+                    oc:sectionOrder 2 ;
+                    oc:sectionTitle "Local fonts with @remotion/fonts" ] ;
+            oc:sectionLevel 1 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Using fonts in Remotion" ] ;
+    oc:impartsKnowledge oc:kn_16518f5e,
+        oc:kn_18b07179,
+        oc:kn_2f6ae677,
+        oc:kn_321fb9e7,
+        oc:kn_32c69194,
+        oc:kn_50a959f6,
+        oc:kn_62f2aba3,
+        oc:kn_6ed2a014,
+        oc:kn_a8aa8914,
+        oc:kn_d55a7892 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
     oc:requiresState oc:EnvironmentReady ;
     oc:resolvesIntent "configure font weights and subsets for video rendering",
-        "ensure fonts are loaded before rendering",
         "load google fonts in remotion",
-        "load local fonts in remotion" ;
+        "load local fonts in remotion",
+        "use custom typography in remotion videos" ;
     oc:yieldsState oc:FontLoaded .
 
-oc:kn_29f820b4 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When structuring component code that uses custom fonts" ;
-    oc:directiveContent "Do not call loadFont() inside component render bodies or useEffect hooks — call it at the module top level or in an early import." ;
-    oc:hasRationale "Calling loadFont() inside render cycles can cause repeated loading, race conditions, or fonts not being ready at render time." ;
-    oc:severityLevel "CRITICAL" .
+oc:kn_16518f5e a oc:KnowledgeNode,
+        oc:Prerequisite ;
+    oc:appliesToContext "Before loading any font" ;
+    oc:directiveContent "@remotion/google-fonts or @remotion/fonts package must be installed before loading fonts. Use 'npx remotion add @remotion/google-fonts' or 'npx remotion add @remotion/fonts'." .
 
-oc:kn_2ac06582 a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "When loading local fonts with @remotion/fonts" ;
-    oc:directiveContent "Place local font files in the public/ directory and reference them via staticFile() to ensure they are bundled correctly." ;
-    oc:hasRationale "The public/ directory is Remotion's convention for static assets that are served during preview and rendering." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_a4a166d7 a oc:DesignPrinciple,
+oc:kn_18b07179 a oc:Constraint,
         oc:KnowledgeNode ;
     oc:appliesToContext "When choosing between Google Fonts and local fonts" ;
-    oc:directiveContent "Prefer @remotion/google-fonts for web fonts as it is type-safe and automatically blocks rendering until the font is ready." ;
-    oc:hasRationale "Type safety and automatic render-blocking prevent flicker or missing-font frames in video output." ;
+    oc:directiveContent "Google Font loading via @remotion/google-fonts is type-safe and automatically blocks rendering until the font is ready." ;
+    oc:hasRationale "Using the recommended package prevents flicker or missing-font frames in rendered video" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_b7a9fd34 a oc:KnowledgeNode,
-        oc:Standard ;
-    oc:appliesToContext "When a font family requires multiple weights (e.g., regular 400 and bold 700)" ;
-    oc:directiveContent "Load multiple font weights by calling loadFont() separately for each weight with the same family name, using Promise.all() for parallel loading." ;
-    oc:hasRationale "Each weight is a separate font-face definition; parallel loading ensures all weights are available without sequential delays." ;
+oc:kn_2f6ae677 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Optimized Google Font loading with specific weights and subsets" ;
+    oc:codeLanguage "tsx" ;
+    oc:directiveContent """import { loadFont } from "@remotion/google-fonts/Roboto";
+const { fontFamily } = loadFont("normal", {
+  weights: ["400", "700"],
+  subsets: ["latin"],
+});""" .
+
+oc:kn_321fb9e7 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Basic Google Font loading pattern" ;
+    oc:codeLanguage "tsx" ;
+    oc:directiveContent """import { loadFont } from "@remotion/google-fonts/Lobster";
+const { fontFamily } = loadFont();""" .
+
+oc:kn_32c69194 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When calling loadFont() for Google Fonts" ;
+    oc:directiveContent "Do not load all font weights and subsets indiscriminately. Always specify only the weights and subsets you actually use." ;
+    oc:hasRationale "Loading unused font variants wastes bandwidth and increases render time" ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_bab375cb a oc:Constraint,
+oc:kn_50a959f6 a oc:KnowledgeNode,
+        oc:KnownIssue ;
+    oc:appliesToContext "When loading local font files with @remotion/fonts" ;
+    oc:directiveContent "Local fonts must be placed in the public/ folder and referenced via staticFile(). Direct URL imports will not work during rendering." ;
+    oc:hasRationale "Remotion's rendering pipeline requires static assets to be in the public directory for correct resolution in both preview and render modes" ;
+    oc:severityLevel "HIGH" .
+
+oc:kn_62f2aba3 a oc:KnowledgeNode,
+        oc:Procedure ;
+    oc:appliesToContext "When adding any font to a Remotion project" ;
+    oc:directiveContent "1. Install @remotion/google-fonts (or @remotion/fonts for local) 2. Import loadFont from the specific font subpath 3. Call loadFont() with desired weights/subsets 4. Destructure fontFamily from the result 5. Apply fontFamily in CSS/style props" ;
+    oc:stepOrder 1 .
+
+oc:kn_6ed2a014 a oc:Heuristic,
         oc:KnowledgeNode ;
     oc:appliesToContext "When calling loadFont() from @remotion/google-fonts" ;
-    oc:directiveContent "Specify only the needed weights and subsets when loading Google Fonts to minimize bundle and rendering overhead." ;
-    oc:hasRationale "Importing all weights and subsets increases file size unnecessarily, slowing down rendering and increasing resource usage." ;
-    oc:severityLevel "MEDIUM" .
+    oc:directiveContent "Specify only needed weights and subsets when loading Google Fonts to minimize bundle/file size." ;
+    oc:hasRationale "Unnecessary weights and subsets increase download time and memory usage during rendering" .
 
-oc:kn_c3b94957 a oc:Heuristic,
+oc:kn_a8aa8914 a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When you need guaranteed font availability before proceeding" ;
-    oc:directiveContent "Use waitUntilDone() to explicitly await font readiness when font loading timing is critical or when rendering programmatically." ;
-    oc:hasRationale "Explicit waiting removes ambiguity about font availability and is especially useful in programmatic rendering pipelines." ;
-    oc:severityLevel "LOW" .
+    oc:appliesToContext "When structuring font loading in components" ;
+    oc:directiveContent "Call loadFont() at the top level of your component or in a separate file that's imported early, not inside event handlers or conditional blocks." ;
+    oc:hasRationale "Top-level loading ensures the font is registered before the component renders, avoiding flash-of-unstyled-text" .
 
-oc:req_1f77ec7c a oc:RequirementTool ;
-    oc:isOptional true ;
-    oc:requirementValue "@remotion/fonts" .
+oc:kn_d55a7892 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "Loading local font files placed in the public/ directory" ;
+    oc:codeLanguage "tsx" ;
+    oc:directiveContent """import { loadFont } from "@remotion/fonts";
+import { staticFile } from "remotion";
 
-oc:req_3312e6a5 a oc:RequirementKnowledge ;
-    oc:isOptional false ;
-    oc:requirementValue "CSS font-face and font-family properties" .
-
-oc:req_aad9bed4 a oc:RequirementTool ;
-    oc:isOptional true ;
-    oc:requirementValue "@remotion/google-fonts" .
+await loadFont({
+  family: "MyFont",
+  url: staticFile("MyFont-Regular.woff2"),
+});""" .
 

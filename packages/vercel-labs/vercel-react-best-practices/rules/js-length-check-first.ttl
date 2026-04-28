@@ -10,52 +10,152 @@ oc:skill_vercel_labs_vercel_react_best_practices_js_length_check_first a oc:Decl
     skos:broader "Performance optimization technique" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "8b54a311c826b299272f29187fc58bc55772a04c4a72eeb29456ee96dc9fc624" ;
-    oc:differentia "checks array length before expensive comparison operations to enable early exit when lengths differ" ;
-    oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
+    oc:differentia "uses O(1) length comparison as a guard before expensive array operations to enable early exit" ;
+    oc:extends oc:skill_ontoskills_vercel_react_best_practices,
+        oc:skill_vercel_labs_vercel_react_best_practices ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_0c943778,
-        oc:kn_141842a1,
-        oc:kn_174d70e8,
-        oc:kn_95e922c7,
-        oc:kn_d6f94ba2 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Early Length Check for Array Comparisons
+impact: MEDIUM-HIGH
+impactDescription: avoids expensive operations when lengths differ
+tags: javascript, arrays, performance, optimization, comparison
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function hasChanges(current: string[], original: string[]) {
+  // Always sorts and joins, even when lengths differ
+  return current.sort().join() !== original.sort().join()
+}
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 4 ;
+                    oc:sourceLocation "lines 16-21" ],
+                [ a oc:BulletList ;
+                    oc:blockType "bullet_list" ;
+                    oc:contentOrder 9 ;
+                    oc:hasItem [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 4 ;
+                            oc:itemText "It returns early when a difference is found" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 1 ;
+                            oc:itemText "It avoids the overhead of sorting and joining the arrays when lengths differ" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 2 ;
+                            oc:itemText "It avoids consuming memory for the joined strings (especially important for large arrays)" ],
+                        [ a oc:BulletItem ;
+                            oc:blockType "bullet_item" ;
+                            oc:itemOrder 3 ;
+                            oc:itemText "It avoids mutating the original arrays" ] ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 6 ;
+                    oc:textContent "**Correct (O(1) length check first):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "In real-world applications, this optimization is especially valuable when the comparison runs in hot paths (event handlers, render loops)." ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function hasChanges(current: string[], original: string[]) {
+  // Early return if lengths differ
+  if (current.length !== original.length) {
+    return true
+  }
+  // Only sort when lengths match
+  const currentSorted = current.toSorted()
+  const originalSorted = original.toSorted()
+  for (let i = 0; i < currentSorted.length; i++) {
+    if (currentSorted[i] !== originalSorted[i]) {
+      return true
+    }
+  }
+  return false
+}
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 7 ;
+                    oc:sourceLocation "lines 27-43" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "When comparing arrays with expensive operations (sorting, deep equality, serialization), check lengths first. If lengths differ, the arrays cannot be equal." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 3 ;
+                    oc:textContent "**Incorrect (always runs expensive comparison):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 8 ;
+                    oc:textContent "This new approach is more efficient because:" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 5 ;
+                    oc:textContent "Two O(n log n) sorts run even when `current.length` is 5 and `original.length` is 100. There is also overhead of joining the arrays and comparing the strings." ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Early Length Check for Array Comparisons" ] ;
+    oc:impartsKnowledge oc:kn_2d92af83,
+        oc:kn_4d07928e,
+        oc:kn_543296be,
+        oc:kn_c0f2a8d0,
+        oc:kn_cd083020 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:resolvesIntent "avoid unnecessary expensive operations on arrays",
-        "improve performance of hot-path comparisons",
-        "optimize array comparisons" .
+    oc:requiresState oc:EnvironmentReady ;
+    oc:resolvesIntent "avoid unnecessary sorting and joining of arrays",
+        "optimize array comparison performance",
+        "write efficient array equality checks" ;
+    oc:yieldsState oc:ArrayComparisonOptimized .
 
-oc:kn_0c943778 a oc:DesignPrinciple,
+oc:kn_2d92af83 a oc:KnowledgeNode,
+        oc:SideEffect ;
+    oc:appliesToContext "When sorting arrays for comparison purposes" ;
+    oc:directiveContent "Array.prototype.sort() mutates the original array. Use toSorted() (non-mutating) or copy the array first to avoid unintended side effects." ;
+    oc:hasRationale "Mutating input arrays can cause bugs in calling code that references the same arrays" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_4d07928e a oc:CodePattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When comparing arrays in JavaScript/TypeScript" ;
-    oc:directiveContent "Always check array lengths before performing expensive comparison operations (sorting, deep equality, serialization). If lengths differ, the arrays cannot be equal, so return immediately." ;
-    oc:hasRationale "Length comparison is O(1) while sort-based comparison is O(n log n); avoiding the expensive path when lengths differ yields significant savings in hot paths like event handlers and render loops." ;
+    oc:appliesToContext "When implementing array change detection or equality comparison" ;
+    oc:codeLanguage "typescript" ;
+    oc:directiveContent """function hasChanges(current: string[], original: string[]) {
+  if (current.length !== original.length) return true;
+  const a = current.toSorted(), b = original.toSorted();
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) return true;
+  }
+  return false;
+}""" ;
+    oc:hasRationale "Combines early length exit, non-mutating sort, and element-by-element early return for optimal performance" .
+
+oc:kn_543296be a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When comparing arrays in any context, especially hot paths like event handlers and render loops" ;
+    oc:directiveContent "Always check array lengths before performing expensive comparison operations (sorting, deep equality, serialization). If lengths differ, the arrays cannot be equal — return early." ;
+    oc:hasRationale "A length check is O(1) and can skip O(n log n) sorting or O(n) serialization when lengths differ" ;
     oc:severityLevel "HIGH" .
 
-oc:kn_141842a1 a oc:KnowledgeNode,
+oc:kn_c0f2a8d0 a oc:KnowledgeNode,
         oc:PerformanceProfile ;
-    oc:appliesToContext "When evaluating performance characteristics of array comparison code" ;
-    oc:directiveContent "The optimized approach has O(1) best-case (lengths differ) and O(n log n) worst-case (lengths match, full sort and compare). It also avoids allocating memory for joined strings." ;
-    oc:hasRationale "In real-world applications with frequently differing array lengths, the best case dominates and provides substantial performance improvement over the naive approach." ;
+    oc:appliesToContext "When evaluating performance characteristics of array comparison functions" ;
+    oc:directiveContent "Early length check converts worst-case from always-O(n log n) to O(1) when lengths differ. When lengths match, the optimized path uses element-by-element comparison with early exit on first mismatch, avoiding string allocation overhead." ;
+    oc:hasRationale "Memory allocation for joined strings can be significant for large arrays; element-by-element comparison avoids this entirely" ;
     oc:severityLevel "MEDIUM" .
 
-oc:kn_174d70e8 a oc:Heuristic,
+oc:kn_cd083020 a oc:AntiPattern,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When writing any comparison or equality-check function" ;
-    oc:directiveContent "Apply early-exit / guard clause patterns at the start of comparison functions: check cheap conditions (lengths, types, references) before expensive ones (sorting, deep equality, serialization)." ;
-    oc:hasRationale "Guard clauses reduce cognitive complexity and improve performance by eliminating unnecessary work upfront." ;
-    oc:severityLevel "LOW" .
-
-oc:kn_95e922c7 a oc:KnowledgeNode,
-        oc:SideEffect ;
-    oc:appliesToContext "When sorting arrays during comparison operations" ;
-    oc:directiveContent "Using Array.prototype.sort() mutates the original array. Use Array.prototype.toSorted() instead to avoid side effects on input data." ;
-    oc:hasRationale "Mutating input arrays can cause subtle bugs in callers that don't expect their data to be reordered, especially in React render paths where referential integrity matters." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_d6f94ba2 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When implementing array equality or change-detection functions" ;
-    oc:directiveContent "Never unconditionally sort and join arrays for comparison without first checking lengths, as this always incurs O(n log n) cost plus memory overhead for joined strings." ;
-    oc:hasRationale "Running two O(n log n) sorts plus string joining and comparison is wasteful when a simple O(1) length check can short-circuit the entire operation." ;
+    oc:appliesToContext "When writing array equality or change-detection functions" ;
+    oc:directiveContent "Never sort and join entire arrays unconditionally for comparison. Avoid: `current.sort().join() !== original.sort().join()` — this always runs two O(n log n) sorts plus string joining even when lengths differ." ;
+    oc:hasRationale "Sorting and joining allocates memory for string intermediaries and runs expensive operations unnecessarily when arrays have different lengths" ;
     oc:severityLevel "HIGH" .
 

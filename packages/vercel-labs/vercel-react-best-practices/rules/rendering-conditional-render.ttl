@@ -10,48 +10,102 @@ oc:skill_vercel_labs_vercel_react_best_practices_rendering_conditional_render a 
     skos:broader "React rendering pattern" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "2ec2fa23c4148285144687050c52369adba3da2fbe3d486f8d3e0aad8f06f2bc" ;
-    oc:differentia "uses explicit ternary operators instead of && for conditional rendering to prevent falsy value rendering bugs" ;
+    oc:differentia "that prevents falsy value rendering bugs by using explicit ternary operators instead of && for conditional JSX" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
-    oc:handlesFailure oc:InvalidInput ;
-    oc:hasArgumentHint "React component code with conditional rendering" ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_10944545,
-        oc:kn_34685884,
-        oc:kn_b79aace5,
-        oc:kn_d726ebe9 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Use Explicit Conditional Rendering
+impact: LOW
+impactDescription: prevents rendering 0 or NaN
+tags: rendering, conditional, jsx, falsy-values
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function Badge({ count }: { count: number }) {
+  return (
+    <div>
+      {count > 0 ? <span className="badge">{count}</span> : null}
+    </div>
+  )
+}
+
+// When count = 0, renders: <div></div>
+// When count = 5, renders: <div><span class="badge">5</span></div>
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 5 ;
+                    oc:sourceLocation "lines 29-40" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "**Correct (renders nothing when count is 0):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "Use explicit ternary operators (`? :`) instead of `&&` for conditional rendering when the condition can be `0`, `NaN`, or other falsy values that render." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "**Incorrect (renders \"0\" when count is 0):**" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """function Badge({ count }: { count: number }) {
+  return (
+    <div>
+      {count && <span className="badge">{count}</span>}
+    </div>
+  )
+}
+
+// When count = 0, renders: <div>0</div>
+// When count = 5, renders: <div><span class="badge">5</span></div>
+""" ;
+                    oc:codeLanguage "tsx" ;
+                    oc:contentOrder 3 ;
+                    oc:sourceLocation "lines 14-25" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Use Explicit Conditional Rendering" ] ;
+    oc:impartsKnowledge oc:kn_2b60a3a1,
+        oc:kn_b6ce7f00,
+        oc:kn_c92a5b7d,
+        oc:kn_ea0ab823 ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:EnvironmentReady ;
-    oc:resolvesIntent "fix conditional rendering bugs with falsy values",
-        "prevent rendering 0 or NaN in JSX",
-        "write correct conditional rendering in React components" ;
-    oc:yieldsState oc:CodePatternApplied .
+    oc:resolvesIntent "avoid rendering 0 or NaN in JSX",
+        "fix conditional rendering bugs with falsy values",
+        "write correct conditional rendering in React components" .
 
-oc:kn_10944545 a oc:KnowledgeNode,
-        oc:SuccessIndicator ;
-    oc:appliesToContext "After implementing conditional rendering with ternary operators" ;
-    oc:directiveContent "When count is 0, the component should render an empty container with no visible text content." ;
-    oc:hasRationale "This confirms the falsy branch correctly returns null instead of rendering the falsy value as text." ;
+oc:kn_2b60a3a1 a oc:CodePattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When conditionally rendering elements based on numeric or falsy-prone values" ;
+    oc:directiveContent "Use explicit ternary: `{count > 0 ? <Component /> : null}` instead of `{count && <Component />}`" ;
+    oc:hasRationale "Ternary with null ensures nothing renders for falsy cases, while && leaks falsy values into the DOM" .
+
+oc:kn_b6ce7f00 a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing conditional JSX with numeric or potentially falsy conditions" ;
+    oc:directiveContent "Never use && for conditional rendering when the left operand can be 0, NaN, or other falsy values that React will render as text" ;
+    oc:hasRationale "React renders falsy values like 0 and NaN as visible text in the DOM, causing unexpected UI output" ;
+    oc:severityLevel "MEDIUM" .
+
+oc:kn_c92a5b7d a oc:Constraint,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When choosing between && and ternary for conditional rendering" ;
+    oc:directiveContent "The && operator is safe only when the left operand is strictly boolean (true/false). For any other type, use a ternary." ;
+    oc:hasRationale "Boolean && never produces a renderable falsy value, but number/string/object && can" ;
     oc:severityLevel "LOW" .
 
-oc:kn_34685884 a oc:KnowledgeNode,
-        oc:KnownIssue ;
-    oc:appliesToContext "When using numeric values as conditions in JSX && expressions" ;
-    oc:directiveContent "The expression {count && <Badge />} renders '0' as text when count is 0, because 0 is a valid React node that gets rendered." ;
-    oc:hasRationale "In JavaScript, 0 && <Badge /> evaluates to 0 (not false), and React treats 0 as a renderable value, displaying it as text content." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_b79aace5 a oc:DesignPrinciple,
+oc:kn_ea0ab823 a oc:DesignPrinciple,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When conditionally rendering JSX elements based on any value that could be a falsy primitive" ;
-    oc:directiveContent "Use explicit ternary operators (condition ? <Component /> : null) for conditional rendering to make the intent unambiguous." ;
-    oc:hasRationale "Ternary operators explicitly define both the truthy and falsy branches, eliminating ambiguity about what gets rendered when the condition is falsy." ;
-    oc:severityLevel "HIGH" .
-
-oc:kn_d726ebe9 a oc:AntiPattern,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When writing JSX conditional rendering with numeric or potentially falsy conditions" ;
-    oc:directiveContent "Never use the && operator for conditional rendering when the left-hand expression can be 0, NaN, or other falsy values that React will render as text." ;
-    oc:hasRationale "React renders falsy values like 0 and NaN as visible text in the DOM, causing unexpected UI output such as '0' appearing on screen." ;
-    oc:severityLevel "MEDIUM" .
+    oc:appliesToContext "When writing any conditional rendering in React components" ;
+    oc:directiveContent "Prefer explicit over implicit conditional logic in JSX — always make the 'else' branch visible (even if null)" ;
+    oc:hasRationale "Explicit ternaries make intent clear and prevent accidental rendering of unexpected values" .
 

@@ -10,57 +10,184 @@ oc:skill_vercel_labs_vercel_react_best_practices_server_auth_actions a oc:Declar
     skos:broader "Security pattern" ;
     prov:wasDerivedFrom "/home/marcello/Documenti/onto/ontoskills/.agents/skills/vercel-labs/vercel-react-best-practices" ;
     oc:contentHash "a2ca8aa102839251c7971ec784560fab943c20b36fe6f80365d4110c13260c23" ;
-    oc:differentia "that enforces authentication and authorization inside Next.js Server Actions as if they were public API endpoints" ;
+    oc:differentia "that enforces authentication and authorization inside Next.js Server Actions, treating them as public API endpoints" ;
     oc:extends oc:skill_vercel_labs_vercel_react_best_practices ;
     oc:handlesFailure oc:InvalidInput,
         oc:UnauthorizedAccess ;
-    oc:hasArgumentHint "server-action-code" ;
     oc:hasCategory "development" ;
-    oc:impartsKnowledge oc:kn_0333fdb1,
-        oc:kn_794f413e,
-        oc:kn_cbd3baf8,
-        oc:kn_d5930adb,
-        oc:kn_dbeb4f60 ;
+    oc:hasSection [ a oc:Section ;
+            oc:hasContent [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 2 ;
+                    oc:textContent "Server Actions (functions with `\"use server\"`) are exposed as public endpoints, just like API routes. Always verify authentication and authorization **inside** each Server Action—do not rely solely on middleware, layout guards, or page-level checks, as Server Actions can be invoked directly." ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 8 ;
+                    oc:textContent "**With input validation:**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 6 ;
+                    oc:textContent "**Correct (authentication inside the action):**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 10 ;
+                    oc:textContent "Reference: [https://nextjs.org/docs/app/guides/authentication](https://nextjs.org/docs/app/guides/authentication)" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """'use server'
+
+import { verifySession } from '@/lib/auth'
+import { z } from 'zod'
+
+const updateProfileSchema = z.object({
+  userId: z.string().uuid(),
+  name: z.string().min(1).max(100),
+  email: z.string().email()
+})
+
+export async function updateProfile(data: unknown) {
+  // Validate input first
+  const validated = updateProfileSchema.parse(data)
+  
+  // Then authenticate
+  const session = await verifySession()
+  if (!session) {
+    throw new Error('Unauthorized')
+  }
+  
+  // Then authorize
+  if (session.user.id !== validated.userId) {
+    throw new Error('Can only update own profile')
+  }
+  
+  // Finally perform the mutation
+  await db.user.update({
+    where: { id: validated.userId },
+    data: {
+      name: validated.name,
+      email: validated.email
+    }
+  })
+  
+  return { success: true }
+}
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 9 ;
+                    oc:sourceLocation "lines 56-94" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """'use server'
+
+export async function deleteUser(userId: string) {
+  // Anyone can call this! No auth check
+  await db.user.delete({ where: { id: userId } })
+  return { success: true }
+}
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 5 ;
+                    oc:sourceLocation "lines 18-26" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 1 ;
+                    oc:textContent "**Impact: CRITICAL (prevents unauthorized access to server mutations)**" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 3 ;
+                    oc:textContent "Next.js documentation explicitly states: \"Treat Server Actions with the same security considerations as public-facing API endpoints, and verify if the user is allowed to perform a mutation.\"" ],
+                [ a oc:CodeExample ;
+                    oc:blockType "code_block" ;
+                    oc:codeContent """'use server'
+
+import { verifySession } from '@/lib/auth'
+import { unauthorized } from '@/lib/errors'
+
+export async function deleteUser(userId: string) {
+  // Always check auth inside the action
+  const session = await verifySession()
+  
+  if (!session) {
+    throw unauthorized('Must be logged in')
+  }
+  
+  // Check authorization too
+  if (session.user.role !== 'admin' && session.user.id !== userId) {
+    throw unauthorized('Cannot delete other users')
+  }
+  
+  await db.user.delete({ where: { id: userId } })
+  return { success: true }
+}
+""" ;
+                    oc:codeLanguage "typescript" ;
+                    oc:contentOrder 7 ;
+                    oc:sourceLocation "lines 30-52" ],
+                [ a oc:Paragraph ;
+                    oc:blockType "paragraph" ;
+                    oc:contentOrder 4 ;
+                    oc:textContent "**Incorrect (no authentication check):**" ] ;
+            oc:sectionLevel 2 ;
+            oc:sectionOrder 1 ;
+            oc:sectionTitle "Authenticate Server Actions Like API Routes" ],
+        [ a oc:Section ;
+            oc:hasContent [ a oc:FrontmatterBlock ;
+                    oc:blockType "frontmatter" ;
+                    oc:contentOrder 1 ;
+                    oc:rawYaml """title: Authenticate Server Actions Like API Routes
+impact: CRITICAL
+impactDescription: prevents unauthorized access to server mutations
+tags: server, server-actions, authentication, security, authorization
+""" ] ;
+            oc:sectionLevel 0 ;
+            oc:sectionOrder 0 ;
+            oc:sectionTitle "" ] ;
+    oc:impartsKnowledge oc:kn_5bf99561,
+        oc:kn_600dd7d3,
+        oc:kn_88a6f85c,
+        oc:kn_b12aa73f,
+        oc:kn_efe180bd ;
     oc:isUserInvocable true ;
     oc:nature "Concept" ;
-    oc:requiresState oc:ServerActionCodeWritten ;
-    oc:resolvesIntent "prevent unauthorized access to server mutations",
-        "secure server actions with authentication",
-        "validate input and authorize users in server actions" ;
+    oc:requiresState oc:ServerActionDefined ;
+    oc:resolvesIntent "authenticate server mutations",
+        "authorize server action calls",
+        "secure server actions",
+        "validate input in server actions" ;
     oc:yieldsState oc:ServerActionSecured .
 
-oc:kn_0333fdb1 a oc:Heuristic,
-        oc:KnowledgeNode ;
-    oc:appliesToContext "When reasoning about security boundaries in Next.js applications" ;
-    oc:directiveContent "Every Server Action should be auditable as a standalone public API endpoint—assume no external context or caller guarantees." ;
-    oc:hasRationale "Server Actions are RPC-style endpoints accessible over HTTP; treating them as isolated public endpoints ensures defense in depth." ;
-    oc:severityLevel "MEDIUM" .
-
-oc:kn_794f413e a oc:KnowledgeNode,
-        oc:PreFlightCheck ;
-    oc:appliesToContext "When reviewing or auditing Server Actions before deployment" ;
-    oc:directiveContent "Before shipping a Server Action, verify it contains an explicit authentication check (e.g., verifySession()) and an authorization check (e.g., role/ownership verification) inside the function body." ;
-    oc:hasRationale "Missing internal auth checks create a direct attack surface for unauthorized mutations." ;
-    oc:severityLevel "CRITICAL" .
-
-oc:kn_cbd3baf8 a oc:DesignPrinciple,
-        oc:KnowledgeNode ;
+oc:kn_5bf99561 a oc:KnowledgeNode,
+        oc:Procedure ;
     oc:appliesToContext "When implementing any Server Action that modifies data" ;
-    oc:directiveContent "Follow the validate-then-authenticate-then-authorize-then-mutate pattern: first validate input with a schema (e.g., Zod), then verify authentication, then check authorization, and only then perform the mutation." ;
-    oc:hasRationale "Layered validation ensures malformed input is rejected cheaply before hitting auth logic, and unauthorized users are rejected before any database writes." ;
-    oc:severityLevel "HIGH" .
+    oc:directiveContent "For every Server Action: 1. Validate input with Zod schema 2. Authenticate via verifySession() 3. Authorize by checking session.user.role or session.user.id 4. Only then perform the mutation" ;
+    oc:hasRationale "This order ensures invalid input is rejected cheaply before auth checks, and auth completes before any side effects." ;
+    oc:severityLevel "HIGH" ;
+    oc:stepOrder 1 .
 
-oc:kn_d5930adb a oc:AntiPattern,
+oc:kn_600dd7d3 a oc:Constraint,
         oc:KnowledgeNode ;
-    oc:appliesToContext "When designing auth strategy for Server Actions" ;
-    oc:directiveContent "Never rely solely on middleware, layout guards, or page-level checks to protect Server Actions—always verify authentication and authorization inside each Server Action function body." ;
-    oc:hasRationale "Server Actions can be invoked directly via HTTP, bypassing any client-side or middleware-based guards." ;
+    oc:appliesToContext "Every Server Action function (functions with 'use server' directive)" ;
+    oc:directiveContent "Always verify authentication and authorization INSIDE each Server Action. Never rely solely on middleware, layout guards, or page-level checks—Server Actions can be invoked directly as public endpoints." ;
+    oc:hasRationale "Server Actions are exposed as public endpoints just like API routes. Page-level or middleware checks can be bypassed by direct invocation." ;
     oc:severityLevel "CRITICAL" .
 
-oc:kn_dbeb4f60 a oc:KnowledgeNode,
-        oc:SecurityImplication ;
-    oc:appliesToContext "When writing any Next.js Server Action" ;
-    oc:directiveContent "Server Actions ('use server') are exposed as public endpoints and can be invoked directly, bypassing any page-level or middleware authentication guards." ;
-    oc:hasRationale "Next.js documentation explicitly states to treat Server Actions with the same security considerations as public-facing API endpoints." ;
+oc:kn_88a6f85c a oc:Heuristic,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When securing Server Actions with role-based or ownership-based access" ;
+    oc:directiveContent "Combine both authentication (is this user logged in?) AND authorization (is this user allowed to do this specific action?) inside each Server Action." ;
+    oc:hasRationale "Authentication alone is insufficient—a logged-in user should not be able to delete another user's account unless authorized." .
+
+oc:kn_b12aa73f a oc:AntiPattern,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When writing any Server Action that modifies data" ;
+    oc:directiveContent "Never write a Server Action that performs mutations without first verifying the user's session and authorization level inside the action body." ;
+    oc:hasRationale "Without in-action auth checks, anyone can invoke the action directly, leading to unauthorized mutations." ;
     oc:severityLevel "CRITICAL" .
+
+oc:kn_efe180bd a oc:DesignPrinciple,
+        oc:KnowledgeNode ;
+    oc:appliesToContext "When designing security architecture for Next.js applications" ;
+    oc:directiveContent "Treat Server Actions with the same security considerations as public-facing API endpoints." ;
+    oc:hasRationale "Server Actions are network-callable endpoints despite looking like regular functions. The Next.js documentation explicitly recommends this parity." ;
+    oc:severityLevel "HIGH" .
 
